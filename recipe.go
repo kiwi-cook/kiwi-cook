@@ -13,14 +13,178 @@ type Recipe struct {
 }
 
 type Step struct {
-	Items       []Item `json:"items"`
-	Description string `json:"description"`
+	Items       []StepItem `json:"items"`
+	Description string     `json:"description"`
+}
+
+type StepItem struct {
+	Amount int    `json:"amount"`
+	Unit   string `json:"unit"`
+	Item   Item   `json:"item"`
 }
 
 type Item struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 	Type string `json:"type"`
+}
+
+var items = []Item{
+	{
+		ID:   1,
+		Name: "Egg",
+		Type: "Food",
+	},
+	{
+		ID:   2,
+		Name: "Flour",
+		Type: "Food",
+	},
+	{
+		ID:   3,
+		Name: "Milk",
+		Type: "Food",
+	},
+	{
+		ID:   4,
+		Name: "Salt",
+		Type: "Food",
+	},
+	{
+		ID:   5,
+		Name: "Sugar",
+		Type: "Food",
+	},
+	{
+		ID:   6,
+		Name: "Butter",
+		Type: "Food",
+	},
+	{
+		ID:   7,
+		Name: "Baking Powder",
+		Type: "Food",
+	},
+	{
+		ID:   8,
+		Name: "Baking Soda",
+		Type: "Food",
+	},
+	{
+		ID:   9,
+		Name: "Vanilla Extract",
+		Type: "Food",
+	},
+	{
+		ID:   10,
+		Name: "Chocolate Chips",
+		Type: "Food",
+	},
+	{
+		ID:   10000,
+		Name: "Oven",
+		Type: "Equipment",
+	},
+	{
+		ID:   10001,
+		Name: "Bowl",
+		Type: "Equipment",
+	},
+	{
+		ID:   10002,
+		Name: "Spoon",
+		Type: "Equipment",
+	},
+	{
+		ID:   10003,
+		Name: "Whisk",
+		Type: "Equipment",
+	},
+	{
+		ID:   10004,
+		Name: "Fork",
+		Type: "Equipment",
+	},
+	{
+		ID:   10005,
+		Name: "Baking Tray",
+		Type: "Equipment",
+	},
+	{
+		ID:   10006,
+		Name: "Baking Sheet",
+		Type: "Equipment",
+	},
+	{
+		ID:   10007,
+		Name: "Mixer",
+		Type: "Equipment",
+	},
+	{
+		ID:   10008,
+		Name: "Spatula",
+		Type: "Equipment",
+	},
+	{
+		ID:   10009,
+		Name: "Measuring Cup",
+		Type: "Equipment",
+	},
+	{
+		ID:   10010,
+		Name: "Measuring Spoon",
+		Type: "Equipment",
+	},
+	{
+		ID:   10011,
+		Name: "Knife",
+		Type: "Equipment",
+	},
+	{
+		ID:   10012,
+		Name: "Grater",
+		Type: "Equipment",
+	},
+	{
+		ID:   10013,
+		Name: "Sieve",
+		Type: "Equipment",
+	},
+	{
+		ID:   10014,
+		Name: "Rolling Pin",
+		Type: "Equipment",
+	},
+	{
+		ID:   10015,
+		Name: "Cookie Cutter",
+		Type: "Equipment",
+	},
+	{
+		ID:   10016,
+		Name: "Pastry Brush",
+		Type: "Equipment",
+	},
+	{
+		ID:   10017,
+		Name: "Cake Pan",
+		Type: "Equipment",
+	},
+	{
+		ID:   10018,
+		Name: "Cake Tin",
+		Type: "Equipment",
+	},
+	{
+		ID:   10019,
+		Name: "Cake Mold",
+		Type: "Equipment",
+	},
+	{
+		ID:   10020,
+		Name: "Cake Ring",
+		Type: "Equipment",
+	},
 }
 
 var recipes = []Recipe{
@@ -30,55 +194,95 @@ var recipes = []Recipe{
 		Description: "A delicious breakfast treat",
 		Steps: []Step{
 			{
-				Items: []Item{
+				Description: "Mix the dry ingredients",
+				Items: []StepItem{
 					{
-						ID:   1,
-						Name: "Flour",
-						Type: "Ingredient",
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[1],
 					},
 					{
-						ID:   2,
-						Name: "Eggs",
-						Type: "Ingredient",
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[3],
 					},
 					{
-						ID:   3,
-						Name: "Milk",
-						Type: "Ingredient",
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[4],
 					},
 					{
-						ID:   4,
-						Name: "Butter",
-						Type: "Ingredient",
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[6],
 					},
 					{
-						ID:   5,
-						Name: "Sugar",
-						Type: "Ingredient",
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[7],
 					},
 					{
-						ID:   6,
-						Name: "Mixer",
-						Type: "Tool",
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
 					},
 				},
-				Description: "Mix the flour, eggs, milk, butter and sugar together",
 			},
 			{
-				Items: []Item{
+				Description: "Mix the wet ingredients",
+				Items: []StepItem{
 					{
-						ID:   7,
-						Name: "Pancakes",
-						Type: "Recipe",
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[0],
+					},
+					{
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[2],
+					},
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
 					},
 				},
-				Description: "Enjoy your pancakes",
+			},
+			{
+				Description: "Mix the dry and wet ingredients",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[8],
+					},
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[9],
+					},
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
+					},
+				},
+			},
+			{
+				Description: "Cook the pancakes",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[10],
+					},
+				},
 			},
 		},
 	},
 }
 
-func recipesToString(recipes []Recipe) string {
+func RecipesToString(recipes []Recipe) string {
 	data, err := json.Marshal(recipes)
 	if err == nil {
 		return string(data)
@@ -90,16 +294,37 @@ func GetItemsByRecipe(recipe Recipe) []Item {
 	var items = []Item{}
 
 	for _, step := range recipe.Steps {
-		items = append(items, step.Items...)
+		for _, stepItem := range step.Items {
+			items = append(items, stepItem.Item)
+		}
 	}
 	return items
+}
+
+func ItemNameToItem(itemNames []string) []Item {
+	var _items = []Item{}
+	for _, itemName := range itemNames {
+		for _, item := range items {
+			if item.Name == itemName {
+				_items = append(_items, item)
+			}
+		}
+	}
+	return _items
 }
 
 func FindRecipesByItems(items []Item) []Recipe {
 	var filteredRecipes = []Recipe{}
 
-	for _, recipe := range recipes {
-		GetItemsByRecipe(recipe)
+	for _, item := range items {
+		for _, recipe := range recipes {
+			var itemsByRecipe = GetItemsByRecipe(recipe)
+			for _, recipeItem := range itemsByRecipe {
+				if item.ID == recipeItem.ID {
+					filteredRecipes = append(filteredRecipes, recipe)
+				}
+			}
+		}
 	}
 	return filteredRecipes
 }
