@@ -18,8 +18,9 @@ func main() {
 		name := c.Param("name")
 		c.JSON(200, FindRecipesByItems(ItemNameToItem([]string{name})))
 	})
+
 	err := r.Run()
 	if err != nil {
 		return
-	} // listen and serve on
+	}
 }

@@ -281,6 +281,88 @@ var recipes = []Recipe{
 			},
 		},
 	},
+	{
+		ID:          2,
+		Name:        "Chocolate Chip Cookies",
+		Description: "A delicious dessert treat",
+		Steps: []Step{
+			{
+				Description: "Mix the dry ingredients",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[1],
+					},
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[3],
+					},
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[4],
+					},
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[6],
+					},
+					{
+						Amount: 1,
+						Unit:   "tsp",
+						Item:   items[7],
+					},
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
+					},
+				},
+			},
+			{
+				Description: "Mix the wet ingredients",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[0],
+					},
+					{
+						Amount: 1,
+						Unit:   "cup",
+						Item:   items[2],
+					},
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
+					},
+				},
+			},
+			{
+				Description: "Mix the dry and wet ingredients",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[17],
+					},
+				},
+			},
+			{
+				Description: "Cook the cookies",
+				Items: []StepItem{
+					{
+						Amount: 1,
+						Unit:   "",
+						Item:   items[10],
+					},
+				},
+			},
+		},
+	},
 }
 
 func RecipesToString(recipes []Recipe) string {
