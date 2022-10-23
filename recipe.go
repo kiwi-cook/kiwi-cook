@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 type Recipe struct {
@@ -304,8 +305,9 @@ func GetItemsByRecipe(recipe Recipe) []Item {
 func ItemNameToItem(itemNames []string) []Item {
 	var _items = []Item{}
 	for _, itemName := range itemNames {
+		var lowerItemName = strings.ToLower(itemName)
 		for _, item := range items {
-			if item.Name == itemName {
+			if strings.ToLower(item.Name) == lowerItemName {
 				_items = append(_items, item)
 			}
 		}
