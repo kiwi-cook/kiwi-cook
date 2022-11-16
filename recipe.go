@@ -10,6 +10,7 @@ type Recipe struct {
 	Name        string `json:"name"`
 	Autor       string `json:"autor"`
 	Description string `json:"description"`
+	ImgUrl      string `json:"imgUrl"`
 	Steps       []Step `json:"steps"`
 }
 
@@ -25,9 +26,10 @@ type StepItem struct {
 }
 
 type Item struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Type string `json:"type"`
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	ImgUrl string `json:"imgUrl"`
 }
 
 var items = []Item{
@@ -365,6 +367,15 @@ var recipes = []Recipe{
 	},
 }
 
+// AddRecipe adds a new recipe to the list of recipes
+// and returns the list of recipes
+func AddRecipe(newRecipe Recipe) []Recipe {
+	newRecipe.ID = len(recipes) + 1
+	recipes = append(recipes, newRecipe)
+	return recipes
+}
+
+// RecipesToString generates a string of the recipes list
 func RecipesToString(recipes []Recipe) string {
 	data, err := json.Marshal(recipes)
 	if err == nil {
@@ -373,6 +384,7 @@ func RecipesToString(recipes []Recipe) string {
 	return ""
 }
 
+// GetItemsByRecipes gets all items used in a recipe
 func GetItemsByRecipe(recipe Recipe) []Item {
 	var items = []Item{}
 
@@ -384,6 +396,8 @@ func GetItemsByRecipe(recipe Recipe) []Item {
 	return items
 }
 
+// ItemNameToItem maps a list of itemnames
+// to a list of items
 func ItemNameToItem(itemNames []string) []Item {
 	var _items = []Item{}
 	for _, itemName := range itemNames {
@@ -397,6 +411,33 @@ func ItemNameToItem(itemNames []string) []Item {
 	return _items
 }
 
+// ItemIdToItem maps a list of itemids
+// to a list of items
+func ItemIdToItem(itemIds []int) []Item {
+	var _items = []Item{}
+	for _, itemId := range itemIds {
+		for _, item := range items {
+			if item.ID == itemId {
+				_items = append(_items, item)
+			}
+		}
+	}
+	return _items
+}
+
+// FindRecipeById returns the recipe with the given id
+func FindRecipeById(recipeId int) Recipe {
+	for _, recipe := range recipes {
+		if recipe.ID == recipeId {
+			return recipe
+		}
+	}
+
+	return recipes[0]
+}
+
+// FindRecipesByItems returns the recipes in which the
+// given items are used
 func FindRecipesByItems(items []Item) []Recipe {
 	var filteredRecipes = []Recipe{}
 
