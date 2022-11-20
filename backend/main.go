@@ -11,7 +11,7 @@ func main() {
 
 	// Management routes
 	// Only for >= moderators only
-	managementRoutes := r.Group("/manag")
+	managementRoutes := r.Group("/m")
 	{
 		// Recipes
 		recipeRoutes := managementRoutes.Group("/recipe")
@@ -36,7 +36,7 @@ func main() {
 		})
 
 		// Users
-		userRoutes := r.Group("/user")
+		userRoutes := managementRoutes.Group("/user")
 
 		// Add an user
 		userRoutes.POST("/", func(c *gin.Context) {
@@ -44,6 +44,14 @@ func main() {
 			c.BindJSON(&newUser)
 			AddUser(newUser.Username, newUser.Password)
 			c.String(200, "Added user")
+		})
+
+		// Items
+		itemRoutes := managementRoutes.Group("/item")
+
+		// Get list of all items
+		itemRoutes.GET("/", func(c *gin.Context) {
+			c.JSON(200, items)
 		})
 	}
 
