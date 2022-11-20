@@ -1,0 +1,162 @@
+[
+    {
+        "ID": 1,
+        "Name": "Egg",
+        "Type": "Food"
+    },
+    {
+        "ID": 2,
+        "Name": "Flour",
+        "Type": "Food"
+    },
+    {
+        "ID": 3,
+        "Name": "Milk",
+        "Type": "Food"
+    },
+    {
+        "ID": 4,
+        "Name": "Salt",
+        "Type": "Food"
+    },
+    {
+        "ID": 5,
+        "Name": "Sugar",
+        "Type": "Food"
+    },
+    {
+        "ID": 6,
+        "Name": "Butter",
+        "Type": "Food"
+    },
+    {
+        "ID": 7,
+        "Name": "Baking Powder",
+        "Type": "Food"
+    },
+    {
+        "ID": 8,
+        "Name": "Baking Soda",
+        "Type": "Food"
+    },
+    {
+        "ID": 9,
+        "Name": "Vanilla Extract",
+        "Type": "Food"
+    },
+    {
+        "ID": 10,
+        "Name": "Chocolate Chips",
+        "Type": "Food"
+    },
+    {
+        "ID": 10000,
+        "Name": "Oven",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10001,
+        "Name": "Bowl",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10002,
+        "Name": "Spoon",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10003,
+        "Name": "Whisk",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10004,
+        "Name": "Fork",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10005,
+        "Name": "Baking Tray",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10006,
+        "Name": "Baking Sheet",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10007,
+        "Name": "Mixer",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10008,
+        "Name": "Spatula",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10009,
+        "Name": "Measuring Cup",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10010,
+        "Name": "Measuring Spoon",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10011,
+        "Name": "Knife",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10012,
+        "Name": "Grater",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10013,
+        "Name": "Sieve",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10014,
+        "Name": "Rolling Pin",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10015,
+        "Name": "Cookie Cutter",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10016,
+        "Name": "Pastry Brush",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10017,
+        "Name": "Cake Pan",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10018,
+        "Name": "Cake Tin",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10019,
+        "Name": "Cake Mold",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10020,
+        "Name": "Cake Ring",
+        "Type": "Equipment"
+    },
+    {
+        "ID": 10021,
+        "Name": "Stove",
+        "Type": "Equipment"
+    }
+]
