@@ -9,7 +9,7 @@ import (
 type Recipe struct {
 	RecipeID    int    `json:"id"`
 	Name        string `json:"name"`
-	Autor       string `json:"autor"`
+	Author      string `json:"author"`
 	Description string `json:"description"`
 	ImgUrl      string `json:"imgUrl"`
 	Steps       []Step `json:"steps"`
@@ -34,12 +34,12 @@ type Item struct {
 }
 
 // Load items from file
-var itemsFile, _ = ioutil.ReadFile("data/items.json")
+var itemsFile, _ = ioutil.ReadFile(".data/items.json")
 var items = []Item{}
 var _ = json.Unmarshal([]byte(itemsFile), &items)
 
 // Load recipes from file
-var recipesFile, _ = ioutil.ReadFile("data/recipes.json")
+var recipesFile, _ = ioutil.ReadFile(".data/recipes.json")
 var recipes = []Recipe{}
 var _ = json.Unmarshal([]byte(recipesFile), &recipes)
 
