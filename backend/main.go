@@ -9,12 +9,20 @@ import (
 func main() {
 	r := gin.Default()
 
+	// Serve frontend static files
+	r.LoadHTMLGlob(".page/*.html")
+
 	// Management routes
-	// Only for >= moderators only
-	managementRoutes := r.Group("/m")
+	// Only for moderators only
+	moderationRoutes := r.Group("/m")
 	{
+		// Editor
+		moderationRoutes.GET("/editor", func(c *gin.Context) {
+			c.HTML(200, "editor.html", nil)
+		})
+
 		// Recipes
-		recipeRoutes := managementRoutes.Group("/recipe")
+		recipeRoutes := moderationRoutes.Group("/recipe")
 
 		// Get list of all recipes
 		recipeRoutes.GET("/", func(c *gin.Context) {
@@ -35,8 +43,16 @@ func main() {
 			c.AbortWithStatus(501)
 		})
 
+		// Items
+		itemRoutes := moderationRoutes.Group("/item")
+
+		// Get list of all items
+		itemRoutes.GET("/", func(c *gin.Context) {
+			c.JSON(200, items)
+		})
+
 		// Users
-		userRoutes := managementRoutes.Group("/user")
+		userRoutes := moderationRoutes.Group("/user")
 
 		// Add an user
 		userRoutes.POST("/", func(c *gin.Context) {
@@ -44,14 +60,6 @@ func main() {
 			c.BindJSON(&newUser)
 			AddUser(newUser.Username, newUser.Password)
 			c.String(200, "Added user")
-		})
-
-		// Items
-		itemRoutes := managementRoutes.Group("/item")
-
-		// Get list of all items
-		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, items)
 		})
 	}
 

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+    <h1>
+        Editor
+    </h1>
+    <div id="editor">
+
+    </div>
+</body>
+<script>
+    const createElement = (item) => {
+        const ul = document.createElement('ul');
+
+        if (Array.isArray(item)) {
+            let items = item
+            items.forEach((item, index) => {
+                const li = document.createElement('li');
+                const span = document.createElement('span');
+                span.append(index + ":")
+                li.append(span, createElement(item))
+                ul.appendChild(li)
+            })
+            return ul
+        }
+
+        Object.keys(item).forEach((key) => {
+            if (key !== 'id') {
+                const value = item[key];
+                const li = document.createElement('li');
+                const span = document.createElement('span');
+                span.append(key + ": ")
+                if (Array.isArray(value)) {
+                    li.append(span, createElement(value))
+                } else {
+                    const input = document.createElement('input');
+                    input.name = `item${key}`;
+                    input.value = value;
+                    li.append(span, input)
+                }
+                ul.appendChild(li)
+            }
+        })
+        return ul
+    }
+
+    const createDataTable = (name) => {
+        fetch(`/m/${name}`)
+            .then(response => response.json())
+            .then(items => {
+                const div = document.createElement('div');
+                const h2 = document.createElement('h2');
+                h2.innerHTML = name.toUpperCase();
+                div.appendChild(h2);
+                div.appendChild(createElement(items));
+                document.getElementById('editor').appendChild(div);
+            });
+    }
+
+    ['item', 'recipe'].forEach(createDataTable);
+</script>
+
+</html>
