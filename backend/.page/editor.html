@@ -1,39 +1,82 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <meta charset="utf-8">
+    <title>Editor</title>
+</head>
+
 <body>
     <h1>
-        Editor
+        JOGJED - JOsef's Great Json-Editor
     </h1>
     <div id="editor">
-
     </div>
 </body>
 <script>
-    const createElement = (item) => {
-        const ul = document.createElement('ul');
-
-        if (Array.isArray(item)) {
-            let items = item
-            items.forEach((item, index) => {
-                const li = document.createElement('li');
-                const span = document.createElement('span');
-                span.append(index + ":")
-                li.append(span, createElement(item))
-                ul.appendChild(li)
+    const createStub = (items) => {
+        const stub = {}
+        items.forEach((item) => {
+            Object.keys(item).forEach((key) => {
+                if (!(key in stub)) {
+                    const value = item[key]
+                    if (typeof value === 'string') {
+                        stub[key] = ''
+                    } else if (typeof value === 'number') {
+                        stub[key] = 0
+                    } else if (typeof value === 'boolean') {
+                        stub[key] = false
+                    } else if (typeof value === 'object') {
+                        if (Array.isArray(value)) {
+                            stub[key] = [createStub(value)]
+                        } else {
+                            stub[key] = createStub(value)
+                        }
+                    }
+                }
             })
-            return ul
-        }
+        })
+        console.debug(stub);
+        return stub
+    }
 
+    const addElementButton = (item, appendOn) => {
+        const buttonLi = document.createElement('li')
+        const button = document.createElement('button')
+        button.innerText = '+'
+        button.onclick = () => {
+            const li = document.createElement('li')
+            const newElement = createElement(createStub(item))
+            li.append(newElement)
+            appendOn.insertBefore(li, buttonLi)
+        }
+        buttonLi.append(button)
+        return buttonLi
+    }
+
+    const listItem = (item) => {
+        const ul = document.createElement('ul')
         Object.keys(item).forEach((key) => {
             if (key !== 'id') {
                 const value = item[key];
                 const li = document.createElement('li');
                 const span = document.createElement('span');
                 span.append(key + ": ")
+
                 if (Array.isArray(value)) {
-                    li.append(span, createElement(value))
+                    /* 
+                    if e.g. "faz" is an array:
+                        "foo": "bar",
+                        "faz": [
+                            ...
+                        ]
+                    */
+                    li.append(span, list(value))
                 } else {
+                    /* 
+                    if e.g. "foo" is an a simple value:
+                        "foo": "bar",
+                    */
                     const input = document.createElement('input');
                     input.name = `item${key}`;
                     input.value = value;
@@ -45,7 +88,25 @@
         return ul
     }
 
-    const createDataTable = (name) => {
+    const list = (items) => {
+        const ol = document.createElement('ol')
+        items.forEach((item, index) => {
+            const li = document.createElement('li');
+            li.append(listItem(item))
+            ol.appendChild(li)
+        })
+        ol.appendChild(addElementButton(items, ol))
+        return ol
+    }
+
+    const createElement = (item) => {
+        if (Array.isArray(item)) {
+            return list(item)
+        }
+        return listItem(item)
+    }
+
+    const build = (name) => {
         fetch(`/m/${name}`)
             .then(response => response.json())
             .then(items => {
@@ -58,7 +119,7 @@
             });
     }
 
-    ['item', 'recipe'].forEach(createDataTable);
+    ['item', 'recipe'].forEach(build);
 </script>
 
 </html>
