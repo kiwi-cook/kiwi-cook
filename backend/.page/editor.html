@@ -36,17 +36,16 @@
                 }
             })
         })
-        console.debug(stub);
         return stub
     }
 
-    const addElementButton = (item, appendOn) => {
+    const createAddItemButton = (item, appendOn) => {
         const buttonLi = document.createElement('li')
         const button = document.createElement('button')
         button.innerText = '+'
         button.onclick = () => {
             const li = document.createElement('li')
-            const newElement = createElement(createStub(item))
+            const newElement = build(createStub(item))
             li.append(newElement)
             appendOn.insertBefore(li, buttonLi)
         }
@@ -54,7 +53,7 @@
         return buttonLi
     }
 
-    const listItem = (item) => {
+    const createObject = (item) => {
         const ul = document.createElement('ul')
         Object.keys(item).forEach((key) => {
             if (key !== 'id') {
@@ -71,7 +70,7 @@
                             ...
                         ]
                     */
-                    li.append(span, list(value))
+                    li.append(span, createList(value))
                 } else {
                     /* 
                     if e.g. "foo" is an a simple value:
@@ -80,6 +79,13 @@
                     const input = document.createElement('input');
                     input.name = `item${key}`;
                     input.value = value;
+                    if (typeof value === 'number') {
+                        input.type = 'number'
+                    } else if (typeof value === 'boolean') {
+                        input.type = 'checkbox'
+                    } else {
+                        input.type = 'text'
+                    }
                     li.append(span, input)
                 }
                 ul.appendChild(li)
@@ -88,38 +94,117 @@
         return ul
     }
 
-    const list = (items) => {
+    const createList = (items) => {
         const ol = document.createElement('ol')
         items.forEach((item, index) => {
             const li = document.createElement('li');
-            li.append(listItem(item))
+            li.append(createObject(item))
             ol.appendChild(li)
         })
-        ol.appendChild(addElementButton(items, ol))
+        ol.appendChild(createAddItemButton(items, ol))
         return ol
     }
 
-    const createElement = (item) => {
+    const build = (item) => {
         if (Array.isArray(item)) {
-            return list(item)
+            return createList(item)
         }
-        return listItem(item)
+        return createObject(item)
     }
 
-    const build = (name) => {
+    const fetchAndCallBuild = (name) => {
         fetch(`/m/${name}`)
             .then(response => response.json())
             .then(items => {
                 const div = document.createElement('div');
+                div.classList.add('json-output');
                 const h2 = document.createElement('h2');
                 h2.innerHTML = name.toUpperCase();
                 div.appendChild(h2);
-                div.appendChild(createElement(items));
+                div.appendChild(build(items));
                 document.getElementById('editor').appendChild(div);
-            });
+            })
     }
 
-    ['item', 'recipe'].forEach(build);
+    ['items', 'recipes'].forEach(fetchAndCallBuild);
+
+
+    const saveObject = (ul) => {
+        // ul
+        const item = {}
+        Array.from(ul.children).forEach((child) => {
+            // li
+            const key = child.children[0].innerHTML.replace(':', '').trim()
+            const value = child.children[1]
+            if (value?.children?.length > 0) {
+                item[key] = saveList(value)
+            } else {
+                if (value.type === 'number') {
+                    item[key] = parseInt(value.value)
+                } else if (value.type === 'checkbox') {
+                    item[key] = parseInt(value.value) === 1
+                } else {
+                    item[key] = value.value
+                }
+            }
+        })
+        return item
+    }
+
+    const saveList = (listElement) => {
+        // ol, ul
+        const list = []
+        Array.from(listElement.children).forEach((li) => {
+            // li
+            const child = li.children[0]
+            if (child instanceof HTMLUListElement) {
+                // ul
+                list.push(saveObject(child))
+            } else if (child instanceof HTMLOListElement) {
+                // ol
+                list.push(saveList(child))
+            }
+        })
+        return list
+    }
+
+    const save = (ref) => {
+        if (ref instanceof HTMLUListElement) {
+            // ul
+            return saveObject(ref)
+        } else if (ref instanceof HTMLOListElement) {
+            // ol
+            return saveList(ref)
+        }
+    }
+
+    document.addEventListener('keydown', e => {
+        // ctrl + s or cmd + s
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            // Prevent the Save dialog to open
+            e.preventDefault();
+            // Place your code here
+            console.log('Saving ...');
+            const outputs = document.querySelectorAll('.json-output');
+            outputs.forEach((output) => {
+                const name = output.children[0].innerHTML.toLowerCase();
+                const data = save(output.children[1]);
+                console.log(name, data);
+                fetch(`/m/${name}/replaceAll`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                    .then(response => {
+                        if (response.status === 200) {
+                            window.location.reload(false)
+                        }
+                    })
+            })
+        }
+    });
 </script>
 
 </html>
