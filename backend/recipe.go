@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"strings"
 )
@@ -33,15 +34,33 @@ type Item struct {
 	ImgUrl string `json:"imgUrl"`
 }
 
-// Load items from file
-var itemsFile, _ = ioutil.ReadFile(".data/items.json")
+var recipes = []Recipe{}
 var items = []Item{}
-var _ = json.Unmarshal([]byte(itemsFile), &items)
+
+// Load items from file
+func LoadItems() {
+	itemsFile, _ := ioutil.ReadFile(".data/items.json")
+	err := json.Unmarshal([]byte(itemsFile), &items)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
 
 // Load recipes from file
-var recipesFile, _ = ioutil.ReadFile(".data/recipes.json")
-var recipes = []Recipe{}
-var _ = json.Unmarshal([]byte(recipesFile), &recipes)
+func LoadRecipes() {
+	recipesFile, _ := ioutil.ReadFile(".data/recipes.json")
+	err := json.Unmarshal([]byte(recipesFile), &recipes)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+// Replaces all recipes
+// Use the /m/editor to edit the recipes
+func ReplaceRecipes(newRecipes []Recipe) {
+	fmt.Println("Replace all recipes.")
+	recipes = newRecipes
+}
 
 // AddRecipe adds a new recipe to the list of recipes
 // and returns the list of recipes
