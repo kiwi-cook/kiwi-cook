@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"strconv"
 
@@ -21,9 +22,15 @@ func main() {
 	// Only for moderators only
 	moderationRoutes := r.Group("/m")
 	{
+		editorRoutes := moderationRoutes.Group("/editor")
+
 		// Editor
-		moderationRoutes.GET("/editor", func(c *gin.Context) {
+		editorRoutes.GET("/", func(c *gin.Context) {
 			c.HTML(200, "editor.html", nil)
+		})
+
+		editorRoutes.GET("/list", func(c *gin.Context) {
+			c.JSON(200, dataFileNames())
 		})
 
 		// Recipes
@@ -43,12 +50,6 @@ func main() {
 			}
 			ReplaceRecipes(newRecipes)
 			c.Status(200)
-		})
-
-		// Update a recipe
-		recipeRoutes.PUT("/", func(c *gin.Context) {
-			// not implemented yet
-			c.AbortWithStatus(501)
 		})
 
 		// Items
@@ -99,4 +100,17 @@ func main() {
 	if err != nil {
 		return
 	}
+}
+
+func dataFileNames() []string {
+	files, err := ioutil.ReadDir("./.data")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	names := []string{}
+	for _, f := range files {
+		names = append(names, f.Name())
+	}
+	return names
 }

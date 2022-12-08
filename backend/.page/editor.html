@@ -126,8 +126,9 @@
             })
     }
 
-    ['items', 'recipes'].forEach(fetchAndCallBuild);
-
+    fetch('/m/editor/list')
+        .then(response => response.json())
+        .then(dataNames => dataNames.forEach(dataName => fetchAndCallBuild(dataName.replace('.json', ''))));
 
     const saveObject = (ul) => {
         // ul
