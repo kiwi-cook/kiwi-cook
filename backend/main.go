@@ -96,6 +96,15 @@ func main() {
 		})
 	}
 
+	// Discount routes
+	discountRoutes := r.Group("/discount")
+	{
+		discountRoutes.GET("/:city", func(c *gin.Context) {
+			city := c.Param("city")
+			c.JSON(200, GetEdekaMarkets(city))
+		})
+	}
+
 	err := r.Run()
 	if err != nil {
 		return
