@@ -1,0 +1,6 @@
+{
+	"appId": "io.ionic.starter",
+	"appName": "Taste-Buddy",
+	"webDir": "dist",
+	"bundledWebRuntime": false
+}
