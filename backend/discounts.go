@@ -11,7 +11,8 @@ import (
 type Discount struct {
 	Price        string `json:"price"`
 	DiscountType string `json:"discountType"`
-	Market       string `json:"marketId"`
+	MarketID     string `json:"internalMarketId"`
+	MarketName   string `json:"marketName"`
 }
 
 type Market struct {
@@ -22,7 +23,7 @@ type Market struct {
 	Location              string `json:"location"`
 }
 
-// EdekaMarketSearch is the response from the edeka api
+// EdekaMarketSearch is the response from the EDEKA api
 type EdekaMarketSearch struct {
 	TotalCount int `json:"totalCount"`
 	Markets    []struct {
@@ -45,10 +46,65 @@ type EdekaMarketSearch struct {
 }
 
 func GetEdekaMarkets(city string) []Market {
-	var edekaMarketSearchURL = "https://www.edeka.de/api/marketsearch/markets?searchstring="
+	var body = _Request("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
 
+	// unmarshal json
+	var edekaMarketSearch EdekaMarketSearch
+	var err = json.Unmarshal(body, &edekaMarketSearch)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// create markets
+	var markets []Market
+	for _, market := range edekaMarketSearch.Markets {
+		markets = append(markets, Market{
+			InternalId:            "edeka" + strconv.Itoa(market.ID),
+			Distributor:           "edeka",
+			DistributorSpecificID: strconv.Itoa(market.ID),
+			Name:                  market.Name,
+			Location:              market.Contact.Address.City.ZIP + " " + market.Contact.Address.City.Name,
+		})
+	}
+	return markets
+}
+
+// ReweMarketSearch is the response from the REWE api
+type ReweMarketSearch struct {
+	ID             string `json:"wwIdent"`
+	Name           string `json:"marketHeadline"`
+	ContactStreet  string `json:"contactStreet"`
+	ContactZipCode string `json:"contactZipCode"`
+	ContactCity    string `json:"contactCity"`
+}
+
+func GetReweMarkets(city string) []Market {
+	var body = _Request("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
+
+	// unmarshal json
+	var reweMarketSearch []ReweMarketSearch
+	var err = json.Unmarshal(body, &reweMarketSearch)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	// create markets
+	var markets []Market
+	for _, market := range reweMarketSearch {
+		markets = append(markets, Market{
+			InternalId:            "rewe" + market.ID,
+			Distributor:           "rewe",
+			DistributorSpecificID: market.ID,
+			Name:                  market.Name,
+			Location:              market.ContactZipCode + " " + market.ContactCity,
+		})
+	}
+	return markets
+}
+
+func _Request(url string) []byte {
 	// fetch markets from edeka api
-	req, err := http.NewRequest(http.MethodGet, edekaMarketSearchURL+city, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,35 +118,23 @@ func GetEdekaMarkets(city string) []Market {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal(err)
-		return []Market{}
+		return []byte{}
 	}
 
 	defer resp.Body.Close()
 
 	// read bytes from body
 	body, err := io.ReadAll(resp.Body)
-	// b, err := ioutil.ReadAll(resp.Body)  Go.1.15 and earlier
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// unmarshal json
-	var edekaMarketSearch EdekaMarketSearch
-	err = json.Unmarshal(body, &edekaMarketSearch)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	return body
+}
 
-	// create markets
+func GetMarkets(city string) []Market {
 	var markets []Market
-	for index, market := range edekaMarketSearch.Markets {
-		markets = append(markets, Market{
-			InternalId:            strconv.Itoa(index),
-			Distributor:           "edeka",
-			DistributorSpecificID: strconv.Itoa(market.ID),
-			Name:                  market.Name,
-			Location:              market.Contact.Address.City.ZIP + " " + market.Contact.Address.City.Name,
-		})
-	}
+	markets = append(markets, GetEdekaMarkets(city)...)
+	markets = append(markets, GetReweMarkets(city)...)
 	return markets
 }

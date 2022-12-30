@@ -101,7 +101,7 @@ func main() {
 	{
 		discountRoutes.GET("/:city", func(c *gin.Context) {
 			city := c.Param("city")
-			c.JSON(200, GetEdekaMarkets(city))
+			c.JSON(200, GetMarkets(city))
 		})
 	}
 
