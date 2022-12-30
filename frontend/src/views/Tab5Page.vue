@@ -17,25 +17,22 @@
           <ion-title size="large">Tab 5</ion-title>
         </ion-toolbar>
       </ion-header>
-
       <LoginComponentVue titel="Lol" />
-
-
     </ion-content>
   </ion-page>
 </template>
   
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonButtons } from '@ionic/vue';
 import { ellipsisHorizontal, ellipsisVertical } from 'ionicons/icons';
 
 import LoginComponentVue from '@/components/LoginComponent.vue';
-import { setupConfig } from '@ionic/core';
+
 
 export default defineComponent({
   titel: 'Tab5Page',
-  components: { LoginComponentVue, IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonButton, IonIcon },
+  components: { LoginComponentVue, IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonButton, IonIcon, IonButtons },
 
   setup() {
     return {

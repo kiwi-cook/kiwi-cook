@@ -18,7 +18,7 @@
         </div>
     </ion-content>
 </template>
-  
+
 <script lang="ts">
 import { IonImg, IonButton, IonContent } from '@ionic/vue';
 import { add, colorPalette, document, globe } from 'ionicons/icons';
