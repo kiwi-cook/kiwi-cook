@@ -26,51 +26,125 @@
                 </ion-item>
                 <ion-item>
                     <div class="container">
-                        <ion-button color="success">
-                            <ion-icon slot="icon-only" :icon="heart"></ion-icon>
-                            Anzahl Likes
-                        </ion-button>
-                        <ion-button color="success">
-                            <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
-                            Gespeichert Icon wird ausgefüllt
-                        </ion-button>
-                        <ion-button color="success">
-                            <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
-                            Share
-                        </ion-button>
+                        <div id="nice">
+                            <ion-button color="success">
+                                <ion-icon slot="icon-only" :icon="heart"></ion-icon>
+                                Anzahl Likes
+                            </ion-button>
+                            <ion-button color="success">
+                                <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
+                                Gespeichert Icon wird ausgefüllt
+                            </ion-button>
+                            <ion-button color="success">
+                                <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
+                                Share
+                            </ion-button>
+                        </div>
                     </div>
                 </ion-item>
             </ion-list>
 
             <ion-list lines="inset">
-                <ion-item>
+                <ion-item :color="'success'">
                     <ion-label>Ingredients</ion-label>
                 </ion-item>
+
+                <div id=topic>
+                    <div class="element">
+                        <ion-avatar slot="start">
+                            <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
+                            Tomato
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar>
+                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
+                            Mais
+                        </ion-avatar>
+                    </div>
+                </div>
             </ion-list>
-            <div id=ContainerRoundIngredients>
-                <div id="ContainerSingelRoundIngredients1">
-                    <ion-avatar slot="start">
-                        <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
-                    </ion-avatar>
-                </div>
-                <div id="ContainerSingelRoundIngredients2">
-                    <ion-avatar slot="start">
-                        <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                    </ion-avatar>
-                </div>
-            </div>
-            <ion-list>
-                <ion-item>
+            <ion-list lines="inset">
+                <ion-item :color="'success'">
                     <ion-label>Cooking Utensils</ion-label>
                 </ion-item>
-                <ion-avatar slot="start">
-                    <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
-                </ion-avatar>
-                <ion-item>
+                <div class="topic">
+                    <div class="element">
+                        <ion-avatar slot="start">
+                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
+                            Pan
+                        </ion-avatar>
+                    </div>
+                    <div class="element">
+                        <ion-avatar slot="start">
+                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
+                            Pan
+                        </ion-avatar>
+                    </div>
+                </div>
+            </ion-list>
+            <ion-list lines="inset">
+                <ion-item :color="'success'">
                     <ion-label>Calories</ion-label>
                 </ion-item>
             </ion-list>
-
+            <div class="topic">
+                hi
+            </div>
         </ion-content>
     </ion-page>
 </template>
@@ -103,32 +177,36 @@ export default defineComponent({
 
 }
 
+.element {
+    float: left;
+    margin-bottom: 2%;
+    margin-top: 2%;
+    margin-right: 2%;
+    margin-left: 2%;
+    display: flex;
+    flex: auto;
+    grid-template-columns: repeat 1fr;
+   /* background-color: red;*/
+    padding: auto;
+    text-align: center;
+}
+
+.topic {
+    /*background-color: blue;*/
+    text-align: center;
+
+}
+
+#nice {
+    margin-top: 2%;
+}
+
 #ContainerIMG {
     object-fit: fill;
     width: 100%;
     height: 100%;
     text-align: center;
 
-}
-
-#ContainerRoundIngredients {
-    /* background-color: blue;
-    */
-}
-
-#ContainerSingelRoundIngredients1 {
-    /* background-color: red;*/
-    flex: auto;
-    display: flex;
-    width: 100px;
-
-}
-
-#ContainerSingelRoundIngredients2 {
-    /* background-color: pink;*/
-    flex: auto;
-    display: flex;
-    width: 100px;
 }
 
 /* Centered text */
