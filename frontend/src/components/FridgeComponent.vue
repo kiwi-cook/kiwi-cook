@@ -10,14 +10,14 @@
 
         </ion-header>
         <ion-list>
-            <ion-item v-for="entry in results" v-bind:key="entry.val">
-                <ion-label>{{ entry.val }}</ion-label>
-                <ion-checkbox slot="end" @update:modelValue="entry.isChecked = $event" :modelValue="entry?.isChecked">
+            <ion-item v-for="result in results" v-bind:key="result.val">
+                <ion-label>{{ result.val }}</ion-label>
+                <ion-checkbox slot="end" @update:modelValue="result.isChecked = $event" :modelValue="result?.isChecked">
                 </ion-checkbox>
             </ion-item>
         </ion-list>
-        <div id="SearchButton">
-                <IonButton color='success'>Search</IonButton>
+        <div class="SearchButton">
+                <IonButton color="success">Search</IonButton>
         </div>
     </IonPage>
 </template>
@@ -43,19 +43,7 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-#FilterButton {
-    text-align: start;
-    padding: auto;
-    margin: auto;
-    margin-left: 2%;
-    margin-bottom: 2%;
-    color: white;
-    object-fit: fill;
-
-    background-color: blue;
-}
-
-#SearchButton {
+.SearchButton {
     text-align: end;
     margin-right: 95%;
     color: white;

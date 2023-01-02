@@ -9,7 +9,7 @@
         <ion-content :fullscreen="true">
             <ion-header collapse="condense">
                 <ion-toolbar>
-                    <ion-title size="large">Tab 1</ion-title>
+                    <ion-title size="large">Detailed Recipe</ion-title>
                 </ion-toolbar>
             </ion-header>
 
@@ -18,15 +18,15 @@
                 <ion-item>
 
                     <div class="container">
-                        <div id="ContainerIMG">
+                        <div class="ContainerIMG">
                             <ion-img src="assets/food/food_hamburger.jpeg" alt="Hamburger Pic"></ion-img>
-                            <div class="centered">Look at this beautyful Hamburger</div>
+                            <div class="centered">Look at this beautiful Hamburger</div>
                         </div>
                     </div>
                 </ion-item>
                 <ion-item>
                     <div class="container">
-                        <div id="nice">
+                        <div id="HeartSaveShareButton">
                             <ion-button color="success">
                                 <ion-icon slot="icon-only" :icon="heart"></ion-icon>
                                 Anzahl Likes
@@ -45,11 +45,11 @@
             </ion-list>
 
             <ion-list lines="inset">
-                <ion-item :color="'success'">
+                <ion-item color="success">
                     <ion-label>Ingredients</ion-label>
                 </ion-item>
 
-                <div id=topic>
+                <div id="topic">
                     <div class="element">
                         <ion-avatar slot="start">
                             <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
@@ -119,7 +119,7 @@
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item :color="'success'">
+                <ion-item color="success">
                     <ion-label>Cooking Utensils</ion-label>
                 </ion-item>
                 <div class="topic">
@@ -138,13 +138,10 @@
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item :color="'success'">
+                <ion-item color="success">
                     <ion-label>Calories</ion-label>
                 </ion-item>
             </ion-list>
-            <div class="topic">
-                hi
-            </div>
         </ion-content>
     </ion-page>
 </template>
@@ -186,7 +183,7 @@ export default defineComponent({
     display: flex;
     flex: auto;
     grid-template-columns: repeat 1fr;
-   /* background-color: red;*/
+    /* background-color: red;*/
     padding: auto;
     text-align: center;
 }
@@ -197,11 +194,11 @@ export default defineComponent({
 
 }
 
-#nice {
+#HeartSaveShareButton {
     margin-top: 2%;
 }
 
-#ContainerIMG {
+.ContainerIMG {
     object-fit: fill;
     width: 100%;
     height: 100%;
