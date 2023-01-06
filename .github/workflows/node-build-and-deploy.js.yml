@@ -25,7 +25,7 @@ jobs:
     # deploy to github-pages
     # see here: https://github.com/marketplace/actions/deploy-to-github-pages
     - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@4.4.1
+      uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: page
         folder: dist
