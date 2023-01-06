@@ -96,24 +96,6 @@ func main() {
 		})
 	}
 
-	// Markets routes
-	marketRoutes := r.Group("/market")
-	{
-		marketRoutes.GET("/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetMarkets(city))
-		})
-	}
-
-	// Discount routes
-	discountRoutes := r.Group("/discount")
-	{
-		discountRoutes.GET("/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetDiscounts(city))
-		})
-	}
-
 	err := r.Run()
 	if err != nil {
 		return
