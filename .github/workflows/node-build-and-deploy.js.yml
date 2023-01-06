@@ -19,8 +19,9 @@ jobs:
     # install and build project
     - name: Install and Build 🔧
       run: |
-        cd ./frontend && npm ci
-        cd ./frontend && npm run-script build --if-present
+        cd ./frontend
+        npm ci
+        npm run build --if-present
 
     # deploy to github-pages
     # see here: https://github.com/marketplace/actions/deploy-to-github-pages
