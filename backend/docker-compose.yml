@@ -3,3 +3,11 @@ services:
     build: .
     ports:
       - "8081:8081"
+    environment: 
+      - MONGODB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb
+
+  mongodb:
+    image: mongo:5.0
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=tastebuddy
+      - MONGO_INITDB_ROOT_PASSWORD=tastebuddy
