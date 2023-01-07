@@ -1,22 +1,21 @@
 <template>
     <ion-page>
         <ion-header>
-            <ion-toolbar>
+            <ion-toolbar color="primary">
                 <ion-title>Today</ion-title>
             </ion-toolbar>
         </ion-header>
 
-        <ion-content :fullscreen="true">
+        <ion-content :fullscreen="true" >
             <ion-header collapse="condense">
                 <ion-toolbar>
-                    <ion-title size="large">Detailed Recipe</ion-title>
+                    <ion-title size="large" >Detailed Recipe</ion-title>
                 </ion-toolbar>
             </ion-header>
 
 
             <ion-list lines="full">
                 <ion-item>
-
                     <div class="container">
                         <div class="ContainerIMG">
                             <ion-img src="assets/food/food_hamburger.jpeg" alt="Hamburger Pic"></ion-img>
@@ -24,18 +23,18 @@
                         </div>
                     </div>
                 </ion-item>
-                <ion-item>
+                <ion-item >
                     <div class="container">
                         <div id="HeartSaveShareButton">
-                            <ion-button color="success">
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="heart"></ion-icon>
                                 Anzahl Likes
                             </ion-button>
-                            <ion-button color="success">
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
                                 Gespeichert Icon wird ausgefüllt
                             </ion-button>
-                            <ion-button color="success">
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
                                 Share
                             </ion-button>
@@ -44,12 +43,12 @@
                 </ion-item>
             </ion-list>
 
-            <ion-list lines="inset">
-                <ion-item color="success">
+            <ion-list lines="inset" >
+                <ion-item color="primary">
                     <ion-label>Ingredients</ion-label>
                 </ion-item>
 
-                <div id="topic">
+                <div class="topic">
                     <div class="element">
                         <ion-avatar slot="start">
                             <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
@@ -119,7 +118,7 @@
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item color="success">
+                <ion-item color="primary">
                     <ion-label>Cooking Utensils</ion-label>
                 </ion-item>
                 <div class="topic">
@@ -138,7 +137,7 @@
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item color="success">
+                <ion-item color="primary">
                     <ion-label>Calories</ion-label>
                 </ion-item>
             </ion-list>
