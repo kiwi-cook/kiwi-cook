@@ -24,3 +24,8 @@ func ConnectToMongo() *mongo.Client {
 	}
 	return client
 }
+
+func DefaultContext() context.Context {
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	return ctx
+}

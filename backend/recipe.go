@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -76,7 +74,7 @@ func ReplaceRecipes(newRecipes []Recipe) {
 
 // Gets all recipes
 func GetAllRecipes(client *mongo.Client) []Recipe {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx := DefaultContext()
 	cursor, err := GetRecipesFromDatabase(client).Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
@@ -88,14 +86,15 @@ func GetAllRecipes(client *mongo.Client) []Recipe {
 	return recipesFromDatabase
 }
 
-// AddRecipe adds a new recipe to the list of recipes
+// AddRecipe adds a new recipe to the database of recipes
 // and returns the list of recipes
-func AddRecipe(client *mongo.Client, newRecipe Recipe) {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+func AddRecipe(client *mongo.Client, newRecipe Recipe) []Recipe {
+	ctx := DefaultContext()
 	_, err := GetRecipesFromDatabase(client).InsertOne(ctx, newRecipe)
 	if err != nil {
 		log.Fatal(err)
 	}
+	return GetAllRecipes(client)
 }
 
 // RecipesToString generates a string of the recipes list
