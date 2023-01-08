@@ -44,7 +44,7 @@ func main() {
 	{
 		// Get all recipes
 		recipeRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, GetAllRecipes(client))
+			c.JSON(200, GetRecipesFromDB(client))
 		})
 
 		// Add recipe to database
@@ -54,7 +54,7 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			c.JSON(200, AddRecipe(client, newRecipe))
+			c.JSON(200, AddRecipeToDB(client, newRecipe))
 		})
 
 		// Replace all recipes
@@ -112,7 +112,7 @@ func main() {
 
 		discountRoutes.GET("/:city", func(c *gin.Context) {
 			city := c.Param("city")
-			c.JSON(200, GetDiscounts(city))
+			c.JSON(200, GetDiscountsFromDBOrAPI(client, city))
 		})
 	}
 

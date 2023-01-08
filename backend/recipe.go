@@ -61,8 +61,8 @@ func LoadRecipes() {
 }
 
 // Get recipes from database
-func GetRecipesFromDatabase(client *mongo.Client) *mongo.Collection {
-	return client.Database("recipes").Collection("recipes")
+func GetRecipesCollection(client *mongo.Client) *mongo.Collection {
+	return client.Database("tastebuddy").Collection("recipes")
 }
 
 // Replaces all recipes
@@ -73,9 +73,9 @@ func ReplaceRecipes(newRecipes []Recipe) {
 }
 
 // Gets all recipes
-func GetAllRecipes(client *mongo.Client) []Recipe {
+func GetRecipesFromDB(client *mongo.Client) []Recipe {
 	ctx := DefaultContext()
-	cursor, err := GetRecipesFromDatabase(client).Find(ctx, bson.M{})
+	cursor, err := GetRecipesCollection(client).Find(ctx, bson.M{})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -86,15 +86,15 @@ func GetAllRecipes(client *mongo.Client) []Recipe {
 	return recipesFromDatabase
 }
 
-// AddRecipe adds a new recipe to the database of recipes
+// AddRecipeToDB adds a new recipe to the database of recipes
 // and returns the list of recipes
-func AddRecipe(client *mongo.Client, newRecipe Recipe) []Recipe {
+func AddRecipeToDB(client *mongo.Client, newRecipe Recipe) []Recipe {
 	ctx := DefaultContext()
-	_, err := GetRecipesFromDatabase(client).InsertOne(ctx, newRecipe)
+	_, err := GetRecipesCollection(client).InsertOne(ctx, newRecipe)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return GetAllRecipes(client)
+	return GetRecipesFromDB(client)
 }
 
 // RecipesToString generates a string of the recipes list
