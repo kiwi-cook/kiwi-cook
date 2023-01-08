@@ -6,24 +6,29 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Discount struct {
-	Title          string `json:"title"` // title of the product
-	Price          string `json:"price"`
-	ImageUrl       string `json:"imageUrl"`
-	ValidUntil     int    `json:"validUntil"`
-	MarketID       string `json:"internalMarketId"`
-	MarketName     string `json:"marketName"`
-	MarketLocation string `json:"marketLocation"`
+	ID             string `json:"_id,omitempty" bson:"_id,omitempty"` // id of the product
+	Title          string `json:"title" bson:"title"`                 // title of the product
+	Price          string `json:"price" bson:"price"`                 // price of the product
+	ImageUrl       string `json:"imageUrl" bson:"imageUrl"`
+	ValidUntil     int    `json:"validUntil" bson:"validUntil"` // unix timestamp
+	MarketID       string `json:"internalMarketId" bson:"internalMarketId"`
+	MarketName     string `json:"marketName" bson:"marketName"`
+	MarketLocation string `json:"marketLocation" bson:"marketLocation"`
 }
 
 type Market struct {
-	InternalId            string `json:"id"`
-	Distributor           string `json:"distributor"`
-	DistributorSpecificID string `json:"distributorSpecificId"`
-	Name                  string `json:"name"`
-	Location              string `json:"location"`
+	ID                    string `json:"_id,omitempty" bson:"_id,omitempty"`
+	Distributor           string `json:"distributor" bson:"distributor"`
+	DistributorSpecificID string `json:"distributorSpecificId" bson:"distributorSpecificId"`
+	Name                  string `json:"name" bson:"name"`
+	City                  string `json:"city" bson:"city"`
+	Location              string `json:"location" bson:"location"`
 }
 
 func _Request(url string) []byte {
@@ -92,10 +97,10 @@ func GetEdekaMarkets(city string) []Market {
 	var markets []Market
 	for _, market := range edekaMarketSearch.Markets {
 		markets = append(markets, Market{
-			InternalId:            "edeka" + strconv.Itoa(market.ID),
 			Distributor:           "edeka",
 			DistributorSpecificID: strconv.Itoa(market.ID),
 			Name:                  market.Name,
+			City:                  city,
 			Location:              market.Contact.Address.City.ZIP + " " + market.Contact.Address.City.Name,
 		})
 	}
@@ -125,41 +130,14 @@ func GetReweMarkets(city string) []Market {
 	var markets []Market
 	for _, market := range reweMarketSearch {
 		markets = append(markets, Market{
-			InternalId:            "rewe" + market.ID,
 			Distributor:           "rewe",
 			DistributorSpecificID: market.ID,
 			Name:                  market.Name,
+			City:                  city,
 			Location:              market.ContactZipCode + " " + market.ContactCity,
 		})
 	}
 	return markets
-}
-
-func GetMarkets(city string) []Market {
-	var markets []Market
-	markets = append(markets, GetEdekaMarkets(city)...)
-	markets = append(markets, GetReweMarkets(city)...)
-	return markets
-}
-
-func GetDiscounts(city string) []Discount {
-	var markets = GetMarkets(city)
-	var discounts []Discount
-	for _, market := range markets {
-		discounts = append(discounts, GetDiscountsForMarket(market)...)
-	}
-	return discounts
-}
-
-func GetDiscountsForMarket(market Market) []Discount {
-	var discounts []Discount
-	switch market.Distributor {
-	case "edeka":
-		discounts = GetEdekaDiscounts(market)
-	case "rewe":
-		discounts = GetReweDiscounts(market)
-	}
-	return discounts
 }
 
 func GetReweDiscounts(market Market) []Discount {
@@ -194,7 +172,7 @@ func GetReweDiscounts(market Market) []Discount {
 				Price:          discount.PriceData.Price,
 				Title:          discount.Title,
 				ValidUntil:     reweDiscounts.ValidUntil,
-				MarketID:       market.InternalId,
+				MarketID:       market.ID,
 				MarketName:     market.Name,
 				MarketLocation: market.Location,
 			})
@@ -229,10 +207,95 @@ func GetEdekaDiscounts(market Market) []Discount {
 			Title:          discount.Title,
 			ImageUrl:       discount.ImageUrl,
 			ValidUntil:     discount.ValidUntil,
-			MarketID:       market.InternalId,
+			MarketID:       market.ID,
 			MarketName:     market.Name,
 			MarketLocation: market.Location,
 		})
 	}
+	return discounts
+}
+
+func GetMarkets(city string) []Market {
+	var markets []Market
+	markets = append(markets, GetEdekaMarkets(city)...)
+	markets = append(markets, GetReweMarkets(city)...)
+	return markets
+}
+
+func GetDiscountsForMarket(market Market) []Discount {
+	var discounts []Discount
+	switch market.Distributor {
+	case "edeka":
+		discounts = GetEdekaDiscounts(market)
+	case "rewe":
+		discounts = GetReweDiscounts(market)
+	}
+	return discounts
+}
+
+func GetDiscountsFromAPI(city string) []Discount {
+	var markets = GetMarkets(city)
+	var discounts []Discount
+	for _, market := range markets {
+		discounts = append(discounts, GetDiscountsForMarket(market)...)
+	}
+	return discounts
+}
+
+func GetDiscountsCollection(client *mongo.Client) *mongo.Collection {
+	return client.Database("tastebuddy").Collection("discounts")
+}
+
+func GetDiscountsFromDB(client *mongo.Client) []Discount {
+	ctx := DefaultContext()
+	cursor, err := GetDiscountsCollection(client).Find(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var discounts []Discount
+	if err = cursor.All(ctx, &discounts); err != nil {
+		log.Fatal(err)
+	}
+	return discounts
+}
+func AddDiscountsToDB(client *mongo.Client, discounts []Discount) []Discount {
+	ctx := DefaultContext()
+	log.Printf("Add %s discounts to database.", strconv.Itoa(len(discounts)))
+
+	// prepare discounts for insertion
+	var discountsAsDocument []interface{}
+	for _, discount := range discounts {
+		discountsAsDocument = append(discountsAsDocument, discount)
+	}
+	_, err := GetDiscountsCollection(client).InsertMany(ctx, discountsAsDocument)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return GetDiscountsFromDB(client)
+}
+
+func GetDiscountsFromDBOrAPI(client *mongo.Client, city string) []Discount {
+	ctx := DefaultContext()
+
+	// check if discounts are in database
+	log.Printf("Check if discounts for city %s are in database.", city)
+	var discountsFromDB, _ = GetDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
+
+	// get discounts from database
+	var discounts []Discount
+	if err := discountsFromDB.All(ctx, &discounts); err != nil {
+		log.Fatal(err)
+	}
+
+	var discountsFrom = "database"
+
+	if len(discounts) == 0 {
+		// if no discounts are in database, get them from API
+		discountsFrom = "API"
+		discounts = GetDiscountsFromAPI(city)
+		AddDiscountsToDB(client, discounts)
+	}
+
+	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
 	return discounts
 }
