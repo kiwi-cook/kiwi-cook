@@ -4,34 +4,39 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strings"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Recipe struct {
-	RecipeID    int    `json:"id"`
-	Name        string `json:"name"`
-	Author      string `json:"author"`
-	Description string `json:"description"`
-	ImgUrl      string `json:"imgUrl"`
-	Steps       []Step `json:"steps"`
+	ID          string   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name        string   `json:"name,omitempty" bson:"name,omitempty"`
+	Author      string   `json:"author,omitempty" bson:"author,omitempty"`
+	Description string   `json:"description,omitempty" bson:"description,omitempty"`
+	ImgUrl      string   `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	Tags        []string `json:"tags,omitempty" bson:"tags,omitempty"`
+	Steps       []Step   `json:"steps,omitempty" bson:"steps,omitempty"`
 }
 
 type Step struct {
-	Items       []StepItem `json:"items"`
-	Description string     `json:"description"`
+	Items       []StepItem `json:"items" bson:"items"`
+	Description string     `json:"description" bson:"description"`
 }
 
 type StepItem struct {
-	Amount int    `json:"amount"`
-	Unit   string `json:"unit"`
-	ItemID int    `json:"item"`
+	Amount int    `json:"amount" bson:"amount"`
+	Unit   string `json:"unit,omitempty" bson:"unit,omitempty"`
+	ItemID string `json:"itemID" bson:"itemID"`
 }
 
 type Item struct {
-	ItemID int    `json:"id"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	ImgUrl string `json:"imgUrl"`
+	ID     string `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name   string `json:"name" bson:"name"`
+	Type   string `json:"type" bson:"type"`
+	ImgUrl string `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
 var recipes = []Recipe{}
@@ -55,6 +60,11 @@ func LoadRecipes() {
 	}
 }
 
+// Get recipes from database
+func GetRecipesCollection(client *mongo.Client) *mongo.Collection {
+	return client.Database("tastebuddy").Collection("recipes")
+}
+
 // Replaces all recipes
 // Use the /m/editor to edit the recipes
 func ReplaceRecipes(newRecipes []Recipe) {
@@ -62,12 +72,29 @@ func ReplaceRecipes(newRecipes []Recipe) {
 	recipes = newRecipes
 }
 
-// AddRecipe adds a new recipe to the list of recipes
+// Gets all recipes
+func GetRecipesFromDB(client *mongo.Client) []Recipe {
+	ctx := DefaultContext()
+	cursor, err := GetRecipesCollection(client).Find(ctx, bson.M{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	var recipesFromDatabase []Recipe
+	if err = cursor.All(ctx, &recipesFromDatabase); err != nil {
+		log.Fatal(err)
+	}
+	return recipesFromDatabase
+}
+
+// AddRecipeToDB adds a new recipe to the database of recipes
 // and returns the list of recipes
-func AddRecipe(newRecipe Recipe) []Recipe {
-	newRecipe.RecipeID = len(recipes) + 1
-	recipes = append(recipes, newRecipe)
-	return recipes
+func AddRecipeToDB(client *mongo.Client, newRecipe Recipe) []Recipe {
+	ctx := DefaultContext()
+	_, err := GetRecipesCollection(client).InsertOne(ctx, newRecipe)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return GetRecipesFromDB(client)
 }
 
 // RecipesToString generates a string of the recipes list
@@ -80,8 +107,8 @@ func RecipesToString(recipes []Recipe) string {
 }
 
 // GetItemsByRecipes gets all items used in a recipe
-func GetItemsByRecipe(recipe Recipe) []int {
-	var items = []int{}
+func GetItemsByRecipe(recipe Recipe) []string {
+	var items = []string{}
 
 	for _, step := range recipe.Steps {
 		for _, stepItem := range step.Items {
@@ -108,11 +135,11 @@ func ItemNameToItem(itemNames []string) []Item {
 
 // ItemIdToItem maps a list of itemids
 // to a list of items
-func ItemIdToItem(itemIds []int) []Item {
+func ItemIdToItem(itemIds []string) []Item {
 	var _items = []Item{}
 	for _, itemId := range itemIds {
 		for _, item := range items {
-			if item.ItemID == itemId {
+			if item.ID == itemId {
 				_items = append(_items, item)
 			}
 		}
@@ -121,9 +148,9 @@ func ItemIdToItem(itemIds []int) []Item {
 }
 
 // FindRecipeById returns the recipe with the given id
-func FindRecipeById(recipeId int) Recipe {
+func FindRecipeById(recipeId string) Recipe {
 	for _, recipe := range recipes {
-		if recipe.RecipeID == recipeId {
+		if recipe.ID == recipeId {
 			return recipe
 		}
 	}
@@ -140,7 +167,7 @@ func FindRecipesByItems(items []Item) []Recipe {
 		for _, recipe := range recipes {
 			var itemsByRecipe = GetItemsByRecipe(recipe)
 			for _, recipeItemID := range itemsByRecipe {
-				if item.ItemID == recipeItemID {
+				if item.ID == recipeItemID {
 					filteredRecipes = append(filteredRecipes, recipe)
 				}
 			}

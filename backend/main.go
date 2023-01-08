@@ -18,12 +18,17 @@ func main() {
 	LoadRecipes()
 	LoadItems()
 
+	// Connect to database
+	client := ConnectToMongo()
+
+	apiRoutes := r.Group("/api")
+
+	v1 := apiRoutes.Group("/v1")
+
 	// Management routes
 	// Only for moderators only
-	moderationRoutes := r.Group("/m")
+	editorRoutes := v1.Group("/editor")
 	{
-		editorRoutes := moderationRoutes.Group("/editor")
-
 		// Editor
 		editorRoutes.GET("/", func(c *gin.Context) {
 			c.HTML(200, "editor.html", nil)
@@ -32,13 +37,24 @@ func main() {
 		editorRoutes.GET("/list", func(c *gin.Context) {
 			c.JSON(200, dataFileNames())
 		})
+	}
 
-		// Recipes
-		recipeRoutes := moderationRoutes.Group("/recipes")
-
-		// Get list of all recipes
+	// Recipes
+	recipeRoutes := v1.Group("/recipe")
+	{
+		// Get all recipes
 		recipeRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, recipes)
+			c.JSON(200, GetRecipesFromDB(client))
+		})
+
+		// Add recipe to database
+		recipeRoutes.POST("/", func(c *gin.Context) {
+			var newRecipe Recipe
+			err := c.BindJSON(&newRecipe)
+			if err != nil {
+				log.Fatal(err)
+			}
+			c.JSON(200, AddRecipeToDB(client, newRecipe))
 		})
 
 		// Replace all recipes
@@ -52,40 +68,30 @@ func main() {
 			c.Status(200)
 		})
 
-		// Items
-		itemRoutes := moderationRoutes.Group("/items")
-
-		// Get list of all items
-		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, items)
-		})
-
-		// Users
-		userRoutes := moderationRoutes.Group("/users")
-
-		// Add an user
-		userRoutes.POST("/", func(c *gin.Context) {
-			var newUser User
-			c.BindJSON(&newUser)
-			AddUser(newUser.Username, newUser.Password)
-			c.String(200, "Added user")
-		})
-	}
-
-	// Recipes routes
-	recipeRoutes := r.Group("/recipe")
-	{
 		recipeRoutes.GET("/byItem/:name", func(c *gin.Context) {
 			name := c.Param("name")
 			c.JSON(200, FindRecipesByItems(ItemNameToItem([]string{name})))
 		})
 	}
 
-	// User routes
-	userRoutes := r.Group("/user")
+	// Items
+	itemRoutes := v1.Group("/item")
 	{
-		userRoutes.GET("/", func(c *gin.Context) {
-			c.String(200, "Try /user/1")
+		// Get list of all items
+		itemRoutes.GET("/", func(c *gin.Context) {
+			c.JSON(200, items)
+		})
+	}
+
+	// Users
+	userRoutes := v1.Group("/user")
+	{
+		// Add an user
+		userRoutes.POST("/", func(c *gin.Context) {
+			var newUser User
+			c.BindJSON(&newUser)
+			AddUser(newUser.Username, newUser.Password)
+			c.String(200, "Added user")
 		})
 
 		userRoutes.GET("/:id", func(c *gin.Context) {
@@ -96,21 +102,17 @@ func main() {
 		})
 	}
 
-	// Markets routes
-	marketRoutes := r.Group("/market")
+	// Discount routes
+	discountRoutes := v1.Group("/discount")
 	{
-		marketRoutes.GET("/:city", func(c *gin.Context) {
+		discountRoutes.GET("market/:city", func(c *gin.Context) {
 			city := c.Param("city")
 			c.JSON(200, GetMarkets(city))
 		})
-	}
 
-	// Discount routes
-	discountRoutes := r.Group("/discount")
-	{
 		discountRoutes.GET("/:city", func(c *gin.Context) {
 			city := c.Param("city")
-			c.JSON(200, GetDiscounts(city))
+			c.JSON(200, GetDiscountsFromDBOrAPI(client, city))
 		})
 	}
 
