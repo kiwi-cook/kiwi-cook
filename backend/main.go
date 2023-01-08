@@ -42,19 +42,19 @@ func main() {
 	// Recipes
 	recipeRoutes := v1.Group("/recipe")
 	{
-		// Get list of all recipes
+		// Get all recipes
 		recipeRoutes.GET("/", func(c *gin.Context) {
 			c.JSON(200, GetAllRecipes(client))
 		})
 
+		// Add recipe to database
 		recipeRoutes.POST("/", func(c *gin.Context) {
 			var newRecipe Recipe
 			err := c.BindJSON(&newRecipe)
 			if err != nil {
 				log.Fatal(err)
 			}
-			AddRecipe(client, newRecipe)
-			// c.JSON(200, GetAllRecipes(client))
+			c.JSON(200, AddRecipe(client, newRecipe))
 		})
 
 		// Replace all recipes
