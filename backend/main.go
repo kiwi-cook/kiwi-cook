@@ -14,10 +14,6 @@ func main() {
 	// Serve frontend static files
 	r.LoadHTMLGlob(".page/*.html")
 
-	// Load json
-	LoadRecipes()
-	LoadItems()
-
 	// Connect to database
 	client := ConnectToMongo()
 
@@ -57,20 +53,10 @@ func main() {
 			c.JSON(200, AddRecipeToDB(client, newRecipe))
 		})
 
-		// Replace all recipes
-		recipeRoutes.POST("/replaceAll", func(c *gin.Context) {
-			var newRecipes []Recipe
-			err := c.BindJSON(&newRecipes)
-			if err != nil {
-				log.Fatal(err)
-			}
-			ReplaceRecipes(newRecipes)
-			c.Status(200)
-		})
-
-		recipeRoutes.GET("/byItem/:name", func(c *gin.Context) {
-			name := c.Param("name")
-			c.JSON(200, FindRecipesByItems(ItemNameToItem([]string{name})))
+		// Get recipe by item ids
+		recipeRoutes.GET("/byItem/:itemIds", func(c *gin.Context) {
+			itemIds := c.Param("itemIds")
+			c.JSON(200, FindRecipesByItemNames(client, itemIds))
 		})
 	}
 
@@ -79,7 +65,7 @@ func main() {
 	{
 		// Get list of all items
 		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, items)
+			c.JSON(200, GetItemsFromDB(client))
 		})
 	}
 
