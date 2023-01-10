@@ -97,6 +97,17 @@ func GetItemsFromDB(client *mongo.Client) []Item {
 	return itemsFromDatabase
 }
 
+// AddItemToDB adds a new recipe to the database of recipes
+// and returns the list of recipes
+func AddItemToDB(client *mongo.Client, newItem Item) []Item {
+	ctx := DefaultContext()
+	_, err := GetItemsCollection(client).InsertOne(ctx, newItem)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return GetItemsFromDB(client)
+}
+
 // RecipesToString generates a string of the recipes list
 func RecipesToString(recipes []Recipe) string {
 	data, err := json.Marshal(recipes)
