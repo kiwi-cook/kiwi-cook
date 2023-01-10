@@ -2,7 +2,7 @@
 
 // types for recipe
 
-type Item = {
+export type Item = {
     _id: string;
     name: string;
     type: string;
@@ -20,7 +20,7 @@ type Step = {
     description: string;
 }
 
-type Recipe = {
+export type Recipe = {
     _id: string;
     name: string;
     author: string;
@@ -33,7 +33,7 @@ type Recipe = {
 
 // types for discounts
 
-type Discount = {
+export type Discount = {
     _id: string;
     title: string;
     price: string;
@@ -44,7 +44,7 @@ type Discount = {
     marketLocation: string;
 }
 
-type Market = {
+export type Market = {
     _id: string;
     distributor: string;
     distributorSpecificId: string;
