@@ -1,10 +1,10 @@
 <template>
     <IonPage>
         <ion-header>
-            <ion-toolbar>
+            <ion-toolbar color="primary">
                 <ion-title>Fridge</ion-title>
             </ion-toolbar>
-            <ion-toolbar>
+            <ion-toolbar color="primary">
                 <ion-searchbar :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
             </ion-toolbar>
 
@@ -17,7 +17,7 @@
             </ion-item>
         </ion-list>
         <div class="SearchButton">
-                <IonButton color="success">Search</IonButton>
+                <IonButton color="primary">Search</IonButton>
         </div>
     </IonPage>
 </template>
