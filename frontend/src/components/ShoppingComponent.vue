@@ -54,10 +54,10 @@
 import { IonToolbar, IonSearchbar, IonImg, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { caretDownCircle, filter, arrowDown } from 'ionicons/icons';
 import { defineComponent, ref } from 'vue';
-import { useRouter } from 'vue-router';
+
 
 export default defineComponent({
-    name: 'Shopping_tree',
+    name: 'ShoppingComponent',
     components: {
         IonContent,
         IonSearchbar,
@@ -74,7 +74,6 @@ export default defineComponent({
         IonLabel
     },
     setup() {
-        const router = useRouter();
 
         const corn = {
             name: "Corn",
@@ -134,7 +133,7 @@ export default defineComponent({
             });
         }
 
-        return { filteredMarkets, router, caretDownCircle, handleChange, filter, arrowDown, };
+        return { filteredMarkets, caretDownCircle, handleChange, filter, arrowDown, };
 
     },
 });

@@ -1,16 +1,16 @@
 <template>
   <ion-page>
-    <ShoppingComponentVue titel="Discounts"></ShoppingComponentVue>
+    <ShoppingComponent title="Discounts"></ShoppingComponent>
   </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { IonPage} from '@ionic/vue';
-import ShoppingComponentVue from '@/components/ShoppingComponent.vue';
+import ShoppingComponent from '@/components/ShoppingComponent.vue';
 
 export default defineComponent({
-  titel: 'Discounts',
-  components: { ShoppingComponentVue, IonPage }
+  name: 'DiscountsPage',
+  components: { ShoppingComponent, IonPage }
 });
 </script>

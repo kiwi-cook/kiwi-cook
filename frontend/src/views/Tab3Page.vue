@@ -1,6 +1,6 @@
 <template>
   <ion-page>
-    <SearchComponent titel="Discounts"></SearchComponent>
+    <SearchComponent title="Discounts"></SearchComponent>
   </ion-page>
 </template>
 
@@ -10,7 +10,7 @@ import { IonPage } from '@ionic/vue';
 import  SearchComponent from '@/components/SearchComponent.vue'
 
 export default defineComponent({
-  titel: 'Search',
+  name: 'SearchTab',
   components: {   IonPage, SearchComponent }
 });
 </script>

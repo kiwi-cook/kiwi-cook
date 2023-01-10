@@ -5,6 +5,9 @@
                 <ion-title>Search</ion-title>
             </ion-toolbar>
         </ion-header>
+        <Transition name="slide-fade">
+            <p v-if="vShow">hello</p>
+        </Transition>
         <ion-toolbar color="primary">
             <ion-searchbar :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
         </ion-toolbar>
@@ -50,11 +53,12 @@
 
 <script lang="ts">
 import { IonPage, IonButton, IonContent, IonHeader, IonToolbar, IonSearchbar } from '@ionic/vue';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref,vShow } from 'vue';
 import { filter, arrowDown } from 'ionicons/icons';
 
 
 export default defineComponent({
+    name: "SearchComponent",
     components: { IonPage, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar },
     setup() {
         const Bolognese = {
@@ -100,7 +104,7 @@ export default defineComponent({
             });
         }
 
-        return { filteredRecipe, handleChange, filter, arrowDown, };
+        return { filteredRecipe, handleChange, filter, arrowDown,vShow };
 
     }
 });
@@ -136,5 +140,21 @@ export default defineComponent({
     object-fit: cover;
     width: 100px;
     height: 100px;
+}
+
+
+/* Transition */
+.slide-fade-enter-active {
+    transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+    transition: all 0.8s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+    transform: translateX(20px);
+    opacity: 0;
 }
 </style>
