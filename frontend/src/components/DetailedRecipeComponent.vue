@@ -6,10 +6,10 @@
             </ion-toolbar>
         </ion-header>
 
-        <ion-content :fullscreen="true" >
+        <ion-content :fullscreen="true">
             <ion-header collapse="condense">
                 <ion-toolbar>
-                    <ion-title size="large" >Detailed Recipe</ion-title>
+                    <ion-title size="large">Detailed Recipe</ion-title>
                 </ion-toolbar>
             </ion-header>
 
@@ -23,7 +23,7 @@
                         </div>
                     </div>
                 </ion-item>
-                <ion-item >
+                <ion-item>
                     <div class="container">
                         <div id="HeartSaveShareButton">
                             <ion-button color="primary">
@@ -43,78 +43,20 @@
                 </ion-item>
             </ion-list>
 
-            <ion-list lines="inset" >
+            <ion-list lines="inset">
                 <ion-item color="primary">
                     <ion-label>Ingredients</ion-label>
                 </ion-item>
 
                 <div class="topic">
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
-                            Tomato
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
+                    <template v-for="ingredient in ingredients" :key="ingredient">
+                        <div class="element">
+                            <ion-avatar slot="start">
+                                <img :alt="ingredient.name" :src="'assets/ingredients/' + ingredient._id + '.jpeg'" />
+                                {{  ingredient.name }}
+                            </ion-avatar>
+                        </div>
+                    </template>
                 </div>
             </ion-list>
             <ion-list lines="inset">
@@ -122,18 +64,14 @@
                     <ion-label>Cooking Utensils</ion-label>
                 </ion-item>
                 <div class="topic">
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
-                            Pan
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
-                            Pan
-                        </ion-avatar>
-                    </div>
+                    <template v-for="equipment in equipments" :key="equipment">
+                        <div class="element">
+                            <ion-avatar slot="start">
+                                <img :alt="equipment.name" :src="'assets/ingredients/' + equipment.name + '.jpeg'" />
+                                {{ equipment }}
+                            </ion-avatar>
+                        </div>
+                    </template>
                 </div>
             </ion-list>
             <ion-list lines="inset">
@@ -146,17 +84,37 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel } from '@ionic/vue';
 import { heart, flagOutline, shareOutline } from 'ionicons/icons';
+import { getFromAPI } from '@/api';
+import { API_ROUTE } from '@/api/constants';
+import { Recipe, Item } from '@/api/types';
 
 export default defineComponent({
     titel: 'Tab1Page',
     components: { IonHeader, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel },
 
     setup() {
+        const recipes = ref<Recipe>();
+        const items = ref<Item[]>();
+
+        getFromAPI(API_ROUTE.RECIPES, (json: Recipe[]) => {
+            recipes.value = json[0];
+        });
+
+        getFromAPI(API_ROUTE.ITEMS, (json: Item[]) => {
+            items.value = json;
+        });
+
+        const itemsFromRecipe = computed(() => items.value?.filter(item => recipes.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
+        const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
+        const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
+
+
         return {
-            heart, flagOutline, shareOutline
+            ingredients, equipments,
+            heart, recipes, flagOutline, shareOutline
         };
     },
 });
