@@ -2,42 +2,45 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Shopping</ion-title>
+                <ion-title color="light">Shopping</ion-title>
             </ion-toolbar>
         </ion-header>
         <ion-toolbar color="primary">
-            <ion-searchbar :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
             <div id="FilterRelevanzButton">
                 <ion-button color="primary">
-                    <ion-icon slot="icon-only" :icon="filter"></ion-icon>
-                    Filter
+                    <IonLabel color="light">
+                        Filter
+                    </IonLabel>
                 </ion-button>
                 <ion-button color="primary">
-                    <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
-                    Relevanz
+                    <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
+                    <IonLabel color="light">
+                        Relevanz
+                    </IonLabel>
                 </ion-button>
             </div>
         </div>
 
         <ion-content>
-            <ion-accordion-group expand="inset" >
+            <ion-accordion-group expand="inset">
                 <template v-for="market in filteredMarkets" :key="market.name">
                     <ion-accordion :value="market.name">
                         <ion-item slot="header" color="primary">
-                            <ion-label>{{ market.name }}</ion-label>
+                            <ion-label color="light">{{ market.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <div class="discount-items" style="background-color: lightsalmon;">
+                            <div class="discount-items" style="background-color: #444953;">
                                 <template v-for="item in market.items" :key="item.name + market.name">
                                     <div class="discount-item">
                                         <div class="imgContainer">
                                             <ion-img class="discount-img" :src="item.imgPath" :alt="item.name + ' Pic'">
                                             </ion-img>
-                                            <p>
+                                            <IonLabel color="light">
                                                 {{ item.name }}<br>- {{ item.reduced }}% <br>{{ item.price }} €
-                                            </p>
+                                            </IonLabel>
                                         </div>
                                     </div>
                                 </template>
@@ -158,6 +161,14 @@ export default defineComponent({
     object-fit: cover;
     width: 100px;
     height: 100px;
+}
+
+.imgContainer {
+    /*background-color: #F28705;*/
+    max-width: fit-content;
+    max-height: 250px;
+
+
 }
 
 /**Nicht beachten drunter */

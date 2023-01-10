@@ -2,24 +2,25 @@
     <ionPage>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Search</ion-title>
+                <ion-title color="light">Search</ion-title>
             </ion-toolbar>
         </ion-header>
-        <Transition name="slide-fade">
-            <p v-if="vShow">hello</p>
-        </Transition>
         <ion-toolbar color="primary">
-            <ion-searchbar :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
-            <div id="FilterRelevanzButton">
+            <div class="FilterRelevanzButton">
                 <ion-button color="primary">
-                    <ion-icon slot="icon-only" :icon="filter"></ion-icon>
-                    Filter
+                    <ion-icon color="light" slot="icon-only" :icon="filter"></ion-icon>
+                    <IonLabel color="light">
+                        Filter
+                    </IonLabel>
                 </ion-button>
                 <ion-button color="primary">
-                    <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
-                    Relevanz
+                    <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
+                    <IonLabel color="light">
+                        Relevanz
+                    </IonLabel>
                 </ion-button>
             </div>
         </div>
@@ -28,7 +29,7 @@
             <template v-for="recipe in filteredRecipe" :key="recipe.name">
                 <ion-list :value="recipe.name">
                     <ion-item slot="header" color="primary">
-                        <ion-label>{{ recipe.name }}</ion-label>
+                        <ion-label color="light">{{ recipe.name }}</ion-label>
                     </ion-item>
                     <div slot="content">
                         <div class="recipe-items">
@@ -37,9 +38,9 @@
                                     <div class="imgContainer">
                                         <ion-img class="recipe-img" :src="item.imgPath" :alt="item.name + ' Pic'">
                                         </ion-img>
-                                        <p>
-                                            {{ item.name }}
-                                        </p>
+                                        <IonLabel color="light">
+                                                {{ item.name }}
+                                        </IonLabel>
                                     </div>
                                 </div>
                             </template>
@@ -52,14 +53,14 @@
 </template>
 
 <script lang="ts">
-import { IonPage, IonButton, IonContent, IonHeader, IonToolbar, IonSearchbar } from '@ionic/vue';
-import { defineComponent, ref,vShow } from 'vue';
+import { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonButton, IonContent, IonHeader, IonToolbar, IonSearchbar, IonLabel } from '@ionic/vue';
+import { defineComponent, ref, vShow } from 'vue';
 import { filter, arrowDown } from 'ionicons/icons';
 
 
 export default defineComponent({
     name: "SearchComponent",
-    components: { IonPage, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar },
+    components: { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar, IonLabel },
     setup() {
         const Bolognese = {
             name: "Bolognese Pasta",
@@ -104,7 +105,7 @@ export default defineComponent({
             });
         }
 
-        return { filteredRecipe, handleChange, filter, arrowDown,vShow };
+        return { filteredRecipe, handleChange, filter, arrowDown, vShow };
 
     }
 });
@@ -116,8 +117,9 @@ export default defineComponent({
     /*background-color: aquamarine;*/
 }
 
-#FilterRelevanzButton {
+.FilterRelevanzButton {
     margin: 2%;
+    color: white;
 }
 
 .recipe-items {
@@ -129,7 +131,6 @@ export default defineComponent({
 }
 
 .recipe-item {
-    background-color: lightsalmon;
     text-align: center;
     font-size: 100%;
     margin: 10px;
@@ -142,6 +143,13 @@ export default defineComponent({
     height: 100px;
 }
 
+
+.imgContainer{
+    /*background-color: #F28705;*/
+    max-width: fit-content;
+    max-height: 150px;
+
+}
 
 /* Transition */
 .slide-fade-enter-active {
