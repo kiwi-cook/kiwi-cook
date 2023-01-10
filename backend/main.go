@@ -116,6 +116,16 @@ func main() {
 		})
 	}
 
+	adminRoutes := v1.Group("/admin")
+	{
+		dbRoutes := adminRoutes.Group("/db")
+		{
+			dbRoutes.GET("/addIndex", func(c *gin.Context) {
+				CreateDiscountsIndex(client)
+			})
+		}
+	}
+
 	err := r.Run(":8081")
 	if err != nil {
 		return

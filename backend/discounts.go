@@ -274,6 +274,17 @@ func AddDiscountsToDB(client *mongo.Client, discounts []Discount) []Discount {
 	return GetDiscountsFromDB(client)
 }
 
+func CreateDiscountsIndex(client *mongo.Client) {
+	ctx := DefaultContext()
+
+	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "marketLocation", Value: "text"}}}
+	name, err := GetDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Created index %s", name)
+}
+
 func GetDiscountsFromDBOrAPI(client *mongo.Client, city string) []Discount {
 	ctx := DefaultContext()
 
