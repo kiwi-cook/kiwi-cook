@@ -1,4 +1,4 @@
-// define data types for the API
+// Data types for the API
 
 // types for recipe
 
