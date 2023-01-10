@@ -1,33 +1,57 @@
 <template>
-    <ion-content class="ion-padding">
-        <div id="ContainerBelow">
-            <div id="ContainerIMG">
-                <ion-img src="/assets/login.jpg" alt="Login You Must"></ion-img>
-            </div>
-            <div id="ContainerProfilText">
-                <p>To discover all our Tastebud tickling recipes and features, please sign up!</p>
-            </div>
-            <div id="IonButtonProfil">
-                <IonButton color="secondary" expand="block" fill="outline">Facebook</IonButton>
-                <IonButton color="secondary" expand="block" fill="outline">E-Mail</IonButton>
-            </div>
-            <div id="LogIn">
-                <p>Already have an account?</p><br>
-                <a href="Login">Login in here</a>
-            </div>
+    <ion-header>
+        <ion-toolbar color="primary">
+            <ion-title color="light">Profil</ion-title>
+            <ion-buttons slot="primary">
+                <ion-button>
+                    <ion-icon color="light" slot="icon-only" :ios="ellipsisHorizontal"
+                        :md="ellipsisVertical"></ion-icon>
+                </ion-button>
+            </ion-buttons>
+        </ion-toolbar>
+    </ion-header>
+
+    <ion-content>
+        <div class="card-container">
+            <ion-card>
+                <ion-row>
+                    <ion-col size-md="9" size="12" class="welcome">
+                        <ion-card-header>
+                            <ion-card-title color="success">Welcome!</ion-card-title>
+                        </ion-card-header>
+                        <ion-card-content color="success">
+                            <ion-label color="light">To discover all our Tastebud tickling recipes and features, please
+                                sign up!</ion-label>
+                            <ion-button shape="round" color="primary">Sign in</ion-button>
+                        </ion-card-content>
+                    </ion-col>
+
+                    <ion-col size-md="9" size="12" class="welcome">
+                        <ion-card-header>
+                            <ion-card-title color="success">Already have an account?</ion-card-title>
+                        </ion-card-header>
+                        <ion-card-content>
+                            <ion-label color="light">Then please</ion-label>
+                            <ion-button shape="round" color="primary">Login</ion-button>
+                        </ion-card-content>
+                    </ion-col>
+                </ion-row>
+            </ion-card>
         </div>
     </ion-content>
 </template>
 
 <script lang="ts">
-import { IonImg, IonButton, IonContent } from '@ionic/vue';
-import { add, colorPalette, document, globe } from 'ionicons/icons';
+import { IonCard, IonLabel, IonCardTitle, IonCardContent, IonCardHeader, IonRow, IonCol, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonButtons } from '@ionic/vue';
+import { add, colorPalette, document, globe, ellipsisHorizontal, ellipsisVertical } from 'ionicons/icons';
 import { defineComponent } from 'vue';
 
+
 export default defineComponent({
-    components: { IonImg, IonButton, IonContent },
+    name: "LoginComponent",
+    components: { IonCardContent, IonLabel, IonCardTitle, IonCardHeader, IonCard, IonRow, IonCol, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonButtons },
     setup() {
-        return { add, colorPalette, document, globe }
+        return { add, colorPalette, document, globe, ellipsisHorizontal, ellipsisVertical }
     }
 });
 </script>
