@@ -6,10 +6,10 @@ export const API_VERSION = '/v1'
 
 // basic API routes
 const API_ROUTES = {
-    RECIPES: '/recipe',
-    ITEMS: '/item',
-    DISCOUNTS: '/discount',
-    MARKETS: '/market',
+    RECIPES: '/recipe/',
+    ITEMS: '/item/',
+    DISCOUNTS: '/discount/',
+    MARKETS: '/market/',
 }
 
 export enum API_ROUTE {
