@@ -9,7 +9,7 @@
             <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
-            <div id="FilterRelevanzButton">
+            <div id="filter-relevanz-button">
                 <ion-button color="primary">
                     <IonLabel color="light">
                         Filter
@@ -177,7 +177,7 @@ export default defineComponent({
     /*background-color: aquamarine;*/
 }
 
-#FilterRelevanzButton {
+#filter-relevanz-button {
     margin: 2%;
 }
 </style>
