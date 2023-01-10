@@ -2,21 +2,21 @@
     <IonPage>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Fridge</ion-title>
+                <ion-title color="light">Fridge</ion-title>
             </ion-toolbar>
             <ion-toolbar color="primary">
-                <ion-searchbar :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
+                <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
             </ion-toolbar>
 
         </ion-header>
         <ion-list>
             <ion-item v-for="result in results" v-bind:key="result.val">
-                <ion-label>{{ result.val }}</ion-label>
-                <ion-checkbox slot="end" @update:modelValue="result.isChecked = $event" :modelValue="result?.isChecked">
+                <ion-label color="light">{{ result.val }}</ion-label>
+                <ion-checkbox slot="end" color="light" @update:modelValue="result.isChecked = $event" :modelValue="result?.isChecked">
                 </ion-checkbox>
             </ion-item>
         </ion-list>
-        <div class="SearchButton">
+        <div class="SearchButton" >
                 <IonButton color="primary">Search</IonButton>
         </div>
     </IonPage>

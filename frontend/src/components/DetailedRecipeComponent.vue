@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Today</ion-title>
+                <ion-title color="light">Today</ion-title>
             </ion-toolbar>
         </ion-header>
 
@@ -26,7 +26,7 @@
                 <ion-item >
                     <div class="container">
                         <div id="HeartSaveShareButton">
-                            <ion-button color="primary">
+                            <ion-button color="primary" >
                                 <ion-icon slot="icon-only" :icon="heart"></ion-icon>
                                 Anzahl Likes
                             </ion-button>
@@ -45,7 +45,7 @@
 
             <ion-list lines="inset" >
                 <ion-item color="primary">
-                    <ion-label>Ingredients</ion-label>
+                    <ion-label color="light">Ingredients</ion-label>
                 </ion-item>
 
                 <div class="topic">
@@ -119,7 +119,7 @@
             </ion-list>
             <ion-list lines="inset">
                 <ion-item color="primary">
-                    <ion-label>Cooking Utensils</ion-label>
+                    <ion-label color="light">Cooking Utensils</ion-label>
                 </ion-item>
                 <div class="topic">
                     <div class="element">
@@ -138,7 +138,7 @@
             </ion-list>
             <ion-list lines="inset">
                 <ion-item color="primary">
-                    <ion-label>Calories</ion-label>
+                    <ion-label color="light">Calories</ion-label>
                 </ion-item>
             </ion-list>
         </ion-content>
@@ -166,7 +166,7 @@ export default defineComponent({
 .container {
     position: relative;
     text-align: center;
-    color: white;
+    color: lightgray;
     object-fit: fill;
     width: 100%;
     height: 100%;
@@ -190,6 +190,7 @@ export default defineComponent({
 .topic {
     /*background-color: blue;*/
     text-align: center;
+    color: lightgray;
 
 }
 
@@ -216,6 +217,6 @@ export default defineComponent({
     font-size: 20px;
     text-size-adjust: initial;
     transform: translate(-50%, -50%);
-    background: rgba(255, 122, 89, 0.6)
+    background: rgba(255, 122, 0, 0.5)
 }
 </style>
