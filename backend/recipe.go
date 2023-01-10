@@ -16,6 +16,7 @@ type Recipe struct {
 	Description string   `json:"description,omitempty" bson:"description,omitempty"`
 	ImgUrl      string   `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Tags        []string `json:"tags,omitempty" bson:"tags,omitempty"`
+	CookingTime int      `json:"cookingTime,omitempty" bson:"cookingTime,omitempty"`
 	Steps       []Step   `json:"steps,omitempty" bson:"steps,omitempty"`
 }
 
