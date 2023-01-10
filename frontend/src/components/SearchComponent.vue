@@ -12,15 +12,15 @@
             <div class="FilterRelevanzButton">
                 <ion-button color="primary">
                     <ion-icon color="light" slot="icon-only" :icon="filter"></ion-icon>
-                    <IonLabel color="light">
+                    <ion-label color="light">
                         Filter
-                    </IonLabel>
+                    </ion-label>
                 </ion-button>
                 <ion-button color="primary">
                     <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
-                    <IonLabel color="light">
+                    <ion-label color="light">
                         Relevanz
-                    </IonLabel>
+                    </ion-label>
                 </ion-button>
             </div>
         </div>
@@ -35,7 +35,7 @@
                         <div class="recipe-items">
                             <template v-for="item in recipe.items" :key="item.name + recipe.name">
                                 <div class="recipe-item">
-                                    <div class="imgContainer">
+                                    <div class="img-container">
                                         <ion-img class="recipe-img" :src="item.imgPath" :alt="item.name + ' Pic'">
                                         </ion-img>
                                         <IonLabel color="light">
@@ -144,7 +144,7 @@ export default defineComponent({
 }
 
 
-.imgContainer{
+.img-container{
     /*background-color: #F28705;*/
     max-width: fit-content;
     max-height: 150px;
