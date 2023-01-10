@@ -5,11 +5,13 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	r := gin.Default()
+	r.Use(cors.Default())
 
 	// Serve frontend static files
 	r.LoadHTMLGlob(".page/*.html")
@@ -66,6 +68,16 @@ func main() {
 		// Get list of all items
 		itemRoutes.GET("/", func(c *gin.Context) {
 			c.JSON(200, GetItemsFromDB(client))
+		})
+
+		// Add recipe to database
+		itemRoutes.POST("/", func(c *gin.Context) {
+			var newItem Item
+			err := c.BindJSON(&newItem)
+			if err != nil {
+				log.Fatal(err)
+			}
+			c.JSON(200, AddItemToDB(client, newItem))
 		})
 	}
 
