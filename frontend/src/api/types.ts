@@ -21,7 +21,7 @@ type Step = {
 }
 
 export type Recipe = {
-    _id: string;
+    _id?: string;
     name: string;
     author: string;
     description: string;
@@ -33,7 +33,6 @@ export type Recipe = {
 
 // dummy recipe
 export const dummyRecipe: Recipe = {
-    _id: '1',
     name: 'Veggie Burger',
     author: 'Josef & Vasilij',
     description: 'The best burger recipe in Konschtanz!',
