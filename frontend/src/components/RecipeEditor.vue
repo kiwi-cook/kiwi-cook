@@ -1,15 +1,26 @@
 <template>
     <!-- Editor for recipes using cards -->
     <ion-card>
-        <img :alt="'Image of ' + mutableRecipe.name" :src="mutableRecipe.imgUrl" />
+        <ion-img :alt="`Image of ${mutableRecipe.name}`"
+            :src="`https://source.unsplash.com/random/700x400?${mutableRecipe.name}`" />
         <ion-card-header>
-            <ion-card-title color="primary">{{ mutableRecipe.name }}</ion-card-title>
-            <ion-card-subtitle color="light">Von {{ mutableRecipe.author }}</ion-card-subtitle>
+            <ion-card-title color="primary">
+                <ion-item>
+                    <ion-label color="light">Rezeptname</ion-label>
+                    <ion-input color="light" v-model="mutableRecipe.name" />
+                </ion-item>
+            </ion-card-title>
+            <ion-card-subtitle color="light">
+                <ion-item>
+                    <ion-label color="light">Author</ion-label>
+                    <ion-input color="light" v-model="mutableRecipe.author" />
+                </ion-item>
+            </ion-card-subtitle>
         </ion-card-header>
 
         <ion-card-content color="light">
             <ion-item>
-                <ion-label color="light">Description</ion-label>
+                <ion-label color="light">Beschreibung</ion-label>
                 <ion-input color="light" v-model="mutableRecipe.description" />
             </ion-item>
         </ion-card-content>
@@ -24,13 +35,13 @@
             <ion-card-content>
                 <div>
                     <template v-for="(item, itemIndex) in step.items" :key="stepIndex + ' - ' + itemIndex">
-                        <ion-thumbnail>
-                            <!-- Add Item image -->
-                            <img alt="Silhouette of mountains"
-                                src="https://ionicframework.com/docs/img/demos/thumbnail.svg" />
-                        </ion-thumbnail>
                         <ion-item>
-                            <ion-label color="light">ID</ion-label>
+                            <ion-thumbnail slot="start">
+                                <!-- Add Item image -->
+                                <img :alt="`Image of ${item.itemID}`"
+                                    :src="`https://source.unsplash.com/random/50x50?${item.itemID}`" />
+                            </ion-thumbnail>
+                            <ion-label color="light">Item</ion-label>
                             <ion-input color="light" v-model="item.itemID" />
                         </ion-item>
                     </template>
@@ -47,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonThumbnail, IonInput, IonItem, IonLabel, IonCardSubtitle } from '@ionic/vue';
+import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonThumbnail, IonInput, IonItem, IonLabel, IonCardSubtitle, IonImg } from '@ionic/vue';
 import { computed, defineComponent, ref, toRefs } from 'vue';
 
 export default defineComponent({
@@ -59,6 +70,7 @@ export default defineComponent({
         },
     },
     components: {
+        IonImg,
         IonCard,
         IonCardHeader,
         IonCardTitle,
