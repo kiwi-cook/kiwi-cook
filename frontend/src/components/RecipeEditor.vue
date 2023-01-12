@@ -76,7 +76,7 @@
             </ion-card-content>
         </ion-card>
 
-        <ion-button fill="clear" @click="saveRecipe()">Save recipe</ion-button>
+        <ion-button @click="saveRecipe()">Save recipe</ion-button>
     </template>
 </template>
 
