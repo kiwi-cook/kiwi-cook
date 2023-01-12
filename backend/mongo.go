@@ -11,18 +11,19 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectToMongo() *mongo.Client {
+func ConnectToMongo() (*mongo.Client, error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_CONNSTRING")))
-	clientContext, _ := context.WithTimeout(context.Background(), 10*time.Second)
-	err = client.Connect(clientContext)
+	ctx := DefaultContext()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Ping(clientContext, readpref.Primary())
-	if err != nil {
-		log.Fatal(err)
-	}
-	return client
+	return client, nil
 }
 
 func DefaultContext() context.Context {

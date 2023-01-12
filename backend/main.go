@@ -17,7 +17,10 @@ func main() {
 	r.LoadHTMLGlob(".page/*.html")
 
 	// Connect to database
-	client := ConnectToMongo()
+	client, err := ConnectToMongo()
+	if err != nil {
+		return
+	}
 
 	apiRoutes := r.Group("/api")
 
@@ -61,17 +64,12 @@ func main() {
 	{
 		// Get list of all items
 		itemRoutes.GET("/", func(context *gin.Context) {
-			context.JSON(200, GetItemsFromDB(client))
+			HandleGetItemsFromDB(context, client)
 		})
 
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
-			var newItem Item
-			err := context.BindJSON(&newItem)
-			if err != nil {
-				log.Fatal(err)
-			}
-			context.JSON(200, AddItemToDB(client, newItem))
+			HandleAddItemToDB(context, client)
 		})
 	}
 
@@ -118,8 +116,9 @@ func main() {
 		}
 	}
 
-	err := r.Run(":8081")
+	err = r.Run(":8081")
 	if err != nil {
+		log.Print(err)
 		return
 	}
 }

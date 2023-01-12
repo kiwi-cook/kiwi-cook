@@ -35,8 +35,8 @@ type StepItem struct {
 
 type Item struct {
 	ID     string `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name   string `json:"name" bson:"name"`
-	Type   string `json:"type" bson:"type"`
+	Name   string `json:"name" bson:"name" binding:"required"`
+	Type   string `json:"type" bson:"type" binding:"required"`
 	ImgUrl string `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
@@ -119,8 +119,20 @@ func GetItemsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("items")
 }
 
+// HandleGetRecipesFromDB gets called by router
+// Calls getRecipesFromDB and handles the context
+func HandleGetItemsFromDB(context *gin.Context, client *mongo.Client) {
+	items, err := getItemsFromDB(client)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, items)
+}
+
 // Gets all items from database
-func GetItemsFromDB(client *mongo.Client) []Item {
+func getItemsFromDB(client *mongo.Client) ([]Item, error) {
 	ctx := DefaultContext()
 	cursor, err := GetItemsCollection(client).Find(ctx, bson.M{})
 	if err != nil {
@@ -133,20 +145,38 @@ func GetItemsFromDB(client *mongo.Client) []Item {
 
 	if itemsFromDatabase == nil {
 		// return void array if nil
-		return []Item{}
+		itemsFromDatabase = []Item{}
 	}
-	return itemsFromDatabase
+	return itemsFromDatabase, nil
+}
+
+// HandleAddItemToDB gets called by router
+// Calls addItemToDB and handles the context
+func HandleAddItemToDB(context *gin.Context, client *mongo.Client) {
+	var newItem Item
+	err := context.BindJSON(&newItem)
+	if err != nil {
+		log.Print(err)
+	}
+
+	items, err := addItemToDB(client, newItem)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, items)
 }
 
 // AddItemToDB adds a new recipe to the database of recipes
 // and returns the list of recipes
-func AddItemToDB(client *mongo.Client, newItem Item) []Item {
+func addItemToDB(client *mongo.Client, newItem Item) ([]Item, error) {
 	ctx := DefaultContext()
 	_, err := GetItemsCollection(client).InsertOne(ctx, newItem)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return GetItemsFromDB(client)
+	return getItemsFromDB(client)
 }
 
 // RecipesToString generates a string of the recipes list
