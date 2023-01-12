@@ -20,6 +20,8 @@
 </template>
 
 <script lang="ts">
+import { getFromAPI } from '@/api';
+import { API_ROUTE } from '@/api/constants';
 import { dummyRecipe, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/RecipeEditor.vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent } from '@ionic/vue';
@@ -38,7 +40,11 @@ export default defineComponent({
         RecipeEditor
     },
     setup() {
-        const recipes = ref<Recipe[]>([dummyRecipe])
+        getFromAPI(API_ROUTE.RECIPES, (data: Recipe[]) => {
+            recipes.value = data
+        })
+
+        const recipes = ref<Recipe[]>([])
         
         const addNewRecipe = () => {
             recipes.value.push(dummyRecipe)
