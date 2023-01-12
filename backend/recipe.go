@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Recipe struct {
@@ -66,7 +67,11 @@ func GetRecipesFromDB(client *mongo.Client) []Recipe {
 // and returns the list of recipes
 func AddRecipeToDB(client *mongo.Client, newRecipe Recipe) []Recipe {
 	ctx := DefaultContext()
-	_, err := GetRecipesCollection(client).InsertOne(ctx, newRecipe)
+	opts := options.Update().SetUpsert(true)
+	_, err := GetRecipesCollection(client).UpdateOne(ctx,
+		bson.D{{Key: "_id", Value: newRecipe.ID}},
+		bson.D{{Key: "$set", Value: newRecipe}},
+		opts)
 	if err != nil {
 		log.Fatal(err)
 	}
