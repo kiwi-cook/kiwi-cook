@@ -28,12 +28,12 @@ func main() {
 	editorRoutes := v1.Group("/editor")
 	{
 		// Editor
-		editorRoutes.GET("/", func(c *gin.Context) {
-			c.HTML(200, "editor.html", nil)
+		editorRoutes.GET("/", func(context *gin.Context) {
+			context.HTML(200, "editor.html", nil)
 		})
 
-		editorRoutes.GET("/list", func(c *gin.Context) {
-			c.JSON(200, dataFileNames())
+		editorRoutes.GET("/list", func(context *gin.Context) {
+			context.JSON(200, dataFileNames())
 		})
 	}
 
@@ -41,24 +41,18 @@ func main() {
 	recipeRoutes := v1.Group("/recipe")
 	{
 		// Get all recipes
-		recipeRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, GetRecipesFromDB(client))
+		recipeRoutes.GET("/", func(context *gin.Context) {
+			HandleGetRecipesFromDB(context, client)
 		})
 
 		// Add recipe to database
-		recipeRoutes.POST("/", func(c *gin.Context) {
-			var newRecipe Recipe
-			err := c.BindJSON(&newRecipe)
-			if err != nil {
-				log.Fatal(err)
-			}
-			c.JSON(200, AddRecipeToDB(client, newRecipe))
+		recipeRoutes.POST("/", func(context *gin.Context) {
+			HandleAddRecipeToDB(context, client)
 		})
 
 		// Get recipe by item ids
-		recipeRoutes.GET("/byItem/:itemIds", func(c *gin.Context) {
-			itemIds := c.Param("itemIds")
-			c.JSON(200, FindRecipesByItemNames(client, itemIds))
+		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
+			HandleFindRecipesByItemNames(context, client)
 		})
 	}
 
@@ -66,18 +60,18 @@ func main() {
 	itemRoutes := v1.Group("/item")
 	{
 		// Get list of all items
-		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, GetItemsFromDB(client))
+		itemRoutes.GET("/", func(context *gin.Context) {
+			context.JSON(200, GetItemsFromDB(client))
 		})
 
 		// Add recipe to database
-		itemRoutes.POST("/", func(c *gin.Context) {
+		itemRoutes.POST("/", func(context *gin.Context) {
 			var newItem Item
-			err := c.BindJSON(&newItem)
+			err := context.BindJSON(&newItem)
 			if err != nil {
 				log.Fatal(err)
 			}
-			c.JSON(200, AddItemToDB(client, newItem))
+			context.JSON(200, AddItemToDB(client, newItem))
 		})
 	}
 
@@ -85,17 +79,17 @@ func main() {
 	userRoutes := v1.Group("/user")
 	{
 		// Add an user
-		userRoutes.POST("/", func(c *gin.Context) {
+		userRoutes.POST("/", func(context *gin.Context) {
 			var newUser User
-			c.BindJSON(&newUser)
+			context.BindJSON(&newUser)
 			AddUser(newUser.Username, newUser.Password)
-			c.String(200, "Added user")
+			context.String(200, "Added user")
 		})
 
-		userRoutes.GET("/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
+		userRoutes.GET("/:id", func(context *gin.Context) {
+			id, err := strconv.Atoi(context.Param("id"))
 			if err == nil {
-				c.JSON(200, FindUserById(id))
+				context.JSON(200, FindUserById(id))
 			}
 		})
 	}
@@ -103,14 +97,14 @@ func main() {
 	// Discount routes
 	discountRoutes := v1.Group("/discount")
 	{
-		discountRoutes.GET("market/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetMarkets(city))
+		discountRoutes.GET("market/:city", func(context *gin.Context) {
+			city := context.Param("city")
+			context.JSON(200, GetMarkets(city))
 		})
 
-		discountRoutes.GET("/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetDiscountsFromDBOrAPI(client, city))
+		discountRoutes.GET("/:city", func(context *gin.Context) {
+			city := context.Param("city")
+			context.JSON(200, GetDiscountsFromDBOrAPI(client, city))
 		})
 	}
 
@@ -118,7 +112,7 @@ func main() {
 	{
 		dbRoutes := adminRoutes.Group("/db")
 		{
-			dbRoutes.GET("/addIndex", func(c *gin.Context) {
+			dbRoutes.GET("/addIndex", func(context *gin.Context) {
 				CreateDiscountsIndex(client)
 			})
 		}
