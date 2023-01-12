@@ -1,5 +1,5 @@
 <template>
-    <ion-page>
+    <ion-page >
         <ion-header>
             <ion-toolbar color="primary">
                 <ion-title color="light">Editor</ion-title>
@@ -10,8 +10,8 @@
             </ion-toolbar>
         </ion-header>
 
-        <ion-content >
-            <template v-for="recipe in recipes" :key="recipe._id">
+        <ion-content :fullscreen="true" class="ion-padding">
+            <template v-for="(recipe, recipeIndex) in recipes" :key="recipe._id  + recipeIndex">
                 <RecipeEditor :recipe="recipe" />
             </template>
             <ion-button @click="addNewRecipe()">Add new Recipe</ion-button>
