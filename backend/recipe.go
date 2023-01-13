@@ -41,7 +41,7 @@ type Item struct {
 }
 
 // Get recipes from database
-func GetRecipesCollection(client *mongo.Client) *mongo.Collection {
+func getRecipesCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("recipes")
 }
 
@@ -61,7 +61,7 @@ func HandleGetRecipesFromDB(context *gin.Context, client *mongo.Client) {
 func getRecipesFromDB(client *mongo.Client) ([]Recipe, error) {
 	ctx := DefaultContext()
 	// try to get collection of recipes
-	cursor, err := GetRecipesCollection(client).Find(ctx, bson.M{})
+	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{})
 	if err != nil {
 		log.Print(err)
 		return []Recipe{}, err
@@ -106,7 +106,7 @@ func HandleAddRecipeToDB(context *gin.Context, client *mongo.Client) {
 // and returns all recipes
 func addRecipeToDB(client *mongo.Client, newRecipe Recipe) ([]Recipe, error) {
 	ctx := DefaultContext()
-	if _, err := GetRecipesCollection(client).InsertOne(ctx, newRecipe); err != nil {
+	if _, err := getRecipesCollection(client).InsertOne(ctx, newRecipe); err != nil {
 		log.Print(err)
 		return []Recipe{}, err
 	}
@@ -115,7 +115,7 @@ func addRecipeToDB(client *mongo.Client, newRecipe Recipe) ([]Recipe, error) {
 }
 
 // Get recipes from database
-func GetItemsCollection(client *mongo.Client) *mongo.Collection {
+func getItemsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("items")
 }
 
@@ -134,13 +134,15 @@ func HandleGetItemsFromDB(context *gin.Context, client *mongo.Client) {
 // Gets all items from database
 func getItemsFromDB(client *mongo.Client) ([]Item, error) {
 	ctx := DefaultContext()
-	cursor, err := GetItemsCollection(client).Find(ctx, bson.M{})
+	cursor, err := getItemsCollection(client).Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Item{}, err
 	}
 	var itemsFromDatabase []Item
 	if err = cursor.All(ctx, &itemsFromDatabase); err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Item{}, err
 	}
 
 	if itemsFromDatabase == nil {
@@ -172,15 +174,16 @@ func HandleAddItemToDB(context *gin.Context, client *mongo.Client) {
 // and returns the list of recipes
 func addItemToDB(client *mongo.Client, newItem Item) ([]Item, error) {
 	ctx := DefaultContext()
-	_, err := GetItemsCollection(client).InsertOne(ctx, newItem)
+	_, err := getItemsCollection(client).InsertOne(ctx, newItem)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Item{}, err
 	}
 	return getItemsFromDB(client)
 }
 
-// RecipesToString generates a string of the recipes list
-func RecipesToString(recipes []Recipe) string {
+// recipesToString generates a string of the recipes list
+func recipesToString(recipes []Recipe) string {
 	data, err := json.Marshal(recipes)
 	if err == nil {
 		return string(data)
@@ -189,7 +192,7 @@ func RecipesToString(recipes []Recipe) string {
 }
 
 // GetItemsByRecipes gets all items used in a recipe
-func GetItemsByRecipe(recipe Recipe) []string {
+func getItemsByRecipe(recipe Recipe) []string {
 	var items = []string{}
 
 	for _, step := range recipe.Steps {
@@ -201,16 +204,20 @@ func GetItemsByRecipe(recipe Recipe) []string {
 }
 
 // FindRecipeById returns the recipe with the given id
-func FindRecipeById(client *mongo.Client, recipeId string) Recipe {
+func FindRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	ctx := DefaultContext()
-	cursor, err := GetRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
+	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return Recipe{}, err
 	}
 
 	var recipe Recipe
-	cursor.Decode(&recipe)
-	return recipe
+	if err := cursor.Decode(&recipe); err != nil {
+		log.Print(err)
+		return Recipe{}, err
+	}
+	return recipe, nil
 }
 
 func HandleFindRecipesByItemNames(context *gin.Context, client *mongo.Client) {
@@ -244,7 +251,7 @@ func findRecipesByItemNames(client *mongo.Client, splitItemIds []string) ([]Reci
 	for _, itemID := range splitItemIds {
 		for _, recipe := range recipes {
 			// iterate through each item used in recipe
-			var itemsByRecipe = GetItemsByRecipe(recipe)
+			var itemsByRecipe = getItemsByRecipe(recipe)
 			for _, recipeItemID := range itemsByRecipe {
 				// add recipe to map if not already added and if itemID corresponds to recipeItemID
 				if _, ok := recipesMap[recipe.ID]; !ok && itemID == recipeItemID {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -31,11 +32,12 @@ type Market struct {
 	Location              string `json:"location" bson:"location"`
 }
 
-func _Request(url string) []byte {
+func request(url string) ([]byte, error) {
 	// fetch from url
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []byte{}, err
 	}
 
 	// set headers
@@ -46,8 +48,8 @@ func _Request(url string) []byte {
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Fatal(err)
-		return []byte{}
+		log.Print(err)
+		return []byte{}, err
 	}
 
 	defer resp.Body.Close()
@@ -55,14 +57,18 @@ func _Request(url string) []byte {
 	// read bytes from body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return []byte{}, err
 	}
 
-	return body
+	return body, nil
 }
 
-func GetEdekaMarkets(city string) []Market {
-	var body = _Request("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
+func getEdekaMarkets(city string) ([]Market, error) {
+	body, err := request("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
+	if err != nil {
+		return []Market{}, err
+	}
 
 	// EdekaMarketSearch is the response from the EDEKA api
 	type EdekaMarketSearch struct {
@@ -88,9 +94,10 @@ func GetEdekaMarkets(city string) []Market {
 
 	// unmarshal json
 	var edekaMarketSearch EdekaMarketSearch
-	var err = json.Unmarshal(body, &edekaMarketSearch)
+	err = json.Unmarshal(body, &edekaMarketSearch)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return []Market{}, err
 	}
 
 	// create markets
@@ -104,11 +111,14 @@ func GetEdekaMarkets(city string) []Market {
 			Location:              market.Contact.Address.City.ZIP + " " + market.Contact.Address.City.Name,
 		})
 	}
-	return markets
+	return markets, nil
 }
 
-func GetReweMarkets(city string) []Market {
-	var body = _Request("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
+func getReweMarkets(city string) ([]Market, error) {
+	body, err := request("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
+	if err != nil {
+		return []Market{}, err
+	}
 
 	// ReweMarketSearch is the response from the REWE api
 	type ReweMarketSearch struct {
@@ -121,9 +131,10 @@ func GetReweMarkets(city string) []Market {
 
 	// unmarshal json
 	var reweMarketSearch []ReweMarketSearch
-	var err = json.Unmarshal(body, &reweMarketSearch)
+	err = json.Unmarshal(body, &reweMarketSearch)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return []Market{}, err
 	}
 
 	// create markets
@@ -137,11 +148,14 @@ func GetReweMarkets(city string) []Market {
 			Location:              market.ContactZipCode + " " + market.ContactCity,
 		})
 	}
-	return markets
+	return markets, nil
 }
 
-func GetReweDiscounts(market Market) []Discount {
-	var body = _Request("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificID)
+func getReweDiscounts(market Market) ([]Discount, error) {
+	body, err := request("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificID)
+	if err != nil {
+		return []Discount{}, err
+	}
 
 	// unmarshal json
 	var reweDiscounts struct {
@@ -159,9 +173,10 @@ func GetReweDiscounts(market Market) []Discount {
 		ValidUntil int `json:"untilDate"`
 	}
 
-	var err = json.Unmarshal(body, &reweDiscounts)
+	err = json.Unmarshal(body, &reweDiscounts)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
 
 	// create discounts
@@ -178,11 +193,14 @@ func GetReweDiscounts(market Market) []Discount {
 			})
 		}
 	}
-	return discounts
+	return discounts, nil
 }
 
-func GetEdekaDiscounts(market Market) []Discount {
-	var body = _Request("https://www.edeka.de/eh/service/eh/offers?marketId=" + market.DistributorSpecificID)
+func getEdekaDiscounts(market Market) ([]Discount, error) {
+	body, err := request("https://www.edeka.de/eh/service/eh/offers?marketId=" + market.DistributorSpecificID)
+	if err != nil {
+		return []Discount{}, err
+	}
 
 	// unmarshal json
 	var edekaDiscounts struct {
@@ -194,9 +212,10 @@ func GetEdekaDiscounts(market Market) []Discount {
 		} `json:"docs"`
 	}
 
-	var err = json.Unmarshal(body, &edekaDiscounts)
+	err = json.Unmarshal(body, &edekaDiscounts)
 	if err != nil {
-		log.Fatalln(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
 
 	// create discounts
@@ -212,53 +231,75 @@ func GetEdekaDiscounts(market Market) []Discount {
 			MarketLocation: market.Location,
 		})
 	}
-	return discounts
+	return discounts, nil
 }
 
-func GetMarkets(city string) []Market {
+// HandleGetMarkets gets called by router
+// Calls getMarkets and handles the context
+func HandleGetMarkets(context *gin.Context) {
+	city := context.Param("city")
+	context.JSON(200, getMarkets(city))
+}
+
+// Gets all markets for a city
+func getMarkets(city string) []Market {
 	var markets []Market
-	markets = append(markets, GetEdekaMarkets(city)...)
-	markets = append(markets, GetReweMarkets(city)...)
+	var functions = []func(string) ([]Market, error){getEdekaMarkets, getReweMarkets}
+	for _, function := range functions {
+		m, err := function(city)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		markets = append(markets, m...)
+	}
 	return markets
 }
 
-func GetDiscountsForMarket(market Market) []Discount {
-	var discounts []Discount
+func getDiscountsForMarket(market Market) ([]Discount, error) {
 	switch market.Distributor {
 	case "edeka":
-		discounts = GetEdekaDiscounts(market)
+		return getEdekaDiscounts(market)
 	case "rewe":
-		discounts = GetReweDiscounts(market)
+		return getReweDiscounts(market)
 	}
-	return discounts
+	return []Discount{}, nil
 }
 
-func GetDiscountsFromAPI(city string) []Discount {
-	var markets = GetMarkets(city)
+func getDiscountsFromAPI(city string) []Discount {
+	var markets = getMarkets(city)
 	var discounts []Discount
 	for _, market := range markets {
-		discounts = append(discounts, GetDiscountsForMarket(market)...)
+		discountsForMarket, err := getDiscountsForMarket(market)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		discounts = append(discounts, discountsForMarket...)
 	}
 	return discounts
 }
 
-func GetDiscountsCollection(client *mongo.Client) *mongo.Collection {
+func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("discounts")
 }
 
-func GetDiscountsFromDB(client *mongo.Client) []Discount {
+func getDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 	ctx := DefaultContext()
-	cursor, err := GetDiscountsCollection(client).Find(ctx, bson.M{})
+	cursor, err := getDiscountsCollection(client).Find(ctx, bson.M{})
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
 	var discounts []Discount
 	if err = cursor.All(ctx, &discounts); err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
-	return discounts
+	return discounts, nil
 }
-func AddDiscountsToDB(client *mongo.Client, discounts []Discount) []Discount {
+
+func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, error) {
 	ctx := DefaultContext()
 	log.Printf("Add %s discounts to database.", strconv.Itoa(len(discounts)))
 
@@ -267,35 +308,51 @@ func AddDiscountsToDB(client *mongo.Client, discounts []Discount) []Discount {
 	for _, discount := range discounts {
 		discountsAsDocument = append(discountsAsDocument, discount)
 	}
-	_, err := GetDiscountsCollection(client).InsertMany(ctx, discountsAsDocument)
+	_, err := getDiscountsCollection(client).InsertMany(ctx, discountsAsDocument)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
-	return GetDiscountsFromDB(client)
+	return getDiscountsFromDB(client)
 }
 
-func CreateDiscountsIndex(client *mongo.Client) {
+func HandleCreateDiscountsIndex(context *gin.Context, client *mongo.Client) {
 	ctx := DefaultContext()
 
 	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "marketLocation", Value: "text"}}}
-	name, err := GetDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
+	name, err := getDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 	log.Printf("Created index %s", name)
+	context.JSON(200, gin.H{"message": "Created index " + name})
 }
 
-func GetDiscountsFromDBOrAPI(client *mongo.Client, city string) []Discount {
+func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
+	city := context.Param("city")
+	discounts, err := getDiscountsFromDBOrAPI(client, city)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(200, discounts)
+}
+
+func getDiscountsFromDBOrAPI(client *mongo.Client, city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
 	// check if discounts are in database
 	log.Printf("Check if discounts for city %s are in database.", city)
-	var discountsFromDB, _ = GetDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
+	var discountsFromDB, _ = getDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
 
 	// get discounts from database
 	var discounts []Discount
 	if err := discountsFromDB.All(ctx, &discounts); err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return []Discount{}, err
 	}
 
 	var discountsFrom = "database"
@@ -303,10 +360,10 @@ func GetDiscountsFromDBOrAPI(client *mongo.Client, city string) []Discount {
 	if len(discounts) == 0 {
 		// if no discounts are in database, get them from API
 		discountsFrom = "API"
-		discounts = GetDiscountsFromAPI(city)
-		AddDiscountsToDB(client, discounts)
+		discounts = getDiscountsFromAPI(city)
+		addDiscountsToDB(client, discounts)
 	}
 
 	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
-	return discounts
+	return discounts, nil
 }

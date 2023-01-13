@@ -96,13 +96,11 @@ func main() {
 	discountRoutes := v1.Group("/discount")
 	{
 		discountRoutes.GET("market/:city", func(context *gin.Context) {
-			city := context.Param("city")
-			context.JSON(200, GetMarkets(city))
+			HandleGetMarkets(context)
 		})
 
 		discountRoutes.GET("/:city", func(context *gin.Context) {
-			city := context.Param("city")
-			context.JSON(200, GetDiscountsFromDBOrAPI(client, city))
+			HandleGetDiscounts(context, client)
 		})
 	}
 
@@ -111,7 +109,7 @@ func main() {
 		dbRoutes := adminRoutes.Group("/db")
 		{
 			dbRoutes.GET("/addIndex", func(context *gin.Context) {
-				CreateDiscountsIndex(client)
+				HandleCreateDiscountsIndex(context, client)
 			})
 		}
 	}
