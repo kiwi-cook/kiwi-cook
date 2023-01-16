@@ -253,6 +253,9 @@ func getMarkets(city string) []Market {
 		}
 		markets = append(markets, m...)
 	}
+	if markets == nil {
+		markets = []Market{}
+	}
 	return markets
 }
 
