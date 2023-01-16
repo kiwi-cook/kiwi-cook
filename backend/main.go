@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"strconv"
 
@@ -40,20 +39,6 @@ func main() {
 	apiRoutes := r.Group("/api")
 
 	v1 := apiRoutes.Group("/v1")
-
-	// Management routes
-	// Only for moderators only
-	editorRoutes := v1.Group("/editor")
-	{
-		// Editor
-		editorRoutes.GET("/", func(context *gin.Context) {
-			context.HTML(200, "editor.html", nil)
-		})
-
-		editorRoutes.GET("/list", func(context *gin.Context) {
-			context.JSON(200, dataFileNames())
-		})
-	}
 
 	// Recipes
 	recipeRoutes := v1.Group("/recipe")
@@ -134,17 +119,4 @@ func main() {
 		log.Print(err)
 		return
 	}
-}
-
-func dataFileNames() []string {
-	files, err := ioutil.ReadDir("./.data")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	names := []string{}
-	for _, f := range files {
-		names = append(names, f.Name())
-	}
-	return names
 }
