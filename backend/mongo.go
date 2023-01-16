@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,17 +10,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectToMongo() (*mongo.Client, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGODB_CONNSTRING")))
+func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
+	// create new mongo client
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
 	ctx := DefaultContext()
+
+	// connect to MongoDB via mongo client
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Print(err)
 		return nil, err
 	}
+
+	// try to ping MongoDB to see if connection is established
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return nil, err
 	}
 	return client, nil
 }

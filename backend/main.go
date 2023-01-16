@@ -1,23 +1,38 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	// Use viper to handle different environments
+	viper.AddConfigPath(".")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+
+	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
+	// e.g. DOCKER_MONGODB_CONNSTRING=...
+	if viper.GetString("APP_ENV") == "docker" {
+		viper.SetEnvPrefix("DOCKER")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("Fatal error config file: %w", err))
+	}
+
 	r := gin.Default()
 	r.Use(cors.Default())
 
-	// Serve frontend static files
-	r.LoadHTMLGlob(".page/*.html")
-
 	// Connect to database
-	client, err := ConnectToMongo()
+	client, err := ConnectToMongo(viper.GetString("MONGODB_CONNSTRING"))
 	if err != nil {
 		return
 	}
