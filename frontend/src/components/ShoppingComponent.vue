@@ -6,7 +6,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleShoppingFilter($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
             <div id="filter-relevanz-button">
@@ -138,7 +138,7 @@ export default defineComponent({
 
         const filteredMarkets = ref<Market[]>(markets);
 
-        const handleChange = (event: any) => {
+        const handleShoppingFilter = (event: any) => {
             const query = event.target.value.toLowerCase();
             // return if query is empty
             if (query === "") {
@@ -162,7 +162,7 @@ export default defineComponent({
             }, [])
         }
 
-        return { filteredMarkets, caretDownCircle, handleChange, filter, arrowDown, };
+        return { filteredMarkets, caretDownCircle, handleShoppingFilter, filter, arrowDown, };
 
     },
 });
