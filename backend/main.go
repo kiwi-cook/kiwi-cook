@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -70,25 +69,6 @@ func main() {
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
 			HandleAddItemToDB(context, client)
-		})
-	}
-
-	// Users
-	userRoutes := v1.Group("/user")
-	{
-		// Add an user
-		userRoutes.POST("/", func(context *gin.Context) {
-			var newUser User
-			context.BindJSON(&newUser)
-			AddUser(newUser.Username, newUser.Password)
-			context.String(200, "Added user")
-		})
-
-		userRoutes.GET("/:id", func(context *gin.Context) {
-			id, err := strconv.Atoi(context.Param("id"))
-			if err == nil {
-				context.JSON(200, FindUserById(id))
-			}
 		})
 	}
 
