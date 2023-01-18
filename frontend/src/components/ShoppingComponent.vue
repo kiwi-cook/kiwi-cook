@@ -33,7 +33,7 @@
                         </ion-item>
                         <div slot="content">
                             <div class="discount-items" style="background-color: #444953;">
-                                <template v-for="item in market.items" :key="item.name + market.name">
+                                <template v-for="(item, itemIndex) in market.items" :key="item.name + itemIndex + market.name">
                                     <div class="discount-item">
                                         <div class="imgContainer">
                                             <ion-img class="discount-img" :src="item.imgPath" :alt="item.name + ' Pic'">
@@ -99,7 +99,17 @@ export default defineComponent({
             reduced: 40
         }
 
-        const markets = [
+        type Market = {
+            name: string;
+            items: {
+                name: string;
+                imgPath: string;
+                price: string;
+                reduced: number;
+            }[];
+        }
+
+        const markets: Market[] = [
             {
                 name: "Edeka",
                 items: [
@@ -126,14 +136,30 @@ export default defineComponent({
             }
         ]
 
-        const filteredMarkets = ref(markets);
+        const filteredMarkets = ref<Market[]>(markets);
 
         const handleChange = (event: any) => {
             const query = event.target.value.toLowerCase();
-            filteredMarkets.value = markets.filter(market => {
-                const itemNames: string[] = market.items.map(item => item.name.toLowerCase())
-                return itemNames.includes(query)
-            });
+            // return if query is empty
+            if (query === "") {
+                filteredMarkets.value = markets
+                return
+            }
+
+            // filter markets
+            filteredMarkets.value = markets.reduce((filteredMarkets: Market[], market: Market) => {
+                // get all items of a market and check if query is included in item name
+                const filteredItems = market.items.filter(item => item.name.toLocaleLowerCase().includes(query))
+                
+                // check if items were found
+                if (filteredItems.length > 0) {
+                    // if items were found, return already filteredMarkets and add market with filtered items
+                    return [...filteredMarkets, { name: market.name, items: filteredItems }]
+                }
+
+                // if not, just return filtered markets
+                return filteredMarkets
+            }, [])
         }
 
         return { filteredMarkets, caretDownCircle, handleChange, filter, arrowDown, };
