@@ -18,7 +18,7 @@ export function getFromAPI<T extends Recipe[] | Item[] | Discount[] | Market[]>(
     }
 
     // call fetch
-    fetch(url)
+    fetch(url, { method: API_ROUTES[route].method ?? 'GET' })
         .then(response => response.json())
         .then(data => {
             console.debug(data)
