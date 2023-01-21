@@ -47,6 +47,9 @@ export function createVueStore() {
             },
             setItems(state, items) {
                 state.items = items
+            },
+            setDiscounts(state, discounts) {
+                state.discounts = discounts
             }
         },
         actions: {
@@ -60,11 +63,10 @@ export function createVueStore() {
                     commit('setItems', json)
                 });
             },
-            async fetchDiscounts({ commit, state }, city: string) {
-                // TODO: this does not work because getFromAPI just accepts enums
-                /* const discounts = getFromAPI(API_ROUTE.DISCOUNTS + city, (json: Discount[]) => {
-                    state.discounts[city] = json
-                }); */
+            async fetchDiscounts({ commit }, city: string) {
+                const discounts = getFromAPI(API_ROUTE.GET_DISCOUNTS, (json: Discount[]) => {
+                    commit('setDiscounts', json)
+                }, { CITY: city });
             }
         },
         getters: {
