@@ -51,12 +51,12 @@ export function createVueStore() {
         },
         actions: {
             async fetchRecipes({ commit }) {
-                const recipes = getFromAPI(API_ROUTE.RECIPES, (json: Recipe[]) => {
+                const recipes = getFromAPI(API_ROUTE.GET_RECIPES, (json: Recipe[]) => {
                     commit('setRecipes', json)
                 });
             },
             async fetchItems({ commit }) {
-                const items = getFromAPI(API_ROUTE.ITEMS, (json: Item[]) => {
+                const items = getFromAPI(API_ROUTE.GET_ITEMS, (json: Item[]) => {
                     commit('setItems', json)
                 });
             },
