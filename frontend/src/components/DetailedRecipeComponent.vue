@@ -84,37 +84,31 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
-import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel } from '@ionic/vue';
+import { computed, ComputedRef, defineComponent, ref } from 'vue';
+import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel, IonAvatar, IonImg } from '@ionic/vue';
 import { heart, flagOutline, shareOutline } from 'ionicons/icons';
 import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Recipe, Item } from '@/api/types';
+import { useTasteBuddyStore } from '@/storage';
 
 export default defineComponent({
     titel: 'Tab1Page',
     components: { IonHeader, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel },
 
     setup() {
-        const recipes = ref<Recipe>();
-        const items = ref<Item[]>();
+        const store = useTasteBuddyStore();
+        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
+        const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
 
-        getFromAPI(API_ROUTE.RECIPES, (json: Recipe[]) => {
-            recipes.value = json[0];
-        });
-
-        getFromAPI(API_ROUTE.ITEMS, (json: Item[]) => {
-            items.value = json;
-        });
-
-        const itemsFromRecipe = computed(() => items.value?.filter(item => recipes.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
+        const itemsFromRecipe = computed(() => items.value?.filter(item => recipe.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
         const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
         const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
 
 
         return {
             ingredients, equipments,
-            heart, recipes, flagOutline, shareOutline
+            heart, recipe, flagOutline, shareOutline
         };
     },
 });
