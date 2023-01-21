@@ -84,11 +84,9 @@
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, ref } from 'vue';
+import { computed, ComputedRef, defineComponent } from 'vue';
 import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel, IonAvatar, IonImg } from '@ionic/vue';
 import { heart, flagOutline, shareOutline } from 'ionicons/icons';
-import { getFromAPI } from '@/api';
-import { API_ROUTE } from '@/api/constants';
 import { Recipe, Item } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
 
