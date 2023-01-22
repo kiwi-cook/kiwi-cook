@@ -20,7 +20,7 @@ export default defineComponent({
     const store = useTasteBuddyStore();
     store.dispatch('fetchRecipes')
     store.dispatch('fetchItems')
-    store.dispatch('fetchDiscounts')
+    store.dispatch('fetchDiscounts', 'Konstanz')
 
     return {
     }
