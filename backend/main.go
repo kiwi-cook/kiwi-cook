@@ -1,64 +1,60 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	// Use viper to handle different environments
+	viper.AddConfigPath(".")
+	viper.SetConfigName(".env")
+	viper.SetConfigType("env")
+	viper.AutomaticEnv()
+
+	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
+	// e.g. DOCKER_MONGODB_CONNSTRING=...
+	if viper.GetString("APP_ENV") == "docker" {
+		viper.SetEnvPrefix("DOCKER")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		panic(fmt.Errorf("Fatal error config file: %w", err))
+	}
+
 	r := gin.Default()
 	r.Use(cors.Default())
 
-	// Serve frontend static files
-	r.LoadHTMLGlob(".page/*.html")
-
 	// Connect to database
-	client := ConnectToMongo()
+	client, err := ConnectToMongo(viper.GetString("MONGODB_CONNSTRING"))
+	if err != nil {
+		return
+	}
 
 	apiRoutes := r.Group("/api")
 
 	v1 := apiRoutes.Group("/v1")
 
-	// Management routes
-	// Only for moderators only
-	editorRoutes := v1.Group("/editor")
-	{
-		// Editor
-		editorRoutes.GET("/", func(c *gin.Context) {
-			c.HTML(200, "editor.html", nil)
-		})
-
-		editorRoutes.GET("/list", func(c *gin.Context) {
-			c.JSON(200, dataFileNames())
-		})
-	}
-
 	// Recipes
 	recipeRoutes := v1.Group("/recipe")
 	{
 		// Get all recipes
-		recipeRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, GetRecipesFromDB(client))
+		recipeRoutes.GET("/", func(context *gin.Context) {
+			HandleGetRecipesFromDB(context, client)
 		})
 
 		// Add recipe to database
-		recipeRoutes.POST("/", func(c *gin.Context) {
-			var newRecipe Recipe
-			err := c.BindJSON(&newRecipe)
-			if err != nil {
-				log.Fatal(err)
-			}
-			c.JSON(200, AddRecipeToDB(client, newRecipe))
+		recipeRoutes.POST("/", func(context *gin.Context) {
+			HandleAddRecipeToDB(context, client)
 		})
 
 		// Get recipe by item ids
-		recipeRoutes.GET("/byItem/:itemIds", func(c *gin.Context) {
-			itemIds := c.Param("itemIds")
-			c.JSON(200, FindRecipesByItemNames(client, itemIds))
+		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
+			HandleFindRecipesByItemNames(context, client)
 		})
 	}
 
@@ -66,51 +62,25 @@ func main() {
 	itemRoutes := v1.Group("/item")
 	{
 		// Get list of all items
-		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, GetItemsFromDB(client))
+		itemRoutes.GET("/", func(context *gin.Context) {
+			HandleGetItemsFromDB(context, client)
 		})
 
 		// Add recipe to database
-		itemRoutes.POST("/", func(c *gin.Context) {
-			var newItem Item
-			err := c.BindJSON(&newItem)
-			if err != nil {
-				log.Fatal(err)
-			}
-			c.JSON(200, AddItemToDB(client, newItem))
-		})
-	}
-
-	// Users
-	userRoutes := v1.Group("/user")
-	{
-		// Add an user
-		userRoutes.POST("/", func(c *gin.Context) {
-			var newUser User
-			c.BindJSON(&newUser)
-			AddUser(newUser.Username, newUser.Password)
-			c.String(200, "Added user")
-		})
-
-		userRoutes.GET("/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
-			if err == nil {
-				c.JSON(200, FindUserById(id))
-			}
+		itemRoutes.POST("/", func(context *gin.Context) {
+			HandleAddItemToDB(context, client)
 		})
 	}
 
 	// Discount routes
 	discountRoutes := v1.Group("/discount")
 	{
-		discountRoutes.GET("market/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetMarkets(city))
+		discountRoutes.GET("market/:city", func(context *gin.Context) {
+			HandleGetMarkets(context)
 		})
 
-		discountRoutes.GET("/:city", func(c *gin.Context) {
-			city := c.Param("city")
-			c.JSON(200, GetDiscountsFromDBOrAPI(client, city))
+		discountRoutes.GET("/:city", func(context *gin.Context) {
+			HandleGetDiscounts(context, client)
 		})
 	}
 
@@ -118,27 +88,15 @@ func main() {
 	{
 		dbRoutes := adminRoutes.Group("/db")
 		{
-			dbRoutes.GET("/addIndex", func(c *gin.Context) {
-				CreateDiscountsIndex(client)
+			dbRoutes.GET("/addIndex", func(context *gin.Context) {
+				HandleCreateDiscountsIndex(context, client)
 			})
 		}
 	}
 
-	err := r.Run(":8081")
+	err = r.Run(":8081")
 	if err != nil {
+		log.Print(err)
 		return
 	}
-}
-
-func dataFileNames() []string {
-	files, err := ioutil.ReadDir("./.data")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	names := []string{}
-	for _, f := range files {
-		names = append(names, f.Name())
-	}
-	return names
 }

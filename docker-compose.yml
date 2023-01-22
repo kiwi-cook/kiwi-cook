@@ -4,7 +4,8 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - MONGODB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb:27017
+      - APP_ENV=docker
+      - DOCKER_MONGODB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb:27017
     depends_on:
       - mongodb
 
