@@ -1,0 +1,8 @@
+backend:
+- any: ['backend/*']
+
+frontend:
+- any: ['frontend/*']
+
+github:
+- any: ['.github/*']
