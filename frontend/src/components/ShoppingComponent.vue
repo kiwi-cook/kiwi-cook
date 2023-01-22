@@ -87,18 +87,13 @@ export default defineComponent({
         IonTitle,
         IonPage,
         IonIcon,
-        IonThumbnail,
         IonButton,
         IonHeader,
         IonToolbar,
         IonAccordion,
         IonAccordionGroup,
         IonItem,
-        IonList,
-        IonLabel,
-        IonCard,
-        IonCardTitle,
-        IonCardSubtitle
+        IonLabel
     },
     setup() {
         const store = useTasteBuddyStore();
@@ -175,9 +170,10 @@ export default defineComponent({
 
         return {
             handleShoppingFilter, selectItem,
-            selectedItems, filteredMarkets, caretDownCircle, filter, arrowDown, price
-        };
-    }
+            filteredMarkets, selectedItems, price,
+            arrowDown
+        }
+    },
 });
 </script>
 <style scoped>
@@ -193,13 +189,21 @@ export default defineComponent({
     text-align: center;
     font-size: 100%;
     margin: 10px;
-    max-width: fit-content;
-    max-height: 250px;
+    max-width: 100px;
 }
 
-ion-thumbnail {
-    --size: 140px;
-    --border-radius: 14px;
+.discount-img {
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+}
+
+.imgContainer {
+    /*background-color: #F28705;*/
+    max-width: fit-content;
+    max-height: 250px;
+
+
 }
 
 /**Nicht beachten drunter */
