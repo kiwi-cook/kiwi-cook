@@ -6,7 +6,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleShoppingFilter($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
             <div id="filter-relevanz-button">
@@ -31,30 +31,48 @@
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ market.name }}</ion-label>
                         </ion-item>
-                        <div slot="content">
-                            <div class="discount-items" style="background-color: #444953;">
-                                <template v-for="item in market.items" :key="item.name + market.name">
-                                    <div class="discount-item">
-                                        <div class="imgContainer">
-                                            <ion-img class="discount-img" :src="item.imgPath" :alt="item.name + ' Pic'">
-                                            </ion-img>
-                                            <IonLabel color="light">
-                                                {{ item.name }}<br>- {{ item.reduced }}% <br>{{ item.price }} €
-                                            </IonLabel>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
+                        <div slot="content" class="discount-items" style="background-color: #444953;">
+                            <template v-for="(item, itemIndex) in market.items"
+                                :key="item.name + itemIndex + market.name">
+                                <ion-card class="discount-item" :button="true" @click="selectItem(item)">
+                                    <ion-thumbnail>
+                                        <img class="discount-img" :src="item.imgPath" :alt="item.name + ' Pic'" />
+                                    </ion-thumbnail>
+                                    <ion-card-title color="light">
+                                        {{ item.name }}
+                                    </ion-card-title>
+                                    <ion-card-subtitle color="light">
+                                        {{ item.price }} €
+                                    </ion-card-subtitle>
+                                    <ion-label color="light" position="stacked">
+                                        {{ item.reduced }}% reduziert
+                                    </ion-label>
+                                </ion-card>
+                            </template>
                         </div>
                     </ion-accordion>
                 </template>
             </ion-accordion-group>
+
+            <div class="container">
+                <ion-list>
+                    <template v-for="item in selectedItems" :key="item.name">
+                        <ion-item color="primary">
+                            <ion-label>{{ item.name }}</ion-label>
+                        </ion-item>
+                    </template>
+                </ion-list>
+                <ion-label v-if="selectedItems.length > 0" color="light">
+                    Gesamtpreis {{ price }} €
+                </ion-label>
+            </div>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import { IonToolbar, IonSearchbar, IonImg, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { IonToolbar, IonSearchbar, IonThumbnail, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonList, IonLabel, IonCard, IonCardTitle, IonCardSubtitle } from '@ionic/vue';
+import { computed } from '@vue/reactivity';
 import { caretDownCircle, filter, arrowDown } from 'ionicons/icons';
 import { defineComponent, ref } from 'vue';
 
@@ -67,16 +85,27 @@ export default defineComponent({
         IonTitle,
         IonPage,
         IonIcon,
-        IonImg,
+        IonThumbnail,
         IonButton,
         IonHeader,
         IonToolbar,
         IonAccordion,
         IonAccordionGroup,
         IonItem,
-        IonLabel
+        IonList,
+        IonLabel,
+        IonCard,
+        IonCardTitle,
+        IonCardSubtitle
     },
     setup() {
+
+        type Item = {
+            name: string;
+            imgPath: string;
+            price: string;
+            reduced: number;
+        }
 
         const corn = {
             name: "Corn",
@@ -99,7 +128,12 @@ export default defineComponent({
             reduced: 40
         }
 
-        const markets = [
+        type Market = {
+            name: string;
+            items: Item[];
+        }
+
+        const markets: Market[] = [
             {
                 name: "Edeka",
                 items: [
@@ -126,19 +160,47 @@ export default defineComponent({
             }
         ]
 
-        const filteredMarkets = ref(markets);
+        const filteredMarkets = ref<Market[]>(markets);
 
-        const handleChange = (event: any) => {
+        const handleShoppingFilter = (event: any) => {
             const query = event.target.value.toLowerCase();
-            filteredMarkets.value = markets.filter(market => {
-                const itemNames: string[] = market.items.map(item => item.name.toLowerCase())
-                return itemNames.includes(query)
-            });
+            // return if query is empty
+            if (query === "") {
+                filteredMarkets.value = markets
+                return
+            }
+
+            // filter markets
+            filteredMarkets.value = markets.reduce((filteredMarkets: Market[], market: Market) => {
+                // get all items of a market and check if query is included in item name
+                const filteredItems = market.items.filter(item => item.name.toLocaleLowerCase().includes(query))
+
+                // check if items were found
+                if (filteredItems.length > 0) {
+                    // if items were found, return already filteredMarkets and add market with filtered items
+                    return [...filteredMarkets, { name: market.name, items: filteredItems }]
+                }
+
+                // if not, just return filtered markets
+                return filteredMarkets
+            }, [])
         }
 
-        return { filteredMarkets, caretDownCircle, handleChange, filter, arrowDown, };
+        const selectedItems = ref<Item[]>([])
+        const selectItem = (item: Item) => {
+            if (selectedItems.value.includes(item)) {
+                selectedItems.value = selectedItems.value.filter(selectedItem => selectedItem !== item)
+            } else {
+                selectedItems.value = [...selectedItems.value, item]
+            }
+        }
+        const price = computed(() => selectedItems.value.reduce((price, item) => price + parseInt(item.price), 0))
 
-    },
+        return {
+            handleShoppingFilter, selectItem,
+            selectedItems, filteredMarkets, caretDownCircle, filter, arrowDown, price
+        };
+    }
 });
 </script>
 <style scoped>
@@ -154,21 +216,13 @@ export default defineComponent({
     text-align: center;
     font-size: 100%;
     margin: 10px;
-    max-width: 100px;
-}
-
-.discount-img {
-    object-fit: cover;
-    width: 100px;
-    height: 100px;
-}
-
-.imgContainer {
-    /*background-color: #F28705;*/
     max-width: fit-content;
     max-height: 250px;
+}
 
-
+ion-thumbnail {
+    --size: 140px;
+    --border-radius: 14px;
 }
 
 /**Nicht beachten drunter */
