@@ -48,36 +48,37 @@ export function createVueStore() {
             setItems(state, items) {
                 state.items = items
             },
-            setDiscounts(state, discounts) {
-                state.discounts = discounts
+            setDiscounts(state, payload) {
+                const { city, discounts } = payload
+                state.discounts[city] = discounts
             }
         },
         actions: {
             async fetchRecipes({ commit }) {
-                const recipes = getFromAPI(API_ROUTE.GET_RECIPES, (json: Recipe[]) => {
+                getFromAPI(API_ROUTE.GET_RECIPES, (json: Recipe[]) => {
                     commit('setRecipes', json)
                 });
             },
             async fetchItems({ commit }) {
-                const items = getFromAPI(API_ROUTE.GET_ITEMS, (json: Item[]) => {
+                getFromAPI(API_ROUTE.GET_ITEMS, (json: Item[]) => {
                     commit('setItems', json)
                 });
             },
             async fetchDiscounts({ commit }, city: string) {
-                const discounts = getFromAPI(API_ROUTE.GET_DISCOUNTS, (json: Discount[]) => {
-                    commit('setDiscounts', json)
+                getFromAPI(API_ROUTE.GET_DISCOUNTS, (json: Discount[]) => {
+                    commit('setDiscounts', { discounts: json, city })
                 }, { CITY: city });
             }
         },
         getters: {
             getRecipes(state): Recipe[] {
-                return state.recipes
+                return state.recipes ?? []
             },
             getItems(state): Item[] {
-                return state.items
+                return state.items ?? []
             },
-            getDiscounts(state, city: string): Discount[] {
-                return state.discounts[city]
+            getDiscounts: (state) => (city: string): Discount[] => {
+                return state.discounts[city] ?? []
             }
         }
     })
