@@ -168,6 +168,7 @@ func getReweDiscounts(market Market) ([]Discount, error) {
 				PriceData struct {
 					Price string `json:"price"`
 				} `json:"priceData"`
+				Images []string `json:"images"`
 			} `json:"offers"`
 		} `json:"categories"`
 		ValidUntil int `json:"untilDate"`
@@ -186,6 +187,7 @@ func getReweDiscounts(market Market) ([]Discount, error) {
 			discounts = append(discounts, Discount{
 				Price:          discount.PriceData.Price,
 				Title:          discount.Title,
+				ImageUrl:       discount.Images[0],
 				ValidUntil:     reweDiscounts.ValidUntil,
 				MarketID:       market.ID,
 				MarketName:     market.Name,
