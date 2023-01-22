@@ -36,17 +36,17 @@
                                 :key="item.name + itemIndex + market.name">
                                 <ion-card class="discount-item" :button="true" @click="selectItem(item)">
                                     <ion-thumbnail>
-                                        <img class="discount-img" :src="item.imgPath" :alt="item.name + ' Pic'" />
+                                        <img class="discount-img" :src="item.imageUrl" :alt="item.title + ' Pic'" />
                                     </ion-thumbnail>
                                     <ion-card-title color="light">
-                                        {{ item.name }}
+                                        {{ item.title }}
                                     </ion-card-title>
                                     <ion-card-subtitle color="light">
                                         {{ item.price }} €
                                     </ion-card-subtitle>
-                                    <ion-label color="light" position="stacked">
-                                        {{ item.reduced }}% reduziert
-                                    </ion-label>
+                                    <!-- <ion-label color="light" position="stacked">
+                                        {{ item. }}% reduziert
+                                    </ion-label> -->
                                 </ion-card>
                             </template>
                         </div>
@@ -58,7 +58,7 @@
                 <ion-list>
                     <template v-for="item in selectedItems" :key="item.name">
                         <ion-item color="primary">
-                            <ion-label>{{ item.name }}</ion-label>
+                            <ion-label>{{ item.title }}</ion-label>
                         </ion-item>
                     </template>
                 </ion-list>
@@ -71,10 +71,12 @@
 </template>
 
 <script lang="ts">
+import { Discount } from '@/api/types';
+import { useTasteBuddyStore } from '@/storage';
 import { IonToolbar, IonSearchbar, IonThumbnail, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonList, IonLabel, IonCard, IonCardTitle, IonCardSubtitle } from '@ionic/vue';
-import { computed } from '@vue/reactivity';
+import { computed, ComputedRef } from '@vue/reactivity';
 import { caretDownCircle, filter, arrowDown } from 'ionicons/icons';
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 
 
 export default defineComponent({
@@ -99,81 +101,44 @@ export default defineComponent({
         IonCardSubtitle
     },
     setup() {
+        const store = useTasteBuddyStore();
+        // Get discounts from store
+        const discounts = computed(() => store.getters.getDiscounts('Konstanz'));
+        
+        // Custom simplified type for markets
+        type Market = { name: string, items: Discount[] };
 
-        type Item = {
-            name: string;
-            imgPath: string;
-            price: string;
-            reduced: number;
-        }
-
-        const corn = {
-            name: "Corn",
-            imgPath: "assets/ingredients/corn.jpeg",
-            price: "1,00",
-            reduced: 30
-        }
-
-        const tomato = {
-            name: "Tomato",
-            imgPath: "assets/ingredients/tomato.jpeg",
-            price: "3,99",
-            reduced: 30
-        }
-
-        const burger = {
-            name: "Hamburger",
-            imgPath: "assets/food/food_hamburger.jpeg",
-            price: "2,50",
-            reduced: 40
-        }
-
-        type Market = {
-            name: string;
-            items: Item[];
-        }
-
-        const markets: Market[] = [
-            {
-                name: "Edeka",
-                items: [
-                    corn,
-                    tomato
-                ]
-            },
-            {
-                name: "Rewe",
-                items: [
-                    corn
-                ]
-            },
-            {
-                name: "Aldi Süd",
-                items: [
-                    tomato,
-                    burger,
-                    tomato,
-                    burger,
-                    corn,
-                    burger,
-                ]
+        // Create markets from discounts
+        const markets: ComputedRef<Market[]> = computed(() => discounts.value.reduce((markets: Market[], discount: Discount) => {
+            const market = markets.find(market => market.name === discount.marketName);
+            if (market) {
+                market.items.push(discount);
+            } else {
+                markets.push({ name: discount.marketName, items: [discount] });
             }
-        ]
+            return markets;
+        }, []));
 
-        const filteredMarkets = ref<Market[]>(markets);
+        // Use filteredMarkets to filter markets
+        const filteredMarkets = ref<Market[]>(markets.value);
+        // Update filteredMarkets when markets value changes
+        watch(markets, () => {
+            filteredMarkets.value = markets.value
+        })
 
+        // Filter markets by query
         const handleShoppingFilter = (event: any) => {
             const query = event.target.value.toLowerCase();
             // return if query is empty
             if (query === "") {
-                filteredMarkets.value = markets
+                filteredMarkets.value = markets.value
                 return
             }
 
             // filter markets
-            filteredMarkets.value = markets.reduce((filteredMarkets: Market[], market: Market) => {
+            filteredMarkets.value = markets.value.reduce((filteredMarkets: Market[], market: Market) => {
                 // get all items of a market and check if query is included in item name
-                const filteredItems = market.items.filter(item => item.name.toLocaleLowerCase().includes(query))
+                const filteredItems = market.items.filter(item => item.title.toLocaleLowerCase().includes(query))
 
                 // check if items were found
                 if (filteredItems.length > 0) {
@@ -186,15 +151,18 @@ export default defineComponent({
             }, [])
         }
 
-        const selectedItems = ref<Item[]>([])
-        const selectItem = (item: Item) => {
+        // List of selected items
+        const selectedItems = ref<Discount[]>([])
+        // Handle item selection
+        const selectItem = (item: Discount) => {
             if (selectedItems.value.includes(item)) {
                 selectedItems.value = selectedItems.value.filter(selectedItem => selectedItem !== item)
             } else {
                 selectedItems.value = [...selectedItems.value, item]
             }
         }
-        const price = computed(() => selectedItems.value.reduce((price, item) => price + parseInt(item.price), 0))
+        // Calculate price of selected items
+        const price = computed(() => selectedItems.value.reduce((price, item) => price + parseFloat(item.price), 0))
 
         return {
             handleShoppingFilter, selectItem,
