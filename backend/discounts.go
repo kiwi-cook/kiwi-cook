@@ -20,6 +20,7 @@ type Discount struct {
 	ValidUntil       int    `json:"validUntil" bson:"validUntil"` // unix timestamp
 	MarketName       string `json:"marketName" bson:"marketName"`
 	InternalMarketID string `json:"internalMarketId" bson:"internalMarketId"`
+	MarketLocation   string `json:"-" bson:"_marketLocation"`
 }
 
 type Coordinates struct {
@@ -258,6 +259,7 @@ func getReweDiscounts(market Market) ([]Discount, error) {
 				ValidUntil:       reweDiscounts.ValidUntil,
 				MarketName:       market.MarketName,
 				InternalMarketID: market.ID,
+				MarketLocation:   market.Location.City,
 			})
 		}
 	}
@@ -296,8 +298,51 @@ func getEdekaDiscounts(market Market) ([]Discount, error) {
 			ValidUntil:       discount.ValidUntil,
 			MarketName:       market.MarketName,
 			InternalMarketID: market.ID,
+			MarketLocation:   market.Location.City,
 		})
 	}
+	return discounts, nil
+}
+
+// HandleGetDiscounts gets called by router
+// Calls getDiscountsFromDBOrAPI and handles the context
+func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
+	city := context.Param("city")
+	log.Print(city)
+	discounts, err := getDiscountsFromDBOrAPI(client, city)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(200, discounts)
+}
+
+// Gets discounts from database or API
+func getDiscountsFromDBOrAPI(client *mongo.Client, city string) ([]Discount, error) {
+	ctx := DefaultContext()
+
+	// check if discounts are in database
+	log.Printf("Check if discounts for city %s are in database.", city)
+	var discountsFromDB, _ = getDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
+
+	// get discounts from database
+	var discounts []Discount
+	if err := discountsFromDB.All(ctx, &discounts); err != nil {
+		log.Print(err)
+		return []Discount{}, err
+	}
+
+	var discountsFrom = "database"
+
+	if len(discounts) == 0 {
+		// if no discounts are in database, get them from API
+		discountsFrom = "API"
+		discounts = getDiscountsFromAPI(city)
+		addDiscountsToDB(client, discounts)
+	}
+
+	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
 	return discounts, nil
 }
 
@@ -371,7 +416,7 @@ func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, e
 func HandleCreateDiscountsIndex(context *gin.Context, client *mongo.Client) {
 	ctx := DefaultContext()
 
-	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "marketLocation", Value: "text"}}}
+	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "_marketLocation", Value: "text"}}}
 	name, err := getDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
 	if err != nil {
 		log.Print(err)
@@ -380,46 +425,4 @@ func HandleCreateDiscountsIndex(context *gin.Context, client *mongo.Client) {
 	}
 	log.Printf("Created index %s", name)
 	context.JSON(200, gin.H{"message": "Created index " + name})
-}
-
-// HandleGetDiscounts gets called by router
-// Calls getDiscountsFromDBOrAPI and handles the context
-func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
-	city := context.Param("city")
-	log.Print(city)
-	discounts, err := getDiscountsFromDBOrAPI(client, city)
-	if err != nil {
-		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
-	context.JSON(200, discounts)
-}
-
-// Gets discounts from database or API
-func getDiscountsFromDBOrAPI(client *mongo.Client, city string) ([]Discount, error) {
-	ctx := DefaultContext()
-
-	// check if discounts are in database
-	log.Printf("Check if discounts for city %s are in database.", city)
-	var discountsFromDB, _ = getDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
-
-	// get discounts from database
-	var discounts []Discount
-	if err := discountsFromDB.All(ctx, &discounts); err != nil {
-		log.Print(err)
-		return []Discount{}, err
-	}
-
-	var discountsFrom = "database"
-
-	if len(discounts) == 0 {
-		// if no discounts are in database, get them from API
-		discountsFrom = "API"
-		discounts = getDiscountsFromAPI(city)
-		addDiscountsToDB(client, discounts)
-	}
-
-	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
-	return discounts, nil
 }
