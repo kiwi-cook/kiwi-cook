@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -38,4 +40,23 @@ func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
 func DefaultContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	return ctx
+}
+
+func HandleDropAllCollections(context *gin.Context, client *mongo.Client) {
+	err := dropAll(client)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, gin.H{"message": "Successfully dropped all collections"})
+}
+
+func dropAll(client *mongo.Client) error {
+	ctx := DefaultContext()
+	err := client.Database("tastebuddy").Drop(ctx)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }

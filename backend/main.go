@@ -75,12 +75,15 @@ func main() {
 	// Discount routes
 	discountRoutes := v1.Group("/discount")
 	{
-		discountRoutes.GET("market/:city", func(context *gin.Context) {
-			HandleGetMarkets(context)
-		})
-
 		discountRoutes.GET("/:city", func(context *gin.Context) {
 			HandleGetDiscounts(context, client)
+		})
+	}
+
+	marketRoutes := v1.Group("/market")
+	{
+		marketRoutes.GET("/:city", func(context *gin.Context) {
+			HandleGetMarkets(context)
 		})
 	}
 
@@ -90,6 +93,10 @@ func main() {
 		{
 			dbRoutes.GET("/addIndex", func(context *gin.Context) {
 				HandleCreateDiscountsIndex(context, client)
+			})
+
+			dbRoutes.GET("/dropAll", func(context *gin.Context) {
+				HandleDropAllCollections(context, client)
 			})
 		}
 	}
