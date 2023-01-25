@@ -13,14 +13,14 @@ import (
 )
 
 type Discount struct {
-	ID               string `json:"_id,omitempty" bson:"_id,omitempty"` // id of the product
-	Title            string `json:"title" bson:"title"`                 // title of the product
-	Price            string `json:"price" bson:"price"`                 // price of the product
-	ImageUrl         string `json:"imageUrl" bson:"imageUrl"`
-	ValidUntil       int    `json:"validUntil" bson:"validUntil"` // unix timestamp
-	MarketName       string `json:"marketName" bson:"marketName"`
-	InternalMarketID string `json:"internalMarketId" bson:"internalMarketId"`
-	MarketLocation   string `json:"-" bson:"_marketLocation"`
+	ID               string   `json:"_id,omitempty" bson:"_id,omitempty"` // id of the product
+	Title            string   `json:"title" bson:"title"`                 // title of the product
+	Price            string   `json:"price" bson:"price"`                 // price of the product
+	ImageUrl         string   `json:"imageUrl" bson:"imageUrl"`
+	ValidUntil       int      `json:"validUntil" bson:"validUntil"` // unix timestamp
+	MarketName       string   `json:"marketName" bson:"marketName"`
+	InternalMarketID string   `json:"internalMarketId" bson:"internalMarketId"`
+	Tags             []string `json:"-" bson:"_tags"`
 }
 
 type Coordinates struct {
@@ -259,7 +259,7 @@ func getReweDiscounts(market Market) ([]Discount, error) {
 				ValidUntil:       reweDiscounts.ValidUntil,
 				MarketName:       market.MarketName,
 				InternalMarketID: market.ID,
-				MarketLocation:   market.Location.City,
+				Tags:             []string{category.Title, discount.SubTitle, market.Distributor, market.Location.City},
 			})
 		}
 	}
@@ -298,7 +298,7 @@ func getEdekaDiscounts(market Market) ([]Discount, error) {
 			ValidUntil:       discount.ValidUntil,
 			MarketName:       market.MarketName,
 			InternalMarketID: market.ID,
-			MarketLocation:   market.Location.City,
+			Tags:             []string{market.Distributor, market.Location.City},
 		})
 	}
 	return discounts, nil
@@ -319,29 +319,49 @@ func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 }
 
 // Gets discounts from database or API
+// TODO: add caching
+// TODO: add pagination
+// TODO: add sorting
+// TODO: better filtering, pass tags as parameter
 func getDiscountsFromDBOrAPI(client *mongo.Client, city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
 	// check if discounts are in database
 	log.Printf("Check if discounts for city %s are in database.", city)
-	var discountsFromDB, _ = getDiscountsCollection(client).Find(ctx, bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: city}}}})
-
-	// get discounts from database
 	var discounts []Discount
-	if err := discountsFromDB.All(ctx, &discounts); err != nil {
+	discountsFromDB, err := getDiscountsCollection(client).Aggregate(ctx, mongo.Pipeline{
+		// unwind
+		bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$_tags"}}}},
+		// match tags using regex
+		bson.D{{Key: "$match", Value: bson.D{{Key: "_tags", Value: bson.D{{Key: "$regex", Value: city}}}}}},
+		// group discounts
+		bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$_id"},
+			{Key: "price", Value: bson.D{{Key: "$first", Value: "$price"}}},
+			{Key: "title", Value: bson.D{{Key: "$first", Value: "$title"}}},
+			{Key: "imageUrl", Value: bson.D{{Key: "$first", Value: "$imageUrl"}}},
+			{Key: "validUntil", Value: bson.D{{Key: "$first", Value: "$validUntil"}}},
+			{Key: "marketName", Value: bson.D{{Key: "$first", Value: "$marketName"}}},
+			{Key: "internalMarketID", Value: bson.D{{Key: "$first", Value: "$internalMarketID"}}},
+			{Key: "_tags", Value: bson.D{{Key: "$push", Value: "$_tags"}}}}}},
+	})
+
+	if err != nil {
 		log.Print(err)
 		return []Discount{}, err
 	}
 
+	// get discounts from database
+	if err := discountsFromDB.All(ctx, &discounts); err != nil {
+		log.Print(err)
+		return []Discount{}, err
+	}
 	var discountsFrom = "database"
-
 	if len(discounts) == 0 {
 		// if no discounts are in database, get them from API
 		discountsFrom = "API"
 		discounts = getDiscountsFromAPI(city)
 		addDiscountsToDB(client, discounts)
 	}
-
 	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
 	return discounts, nil
 }
@@ -416,7 +436,7 @@ func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, e
 func HandleCreateDiscountsIndex(context *gin.Context, client *mongo.Client) {
 	ctx := DefaultContext()
 
-	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "_marketLocation", Value: "text"}}}
+	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "_tags", Value: "text"}}}
 	name, err := getDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
 	if err != nil {
 		log.Print(err)
