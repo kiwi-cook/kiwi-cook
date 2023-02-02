@@ -47,13 +47,13 @@ func getEdekaMarkets(city string) ([]Market, error) {
 	var markets []Market
 	for _, market := range edekaMarketSearch.Markets {
 		// parse coordinates
-		lat, err := strconv.ParseFloat(market.Coordinates.Latitude, 8)
+		lat, err := strconv.ParseFloat(market.Coordinates.Latitude, 32)
 		if err != nil {
 			log.Print(err)
 			lat = 0
 		}
 
-		lon, err := strconv.ParseFloat(market.Coordinates.Longitude, 8)
+		lon, err := strconv.ParseFloat(market.Coordinates.Longitude, 32)
 		if err != nil {
 			log.Print(err)
 			lon = 0
