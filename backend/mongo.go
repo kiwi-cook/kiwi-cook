@@ -1,10 +1,8 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -35,11 +33,6 @@ func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
 		return nil, err
 	}
 	return client, nil
-}
-
-func DefaultContext() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	return ctx
 }
 
 func HandleDropAllCollections(context *gin.Context, client *mongo.Client) {
