@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strings"
@@ -180,15 +179,6 @@ func addItemToDB(client *mongo.Client, newItem Item) ([]Item, error) {
 		return []Item{}, err
 	}
 	return getItemsFromDB(client)
-}
-
-// Generate a string of the recipes list
-func recipesToString(recipes []Recipe) string {
-	data, err := json.Marshal(recipes)
-	if err == nil {
-		return string(data)
-	}
-	return ""
 }
 
 // Get all items used in a recipe
