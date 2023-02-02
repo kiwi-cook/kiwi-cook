@@ -57,7 +57,7 @@ func HandleGetRecipesFromDB(context *gin.Context, client *mongo.Client) {
 	context.JSON(http.StatusOK, recipes)
 }
 
-// Gets all recipes from database
+// Get all recipes from database
 func getRecipesFromDB(client *mongo.Client) ([]Recipe, error) {
 	ctx := DefaultContext()
 	// try to get collection of recipes
@@ -131,7 +131,7 @@ func HandleGetItemsFromDB(context *gin.Context, client *mongo.Client) {
 	context.JSON(http.StatusOK, items)
 }
 
-// Gets all items from database
+// Get all items from database
 func getItemsFromDB(client *mongo.Client) ([]Item, error) {
 	ctx := DefaultContext()
 	cursor, err := getItemsCollection(client).Find(ctx, bson.M{})
@@ -182,7 +182,7 @@ func addItemToDB(client *mongo.Client, newItem Item) ([]Item, error) {
 	return getItemsFromDB(client)
 }
 
-// recipesToString generates a string of the recipes list
+// Generate a string of the recipes list
 func recipesToString(recipes []Recipe) string {
 	data, err := json.Marshal(recipes)
 	if err == nil {
@@ -191,7 +191,7 @@ func recipesToString(recipes []Recipe) string {
 	return ""
 }
 
-// GetItemsByRecipes gets all items used in a recipe
+// Get all items used in a recipe
 func getItemsByRecipe(recipe Recipe) []string {
 	var items = []string{}
 
@@ -203,7 +203,7 @@ func getItemsByRecipe(recipe Recipe) []string {
 	return items
 }
 
-// FindRecipeById returns the recipe with the given id
+// Get recipe with the given id
 func FindRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	ctx := DefaultContext()
 	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
@@ -220,6 +220,8 @@ func FindRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	return recipe, nil
 }
 
+// HandleFindRecipesByItemNames gets called by router
+// Calls findRecipesByItemNames and handles the context
 func HandleFindRecipesByItemNames(context *gin.Context, client *mongo.Client) {
 	itemIds := context.Param("itemIds")
 
