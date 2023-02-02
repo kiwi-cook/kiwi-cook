@@ -23,7 +23,7 @@ func main() {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Fatal error config file: %w", err))
+		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 
 	r := gin.Default()
