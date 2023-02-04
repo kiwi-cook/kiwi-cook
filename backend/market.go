@@ -135,6 +135,7 @@ func getMarketsByCityFromAPI(city string) []Market {
 	return markets
 }
 
+// Goroutine to save markets from different cities to database
 func GoRoutineSaveMarketsToDB(client *mongo.Client) {
 	cities := []string{
 		"Konstanz",

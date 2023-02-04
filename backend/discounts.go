@@ -28,7 +28,7 @@ type Discount struct {
 func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
 	log.Print(city)
-	if discounts, err := getDiscountsFromDB(client, city); err != nil {
+	if discounts, err := getDiscountsByCityFromDB(client, city); err != nil {
 		log.Print(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
 	} else {
@@ -36,17 +36,13 @@ func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 	}
 }
 
-// Get discounts from database
+// Get discounts collection from database
 func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("discounts")
 }
 
-// Get discounts from database or API
-// TODO: add caching
-// TODO: add pagination
-// TODO: add sorting
-// TODO: better filtering, pass tags as parameter
-func getDiscountsFromDB(client *mongo.Client, city string) ([]Discount, error) {
+// Get discounts by city from database
+func getDiscountsByCityFromDB(client *mongo.Client, city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
 	// get marketIds for city
@@ -153,6 +149,7 @@ func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
 	}
 }
 
+// Goroutine to save discounts from different cities to the database
 func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
 	cities := []string{
 		"Konstanz",
