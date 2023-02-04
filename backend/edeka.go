@@ -108,7 +108,7 @@ func getEdekaDiscounts(market Market) ([]Discount, error) {
 			ImageUrl:         discount.ImageUrl,
 			ValidUntil:       discount.ValidUntil,
 			MarketName:       market.MarketName,
-			InternalMarketID: market.ID,
+			InternalMarketID: market.ID.Hex(),
 			Tags:             []string{market.Distributor, market.Location.City},
 		})
 	}

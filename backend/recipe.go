@@ -7,18 +7,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Recipe struct {
-	ID          string   `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name        string   `json:"name" bson:"name" binding:"required"`
-	Author      string   `json:"author" bson:"author" binding:"required"`
-	Description string   `json:"description" bson:"description" binding:"required"`
-	ImgUrl      string   `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Tags        []string `json:"tags" bson:"tags" binding:"required"`
-	CookingTime int      `json:"cookingTime" bson:"cookingTime" binding:"required"`
-	Steps       []Step   `json:"steps" bson:"steps" binding:"required"`
+	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name        string             `json:"name" bson:"name" binding:"required"`
+	Author      string             `json:"author" bson:"author" binding:"required"`
+	Description string             `json:"description" bson:"description" binding:"required"`
+	ImgUrl      string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	Tags        []string           `json:"tags" bson:"tags" binding:"required"`
+	CookingTime int                `json:"cookingTime" bson:"cookingTime" binding:"required"`
+	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
 }
 
 type Step struct {
@@ -39,11 +41,6 @@ type Item struct {
 	ImgUrl string `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
-// Get recipes from database
-func getRecipesCollection(client *mongo.Client) *mongo.Collection {
-	return client.Database("tastebuddy").Collection("recipes")
-}
-
 // HandleGetRecipesFromDB gets called by router
 // Calls getRecipesFromDB and handles the context
 func HandleGetRecipesFromDB(context *gin.Context, client *mongo.Client) {
@@ -54,6 +51,78 @@ func HandleGetRecipesFromDB(context *gin.Context, client *mongo.Client) {
 		return
 	}
 	context.JSON(http.StatusOK, recipes)
+}
+
+// HandleAddRecipeToDB gets called by router
+// Calls addRecipeToDB and handles the context
+func HandleAddRecipeToDB(context *gin.Context, client *mongo.Client) {
+	// try to bind json to recipe
+	var newRecipe Recipe
+	if err := context.BindJSON(&newRecipe); err != nil {
+		log.Print(err)
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	recipes, err := addRecipeToDB(client, newRecipe)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, recipes)
+}
+
+// HandleFindRecipesByItemNames gets called by router
+// Calls findRecipesByItemNames and handles the context
+func HandleFindRecipesByItemNames(context *gin.Context, client *mongo.Client) {
+	itemIds := context.Param("itemIds")
+
+	// split itemIds string into array
+	splitItemIds := strings.Split(itemIds, ",")
+
+	recipes, err := findRecipesByItemNames(client, splitItemIds)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, recipes)
+}
+
+// HandleGetRecipesFromDB gets called by router
+// Calls getRecipesFromDB and handles the context
+func HandleGetItemsFromDB(context *gin.Context, client *mongo.Client) {
+	items, err := getItemsFromDB(client)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, items)
+}
+
+// HandleAddItemToDB gets called by router
+// Calls addItemToDB and handles the context
+func HandleAddItemToDB(context *gin.Context, client *mongo.Client) {
+	var newItem Item
+	err := context.BindJSON(&newItem)
+	if err != nil {
+		log.Print(err)
+	}
+
+	items, err := addItemToDB(client, newItem)
+	if err != nil {
+		log.Print(err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		return
+	}
+	context.JSON(http.StatusOK, items)
+}
+
+// Get recipes from database
+func getRecipesCollection(client *mongo.Client) *mongo.Collection {
+	return client.Database("tastebuddy").Collection("recipes")
 }
 
 // Get all recipes from database
@@ -81,31 +150,14 @@ func getRecipesFromDB(client *mongo.Client) ([]Recipe, error) {
 	return recipesFromDatabase, nil
 }
 
-// HandleAddRecipeToDB gets called by router
-// Calls addRecipeToDB and handles the context
-func HandleAddRecipeToDB(context *gin.Context, client *mongo.Client) {
-	// try to bind json to recipe
-	var newRecipe Recipe
-	if err := context.BindJSON(&newRecipe); err != nil {
-		log.Print(err)
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
-		return
-	}
-
-	recipes, err := addRecipeToDB(client, newRecipe)
-	if err != nil {
-		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
-	context.JSON(http.StatusOK, recipes)
-}
-
 // Adds a new recipe to the database of recipes
 // and returns all recipes
 func addRecipeToDB(client *mongo.Client, newRecipe Recipe) ([]Recipe, error) {
 	ctx := DefaultContext()
-	if _, err := getRecipesCollection(client).InsertOne(ctx, newRecipe); err != nil {
+	opts := options.Update().SetUpsert(true)
+	if _, err := getRecipesCollection(client).UpdateOne(ctx,
+		bson.D{{Key: "_id", Value: newRecipe.ID}},
+		bson.D{{Key: "$set", Value: newRecipe}}, opts); err != nil {
 		log.Print(err)
 		return []Recipe{}, err
 	}
@@ -116,18 +168,6 @@ func addRecipeToDB(client *mongo.Client, newRecipe Recipe) ([]Recipe, error) {
 // Get recipes from database
 func getItemsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("items")
-}
-
-// HandleGetRecipesFromDB gets called by router
-// Calls getRecipesFromDB and handles the context
-func HandleGetItemsFromDB(context *gin.Context, client *mongo.Client) {
-	items, err := getItemsFromDB(client)
-	if err != nil {
-		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
-	context.JSON(http.StatusOK, items)
 }
 
 // Get all items from database
@@ -149,24 +189,6 @@ func getItemsFromDB(client *mongo.Client) ([]Item, error) {
 		itemsFromDatabase = []Item{}
 	}
 	return itemsFromDatabase, nil
-}
-
-// HandleAddItemToDB gets called by router
-// Calls addItemToDB and handles the context
-func HandleAddItemToDB(context *gin.Context, client *mongo.Client) {
-	var newItem Item
-	err := context.BindJSON(&newItem)
-	if err != nil {
-		log.Print(err)
-	}
-
-	items, err := addItemToDB(client, newItem)
-	if err != nil {
-		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
-	context.JSON(http.StatusOK, items)
 }
 
 // AddItemToDB adds a new recipe to the database of recipes
@@ -194,7 +216,7 @@ func getItemsByRecipe(recipe Recipe) []string {
 }
 
 // Get recipe with the given id
-func FindRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
+func findRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	ctx := DefaultContext()
 	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
 	if err != nil {
@@ -208,23 +230,6 @@ func FindRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 		return Recipe{}, err
 	}
 	return recipe, nil
-}
-
-// HandleFindRecipesByItemNames gets called by router
-// Calls findRecipesByItemNames and handles the context
-func HandleFindRecipesByItemNames(context *gin.Context, client *mongo.Client) {
-	itemIds := context.Param("itemIds")
-
-	// split itemIds string into array
-	splitItemIds := strings.Split(itemIds, ",")
-
-	recipes, err := findRecipesByItemNames(client, splitItemIds)
-	if err != nil {
-		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
-	}
-	context.JSON(http.StatusOK, recipes)
 }
 
 // FindRecipesByItems returns the recipes in which the
@@ -246,8 +251,8 @@ func findRecipesByItemNames(client *mongo.Client, splitItemIds []string) ([]Reci
 			var itemsByRecipe = getItemsByRecipe(recipe)
 			for _, recipeItemID := range itemsByRecipe {
 				// add recipe to map if not already added and if itemID corresponds to recipeItemID
-				if _, ok := recipesMap[recipe.ID]; !ok && itemID == recipeItemID {
-					recipesMap[recipe.ID] = recipe
+				if _, ok := recipesMap[recipe.ID.Hex()]; !ok && itemID == recipeItemID {
+					recipesMap[recipe.ID.Hex()] = recipe
 				}
 			}
 		}

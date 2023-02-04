@@ -10,6 +10,8 @@ import (
 )
 
 func main() {
+	////////////////////////////////////////////////////////////////////////
+	// Set up viper
 	// Use viper to handle different environments
 	viper.AddConfigPath(".")
 	viper.SetConfigName(".env")
@@ -25,18 +27,37 @@ func main() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
+	// Finish viper
+	////////////////////////////////////////////////////////////////////////
 
-	r := gin.Default()
-	r.Use(cors.Default())
-
+	////////////////////////////////////////////////////////////////////////
 	// Connect to database
 	client, err := ConnectToMongo(viper.GetString("MONGODB_CONNSTRING"))
 	if err != nil {
 		return
 	}
+	// Finish Database
+	////////////////////////////////////////////////////////////////////////
 
+	////////////////////////////////////////////////////////////////////////
+	// Goroutines
+	go func() {
+		GoRoutineSaveMarketsToDB(client)
+		// Discounts must be saved after markets
+		GoRoutineSaveDiscountsToDB(client)
+	}()
+	// Finish Goroutines
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
+	// Set up gin
+	r := gin.Default()
+	r.Use(cors.Default())
+
+	// Routes
 	apiRoutes := r.Group("/api")
 
+	// Version 1
 	v1 := apiRoutes.Group("/v1")
 
 	// Recipes
@@ -80,30 +101,34 @@ func main() {
 		})
 	}
 
+	// Market routes
 	marketRoutes := v1.Group("/market")
 	{
 		marketRoutes.GET("/:city", func(context *gin.Context) {
-			HandleGetMarkets(context)
+			HandleGetMarkets(context, client)
 		})
 	}
 
+	// Admin routes
 	adminRoutes := v1.Group("/admin")
 	{
 		dbRoutes := adminRoutes.Group("/db")
 		{
-			dbRoutes.GET("/addIndex", func(context *gin.Context) {
-				HandleCreateDiscountsIndex(context, client)
-			})
-
 			dbRoutes.GET("/dropAll", func(context *gin.Context) {
 				HandleDropAllCollections(context, client)
 			})
 		}
 	}
 
+	log.Print("[main] DONE...")
+
+	// Start server
 	err = r.Run(":8081")
 	if err != nil {
 		log.Print(err)
 		return
 	}
+
+	// Finish gin
+	////////////////////////////////////////////////////////////////////////
 }

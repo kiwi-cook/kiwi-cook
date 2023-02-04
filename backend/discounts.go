@@ -7,18 +7,20 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Discount struct {
-	ID               string   `json:"_id,omitempty" bson:"_id,omitempty"` // id of the product
-	Title            string   `json:"title" bson:"title"`                 // title of the product
-	Price            string   `json:"price" bson:"price"`                 // price of the product
-	ImageUrl         string   `json:"imageUrl" bson:"imageUrl"`
-	ValidUntil       int      `json:"validUntil" bson:"validUntil"` // unix timestamp
-	MarketName       string   `json:"marketName" bson:"marketName"`
-	InternalMarketID string   `json:"internalMarketId" bson:"internalMarketId"`
-	Tags             []string `json:"-" bson:"_tags"`
+	ID               primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"` // id of the product
+	Title            string             `json:"title" bson:"title"`                 // title of the product
+	Price            string             `json:"price" bson:"price"`                 // price of the product
+	ImageUrl         string             `json:"imageUrl" bson:"imageUrl"`
+	ValidUntil       int                `json:"validUntil" bson:"validUntil"` // unix timestamp
+	MarketName       string             `json:"marketName" bson:"marketName"`
+	InternalMarketID string             `json:"internalMarketId,omitempty" bson:"internalMarketId,omitempty"`
+	Tags             []string           `json:"-" bson:"_tags"`
 }
 
 // HandleGetDiscounts gets called by router
@@ -26,13 +28,17 @@ type Discount struct {
 func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
 	log.Print(city)
-	discounts, err := getDiscountsFromDBOrAPI(client, city)
-	if err != nil {
+	if discounts, err := getDiscountsFromDB(client, city); err != nil {
 		log.Print(err)
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
-		return
+	} else {
+		context.JSON(200, discounts)
 	}
-	context.JSON(200, discounts)
+}
+
+// Get discounts from database
+func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
+	return client.Database("tastebuddy").Collection("discounts")
 }
 
 // Get discounts from database or API
@@ -40,54 +46,48 @@ func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 // TODO: add pagination
 // TODO: add sorting
 // TODO: better filtering, pass tags as parameter
-func getDiscountsFromDBOrAPI(client *mongo.Client, city string) ([]Discount, error) {
+func getDiscountsFromDB(client *mongo.Client, city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
-	// check if discounts are in database
-	log.Printf("Check if discounts for city %s are in database.", city)
+	// get marketIds for city
+	marketIds := getAllMarketIDByCityFromDB(client, city)
 
-	// very expensive query
-	// TODO: improve query
-	var discounts []Discount
-	discountsFromDB, err := getDiscountsCollection(client).Aggregate(ctx, mongo.Pipeline{
-		// unwind
-		bson.D{{Key: "$unwind", Value: bson.D{{Key: "path", Value: "$_tags"}}}},
-		// match tags using regex
-		bson.D{{Key: "$match", Value: bson.D{{Key: "_tags", Value: bson.D{{Key: "$regex", Value: city}}}}}},
-		// group discounts
-		bson.D{{Key: "$group", Value: bson.D{{Key: "_id", Value: "$_id"},
-			{Key: "price", Value: bson.D{{Key: "$first", Value: "$price"}}},
-			{Key: "title", Value: bson.D{{Key: "$first", Value: "$title"}}},
-			{Key: "imageUrl", Value: bson.D{{Key: "$first", Value: "$imageUrl"}}},
-			{Key: "validUntil", Value: bson.D{{Key: "$first", Value: "$validUntil"}}},
-			{Key: "marketName", Value: bson.D{{Key: "$first", Value: "$marketName"}}},
-			{Key: "internalMarketID", Value: bson.D{{Key: "$first", Value: "$internalMarketID"}}},
-			{Key: "_tags", Value: bson.D{{Key: "$push", Value: "$_tags"}}}}}},
-	})
-
+	// get discounts for markets
+	// TODO: add unique values to discounts
+	discountsFromDB, err := getDiscountsCollection(client).Find(ctx, bson.D{{Key: "internalMarketId", Value: bson.D{{Key: "$in", Value: marketIds}}}})
 	if err != nil {
 		log.Print(err)
 		return []Discount{}, err
 	}
 
 	// get discounts from database
+	var discounts []Discount
 	if err := discountsFromDB.All(ctx, &discounts); err != nil {
 		log.Print(err)
 		return []Discount{}, err
 	}
-	var discountsFrom = "database"
-	if len(discounts) == 0 {
-		// if no discounts are in database, get them from API
-		discountsFrom = "API"
-		discounts = getDiscountsFromAPI(city)
-		addDiscountsToDB(client, discounts)
+
+	// there can be multiple copies of the same discount after the filter operation above
+	var discountsMap = make(map[string]Discount)
+	var filteredDiscounts = []Discount{}
+	for _, discount := range discounts {
+		// only add discount if it is not already in the map
+		if _, ok := discountsMap[discount.Title]; !ok {
+			discountsMap[discount.Title] = discount
+		}
 	}
-	log.Printf("Return %s discounts from %s.", strconv.Itoa(len(discounts)), discountsFrom)
+	// convert map to array
+	for _, discount := range discountsMap {
+		filteredDiscounts = append(filteredDiscounts, discount)
+	}
+	discounts = filteredDiscounts
+
+	log.Printf("Return %s discounts from database.", strconv.Itoa(len(discounts)))
 	return discounts, nil
 }
 
 // Get all discounts for a market from the market's API
-func getDiscountsForMarket(market Market) ([]Discount, error) {
+func getDiscountsForMarketFromAPI(market Market) ([]Discount, error) {
 	switch market.Distributor {
 	case "edeka":
 		return getEdekaDiscounts(market)
@@ -97,28 +97,8 @@ func getDiscountsForMarket(market Market) ([]Discount, error) {
 	return []Discount{}, nil
 }
 
-// Get all discounts for a city from the market's APIs
-func getDiscountsFromAPI(city string) []Discount {
-	var markets = getMarkets(city)
-	var discounts []Discount
-	for _, market := range markets {
-		discountsForMarket, err := getDiscountsForMarket(market)
-		if err != nil {
-			log.Print(err)
-			continue
-		}
-		discounts = append(discounts, discountsForMarket...)
-	}
-	return discounts
-}
-
-// Get discounts from database
-func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
-	return client.Database("tastebuddy").Collection("discounts")
-}
-
 // Get all discounts from database
-func getDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
+func getAllDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 	ctx := DefaultContext()
 	cursor, err := getDiscountsCollection(client).Find(ctx, bson.M{})
 	if err != nil {
@@ -136,33 +116,61 @@ func getDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 // Adds discounts to database
 func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, error) {
 	ctx := DefaultContext()
-	log.Printf("Add %s discounts to database.", strconv.Itoa(len(discounts)))
+	log.Printf("[addDiscountsToDB] Add %s discounts to database...", strconv.Itoa(len(discounts)))
 
-	// prepare discounts for insertion
-	var discountsAsDocument []interface{}
+	// Insert all markets
+	opts := options.Update().SetUpsert(true)
+	collection := getDiscountsCollection(client)
 	for _, discount := range discounts {
-		discountsAsDocument = append(discountsAsDocument, discount)
+
+		// Upsert market
+		_, err := collection.UpdateOne(ctx, bson.M{"internalMarketId": discount.InternalMarketID, "title": discount.Title}, bson.D{{Key: "$set", Value: discount}}, opts)
+		if err != nil {
+			log.Print(err)
+			return nil, err
+		}
 	}
-	_, err := getDiscountsCollection(client).InsertMany(ctx, discountsAsDocument)
-	if err != nil {
-		log.Print(err)
-		return []Discount{}, err
-	}
-	return getDiscountsFromDB(client)
+
+	return getAllDiscountsFromDB(client)
 }
 
-// HandleCreateDiscountsIndex gets called by router
-// Calls getDiscountsCollection and handles the context
-func HandleCreateDiscountsIndex(context *gin.Context, client *mongo.Client) {
-	ctx := DefaultContext()
-
-	indexModel := mongo.IndexModel{Keys: bson.D{{Key: "_tags", Value: "text"}}}
-	name, err := getDiscountsCollection(client).Indexes().CreateOne(ctx, indexModel)
-	if err != nil {
+// Get all discounts for a city from the market's APIs
+func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
+	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
 		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		return []Discount{}
+	} else {
+		var discounts []Discount
+		for _, market := range markets {
+			discountsForMarket, err := getDiscountsForMarketFromAPI(market)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			discounts = append(discounts, discountsForMarket...)
+		}
+		return discounts
 	}
-	log.Printf("Created index %s", name)
-	context.JSON(200, gin.H{"message": "Created index " + name})
+}
+
+func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
+	cities := []string{
+		"Konstanz",
+		"Berlin",
+		"Hamburg",
+		"München",
+	}
+
+	log.Print("[GoRoutineSaveDiscountsToDB] Start saving discounts to database...")
+	for _, city := range cities {
+		go saveDiscountsFromAPIToDB(client, city)
+	}
+}
+
+// Save discounts to database
+func saveDiscountsFromAPIToDB(client *mongo.Client, city string) {
+	log.Printf("[saveDiscountsFromAPIToDB] Save discounts for %s...\n", city)
+	discounts := getDiscountsByCityFromAPI(client, city)
+	addDiscountsToDB(client, discounts)
+	log.Printf("[saveDiscountsFromAPIToDB] DONE...")
 }

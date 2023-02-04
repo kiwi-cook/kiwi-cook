@@ -92,7 +92,7 @@ func getReweDiscounts(market Market) ([]Discount, error) {
 				ImageUrl:         imageUrl,
 				ValidUntil:       reweDiscounts.ValidUntil,
 				MarketName:       market.MarketName,
-				InternalMarketID: market.ID,
+				InternalMarketID: market.ID.Hex(),
 				Tags:             []string{category.Title, discount.SubTitle, market.Distributor, market.Location.City},
 			})
 		}
