@@ -1,8 +1,8 @@
 package main
 
 import (
+	"errors"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -27,29 +27,31 @@ type Discount struct {
 // Calls getDiscountsFromDBOrAPI and handles the context
 func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
-	log.Print(city)
+	log.Print("[HandleGetDiscounts] Get discounts for city " + city)
 	if discounts, err := getDiscountsByCityFromDB(client, city); err != nil {
 		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		ServerError(context, true)
 	} else {
-		context.JSON(200, discounts)
+		SuccessJSON(context, discounts)
 	}
 }
 
-// Get discounts collection from database
+// getDiscountsCollection gets discounts collection from database
 func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("discounts")
 }
 
-// Get discounts by city from database
+// getDiscountsByCityFromDB gets discounts by city from database
 func getDiscountsByCityFromDB(client *mongo.Client, city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
 	// get marketIds for city
 	marketIds := getAllMarketIDByCityFromDB(client, city)
+	if len(marketIds) == 0 {
+		return []Discount{}, errors.New("[getDiscountsByCityFromDB] No markets found for " + city)
+	}
 
 	// get discounts for markets
-	// TODO: add unique values to discounts
 	discountsFromDB, err := getDiscountsCollection(client).Find(ctx, bson.D{{Key: "internalMarketId", Value: bson.D{{Key: "$in", Value: marketIds}}}})
 	if err != nil {
 		log.Print(err)
@@ -82,7 +84,7 @@ func getDiscountsByCityFromDB(client *mongo.Client, city string) ([]Discount, er
 	return discounts, nil
 }
 
-// Get all discounts for a market from the market's API
+// getDiscountsForMarketFromAPI gets all discounts for a market from the market's API
 func getDiscountsForMarketFromAPI(market Market) ([]Discount, error) {
 	switch market.Distributor {
 	case "edeka":
@@ -93,7 +95,7 @@ func getDiscountsForMarketFromAPI(market Market) ([]Discount, error) {
 	return []Discount{}, nil
 }
 
-// Get all discounts from database
+// getAllDiscountsFromDB gets all discounts from database
 func getAllDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 	ctx := DefaultContext()
 	cursor, err := getDiscountsCollection(client).Find(ctx, bson.M{})
@@ -109,8 +111,8 @@ func getAllDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 	return discounts, nil
 }
 
-// Adds discounts to database
-func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, error) {
+// addDiscountsToDB adds discounts to database
+func addDiscountsToDB(client *mongo.Client, discounts []Discount) error {
 	ctx := DefaultContext()
 	log.Printf("[addDiscountsToDB] Add %s discounts to database...", strconv.Itoa(len(discounts)))
 
@@ -120,17 +122,16 @@ func addDiscountsToDB(client *mongo.Client, discounts []Discount) ([]Discount, e
 	for _, discount := range discounts {
 
 		// Upsert market
-		_, err := collection.UpdateOne(ctx, bson.M{"internalMarketId": discount.InternalMarketID, "title": discount.Title}, bson.D{{Key: "$set", Value: discount}}, opts)
-		if err != nil {
+		if _, err := collection.UpdateOne(ctx, bson.M{"internalMarketId": discount.InternalMarketID, "title": discount.Title}, bson.D{{Key: "$set", Value: discount}}, opts); err != nil {
 			log.Print(err)
-			return nil, err
+			return err
 		}
 	}
 
-	return getAllDiscountsFromDB(client)
+	return nil
 }
 
-// Get all discounts for a city from the market's APIs
+// getDiscountsByCityFromAPI gets all discounts for a city from the market's APIs
 func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
 	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
 		log.Print(err)
@@ -149,7 +150,8 @@ func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
 	}
 }
 
-// Goroutine to save discounts from different cities to the database
+// GoRoutineSaveDiscountsToDB save discounts from different cities to the database
+// Is Goroutine
 func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
 	cities := []string{
 		"Konstanz",
@@ -164,10 +166,13 @@ func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
 	}
 }
 
-// Save discounts to database
+// saveDiscountsFromAPIToDB saves discounts to database
 func saveDiscountsFromAPIToDB(client *mongo.Client, city string) {
 	log.Printf("[saveDiscountsFromAPIToDB] Save discounts for %s...\n", city)
 	discounts := getDiscountsByCityFromAPI(client, city)
-	addDiscountsToDB(client, discounts)
+	if err := addDiscountsToDB(client, discounts); err != nil {
+		log.Print(err)
+		return
+	}
 	log.Printf("[saveDiscountsFromAPIToDB] DONE...")
 }

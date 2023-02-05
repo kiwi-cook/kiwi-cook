@@ -1,13 +1,11 @@
 package main
 
 import (
-	"log"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"log"
 )
 
 func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
@@ -36,13 +34,12 @@ func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
 }
 
 func HandleDropAllCollections(context *gin.Context, client *mongo.Client) {
-	err := dropAll(client)
-	if err != nil {
+	if err := dropAll(client); err != nil {
 		log.Print(err)
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Internal Server Error"})
+		ServerError(context, false)
 		return
 	}
-	context.JSON(http.StatusOK, gin.H{"message": "Successfully dropped all collections"})
+	Success(context, "Successfully dropped all collections")
 }
 
 func dropAll(client *mongo.Client) error {

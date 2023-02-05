@@ -35,19 +35,20 @@ type Market struct {
 // Calls getMarkets and handles the context
 func HandleGetMarkets(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
-	if discounts, err := getMarketsByCityFromDB(client, city); err != nil {
-		context.JSON(500, gin.H{"error": err.Error()})
+	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
+		log.Print(err)
+		ServerError(context, true)
 	} else {
-		context.JSON(200, discounts)
+		SuccessJSON(context, markets)
 	}
 }
 
-// Get markets from database
+// getMarketsCollection gets markets collection from database
 func getMarketsCollection(client *mongo.Client) *mongo.Collection {
 	return client.Database("tastebuddy").Collection("markets")
 }
 
-// Get all markets for a city from the db or the api
+// getMarketsByCityFromDB gets all markets for a city from the db or the api
 func getMarketsByCityFromDB(client *mongo.Client, city string) ([]Market, error) {
 	ctx := DefaultContext()
 	collection := getMarketsCollection(client)
@@ -64,7 +65,7 @@ func getMarketsByCityFromDB(client *mongo.Client, city string) ([]Market, error)
 	return markets, nil
 }
 
-// Get discounts from database
+// getAllMarketsFromDB gets markets from database
 func getAllMarketsFromDB(client *mongo.Client) ([]Market, error) {
 	ctx := DefaultContext()
 	collection := getMarketsCollection(client)
@@ -81,7 +82,7 @@ func getAllMarketsFromDB(client *mongo.Client) ([]Market, error) {
 	return markets, nil
 }
 
-// Get all marketIDs for a city
+// getAllMarketIDByCityFromDB gets all marketIDs for a city
 func getAllMarketIDByCityFromDB(client *mongo.Client, city string) []string {
 	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
 		log.Print(err)
@@ -95,8 +96,8 @@ func getAllMarketIDByCityFromDB(client *mongo.Client, city string) []string {
 	}
 }
 
-// Adds discounts to database
-func addMarketsToDB(client *mongo.Client, markets []Market) ([]Market, error) {
+// addMarketsToDB adds markets to database
+func addMarketsToDB(client *mongo.Client, markets []Market) error {
 	ctx := DefaultContext()
 	log.Printf("[addMarketsToDB] Add %s markets to database...", strconv.Itoa(len(markets)))
 
@@ -109,14 +110,14 @@ func addMarketsToDB(client *mongo.Client, markets []Market) ([]Market, error) {
 		_, err := collection.UpdateOne(ctx, bson.D{{Key: "distMarketId", Value: market.DistributorSpecificMarketID}}, bson.D{{Key: "$set", Value: market}}, opts)
 		if err != nil {
 			log.Print(err)
-			return nil, err
+			return err
 		}
 	}
 
-	return getAllMarketsFromDB(client)
+	return nil
 }
 
-// Get all markets for a city
+// getMarketsByCityFromAPI gets all markets for a city
 func getMarketsByCityFromAPI(city string) []Market {
 	var markets []Market
 	var functions = []func(string) ([]Market, error){getEdekaMarkets, getReweMarkets}
@@ -135,7 +136,8 @@ func getMarketsByCityFromAPI(city string) []Market {
 	return markets
 }
 
-// Goroutine to save markets from different cities to database
+// GoRoutineSaveMarketsToDB saves markets from different cities to database
+// Is Goroutine
 func GoRoutineSaveMarketsToDB(client *mongo.Client) {
 	cities := []string{
 		"Konstanz",
@@ -150,11 +152,14 @@ func GoRoutineSaveMarketsToDB(client *mongo.Client) {
 	}
 }
 
-// Get all markets for a city and save them to the db
+// saveMarketsFromAPIToDB gets all markets for a city and save them to the db
 // Helper function for GoRoutineSavemarketsToDB
 func saveMarketsFromAPIToDB(client *mongo.Client, city string) {
 	log.Printf("[saveMarketsFromAPIToDB] Save markets for %s...", city)
 	markets := getMarketsByCityFromAPI(city)
-	addMarketsToDB(client, markets)
+	if err := addMarketsToDB(client, markets); err != nil {
+		log.Print(err)
+		return
+	}
 	log.Print("[saveMarketsFromAPIToDB] DONE...")
 }
