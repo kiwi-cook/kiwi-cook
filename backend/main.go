@@ -68,6 +68,11 @@ func main() {
 			HandleGetAllRecipes(context, client)
 		})
 
+		// Get recipe by id
+		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
+			HandleGetRecipeById(context, client)
+		})
+
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
 			HandleGetRandomRecipe(context, client)
@@ -92,6 +97,11 @@ func main() {
 			HandleGetAllItems(context, client)
 		})
 
+		// Get item by id
+		itemRoutes.GET("/byId/:id", func(context *gin.Context) {
+			HandleGetItemById(context, client)
+		})
+
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
 			HandleAddItem(context, client)
@@ -101,6 +111,7 @@ func main() {
 	// Discount routes
 	discountRoutes := v1.Group("/discount")
 	{
+		// Get all discounts by city
 		discountRoutes.GET("/:city", func(context *gin.Context) {
 			HandleGetDiscounts(context, client)
 		})
@@ -109,6 +120,7 @@ func main() {
 	// Market routes
 	marketRoutes := v1.Group("/market")
 	{
+		// Get all markets by city
 		marketRoutes.GET("/:city", func(context *gin.Context) {
 			HandleGetMarkets(context, client)
 		})

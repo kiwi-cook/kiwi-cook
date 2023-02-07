@@ -35,8 +35,8 @@ type StepItem struct {
 }
 
 type Item struct {
-	ID     string `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name   string `json:"name" bson:"name" binding:"required"`
+	ID     primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	string `json:"name" bson:"name" binding:"required"`
 	Type   string `json:"type" bson:"type" binding:"required"`
 	ImgUrl string `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
@@ -51,6 +51,27 @@ func HandleGetAllRecipes(context *gin.Context, client *mongo.Client) {
 		return
 	}
 	context.JSON(http.StatusOK, recipes)
+}
+
+func HandleGetRecipeById(context *gin.Context, client *mongo.Client) {
+	id := context.Param("id")
+
+	// convert id to primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	recipe, err := getRecipeByIdFromDB(client, objectID)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	context.JSON(http.StatusOK, recipe)
 }
 
 // HandleGetRandomRecipe gets called by router
@@ -94,14 +115,14 @@ func HandleAddRecipe(context *gin.Context, client *mongo.Client) {
 }
 
 // HandleFindRecipesByItemNames gets called by router
-// Calls findRecipesByItemNames and handles the context
+// Calls getRecipesByItemNames and handles the context
 func HandleFindRecipesByItemNames(context *gin.Context, client *mongo.Client) {
 	itemIds := context.Param("itemIds")
 
 	// split itemIds string into array
 	splitItemIds := strings.Split(itemIds, ",")
 
-	recipes, err := findRecipesByItemNames(client, splitItemIds)
+	recipes, err := getRecipesByItemNames(client, splitItemIds)
 	if err != nil {
 		log.Print(err)
 		ServerError(context, true)
@@ -122,13 +143,36 @@ func HandleGetAllItems(context *gin.Context, client *mongo.Client) {
 	SuccessJSON(context, items)
 }
 
+// HandleGetItemById gets called by router
+// Calls getItemByIdFromDB and handles the context
+func HandleGetItemById(context *gin.Context, client *mongo.Client) {
+	id := context.Param("id")
+
+	// convert id to primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	item, err := getItemByIdFromDB(client, objectID)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	SuccessJSON(context, item)
+}
+
 // HandleAddItem gets called by router
 // Calls addItemToDB and handles the context
 func HandleAddItem(context *gin.Context, client *mongo.Client) {
 	var newItem Item
 	if err := context.BindJSON(&newItem); err != nil {
 		log.Print(err)
-		BadRequestError(context, "Invalid Item")
+		BadRequestError(context, "Invalid item")
 		return
 	}
 
@@ -137,7 +181,7 @@ func HandleAddItem(context *gin.Context, client *mongo.Client) {
 		ServerError(context, true)
 		return
 	}
-	Success(context, "Added items")
+	Success(context, "Added item")
 }
 
 // getRecipesCollection gets recipes collection from database
@@ -168,6 +212,25 @@ func getAllRecipesFromDB(client *mongo.Client) ([]Recipe, error) {
 	}
 
 	return recipesFromDatabase, nil
+}
+
+func getRecipeByIdFromDB(client *mongo.Client, id primitive.ObjectID) (Recipe, error) {
+	ctx := DefaultContext()
+	// try to get collection of recipes
+	recipe := getRecipesCollection(client).FindOne(ctx, bson.M{"_id": id})
+
+	if recipe.Err() != nil {
+		log.Print(recipe.Err())
+		return Recipe{}, recipe.Err()
+	}
+
+	var recipeFromDatabase Recipe
+	if err := recipe.Decode(&recipeFromDatabase); err != nil {
+		log.Print(err)
+		return Recipe{}, err
+	}
+
+	return recipeFromDatabase, nil
 }
 
 // addRecipeToDB adds a new recipe to the database of recipes
@@ -219,6 +282,26 @@ func getAllItemsFromDB(client *mongo.Client) ([]Item, error) {
 	return itemsFromDatabase, nil
 }
 
+// getItemByIdFromDB gets item from database by id
+func getItemByIdFromDB(client *mongo.Client, id primitive.ObjectID) (Item, error) {
+	ctx := DefaultContext()
+
+	items := getItemsCollection(client).FindOne(ctx, bson.M{"_id": id})
+
+	if items.Err() != nil {
+		log.Print(items.Err())
+		return Item{}, items.Err()
+	}
+
+	var itemFromDatabase Item
+	if err := items.Decode(&itemFromDatabase); err != nil {
+		log.Print(err)
+		return Item{}, err
+	}
+
+	return itemFromDatabase, nil
+}
+
 // addItemToDB adds a new recipe to the database of recipes
 // and returns all items from the database
 func addItemToDB(client *mongo.Client, newItem Item) error {
@@ -243,8 +326,8 @@ func getItemsByRecipe(recipe Recipe) []string {
 	return items
 }
 
-// findRecipeById gets recipe with the given id
-func findRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
+// getRecipeById gets recipe with the given id
+func getRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	ctx := DefaultContext()
 	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
 	if err != nil {
@@ -260,8 +343,8 @@ func findRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
 	return recipe, nil
 }
 
-// findRecipesByItemNames gets the recipes in which the given items are used
-func findRecipesByItemNames(client *mongo.Client, splitItemIds []string) ([]Recipe, error) {
+// getRecipesByItemNames gets the recipes in which the given items are used
+func getRecipesByItemNames(client *mongo.Client, splitItemIds []string) ([]Recipe, error) {
 	// use map since its easier to avoid duplicates
 	var recipesMap = make(map[string]Recipe)
 
