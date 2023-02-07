@@ -55,12 +55,12 @@ func getMarketsByCityFromDB(client *mongo.Client, city string) ([]Market, error)
 	cursor, err := collection.Find(ctx, bson.D{{Key: "location.city", Value: city}})
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return []Market{}, err
 	}
 	var markets []Market
 	if err = cursor.All(ctx, &markets); err != nil {
 		log.Print(err)
-		return nil, err
+		return []Market{}, err
 	}
 	return markets, nil
 }
@@ -72,12 +72,12 @@ func getAllMarketsFromDB(client *mongo.Client) ([]Market, error) {
 	cursor, err := collection.Find(ctx, bson.D{})
 	if err != nil {
 		log.Print(err)
-		return nil, err
+		return []Market{}, err
 	}
 	var markets []Market
 	if err = cursor.All(ctx, &markets); err != nil {
 		log.Print(err)
-		return nil, err
+		return []Market{}, err
 	}
 	return markets, nil
 }
