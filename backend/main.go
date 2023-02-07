@@ -68,24 +68,24 @@ func main() {
 			HandleGetAllRecipes(context, client)
 		})
 
-		// Get recipe by id
-		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
-			HandleGetRecipeById(context, client)
-		})
-
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
 			HandleGetRandomRecipe(context, client)
 		})
 
-		// Add recipe to database
-		recipeRoutes.POST("/", func(context *gin.Context) {
-			HandleAddRecipe(context, client)
+		// Get recipe by id
+		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
+			HandleGetRecipeById(context, client)
 		})
 
 		// Get recipe by item ids
 		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
 			HandleFindRecipesByItemNames(context, client)
+		})
+
+		// Add recipe to database
+		recipeRoutes.POST("/", func(context *gin.Context) {
+			HandleAddRecipe(context, client)
 		})
 	}
 
