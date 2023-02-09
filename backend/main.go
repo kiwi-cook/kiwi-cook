@@ -126,7 +126,7 @@ func main() {
 	marketRoutes := v1.Group("/market")
 	{
 		// Get all markets
-		discountRoutes.GET("/", func(context *gin.Context) {
+		marketRoutes.GET("/", func(context *gin.Context) {
 			HandleGetAllMarkets(context, client)
 		})
 
