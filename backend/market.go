@@ -31,11 +31,22 @@ type Market struct {
 	Location                    MarketLocation     `json:"location,omitempty" bson:"location,omitempty"`
 }
 
-// HandleGetMarkets gets called by router
+// HandleGetMarketsByCity gets called by router
 // Calls getMarkets and handles the context
-func HandleGetMarkets(context *gin.Context, client *mongo.Client) {
+func HandleGetMarketsByCity(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
 	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
+		log.Print(err)
+		ServerError(context, true)
+	} else {
+		SuccessJSON(context, markets)
+	}
+}
+
+// HandleGetAllMarkets gets called by router
+// Calls getMarkets and handles the context
+func HandleGetAllMarkets(context *gin.Context, client *mongo.Client) {
+	if markets, err := getAllMarketsFromDB(client); err != nil {
 		log.Print(err)
 		ServerError(context, true)
 	} else {

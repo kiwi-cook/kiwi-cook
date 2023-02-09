@@ -23,12 +23,24 @@ type Discount struct {
 	Tags             []string           `json:"-" bson:"_tags"`
 }
 
-// HandleGetDiscounts gets called by router
+// HandleGetDiscountsByCity gets called by router
 // Calls getDiscountsFromDBOrAPI and handles the context
-func HandleGetDiscounts(context *gin.Context, client *mongo.Client) {
+func HandleGetDiscountsByCity(context *gin.Context, client *mongo.Client) {
 	city := context.Param("city")
 	log.Print("[HandleGetDiscounts] Get discounts for city " + city)
 	if discounts, err := getDiscountsByCityFromDB(client, city); err != nil {
+		log.Print(err)
+		ServerError(context, true)
+	} else {
+		SuccessJSON(context, discounts)
+	}
+}
+
+// HandleGetDiscounts gets called by router
+// Calls getDiscountsFromDB
+func HandleGetAllDiscounts(context *gin.Context, client *mongo.Client) {
+	log.Print("[HandleGetDiscounts] Get all discounts")
+	if discounts, err := getAllDiscountsFromDB(client); err != nil {
 		log.Print(err)
 		ServerError(context, true)
 	} else {
