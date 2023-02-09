@@ -2,14 +2,14 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">Today</ion-title>
+                <ion-title color="light">Recipe Of the Day</ion-title>
             </ion-toolbar>
         </ion-header>
 
-        <ion-content :fullscreen="true">
+        <ion-content :fullscreen="true" class="tb-content">
             <ion-header collapse="condense">
                 <ion-toolbar>
-                    <ion-title size="large">Detailed Recipe</ion-title>
+                    <ion-title size="large">Recipe Of the Day</ion-title>
                 </ion-toolbar>
             </ion-header>
 
@@ -18,8 +18,8 @@
                 <ion-item>
                     <div class="container">
                         <div class="ContainerIMG">
-                            <ion-img src="assets/food/food_hamburger.jpeg" alt="Hamburger Pic"></ion-img>
-                            <div class="centered">Look at this beautiful Hamburger</div>
+                            <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`"></ion-img>
+                            <div class="centered">{{ recipeOfTheDay?.description }}</div>
                         </div>
                     </div>
                 </ion-item>
@@ -27,16 +27,15 @@
                     <div class="container">
                         <div id="HeartSaveShareButton">
                             <ion-button color="primary" >
-                                <ion-icon slot="icon-only" :icon="heart"></ion-icon>
-                                Anzahl Likes
+                                <ion-icon slot="icon-only" :icon="heartOutline"></ion-icon>
+                                3012 Likes
                             </ion-button>
                             <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
-                                Gespeichert Icon wird ausgefüllt
+                                Save
                             </ion-button>
                             <ion-button color="primary">
-                                <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
-                                Share
+                                <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"></ion-icon>
                             </ion-button>
                         </div>
                     </div>
@@ -61,7 +60,7 @@
             </ion-list>
             <ion-list lines="inset">
                 <ion-item color="primary">
-                    <ion-label color="light">Cooking Utensils</ion-label>
+                    <ion-label color="light">Cooking utensils</ion-label>
                 </ion-item>
                 <div class="topic">
                     <template v-for="equipment in equipments" :key="equipment">
@@ -96,17 +95,18 @@ export default defineComponent({
 
     setup() {
         const store = useTasteBuddyStore();
-        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
+        const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
         const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
 
-        const itemsFromRecipe = computed(() => items.value?.filter(item => recipe.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
+        const itemsFromRecipe = computed(() => items.value?.filter(item => recipeOfTheDay.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
         const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
         const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
 
 
         return {
             ingredients, equipments,
-            heart, recipe, flagOutline, shareOutline
+            recipeOfTheDay,
+            heart, flagOutline, shareOutline
         };
     },
 });
