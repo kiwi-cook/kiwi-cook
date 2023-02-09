@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"math/rand"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func Success(context *gin.Context, message string) {
 	context.JSON(http.StatusOK, gin.H{"success": message})
 }
 
-func SuccessJSON(context *gin.Context, json any) {
+func SuccessJSON(context *gin.Context, json interface{}) {
 	context.JSON(http.StatusOK, json)
 }
 
