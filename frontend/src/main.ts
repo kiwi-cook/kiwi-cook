@@ -33,7 +33,7 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import 'ionicons/icons';
 
-
+import './theme/tbContent.css';
 
 const app = createApp(App)
   .use(IonicVue)
