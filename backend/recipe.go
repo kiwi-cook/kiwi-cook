@@ -36,9 +36,9 @@ type StepItem struct {
 
 type Item struct {
 	ID     primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	string `json:"name" bson:"name" binding:"required"`
-	Type   string `json:"type" bson:"type" binding:"required"`
-	ImgUrl string `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	Name   string             `json:"name" bson:"name" binding:"required"`
+	Type   string             `json:"type" bson:"type" binding:"required"`
+	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
 // HandleGetAllRecipes gets called by router
@@ -324,23 +324,6 @@ func getItemsByRecipe(recipe Recipe) []string {
 		}
 	}
 	return items
-}
-
-// getRecipeById gets recipe with the given id
-func getRecipeById(client *mongo.Client, recipeId string) (Recipe, error) {
-	ctx := DefaultContext()
-	cursor, err := getRecipesCollection(client).Find(ctx, bson.M{"_id": recipeId})
-	if err != nil {
-		log.Print(err)
-		return Recipe{}, err
-	}
-
-	var recipe Recipe
-	if err := cursor.Decode(&recipe); err != nil {
-		log.Print(err)
-		return Recipe{}, err
-	}
-	return recipe, nil
 }
 
 // getRecipesByItemNames gets the recipes in which the given items are used
