@@ -104,7 +104,7 @@ export default defineComponent({
         const store = useTasteBuddyStore();
         // Get discounts from store
         const discounts = computed(() => store.getters.getDiscounts('Konstanz'));
-        
+
         // Custom simplified type for markets
         type Market = { name: string, items: Discount[] };
 
@@ -128,27 +128,36 @@ export default defineComponent({
 
         // Filter markets by query
         const handleShoppingFilter = (event: any) => {
-            const query = event.target.value.toLowerCase();
+            const query: string = event.target.value.toLowerCase().trim();
             // return if query is empty
             if (query === "") {
                 filteredMarkets.value = markets.value
                 return
             }
 
+            // split by separator, e.g. ","
+            const queries: string[] = query.split(",").map((q: string) => q.trim())
+            console.log(queries);
+            
+
             // filter markets
-            filteredMarkets.value = markets.value.reduce((filteredMarkets: Market[], market: Market) => {
-                // get all items of a market and check if query is included in item name
-                const filteredItems = market.items.filter(item => item.title.toLocaleLowerCase().includes(query))
+            filteredMarkets.value = markets.value
+                // filter and map markets using reduce(...)
+                .reduce((filteredMarkets: Market[], market: Market) => {
+                    // get all items of a market and check if query is included in item name
+                    const filteredItems = market.items.filter(item => queries.some((q: string) => item.title.toLocaleLowerCase().includes(q) && q !== ""))
 
-                // check if items were found
-                if (filteredItems.length > 0) {
-                    // if items were found, return already filteredMarkets and add market with filtered items
-                    return [...filteredMarkets, { name: market.name, items: filteredItems }]
-                }
+                    // check if items were found
+                    if (filteredItems.length > 0) {
+                        // if items were found, return already filteredMarkets and add market with filtered items
+                        return [...filteredMarkets, { name: market.name, items: filteredItems }]
+                    }
 
-                // if not, just return filtered markets
-                return filteredMarkets
-            }, [])
+                    // if not, just return filtered markets
+                    return filteredMarkets
+                }, [])
+                // sort markets by their name
+                .sort((a: Market, b: Market) => a.name.localeCompare(b.name))
         }
 
         // List of selected items
