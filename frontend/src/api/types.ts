@@ -21,7 +21,7 @@ type Step = {
 }
 
 export type Recipe = {
-    _id: string;
+    _id?: string;
     name: string;
     author: string;
     description: string;
@@ -30,6 +30,28 @@ export type Recipe = {
     cookingTime: number;
     steps: Step[];
 };
+
+// dummy recipe
+export const dummyRecipe: Recipe = {
+    name: 'Veggie Burger',
+    author: 'Josef & Vasilij',
+    description: 'The best burger recipe in Konschtanz!',
+    imgUrl: 'https://source.unsplash.com/random/900x450?burger',
+    tags: ['vegan', 'burger', 'veggie'],
+    cookingTime: 1800,
+    steps: [
+        {
+            description: 'This is a description',
+            items: [
+                {
+                    amount: 1,
+                    unit: 'pcs',
+                    itemID: 'bread'
+                }
+            ]
+        }
+    ]
+}
 
 // types for discounts
 

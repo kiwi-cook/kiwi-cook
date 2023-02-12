@@ -28,3 +28,19 @@ export function getFromAPI<T extends Recipe[] | Item[] | Discount[] | Market[]>(
             console.error(error)
         })
 }
+
+/**
+ * Post different data to the API by providing the API_ROUTE and a list of e.g., Recipe or Item objects.
+ * @param route enum value of API_ROUTE
+ * @param body 
+ */
+export function postToAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, body: T): void {
+    // call fetch
+    fetch(getApiRoute(route), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    })
+}
