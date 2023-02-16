@@ -5,7 +5,6 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,46 +24,46 @@ type Discount struct {
 
 // HandleGetDiscountsByCity gets called by router
 // Calls getDiscountsFromDBOrAPI and handles the context
-func HandleGetDiscountsByCity(context *gin.Context, client *mongo.Client) {
-	city := context.Param("city")
+func (app *TasteBuddyApp) HandleGetDiscountsByCity() {
+	city := app.context.Param("city")
 	log.Print("[HandleGetDiscounts] Get discounts for city " + city)
-	if discounts, err := getDiscountsByCityFromDB(client, city); err != nil {
+	if discounts, err := app.client.GetDiscountsByCity(city); err != nil {
 		log.Print(err)
-		ServerError(context, true)
+		app.context.ServerError(true)
 	} else {
-		SuccessJSON(context, discounts)
+		app.context.SuccessJSON(discounts)
 	}
 }
 
 // HandleGetDiscounts gets called by router
 // Calls getDiscountsFromDB
-func HandleGetAllDiscounts(context *gin.Context, client *mongo.Client) {
+func (app *TasteBuddyApp) HandleGetAllDiscounts() {
 	log.Print("[HandleGetDiscounts] Get all discounts")
-	if discounts, err := getAllDiscountsFromDB(client); err != nil {
+	if discounts, err := app.client.GetAllDiscounts(); err != nil {
 		log.Print(err)
-		ServerError(context, true)
+		app.context.ServerError(true)
 	} else {
-		SuccessJSON(context, discounts)
+		app.context.SuccessJSON(discounts)
 	}
 }
 
-// getDiscountsCollection gets discounts collection from database
-func getDiscountsCollection(client *mongo.Client) *mongo.Collection {
+// GetDiscountsCollection gets discounts collection from database
+func (client *TasteBuddyDatabase) GetDiscountsCollection() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("discounts")
 }
 
-// getDiscountsByCityFromDB gets discounts by city from database
-func getDiscountsByCityFromDB(client *mongo.Client, city string) ([]Discount, error) {
+// GetDiscountsByCity gets discounts by city from database
+func (client *TasteBuddyDatabase) GetDiscountsByCity(city string) ([]Discount, error) {
 	ctx := DefaultContext()
 
 	// get marketIds for city
-	marketIds := getAllMarketIDByCityFromDB(client, city)
+	marketIds := client.GetAllMarketIDsByCity(city)
 	if len(marketIds) == 0 {
-		return []Discount{}, errors.New("[getDiscountsByCityFromDB] No markets found for " + city)
+		return []Discount{}, errors.New("[GetDiscountsByCity] No markets found for " + city)
 	}
 
 	// get discounts for markets
-	discountsFromDB, err := getDiscountsCollection(client).Find(ctx, bson.D{{Key: "internalMarketId", Value: bson.D{{Key: "$in", Value: marketIds}}}})
+	discountsFromDB, err := client.GetDiscountsCollection().Find(ctx, bson.D{{Key: "internalMarketId", Value: bson.D{{Key: "$in", Value: marketIds}}}})
 	if err != nil {
 		log.Print(err)
 		return []Discount{}, err
@@ -96,21 +95,21 @@ func getDiscountsByCityFromDB(client *mongo.Client, city string) ([]Discount, er
 	return discounts, nil
 }
 
-// getDiscountsForMarketFromAPI gets all discounts for a market from the market's API
-func getDiscountsForMarketFromAPI(market Market) ([]Discount, error) {
+// GetDiscountsFromAPI gets all discounts for a market from the market's API
+func (market *Market) GetDiscountsFromAPI() ([]Discount, error) {
 	switch market.Distributor {
 	case "edeka":
-		return getEdekaDiscounts(market)
+		return GetEdekaDiscounts(*market)
 	case "rewe":
-		return getReweDiscounts(market)
+		return GetReweDiscounts(*market)
 	}
 	return []Discount{}, nil
 }
 
 // getAllDiscountsFromDB gets all discounts from database
-func getAllDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
+func (client *TasteBuddyDatabase) GetAllDiscounts() ([]Discount, error) {
 	ctx := DefaultContext()
-	cursor, err := getDiscountsCollection(client).Find(ctx, bson.M{})
+	cursor, err := client.GetDiscountsCollection().Find(ctx, bson.M{})
 	if err != nil {
 		log.Print(err)
 		return []Discount{}, err
@@ -123,14 +122,14 @@ func getAllDiscountsFromDB(client *mongo.Client) ([]Discount, error) {
 	return discounts, nil
 }
 
-// addDiscountsToDB adds discounts to database
-func addDiscountsToDB(client *mongo.Client, discounts []Discount) error {
+// AddDiscounts adds discounts to database
+func (client *TasteBuddyDatabase) AddDiscounts(discounts []Discount) error {
 	ctx := DefaultContext()
-	log.Printf("[addDiscountsToDB] Add %s discounts to database...", strconv.Itoa(len(discounts)))
+	log.Printf("[AddDiscounts] Add %s discounts to database...", strconv.Itoa(len(discounts)))
 
 	// Insert all markets
 	opts := options.Update().SetUpsert(true)
-	collection := getDiscountsCollection(client)
+	collection := client.GetDiscountsCollection()
 	for _, discount := range discounts {
 
 		// Upsert market
@@ -143,15 +142,15 @@ func addDiscountsToDB(client *mongo.Client, discounts []Discount) error {
 	return nil
 }
 
-// getDiscountsByCityFromAPI gets all discounts for a city from the market's APIs
-func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
-	if markets, err := getMarketsByCityFromDB(client, city); err != nil {
+// GetDiscountsByCityFromAPI gets all discounts for a city from the market's APIs
+func (client *TasteBuddyDatabase) GetDiscountsByCityFromAPI(city string) []Discount {
+	if markets, err := client.GetMarketsByCity(city); err != nil {
 		log.Print(err)
 		return []Discount{}
 	} else {
 		var discounts []Discount
 		for _, market := range markets {
-			discountsForMarket, err := getDiscountsForMarketFromAPI(market)
+			discountsForMarket, err := market.GetDiscountsFromAPI()
 			if err != nil {
 				log.Print(err)
 				continue
@@ -164,7 +163,7 @@ func getDiscountsByCityFromAPI(client *mongo.Client, city string) []Discount {
 
 // GoRoutineSaveDiscountsToDB save discounts from different cities to the database
 // Is Goroutine
-func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
+func GoRoutineSaveDiscountsToDB(client *TasteBuddyDatabase) {
 	cities := []string{
 		"Konstanz",
 		"Berlin",
@@ -174,17 +173,17 @@ func GoRoutineSaveDiscountsToDB(client *mongo.Client) {
 
 	log.Print("[GoRoutineSaveDiscountsToDB] Start saving discounts to database...")
 	for _, city := range cities {
-		go saveDiscountsFromAPIToDB(client, city)
+		go client.SaveDiscountsFromAPI(city)
 	}
 }
 
-// saveDiscountsFromAPIToDB saves discounts to database
-func saveDiscountsFromAPIToDB(client *mongo.Client, city string) {
-	log.Printf("[saveDiscountsFromAPIToDB] Save discounts for %s...\n", city)
-	discounts := getDiscountsByCityFromAPI(client, city)
-	if err := addDiscountsToDB(client, discounts); err != nil {
+// SaveDiscountsFromAPI saves discounts to database
+func (client *TasteBuddyDatabase) SaveDiscountsFromAPI(city string) {
+	log.Printf("[SaveDiscountsFromAPI] Save discounts for %s...\n", city)
+	discounts := client.GetDiscountsByCityFromAPI(city)
+	if err := client.AddDiscounts(discounts); err != nil {
 		log.Print(err)
 		return
 	}
-	log.Printf("[saveDiscountsFromAPIToDB] DONE...")
+	log.Printf("[SaveDiscountsFromAPI] DONE...")
 }

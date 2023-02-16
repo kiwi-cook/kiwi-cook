@@ -6,7 +6,7 @@ import (
 )
 
 // Get the REWE markets for a city
-func getReweMarkets(city string) ([]Market, error) {
+func GetReweMarkets(city string) ([]Market, error) {
 	body, err := GetFromUrl("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
 	if err != nil {
 		return []Market{}, err
@@ -47,7 +47,7 @@ func getReweMarkets(city string) ([]Market, error) {
 }
 
 // Get the discounts for a REWE market
-func getReweDiscounts(market Market) ([]Discount, error) {
+func GetReweDiscounts(market Market) ([]Discount, error) {
 	body, err := GetFromUrl("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificMarketID)
 	if err != nil {
 		return []Discount{}, err

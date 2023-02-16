@@ -1,15 +1,16 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
 )
 
-func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
+func ConnectToDatabase(mongoUri string) (*TasteBuddyDatabase, error) {
 	// create new mongo client
+	log.Print("Connecting to MongoDB at " + mongoUri + " ...")
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		log.Print(err)
@@ -30,19 +31,20 @@ func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
 		log.Print(err)
 		return nil, err
 	}
-	return client, nil
+	log.Print("Successfully connected to MongoDB")
+	return &TasteBuddyDatabase{client}, nil
 }
 
-func HandleDropAllCollections(context *gin.Context, client *mongo.Client) {
-	if err := dropAll(client); err != nil {
+func (app *TasteBuddyApp) HandleDropAllCollections() {
+	if err := app.client.DropAll(); err != nil {
 		log.Print(err)
-		ServerError(context, false)
+		app.context.ServerError(false)
 		return
 	}
-	Success(context, "Successfully dropped all collections")
+	app.context.Success("Successfully dropped all collections")
 }
 
-func dropAll(client *mongo.Client) error {
+func (client *TasteBuddyDatabase) DropAll() error {
 	ctx := DefaultContext()
 	err := client.Database("tastebuddy").Drop(ctx)
 	if err != nil {

@@ -11,6 +11,13 @@ import (
 
 func main() {
 	////////////////////////////////////////////////////////////////////////
+	// Initialize App
+	app := TasteBuddyAppFactory()
+	log.Print("Starting TasteBuddy API")
+	// Finish Initialize App
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
 	// Set up viper
 	// Use viper to handle different environments
 	viper.AddConfigPath(".")
@@ -32,10 +39,12 @@ func main() {
 
 	////////////////////////////////////////////////////////////////////////
 	// Connect to database
-	client, err := ConnectToMongo(viper.GetString("MONGODB_CONNSTRING"))
+	client, err := ConnectToDatabase(viper.GetString("MONGODB_CONNSTRING"))
 	if err != nil {
 		return
 	}
+	// Register database client
+	app.SetDatabase(client)
 	// Finish Database
 	////////////////////////////////////////////////////////////////////////
 
@@ -65,27 +74,27 @@ func main() {
 	{
 		// Get all recipes
 		recipeRoutes.GET("/", func(context *gin.Context) {
-			HandleGetAllRecipes(context, client)
+			app.SetContext(context).HandleGetAllRecipes()
 		})
 
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
-			HandleGetRandomRecipe(context, client)
+			app.SetContext(context).HandleGetRandomRecipe()
 		})
 
 		// Get recipe by id
 		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
-			HandleGetRecipeById(context, client)
+			app.SetContext(context).HandleGetRecipeById()
 		})
 
 		// Get recipe by item ids
 		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
-			HandleFindRecipesByItemNames(context, client)
+			app.SetContext(context).HandleFindRecipesByItemNames()
 		})
 
 		// Add recipe to database
 		recipeRoutes.POST("/", func(context *gin.Context) {
-			HandleAddRecipe(context, client)
+			app.SetContext(context).HandleAddRecipe()
 		})
 	}
 
@@ -94,17 +103,17 @@ func main() {
 	{
 		// Get list of all items
 		itemRoutes.GET("/", func(context *gin.Context) {
-			HandleGetAllItems(context, client)
+			app.SetContext(context).HandleGetAllItems()
 		})
 
 		// Get item by id
 		itemRoutes.GET("/byId/:id", func(context *gin.Context) {
-			HandleGetItemById(context, client)
+			app.SetContext(context).HandleGetItemById()
 		})
 
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
-			HandleAddItem(context, client)
+			app.SetContext(context).HandleAddItem()
 		})
 	}
 
@@ -113,12 +122,12 @@ func main() {
 	{
 		// Get all discounts
 		discountRoutes.GET("/", func(context *gin.Context) {
-			HandleGetAllDiscounts(context, client)
+			app.SetContext(context).HandleGetAllDiscounts()
 		})
 
 		// Get all discounts by city
 		discountRoutes.GET("/:city", func(context *gin.Context) {
-			HandleGetDiscountsByCity(context, client)
+			app.SetContext(context).HandleGetDiscountsByCity()
 		})
 	}
 
@@ -127,12 +136,12 @@ func main() {
 	{
 		// Get all markets
 		marketRoutes.GET("/", func(context *gin.Context) {
-			HandleGetAllMarkets(context, client)
+			app.SetContext(context).HandleGetAllMarkets()
 		})
 
 		// Get all markets by city
 		marketRoutes.GET("/:city", func(context *gin.Context) {
-			HandleGetMarketsByCity(context, client)
+			app.SetContext(context).HandleGetMarketsByCity()
 		})
 	}
 
@@ -142,7 +151,7 @@ func main() {
 		dbRoutes := adminRoutes.Group("/db")
 		{
 			dbRoutes.GET("/dropAll", func(context *gin.Context) {
-				HandleDropAllCollections(context, client)
+				app.SetContext(context).HandleDropAllCollections()
 			})
 		}
 	}

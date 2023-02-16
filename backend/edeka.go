@@ -7,7 +7,7 @@ import (
 )
 
 // Get the EDEKA markets for a city
-func getEdekaMarkets(city string) ([]Market, error) {
+func GetEdekaMarkets(city string) ([]Market, error) {
 	body, err := GetFromUrl("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
 	if err != nil {
 		return []Market{}, err
@@ -77,7 +77,7 @@ func getEdekaMarkets(city string) ([]Market, error) {
 	return markets, nil
 }
 
-func getEdekaDiscounts(market Market) ([]Discount, error) {
+func GetEdekaDiscounts(market Market) ([]Discount, error) {
 	body, err := GetFromUrl("https://www.edeka.de/eh/service/eh/offers?marketId=" + market.DistributorSpecificMarketID)
 	if err != nil {
 		return []Discount{}, err
