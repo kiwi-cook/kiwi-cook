@@ -65,6 +65,12 @@ func funnyErrorMessage() string {
 		"Looks like you're trying to break the internet again. Please stop, it's already had a rough year.",
 		"Error: We couldn't find the page you were looking for. Maybe try turning it off and on again?",
 		"We apologize, but our servers are currently in a time-out. They need to think about what they've done.",
+		"Error: Our servers are currently experiencing a moment of clarity. Please try again later.",
+		"Error: Looks like you sent the wrong request. Don't worry, we won't tell anyone.",
+		"Whoops! You just sent a request to a non-existent endpoint. Did you mean to do that or did your cat walk over the keyboard again?",
+		"Oops, you seem to have sent a request to the wrong universe. Better luck next time, Interdimensional Voyager.",
+		"Error: You sent a request that was too hot to handle. Please let it cool down before trying again.",
+		"We're sorry, but the request you sent has caused our servers to burst into song. Please try a more appropriate request next time.",
 	}
 
 	randomIndex := rand.Intn(len(funnyMessages))
