@@ -1,3 +1,6 @@
 # Code editors
 .idea
 .vscode
+
+# Certificates
+*.pem
