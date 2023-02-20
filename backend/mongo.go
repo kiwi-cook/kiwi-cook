@@ -8,10 +8,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectToDatabase(mongoUri string) (*TasteBuddyDatabase, error) {
+func ConnectToDatabase(uri string) (*TasteBuddyDatabase, error) {
 	// create new mongo client
-	log.Print("Connecting to MongoDB at " + mongoUri + " ...")
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
+	log.Print("Connecting to Database at " + uri + " ...")
+
+	credential := options.Credential{
+		AuthMechanism: "MONGODB-X509",
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri).SetAuth(credential))
 	if err != nil {
 		log.Print(err)
 		return nil, err

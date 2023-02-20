@@ -21,25 +21,28 @@ func main() {
 	// Set up viper
 	// Use viper to handle different environments
 	viper.AddConfigPath(".")
-	viper.SetConfigName(".env")
-	viper.SetConfigType("env")
 	viper.AutomaticEnv()
+	viper.SetConfigFile(".env")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("fatal error config file, %s", err)
+	}
 
 	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
-	// e.g. DOCKER_MONGODB_CONNSTRING=...
+	// e.g. DOCKER_DB_CONNSTRING=...
+	var DB_CONNSTRING string
 	if viper.GetString("APP_ENV") == "docker" {
-		viper.SetEnvPrefix("DOCKER")
+		log.Print("Using docker environment variables")
+		DB_CONNSTRING = viper.GetString("DOCKER_DB_CONNSTRING")
+	} else {
+		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
 	// Finish viper
 	////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////
 	// Connect to database
-	client, err := ConnectToDatabase(viper.GetString("MONGODB_CONNSTRING"))
+	client, err := ConnectToDatabase(DB_CONNSTRING)
 	if err != nil {
 		return
 	}
