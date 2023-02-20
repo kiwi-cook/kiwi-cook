@@ -12,7 +12,7 @@ export type Item = {
 type StepItem = {
     amount: number;
     unit: string;
-    itemID: string;
+    item: Item;
 }
 
 type Step = {
@@ -46,7 +46,12 @@ export const dummyRecipe: Recipe = {
                 {
                     amount: 1,
                     unit: 'pcs',
-                    itemID: 'bread'
+                    item: {
+                        _id: '1',
+                        name: 'Bread',
+                        type: 'Bread',
+                        imgUrl: 'https://source.unsplash.com/random/900x450?bread',
+                    }
                 }
             ]
         }
