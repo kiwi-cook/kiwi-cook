@@ -305,7 +305,7 @@ func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {
 			}
 			stepItem.ItemID = itemId
 			stepItem.Item = Item{}
-			log.Print("[prepareRecipeForDB] map stepItem: ", stepItem.Item.Name, " to ", stepItem.ItemID)
+			log.Print("[PrepareForDB] map stepItem: " + stepItem.Item.Name + " to " + stepItem.ItemID.String())
 			recipe.Steps[stepIndex].Items[itemIndex] = stepItem
 		}
 	}
