@@ -26,7 +26,7 @@
                 <ion-item>
                     <div class="container">
                         <div id="HeartSaveShareButton">
-                            <ion-button color="primary" >
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="heart"></ion-icon>
                                 3012 Likes
                             </ion-button>
@@ -52,7 +52,7 @@
                         <div class="element">
                             <ion-avatar slot="start">
                                 <img :alt="ingredient.name" :src="'assets/ingredients/' + ingredient._id + '.jpeg'" />
-                                {{  ingredient.name }}
+                                {{ ingredient.name }}
                             </ion-avatar>
                         </div>
                     </template>
@@ -96,12 +96,9 @@ export default defineComponent({
     setup() {
         const store = useTasteBuddyStore();
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
-        const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
-
-        const itemsFromRecipe = computed(() => items.value?.filter(item => recipeOfTheDay.value?.steps.map((step) => (step.items ?? []).map((stepItem) => stepItem.itemID).includes(item._id))));
+        const itemsFromRecipe: ComputedRef<Item[]> = computed(() => recipeOfTheDay.value?.steps.flatMap((step) => (step.items ?? []).map((stepItem) => stepItem.item)));
         const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
         const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
-
 
         return {
             ingredients, equipments,
