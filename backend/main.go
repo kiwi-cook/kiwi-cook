@@ -77,27 +77,27 @@ func main() {
 	{
 		// Get all recipes
 		recipeRoutes.GET("/", func(context *gin.Context) {
-			app.SetContext(context).HandleGetAllRecipes()
+			app.HandleGetAllRecipes(context)
 		})
 
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
-			app.SetContext(context).HandleGetRandomRecipe()
+			app.HandleGetRandomRecipe(context)
 		})
 
 		// Get recipe by id
 		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
-			app.SetContext(context).HandleGetRecipeById()
+			app.HandleGetRecipeById(context)
 		})
 
 		// Get recipe by item ids
 		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
-			app.SetContext(context).HandleFindRecipesByItemNames()
+			app.HandleFindRecipesByItemNames(context)
 		})
 
 		// Add recipe to database
 		recipeRoutes.POST("/", func(context *gin.Context) {
-			app.SetContext(context).HandleAddRecipe()
+			app.HandleAddRecipe(context)
 		})
 	}
 
@@ -106,17 +106,17 @@ func main() {
 	{
 		// Get list of all items
 		itemRoutes.GET("/", func(context *gin.Context) {
-			app.SetContext(context).HandleGetAllItems()
+			app.HandleGetAllItems(context)
 		})
 
 		// Get item by id
 		itemRoutes.GET("/byId/:id", func(context *gin.Context) {
-			app.SetContext(context).HandleGetItemById()
+			app.HandleGetItemById(context)
 		})
 
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
-			app.SetContext(context).HandleAddItem()
+			app.HandleAddItem(context)
 		})
 	}
 
@@ -125,12 +125,12 @@ func main() {
 	{
 		// Get all discounts
 		discountRoutes.GET("/", func(context *gin.Context) {
-			app.SetContext(context).HandleGetAllDiscounts()
+			app.HandleGetAllDiscounts(context)
 		})
 
 		// Get all discounts by city
 		discountRoutes.GET("/:city", func(context *gin.Context) {
-			app.SetContext(context).HandleGetDiscountsByCity()
+			app.HandleGetDiscountsByCity(context)
 		})
 	}
 
@@ -139,12 +139,12 @@ func main() {
 	{
 		// Get all markets
 		marketRoutes.GET("/", func(context *gin.Context) {
-			app.SetContext(context).HandleGetAllMarkets()
+			app.HandleGetAllMarkets(context)
 		})
 
 		// Get all markets by city
 		marketRoutes.GET("/:city", func(context *gin.Context) {
-			app.SetContext(context).HandleGetMarketsByCity()
+			app.HandleGetMarketsByCity(context)
 		})
 	}
 
@@ -154,7 +154,7 @@ func main() {
 		dbRoutes := adminRoutes.Group("/db")
 		{
 			dbRoutes.GET("/dropAll", func(context *gin.Context) {
-				app.SetContext(context).HandleDropAllCollections()
+				app.HandleDropAllCollections(context)
 			})
 		}
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -40,13 +41,13 @@ func ConnectToDatabase(uri string) (*TasteBuddyDatabase, error) {
 	return &TasteBuddyDatabase{client}, nil
 }
 
-func (app *TasteBuddyApp) HandleDropAllCollections() {
+func (app *TasteBuddyApp) HandleDropAllCollections(context *gin.Context) {
 	if err := app.client.DropAll(); err != nil {
 		log.Print(err)
-		app.context.ServerError(false)
+		ServerError(context, false)
 		return
 	}
-	app.context.Success("Successfully dropped all collections")
+	Success(context, "Successfully dropped all collections")
 }
 
 func (client *TasteBuddyDatabase) DropAll() error {

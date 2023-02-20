@@ -7,33 +7,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (context *TasteBuddyContext) Success(message string) {
+func Success(context *gin.Context, message string) {
 	context.JSON(http.StatusOK, gin.H{"success": message})
 }
 
-func (context *TasteBuddyContext) SuccessJSON(json interface{}) {
+func SuccessJSON(context *gin.Context, json interface{}) {
 	context.JSON(http.StatusOK, json)
 }
 
-func (context *TasteBuddyContext) NotFoundError(itemName string) {
+func NotFoundError(context *gin.Context, itemName string) {
 	context.JSON(http.StatusNotFound, gin.H{"error": itemName + " not found."})
 }
 
-func (context *TasteBuddyContext) BadRequestError(message string) {
+func BadRequestError(context *gin.Context, message string) {
 	context.JSON(http.StatusBadRequest, gin.H{"error": message})
 }
 
-func (context *TasteBuddyContext) ServerError(funny bool) {
+func ServerError(context *gin.Context, funny bool) {
 	var message string
 	if funny {
 		message = funnyErrorMessage()
 	} else {
 		message = "Internal Server ErrorMessage"
 	}
-	context.ErrorMessage(message)
+	ErrorMessage(context, message)
 }
 
-func (context *TasteBuddyContext) ErrorMessage(message string) {
+func ErrorMessage(context *gin.Context, message string) {
 	context.JSON(http.StatusInternalServerError, gin.H{"error": message})
 }
 
