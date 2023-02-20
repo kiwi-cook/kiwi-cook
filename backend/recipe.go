@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -44,81 +45,81 @@ type Item struct {
 
 // HandleGetAllRecipes gets called by router
 // Calls getRecipesFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetAllRecipes() {
+func (app *TasteBuddyApp) HandleGetAllRecipes(context *gin.Context) {
 	recipes, err := app.client.GetAllRecipes()
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
-	app.context.JSON(http.StatusOK, recipes)
+	context.JSON(http.StatusOK, recipes)
 }
 
-func (app *TasteBuddyApp) HandleGetRecipeById() {
-	id := app.context.Param("id")
+func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
+	id := context.Param("id")
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
 
 	recipe, err := app.client.GetRecipeById(objectID)
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
 
-	app.context.JSON(http.StatusOK, recipe)
+	context.JSON(http.StatusOK, recipe)
 }
 
 // HandleGetRandomRecipe gets called by router
 // Calls getRecipesFromDB and selects a random recipe
-func (app *TasteBuddyApp) HandleGetRandomRecipe() {
+func (app *TasteBuddyApp) HandleGetRandomRecipe(context *gin.Context) {
 	recipes, err := app.client.GetAllRecipes()
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
 
 	// check if there are recipes
 	if len(recipes) == 0 {
-		app.context.NotFoundError("Recipes")
+		NotFoundError(context, "Recipes")
 		return
 	}
 
 	// get random recipe
 	randomIndex := rand.Intn(len(recipes))
-	app.context.SuccessJSON(recipes[randomIndex])
+	SuccessJSON(context, recipes[randomIndex])
 }
 
 // HandleAddRecipe gets called by router
 // Calls addRecipeToDB and handles the context
-func (app *TasteBuddyApp) HandleAddRecipe() {
+func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
 	// try to bind json to recipe
 	var newRecipe Recipe
-	if err := app.context.BindJSON(&newRecipe); err != nil {
+	if err := context.BindJSON(&newRecipe); err != nil {
 		log.Print(err)
-		app.context.BadRequestError("Invalid Recipe")
+		BadRequestError(context, "Invalid Recipe")
 		return
 	}
 
 	if err := app.client.AddOrUpdateRecipe(newRecipe); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
-	app.context.Success("Added recipe")
+	Success(context, "Added recipe")
 }
 
 // HandleFindRecipesByItemNames gets called by router
 // Calls GetRecipesByItemNames and handles the context
-func (app *TasteBuddyApp) HandleFindRecipesByItemNames() {
-	itemIds := app.context.Param("itemIds")
+func (app *TasteBuddyApp) HandleFindRecipesByItemNames(context *gin.Context) {
+	itemIds := context.Param("itemIds")
 
 	// split itemIds string into array
 	splitItemIds := strings.Split(itemIds, ",")
@@ -126,63 +127,63 @@ func (app *TasteBuddyApp) HandleFindRecipesByItemNames() {
 	recipes, err := app.client.GetRecipesByItemNames(splitItemIds)
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
-	app.context.SuccessJSON(recipes)
+	SuccessJSON(context, recipes)
 }
 
 // HandleGetAllItems gets called by router
 // Calls getRecipesFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetAllItems() {
+func (app *TasteBuddyApp) HandleGetAllItems(context *gin.Context) {
 	items, err := app.client.GetAllItems()
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
-	app.context.SuccessJSON(items)
+	SuccessJSON(context, items)
 }
 
 // HandleGetItemById gets called by router
 // Calls getItemByIdFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetItemById() {
-	id := app.context.Param("id")
+func (app *TasteBuddyApp) HandleGetItemById(context *gin.Context) {
+	id := context.Param("id")
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
 
 	item, err := app.client.GetItemById(objectID)
 	if err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
 
-	app.context.SuccessJSON(item)
+	SuccessJSON(context, item)
 }
 
 // HandleAddItem gets called by router
 // Calls addItemToDB and handles the context
-func (app *TasteBuddyApp) HandleAddItem() {
+func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
 	var newItem Item
-	if err := app.context.BindJSON(&newItem); err != nil {
+	if err := context.BindJSON(&newItem); err != nil {
 		log.Print(err)
-		app.context.BadRequestError("Invalid item")
+		BadRequestError(context, "Invalid item")
 		return
 	}
 
 	if _, err := app.client.AddOrUpdateItem(newItem); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 		return
 	}
-	app.context.Success("Added item")
+	Success(context, "Added item")
 }
 
 // getRecipesCollection gets recipes collection from database

@@ -5,6 +5,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,26 +25,26 @@ type Discount struct {
 
 // HandleGetDiscountsByCity gets called by router
 // Calls getDiscountsFromDBOrAPI and handles the context
-func (app *TasteBuddyApp) HandleGetDiscountsByCity() {
-	city := app.context.Param("city")
+func (app *TasteBuddyApp) HandleGetDiscountsByCity(context *gin.Context) {
+	city := context.Param("city")
 	log.Print("[HandleGetDiscounts] Get discounts for city " + city)
 	if discounts, err := app.client.GetDiscountsByCity(city); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 	} else {
-		app.context.SuccessJSON(discounts)
+		SuccessJSON(context, discounts)
 	}
 }
 
 // HandleGetDiscounts gets called by router
 // Calls getDiscountsFromDB
-func (app *TasteBuddyApp) HandleGetAllDiscounts() {
+func (app *TasteBuddyApp) HandleGetAllDiscounts(context *gin.Context) {
 	log.Print("[HandleGetDiscounts] Get all discounts")
 	if discounts, err := app.client.GetAllDiscounts(); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 	} else {
-		app.context.SuccessJSON(discounts)
+		SuccessJSON(context, discounts)
 	}
 }
 
