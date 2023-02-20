@@ -3,7 +3,7 @@
 // types for recipe
 
 export type Item = {
-    _id: string;
+    _id?: string;
     name: string;
     type: string;
     imgUrl: string;
@@ -47,7 +47,6 @@ export const dummyRecipe: Recipe = {
                     amount: 1,
                     unit: 'pcs',
                     item: {
-                        _id: '1',
                         name: 'Bread',
                         type: 'Bread',
                         imgUrl: 'https://source.unsplash.com/random/900x450?bread',

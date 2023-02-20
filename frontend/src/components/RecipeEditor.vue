@@ -134,7 +134,6 @@ export default defineComponent({
                 amount: 0,
                 unit: '',
                 item: {
-                    _id: '',
                     name: '',
                     type: '',
                     imgUrl: '',
