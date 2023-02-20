@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -32,24 +33,24 @@ type Market struct {
 
 // HandleGetMarketsByCity gets called by router
 // Calls getMarkets and handles the context
-func (app *TasteBuddyApp) HandleGetMarketsByCity() {
-	city := app.context.Param("city")
+func (app *TasteBuddyApp) HandleGetMarketsByCity(context *gin.Context) {
+	city := context.Param("city")
 	if markets, err := app.client.GetMarketsByCity(city); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 	} else {
-		app.context.SuccessJSON(markets)
+		SuccessJSON(context, markets)
 	}
 }
 
 // HandleGetAllMarkets gets called by router
 // Calls getMarkets and handles the context
-func (app *TasteBuddyApp) HandleGetAllMarkets() {
+func (app *TasteBuddyApp) HandleGetAllMarkets(context *gin.Context) {
 	if markets, err := app.client.GetAllMarkets(); err != nil {
 		log.Print(err)
-		app.context.ServerError(true)
+		ServerError(context, true)
 	} else {
-		app.context.SuccessJSON(markets)
+		SuccessJSON(context, markets)
 	}
 }
 
