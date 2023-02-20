@@ -17,7 +17,7 @@
             <ion-list lines="full">
                 <ion-item>
                     <div class="container">
-                        <div class="ContainerIMG">
+                        <div class="container-img">
                             <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`"></ion-img>
                             <div class="centered">{{ recipeOfTheDay?.description }}</div>
                         </div>
@@ -27,7 +27,7 @@
                     <div class="container">
                         <div id="HeartSaveShareButton">
                             <ion-button color="primary" >
-                                <ion-icon slot="icon-only" :icon="heartOutline"></ion-icon>
+                                <ion-icon slot="icon-only" :icon="heart"></ion-icon>
                                 3012 Likes
                             </ion-button>
                             <ion-button color="primary">
@@ -91,14 +91,14 @@ import { useTasteBuddyStore } from '@/storage';
 
 export default defineComponent({
     titel: 'Tab1Page',
-    components: { IonHeader, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel },
+    components: { IonHeader, IonImg, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel, IonAvatar },
 
     setup() {
         const store = useTasteBuddyStore();
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
         const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
 
-        const itemsFromRecipe = computed(() => items.value?.filter(item => recipeOfTheDay.value?.steps.map((step) => step.items.map((stepItem) => stepItem.itemID).includes(item._id))));
+        const itemsFromRecipe = computed(() => items.value?.filter(item => recipeOfTheDay.value?.steps.map((step) => (step.items ?? []).map((stepItem) => stepItem.itemID).includes(item._id))));
         const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
         const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
 
@@ -148,12 +148,11 @@ export default defineComponent({
     margin-top: 2%;
 }
 
-.ContainerIMG {
+.container-img {
     object-fit: fill;
     width: 100%;
     height: 100%;
     text-align: center;
-
 }
 
 /* Centered text */
