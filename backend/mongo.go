@@ -1,18 +1,22 @@
 package main
 
 import (
-	"context"
 	"log"
-	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
+func ConnectToDatabase(uri string) (*TasteBuddyDatabase, error) {
 	// create new mongo client
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoUri))
+	log.Print("Connecting to Database at " + uri + " ...")
+
+	credential := options.Credential{
+		AuthMechanism: "MONGODB-X509",
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri).SetAuth(credential))
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -32,10 +36,24 @@ func ConnectToMongo(mongoUri string) (*mongo.Client, error) {
 		log.Print(err)
 		return nil, err
 	}
-	return client, nil
+	log.Print("Successfully connected to MongoDB")
+	return &TasteBuddyDatabase{client}, nil
 }
 
-func DefaultContext() context.Context {
-	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
-	return ctx
+func (app *TasteBuddyApp) HandleDropAllCollections() {
+	if err := app.client.DropAll(); err != nil {
+		log.Print(err)
+		app.context.ServerError(false)
+		return
+	}
+	app.context.Success("Successfully dropped all collections")
+}
+
+func (client *TasteBuddyDatabase) DropAll() error {
+	ctx := DefaultContext()
+	err := client.Database("tastebuddy").Drop(ctx)
+	if err != nil {
+		log.Print(err)
+	}
+	return err
 }

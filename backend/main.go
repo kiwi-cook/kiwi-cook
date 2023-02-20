@@ -10,33 +10,66 @@ import (
 )
 
 func main() {
+	////////////////////////////////////////////////////////////////////////
+	// Initialize App
+	app := TasteBuddyAppFactory()
+	log.Print("Starting TasteBuddy API")
+	// Finish Initialize App
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
+	// Set up viper
 	// Use viper to handle different environments
 	viper.AddConfigPath(".")
-	viper.SetConfigName(".env")
-	viper.SetConfigType("env")
 	viper.AutomaticEnv()
+	viper.SetConfigFile(".env")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("fatal error config file, %s", err)
+	}
 
 	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
-	// e.g. DOCKER_MONGODB_CONNSTRING=...
+	// e.g. DOCKER_DB_CONNSTRING=...
+	var DB_CONNSTRING string
 	if viper.GetString("APP_ENV") == "docker" {
-		viper.SetEnvPrefix("DOCKER")
+		log.Print("Using docker environment variables")
+		DB_CONNSTRING = viper.GetString("DOCKER_DB_CONNSTRING")
+	} else {
+		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("Fatal error config file: %w", err))
-	}
+	// Finish viper
+	////////////////////////////////////////////////////////////////////////
 
-	r := gin.Default()
-	r.Use(cors.Default())
-
+	////////////////////////////////////////////////////////////////////////
 	// Connect to database
-	client, err := ConnectToMongo(viper.GetString("MONGODB_CONNSTRING"))
+	client, err := ConnectToDatabase(DB_CONNSTRING)
 	if err != nil {
 		return
 	}
+	// Register database client
+	app.SetDatabase(client)
+	// Finish Database
+	////////////////////////////////////////////////////////////////////////
 
+	////////////////////////////////////////////////////////////////////////
+	// Goroutines
+	go func() {
+		GoRoutineSaveMarketsToDB(client)
+		// Discounts must be saved after markets
+		GoRoutineSaveDiscountsToDB(client)
+	}()
+	// Finish Goroutines
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
+	// Set up gin
+	r := gin.Default()
+	r.Use(cors.Default())
+
+	// Routes
 	apiRoutes := r.Group("/api")
 
+	// Version 1
 	v1 := apiRoutes.Group("/v1")
 
 	// Recipes
@@ -44,17 +77,27 @@ func main() {
 	{
 		// Get all recipes
 		recipeRoutes.GET("/", func(context *gin.Context) {
-			HandleGetRecipesFromDB(context, client)
+			app.SetContext(context).HandleGetAllRecipes()
 		})
 
-		// Add recipe to database
-		recipeRoutes.POST("/", func(context *gin.Context) {
-			HandleAddRecipeToDB(context, client)
+		// Get random recipe
+		recipeRoutes.GET("/random", func(context *gin.Context) {
+			app.SetContext(context).HandleGetRandomRecipe()
+		})
+
+		// Get recipe by id
+		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
+			app.SetContext(context).HandleGetRecipeById()
 		})
 
 		// Get recipe by item ids
 		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
-			HandleFindRecipesByItemNames(context, client)
+			app.SetContext(context).HandleFindRecipesByItemNames()
+		})
+
+		// Add recipe to database
+		recipeRoutes.POST("/", func(context *gin.Context) {
+			app.SetContext(context).HandleAddRecipe()
 		})
 	}
 
@@ -63,40 +106,68 @@ func main() {
 	{
 		// Get list of all items
 		itemRoutes.GET("/", func(context *gin.Context) {
-			HandleGetItemsFromDB(context, client)
+			app.SetContext(context).HandleGetAllItems()
+		})
+
+		// Get item by id
+		itemRoutes.GET("/byId/:id", func(context *gin.Context) {
+			app.SetContext(context).HandleGetItemById()
 		})
 
 		// Add recipe to database
 		itemRoutes.POST("/", func(context *gin.Context) {
-			HandleAddItemToDB(context, client)
+			app.SetContext(context).HandleAddItem()
 		})
 	}
 
 	// Discount routes
 	discountRoutes := v1.Group("/discount")
 	{
-		discountRoutes.GET("market/:city", func(context *gin.Context) {
-			HandleGetMarkets(context)
+		// Get all discounts
+		discountRoutes.GET("/", func(context *gin.Context) {
+			app.SetContext(context).HandleGetAllDiscounts()
 		})
 
+		// Get all discounts by city
 		discountRoutes.GET("/:city", func(context *gin.Context) {
-			HandleGetDiscounts(context, client)
+			app.SetContext(context).HandleGetDiscountsByCity()
 		})
 	}
 
+	// Market routes
+	marketRoutes := v1.Group("/market")
+	{
+		// Get all markets
+		marketRoutes.GET("/", func(context *gin.Context) {
+			app.SetContext(context).HandleGetAllMarkets()
+		})
+
+		// Get all markets by city
+		marketRoutes.GET("/:city", func(context *gin.Context) {
+			app.SetContext(context).HandleGetMarketsByCity()
+		})
+	}
+
+	// Admin routes
 	adminRoutes := v1.Group("/admin")
 	{
 		dbRoutes := adminRoutes.Group("/db")
 		{
-			dbRoutes.GET("/addIndex", func(context *gin.Context) {
-				HandleCreateDiscountsIndex(context, client)
+			dbRoutes.GET("/dropAll", func(context *gin.Context) {
+				app.SetContext(context).HandleDropAllCollections()
 			})
 		}
 	}
 
+	log.Print("[main] DONE...")
+
+	// Start server
 	err = r.Run(":8081")
 	if err != nil {
 		log.Print(err)
 		return
 	}
+
+	// Finish gin
+	////////////////////////////////////////////////////////////////////////
 }
