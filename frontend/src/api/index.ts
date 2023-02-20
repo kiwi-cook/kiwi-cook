@@ -7,40 +7,36 @@ import { Recipe, Discount, Market, Item } from './types';
  * @param route enum value of API_ROUTE
  * @param callback function that takes a list of e.g., Recipe or Item objects as parameter
  */
-export function getFromAPI<T extends Recipe[] | Item[] | Discount[] | Market[]>(route: API_ROUTE, callback: (json: T) => void, formatObject?: { [key: string]: string | number }): void {
+export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options: { callback?: (json: T[]) => void, formatObject?: { [key: string]: string | number }, body?: T}): void {
     let url = API_URL + API_VERSION + API_ROUTES[route].url;
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
-    if (formatObject) {
-        for (const key in formatObject) {
-            url = url.replace(key, formatObject[key].toString());
+    if (options?.formatObject) {
+        for (const key in options?.formatObject) {
+            url = url.replace(key, options?.formatObject[key].toString());
         }
     }
 
+    const fetchOptions: RequestInit = {
+        method: API_ROUTES[route].method ?? 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    }
+
+    if (options?.body) {
+        fetchOptions.body = JSON.stringify(options?.body)
+    }
+
     // call fetch
-    fetch(url, { method: API_ROUTES[route].method ?? 'GET' })
+    fetch(url, fetchOptions)
         .then(response => response.json())
         .then(data => {
             console.debug(data)
-            callback(data)
+            if (typeof options?.callback !== 'undefined') {
+                options?.callback(data)
+            }
         })
         .catch(error => {
             console.error(error)
         })
 }
 
-/**
- * Post different data to the API by providing the API_ROUTE and a list of e.g., Recipe or Item objects.
- * @param route enum value of API_ROUTE
- * @param body 
- */
-export function postToAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, body: T): void {
-    // call fetch
-    fetch(getApiRoute(route), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    })
-}

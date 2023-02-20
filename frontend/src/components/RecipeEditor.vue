@@ -2,7 +2,7 @@
     <!-- Recipe information -->
     <ion-card>
         <ion-img :alt="`Image of ${mutableRecipe.name}`"
-            :src="`https://source.unsplash.com/random/700x400?${mutableRecipe.name}`" />
+            :src="`https://source.unsplash.com/random/300x200?${mutableRecipe.name}`" />
         <ion-card-header>
             <ion-text color="tertiary">
                 ID {{ mutableRecipe._id }}
@@ -76,12 +76,12 @@
             </ion-card-content>
         </ion-card>
 
-        <ion-button @click="saveRecipe()">Save recipe</ion-button>
     </template>
+    <ion-button @click="saveRecipe()">Save recipe</ion-button>
 </template>
 
 <script lang="ts">
-import { postToAPI } from '@/api';
+import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Recipe } from '@/api/types';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonThumbnail, IonInput, IonItem, IonLabel, IonCardSubtitle, IonImg, IonSelect, IonSelectOption, IonText } from '@ionic/vue';
@@ -134,7 +134,7 @@ export default defineComponent({
 
         const saveRecipe = () => {
             console.debug('Saving recipe ...', mutableRecipe.value)
-            postToAPI(API_ROUTE.RECIPES, mutableRecipe.value)
+            getFromAPI(API_ROUTE.ADD_RECIPE, { body: mutableRecipe.value })
         }
 
         return {

@@ -55,19 +55,25 @@ export function createVueStore() {
         },
         actions: {
             async fetchRecipes({ commit }) {
-                getFromAPI(API_ROUTE.GET_RECIPES, (json: Recipe[]) => {
-                    commit('setRecipes', json)
+                getFromAPI(API_ROUTE.GET_RECIPES, {
+                    callback: (json: Recipe[]) => {
+                        commit('setRecipes', json)
+                    }
                 });
             },
             async fetchItems({ commit }) {
-                getFromAPI(API_ROUTE.GET_ITEMS, (json: Item[]) => {
-                    commit('setItems', json)
+                getFromAPI(API_ROUTE.GET_ITEMS, {
+                    callback: (json: Item[]) => {
+                        commit('setItems', json)
+                    }
                 });
             },
             async fetchDiscounts({ commit }, city: string) {
-                getFromAPI(API_ROUTE.GET_DISCOUNTS, (json: Discount[]) => {
-                    commit('setDiscounts', { discounts: json, city })
-                }, { CITY: city });
+                getFromAPI(API_ROUTE.GET_DISCOUNTS, {
+                    callback: (json: Discount[]) => {
+                        commit('setDiscounts', { discounts: json, city })
+                    }, formatObject: { CITY: city }
+                });
             }
         },
         getters: {

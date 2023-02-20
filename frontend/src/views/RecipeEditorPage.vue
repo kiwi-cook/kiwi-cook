@@ -1,5 +1,5 @@
 <template>
-    <ion-page >
+    <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
                 <ion-title color="light">Editor</ion-title>
@@ -40,12 +40,14 @@ export default defineComponent({
         RecipeEditor
     },
     setup() {
-        getFromAPI(API_ROUTE.RECIPES, (data: Recipe[]) => {
-            recipes.value = data
+        getFromAPI(API_ROUTE.GET_RECIPES, {
+            callback: (data: Recipe[]) => {
+                recipes.value = data
+            }
         })
 
         const recipes = ref<Recipe[]>([])
-        
+
         const addNewRecipe = () => {
             recipes.value.push(dummyRecipe)
         }
