@@ -6,7 +6,7 @@
             </ion-toolbar>
         </ion-header>
         <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleShoppingFilter($event)"></ion-searchbar>
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
         </ion-toolbar>
         <div class="container">
             <div id="filter-relevanz-button">
