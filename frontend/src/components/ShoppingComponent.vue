@@ -58,7 +58,7 @@
                 <ion-list>
                     <template v-for="item in selectedItems" :key="item.name">
                         <ion-item color="primary">
-                            <ion-label>{{ item.title }}</ion-label>
+                            <ion-label>{{ item.title }}</ion-label> {{  item.marketName }}
                         </ion-item>
                     </template>
                 </ion-list>
