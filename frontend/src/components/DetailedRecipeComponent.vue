@@ -6,7 +6,7 @@
             </ion-toolbar>
         </ion-header>
 
-        <ion-content :fullscreen="true" class="tb-content">
+        <ion-content :fullscreen="true">
             <ion-header collapse="condense">
                 <ion-toolbar>
                     <ion-title size="large">Recipe Of the Day</ion-title>
@@ -19,7 +19,7 @@
                     <div class="container">
                         <div class="container-img">
                             <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`"></ion-img>
-                            <div class="centered">{{ recipeOfTheDay?.description }}</div>
+                            <div class="container-img-text">{{ recipeOfTheDay?.description }}</div>
                         </div>
                     </div>
                 </ion-item>
@@ -97,8 +97,8 @@ export default defineComponent({
         const store = useTasteBuddyStore();
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
         const itemsFromRecipe: ComputedRef<Item[]> = computed(() => recipeOfTheDay.value?.steps.flatMap((step) => (step.items ?? []).map((stepItem) => stepItem.item)));
-        const ingredients = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Food'))
-        const equipments = computed(() => itemsFromRecipe.value?.filter(item => item.type === 'Equipment'))
+        const ingredients: ComputedRef<Item[]> = computed(() => itemsFromRecipe.value)
+        const equipments: ComputedRef<Item[]> = computed(() => []);
 
         return {
             ingredients, equipments,
@@ -152,8 +152,7 @@ export default defineComponent({
     text-align: center;
 }
 
-/* Centered text */
-.centered {
+.container-img-text {
     position: absolute;
     top: 95%;
     left: 50%;
