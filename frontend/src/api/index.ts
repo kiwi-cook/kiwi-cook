@@ -1,4 +1,4 @@
-import { API_ROUTE, getApiRoute } from './constants';
+import { API_ROUTE, API_ROUTES, API_URL, API_VERSION } from './constants';
 import { Recipe, Discount, Market, Item } from './types';
 
 /**
@@ -7,15 +7,36 @@ import { Recipe, Discount, Market, Item } from './types';
  * @param route enum value of API_ROUTE
  * @param callback function that takes a list of e.g., Recipe or Item objects as parameter
  */
-export function getFromAPI<T extends Recipe[] | Item[] | Discount[] | Market[]>(route: API_ROUTE, callback: (json: T) => void): void {
+export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options: { callback?: (json: T[]) => void, formatObject?: { [key: string]: string | number }, body?: T}): void {
+    let url = API_URL + API_VERSION + API_ROUTES[route].url;
+    // replace placeholders in url, e.g. CITY
+    // please check the keys that can be replaced in constants.ts
+    if (options?.formatObject) {
+        for (const key in options?.formatObject) {
+            url = url.replace(key, options?.formatObject[key].toString());
+        }
+    }
+
+    const fetchOptions: RequestInit = {
+        method: API_ROUTES[route].method ?? 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    }
+
+    if (options?.body) {
+        fetchOptions.body = JSON.stringify(options?.body)
+    }
+
     // call fetch
-    fetch(getApiRoute(route))
+    fetch(url, fetchOptions)
         .then(response => response.json())
         .then(data => {
             console.debug(data)
-            callback(data)
+            if (typeof options?.callback !== 'undefined') {
+                options?.callback(data)
+            }
         })
         .catch(error => {
             console.error(error)
         })
 }
+
