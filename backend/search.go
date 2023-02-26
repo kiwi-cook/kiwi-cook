@@ -108,7 +108,7 @@ func search(searchQuery SearchQuery, client *TasteBuddyDatabase) (SearchResult, 
 
 // searchRecipe searches for a recipe by ID or by different parameters
 func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, error) {
-	var err error = errors.New("no recipe found")
+	var err error
 	var recipe Recipe = Recipe{}
 
 	// Check if recipe ID is given
