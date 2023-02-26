@@ -80,6 +80,10 @@ func main() {
 			app.HandleGetAllRecipes(context)
 		})
 
+		recipeRoutes.POST("/search", func(context *gin.Context) {
+			app.HandleSearchRecipes(context)
+		})
+
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
 			app.HandleGetRandomRecipe(context)
