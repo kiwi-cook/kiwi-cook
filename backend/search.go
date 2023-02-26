@@ -34,7 +34,6 @@ type SearchQuery struct {
 }
 
 type SearchResult struct {
-	Status string   `json:"status"`
 	Recipe []Recipe `json:"recipe,omitempty"`
 	Item   []Item   `json:"item,omitempty"`
 }
@@ -60,9 +59,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 
 // search searches for recipes and items by using goroutines
 func search(searchQuery SearchQuery, client *TasteBuddyDatabase) (SearchResult, error) {
-	var result SearchResult
-
-	result.Status = "ok"
+	var result SearchResult = SearchResult{}
 
 	var err error = nil
 
@@ -149,13 +146,15 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 			for _, tmpRecipe := range allRecipes {
 
 				// ... check if the name matches
-				if tmpRecipe.Name == recipeQuery.Name && checkName {
-					recipe = tmpRecipe
-					err = nil
-				} else if checkName {
-					log.Print("[searchRecipe] No match for recipe ", tmpRecipe.Name, " with nameQuery ", recipeQuery.Name)
-					err = errors.New("no recipe found")
-					continue
+				if checkName {
+					if tmpRecipe.Name == recipeQuery.Name {
+						recipe = tmpRecipe
+						err = nil
+					} else {
+						log.Print("[searchRecipe] No match for recipe ", tmpRecipe.Name, " with nameQuery ", recipeQuery.Name)
+						err = errors.New("no recipe found")
+						continue
+					}
 				}
 
 				// ... check if the items match
@@ -190,6 +189,8 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 						continue
 					}
 				}
+
+				break
 			}
 		}
 	}
