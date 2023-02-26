@@ -44,7 +44,8 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 
 	var searchQuery SearchQuery
 	if err := context.ShouldBindJSON(&searchQuery); err != nil {
-		BadRequestError(context, err.Error())
+		log.Print(err.Error())
+		ServerError(context, true)
 		return
 	}
 
