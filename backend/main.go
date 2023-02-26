@@ -80,10 +80,6 @@ func main() {
 			app.HandleGetAllRecipes(context)
 		})
 
-		recipeRoutes.POST("/search", func(context *gin.Context) {
-			app.HandleSearchRecipes(context)
-		})
-
 		// Get random recipe
 		recipeRoutes.GET("/random", func(context *gin.Context) {
 			app.HandleGetRandomRecipe(context)
@@ -149,6 +145,15 @@ func main() {
 		// Get all markets by city
 		marketRoutes.GET("/:city", func(context *gin.Context) {
 			app.HandleGetMarketsByCity(context)
+		})
+	}
+
+	// Search routes
+	searchRoutes := v1.Group("/search")
+	{
+		// Search
+		searchRoutes.POST("/", func(context *gin.Context) {
+			app.HandleSearch(context)
 		})
 	}
 

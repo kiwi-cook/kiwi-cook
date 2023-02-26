@@ -54,46 +54,6 @@ func (app *TasteBuddyApp) HandleGetAllRecipes(context *gin.Context) {
 	context.JSON(http.StatusOK, recipes)
 }
 
-// HandleSearchRecipes gets called by router
-// Calls getRecipesFromDB and handles the context
-func (app *TasteBuddyApp) HandleSearchRecipes(context *gin.Context) {
-
-	var searchQuery []struct {
-		Recipe struct {
-			Name  string `json:"name,omitempty"`
-			Type  string `json:"type,omitempty"`
-			Items struct {
-				Name    string `json:"item" binding:"required"`
-				ID      string `json:"id"`
-				Exclude bool   `json:"exclude"`
-			} `json:"items,omitempty"`
-		} `json:"recipe,omitempty"`
-	}
-
-	if err := context.ShouldBindJSON(&searchQuery); err != nil {
-		BadRequestError(context, err.Error())
-		return
-	}
-
-	// split search query
-	searchQuerySplit := strings.Split(searchQuery.Search, " ")
-
-	// create query
-	query := bson.M{}
-	for _, search := range searchQuerySplit {
-		query["$or"] = append(query["$or"].([]interface{}), bson.M{"name": bson.M{"$regex": search, "$options": "i"}}, bson.M{"author": bson.M{"$regex": search, "$options": "i"}}, bson.M{"description": bson.M{"$regex": search, "$options": "i"}}, bson.M{"tags": bson.M{"$regex": search, "$options": "i"}})
-	}
-
-	/* recipes, err := app.client.GetRecipesByQuery(query)
-	if err != nil {
-		log.Print(err)
-		ServerError(context, true)
-		return
-	}
-
-	context.JSON(http.StatusOK, recipes) */
-}
-
 func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
 	id := context.Param("id")
 
