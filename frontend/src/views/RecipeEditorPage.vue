@@ -9,7 +9,7 @@
         <ion-content :fullscreen="true" class="ion-padding">
             <ion-accordion-group expand="inset">
                 <template v-for="(recipe, recipeIndex) in recipes" :key="recipe._id + recipeIndex">
-                    <ion-accordion :value="recipe.name">
+                    <ion-accordion :value="recipeIndex.toString()">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ recipe.name }}</ion-label>
                         </ion-item>
