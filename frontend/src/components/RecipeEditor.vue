@@ -52,7 +52,13 @@
                                 <img :src="stepItem.item.imgUrl" />
                             </ion-thumbnail>
                             <ion-card-title color="primary">
-                                <ion-input v-model="stepItem.item.name" placeholder="Itemname" color="primary" />
+                                <drop-down-search v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)" :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
+                                    <template #item="{ filteredItem }">
+                                        <ion-label>
+                                            {{ filteredItem.name }} - {{ filteredItem._id }}
+                                        </ion-label>
+                                    </template>
+                                </drop-down-search>
                             </ion-card-title>
                             <ion-text color="tertiary">
                                 ID {{ stepItem.item._id }}
@@ -72,9 +78,12 @@
                             </ion-item>
 
                             <ion-item>
-                                <ion-select color="light" placeholder="Unit">
+                                <ion-select color="light" placeholder="Unit" v-model="stepItem.unit">
                                     <ion-select-option value="ml">ml</ion-select-option>
+                                    <ion-select-option value="l">l</ion-select-option>
                                     <ion-select-option value="g">g</ion-select-option>
+                                    <ion-select-option value="kg">kg</ion-select-option>
+                                    <ion-select-option value="pcs">pcs</ion-select-option>
                                 </ion-select>
                             </ion-item>
                         </ion-card-content>
@@ -86,14 +95,17 @@
         <ion-button fill="clear" @click="addStep(stepIndex)">Add step</ion-button>
     </template>
     <ion-button @click="saveRecipe()">Save recipe</ion-button>
+    <ion-button color="warning" @click="deleteRecipe()">Delete recipe</ion-button>
 </template>
 
 <script lang="ts">
 import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
-import { Recipe } from '@/api/types';
+import { Item, Recipe } from '@/api/types';
+import { useTasteBuddyStore } from '@/storage';
 import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonItem, IonLabel, IonSelect, IonSelectOption, IonText } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
+import DropDownSearch from './utility/DropDownSearch.vue';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -114,13 +126,31 @@ export default defineComponent({
         IonInput,
         IonSelect,
         IonSelectOption,
-        IonButton
+        IonButton,
+        DropDownSearch
     },
     setup(props) {
         const { recipe } = toRefs(props)
 
+        const store = useTasteBuddyStore();
+        const allItems = computed(() => store.state.items);
+
         const mutableRecipe = ref<Recipe>(recipe.value)
         const steps = computed(() => mutableRecipe.value.steps);
+
+        const saveRecipe = () => {
+            console.debug('Saving recipe ...', mutableRecipe.value.name)
+            getFromAPI(API_ROUTE.ADD_RECIPE, { body: mutableRecipe.value })
+        }
+
+        const deleteRecipe = () => {
+            console.debug('Deleting recipe ...', mutableRecipe.value.name)
+            if (!mutableRecipe.value._id) {
+                console.error('Cannot delete recipe without id')
+                return;
+            }
+            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id! }})
+        }
 
         const addStep = (stepIndex: number) => {
             steps.value.splice(stepIndex + 1, 0, {
@@ -141,14 +171,21 @@ export default defineComponent({
             });
         };
 
-        const saveRecipe = () => {
-            console.debug('Saving recipe ...', mutableRecipe.value)
-            getFromAPI(API_ROUTE.ADD_RECIPE, { body: mutableRecipe.value })
+        const addNewItem = (stepIndex: number, itemIndex: number, item: string) => {
+            steps.value[stepIndex].items[itemIndex].item = {
+                name: item,
+                type: '',
+                imgUrl: '',
+            };
         }
 
         return {
-            mutableRecipe, steps,
-            addStep, addItem, saveRecipe
+            // recipe
+            mutableRecipe, saveRecipe, deleteRecipe,
+            // steps
+            steps, addStep,
+            // items
+            allItems, addNewItem, addItem
         };
     },
 })
