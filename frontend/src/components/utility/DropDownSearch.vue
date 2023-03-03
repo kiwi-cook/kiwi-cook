@@ -90,6 +90,8 @@ export default defineComponent({
         }
 
         const addItem = () => {
+            showItemsList.value = false
+
             // emit the input value to the parent component and add the item
             ctx.emit('addItem', inputValue.value)
         }
