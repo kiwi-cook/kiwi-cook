@@ -5,27 +5,49 @@
                 <ion-card-title color="primary">
                     <ion-input v-model="mutableRecipe.name" color="primary" />
                 </ion-card-title>
-                <ion-text color="tertiary">
+                <ion-chip color="tertiary" v-if="mutableRecipe._id">
                     ID {{ mutableRecipe._id }}
-                </ion-text>
+                </ion-chip>
             </ion-card-header>
         </ion-card-header>
 
         <ion-card-content color="light">
             <ion-item>
                 <ion-label color="primary">Author</ion-label>
-                <ion-input color="light" v-model="mutableRecipe.author" />
+                <ion-input color="light" v-model.trim="mutableRecipe.author" />
             </ion-item>
 
             <ion-item>
-                <ion-label color="primary">Cooking time</ion-label>
-                <ion-input color="light" v-model.number="mutableRecipe.cookingTime" />
+                <ion-label color="primary">Cooking time (minutes)</ion-label>
+                <ion-input color="light" min="1" max="9999" type="number" v-model.number="mutableRecipe.cookingTime" />
             </ion-item>
 
             <ion-item>
                 <ion-label color="primary">Description</ion-label>
-                <ion-input color="light" v-model="mutableRecipe.description" />
+                <ion-input color="light" v-model.trim="mutableRecipe.description" />
             </ion-item>
+
+            <ion-item>
+                <ion-label color="primary">Image URL</ion-label>
+                <ion-input color="light" v-model="mutableRecipe.imgUrl" />
+            </ion-item>
+
+            <ion-item>
+                <!-- Tags -->
+                <ion-chip v-for="(tag, index) in mutableRecipe.tags" :key="index" color="light">
+                    <ion-label>{{ tag }}</ion-label>
+                    <ion-icon :icon="closeCircleOutline" @click="mutableRecipe.tags.splice(index, 1)" />
+                </ion-chip>
+                <!-- Add tag to the list -->
+                <ion-chip color="light">
+                    <ion-input placeholder="Add tag" @keyup.enter="$event => { mutableRecipe.tags.push($event.target.value.toLowerCase()); $event.target.value = ''} " />
+                </ion-chip>
+            </ion-item>
+
+            <!-- <ion-item>
+                <ion-label color="primary">Servings</ion-label>
+                <ion-input color="light" min="1" max="9999" type="number" v-model.number="mutableRecipe.servings" />
+            </ion-item> -->
         </ion-card-content>
     </ion-card>
 
@@ -40,7 +62,8 @@
 
             <ion-item>
                 <ion-label color="light">Description</ion-label>
-                <ion-input color="light" v-model="step.description" />
+                <ion-textarea color="light" placeholder="Type something here" :auto-grow="true"
+                    v-model.trim="step.description"></ion-textarea>
             </ion-item>
 
             <ion-card-content class="items-editor">
@@ -52,7 +75,9 @@
                                 <img :src="stepItem.item.imgUrl" />
                             </ion-thumbnail>
                             <ion-card-title color="primary">
-                                <drop-down-search v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)" :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
+                                <drop-down-search v-model="stepItem.item"
+                                    @add-item="addNewItem(stepIndex, itemIndex, $event)"
+                                    :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
                                     <template #item="{ filteredItem }">
                                         <ion-label>
                                             {{ filteredItem.name }} - {{ filteredItem._id }}
@@ -60,21 +85,22 @@
                                     </template>
                                 </drop-down-search>
                             </ion-card-title>
-                            <ion-text color="tertiary">
+                            <ion-chip color="tertiary" v-if="stepItem.item._id">
                                 ID {{ stepItem.item._id }}
-                            </ion-text>
+                            </ion-chip>
                         </ion-card-header>
 
                         <ion-card-content>
                             <ion-item>
-                                <ion-label color="light" position="stacked">URL</ion-label>
+                                <ion-label color="light" position="stacked">Image URL</ion-label>
                                 <ion-input color="light" :placeholder="`Image URL for ${stepItem.item.name}`"
-                                    v-model="stepItem.item.imgUrl" />
+                                    v-model.trim="stepItem.item.imgUrl" />
                             </ion-item>
 
                             <ion-item>
                                 <ion-label color="light" position="stacked">Amount</ion-label>
-                                <ion-input color="light" v-model.number="stepItem.amount" />
+                                <ion-input color="light" type="number" min="0" max="9999"
+                                    v-model.number="stepItem.amount" />
                             </ion-item>
 
                             <ion-item>
@@ -86,6 +112,13 @@
                                     <ion-select-option value="pcs">pcs</ion-select-option>
                                 </ion-select>
                             </ion-item>
+
+                            <ion-item>
+                                <ion-select color="light" placeholder="Type" v-model="stepItem.item.type">
+                                    <ion-select-option value="ingredient">Ingredient</ion-select-option>
+                                    <ion-select-option value="tool">Tool</ion-select-option>
+                                </ion-select>
+                            </ion-item>
                         </ion-card-content>
                     </ion-card>
                 </template>
@@ -94,7 +127,7 @@
         </ion-card>
         <ion-button fill="clear" @click="addStep(stepIndex)">Add step</ion-button>
     </template>
-    <ion-button @click="saveRecipe()">Save recipe</ion-button>
+    <ion-button @click="saveRecipe()">{{ mutableRecipe._id ? 'Update' : 'Add' }} recipe</ion-button>
     <ion-button color="warning" @click="deleteRecipe()">Delete recipe</ion-button>
 </template>
 
@@ -103,8 +136,9 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Item, Recipe } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonItem, IonLabel, IonSelect, IonSelectOption, IonText } from '@ionic/vue';
+import { IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
+import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from './utility/DropDownSearch.vue';
 
 export default defineComponent({
@@ -116,17 +150,7 @@ export default defineComponent({
         },
     },
     components: {
-        IonText,
-        IonCard,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardContent,
-        IonItem,
-        IonLabel,
-        IonInput,
-        IonSelect,
-        IonSelectOption,
-        IonButton,
+        IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
         DropDownSearch
     },
     setup(props) {
@@ -149,7 +173,7 @@ export default defineComponent({
                 console.error('Cannot delete recipe without id')
                 return;
             }
-            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id! }})
+            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id! } })
         }
 
         const addStep = (stepIndex: number) => {
@@ -174,7 +198,7 @@ export default defineComponent({
         const addNewItem = (stepIndex: number, itemIndex: number, item: string) => {
             steps.value[stepIndex].items[itemIndex].item = {
                 name: item,
-                type: '',
+                type: 'ingredient',
                 imgUrl: '',
             };
         }
@@ -185,7 +209,9 @@ export default defineComponent({
             // steps
             steps, addStep,
             // items
-            allItems, addNewItem, addItem
+            allItems, addNewItem, addItem,
+            // icons
+            closeCircleOutline,
         };
     },
 })
