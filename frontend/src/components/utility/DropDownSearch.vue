@@ -52,6 +52,7 @@ export default defineComponent({
     components: {
         IonLabel, IonInput, IonList, IonItem, IonButton
     },
+    emits: ['update:modelValue', 'addItem'],
     setup(props: { modelValue: any, customMapper: any, items: any[], maxItems: number }, ctx: { emit: any }) {
         const { modelValue, customMapper, items, maxItems } = toRefs(props)
 
