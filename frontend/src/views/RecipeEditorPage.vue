@@ -29,18 +29,13 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { dummyRecipe, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/RecipeEditor.vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonPage,
-        IonHeader,
-        IonToolbar,
-        IonTitle,
-        IonContent,
-        IonAccordion, IonAccordionGroup, IonItem, IonLabel,
+        IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton,
         RecipeEditor
     },
     setup() {
