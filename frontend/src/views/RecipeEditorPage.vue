@@ -3,17 +3,22 @@
         <ion-header>
             <ion-toolbar color="primary">
                 <ion-title color="light">Editor</ion-title>
-                <ion-buttons slot="primary">
-                    <ion-button>
-                    </ion-button>
-                </ion-buttons>
             </ion-toolbar>
         </ion-header>
 
         <ion-content :fullscreen="true" class="ion-padding">
-            <template v-for="(recipe, recipeIndex) in recipes" :key="recipe._id  + recipeIndex">
-                <RecipeEditor :recipe="recipe" />
-            </template>
+            <ion-accordion-group expand="inset">
+                <template v-for="(recipe, recipeIndex) in recipes" :key="recipe._id + recipeIndex">
+                    <ion-accordion :value="recipe.name">
+                        <ion-item slot="header" color="primary">
+                            <ion-label color="light">{{ recipe.name }}</ion-label>
+                        </ion-item>
+                        <div slot="content">
+                            <RecipeEditor :recipe="recipe"  />
+                        </div>
+                    </ion-accordion>
+                </template>
+            </ion-accordion-group>
             <ion-button @click="addNewRecipe()">Add new Recipe</ion-button>
         </ion-content>
     </ion-page>
@@ -24,7 +29,7 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { dummyRecipe, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/RecipeEditor.vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonContent } from '@ionic/vue';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { defineComponent, ref } from 'vue';
 
 export default defineComponent({
@@ -34,9 +39,8 @@ export default defineComponent({
         IonHeader,
         IonToolbar,
         IonTitle,
-        IonButtons,
-        IonButton,
         IonContent,
+        IonAccordion, IonAccordionGroup, IonItem, IonLabel,
         RecipeEditor
     },
     setup() {
