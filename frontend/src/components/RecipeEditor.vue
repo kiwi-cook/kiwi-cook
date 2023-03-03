@@ -75,7 +75,7 @@
                                 <img :src="stepItem.item.imgUrl" />
                             </ion-thumbnail>
                             <ion-card-title color="primary">
-                                <drop-down-search v-model="stepItem.item"
+                                <DropDownSearch v-model="stepItem.item"
                                     @add-item="addNewItem(stepIndex, itemIndex, $event)"
                                     :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
                                     <template #item="{ filteredItem }">
@@ -83,7 +83,7 @@
                                             {{ filteredItem.name }} - {{ filteredItem._id }}
                                         </ion-label>
                                     </template>
-                                </drop-down-search>
+                                </DropDownSearch>
                             </ion-card-title>
                             <ion-chip color="tertiary" v-if="stepItem.item._id">
                                 ID {{ stepItem.item._id }}
@@ -136,7 +136,7 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Item, Recipe } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
+import { IonIcon, IonThumbnail, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from './utility/DropDownSearch.vue';
@@ -150,7 +150,7 @@ export default defineComponent({
         },
     },
     components: {
-        IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
+        IonIcon, IonThumbnail, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
         DropDownSearch
     },
     setup(props) {
