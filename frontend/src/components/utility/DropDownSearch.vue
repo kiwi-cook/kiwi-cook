@@ -75,7 +75,7 @@ export default defineComponent({
                 .slice(0, maxItems.value)
 
             // update the input value
-            inputValue.value = input
+            inputValue.value = input.trim()
             showItemsList.value = inputValue.value !== ''
             showAddItemButton.value = showItemsList.value && filteredItems.value.length === 0
         }
