@@ -115,6 +115,28 @@ func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
 	Success(context, "Added recipe")
 }
 
+// HandleDeleteRecipeById gets called by router
+// Calls DeleteRecipeById and handles the context
+func (app *TasteBuddyApp) HandleDeleteRecipeById(context *gin.Context) {
+	id := context.Param("id")
+
+	// convert id to primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	// delete recipe
+	if _, err := app.client.DeleteRecipeById(objectID); err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+	Success(context, "Deleted recipe "+id)
+}
+
 // HandleFindRecipesByItemNames gets called by router
 // Calls GetRecipesByItemNames and handles the context
 func (app *TasteBuddyApp) HandleFindRecipesByItemNames(context *gin.Context) {
@@ -193,8 +215,9 @@ func (client *TasteBuddyDatabase) GetRecipesCollection() *mongo.Collection {
 // GetAllRecipes gets all recipes from database
 func (client *TasteBuddyDatabase) GetAllRecipes() ([]Recipe, error) {
 	ctx := DefaultContext()
-	// try to get collection of recipes
-	cursor, err := client.GetRecipesCollection().Find(ctx, bson.M{})
+
+	// get all recipes from database that are not deleted
+	cursor, err := client.GetRecipesCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
 	if err != nil {
 		log.Print(err)
 		return []Recipe{}, err
@@ -290,6 +313,20 @@ func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) error {
 	}
 
 	return nil
+}
+
+func (client *TasteBuddyDatabase) DeleteRecipeById(id primitive.ObjectID) (primitive.ObjectID, error) {
+	ctx := DefaultContext()
+	var err error
+
+	// delete recipe by setting deleted to true
+	_, err = client.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
+	if err != nil {
+		log.Print(err)
+		return id, err
+	}
+
+	return id, nil
 }
 
 func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {

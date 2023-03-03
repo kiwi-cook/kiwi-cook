@@ -99,6 +99,11 @@ func main() {
 		recipeRoutes.POST("/", func(context *gin.Context) {
 			app.HandleAddRecipe(context)
 		})
+
+		// Delete recipe by id
+		recipeRoutes.DELETE("/:id", func(context *gin.Context) {
+			app.HandleDeleteRecipeById(context)
+		})
 	}
 
 	// Items
