@@ -8,7 +8,7 @@
                             <img :src="mutableRecipe.imgUrl" />
                         </ion-avatar>
                     </ion-col>
-                    <ion-col size="2">
+                    <ion-col size="3">
                         <ion-card-title>
                             <ion-input v-model="mutableRecipe.name" :maxlength="40" color="light" />
                         </ion-card-title>
@@ -44,14 +44,14 @@
                 <ion-input color="light" v-model="mutableRecipe.imgUrl" />
             </ion-item>
 
-            <ion-item>
+            <ion-item class="tags-editor">
                 <!-- Tags -->
-                <ion-chip v-for="(tag, index) in mutableRecipe.tags" :key="index" color="light">
+                <ion-chip v-for="(tag, index) in mutableRecipe.tags" :key="index" color="light" class="tag">
                     <ion-label>{{ tag }}</ion-label>
                     <ion-icon :icon="closeCircleOutline" @click="mutableRecipe.tags.splice(index, 1)" />
                 </ion-chip>
                 <!-- Add tag to the list -->
-                <ion-chip color="light">
+                <ion-chip color="light" class="tag">
                     <ion-input placeholder="Add tag"
                         @keyup.enter="$event => { mutableRecipe.tags.push($event.target.value.toLowerCase()); $event.target.value = '' }" />
                 </ion-chip>
@@ -118,7 +118,7 @@
                                             <ion-input color="light" type="number" inputmode="numeric" min="0" max="9999"
                                                 v-model.number="stepItem.amount" />
                                         </ion-col>
-                                        <ion-col>
+                                        <ion-col size="8">
                                             <ion-select placeholder="Unit" v-model="stepItem.unit">
                                                 <ion-select-option value="ml">ml</ion-select-option>
                                                 <ion-select-option value="l">l</ion-select-option>
@@ -236,6 +236,7 @@ export default defineComponent({
 </script>
 
 <style>
+.recipe-editor,
 .step-editor,
 .item-editor {
     /* nice shadow with light background and round corners */
@@ -250,18 +251,39 @@ ion-avatar.recipe-img {
     --size: 140px;
 }
 
+.tags-editor {
+    margin: 10px;
+    max-width: fit-content;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
 .step-editor {
     margin: 10px;
+    max-width: fit-content;
 }
 
 .items-editor {
     margin: 10px;
     max-width: fit-content;
     display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .item-editor {
     margin: 10px;
     max-width: fit-content;
+}
+
+@media screen and (max-width: 600px) {
+    .tags-editor {
+        flex-direction: column;
+    }
+
+    .items-editor {
+        flex-direction: column;
+    }
 }
 </style>
