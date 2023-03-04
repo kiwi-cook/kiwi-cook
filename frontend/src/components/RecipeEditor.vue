@@ -1,30 +1,42 @@
 <template>
     <ion-card class="recipe-editor">
         <ion-card-header>
-            <ion-card-header>
-                <ion-card-title color="primary">
-                    <ion-input v-model="mutableRecipe.name" color="primary" />
-                </ion-card-title>
-                <ion-chip color="tertiary" v-if="mutableRecipe._id">
-                    ID {{ mutableRecipe._id }}
-                </ion-chip>
-            </ion-card-header>
+            <ion-grid>
+                <ion-row>
+                    <ion-col size="auto">
+                        <ion-avatar v-if="mutableRecipe.imgUrl" class="recipe-img">
+                            <img :src="mutableRecipe.imgUrl" />
+                        </ion-avatar>
+                    </ion-col>
+                    <ion-col size="2">
+                        <ion-card-title>
+                            <ion-input v-model="mutableRecipe.name" :maxlength="40" color="light" />
+                        </ion-card-title>
+                    </ion-col>
+                    <ion-col size="auto">
+                        <ion-chip color="light" v-if="mutableRecipe._id">
+                            {{ mutableRecipe._id }}
+                        </ion-chip>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
         </ion-card-header>
 
-        <ion-card-content color="light">
+        <ion-card-content>
+            <ion-item>
+                <ion-label color="primary">Description</ion-label>
+                <ion-input color="light" placeholder="e.g. The best recipe in Germany"
+                    v-model.trim="mutableRecipe.description" />
+            </ion-item>
+
             <ion-item>
                 <ion-label color="primary">Author</ion-label>
-                <ion-input color="light" v-model.trim="mutableRecipe.author" />
+                <ion-input color="light" placeholder="e.g. Vasilij & Josef" v-model.trim="mutableRecipe.author" />
             </ion-item>
 
             <ion-item>
                 <ion-label color="primary">Cooking time (minutes)</ion-label>
                 <ion-input color="light" min="1" max="9999" type="number" v-model.number="mutableRecipe.cookingTime" />
-            </ion-item>
-
-            <ion-item>
-                <ion-label color="primary">Description</ion-label>
-                <ion-input color="light" v-model.trim="mutableRecipe.description" />
             </ion-item>
 
             <ion-item>
@@ -62,9 +74,8 @@
             </ion-card-header>
 
             <ion-item>
-                <ion-label color="light">Description</ion-label>
-                <ion-textarea color="light" placeholder="Type something here" :auto-grow="true"
-                    v-model.trim="step.description"></ion-textarea>
+                <ion-label color="primary">Description</ion-label>
+                <ion-textarea color="light" placeholder="e.g. Mix the ingredients together" :auto-grow="true" v-model.trim="step.description" />
             </ion-item>
 
             <ion-card-content class="items-editor">
@@ -82,7 +93,7 @@
                             </ion-item>
                             <ion-card-title color="primary">
                                 <DropDownSearch v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)"
-                                    :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
+                                    :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Item name">
                                     <template #item="{ filteredItem }">
                                         <ion-label color="light">
                                             {{ filteredItem.name }} - {{ filteredItem._id }}
@@ -96,24 +107,28 @@
                         <ion-card-content>
                             <ion-item>
                                 <ion-label color="light" position="stacked">Image URL</ion-label>
-                                <ion-input color="light" :placeholder="`Image URL for ${stepItem.item.name}`"
+                                <ion-input color="light" :placeholder="`e.g. https://source.unsplash.com/`"
                                     v-model.trim="stepItem.item.imgUrl" />
                             </ion-item>
 
                             <ion-item>
-                                <ion-label color="light" position="stacked">Amount</ion-label>
-                                <ion-input color="light" type="number" min="0" max="9999"
-                                    v-model.number="stepItem.amount" />
-                            </ion-item>
-
-                            <ion-item>
-                                <ion-select color="light" placeholder="Unit" v-model="stepItem.unit">
-                                    <ion-select-option value="ml">ml</ion-select-option>
-                                    <ion-select-option value="l">l</ion-select-option>
-                                    <ion-select-option value="g">g</ion-select-option>
-                                    <ion-select-option value="kg">kg</ion-select-option>
-                                    <ion-select-option value="pcs">pcs</ion-select-option>
-                                </ion-select>
+                                <ion-grid>
+                                    <ion-row>
+                                        <ion-col size="auto">
+                                            <ion-input color="light" type="number" inputmode="numeric" min="0" max="9999"
+                                                v-model.number="stepItem.amount" />
+                                        </ion-col>
+                                        <ion-col>
+                                            <ion-select placeholder="Unit" v-model="stepItem.unit">
+                                                <ion-select-option value="ml">ml</ion-select-option>
+                                                <ion-select-option value="l">l</ion-select-option>
+                                                <ion-select-option value="g">g</ion-select-option>
+                                                <ion-select-option value="kg">kg</ion-select-option>
+                                                <ion-select-option value="pcs">pcs</ion-select-option>
+                                            </ion-select>
+                                        </ion-col>
+                                    </ion-row>
+                                </ion-grid>
                             </ion-item>
 
                             <ion-item>
@@ -139,7 +154,7 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Item, Recipe } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
+import { IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from './utility/DropDownSearch.vue';
@@ -153,7 +168,7 @@ export default defineComponent({
         },
     },
     components: {
-        IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
+        IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
         DropDownSearch
     },
     setup(props) {
@@ -188,8 +203,8 @@ export default defineComponent({
 
         const addItem = (stepIndex: number) => {
             steps.value[stepIndex].items.push({
-                amount: 0,
-                unit: '',
+                amount: 1,
+                unit: 'pcs',
                 item: {
                     name: '',
                     type: '',
@@ -229,6 +244,10 @@ export default defineComponent({
 
 .recipe-editor {
     margin: 10px;
+}
+
+ion-avatar.recipe-img {
+    --size: 140px;
 }
 
 .step-editor {
