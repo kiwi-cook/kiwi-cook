@@ -40,7 +40,8 @@
                 </ion-chip>
                 <!-- Add tag to the list -->
                 <ion-chip color="light">
-                    <ion-input placeholder="Add tag" @keyup.enter="$event => { mutableRecipe.tags.push($event.target.value.toLowerCase()); $event.target.value = ''} " />
+                    <ion-input placeholder="Add tag"
+                        @keyup.enter="$event => { mutableRecipe.tags.push($event.target.value.toLowerCase()); $event.target.value = '' }" />
                 </ion-chip>
             </ion-item>
 
@@ -71,23 +72,25 @@
                 <template v-for="(stepItem, itemIndex) in step.items" :key="stepIndex + ' - ' + itemIndex">
                     <ion-card class="item-editor">
                         <ion-card-header>
-                            <ion-thumbnail v-if="stepItem.item.imgUrl">
-                                <img :src="stepItem.item.imgUrl" />
-                            </ion-thumbnail>
+                            <ion-item lines="none">
+                                <ion-avatar v-if="stepItem.item.imgUrl">
+                                    <img :src="stepItem.item.imgUrl" />
+                                </ion-avatar>
+                                <ion-chip color="light" v-if="stepItem.item._id">
+                                    {{ stepItem.item._id }}
+                                </ion-chip>
+                            </ion-item>
                             <ion-card-title color="primary">
-                                <DropDownSearch v-model="stepItem.item"
-                                    @add-item="addNewItem(stepIndex, itemIndex, $event)"
+                                <DropDownSearch v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)"
                                     :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Itemname">
                                     <template #item="{ filteredItem }">
-                                        <ion-label>
+                                        <ion-label color="light">
                                             {{ filteredItem.name }} - {{ filteredItem._id }}
                                         </ion-label>
                                     </template>
                                 </DropDownSearch>
                             </ion-card-title>
-                            <ion-chip color="tertiary" v-if="stepItem.item._id">
-                                ID {{ stepItem.item._id }}
-                            </ion-chip>
+
                         </ion-card-header>
 
                         <ion-card-content>
@@ -136,7 +139,7 @@ import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
 import { Item, Recipe } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonIcon, IonThumbnail, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
+import { IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from './utility/DropDownSearch.vue';
@@ -150,7 +153,7 @@ export default defineComponent({
         },
     },
     components: {
-        IonIcon, IonThumbnail, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
+        IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
         DropDownSearch
     },
     setup(props) {
