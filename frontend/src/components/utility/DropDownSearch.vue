@@ -1,5 +1,5 @@
 <template>
-    <ion-input color="light" :value="inputValue" @input="handleInput($event)" />
+    <ion-input color="light" :value="inputValue" @input="handleInput($event)" :placeholder="placeholder"/>
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
