@@ -6,15 +6,22 @@
             </ion-toolbar>
         </ion-header>
 
+        <ion-toolbar color="primary">
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleRecipeFilter($event)" />
+        </ion-toolbar>
+
         <ion-content :fullscreen="true" class="ion-padding">
+            <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+                <ion-refresher-content />
+            </ion-refresher>
             <ion-accordion-group expand="inset">
-                <template v-for="(recipe, recipeIndex) in recipes" :key="recipe._id + recipeIndex">
+                <template v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipe._id + recipeIndex">
                     <ion-accordion :value="recipeIndex.toString()">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ recipe.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <RecipeEditor :recipe="recipe"  />
+                            <RecipeEditor :recipe="recipe" />
                         </div>
                     </ion-accordion>
                 </template>
@@ -25,35 +32,55 @@
 </template>
 
 <script lang="ts">
-import { getFromAPI } from '@/api';
-import { API_ROUTE } from '@/api/constants';
-import { dummyRecipe, Recipe } from '@/api/types';
+import { emptyRecipe, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/RecipeEditor.vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton } from '@ionic/vue';
-import { defineComponent, ref } from 'vue';
+import { useTasteBuddyStore } from '@/storage';
+import { IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton } from '@ionic/vue';
+import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton,
+        IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton,
         RecipeEditor
     },
     setup() {
-        getFromAPI(API_ROUTE.GET_RECIPES, {
-            callback: (data: Recipe[]) => {
-                recipes.value = data
-            }
+        const store = useTasteBuddyStore()
+        const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes)
+        const filteredRecipes = ref<Recipe[]>(recipes.value)
+        
+        const handleRefresh = async (event: any) => {
+            store.dispatch('fetchRecipes').then(() => {
+                // set timeout to avoid sus behaviour :)
+                setTimeout(() => {
+                    // 'complete' tells the refresher to close itself
+                    event.detail.complete()
+                }, 1700)
+            })
+        }
+
+        watch(recipes, () => {
+            filteredRecipes.value = recipes.value
         })
 
-        const recipes = ref<Recipe[]>([])
+        const handleRecipeFilter = (event: any) => {
+            const query: string = event.target.value.toLowerCase().trim();
+            if (query === "") {
+                filteredRecipes.value = recipes.value
+                return
+            }
+
+            filteredRecipes.value = recipes.value.filter(recipe => JSON.stringify(recipe).toLowerCase().includes(query))
+        }
 
         const addNewRecipe = () => {
-            recipes.value.push(dummyRecipe)
+            recipes.value.push(emptyRecipe)
         }
 
         return {
-            addNewRecipe,
-            recipes
+            handleRefresh,
+            handleRecipeFilter,
+            filteredRecipes, addNewRecipe,
         };
     }
 })
