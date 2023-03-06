@@ -23,28 +23,28 @@
         </ion-card-header>
 
         <ion-card-content>
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Description</ion-label>
                 <ion-input color="light" placeholder="e.g. The best recipe in Germany"
                     v-model.trim="mutableRecipe.description" />
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Author</ion-label>
                 <ion-input color="light" placeholder="e.g. Vasilij & Josef" v-model.trim="mutableRecipe.author" />
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Cooking time (minutes)</ion-label>
                 <ion-input color="light" min="1" max="9999" type="number" v-model.number="mutableRecipe.cookingTime" />
             </ion-item>
 
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Image URL</ion-label>
                 <ion-input color="light" v-model="mutableRecipe.imgUrl" />
             </ion-item>
 
-            <ion-item class="tags-editor">
+            <ion-item lines="none" class="tags-editor">
                 <!-- Tags -->
                 <ion-chip v-for="(tag, index) in mutableRecipe.tags" :key="index" color="light" class="tag">
                     <ion-label>{{ tag }}</ion-label>
@@ -66,7 +66,7 @@
 
     <ion-card>
         <ion-card-content>
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Steps from description</ion-label>
                 <ion-textarea color="light" @keyup.enter="addStepsFromDescription($event.target.value)" />
             </ion-item>
@@ -79,17 +79,23 @@
 
         <ion-card class="step-editor">
             <ion-card-header>
-                <ion-card-title color="primary">Step {{ stepIndex + 1 }}</ion-card-title>
+                <ion-item lines="none">
+                    <ion-card-title color="primary">Step {{ stepIndex + 1 }}</ion-card-title>
+                    <ion-button fill="solid" color="danger" @click="removeStep(stepIndex)">
+                        Remove step
+                    </ion-button>
+                </ion-item>
             </ion-card-header>
 
-            <ion-item>
+            <ion-item lines="none">
                 <ion-label color="primary">Description</ion-label>
-                <ion-textarea color="light" placeholder="e.g. Mix the ingredients together" :auto-grow="true" v-model.trim="step.description" @keyup.enter="addItemsFromDescription(stepIndex)" />
+                <ion-textarea color="light" placeholder="e.g. Mix the ingredients together" :auto-grow="true"
+                    v-model.trim="step.description" @keyup.enter="addItemsFromDescription(stepIndex)" />
             </ion-item>
 
             <ion-card-content class="items-editor">
                 <!-- Items -->
-                <template v-for="(stepItem, itemIndex) in step.items" :key="stepIndex + ' - ' + itemIndex">
+                <template v-for="(stepItem, itemIndex) in step.items" :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
                     <ion-card class="item-editor">
                         <ion-card-header>
                             <ion-item lines="none">
@@ -101,26 +107,38 @@
                                 </ion-chip>
                             </ion-item>
                             <ion-card-title color="primary">
-                                <DropDownSearch v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)"
-                                    :custom-mapper="(item: Item) => item.name" :items="allItems" placeholder="Item name">
-                                    <template #item="{ filteredItem }">
-                                        <ion-label color="light">
-                                            {{ filteredItem.name }} - {{ filteredItem._id }}
-                                        </ion-label>
-                                    </template>
-                                </DropDownSearch>
+                                <ion-item lines="none">
+                                    <div slot="start">
+                                        <ion-label color="light" position="stacked">Item</ion-label>
+                                        <DropDownSearch v-model="stepItem.item"
+                                            @add-item="addNewItem(stepIndex, itemIndex, $event)"
+                                            :custom-mapper="(item: Item) => item.name" :items="allItems"
+                                            placeholder="e.g. Baking powder">
+                                            <template #item="{ filteredItem }">
+                                                <ion-label color="light">
+                                                    {{ filteredItem.name }} - {{ filteredItem._id }}
+                                                </ion-label>
+                                            </template>
+                                        </DropDownSearch>
+                                    </div>
+                                    <div slot="end">
+                                        <ion-button fill="solid" color="danger" @click="removeItem(stepIndex, itemIndex)">
+                                            Remove item
+                                        </ion-button>
+                                    </div>
+                                </ion-item>
                             </ion-card-title>
 
                         </ion-card-header>
 
                         <ion-card-content>
-                            <ion-item>
+                            <ion-item lines="none">
                                 <ion-label color="light" position="stacked">Image URL</ion-label>
                                 <ion-input color="light" :placeholder="`e.g. https://source.unsplash.com/`"
                                     v-model.trim="stepItem.item.imgUrl" />
                             </ion-item>
 
-                            <ion-item>
+                            <ion-item lines="none">
                                 <ion-grid>
                                     <ion-row>
                                         <ion-col size="auto">
@@ -140,7 +158,7 @@
                                 </ion-grid>
                             </ion-item>
 
-                            <ion-item>
+                            <ion-item lines="none">
                                 <ion-select color="light" placeholder="Type" v-model="stepItem.item.type">
                                     <ion-select-option value="ingredient">Ingredient</ion-select-option>
                                     <ion-select-option value="tool">Tool</ion-select-option>
@@ -154,8 +172,10 @@
         </ion-card>
         <ion-button fill="clear" @click="addStep(stepIndex)">Add step</ion-button>
     </template>
-    <ion-button @click="saveRecipe()">{{ mutableRecipe._id ? 'Update' : 'Add' }} recipe</ion-button>
-    <ion-button color="warning" @click="deleteRecipe()">Delete recipe</ion-button>
+    <ion-item>
+        <ion-button @click="saveRecipe()">{{ mutableRecipe._id ? 'Update' : 'Save' }} recipe</ion-button>
+        <ion-button color="danger" fill="solid" @click="removeRecipe()">{{ mutableRecipe._id ? 'Delete' : 'Remove' }} recipe</ion-button>
+    </ion-item>
 </template>
 
 <script lang="ts">
@@ -182,7 +202,8 @@ export default defineComponent({
         IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip,
         DropDownSearch
     },
-    setup(props) {
+    emits: ['remove'],
+    setup(props, ctx) {
         const { recipe } = toRefs(props)
 
         const store = useTasteBuddyStore();
@@ -196,13 +217,14 @@ export default defineComponent({
             getFromAPI(API_ROUTE.ADD_RECIPE, { body: mutableRecipe.value })
         }
 
-        const deleteRecipe = () => {
+        const removeRecipe = () => {
             console.debug('Deleting recipe ...', mutableRecipe.value.name)
-            if (typeof mutableRecipe.value._id === 'undefined') {
-                console.error('Cannot delete recipe without id')
-                return;
+            if (typeof mutableRecipe.value._id !== 'undefined') {
+                // delete recipe from API
+                getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id } })
             }
-            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id } })
+            // remove recipe from parent
+            ctx.emit('remove')
         }
 
         const addStep = (stepIndex: number) => {
@@ -210,6 +232,10 @@ export default defineComponent({
                 description: '',
                 items: [],
             });
+        };
+
+        const removeStep = (stepIndex: number) => {
+            steps.value.splice(stepIndex, 1);
         };
 
         const addItem = (stepIndex: number) => {
@@ -222,6 +248,10 @@ export default defineComponent({
                     imgUrl: '',
                 },
             });
+        };
+
+        const removeItem = (stepIndex: number, itemIndex: number) => {
+            steps.value[stepIndex].items.splice(itemIndex, 1);
         };
 
         const addNewItem = (stepIndex: number, itemIndex: number, item: string) => {
@@ -243,11 +273,11 @@ export default defineComponent({
 
         return {
             // recipe
-            mutableRecipe, saveRecipe, deleteRecipe,
+            mutableRecipe, saveRecipe, removeRecipe,
             // steps
-            steps, addStep, addStepsFromDescription,
+            steps, addStep, removeStep, addStepsFromDescription,
             // items
-            allItems, addNewItem, addItem, addItemsFromDescription,
+            allItems, addNewItem, addItem, removeItem, addItemsFromDescription,
             // icons
             closeCircleOutline,
         };
@@ -255,10 +285,8 @@ export default defineComponent({
 })
 </script>
 
-<style>
-.recipe-editor,
-.step-editor,
-.item-editor {
+<style scoped>
+ion-card {
     /* nice shadow with light background and round corners */
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.19);
 }
@@ -305,5 +333,10 @@ ion-avatar.recipe-img {
     .items-editor {
         flex-direction: column;
     }
+}
+
+ion-button {
+    margin-left: 10px;
+    margin-right: 10px;
 }
 </style>

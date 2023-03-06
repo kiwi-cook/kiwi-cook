@@ -11,7 +11,7 @@
         </ion-toolbar>
 
         <ion-content :fullscreen="true" class="ion-padding">
-            <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+            <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
                 <ion-refresher-content />
             </ion-refresher>
             <ion-accordion-group expand="inset">
@@ -21,7 +21,7 @@
                             <ion-label color="light">{{ recipe.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <RecipeEditor :recipe="recipe" />
+                            <RecipeEditor :recipe="recipe" @remove="removeRecipe(recipeIndex)"/>
                         </div>
                     </ion-accordion>
                 </template>
@@ -77,10 +77,14 @@ export default defineComponent({
             recipes.value.push(emptyRecipe)
         }
 
+        const removeRecipe = (index: number) => {
+            recipes.value.splice(index, 1)
+        }
+
         return {
             handleRefresh,
             handleRecipeFilter,
-            filteredRecipes, addNewRecipe,
+            filteredRecipes, addNewRecipe, removeRecipe,
         };
     }
 })
