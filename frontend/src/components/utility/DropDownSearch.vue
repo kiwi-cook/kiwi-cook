@@ -1,5 +1,6 @@
 <template>
-    <ion-input color="light" :value="inputValue" @input="handleInput($event)" :placeholder="placeholder"/>
+    <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :value="inputValue" @input="handleInput($event)"
+        @keyup.enter="addItem()" :placeholder="placeholder" />
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
@@ -13,13 +14,13 @@
         </template>
     </ion-list>
 
-    <ion-button v-if="showAddItemButton" @click="addItem()">
+    <ion-button v-if="isTemporaryInput" @click="addItem()">
         Add new item
     </ion-button>
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, ref, toRefs } from 'vue';
+import { defineComponent, Ref, ref, toRefs, watch } from 'vue';
 import { IonLabel, IonInput, IonList, IonItem, IonButton } from '@ionic/vue';
 
 export default defineComponent({
@@ -57,13 +58,17 @@ export default defineComponent({
         const { modelValue, customMapper, items, maxItems } = toRefs(props)
 
         const inputValue: Ref<string> = ref(customMapper.value(modelValue.value))
+        // update the input value when the value coming from the parent changes
+        watch(modelValue, () => {
+            inputValue.value = customMapper.value(modelValue.value)
+        })
         const filteredItems: Ref<any[]> = ref(items.value.slice(0, maxItems.value))
 
         // show the items list only if the input value is not empty
         const showItemsList: Ref<boolean> = ref(false)
 
-        // show the add item button only if the input value is not empty and the items list is empty
-        const showAddItemButton: Ref<boolean> = ref(false)
+        // define if the input is temporary or not
+        const isTemporaryInput: Ref<boolean> = ref(false)
 
         const handleInput = (event: { target: { value: string; }; }) => {
             const input = event.target.value
@@ -78,12 +83,13 @@ export default defineComponent({
             // update the input value
             inputValue.value = input.trim()
             showItemsList.value = inputValue.value !== ''
-            showAddItemButton.value = showItemsList.value && filteredItems.value.length === 0
+            isTemporaryInput.value = inputValue.value !== ''
         }
 
         const selectItem = (selectedItem: any) => {
             inputValue.value = customMapper.value(selectedItem)
             showItemsList.value = false
+            isTemporaryInput.value = false
 
             // v-model
             // emit the selected item to the parent component and update the item
@@ -92,6 +98,7 @@ export default defineComponent({
 
         const addItem = () => {
             showItemsList.value = false
+            isTemporaryInput.value = false
 
             // emit the input value to the parent component and add the item
             ctx.emit('addItem', inputValue.value)
@@ -100,7 +107,7 @@ export default defineComponent({
         return {
             inputValue, handleInput,
             filteredItems, showItemsList, selectItem,
-            showAddItemButton, addItem
+            isTemporaryInput, addItem
         }
     },
 })
