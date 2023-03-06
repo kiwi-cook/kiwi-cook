@@ -64,6 +64,15 @@
         </ion-card-content>
     </ion-card>
 
+    <ion-card>
+        <ion-card-content>
+            <ion-item>
+                <ion-label color="primary">Steps from description</ion-label>
+                <ion-textarea color="light" @keyup.enter="addStepsFromDescription($event.target.value)" />
+            </ion-item>
+        </ion-card-content>
+    </ion-card>
+
     <!-- Steps -->
     <ion-button fill="clear" @click="addStep(-1)">Add step</ion-button>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
@@ -75,7 +84,7 @@
 
             <ion-item>
                 <ion-label color="primary">Description</ion-label>
-                <ion-textarea color="light" placeholder="e.g. Mix the ingredients together" :auto-grow="true" v-model.trim="step.description" />
+                <ion-textarea color="light" placeholder="e.g. Mix the ingredients together" :auto-grow="true" v-model.trim="step.description" @keyup.enter="addItemsFromDescription(stepIndex)" />
             </ion-item>
 
             <ion-card-content class="items-editor">
@@ -152,12 +161,14 @@
 <script lang="ts">
 import { getFromAPI } from '@/api';
 import { API_ROUTE } from '@/api/constants';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Item, Recipe } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
 import { IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from './utility/DropDownSearch.vue';
+import { descriptionToItems, descriptionToSteps } from '@/utility/recipeParser';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -187,11 +198,11 @@ export default defineComponent({
 
         const deleteRecipe = () => {
             console.debug('Deleting recipe ...', mutableRecipe.value.name)
-            if (!mutableRecipe.value._id) {
+            if (typeof mutableRecipe.value._id === 'undefined') {
                 console.error('Cannot delete recipe without id')
                 return;
             }
-            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id! } })
+            getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id } })
         }
 
         const addStep = (stepIndex: number) => {
@@ -221,13 +232,22 @@ export default defineComponent({
             };
         }
 
+        const addItemsFromDescription = (stepIndex: number) => {
+            const description = steps.value[stepIndex].description;
+            recipe.value.steps[stepIndex].items.push(...descriptionToItems(description))
+        }
+
+        const addStepsFromDescription = (description: string) => {
+            mutableRecipe.value.steps.push(...descriptionToSteps(description))
+        }
+
         return {
             // recipe
             mutableRecipe, saveRecipe, deleteRecipe,
             // steps
-            steps, addStep,
+            steps, addStep, addStepsFromDescription,
             // items
-            allItems, addNewItem, addItem,
+            allItems, addNewItem, addItem, addItemsFromDescription,
             // icons
             closeCircleOutline,
         };
