@@ -9,13 +9,13 @@ export type Item = {
     imgUrl: string;
 }
 
-type StepItem = {
+export type StepItem = {
     amount: number;
     unit: string;
     item: Item;
 }
 
-type Step = {
+export type Step = {
     items: StepItem[];
     description: string;
 }
