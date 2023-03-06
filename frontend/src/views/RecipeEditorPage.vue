@@ -65,7 +65,7 @@ export default defineComponent({
 
         const handleRecipeFilter = (event: any) => {
             const query: string = event.target.value.toLowerCase().trim();
-            if (query === "") {
+            if (query === '') {
                 filteredRecipes.value = recipes.value
                 return
             }
