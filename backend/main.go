@@ -1,116 +1,173 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
-	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 )
 
 func main() {
-	r := gin.Default()
+	////////////////////////////////////////////////////////////////////////
+	// Initialize App
+	app := TasteBuddyAppFactory()
+	log.Print("Starting TasteBuddy API")
+	// Finish Initialize App
+	////////////////////////////////////////////////////////////////////////
 
-	// Serve frontend static files
-	r.LoadHTMLGlob(".page/*.html")
-
-	// Load json
-	LoadRecipes()
-	LoadItems()
-
-	// Management routes
-	// Only for moderators only
-	moderationRoutes := r.Group("/m")
-	{
-		editorRoutes := moderationRoutes.Group("/editor")
-
-		// Editor
-		editorRoutes.GET("/", func(c *gin.Context) {
-			c.HTML(200, "editor.html", nil)
-		})
-
-		editorRoutes.GET("/list", func(c *gin.Context) {
-			c.JSON(200, dataFileNames())
-		})
-
-		// Recipes
-		recipeRoutes := moderationRoutes.Group("/recipes")
-
-		// Get list of all recipes
-		recipeRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, recipes)
-		})
-
-		// Replace all recipes
-		recipeRoutes.POST("/replaceAll", func(c *gin.Context) {
-			var newRecipes []Recipe
-			err := c.BindJSON(&newRecipes)
-			if err != nil {
-				log.Fatal(err)
-			}
-			ReplaceRecipes(newRecipes)
-			c.Status(200)
-		})
-
-		// Items
-		itemRoutes := moderationRoutes.Group("/items")
-
-		// Get list of all items
-		itemRoutes.GET("/", func(c *gin.Context) {
-			c.JSON(200, items)
-		})
-
-		// Users
-		userRoutes := moderationRoutes.Group("/users")
-
-		// Add an user
-		userRoutes.POST("/", func(c *gin.Context) {
-			var newUser User
-			c.BindJSON(&newUser)
-			AddUser(newUser.Username, newUser.Password)
-			c.String(200, "Added user")
-		})
+	////////////////////////////////////////////////////////////////////////
+	// Set up viper
+	// Use viper to handle different environments
+	viper.AddConfigPath(".")
+	viper.AutomaticEnv()
+	viper.SetConfigFile(".env")
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("fatal error config file, %s", err)
 	}
 
-	// Recipes routes
-	recipeRoutes := r.Group("/recipe")
-	{
-		recipeRoutes.GET("/byItem/:name", func(c *gin.Context) {
-			name := c.Param("name")
-			c.JSON(200, FindRecipesByItems(ItemNameToItem([]string{name})))
-		})
+	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
+	// e.g. DOCKER_DB_CONNSTRING=...
+	var DB_CONNSTRING string
+	if viper.GetString("APP_ENV") == "docker" {
+		log.Print("Using docker environment variables")
+		DB_CONNSTRING = viper.GetString("DOCKER_DB_CONNSTRING")
+	} else {
+		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
 	}
 
-	// User routes
-	userRoutes := r.Group("/user")
-	{
-		userRoutes.GET("/", func(c *gin.Context) {
-			c.String(200, "Try /user/1")
-		})
+	// Finish viper
+	////////////////////////////////////////////////////////////////////////
 
-		userRoutes.GET("/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
-			if err == nil {
-				c.JSON(200, FindUserById(id))
-			}
-		})
-	}
-
-	err := r.Run()
+	////////////////////////////////////////////////////////////////////////
+	// Connect to database
+	client, err := ConnectToDatabase(DB_CONNSTRING)
 	if err != nil {
 		return
 	}
-}
+	// Register database client
+	app.SetDatabase(client)
+	// Finish Database
+	////////////////////////////////////////////////////////////////////////
 
-func dataFileNames() []string {
-	files, err := ioutil.ReadDir("./.data")
+	////////////////////////////////////////////////////////////////////////
+	// Goroutines
+	go func() {
+		GoRoutineSaveMarketsToDB(client)
+		// Discounts must be saved after markets
+		GoRoutineSaveDiscountsToDB(client)
+	}()
+	// Finish Goroutines
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
+	// Set up gin
+	r := gin.Default()
+	r.Use(cors.Default())
+
+	// Routes
+	apiRoutes := r.Group("/api")
+
+	// Version 1
+	v1 := apiRoutes.Group("/v1")
+
+	// Recipes
+	recipeRoutes := v1.Group("/recipe")
+	{
+		// Get all recipes
+		recipeRoutes.GET("/", func(context *gin.Context) {
+			app.HandleGetAllRecipes(context)
+		})
+
+		// Get random recipe
+		recipeRoutes.GET("/random", func(context *gin.Context) {
+			app.HandleGetRandomRecipe(context)
+		})
+
+		// Get recipe by id
+		recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
+			app.HandleGetRecipeById(context)
+		})
+
+		// Get recipe by item ids
+		recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
+			app.HandleFindRecipesByItemNames(context)
+		})
+
+		// Add recipe to database
+		recipeRoutes.POST("/", func(context *gin.Context) {
+			app.HandleAddRecipe(context)
+		})
+	}
+
+	// Items
+	itemRoutes := v1.Group("/item")
+	{
+		// Get list of all items
+		itemRoutes.GET("/", func(context *gin.Context) {
+			app.HandleGetAllItems(context)
+		})
+
+		// Get item by id
+		itemRoutes.GET("/byId/:id", func(context *gin.Context) {
+			app.HandleGetItemById(context)
+		})
+
+		// Add recipe to database
+		itemRoutes.POST("/", func(context *gin.Context) {
+			app.HandleAddItem(context)
+		})
+	}
+
+	// Discount routes
+	discountRoutes := v1.Group("/discount")
+	{
+		// Get all discounts
+		discountRoutes.GET("/", func(context *gin.Context) {
+			app.HandleGetAllDiscounts(context)
+		})
+
+		// Get all discounts by city
+		discountRoutes.GET("/:city", func(context *gin.Context) {
+			app.HandleGetDiscountsByCity(context)
+		})
+	}
+
+	// Market routes
+	marketRoutes := v1.Group("/market")
+	{
+		// Get all markets
+		marketRoutes.GET("/", func(context *gin.Context) {
+			app.HandleGetAllMarkets(context)
+		})
+
+		// Get all markets by city
+		marketRoutes.GET("/:city", func(context *gin.Context) {
+			app.HandleGetMarketsByCity(context)
+		})
+	}
+
+	// Admin routes
+	adminRoutes := v1.Group("/admin")
+	{
+		dbRoutes := adminRoutes.Group("/db")
+		{
+			dbRoutes.GET("/dropAll", func(context *gin.Context) {
+				app.HandleDropAllCollections(context)
+			})
+		}
+	}
+
+	log.Print("[main] DONE...")
+
+	// Start server
+	err = r.Run(":8081")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
+		return
 	}
 
-	names := []string{}
-	for _, f := range files {
-		names = append(names, f.Name())
-	}
-	return names
+	// Finish gin
+	////////////////////////////////////////////////////////////////////////
 }

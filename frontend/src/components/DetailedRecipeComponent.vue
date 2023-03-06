@@ -1,43 +1,41 @@
 <template>
     <ion-page>
         <ion-header>
-            <ion-toolbar>
-                <ion-title>Today</ion-title>
+            <ion-toolbar color="primary">
+                <ion-title color="light">Recipe Of the Day</ion-title>
             </ion-toolbar>
         </ion-header>
 
         <ion-content :fullscreen="true">
             <ion-header collapse="condense">
                 <ion-toolbar>
-                    <ion-title size="large">Detailed Recipe</ion-title>
+                    <ion-title size="large">Recipe Of the Day</ion-title>
                 </ion-toolbar>
             </ion-header>
 
 
             <ion-list lines="full">
                 <ion-item>
-
                     <div class="container">
-                        <div class="ContainerIMG">
-                            <ion-img src="assets/food/food_hamburger.jpeg" alt="Hamburger Pic"></ion-img>
-                            <div class="centered">Look at this beautiful Hamburger</div>
+                        <div class="container-img">
+                            <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`"></ion-img>
+                            <div class="container-img-text">{{ recipeOfTheDay?.description }}</div>
                         </div>
                     </div>
                 </ion-item>
                 <ion-item>
                     <div class="container">
                         <div id="HeartSaveShareButton">
-                            <ion-button color="success">
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="heart"></ion-icon>
-                                Anzahl Likes
+                                3012 Likes
                             </ion-button>
-                            <ion-button color="success">
+                            <ion-button color="primary">
                                 <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
-                                Gespeichert Icon wird ausgefüllt
+                                Save
                             </ion-button>
-                            <ion-button color="success">
-                                <ion-icon slot="icon-only" :icon="shareOutline"></ion-icon>
-                                Share
+                            <ion-button color="primary">
+                                <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"></ion-icon>
                             </ion-button>
                         </div>
                     </div>
@@ -45,101 +43,39 @@
             </ion-list>
 
             <ion-list lines="inset">
-                <ion-item color="success">
-                    <ion-label>Ingredients</ion-label>
+                <ion-item color="primary">
+                    <ion-label color="light">Ingredients</ion-label>
                 </ion-item>
 
-                <div id="topic">
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="Tomato" src="assets/ingredients/tomato.jpeg" />
-                            Tomato
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar>
-                            <img alt="Corn" src="assets/ingredients/corn.jpeg" />
-                            Mais
-                        </ion-avatar>
-                    </div>
+                <div class="topic">
+                    <template v-for="ingredient in ingredients" :key="ingredient">
+                        <div class="element">
+                            <ion-avatar slot="start">
+                                <img :alt="ingredient.name" :src="'assets/ingredients/' + ingredient._id + '.jpeg'" />
+                                {{ ingredient.name }}
+                            </ion-avatar>
+                        </div>
+                    </template>
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item color="success">
-                    <ion-label>Cooking Utensils</ion-label>
+                <ion-item color="primary">
+                    <ion-label color="light">Cooking utensils</ion-label>
                 </ion-item>
                 <div class="topic">
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
-                            Pan
-                        </ion-avatar>
-                    </div>
-                    <div class="element">
-                        <ion-avatar slot="start">
-                            <img alt="pan" src="assets/cooking_utensils/pan.jpeg" />
-                            Pan
-                        </ion-avatar>
-                    </div>
+                    <template v-for="equipment in equipments" :key="equipment">
+                        <div class="element">
+                            <ion-avatar slot="start">
+                                <img :alt="equipment.name" :src="'assets/ingredients/' + equipment.name + '.jpeg'" />
+                                {{ equipment }}
+                            </ion-avatar>
+                        </div>
+                    </template>
                 </div>
             </ion-list>
             <ion-list lines="inset">
-                <ion-item color="success">
-                    <ion-label>Calories</ion-label>
+                <ion-item color="primary">
+                    <ion-label color="light">Calories</ion-label>
                 </ion-item>
             </ion-list>
         </ion-content>
@@ -147,16 +83,26 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel } from '@ionic/vue';
+import { computed, ComputedRef, defineComponent } from 'vue';
+import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel, IonAvatar, IonImg } from '@ionic/vue';
 import { heart, flagOutline, shareOutline } from 'ionicons/icons';
+import { Recipe, Item } from '@/api/types';
+import { useTasteBuddyStore } from '@/storage';
 
 export default defineComponent({
     titel: 'Tab1Page',
-    components: { IonHeader, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel },
+    components: { IonHeader, IonImg, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel, IonAvatar },
 
     setup() {
+        const store = useTasteBuddyStore();
+        const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
+        const itemsFromRecipe: ComputedRef<Item[]> = computed(() => recipeOfTheDay.value?.steps.flatMap((step) => (step.items ?? []).map((stepItem) => stepItem.item)));
+        const ingredients: ComputedRef<Item[]> = computed(() => itemsFromRecipe.value)
+        const equipments: ComputedRef<Item[]> = computed(() => []);
+
         return {
+            ingredients, equipments,
+            recipeOfTheDay,
             heart, flagOutline, shareOutline
         };
     },
@@ -167,7 +113,7 @@ export default defineComponent({
 .container {
     position: relative;
     text-align: center;
-    color: white;
+    color: lightgray;
     object-fit: fill;
     width: 100%;
     height: 100%;
@@ -191,6 +137,7 @@ export default defineComponent({
 .topic {
     /*background-color: blue;*/
     text-align: center;
+    color: lightgray;
 
 }
 
@@ -198,16 +145,14 @@ export default defineComponent({
     margin-top: 2%;
 }
 
-.ContainerIMG {
+.container-img {
     object-fit: fill;
     width: 100%;
     height: 100%;
     text-align: center;
-
 }
 
-/* Centered text */
-.centered {
+.container-img-text {
     position: absolute;
     top: 95%;
     left: 50%;
@@ -217,6 +162,6 @@ export default defineComponent({
     font-size: 20px;
     text-size-adjust: initial;
     transform: translate(-50%, -50%);
-    background: rgba(255, 122, 89, 0.6)
+    background: rgba(255, 122, 0, 0.5)
 }
 </style>

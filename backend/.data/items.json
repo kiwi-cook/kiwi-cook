@@ -1,162 +1,162 @@
 [
     {
-        "ID": 1,
-        "Name": "Egg",
-        "Type": "Food"
+        "_id": "egg",
+        "name": "Egg",
+        "type": "Food"
     },
     {
-        "ID": 2,
-        "Name": "Flour",
-        "Type": "Food"
+        "_id": "flour",
+        "name": "Flour",
+        "type": "Food"
     },
     {
-        "ID": 3,
-        "Name": "Milk",
-        "Type": "Food"
+        "_id": "milk",
+        "name": "Milk",
+        "type": "Food"
     },
     {
-        "ID": 4,
-        "Name": "Salt",
-        "Type": "Food"
+        "_id": "salt",
+        "name": "Salt",
+        "type": "Food"
     },
     {
-        "ID": 5,
-        "Name": "Sugar",
-        "Type": "Food"
+        "_id": "sugar",
+        "name": "Sugar",
+        "type": "Food"
     },
     {
-        "ID": 6,
-        "Name": "Butter",
-        "Type": "Food"
+        "_id": "butter",
+        "name": "Butter",
+        "type": "Food"
     },
     {
-        "ID": 7,
-        "Name": "Baking Powder",
-        "Type": "Food"
+        "_id": "baking_powder",
+        "name": "Baking Powder",
+        "type": "Food"
     },
     {
-        "ID": 8,
-        "Name": "Baking Soda",
-        "Type": "Food"
+        "_id": "baking_soda",
+        "name": "Baking Soda",
+        "type": "Food"
     },
     {
-        "ID": 9,
-        "Name": "Vanilla Extract",
-        "Type": "Food"
+        "_id": "vanilla_extract",
+        "name": "Vanilla Extract",
+        "type": "Food"
     },
     {
-        "ID": 10,
-        "Name": "Chocolate Chips",
-        "Type": "Food"
+        "_id": "chocolate_chips",
+        "name": "Chocolate Chips",
+        "type": "Food"
     },
     {
-        "ID": 10000,
-        "Name": "Oven",
-        "Type": "Equipment"
+        "_id": "oven",
+        "name": "Oven",
+        "type": "Equipment"
     },
     {
-        "ID": 10001,
-        "Name": "Bowl",
-        "Type": "Equipment"
+        "_id": "bowl",
+        "name": "Bowl",
+        "type": "Equipment"
     },
     {
-        "ID": 10002,
-        "Name": "Spoon",
-        "Type": "Equipment"
+        "_id": "spoon",
+        "name": "Spoon",
+        "type": "Equipment"
     },
     {
-        "ID": 10003,
-        "Name": "Whisk",
-        "Type": "Equipment"
+        "_id": "whisk",
+        "name": "Whisk",
+        "type": "Equipment"
     },
     {
-        "ID": 10004,
-        "Name": "Fork",
-        "Type": "Equipment"
+        "_id": "fork",
+        "name": "Fork",
+        "type": "Equipment"
     },
     {
-        "ID": 10005,
-        "Name": "Baking Tray",
-        "Type": "Equipment"
+        "_id": "baking_tray",
+        "name": "Baking Tray",
+        "type": "Equipment"
     },
     {
-        "ID": 10006,
-        "Name": "Baking Sheet",
-        "Type": "Equipment"
+        "_id": "baking_sheet",
+        "name": "Baking Sheet",
+        "type": "Equipment"
     },
     {
-        "ID": 10007,
-        "Name": "Mixer",
-        "Type": "Equipment"
+        "_id": "mixer",
+        "name": "Mixer",
+        "type": "Equipment"
     },
     {
-        "ID": 10008,
-        "Name": "Spatula",
-        "Type": "Equipment"
+        "_id": "spatula",
+        "name": "Spatula",
+        "type": "Equipment"
     },
     {
-        "ID": 10009,
-        "Name": "Measuring Cup",
-        "Type": "Equipment"
+        "_id": "measuring_cup",
+        "name": "Measuring Cup",
+        "type": "Equipment"
     },
     {
-        "ID": 10010,
-        "Name": "Measuring Spoon",
-        "Type": "Equipment"
+        "_id": "measuring_spoon",
+        "name": "Measuring Spoon",
+        "type": "Equipment"
     },
     {
-        "ID": 10011,
-        "Name": "Knife",
-        "Type": "Equipment"
+        "_id": "knife",
+        "name": "Knife",
+        "type": "Equipment"
     },
     {
-        "ID": 10012,
-        "Name": "Grater",
-        "Type": "Equipment"
+        "_id": "grater",
+        "name": "Grater",
+        "type": "Equipment"
     },
     {
-        "ID": 10013,
-        "Name": "Sieve",
-        "Type": "Equipment"
+        "_id": "sieve",
+        "name": "Sieve",
+        "type": "Equipment"
     },
     {
-        "ID": 10014,
-        "Name": "Rolling Pin",
-        "Type": "Equipment"
+        "_id": "rolling_pin",
+        "name": "Rolling Pin",
+        "type": "Equipment"
     },
     {
-        "ID": 10015,
-        "Name": "Cookie Cutter",
-        "Type": "Equipment"
+        "_id": "cookie_cutter",
+        "name": "Cookie Cutter",
+        "type": "Equipment"
     },
     {
-        "ID": 10016,
-        "Name": "Pastry Brush",
-        "Type": "Equipment"
+        "_id": "pastry_brush",
+        "name": "Pastry Brush",
+        "type": "Equipment"
     },
     {
-        "ID": 10017,
-        "Name": "Cake Pan",
-        "Type": "Equipment"
+        "_id": "cake_pan",
+        "name": "Cake Pan",
+        "type": "Equipment"
     },
     {
-        "ID": 10018,
-        "Name": "Cake Tin",
-        "Type": "Equipment"
+        "_id": "cake_tin",
+        "name": "Cake Tin",
+        "type": "Equipment"
     },
     {
-        "ID": 10019,
-        "Name": "Cake Mold",
-        "Type": "Equipment"
+        "_id": "cake_mold",
+        "name": "Cake Mold",
+        "type": "Equipment"
     },
     {
-        "ID": 10020,
-        "Name": "Cake Ring",
-        "Type": "Equipment"
+        "_id": "cake_ring",
+        "name": "Cake Ring",
+        "type": "Equipment"
     },
     {
-        "ID": 10021,
-        "Name": "Stove",
-        "Type": "Equipment"
+        "_id": "stove",
+        "name": "Stove",
+        "type": "Equipment"
     }
 ]

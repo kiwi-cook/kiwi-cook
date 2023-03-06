@@ -1,255 +1,87 @@
 [
     {
-        "ID": 1,
-        "Name": "Pancakes",
-        "Description": "A delicious breakfast treat",
-        "Steps": [
+        "_id": "1",
+        "name": "Pancakes",
+        "description": "A delicious breakfast treat",
+        "steps": [
             {
-                "Description": "Mix the dry ingredients",
-                "Items": [
+                "description": "Mix the dry ingredients",
+                "items": [
                     {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 1
+                        "amount": 1,
+                        "unit": "cup",
+                        "itemID": "flour"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 3
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "salt"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 4
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "sugar"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 6
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "baking_powder"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 7
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "baking_soda"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
+                        "amount": 1,
+                        "itemID": "mixer"
                     }
                 ]
             },
             {
-                "Description": "Mix the wet ingredients",
-                "Items": [
+                "description": "Mix the wet ingredients",
+                "items": [
                     {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 0
+                        "amount": 1,
+                        "unit": "cup",
+                        "itemID": "egg"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 2
+                        "amount": 1,
+                        "unit": "cup",
+                        "itemID": "milk"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
+                        "amount": 1,
+                        "itemID": "mixer"
                     }
                 ]
             },
             {
-                "Description": "Mix the dry and wet ingredients",
-                "Items": [
+                "description": "Mix the dry and wet ingredients",
+                "items": [
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 8
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "vanilla_extract"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 9
+                        "amount": 1,
+                        "unit": "tsp",
+                        "itemID": "chocolate_chips"
                     },
                     {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
+                        "amount": 1,
+                        "itemID": "mixer"
                     }
                 ]
             },
             {
-                "Description": "Cook the pancakes",
-                "Items": [
+                "description": "Cook the pancakes",
+                "items": [
                     {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10021
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "ID": 2,
-        "Name": "Chocolate Chip Cookies",
-        "Description": "A delicious dessert treat",
-        "Steps": [
-            {
-                "Description": "Mix the dry ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 1
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 3
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 4
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 6
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 7
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Mix the wet ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 0
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 2
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Mix the dry and wet ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Cook the cookies",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10000
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        "ID": 3,
-        "Name": "Chocolate Cake",
-        "Description": "A delicious dessert treat",
-        "Steps": [
-            {
-                "Description": "Mix the dry ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 1
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 3
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 4
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 6
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "tsp",
-                        "Item": 7
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Mix the wet ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 0
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "cup",
-                        "Item": 2
-                    },
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Mix the dry and wet ingredients",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10007
-                    }
-                ]
-            },
-            {
-                "Description": "Cook the cake",
-                "Items": [
-                    {
-                        "Amount": 1,
-                        "Unit": "",
-                        "Item": 10000
+                        "amount": 1,
+                        "itemID": "oven"
                     }
                 ]
             }

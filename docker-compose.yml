@@ -1,0 +1,18 @@
+services:
+  app:
+    build: ./backend
+    ports:
+      - "8081:8081"
+    environment:
+      - APP_ENV=docker
+      - DOCKER_MONGODB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb:27017
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:5.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=tastebuddy
+      - MONGO_INITDB_ROOT_PASSWORD=tastebuddy

@@ -1,8 +1,17 @@
+// Ionic
+import { IonicVue } from '@ionic/vue';
+
+// Vue + App
 import { createApp } from 'vue'
 import App from './App.vue'
+
+// Router
 import router from './router';
 
-import { IonicVue } from '@ionic/vue';
+// Storage
+import { createVueStore, ionicStorageVuePlugin, storeKey } from './storage';
+
+// Styles
 
 /* Add service worker */
 import './registerServiceWorker';
@@ -27,10 +36,14 @@ import '@ionic/vue/css/display.css';
 import './theme/variables.css';
 import 'ionicons/icons';
 
+import './theme/tbContent.css';
+
 const app = createApp(App)
   .use(IonicVue)
-  .use(router);
-  
+  .use(router)
+  .use(createVueStore(), storeKey)
+  .use(ionicStorageVuePlugin)
+
 router.isReady().then(() => {
   app.mount('#app');
 });
