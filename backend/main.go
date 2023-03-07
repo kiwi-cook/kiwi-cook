@@ -37,6 +37,14 @@ func main() {
 		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
 	}
 
+	// Set port
+	var PORT string
+	if viper.GetString("PORT") == "" {
+		PORT = "8081"
+	} else {
+		PORT = viper.GetString("PORT")
+	}
+
 	// Finish viper
 	////////////////////////////////////////////////////////////////////////
 
@@ -162,7 +170,7 @@ func main() {
 	log.Print("[main] DONE...")
 
 	// Start server
-	err = r.Run(":8081")
+	err = r.Run(":" + PORT)
 	if err != nil {
 		log.Print(err)
 		return
