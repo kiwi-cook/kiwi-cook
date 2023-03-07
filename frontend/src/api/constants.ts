@@ -1,8 +1,18 @@
 // URLs for the API
 
-// API constants
-export const API_URL = 'http://localhost:8081/api'
-export const API_VERSION = '/v1'
+// checks if a URL is reachable
+async function checkURL(URL: string) {
+    const response = await fetch(URL)
+    console.debug('API_URL: ' + URL + ' -> ' + response.ok)
+    return response.ok
+}
+
+// Try to find a reachable API_URL
+const possibleAPI_URLS = ['http://taste-buddy.sh1.hidora.net:8080/api/v1', 'http://localhost:8081/api/v1']
+export const API_URL = possibleAPI_URLS.find(checkURL) ?? ''
+if (API_URL === '') {
+    console.error('No API_URL found!')
+}
 
 export enum API_ROUTE {
     GET_RECIPES,

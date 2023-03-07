@@ -8,10 +8,11 @@ COPY go.mod ./
 COPY go.sum ./
 RUN go mod download
 
-COPY . ./
+COPY *.go ./
 
 RUN go build -o /app
 
-EXPOSE 8081
+ENV PORT 8081
+EXPOSE ${PORT}
 
 CMD [ "/app" ]
