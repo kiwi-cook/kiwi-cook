@@ -27,15 +27,8 @@ func main() {
 		fmt.Printf("fatal error config file, %s", err)
 	}
 
-	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
-	// e.g. DOCKER_DB_CONNSTRING=...
-	var DB_CONNSTRING string
-	if viper.GetString("APP_ENV") == "docker" {
-		log.Print("Using docker environment variables")
-		DB_CONNSTRING = viper.GetString("DOCKER_DB_CONNSTRING")
-	} else {
-		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
-	}
+	// Set database connection string
+	var DB_CONNSTRING string = viper.GetString("DB_CONNSTRING")
 
 	// Set port
 	var PORT string
