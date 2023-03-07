@@ -4,8 +4,8 @@ services:
     ports:
       - "8081:8081"
     environment:
-      - APP_ENV=docker
-      - DOCKER_MONGODB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb:27017
+      - DB_CONNSTRING=mongodb://tastebuddy:tastebuddy@mongodb:27017
+      - PORT=8081 # (not needed) 8081 is default port for the backend
     depends_on:
       - mongodb
 
