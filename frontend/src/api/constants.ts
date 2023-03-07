@@ -8,7 +8,7 @@ async function checkURL(URL: string) {
 }
 
 // Try to find a reachable API_URL
-const possibleAPI_URLS = ['http://taste-buddy.sh1.hidora.net:8080/api/v1', 'http://localhost:8081/api/v1']
+const possibleAPI_URLS = ['http://localhost:8081/api/v1', 'http://taste-buddy.sh1.hidora.net:8080/api/v1']
 export const API_URL = possibleAPI_URLS.find(checkURL) ?? ''
 if (API_URL === '') {
     console.error('No API_URL found!')
