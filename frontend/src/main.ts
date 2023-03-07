@@ -13,6 +13,9 @@ import { createVueStore, ionicStorageVuePlugin, storeKey } from './storage';
 
 // Styles
 
+/* Add service worker */
+import './registerServiceWorker';
+
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
 

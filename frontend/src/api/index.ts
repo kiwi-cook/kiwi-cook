@@ -1,4 +1,4 @@
-import { API_ROUTE, API_ROUTES, API_URL, API_VERSION } from './constants';
+import { API_ROUTE, API_ROUTES, API_URL } from './constants';
 import { Recipe, Discount, Market, Item } from './types';
 
 /**
@@ -8,7 +8,7 @@ import { Recipe, Discount, Market, Item } from './types';
  * @param callback function that takes a list of e.g., Recipe or Item objects as parameter
  */
 export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options: { callback?: (json: T[]) => void, formatObject?: { [key: string]: string | number }, body?: T}): void {
-    let url = API_URL + API_VERSION + API_ROUTES[route].url;
+    let url = API_URL + API_ROUTES[route].url;
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
     if (options?.formatObject) {

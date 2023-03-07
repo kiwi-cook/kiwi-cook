@@ -73,10 +73,9 @@
 <script lang="ts">
 import { Discount } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonToolbar, IonSearchbar, IonThumbnail, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonList, IonLabel, IonCard, IonCardTitle, IonCardSubtitle } from '@ionic/vue';
-import { computed, ComputedRef } from '@vue/reactivity';
-import { caretDownCircle, filter, arrowDown } from 'ionicons/icons';
-import { defineComponent, ref, watch } from 'vue';
+import { IonToolbar, IonSearchbar, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { arrowDown } from 'ionicons/icons';
+import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
 
 
 export default defineComponent({

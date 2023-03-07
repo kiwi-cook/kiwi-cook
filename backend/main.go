@@ -27,14 +27,15 @@ func main() {
 		fmt.Printf("fatal error config file, %s", err)
 	}
 
-	// If DEV_ENV is set to docker, then parse environment variables with DOCKER_ prefix
-	// e.g. DOCKER_DB_CONNSTRING=...
-	var DB_CONNSTRING string
-	if viper.GetString("APP_ENV") == "docker" {
-		log.Print("Using docker environment variables")
-		DB_CONNSTRING = viper.GetString("DOCKER_DB_CONNSTRING")
+	// Set database connection string
+	var DB_CONNSTRING string = viper.GetString("DB_CONNSTRING")
+
+	// Set port
+	var PORT string
+	if viper.GetString("PORT") == "" {
+		PORT = "8081"
 	} else {
-		DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
+		PORT = viper.GetString("PORT")
 	}
 
 	// Finish viper
@@ -167,7 +168,7 @@ func main() {
 	log.Print("[main] DONE...")
 
 	// Start server
-	err = r.Run(":8081")
+	err = r.Run(":" + PORT)
 	if err != nil {
 		log.Print(err)
 		return
