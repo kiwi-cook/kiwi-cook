@@ -187,7 +187,7 @@ import { useTasteBuddyStore } from '@/storage';
 import { IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
 import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
-import DropDownSearch from './utility/DropDownSearch.vue';
+import DropDownSearch from '../utility/DropDownSearch.vue';
 import { descriptionToItems, descriptionToSteps } from '@/utility/recipeParser';
 
 export default defineComponent({

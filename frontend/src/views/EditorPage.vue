@@ -33,7 +33,7 @@
 
 <script lang="ts">
 import { emptyRecipe, Recipe } from '@/api/types';
-import RecipeEditor from '@/components/RecipeEditor.vue';
+import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import { useTasteBuddyStore } from '@/storage';
 import { IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
