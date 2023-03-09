@@ -19,6 +19,7 @@ export enum API_ROUTE {
     ADD_RECIPE,
     DELETE_RECIPE,
     GET_ITEMS,
+    DELETE_ITEM,
     GET_DISCOUNTS,
     GET_MARKETS,
 }
@@ -28,6 +29,7 @@ export const API_ROUTES: { [key in API_ROUTE]: any } = {
     [API_ROUTE.ADD_RECIPE]: { url: '/recipe/', method: 'POST' },
     [API_ROUTE.DELETE_RECIPE]: { url: '/recipe/RECIPE_ID', method: 'DELETE' },
     [API_ROUTE.GET_ITEMS]: { url: '/item/', method: 'GET' },
+    [API_ROUTE.DELETE_ITEM]: { url: '/item/ITEM_ID', method: 'DELETE' },
     [API_ROUTE.GET_DISCOUNTS]: { url: '/discount/CITY', method: 'GET' },
     [API_ROUTE.GET_MARKETS]: { url: '/discount/markets/CITY', method: 'GET' }
 }

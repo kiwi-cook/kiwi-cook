@@ -10,6 +10,7 @@ import { createStore, useStore as baseUseStore, Store } from 'vuex';
 import { Discount, Item, Recipe } from '@/api/types';
 import { API_ROUTE } from '@/api/constants';
 import { getFromAPI } from '@/api';
+import { getItemsFromRecipe } from '@/api/utility';
 
 
 
@@ -20,7 +21,8 @@ import { getFromAPI } from '@/api';
 export interface State {
     recipes: Recipe[],
     items: Item[],
-    discounts: { [city: string]: Discount[] }
+    discounts: { [city: string]: Discount[] },
+    recipesByItemId: { [itemId: string]: string[] }
 }
 
 // Define injection key
@@ -39,7 +41,8 @@ export function createVueStore() {
         state: {
             recipes: [],
             items: [],
-            discounts: {}
+            discounts: {},
+            recipesByItemId: {}
         },
         mutations: {
             setRecipes(state, recipes) {
@@ -48,9 +51,25 @@ export function createVueStore() {
             setItems(state, items) {
                 state.items = items
             },
-            setDiscounts(state, payload) {
+            setDiscounts(state, payload: { city: string, discounts: Discount[] }) {
                 const { city, discounts } = payload
                 state.discounts[city] = discounts
+            },
+            mapRecipeIdsToItemIds(state, recipes) {
+                state.recipesByItemId = recipes
+                    .reduce((recipesIdByItemId: { [itemId: string]: string[] }, recipe: Recipe) => {
+                        getItemsFromRecipe(recipe)
+                            .forEach((item: Item) => {
+                                if (typeof item._id !== 'undefined' && typeof recipe._id !== 'undefined') {
+                                    if (typeof recipesIdByItemId[item._id] === 'undefined') {
+                                        recipesIdByItemId[item._id] = []
+                                    }
+                                    recipesIdByItemId[item._id].push(recipe._id)
+                                }
+                            })
+
+                        return recipesIdByItemId
+                    }, {})
             }
         },
         actions: {
@@ -74,19 +93,33 @@ export function createVueStore() {
                         commit('setDiscounts', { discounts: json, city })
                     }, formatObject: { CITY: city }
                 });
+            },
+            async mapRecipeIdsToItemIds({ commit, getters }) {
+                commit('mapRecipeIdsToItemIds', getters.getRecipes)
             }
         },
         getters: {
             getRecipes(state): Recipe[] {
                 return state.recipes ?? []
             },
+            getRecipesById: (_, getters): { [recipeId: string]: Recipe } => {
+                return getters.getRecipes.reduce((recipeMap: { [recipeId: string]: Recipe }, recipe: Recipe) => {
+                    if (typeof recipe._id !== 'undefined') {
+                        recipeMap[recipe._id] = recipe
+                    }
+                    return recipeMap
+                }, {})
+            },
             getItems(state): Item[] {
                 return state.items ?? []
             },
             getDiscounts: (state) => (city: string): Discount[] => {
                 return state.discounts[city] ?? []
+            },
+            getRecipesByItemId: (state) => (itemId?: string): string[] => {
+                return state.recipesByItemId[itemId ?? ''] ?? []
             }
-        }
+        },
     })
 
     return store
