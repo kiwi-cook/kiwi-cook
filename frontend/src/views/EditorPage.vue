@@ -36,7 +36,6 @@
                         </div>
                     </ion-accordion>
                 </template>
-                <ion-button @click="addNewRecipe()">Add new Recipe</ion-button>
             </ion-accordion-group>
 
             <!-- Item Editor -->
@@ -47,27 +46,34 @@
                             <ion-label color="light">{{ item.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <ItemEditor :item="item" />
+                            <ItemEditor :item="item" @remove="removeItem(itemIndex)" />
                         </div>
                     </ion-accordion>
                 </template>
             </ion-accordion-group>
+
+            <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+                <ion-fab-button @click="addNew()" color="tertiary">
+                    <ion-icon :icon="add">></ion-icon>
+                </ion-fab-button>
+            </ion-fab>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import { emptyRecipe, Item, Recipe } from '@/api/types';
+import { emptyItem, emptyRecipe, Item, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
 import { useTasteBuddyStore } from '@/storage';
-import { IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton } from '@ionic/vue';
+import { IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { add } from 'ionicons/icons'
 import { computed, ComputedRef, defineComponent, Ref, ref, watch } from 'vue';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel, IonButton,
+        IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
         RecipeEditor, ItemEditor
     },
     setup() {
@@ -121,13 +127,39 @@ export default defineComponent({
             recipes.value.splice(index, 1)
         }
 
+        const addNewItem = () => {
+            items.value.push(emptyItem)
+        }
+
+        const removeItem = (index: number) => {
+            items.value.splice(index, 1)
+        }
+
+        const addNew = () => {
+            switch (segment.value) {
+                case 'items':
+                    addNewItem()
+                    break;
+                case 'recipes':
+                    addNewRecipe();
+                    break;
+                default:
+                    break;
+            }
+        }
+
         return {
             handleRefresh,
             // toolbar
             segment, handleSegment,
             handleRecipeFilter,
+            addNew,
+            // recipes
             filteredRecipes, addNewRecipe, removeRecipe,
-            items
+            // items
+            items, addNewItem, removeItem,
+            // icons
+            add,
         };
     }
 })
