@@ -25,21 +25,23 @@
         </ion-card-header>
 
         <ion-card-content>
-            Used in recipes:
-            <ion-list>
-                <template v-for="(recipe, index) in usedInRecipes" :key="index">
-                    <ion-chip color="light">
-                        {{ recipe.name }}
-                    </ion-chip>
-                </template>
-            </ion-list>
+            <template v-if="usedInRecipes.length > 0">
+                Used in recipes:
+                <ion-list>
+                    <template v-for="(recipe, index) in usedInRecipes" :key="index">
+                        <ion-chip color="light">
+                            {{ recipe.name }}
+                        </ion-chip>
+                    </template>
+                </ion-list>
+            </template>
         </ion-card-content>
     </ion-card>
 </template>
 
 <script lang="ts">
 import { Item, Recipe } from '@/api/types';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar } from '@ionic/vue';
+import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { useTasteBuddyStore } from '@/storage';
 import { getFromAPI } from '@/api';
@@ -54,9 +56,10 @@ export default defineComponent({
         }
     },
     components: {
-        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar,
+        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton
     },
-    setup(props) {
+    emits: ['remove'],
+    setup(props, ctx) {
         const { item } = toRefs(props)
         const store = useTasteBuddyStore()
 
@@ -67,11 +70,13 @@ export default defineComponent({
             mutableItem.value = item.value
         })
 
-        const usedInRecipes = computed(() => store.getters.getRecipesByItemId(mutableItem.value._id)
+        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesByItemId(mutableItem.value._id)
             .map((recipeId: string) => store.getters.getRecipesById[recipeId]))
 
         const removeItem = () => {
-            getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: mutableItem.value._id ?? '' }})
+            getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: mutableItem.value._id ?? '' } })
+            // remove item from parent
+            ctx.emit('remove')
         }
 
         return {
