@@ -9,6 +9,12 @@ export type Item = {
     imgUrl: string;
 }
 
+export const emptyItem: Item = {
+    name: 'New Item',
+    type: '',
+    imgUrl: ''
+}
+
 export type StepItem = {
     amount: number;
     unit: string;
