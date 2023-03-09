@@ -207,6 +207,28 @@ func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
 	Success(context, "Added item")
 }
 
+// HandleDeleteItemById gets called by router
+// Calls DeleteItemById and handles the context
+func (app *TasteBuddyApp) HandleDeleteItemById(context *gin.Context) {
+	id := context.Param("id")
+
+	// convert id to primitive.ObjectID
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+
+	// delete recipe
+	if _, err := app.client.DeleteItemById(objectID); err != nil {
+		log.Print(err)
+		ServerError(context, true)
+		return
+	}
+	Success(context, "Deleted item "+id)
+}
+
 // getRecipesCollection gets recipes collection from database
 func (client *TasteBuddyDatabase) GetRecipesCollection() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("recipes")
@@ -358,7 +380,9 @@ func (client *TasteBuddyDatabase) GetItemsCollection() *mongo.Collection {
 // GetAllItems gets all items from database
 func (client *TasteBuddyDatabase) GetAllItems() ([]Item, error) {
 	ctx := DefaultContext()
-	cursor, err := client.GetItemsCollection().Find(ctx, bson.M{})
+
+	// get all items from database that are not deleted
+	cursor, err := client.GetItemsCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
 	if err != nil {
 		log.Print(err)
 		return []Item{}, err
@@ -394,6 +418,20 @@ func (client *TasteBuddyDatabase) GetItemById(id primitive.ObjectID) (Item, erro
 	}
 
 	return itemFromDatabase, nil
+}
+
+func (client *TasteBuddyDatabase) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
+	ctx := DefaultContext()
+	var err error
+
+	// delete recipe by setting deleted to true
+	_, err = client.GetItemsCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
+	if err != nil {
+		log.Print(err)
+		return id, err
+	}
+
+	return id, nil
 }
 
 // addOrUpdateItemToDB adds or updates multiple items in the database of items
