@@ -40,6 +40,20 @@
 
             <!-- Item Editor -->
             <ion-accordion-group v-if="segment === 'items'" expand="inset">
+                <!-- Control panel for items -->
+                <ion-card>
+                    <ion-card-header>
+                        Control panel
+                    </ion-card-header>
+                    <ion-card-content>
+                        <ion-list>
+                            <ion-item v-if="items.length > 0">
+                                <ion-button @click="removeItemsWithoutRecipe">Remove items without recipe</ion-button>
+                            </ion-item>
+                        </ion-list>
+                    </ion-card-content>
+                </ion-card>
+
                 <template v-for="(item, itemIndex) in items" :key="item._id + itemIndex">
                     <ion-accordion :value="itemIndex.toString()">
                         <ion-item slot="header" color="primary">
@@ -66,14 +80,17 @@ import { emptyItem, emptyRecipe, Item, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
 import { useTasteBuddyStore } from '@/storage';
-import { IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { add } from 'ionicons/icons'
 import { computed, ComputedRef, defineComponent, Ref, ref, watch } from 'vue';
+import { getFromAPI } from '@/api';
+import { API_ROUTE } from '@/api/constants';
+import { deepCopy } from '@/utility/util';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
+        IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
         RecipeEditor, ItemEditor
     },
     setup() {
@@ -135,6 +152,21 @@ export default defineComponent({
             items.value.splice(index, 1)
         }
 
+        // control panel
+        const removeItemsWithoutRecipe = () => {
+            const removedItems: Item[] = []
+            // copy items to avoid mutability side effects
+            const tmpItems: Item[] = deepCopy(items.value)
+            tmpItems.forEach((item: Item) => {
+                if (store.getters.getRecipesByItemId(item._id).length === 0) {
+                    removedItems.push(item)
+                    getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: item._id ?? '' } })
+                    removeItem(items.value.indexOf(item))
+                }
+            })
+            console.debug('Removed the following items: ' + removedItems.map(item => item.name));
+        }
+
         const addNew = () => {
             switch (segment.value) {
                 case 'items':
@@ -157,7 +189,7 @@ export default defineComponent({
             // recipes
             filteredRecipes, addNewRecipe, removeRecipe,
             // items
-            items, addNewItem, removeItem,
+            items, addNewItem, removeItem, removeItemsWithoutRecipe,
             // icons
             add,
         };
