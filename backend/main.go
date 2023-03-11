@@ -55,9 +55,12 @@ func main() {
 	////////////////////////////////////////////////////////////////////////
 	// Goroutines
 	go func() {
+		// Markets must be saved before discounts
 		GoRoutineSaveMarketsToDB(client)
 		// Discounts must be saved after markets
 		GoRoutineSaveDiscountsToDB(client)
+		// Clean up the recipes
+		GoRoutineCleanUpRecipes(client)
 	}()
 	// Finish Goroutines
 	////////////////////////////////////////////////////////////////////////
