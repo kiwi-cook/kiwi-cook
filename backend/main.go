@@ -149,6 +149,15 @@ func main() {
 		})
 	}
 
+	// Search routes
+	searchRoutes := v1.Group("/search")
+	{
+		// Search
+		searchRoutes.POST("/", func(context *gin.Context) {
+			app.HandleSearch(context)
+		})
+	}
+
 	// Admin routes
 	adminRoutes := v1.Group("/admin")
 	{

@@ -33,13 +33,13 @@
                     </ion-item>
                     <div slot="content">
                         <div class="recipe-items">
-                            <template v-for="item in recipe.items" :key="item.name + recipe.name">
+                            <template v-for="item in getItemsFromRecipe(recipe)" :key="item.name + recipe.name">
                                 <div class="recipe-item">
                                     <div class="img-container">
-                                        <ion-img class="recipe-img" :src="item.imgPath" :alt="item.name + ' Pic'">
+                                        <ion-img class="recipe-img" :src="item.imgUrl" :alt="item.name + ' Pic'">
                                         </ion-img>
                                         <IonLabel color="light">
-                                                {{ item.name }}
+                                            {{ item.name }}
                                         </IonLabel>
                                     </div>
                                 </div>
@@ -54,58 +54,39 @@
 
 <script lang="ts">
 import { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonButton, IonContent, IonHeader, IonToolbar, IonSearchbar, IonLabel } from '@ionic/vue';
-import { defineComponent, ref, vShow } from 'vue';
+import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
 import { filter, arrowDown } from 'ionicons/icons';
+import { useTasteBuddyStore } from '@/storage';
+import { Recipe } from '@/api/types';
+import { getItemsFromRecipe } from '@/api/utility';
 
 
 export default defineComponent({
     name: "SearchComponent",
     components: { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar, IonLabel },
     setup() {
-        const Bolognese = {
-            name: "Bolognese Pasta",
-            imgPath: "assets/ingredients/corn.jpeg",
-        }
+        const store = useTasteBuddyStore();
+        const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes);
 
-        const Alioolio = {
-            name: "Knobi Pasta",
-            imgPath: "assets/ingredients/tomato.jpeg",
-
-        }
-
-        const fleischSalat = {
-            name: "Fleisch Salat",
-            imgPath: "assets/food/food_hamburger.jpeg",
-
-        }
-
-        const recipe = [
-            {
-                name: "Pasta",
-                items: [
-                    Bolognese,
-                    Alioolio
-                ]
-            },
-            {
-                name: "Salat",
-                items: [
-                    fleischSalat
-                ]
-            },
-        ]
-
-        const filteredRecipe = ref(recipe);
+        const filteredRecipe = ref(recipes.value);
 
         const handleChange = (event: any) => {
             const query = event.target.value.toLowerCase();
-            filteredRecipe.value = recipe.filter(recipe => {
-                const itemNames: string[] = recipe.items.map(item => item.name.toLowerCase())
+            filteredRecipe.value = recipes.value.filter(recipe => {
+                const itemNames: string[] = getItemsFromRecipe(recipe).map(item => item.name.toLowerCase())
                 return itemNames.includes(query)
             });
         }
 
-        return { filteredRecipe, handleChange, filter, arrowDown, vShow };
+        watch(recipes, () => {
+            filteredRecipe.value = recipes.value;
+        })
+
+        return { 
+            getItemsFromRecipe, filteredRecipe,
+            handleChange, filter,
+            arrowDown 
+        };
 
     }
 });
