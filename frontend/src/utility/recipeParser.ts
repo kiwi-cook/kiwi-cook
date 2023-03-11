@@ -1,4 +1,5 @@
 import { Step, StepItem } from '@/api/types';
+import { deepCopy } from './util';
 
 enum State {
     Ignore,
@@ -6,10 +7,6 @@ enum State {
     Unit,
     AmountWithUnit,
     Ingredient
-}
-
-const deepCopy = (obj: any): any => {
-    return JSON.parse(JSON.stringify(obj));
 }
 
 export const descriptionToSteps = (description: string): Step[] => {
