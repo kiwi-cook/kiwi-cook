@@ -1,7 +1,7 @@
 <template>
     <ion-card>
         <ion-card-header>
-            <ion-item lines="none">
+            <ion-item lines="none" v-if="mutableItem.imgUrl || mutableItem._id">
                 <ion-avatar v-if="mutableItem.imgUrl">
                     <img :src="mutableItem.imgUrl" />
                 </ion-avatar>
@@ -13,13 +13,27 @@
                 <ion-item lines="none">
                     <div slot="start">
                         <ion-label color="light" position="stacked">Name</ion-label>
-                        <ion-input v-model="mutableItem.name" placeholder="Item name" color="light"></ion-input>
+                        <ion-input :value="mutableItem.name" @keyup.enter="$event => mutableItem.name = $event.target.value"
+                            @ion-blur="$event => mutableItem.name = ($event.target.value ?? '').toString()" :maxlength="40"
+                            color="light" placeholder="e.g. Baking powder" />
                     </div>
                     <div slot="end">
                         <ion-button fill="solid" color="danger" @click="removeItem()">
                             Remove item
                         </ion-button>
                     </div>
+                </ion-item>
+
+                <ion-item lines="none">
+                    <ion-label color="light" position="stacked">Image URL</ion-label>
+                    <ion-input color="light" v-model="mutableItem.imgUrl" />
+                </ion-item>
+
+                <ion-item lines="none">
+                    <ion-select color="light" placeholder="Type" v-model="mutableItem.type">
+                        <ion-select-option value="ingredient">Ingredient</ion-select-option>
+                        <ion-select-option value="tool">Tool</ion-select-option>
+                    </ion-select>
                 </ion-item>
             </ion-card-title>
         </ion-card-header>
@@ -37,11 +51,15 @@
             </template>
         </ion-card-content>
     </ion-card>
+
+    <ion-item>
+        <ion-button @click="saveItem()">{{ mutableItem._id ? 'Update' : 'Save' }} item</ion-button>
+    </ion-item>
 </template>
 
 <script lang="ts">
 import { Item, Recipe } from '@/api/types';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton } from '@ionic/vue';
+import { IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { useTasteBuddyStore } from '@/storage';
 import { getFromAPI } from '@/api';
@@ -56,7 +74,7 @@ export default defineComponent({
         }
     },
     components: {
-        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton
+        IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton
     },
     emits: ['remove'],
     setup(props, ctx) {
@@ -73,6 +91,10 @@ export default defineComponent({
         const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesByItemId(mutableItem.value._id)
             .map((recipeId: string) => store.getters.getRecipesById[recipeId]))
 
+        const saveItem = () => {
+            getFromAPI(API_ROUTE.ADD_ITEM, { body: mutableItem.value })
+        }
+        
         const removeItem = () => {
             getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: mutableItem.value._id ?? '' } })
             // remove item from parent
@@ -80,7 +102,7 @@ export default defineComponent({
         }
 
         return {
-            mutableItem, removeItem,
+            mutableItem, saveItem, removeItem,
             usedInRecipes
         }
     }

@@ -10,7 +10,7 @@
                     </ion-col>
                     <ion-col size="3">
                         <ion-card-title>
-                            <ion-input v-model="mutableRecipe.name" :maxlength="40" color="light" />
+                            <ion-input :value="mutableRecipe.name" @keyup.enter="$event => mutableRecipe.name = $event.target.value" @ion-blur="$event => mutableRecipe.name = ($event.target.value ?? '').toString() " :maxlength="40" color="light" />
                         </ion-card-title>
                     </ion-col>
                     <ion-col size="auto">
@@ -116,7 +116,7 @@
                                             placeholder="e.g. Baking powder">
                                             <template #item="{ filteredItem }">
                                                 <ion-label color="light">
-                                                    {{ filteredItem.name }} - {{ filteredItem._id }}
+                                                    {{ filteredItem.name }} {{ filteredItem._id ? ' - ' + filteredItem._id : '' }}
                                                 </ion-label>
                                             </template>
                                         </DropDownSearch>
@@ -280,6 +280,7 @@ export default defineComponent({
             allItems, addNewItem, addItem, removeItem, addItemsFromDescription,
             // icons
             closeCircleOutline,
+            log: console.log,
         };
     },
 })
