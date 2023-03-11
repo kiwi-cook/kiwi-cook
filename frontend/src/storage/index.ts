@@ -100,7 +100,7 @@ export function createVueStore() {
         },
         getters: {
             getRecipes(state): Recipe[] {
-                return state.recipes ?? []
+                return state.recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name)) ?? []
             },
             getRecipesById: (_, getters): { [recipeId: string]: Recipe } => {
                 return getters.getRecipes.reduce((recipeMap: { [recipeId: string]: Recipe }, recipe: Recipe) => {
@@ -111,7 +111,7 @@ export function createVueStore() {
                 }, {})
             },
             getItems(state): Item[] {
-                return state.items ?? []
+                return state.items.sort((a: Item, b: Item) => a.name.localeCompare(b.name)) ?? []
             },
             getDiscounts: (state) => (city: string): Discount[] => {
                 return state.discounts[city] ?? []
