@@ -26,7 +26,7 @@ func GetFromUrl(url string) ([]byte, error) {
 	// set headers
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("Accept-Language", "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101 Firefox/78.0")
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0")
 
 	// send request
 	resp, err := http.DefaultClient.Do(req)
