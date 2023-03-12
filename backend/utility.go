@@ -19,7 +19,7 @@ func GetFromUrl(url string) ([]byte, error) {
 	// fetch from url
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		log.Print(err)
+		LogError("GetFromUrl", err)
 		return []byte{}, err
 	}
 
@@ -31,7 +31,7 @@ func GetFromUrl(url string) ([]byte, error) {
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Print(err)
+		LogError("GetFromUrl", err)
 		return []byte{}, err
 	}
 
@@ -40,9 +40,28 @@ func GetFromUrl(url string) ([]byte, error) {
 	// read bytes from body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Print(err)
+		LogError("GetFromUrl", err)
 		return []byte{}, err
 	}
 
 	return body, nil
+}
+
+func Log(functionName string, message ...any) {
+	if len(message) == 0 {
+		log.Printf("INFO [%s]", functionName)
+		return
+	} else if len(message) == 1 {
+		log.Printf("INFO [%s]: %v", functionName, message[0])
+		return
+	}
+	log.Printf("INFO [%s]: %s", functionName, message)
+}
+
+// Log Error
+func LogError(functionName string, err error) {
+	const colorRed = "\033[0;31m"
+	const colorNone = "\033[0m"
+
+	log.Printf("%sERROR%s [%s]: %s", colorRed, colorNone, functionName, err)
 }

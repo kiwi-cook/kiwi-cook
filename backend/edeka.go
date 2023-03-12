@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 	"strconv"
 )
 
@@ -39,7 +38,7 @@ func GetEdekaMarkets(city string) ([]Market, error) {
 	var edekaMarketSearch EdekaMarketSearch
 	err = json.Unmarshal(body, &edekaMarketSearch)
 	if err != nil {
-		log.Print(err)
+		LogError("GetEdekaMarkets", err)
 		return []Market{}, err
 	}
 
@@ -49,13 +48,13 @@ func GetEdekaMarkets(city string) ([]Market, error) {
 		// parse coordinates
 		lat, err := strconv.ParseFloat(market.Coordinates.Latitude, 32)
 		if err != nil {
-			log.Print(err)
+			LogError("GetEdekaMarkets", err)
 			lat = 0
 		}
 
 		lon, err := strconv.ParseFloat(market.Coordinates.Longitude, 32)
 		if err != nil {
-			log.Print(err)
+			LogError("GetEdekaMarkets", err)
 			lon = 0
 		}
 
@@ -95,7 +94,7 @@ func GetEdekaDiscounts(market Market) ([]Discount, error) {
 
 	err = json.Unmarshal(body, &edekaDiscounts)
 	if err != nil {
-		log.Print(err)
+		LogError("GetEdekaDiscounts", err)
 		return []Discount{}, err
 	}
 

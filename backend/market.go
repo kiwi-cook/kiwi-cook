@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +35,7 @@ type Market struct {
 func (app *TasteBuddyApp) HandleGetMarketsByCity(context *gin.Context) {
 	city := context.Param("city")
 	if markets, err := app.client.GetMarketsByCity(city); err != nil {
-		log.Print(err)
+		LogError("HandleGetMarketsByCity", err)
 		ServerError(context, true)
 	} else {
 		SuccessJSON(context, markets)
@@ -47,7 +46,7 @@ func (app *TasteBuddyApp) HandleGetMarketsByCity(context *gin.Context) {
 // Calls getMarkets and handles the context
 func (app *TasteBuddyApp) HandleGetAllMarkets(context *gin.Context) {
 	if markets, err := app.client.GetAllMarkets(); err != nil {
-		log.Print(err)
+		LogError("HandleGetAllMarkets", err)
 		ServerError(context, true)
 	} else {
 		SuccessJSON(context, markets)
@@ -65,12 +64,12 @@ func (client *TasteBuddyDatabase) GetMarketsByCity(city string) ([]Market, error
 	collection := client.GetMarketsCollection()
 	cursor, err := collection.Find(ctx, bson.D{{Key: "location.city", Value: city}})
 	if err != nil {
-		log.Print(err)
+		LogError("GetMarketsByCity + "+city, err)
 		return []Market{}, err
 	}
 	var markets []Market
 	if err = cursor.All(ctx, &markets); err != nil {
-		log.Print(err)
+		LogError("GetMarketsByCity + "+city, err)
 		return []Market{}, err
 	}
 	return markets, nil
@@ -82,12 +81,12 @@ func (client *TasteBuddyDatabase) GetAllMarkets() ([]Market, error) {
 	collection := client.GetMarketsCollection()
 	cursor, err := collection.Find(ctx, bson.D{})
 	if err != nil {
-		log.Print(err)
+		LogError("GetAllMarkets", err)
 		return []Market{}, err
 	}
 	var markets []Market
 	if err = cursor.All(ctx, &markets); err != nil {
-		log.Print(err)
+		LogError("GetAllMarkets", err)
 		return []Market{}, err
 	}
 	return markets, nil
@@ -96,7 +95,7 @@ func (client *TasteBuddyDatabase) GetAllMarkets() ([]Market, error) {
 // GetAllMarketIDsByCity gets all marketIDs for a city
 func (client *TasteBuddyDatabase) GetAllMarketIDsByCity(city string) []string {
 	if markets, err := client.GetMarketsByCity(city); err != nil {
-		log.Print(err)
+		LogError("GetAllMarketIDsByCity + "+city, err)
 		return []string{}
 	} else {
 		var marketIDs []string
@@ -107,10 +106,10 @@ func (client *TasteBuddyDatabase) GetAllMarketIDsByCity(city string) []string {
 	}
 }
 
-// addMarketsToDB adds markets to database
+// AddMarkets adds markets to database
 func (client *TasteBuddyDatabase) AddMarkets(markets []Market) error {
 	ctx := DefaultContext()
-	log.Printf("[addMarketsToDB] Add %s markets to database...", strconv.Itoa(len(markets)))
+	Log("AddMarkets", "Add "+strconv.Itoa(len(markets))+" markets to database")
 
 	// Insert all markets
 	opts := options.Update().SetUpsert(true)
@@ -120,7 +119,7 @@ func (client *TasteBuddyDatabase) AddMarkets(markets []Market) error {
 		// Upsert market
 		_, err := collection.UpdateOne(ctx, bson.D{{Key: "distMarketId", Value: market.DistributorSpecificMarketID}}, bson.D{{Key: "$set", Value: market}}, opts)
 		if err != nil {
-			log.Print(err)
+			LogError("AddMarkets + "+market.MarketName, err)
 			return err
 		}
 	}
@@ -128,14 +127,14 @@ func (client *TasteBuddyDatabase) AddMarkets(markets []Market) error {
 	return nil
 }
 
-// getMarketsByCityFromAPI gets all markets for a city
+// GetMarketsByCityFromAPI gets all markets for a city
 func GetMarketsByCityFromAPI(city string) []Market {
 	var markets []Market
 	var functions = []func(string) ([]Market, error){GetEdekaMarkets, GetReweMarkets}
 	for _, function := range functions {
 		m, err := function(city)
 		if err != nil {
-			log.Print(err)
+			LogError("GetMarketsByCityFromAPI + "+city, err)
 			continue
 		}
 		markets = append(markets, m...)
@@ -143,7 +142,7 @@ func GetMarketsByCityFromAPI(city string) []Market {
 	if markets == nil {
 		markets = []Market{}
 	}
-	log.Printf("[getMarketsByCityFromAPI] Found %s markets for %s", strconv.Itoa(len(markets)), city)
+	Log("GetMarketsByCityFromAPI + "+city, "Found "+strconv.Itoa(len(markets))+" markets for "+city)
 	return markets
 }
 
@@ -154,10 +153,10 @@ func GoRoutineSaveMarketsToDB(client *TasteBuddyDatabase) {
 		"Konstanz",
 		"Berlin",
 		"Hamburg",
-		"München",
+		"Muenchen",
 	}
 
-	log.Print("[GoRoutineSaveMarketsToDB] Start saving markets to database...")
+	Log("GoRoutineSaveMarketsToDB", "Start saving markets to database")
 	for _, city := range cities {
 		go client.SaveMarketsFromAPI(city)
 	}
@@ -166,11 +165,11 @@ func GoRoutineSaveMarketsToDB(client *TasteBuddyDatabase) {
 // SaveMarketsFromAPI gets all markets for a city and save them to the db
 // Helper function for GoRoutineSavemarketsToDB
 func (client *TasteBuddyDatabase) SaveMarketsFromAPI(city string) {
-	log.Printf("[SaveMarketsFromAPI] Save markets for %s...", city)
+	Log("SaveMarketsFromAPI + "+city, "Save markets")
 	markets := GetMarketsByCityFromAPI(city)
 	if err := client.AddMarkets(markets); err != nil {
-		log.Print(err)
+		LogError("SaveMarketsFromAPI", err)
 		return
 	}
-	log.Print("[SaveMarketsFromAPI] DONE...")
+	Log("SaveMarketsFromAPI + "+city, "Done saving markets")
 }

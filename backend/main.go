@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,7 +12,7 @@ func main() {
 	////////////////////////////////////////////////////////////////////////
 	// Initialize App
 	app := TasteBuddyAppFactory()
-	log.Print("Starting TasteBuddy API")
+	Log("main", "Starting TasteBuddy API")
 	// Finish Initialize App
 	////////////////////////////////////////////////////////////////////////
 
@@ -188,12 +187,12 @@ func main() {
 		}
 	}
 
-	log.Print("[main] DONE...")
+	Log("main", "DONE preparing server")
 
 	// Start server
 	err = r.Run(":" + PORT)
 	if err != nil {
-		log.Print(err)
+		LogError("main", err)
 		return
 	}
 
