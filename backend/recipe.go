@@ -22,13 +22,27 @@ type Recipe struct {
 	Tags        []string           `json:"tags,omitempty" bson:"tags,omitempty"`
 	CookingTime int                `json:"cookingTime" bson:"cookingTime" binding:"required"`
 	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
+	CreatedAt   time.Time          `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
+	Deleted     bool               `json:"-" bson:"deleted,omitempty"`
 }
 
 type Step struct {
-	Items           []StepItem `json:"items" bson:"items" binding:"required"`
-	ImgUrl          string     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Description     string     `json:"description" bson:"description" binding:"required"`
-	PreparationTime int        `json:"preparationTime" bson:"preparationTime" binding:"required"`
+	Description               string                     `json:"description" bson:"description" binding:"required"`
+	Items                     []StepItem                 `json:"items" bson:"items" binding:"required"`
+	ImgUrl                    string                     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	PreparationTime           int                        `json:"preparationTime,omitempty" bson:"preparationTime,omitempty"`
+	AdditionalStepInformation *AdditionalStepInformation `json:"additional,omitempty" bson:"additional,omitempty"`
+}
+
+type AdditionalStepInformation struct {
+	Type                  string `json:"informationType,omitempty" bson:"informationType,omitempty"`
+	BakingStepInformation `json:",inline,omitempty" bson:",inline,omitempty"`
+}
+
+type BakingStepInformation struct {
+	Degrees    int    `json:"degrees,omitempty" bson:"degrees,omitempty"`
+	Time       int    `json:"time,omitempty" bson:"time,omitempty"`
+	BakingType string `json:"bakingType,omitempty" bson:"bakingType,omitempty"`
 }
 
 type StepItem struct {
@@ -325,6 +339,8 @@ func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) error {
 
 	if newRecipe.ID.IsZero() {
 		// add new recipe
+		// set createdAt to current time
+		newRecipe.CreatedAt = time.Now()
 		_, err = client.GetRecipesCollection().InsertOne(ctx, newRecipe)
 	} else {
 		// update recipe
@@ -373,107 +389,6 @@ func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {
 		}
 	}
 	return nil
-}
-
-// CleanUpItemsInRecipes removes all items from recipes that are not in the database
-// and replaces them with the best item from the database
-func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
-	var err error
-
-	var items []Item
-	var recipes []Recipe
-
-	// get items
-	items, err = client.GetAllItems()
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	// create map of the "best" item for each name
-	var itemMap = make(map[string]Item)
-	for _, item := range items {
-		// check if map already contains item
-		if itemFromMap, ok := itemMap[item.Name]; ok {
-			// check if item is better than item in map
-			if GetItemQuality(item) > GetItemQuality(itemFromMap) {
-				// replace item in map
-				itemMap[item.Name] = item
-				log.Printf("[CleanUpItemsInRecipes] replace %s with %s", itemFromMap.ID.String(), item.ID.String())
-			}
-		} else {
-			// add item to map
-			itemMap[item.Name] = item
-		}
-	}
-
-	// get recipes
-	recipes, err = client.GetAllRecipes()
-	if err != nil {
-		log.Print(err)
-		return err
-	}
-
-	// go through all recipes
-	var amountCleanedUp = 0
-	for _, recipe := range recipes {
-		for stepIndex, step := range recipe.Steps {
-			for itemIndex, stepItem := range step.Items {
-				// check if item is in map
-				if item, ok := itemMap[stepItem.Item.Name]; ok {
-					// replace item
-					stepItem.Item = item
-					stepItem.ItemID = item.ID
-					recipe.Steps[stepIndex].Items[itemIndex] = stepItem
-					amountCleanedUp++
-				}
-			}
-		}
-	}
-
-	// update recipes
-	for _, recipe := range recipes {
-		err = client.AddOrUpdateRecipe(recipe)
-		if err != nil {
-			log.Print(err)
-			return err
-		}
-	}
-
-	log.Printf("[CleanUpItemsInRecipes] Clean up %d recipes...\n", amountCleanedUp)
-
-	return nil
-}
-
-// GetItemQuality gets the quality of an item
-// 0 = empty (low quality)
-// 1 = ID (medium quality)
-// 2 = name (medium quality)
-// 3 = name + type (medium quality)
-// 4 = name + type + imgurl (high quality)
-func GetItemQuality(item Item) int {
-	var itemQuality int = 0
-
-	if !item.ID.IsZero() {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.ImgUrl != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.Name != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.Type != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	return itemQuality
 }
 
 // GetItemsCollection gets recipes from database
@@ -618,10 +533,130 @@ func (client *TasteBuddyDatabase) GetRecipesByItemNames(splitItemIds []string) (
 	return filteredRecipes, nil
 }
 
+// CleanUpItemsInRecipes removes all items from recipes that are not in the database
+// and replaces them with the best item from the database
+func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
+	var err error
+
+	var items []Item
+	var recipes []Recipe
+
+	// get items
+	items, err = client.GetAllItems()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	// create map of the "best" item for each name
+	var itemMap = make(map[string]Item)
+	for _, item := range items {
+		// check if map already contains item
+		if itemFromMap, ok := itemMap[item.Name]; ok {
+			// check if item is better than item in map
+			if GetItemQuality(item) > GetItemQuality(itemFromMap) {
+				// replace item in map
+				itemMap[item.Name] = item
+				log.Printf("[CleanUpItemsInRecipes] replace %s with %s", itemFromMap.ID.String(), item.ID.String())
+			}
+		} else {
+			// add item to map
+			itemMap[item.Name] = item
+		}
+	}
+
+	// get recipes
+	recipes, err = client.GetAllRecipes()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	// go through all recipes
+	var amountCleanedUp = 0
+	for _, recipe := range recipes {
+		for stepIndex, step := range recipe.Steps {
+			for itemIndex, stepItem := range step.Items {
+				// check if item is in map
+				if item, ok := itemMap[stepItem.Item.Name]; ok {
+					// replace item
+					stepItem.Item = item
+					stepItem.ItemID = item.ID
+					recipe.Steps[stepIndex].Items[itemIndex] = stepItem
+					amountCleanedUp++
+				}
+			}
+		}
+	}
+
+	// update recipes
+	for _, recipe := range recipes {
+		err = client.AddOrUpdateRecipe(recipe)
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+	}
+
+	log.Printf("[CleanUpItemsInRecipes] Clean up %d recipes...\n", amountCleanedUp)
+
+	return nil
+}
+
+// GetItemQuality gets the quality of an item
+// 0 = empty (low quality)
+// 1 = ID (medium quality)
+// 2 = name (medium quality)
+// 3 = name + type (medium quality)
+// 4 = name + type + imgurl (high quality)
+func GetItemQuality(item Item) int {
+	var itemQuality int = 0
+
+	if !item.ID.IsZero() {
+		itemQuality = itemQuality + 1
+	}
+
+	// check if url is not empty
+	if item.ImgUrl != "" {
+		itemQuality = itemQuality + 1
+	}
+
+	// check if url is not empty
+	if item.Name != "" {
+		itemQuality = itemQuality + 1
+	}
+
+	// check if url is not empty
+	if item.Type != "" {
+		itemQuality = itemQuality + 1
+	}
+
+	return itemQuality
+}
+
+// CleanUpUnusedAttributesInRecipes marshals and unmarshals all recipes and
+// tries to remove all unused attributes
+func (client *TasteBuddyDatabase) CleanUpUnusedAttributesInRecipes() error {
+	recipes, err := client.GetAllRecipes()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	for _, recipe := range recipes {
+		if err := client.AddOrUpdateRecipe(recipe); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // GoRoutineCleanUpRecipes
 func GoRoutineCleanUpRecipes(client *TasteBuddyDatabase) {
 	for {
 		client.CleanUpItemsInRecipes()
+		client.CleanUpUnusedAttributesInRecipes()
 		// clean up recipes every 6 hours
 		time.Sleep(6 * time.Hour)
 	}
