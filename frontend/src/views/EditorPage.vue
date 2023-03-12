@@ -7,7 +7,7 @@
         </ion-header>
 
         <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleRecipeFilter($event)" />
+            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleFilter($event)" />
 
             <ion-segment value="default" @ion-change="handleSegment($event)">
                 <ion-segment-button value="recipes">
@@ -27,7 +27,7 @@
             <!-- Recipe Editor -->
             <ion-accordion-group v-if="segment === 'recipes'" expand="inset">
                 <template v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipe._id + recipeIndex">
-                    <ion-accordion :value="recipeIndex.toString()">
+                    <ion-accordion :value="recipe.name">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ recipe.name }}</ion-label>
                         </ion-item>
@@ -47,14 +47,14 @@
                     </ion-card-header>
                     <ion-card-content>
                         <ion-list>
-                            <ion-item v-if="items.length > 0">
+                            <ion-item v-if="filteredItems.length > 0">
                                 <ion-button @click="removeItemsWithoutRecipe">Remove items without recipe</ion-button>
                             </ion-item>
                         </ion-list>
                     </ion-card-content>
                 </ion-card>
 
-                <template v-for="(item, itemIndex) in items" :key="item._id + itemIndex">
+                <template v-for="(item, itemIndex) in filteredItems" :key="item._id + item.name + itemIndex">
                     <ion-accordion :value="itemIndex.toString()">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ item.name }}</ion-label>
@@ -68,7 +68,7 @@
 
             <ion-fab slot="fixed" vertical="bottom" horizontal="end">
                 <ion-fab-button @click="addNew()" color="tertiary">
-                    <ion-icon :icon="add">></ion-icon>
+                    <ion-icon :icon="add" color="light" />
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -102,6 +102,7 @@ export default defineComponent({
 
         // items
         const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
+        const filteredItems = ref<Item[]>(items.value)
 
         // segment
         const segment: Ref<string> = ref('recipes')
@@ -126,14 +127,20 @@ export default defineComponent({
             store.dispatch('mapRecipeIdsToItemIds')
         })
 
-        const handleRecipeFilter = (event: any) => {
+        watch(items, () => {
+            filteredItems.value = items.value
+        })
+
+        const handleFilter = (event: any) => {
             const query: string = event.target.value.toLowerCase().trim();
             if (query === '') {
                 filteredRecipes.value = recipes.value
+                filteredItems.value = items.value
                 return
             }
 
             filteredRecipes.value = recipes.value.filter(recipe => JSON.stringify(recipe).toLowerCase().includes(query))
+            filteredItems.value = items.value.filter(item => JSON.stringify(item).toLowerCase().includes(query))
         }
 
         const addNewRecipe = () => {
@@ -160,7 +167,11 @@ export default defineComponent({
             tmpItems.forEach((item: Item) => {
                 if (store.getters.getRecipesByItemId(item._id).length === 0) {
                     removedItems.push(item)
-                    getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: item._id ?? '' } })
+                    // delete item if it has an id
+                    if (item._id) {
+                        getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: item._id ?? '' } })
+                    }
+                    // delete item from items array
                     removeItem(items.value.indexOf(item))
                 }
             })
@@ -184,12 +195,12 @@ export default defineComponent({
             handleRefresh,
             // toolbar
             segment, handleSegment,
-            handleRecipeFilter,
+            handleFilter,
             addNew,
             // recipes
             filteredRecipes, addNewRecipe, removeRecipe,
             // items
-            items, addNewItem, removeItem, removeItemsWithoutRecipe,
+            filteredItems, addNewItem, removeItem, removeItemsWithoutRecipe,
             // icons
             add,
         };
