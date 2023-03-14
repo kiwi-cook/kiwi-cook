@@ -116,6 +116,8 @@ func (app *TasteBuddyApp) HandleGetRandomRecipe(context *gin.Context) {
 // HandleAddRecipe gets called by router
 // Calls addRecipeToDB and handles the context
 func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
+	LogContextHandle(context, "HandleAddRecipe", "Trying to add/update recipe")
+
 	// try to bind json to recipe
 	var newRecipe Recipe
 	if err := context.BindJSON(&newRecipe); err != nil {
@@ -129,6 +131,7 @@ func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
+	LogContextHandle(context, "HandleAddRecipe", "Added/Updated recipe "+newRecipe.Name+" ("+newRecipe.ID.Hex()+")")
 	Success(context, "Added recipe")
 }
 
@@ -136,6 +139,7 @@ func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
 // Calls DeleteRecipeById and handles the context
 func (app *TasteBuddyApp) HandleDeleteRecipeById(context *gin.Context) {
 	id := context.Param("id")
+	LogContextHandle(context, "HandleDeleteRecipeById", "Trying to delete recipe "+id)
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -151,6 +155,7 @@ func (app *TasteBuddyApp) HandleDeleteRecipeById(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
+	LogContextHandle(context, "HandleDeleteRecipeById", "Deleted recipe "+id)
 	Success(context, "Deleted recipe "+id)
 }
 
@@ -209,6 +214,8 @@ func (app *TasteBuddyApp) HandleGetItemById(context *gin.Context) {
 // HandleAddItem gets called by router
 // Calls addItemToDB and handles the context
 func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
+	LogContextHandle(context, "HandleAddItem", "Trying to add/update item")
+
 	var newItem Item
 	if err := context.BindJSON(&newItem); err != nil {
 		LogError("HandleAddItem", err)
@@ -221,6 +228,7 @@ func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
+	LogContextHandle(context, "HandleAddItem", "Added/Updated item "+newItem.Name+" ("+newItem.ID.Hex()+")")
 	Success(context, "Added item")
 }
 
@@ -228,6 +236,7 @@ func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
 // Calls DeleteItemById and handles the context
 func (app *TasteBuddyApp) HandleDeleteItemById(context *gin.Context) {
 	id := context.Param("id")
+	LogContextHandle(context, "HandleDeleteItemById", "Trying to delete item "+id)
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
@@ -243,7 +252,7 @@ func (app *TasteBuddyApp) HandleDeleteItemById(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	Log("HandleDeleteItemById", "Deleted item "+id)
+	LogContextHandle(context, "HandleDeleteItemById", "Deleted item "+id)
 	Success(context, "Deleted item "+id)
 }
 
@@ -330,30 +339,37 @@ func (client *TasteBuddyDatabase) GetRecipeById(id primitive.ObjectID) (Recipe, 
 func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) error {
 	ctx := DefaultContext()
 	var err error
+	var objectId primitive.ObjectID
 
 	// get the items from the recipe and add them to the database
 	err = newRecipe.PrepareForDB(client)
 	if err != nil {
-		LogError("GetRecipeById", err)
+		LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name, err)
 		return err
 	}
 
 	if newRecipe.ID.IsZero() {
 		// add new recipe
 		// set createdAt to current time
+		LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name, "Add new recipe to database")
+		var result *mongo.InsertOneResult
 		newRecipe.CreatedAt = time.Now()
-		_, err = client.GetRecipesCollection().InsertOne(ctx, newRecipe)
+		result, err = client.GetRecipesCollection().InsertOne(ctx, newRecipe)
+		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
 		// update recipe
+		LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+newRecipe.ID.String()+")", "Update existing recipe in database")
 		_, err = client.GetRecipesCollection().UpdateOne(ctx,
 			bson.D{{Key: "_id", Value: newRecipe.ID}},
 			bson.D{{Key: "$set", Value: newRecipe}})
+		objectId = newRecipe.ID
 	}
 	if err != nil {
-		LogError("GetRecipeById", err)
+		LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.String()+")", err)
 		return err
 	}
 
+	LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.String()+")", "Successful operation")
 	return nil
 }
 
@@ -362,6 +378,7 @@ func (client *TasteBuddyDatabase) DeleteRecipeById(id primitive.ObjectID) (primi
 	var err error
 
 	// delete recipe by setting deleted to true
+	LogWarning("DeleteRecipeById", "Delete recipe "+id.String()+" from database")
 	_, err = client.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
 	if err != nil {
 		LogError("DeleteRecipeById", err)
@@ -383,7 +400,7 @@ func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {
 				LogError("PrepareForDB + "+recipe.Name+" + "+stepItem.Item.Name, err)
 				return err
 			}
-			Log("PrepareForDB + '"+recipe.Name+"' ("+recipe.ID.String()+")", "Map "+stepItem.Item.Name+" to "+itemId.String())
+			Log("PrepareForDB + recipe "+recipe.Name+"("+recipe.ID.String()+")", "Map "+stepItem.Item.Name+" to "+itemId.String())
 			stepItem.ItemID = itemId
 			stepItem.Item = Item{}
 			recipe.Steps[stepIndex].Items[itemIndex] = stepItem
@@ -445,6 +462,7 @@ func (client *TasteBuddyDatabase) DeleteItemById(id primitive.ObjectID) (primiti
 	var err error
 
 	// delete recipe by setting deleted to true
+	LogWarning("DeleteItemById", "Delete item "+id.String()+" from database")
 	_, err = client.GetItemsCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
 	if err != nil {
 		LogError("DeleteItemById + "+id.String(), err)
@@ -469,22 +487,26 @@ func (client *TasteBuddyDatabase) AddOrUpdateItem(newItem Item) (primitive.Objec
 	ctx := DefaultContext()
 	var err error
 	var objectId primitive.ObjectID
+
 	if newItem.ID.IsZero() {
 		// add item
 		var result *mongo.InsertOneResult
+		LogWarning("AddOrUpdateItem + "+newItem.Name, "Add new item to database")
 		result, err = client.GetItemsCollection().InsertOne(ctx, newItem)
 		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
 		// update item
+		LogWarning("AddOrUpdateItem + "+newItem.Name+"("+newItem.ID.String()+")", "Update existing item in database")
 		_, err = client.GetItemsCollection().UpdateOne(ctx,
 			bson.D{{Key: "_id", Value: newItem.ID}},
 			bson.D{{Key: "$set", Value: newItem}})
 		objectId = newItem.ID
 	}
 	if err != nil {
-		LogError("AddOrUpdateItem", err)
+		LogError("AddOrUpdateItem + "+newItem.Name, err)
 		return objectId, err
 	}
+	LogWarning("AddOrUpdateItem + "+newItem.Name+"("+objectId.String()+")", "Successful operation")
 	return objectId, nil
 }
 

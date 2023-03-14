@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // Create a default context with a timeout of 30 seconds
@@ -56,6 +58,27 @@ func Log(functionName string, message ...any) {
 		return
 	}
 	log.Printf("INFO [%s]: %s", functionName, message)
+}
+
+func LogWarning(functionName string, message ...any) {
+	const colorYellow = "\033[0;33m"
+	const colorNone = "\033[0m"
+
+	if len(message) == 0 {
+		log.Printf("%sWARNING%s [%s]", colorYellow, colorNone, functionName)
+		return
+	} else if len(message) == 1 {
+		log.Printf("%sWARNING%s [%s]: %v", colorYellow, colorNone, functionName, message[0])
+		return
+	}
+	log.Printf("%sWARNING%s [%s]: %s", colorYellow, colorNone, functionName, message)
+}
+
+func LogContextHandle(context *gin.Context, functionName string, message ...any) {
+	const colorBlue = "\033[0;34m"
+	const colorNone = "\033[0m"
+
+	log.Printf("%sHANDLE IP(%s)%s [%s]: %s", colorBlue, context.ClientIP(), colorNone, functionName, message)
 }
 
 // Log Error
