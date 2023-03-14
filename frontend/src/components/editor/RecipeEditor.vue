@@ -10,7 +10,10 @@
                     </ion-col>
                     <ion-col size="3">
                         <ion-card-title>
-                            <ion-input :value="mutableRecipe.name" @keyup.enter="$event => mutableRecipe.name = $event.target.value" @ion-blur="$event => mutableRecipe.name = ($event.target.value ?? '').toString() " :maxlength="40" color="light" />
+                            <ion-input :value="mutableRecipe.name"
+                                @keyup.enter="$event => mutableRecipe.name = $event.target.value"
+                                @ion-blur="$event => mutableRecipe.name = ($event.target.value ?? '').toString()"
+                                :maxlength="40" color="light" />
                         </ion-card-title>
                     </ion-col>
                     <ion-col size="auto">
@@ -75,7 +78,7 @@
 
     <!-- Steps -->
     <ion-button fill="clear" @click="addStep(-1)">Add step</ion-button>
-    <template v-for="(step, stepIndex) in steps" :key="stepIndex">
+    <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
 
         <ion-card class="step-editor">
             <ion-card-header>
@@ -95,7 +98,8 @@
 
             <ion-card-content class="items-editor">
                 <!-- Items -->
-                <template v-for="(stepItem, itemIndex) in step.items" :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
+                <template v-for="(stepItem, itemIndex) in step.items"
+                    :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
                     <ion-card class="item-editor">
                         <ion-card-header>
                             <ion-item lines="none">
@@ -110,13 +114,13 @@
                                 <ion-item lines="none">
                                     <div slot="start">
                                         <ion-label color="light" position="stacked">Item</ion-label>
-                                        <DropDownSearch v-model="stepItem.item"
-                                            @add-item="addNewItem(stepIndex, itemIndex, $event)"
+                                        <DropDownSearch v-model="stepItem.item" @add-item="addNewItem(stepIndex, itemIndex, $event)"
                                             :custom-mapper="(item: Item) => item.name" :items="allItems"
                                             placeholder="e.g. Baking powder">
                                             <template #item="{ filteredItem }">
                                                 <ion-label color="light">
-                                                    {{ filteredItem.name }} {{ filteredItem._id ? ' - ' + filteredItem._id : '' }}
+                                                    {{ filteredItem.name }} {{ filteredItem._id ? ' - ' + filteredItem._id :
+                                                        '' }}
                                                 </ion-label>
                                             </template>
                                         </DropDownSearch>
@@ -173,22 +177,19 @@
         <ion-button fill="clear" @click="addStep(stepIndex)">Add step</ion-button>
     </template>
     <ion-item>
-        <ion-button @click="saveRecipe()">{{ mutableRecipe._id ? 'Update' : 'Save' }} recipe</ion-button>
-        <ion-button color="danger" fill="solid" @click="removeRecipe()">{{ mutableRecipe._id ? 'Delete' : 'Remove' }} recipe</ion-button>
+        <ion-button @click="saveRecipe()">Save recipe</ion-button>
+        <ion-button color="danger" fill="solid" @click="deleteRecipe()">Delete recipe</ion-button>
     </ion-item>
 </template>
 
 <script lang="ts">
-import { getFromAPI } from '@/api';
-import { API_ROUTE } from '@/api/constants';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Item, Recipe } from '@/api/types';
+import { Item, Recipe, Step, StepItem } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
 import { IonGrid, IonRow, IonCol, IonIcon, IonAvatar, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonButton, IonInput, IonTextarea, IonItem, IonLabel, IonSelect, IonSelectOption, IonChip } from '@ionic/vue';
-import { computed, defineComponent, PropType, ref, toRefs } from 'vue';
+import { computed, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
-import { descriptionToItems, descriptionToSteps } from '@/utility/recipeParser';
+import { descriptionToItems } from '@/utility/recipeParser';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -203,79 +204,38 @@ export default defineComponent({
         DropDownSearch
     },
     emits: ['remove'],
-    setup(props, ctx) {
+    setup(props) {
         const { recipe } = toRefs(props)
 
         const store = useTasteBuddyStore();
         const allItems = computed(() => store.state.items);
 
-        const mutableRecipe = ref<Recipe>(recipe.value)
-        const steps = computed(() => mutableRecipe.value.steps);
+        const mutableRecipe: Ref<Recipe> = ref<Recipe>(recipe.value)
+        // update recipe and steps when prop changes
+        watch(recipe, (newRecipe: Recipe) => {
+            mutableRecipe.value = newRecipe
+        }, { deep: true })
 
-        const saveRecipe = () => {
-            console.debug('Saving recipe ...', mutableRecipe.value.name)
-            getFromAPI(API_ROUTE.ADD_RECIPE, { body: mutableRecipe.value })
-        }
-
-        const removeRecipe = () => {
-            console.debug('Deleting recipe ...', mutableRecipe.value.name)
-            if (typeof mutableRecipe.value._id !== 'undefined') {
-                // delete recipe from API
-                getFromAPI(API_ROUTE.DELETE_RECIPE, { formatObject: { RECIPE_ID: mutableRecipe.value._id } })
-            }
-            // remove recipe from parent
-            ctx.emit('remove')
-        }
-
-        const addStep = (stepIndex: number) => {
-            steps.value.splice(stepIndex + 1, 0, {
-                description: '',
-                items: [],
-            });
-        };
-
-        const removeStep = (stepIndex: number) => {
-            steps.value.splice(stepIndex, 1);
-        };
-
-        const addItem = (stepIndex: number) => {
-            steps.value[stepIndex].items.push({
-                amount: 1,
-                unit: 'pcs',
-                item: {
-                    name: '',
-                    type: '',
-                    imgUrl: '',
-                },
-            });
-        };
-
-        const removeItem = (stepIndex: number, itemIndex: number) => {
-            steps.value[stepIndex].items.splice(itemIndex, 1);
-        };
-
-        const addNewItem = (stepIndex: number, itemIndex: number, item: string) => {
-            steps.value[stepIndex].items[itemIndex].item = {
-                name: item,
-                type: 'ingredient',
-                imgUrl: '',
-            };
-        }
-
+        const saveRecipe = () => mutableRecipe.value.save(store)
+        const deleteRecipe = () => mutableRecipe.value.delete(store)
+        const addStep = (stepIndex: number) => mutableRecipe.value.addStep(undefined, stepIndex)
+        const addStepsFromDescription = (description: string) => mutableRecipe.value.addSteps(Step.fromDescription(description))
+        const removeStep = (stepIndex: number) => mutableRecipe.value.removeStep(stepIndex)
+        const addItem = (stepIndex: number) => mutableRecipe.value.addItem(stepIndex).item.update(store)
+        const addNewItem = (stepIndex: number, itemIndex: number, itemName: string) => mutableRecipe.value.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
         const addItemsFromDescription = (stepIndex: number) => {
-            const description = steps.value[stepIndex].description;
-            recipe.value.steps[stepIndex].items.push(...descriptionToItems(description))
+            const description: string = mutableRecipe.value.steps[stepIndex].description;
+            descriptionToItems(description).forEach((stepItem: StepItem) => {
+                mutableRecipe.value.addStep(Step.fromStepItems([stepItem], description))
+            })
         }
-
-        const addStepsFromDescription = (description: string) => {
-            mutableRecipe.value.steps.push(...descriptionToSteps(description))
-        }
+        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value.steps[stepIndex].items.splice(itemIndex, 1);
 
         return {
             // recipe
-            mutableRecipe, saveRecipe, removeRecipe,
+            mutableRecipe, saveRecipe, deleteRecipe,
             // steps
-            steps, addStep, removeStep, addStepsFromDescription,
+            addStep, removeStep, addStepsFromDescription,
             // items
             allItems, addNewItem, addItem, removeItem, addItemsFromDescription,
             // icons

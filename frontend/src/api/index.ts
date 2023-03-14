@@ -7,7 +7,7 @@ import { Recipe, Discount, Market, Item } from './types';
  * @param route enum value of API_ROUTE
  * @param callback function that takes a list of e.g., Recipe or Item objects as parameter
  */
-export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options: { callback?: (json: T[]) => void, formatObject?: { [key: string]: string | number }, body?: T}): void {
+export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options?: { callback?: (json: T[]) => void, formatObject?: { [key: string]: string | number }, body?: T}): Promise<T[]> {
     let url = API_URL + API_ROUTES[route].url;
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
@@ -23,20 +23,21 @@ export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: A
     }
 
     if (options?.body) {
-        fetchOptions.body = JSON.stringify(options?.body)
+        fetchOptions.body = JSON.stringify(options.body)
     }
 
     // call fetch
-    fetch(url, fetchOptions)
+    return fetch(url, fetchOptions)
         .then(response => response.json())
         .then(data => {
             console.debug(data)
             if (typeof options?.callback !== 'undefined') {
                 options?.callback(data)
             }
+            return data
         })
         .catch(error => {
             console.error(error)
+            return []
         })
 }
-

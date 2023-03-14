@@ -32,7 +32,7 @@
                             <ion-label color="light">{{ recipe.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <RecipeEditor :recipe="recipe" @remove="removeRecipe(recipeIndex)" />
+                            <RecipeEditor :recipe="recipe" />
                         </div>
                     </ion-accordion>
                 </template>
@@ -60,7 +60,7 @@
                             <ion-label color="light">{{ item.name }}</ion-label>
                         </ion-item>
                         <div slot="content">
-                            <ItemEditor :item="item" @remove="removeItem(itemIndex)" />
+                            <ItemEditor :item="item" />
                         </div>
                     </ion-accordion>
                 </template>
@@ -76,16 +76,13 @@
 </template>
 
 <script lang="ts">
-import { emptyItem, emptyRecipe, Item, Recipe } from '@/api/types';
+import { Item, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
 import { useTasteBuddyStore } from '@/storage';
 import { IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { add } from 'ionicons/icons'
 import { computed, ComputedRef, defineComponent, Ref, ref, watch } from 'vue';
-import { getFromAPI } from '@/api';
-import { API_ROUTE } from '@/api/constants';
-import { deepCopy } from '@/utility/util';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
@@ -99,10 +96,20 @@ export default defineComponent({
         // recipes
         const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes)
         const filteredRecipes = ref<Recipe[]>(recipes.value)
+        const addRecipe = () => Recipe.newRecipe().update(store)
 
         // items
         const items: ComputedRef<Item[]> = computed(() => store.getters.getItems)
         const filteredItems = ref<Item[]>(items.value)
+        const addItem = () => Item.newItem().update(store)
+
+        // control panel
+        const removeItemsWithoutRecipe = async () => {
+            const itemsToDelete = items.value.filter(item => store.getters.getRecipesByItemId(item._id).length === 0)
+            itemsToDelete.forEach(item => async () => {
+                await store.dispatch('deleteItem', item._id)
+            })
+        }
 
         // segment
         const segment: Ref<string> = ref('recipes')
@@ -122,14 +129,11 @@ export default defineComponent({
 
         watch(recipes, () => {
             filteredRecipes.value = recipes.value
-
-            // update map of recipes to item ids
-            store.dispatch('mapRecipeIdsToItemIds')
-        })
+        }, { deep: true })
 
         watch(items, () => {
             filteredItems.value = items.value
-        })
+        }, { deep: true })
 
         const handleFilter = (event: any) => {
             const query: string = event.target.value.toLowerCase().trim();
@@ -143,48 +147,13 @@ export default defineComponent({
             filteredItems.value = items.value.filter(item => JSON.stringify(item).toLowerCase().includes(query))
         }
 
-        const addNewRecipe = () => {
-            recipes.value.push(emptyRecipe)
-        }
-
-        const removeRecipe = (index: number) => {
-            recipes.value.splice(index, 1)
-        }
-
-        const addNewItem = () => {
-            items.value.push(emptyItem)
-        }
-
-        const removeItem = (index: number) => {
-            items.value.splice(index, 1)
-        }
-
-        // control panel
-        const removeItemsWithoutRecipe = () => {
-            const removedItems: Item[] = []
-            // copy items to avoid mutability side effects
-            const tmpItems: Item[] = deepCopy(items.value)
-            tmpItems.forEach((item: Item) => {
-                if (store.getters.getRecipesByItemId(item._id).length === 0) {
-                    removedItems.push(item)
-                    // delete item if it has an id
-                    if (item._id) {
-                        getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: item._id ?? '' } })
-                    }
-                    // delete item from items array
-                    removeItem(items.value.indexOf(item))
-                }
-            })
-            console.debug('Removed the following items: ' + removedItems.map(item => item.name));
-        }
-
         const addNew = () => {
             switch (segment.value) {
                 case 'items':
-                    addNewItem()
+                    addItem()
                     break;
                 case 'recipes':
-                    addNewRecipe();
+                    addRecipe();
                     break;
                 default:
                     break;
@@ -198,9 +167,9 @@ export default defineComponent({
             handleFilter,
             addNew,
             // recipes
-            filteredRecipes, addNewRecipe, removeRecipe,
+            filteredRecipes,
             // items
-            filteredItems, addNewItem, removeItem, removeItemsWithoutRecipe,
+            filteredItems, removeItemsWithoutRecipe,
             // icons
             add,
         };

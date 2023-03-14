@@ -19,7 +19,7 @@
                     </div>
                     <div slot="end">
                         <ion-button fill="solid" color="danger" @click="removeItem()">
-                            Remove item
+                            Delete item
                         </ion-button>
                     </div>
                 </ion-item>
@@ -44,7 +44,7 @@
                 <ion-list>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
                         <ion-chip color="light">
-                            {{ recipe.name }}
+                            {{ recipe?.name }}
                         </ion-chip>
                     </template>
                 </ion-list>
@@ -53,7 +53,7 @@
     </ion-card>
 
     <ion-item>
-        <ion-button @click="saveItem()">{{ mutableItem._id ? 'Update' : 'Save' }} item</ion-button>
+        <ion-button @click="saveItem()">Save item</ion-button>
     </ion-item>
 </template>
 
@@ -62,8 +62,6 @@ import { Item, Recipe } from '@/api/types';
 import { IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { useTasteBuddyStore } from '@/storage';
-import { getFromAPI } from '@/api';
-import { API_ROUTE } from '@/api/constants';
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -77,32 +75,25 @@ export default defineComponent({
         IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton
     },
     emits: ['remove'],
-    setup(props, ctx) {
+    setup(props) {
         const { item } = toRefs(props)
         const store = useTasteBuddyStore()
 
-        const mutableItem: Ref<Item> = ref(item)
+        const mutableItem: Ref<Item> = ref(item.value)
 
         // update mutableItem when item changes
         watch(item, () => {
             mutableItem.value = item.value
         })
 
-        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesByItemId(mutableItem.value._id)
+        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesByItemId(item.value._id)
             .map((recipeId: string) => store.getters.getRecipesById[recipeId]))
 
-        const saveItem = () => {
-            getFromAPI(API_ROUTE.ADD_ITEM, { body: mutableItem.value })
-        }
-        
-        const removeItem = () => {
-            getFromAPI(API_ROUTE.DELETE_ITEM, { formatObject: { ITEM_ID: mutableItem.value._id ?? '' } })
-            // remove item from parent
-            ctx.emit('remove')
-        }
+        const saveItem = () => mutableItem.value.save(store)
+        const deleteItem = () => mutableItem.value.delete(store)
 
         return {
-            mutableItem, saveItem, removeItem,
+            mutableItem, saveItem, removeItem: deleteItem,
             usedInRecipes
         }
     }

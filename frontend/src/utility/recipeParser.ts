@@ -134,17 +134,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
         .filter((token) => token.length > 0);
 
     const stepItems: StepItem[] = [];
-    const emptyStepItem: StepItem = {
-        amount: 1,
-        unit: 'pcs',
-        item: {
-            name: '',
-            type: '',
-            imgUrl: '',
-        }
-    }
-
-    let stepItem: StepItem = deepCopy(emptyStepItem)
+    let stepItem: StepItem = deepCopy(new StepItem());
 
     type StateMachine = {
         is: (token: string) => boolean,
@@ -200,7 +190,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
                 if (!isIngredient(nextToken)) {
                     console.debug(deepCopy(stepItem))
                     stepItems.push(deepCopy(stepItem));
-                    stepItem = deepCopy(emptyStepItem);
+                    stepItem = deepCopy(new StepItem());
                 }
             },
             next: [
