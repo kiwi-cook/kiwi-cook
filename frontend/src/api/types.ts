@@ -17,10 +17,23 @@ export class Item {
     constructor() {
         this._isSaved = false
         // create a temporary id to identify the item in the store before it is saved
-        this._tmpId = 'tmp' + Date.now().toString(16)
+        this._tmpId = 'tmp' + Date.now().toString(16) + Math.random().toString(16).slice(2)
         this.name = 'New Item'
         this.type = 'ingredient'
         this.imgUrl = ''
+    }
+
+    /**
+     * Get the id of the item
+     * @returns the id of the item
+     * @throws an error if the id is undefined
+     */
+    public getId(): string {
+        // if the id is undefined, throw an error
+        if (this._id === undefined && this._tmpId === undefined) {
+            throw new Error("item id is undefined")
+        }
+        return this._id ?? this._tmpId as string
     }
 
     /**
@@ -33,6 +46,12 @@ export class Item {
     static fromJSON(json: Item): Item {
         const item = new Item()
         item._id = json._id
+        // remove the temporary id
+        delete item._tmpId
+        // if the id is undefined, throw an error
+        if (item._id === undefined) {
+            throw new Error("item id is undefined")
+        }
         item._isSaved = true
         item.name = json.name
         item.type = json.type
@@ -53,9 +72,9 @@ export class Item {
      * @param name
      * @returns the item to allow chaining
      */
-    public static newItemFromName(name: string): Item {
+    public static newItemFromName(name?: string): Item {
         const item = new Item()
-        item.name = name
+        item.name = name ?? 'New Item'
         return item
     }
 
@@ -99,17 +118,60 @@ export class StepItem {
         this.unit = 'pcs'
         this.item = item ?? new Item()
     }
+
+    /**
+     * Initialize an stepItem from a json object
+     * This is done because the json object does not have the methods of the class
+     * 
+     * @param json 
+     * @returns a new recipe
+     */
+    static fromJSON(json: StepItem): StepItem {
+        const stepItem = new StepItem()
+        stepItem.amount = json.amount
+        stepItem.unit = json.unit
+        stepItem.item = Item.fromJSON(json.item)
+        return stepItem
+    }
 }
 
 export class Step {
     items: StepItem[];
+    imgUrl?: string;
     description: string;
+    preparationTime?: number;
+    additional?: { [key: string]: string; }
 
     constructor() {
         this.items = [new StepItem()]
+        this.imgUrl = ''
         this.description = 'New step description'
+        this.preparationTime = 0
     }
 
+    /**
+     * Initialize an stepItem from a json object
+     * This is done because the json object does not have the methods of the class
+     * 
+     * @param json 
+     * @returns a new recipe
+     */
+    static fromJSON(json: Step): Step {
+        const item = new Step()
+        item.items = json.items.map(item => StepItem.fromJSON(item))
+        item.imgUrl = json.imgUrl
+        item.description = json.description
+        item.preparationTime = json.preparationTime
+        item.additional = json.additional
+        return item
+    }
+
+    /**
+     * Create a step from a list of step items
+     * @param stepItems 
+     * @param description 
+     * @returns a new step
+     */
     public static fromStepItems(stepItems: StepItem[], description?: string): Step {
         const step = new Step()
         step.items = stepItems
@@ -117,6 +179,11 @@ export class Step {
         return step
     }
 
+    /**
+     * Generate a list of steps from a description
+     * @param description 
+     * @returns a list of steps
+     */
     public static fromDescription(description: string): Step[] {
         return descriptionToSteps(description)
     }
@@ -137,7 +204,7 @@ export class Recipe {
     constructor() {
         this._isSaved = false
         // create a temporary id to identify the recipe in the store before it is saved
-        this._tmpId = 'tmp' + Date.now().toString(16)
+        this._tmpId = 'tmp' + Date.now().toString(16) + Math.random().toString(16).slice(2)
         this.name = 'New Recipe'
         this.author = ''
         this.description = ''
@@ -157,6 +224,11 @@ export class Recipe {
     public static fromJSON(json: Recipe): Recipe {
         const recipe = new Recipe()
         recipe._id = json._id
+        delete recipe._tmpId
+        // if the id is undefined, throw an error
+        if (recipe._id === undefined) {
+            throw new Error("recipe id is undefined")
+        }
         recipe._isSaved = true
         recipe.name = json.name
         recipe.author = json.author
@@ -164,9 +236,22 @@ export class Recipe {
         recipe.imgUrl = json.imgUrl
         recipe.tags = json.tags
         recipe.cookingTime = json.cookingTime
-        recipe.steps = json.steps
+        recipe.steps = json.steps.map(step => Step.fromJSON(step))
 
         return recipe
+    }
+
+    /**
+     * Get the id of the recipe
+     * @returns the id of the recipe
+     * @throws an error if the id is undefined
+     */
+    public getId(): string {
+        // if the id is undefined, throw an error
+        if (this._id === undefined && this._tmpId === undefined) {
+            throw new Error("recipe id is undefined")
+        }
+        return this._id ?? this._tmpId as string
     }
 
     /**
@@ -183,6 +268,7 @@ export class Recipe {
      * @returns the recipe to allow chaining
      */
     public update(store: Store<State>): Recipe {
+        console.debug('[Recipe] update', this.getId())
         store.commit('updateRecipe', this)
         return this
     }
@@ -193,9 +279,14 @@ export class Recipe {
      * @returns the recipe to allow chaining
      */
     public save(store: Store<State>): Recipe {
-        // remove the temporary id
+        console.debug('[Recipe] save', this.getId())
         store.dispatch('saveRecipe', this)
         return this
+    }
+
+    public static saveById(store: Store<State>, id: string): void {
+        console.debug('[Recipe] saveById', id)
+        store.dispatch('saveRecipeById', id)
     }
 
     /**
@@ -203,6 +294,7 @@ export class Recipe {
      * @param store 
      */
     public delete(store: Store<State>): void {
+        console.debug('[Recipe] delete', this.getId())
         store.dispatch('deleteRecipe', this)
     }
 
@@ -216,8 +308,10 @@ export class Recipe {
         const _step: Step = step ?? new Step()
 
         if (stepIndex !== undefined) {
-            this.steps.splice(stepIndex, 0, _step)
+            // insert the step at the given index
+            this.steps.splice(stepIndex + 1, 0, _step)
         } else {
+            // add the step to the end
             this.steps.push(_step)
         }
         return this
@@ -253,15 +347,42 @@ export class Recipe {
         const stepItem = new StepItem(item);
 
         if (stepIndex === undefined) {
+            // add a new step if no step is specified
             this.steps[this.steps.length - 1].items.push(stepItem);
         } else if (itemIndex === undefined) {
+            // add a new item to the step if no item is specified
             this.steps[stepIndex].items.push(stepItem);
         } else {
-            this.steps[stepIndex].items[itemIndex] = stepItem;
+            // update the item at the specified index
+            this.steps[stepIndex].items[itemIndex].item = item;
         }
 
         console.debug('addItem', { stepIndex, itemIndex, item, recipe: this })
         return { item, recipe: this };
+    }
+
+    /**
+     * Get all unique items in the recipe
+     * @returns a list of all items in the recipe
+     */
+    public getItems(): Item[] {
+        // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
+        // use flatMap to get all items in the recipe
+        return [...new Set(this.steps.flatMap((step: Step) => step.items.map((item: StepItem) => item.item)))]
+    }
+
+    /**
+     * Add a tag to the recipe
+     * @param tag 
+     * @returns the recipe to allow chaining
+     */
+    public addTag(tag: string): Recipe {
+        if (this.tags === undefined) {
+            // initialize the tags array if it is undefined
+            this.tags = []
+        }
+        this.tags.push(tag)
+        return this
     }
 }
 
