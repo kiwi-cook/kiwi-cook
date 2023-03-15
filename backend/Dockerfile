@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.19-bullseye
+FROM golang:1.20.1-buster
 
 WORKDIR /
 
