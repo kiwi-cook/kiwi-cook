@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -54,7 +53,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, result)
+	SuccessJSON(context, result)
 }
 
 // search searches for recipes and items by using goroutines

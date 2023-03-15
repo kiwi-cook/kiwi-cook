@@ -134,7 +134,7 @@ func (client *TasteBuddyDatabase) AddDiscounts(discounts []Discount) error {
 		// Upsert market
 		ctx := DefaultContext()
 		if _, err := collection.UpdateOne(ctx, bson.M{"internalMarketId": discount.InternalMarketID, "title": discount.Title}, bson.D{{Key: "$set", Value: discount}}, opts); err != nil {
-			LogError("AddDiscounts + "+discount.ID.String(), err)
+			LogError("AddDiscounts + "+discount.ID.Hex(), err)
 			return err
 		}
 	}
