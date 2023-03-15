@@ -32,19 +32,7 @@
                         <ion-label color="light">{{ recipe.name }}</ion-label>
                     </ion-item>
                     <div slot="content">
-                        <div class="recipe-items">
-                            <template v-for="item in getItemsFromRecipe(recipe)" :key="item.name + recipe.name">
-                                <div class="recipe-item">
-                                    <div class="img-container">
-                                        <ion-img class="recipe-img" :src="item.imgUrl" :alt="item.name + ' Pic'">
-                                        </ion-img>
-                                        <IonLabel color="light">
-                                            {{ item.name }}
-                                        </IonLabel>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
+                        <SmallItemContainer :items="getItemsFromRecipe(recipe)" />
                     </div>
                 </ion-list>
             </template>
@@ -59,11 +47,15 @@ import { filter, arrowDown } from 'ionicons/icons';
 import { useTasteBuddyStore } from '@/storage';
 import { Recipe } from '@/api/types';
 import { getItemsFromRecipe } from '@/api/utility';
+import SmallItemContainer from './item/SmallItemContainer.vue';
 
 
 export default defineComponent({
     name: "SearchComponent",
-    components: { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar, IonLabel },
+    components: {
+        IonPage, IonList, IonItem, IonTitle, IonIcon, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar, IonLabel,
+        SmallItemContainer
+    },
     setup() {
         const store = useTasteBuddyStore();
         const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes);
@@ -82,10 +74,10 @@ export default defineComponent({
             filteredRecipe.value = recipes.value;
         })
 
-        return { 
+        return {
             getItemsFromRecipe, filteredRecipe,
             handleChange, filter,
-            arrowDown 
+            arrowDown
         };
 
     }
@@ -125,7 +117,7 @@ export default defineComponent({
 }
 
 
-.img-container{
+.img-container {
     /*background-color: #F28705;*/
     max-width: fit-content;
     max-height: 150px;
