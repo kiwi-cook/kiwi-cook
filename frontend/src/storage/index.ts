@@ -26,7 +26,7 @@ export interface State {
 }
 
 // Define injection key
-export const storeKey: InjectionKey<Store<State>> = Symbol()
+export const storeKey: InjectionKey<Store<State>> = Symbol("Taste Buddy Store")
 
 // Custom Vuex Store
 // https://vuex.vuejs.org/guide/typescript-support.html#simplifying-usestore-usage

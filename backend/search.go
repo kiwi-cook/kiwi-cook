@@ -58,7 +58,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 
 // search searches for recipes and items by using goroutines
 func search(searchQuery SearchQuery, client *TasteBuddyDatabase) (SearchResult, error) {
-	var result SearchResult = SearchResult{}
+	var result = SearchResult{}
 
 	var err error = nil
 
@@ -105,7 +105,7 @@ func search(searchQuery SearchQuery, client *TasteBuddyDatabase) (SearchResult, 
 // searchRecipe searches for a recipe by ID or by different parameters
 func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, error) {
 	var err error
-	var recipe Recipe = Recipe{}
+	var recipe = Recipe{}
 
 	// Check if recipe ID is given
 	if recipeQuery.RecipeID != primitive.NilObjectID {

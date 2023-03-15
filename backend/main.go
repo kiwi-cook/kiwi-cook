@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// Set database connection string
-	var DB_CONNSTRING string = viper.GetString("DB_CONNSTRING")
+	var DB_CONNSTRING = viper.GetString("DB_CONNSTRING")
 
 	// Set port
 	var PORT string
