@@ -26,10 +26,13 @@
 
             <!-- Recipe Editor -->
             <ion-accordion-group v-if="segment === 'recipes'" expand="inset">
-                <template v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipe._id + recipeIndex">
-                    <ion-accordion :value="recipe.name">
+                <template v-for="recipe in filteredRecipes" :key="recipe._id ?? recipe._tmpId">
+                    <ion-accordion :value="recipe._id ?? recipe._tmpId">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ recipe.name }}</ion-label>
+                            <ion-chip color="light" v-if="recipe._id || recipe._tmpId">
+                                {{ recipe._id ?? recipe._tmpId }}
+                            </ion-chip>
                         </ion-item>
                         <div slot="content">
                             <RecipeEditor :recipe="recipe" />
@@ -54,8 +57,8 @@
                     </ion-card-content>
                 </ion-card>
 
-                <template v-for="(item, itemIndex) in filteredItems" :key="item._id + item.name + itemIndex">
-                    <ion-accordion :value="itemIndex.toString()">
+                <template v-for="item in filteredItems" :key="item.getId()">
+                    <ion-accordion :value="item.getId()">
                         <ion-item slot="header" color="primary">
                             <ion-label color="light">{{ item.name }}</ion-label>
                         </ion-item>
@@ -80,14 +83,14 @@ import { Item, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
 import { useTasteBuddyStore } from '@/storage';
-import { IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { IonChip, IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { add } from 'ionicons/icons'
-import { computed, ComputedRef, defineComponent, Ref, ref, watch } from 'vue';
+import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, watch } from 'vue';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
+        IonChip, IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
         RecipeEditor, ItemEditor
     },
     setup() {
@@ -146,6 +149,24 @@ export default defineComponent({
             filteredRecipes.value = recipes.value.filter(recipe => JSON.stringify(recipe).toLowerCase().includes(query))
             filteredItems.value = items.value.filter(item => JSON.stringify(item).toLowerCase().includes(query))
         }
+
+        const handleSave = (event: any) => {
+            if (!(event.keyCode === 83 && (event.ctrlKey || event.metaKey))) {
+                return;
+            }
+
+            event.preventDefault();
+            if (segment.value === 'recipes') {
+                // save only recipes that are not new
+                console.log(filteredRecipes.value);
+                filteredRecipes.value.filter(recipe => typeof recipe._tmpId === 'undefined').forEach(recipe => recipe.update(store).save(store))
+            }
+        }
+
+        onMounted(() => {
+            document.addEventListener("keydown", handleSave, false);
+        })
+
 
         const addNew = () => {
             switch (segment.value) {
