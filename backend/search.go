@@ -60,7 +60,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 
 // search searches for recipes and items by using goroutines
 func search(searchQuery SearchQuery, client *TasteBuddyDatabase) (SearchResult, error) {
-	var result SearchResult = SearchResult{}
+	var result = SearchResult{}
 
 	var err error = nil
 
