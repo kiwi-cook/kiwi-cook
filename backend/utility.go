@@ -17,7 +17,7 @@ func DefaultContext() context.Context {
 // Fetches bytes from a url
 func GetFromUrl(url string) ([]byte, error) {
 	// fetch from url
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
 	if err != nil {
 		log.Print(err)
 		return []byte{}, err
