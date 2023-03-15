@@ -8,19 +8,19 @@ import (
 )
 
 func Success(context *gin.Context, message string) {
-	context.JSON(http.StatusOK, gin.H{"success": message})
+	context.JSON(http.StatusOK, gin.H{"message": message, "error": false})
 }
 
 func SuccessJSON(context *gin.Context, json interface{}) {
-	context.JSON(http.StatusOK, json)
+	context.JSON(http.StatusOK, gin.H{"response": json, "error": false})
 }
 
 func NotFoundError(context *gin.Context, itemName string) {
-	context.JSON(http.StatusNotFound, gin.H{"error": itemName + " not found."})
+	context.JSON(http.StatusNotFound, gin.H{"message": itemName + " not found.", "error": true})
 }
 
 func BadRequestError(context *gin.Context, message string) {
-	context.JSON(http.StatusBadRequest, gin.H{"error": message})
+	context.JSON(http.StatusBadRequest, gin.H{"message": message, "error": true})
 }
 
 func ServerError(context *gin.Context, funny bool) {
@@ -34,7 +34,7 @@ func ServerError(context *gin.Context, funny bool) {
 }
 
 func ErrorMessage(context *gin.Context, message string) {
-	context.JSON(http.StatusInternalServerError, gin.H{"error": message})
+	context.JSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
 }
 
 func funnyErrorMessage() string {

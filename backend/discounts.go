@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -27,9 +26,9 @@ type Discount struct {
 // Calls getDiscountsFromDBOrAPI and handles the context
 func (app *TasteBuddyApp) HandleGetDiscountsByCity(context *gin.Context) {
 	city := context.Param("city")
-	log.Print("[HandleGetDiscounts] Get discounts for city " + city)
+	Log("HandleGetDiscountsByCity", "Get discounts for city "+city)
 	if discounts, err := app.client.GetDiscountsByCity(city); err != nil {
-		log.Print(err)
+		LogError("HandleGetDiscountsByCity + "+city, err)
 		ServerError(context, true)
 	} else {
 		SuccessJSON(context, discounts)
@@ -39,9 +38,9 @@ func (app *TasteBuddyApp) HandleGetDiscountsByCity(context *gin.Context) {
 // HandleGetDiscounts gets called by router
 // Calls getDiscountsFromDB
 func (app *TasteBuddyApp) HandleGetAllDiscounts(context *gin.Context) {
-	log.Print("[HandleGetDiscounts] Get all discounts")
+	Log("HandleGetAllDiscounts", "Get all discounts")
 	if discounts, err := app.client.GetAllDiscounts(); err != nil {
-		log.Print(err)
+		LogError("HandleGetAllDiscounts", err)
 		ServerError(context, true)
 	} else {
 		SuccessJSON(context, discounts)
@@ -60,20 +59,20 @@ func (client *TasteBuddyDatabase) GetDiscountsByCity(city string) ([]Discount, e
 	// get marketIds for city
 	marketIds := client.GetAllMarketIDsByCity(city)
 	if len(marketIds) == 0 {
-		return []Discount{}, errors.New("[GetDiscountsByCity] No markets found for " + city)
+		return []Discount{}, errors.New("No markets found for " + city)
 	}
 
 	// get discounts for markets
 	discountsFromDB, err := client.GetDiscountsCollection().Find(ctx, bson.D{{Key: "internalMarketId", Value: bson.D{{Key: "$in", Value: marketIds}}}})
 	if err != nil {
-		log.Print(err)
+		LogError("GetDiscountsByCity + "+city, err)
 		return []Discount{}, err
 	}
 
 	// get discounts from database
 	var discounts []Discount
 	if err := discountsFromDB.All(ctx, &discounts); err != nil {
-		log.Print(err)
+		LogError("GetDiscountsByCity + "+city, err)
 		return []Discount{}, err
 	}
 
@@ -92,7 +91,7 @@ func (client *TasteBuddyDatabase) GetDiscountsByCity(city string) ([]Discount, e
 	}
 	discounts = filteredDiscounts
 
-	log.Printf("Return %s discounts from database.", strconv.Itoa(len(discounts)))
+	Log("GetDiscountsByCity + "+city, "Return "+strconv.Itoa(len(discounts))+" discounts from database")
 	return discounts, nil
 }
 
@@ -107,17 +106,17 @@ func (market *Market) GetDiscountsFromAPI() ([]Discount, error) {
 	return []Discount{}, nil
 }
 
-// getAllDiscountsFromDB gets all discounts from database
+// GetAllDiscounts gets all discounts from database
 func (client *TasteBuddyDatabase) GetAllDiscounts() ([]Discount, error) {
 	ctx := DefaultContext()
 	cursor, err := client.GetDiscountsCollection().Find(ctx, bson.M{})
 	if err != nil {
-		log.Print(err)
+		LogError("GetAllDiscounts", err)
 		return []Discount{}, err
 	}
 	var discounts []Discount
 	if err = cursor.All(ctx, &discounts); err != nil {
-		log.Print(err)
+		LogError("GetAllDiscounts", err)
 		return []Discount{}, err
 	}
 	return discounts, nil
@@ -125,8 +124,7 @@ func (client *TasteBuddyDatabase) GetAllDiscounts() ([]Discount, error) {
 
 // AddDiscounts adds discounts to database
 func (client *TasteBuddyDatabase) AddDiscounts(discounts []Discount) error {
-	ctx := DefaultContext()
-	log.Printf("[AddDiscounts] Add %s discounts to database...", strconv.Itoa(len(discounts)))
+	Log("AddDiscounts", "Add "+strconv.Itoa(len(discounts))+" discounts to database")
 
 	// Insert all markets
 	opts := options.Update().SetUpsert(true)
@@ -134,8 +132,9 @@ func (client *TasteBuddyDatabase) AddDiscounts(discounts []Discount) error {
 	for _, discount := range discounts {
 
 		// Upsert market
+		ctx := DefaultContext()
 		if _, err := collection.UpdateOne(ctx, bson.M{"internalMarketId": discount.InternalMarketID, "title": discount.Title}, bson.D{{Key: "$set", Value: discount}}, opts); err != nil {
-			log.Print(err)
+			LogError("AddDiscounts + "+discount.ID.Hex(), err)
 			return err
 		}
 	}
@@ -146,14 +145,14 @@ func (client *TasteBuddyDatabase) AddDiscounts(discounts []Discount) error {
 // GetDiscountsByCityFromAPI gets all discounts for a city from the market's APIs
 func (client *TasteBuddyDatabase) GetDiscountsByCityFromAPI(city string) []Discount {
 	if markets, err := client.GetMarketsByCity(city); err != nil {
-		log.Print(err)
+		LogError("GetDiscountsByCityFromAPI", err)
 		return []Discount{}
 	} else {
 		var discounts []Discount
 		for _, market := range markets {
 			discountsForMarket, err := market.GetDiscountsFromAPI()
 			if err != nil {
-				log.Print(err)
+				LogError("GetDiscountsByCityFromAPI + "+city, err)
 				continue
 			}
 			discounts = append(discounts, discountsForMarket...)
@@ -169,10 +168,10 @@ func GoRoutineSaveDiscountsToDB(client *TasteBuddyDatabase) {
 		"Konstanz",
 		"Berlin",
 		"Hamburg",
-		"München",
+		"Muenchen",
 	}
 
-	log.Print("[GoRoutineSaveDiscountsToDB] Start saving discounts to database...")
+	Log("GoRoutineSaveDiscountsToDB", "Start saving discounts to database")
 	for _, city := range cities {
 		go client.SaveDiscountsFromAPI(city)
 	}
@@ -180,11 +179,11 @@ func GoRoutineSaveDiscountsToDB(client *TasteBuddyDatabase) {
 
 // SaveDiscountsFromAPI saves discounts to database
 func (client *TasteBuddyDatabase) SaveDiscountsFromAPI(city string) {
-	log.Printf("[SaveDiscountsFromAPI] Save discounts for %s...\n", city)
+	Log("SaveDiscountsFromAPI", "Save discounts for "+city)
 	discounts := client.GetDiscountsByCityFromAPI(city)
 	if err := client.AddDiscounts(discounts); err != nil {
-		log.Print(err)
+		LogError("SaveDiscountsFromAPI + "+city, err)
 		return
 	}
-	log.Printf("[SaveDiscountsFromAPI] DONE...")
+	Log("SaveDiscountsFromAPI + "+city, "Done saving discounts")
 }

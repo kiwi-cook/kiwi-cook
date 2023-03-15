@@ -37,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'editor',
-        component: () => import('@/views/RecipeEditorPage.vue')
+        component: () => import('@/views/EditorPage.vue')
       }
     ]
   }

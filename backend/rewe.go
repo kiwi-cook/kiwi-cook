@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"log"
 )
 
 // Get the REWE markets for a city
@@ -25,7 +24,7 @@ func GetReweMarkets(city string) ([]Market, error) {
 	var reweMarketSearch []ReweMarketSearch
 	err = json.Unmarshal(body, &reweMarketSearch)
 	if err != nil {
-		log.Print(err)
+		LogError("GetReweMarkets", err)
 		return []Market{}, err
 	}
 
@@ -72,7 +71,7 @@ func GetReweDiscounts(market Market) ([]Discount, error) {
 
 	err = json.Unmarshal(body, &reweDiscounts)
 	if err != nil {
-		log.Print(err)
+		LogError("GetReweDiscounts", err)
 		return []Discount{}, err
 	}
 

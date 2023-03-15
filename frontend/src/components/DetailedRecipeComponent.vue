@@ -51,7 +51,7 @@
                     <template v-for="ingredient in ingredients" :key="ingredient">
                         <div class="element">
                             <ion-avatar slot="start">
-                                <img :alt="ingredient.name" :src="'assets/ingredients/' + ingredient._id + '.jpeg'" />
+                                <img :alt="ingredient.name" :src="ingredient.imgUrl" />
                                 {{ ingredient.name }}
                             </ion-avatar>
                         </div>
@@ -96,7 +96,7 @@ export default defineComponent({
     setup() {
         const store = useTasteBuddyStore();
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
-        const itemsFromRecipe: ComputedRef<Item[]> = computed(() => recipeOfTheDay.value?.steps.flatMap((step) => (step.items ?? []).map((stepItem) => stepItem.item)));
+        const itemsFromRecipe: ComputedRef<Item[]> = computed(() => recipeOfTheDay.value?.getItems());
         const ingredients: ComputedRef<Item[]> = computed(() => itemsFromRecipe.value)
         const equipments: ComputedRef<Item[]> = computed(() => []);
 

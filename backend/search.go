@@ -2,8 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -44,7 +42,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 
 	var searchQuery SearchQuery
 	if err := context.ShouldBindJSON(&searchQuery); err != nil {
-		log.Print(err.Error())
+		LogError("HandleSearch", err)
 		ServerError(context, true)
 		return
 	}
@@ -55,7 +53,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, result)
+	SuccessJSON(context, result)
 }
 
 // search searches for recipes and items by using goroutines
@@ -111,7 +109,7 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 
 	// Check if recipe ID is given
 	if recipeQuery.RecipeID != primitive.NilObjectID {
-		log.Print("[searchRecipe] Search by ID ...")
+		Log("searchRecipe", "Search by ID "+recipeQuery.RecipeID.Hex())
 		// Get recipe by ID
 		recipe, err = client.GetRecipeById(recipeQuery.RecipeID)
 	} else {
@@ -119,7 +117,7 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 		if recipeQuery.UserID != primitive.NilObjectID {
 			// Get recipes by user ID
 
-			log.Print("[searchRecipe] Search recipes of User ...")
+			Log("searchRecipe", "Search recipes of User")
 			err = errors.New("not implemented")
 			/*
 				TODO: Implement this
@@ -141,7 +139,7 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 			checkItems := len(recipeQuery.Items) > 0
 
 			// Get recipes by name
-			log.Print("[searchRecipe] Search by Name=", checkName, " and Items=", checkItems, " ...")
+			Log("searchRecipe", "Search by Name=", checkName, " and Items=", checkItems, " ...")
 
 			// Go through all recipes and ...
 			for _, tmpRecipe := range allRecipes {
@@ -152,7 +150,7 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 						recipe = tmpRecipe
 						err = nil
 					} else {
-						log.Print("[searchRecipe] No match for recipe ", tmpRecipe.Name, " with nameQuery ", recipeQuery.Name)
+						Log("searchRecipe", "No match for recipe "+tmpRecipe.Name+" with nameQuery "+recipeQuery.Name)
 						err = errors.New("no recipe found")
 						continue
 					}
@@ -185,7 +183,7 @@ func searchRecipe(recipeQuery RecipeQuery, client *TasteBuddyDatabase) (Recipe, 
 						recipe = tmpRecipe
 						err = nil
 					} else {
-						log.Print("[searchRecipe] No match for recipe ", tmpRecipe.Name, " with itemQuery ", recipeQuery.Items)
+						Log("searchRecipe", "No match for recipe "+tmpRecipe.Name+" with itemQuery ", recipeQuery.Items)
 						err = errors.New("no recipe found")
 						continue
 					}
