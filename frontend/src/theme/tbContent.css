@@ -1,17 +1,13 @@
 /** CONTENT **/
 
-:root {
-    --tb-max-width: 800px;
-    --tb-margin: auto;
-}
-
 /** content **/
 .tb-content {
-    max-width: var(--tb-max-width);
-    margin: var(--tb-margin);
+    width: 800px;
+    margin: 0 auto !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
-/** margin **/
-.tb-margin {
-    margin: var(--tb-margin);
+.flex {
+    display: flex;
 }
