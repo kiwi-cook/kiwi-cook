@@ -29,7 +29,8 @@ export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: A
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
     if (options?.formatObject) {
-        for (const key in options?.formatObject) {
+        // use Object.keys to get all keys of the formatObject
+        for (const key of Object.keys(options?.formatObject)) {
             url = url.replace(key, options?.formatObject[key].toString());
         }
     }
