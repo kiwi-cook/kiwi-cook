@@ -3,7 +3,7 @@
 // checks if a URL is reachable
 async function checkURL(URL: string) {
     const response = await fetch(URL)
-    console.debug('API_URL: ' + URL + ' -> ' + response.ok)
+    console.debug(`API_URL: ${URL} -> ${response.ok}`)
     return response.ok
 }
 

@@ -17,7 +17,7 @@ export class Item {
     constructor() {
         this._isSaved = false
         // create a temporary id to identify the item in the store before it is saved
-        this._tmpId = 'tmp' + Date.now().toString(16) + Math.random().toString(16).slice(2)
+        this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         this.name = 'New Item'
         this.type = 'ingredient'
         this.imgUrl = ''
@@ -204,7 +204,7 @@ export class Recipe {
     constructor() {
         this._isSaved = false
         // create a temporary id to identify the recipe in the store before it is saved
-        this._tmpId = 'tmp' + Date.now().toString(16) + Math.random().toString(16).slice(2)
+        this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         this.name = 'New Recipe'
         this.author = ''
         this.description = ''
