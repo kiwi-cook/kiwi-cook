@@ -635,7 +635,7 @@ func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
 // 3 = name + type (medium quality)
 // 4 = name + type + imgurl (high quality)
 func GetItemQuality(item Item) int {
-	var itemQuality int = 0
+	var itemQuality = 0
 
 	if !item.ID.IsZero() {
 		itemQuality = itemQuality + 1

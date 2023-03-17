@@ -20,9 +20,8 @@
                             <ion-card-title color="success">Welcome!</ion-card-title>
                         </ion-card-header>
                         <ion-card-content color="success">
-                            <ion-label color="light">To discover all our Tastebud tickling recipes and features, please
-                                sign up!</ion-label>
-                            <ion-button shape="round" color="primary">Sign in</ion-button>
+                            <ion-label color="light">New to Taste Buddy?</ion-label>
+                            <ion-button shape="round" color="primary">Create an account</ion-button>
                         </ion-card-content>
                     </ion-col>
 
@@ -32,7 +31,7 @@
                         </ion-card-header>
                         <ion-card-content>
                             <ion-label color="light">Then please</ion-label>
-                            <ion-button shape="round" color="primary">Login</ion-button>
+                            <ion-button shape="round" color="primary">Sign in</ion-button>
                         </ion-card-content>
                     </ion-col>
                 </ion-row>

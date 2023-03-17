@@ -1,8 +1,12 @@
+# https://github.com/actions/labeler
+
 backend:
-- any: ['backend/*']
+- backend/**
 
 frontend:
-- any: ['frontend/*']
+- frontend/**/*
 
-github:
-- any: ['.github/*']
+infrastructure:
+- .github/**/*
+- .vscode/**/*
+- scripts/**/*
