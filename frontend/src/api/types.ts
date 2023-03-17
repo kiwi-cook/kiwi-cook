@@ -6,6 +6,10 @@ import { Store } from "vuex";
 
 // types for recipe
 
+/**
+ * Item of a recipe
+ * It can be an ingredient or a tool
+ */
 export class Item {
     _id?: string;
     _isSaved?: boolean;
@@ -108,6 +112,12 @@ export class Item {
     }
 }
 
+/**
+ * StepItem of a recipe
+ * It is an item with an amount and a unit
+ * It is used in a step
+ * This is done to make the item reusable
+ */
 export class StepItem {
     amount: number;
     unit: string;
@@ -135,6 +145,11 @@ export class StepItem {
     }
 }
 
+/**
+ * Step of a recipe
+ * It is a step with a list of StepItems
+ * It can have an image, a description and a preparation time for the step
+ */
 export class Step {
     items: StepItem[];
     imgUrl?: string;
@@ -189,6 +204,11 @@ export class Step {
     }
 }
 
+/**
+ * Recipe
+ * It is a recipe with a list of steps
+ * It contains all the information about a recipe
+ */
 export class Recipe {
     _id?: string;
     _isSaved?: boolean;
@@ -284,6 +304,11 @@ export class Recipe {
         return this
     }
 
+    /**
+     * Save the recipe to the database by its id
+     * @param store 
+     * @param id 
+     */
     public static saveById(store: Store<State>, id: string): void {
         console.debug('[Recipe] saveById', id)
         store.dispatch('saveRecipeById', id)
@@ -388,6 +413,11 @@ export class Recipe {
 
 // types for discounts
 
+/**
+ * A discount represents a discount on a product
+ * It is a generic represantation that is created by the backend based on the data from the different markets
+ * The id is the id of the discount in the database
+ */
 export type Discount = {
     _id: string;
     title: string;
@@ -399,6 +429,11 @@ export type Discount = {
     marketLocation: string;
 }
 
+/**
+ * A market represents a market where a product is sold
+ * It is a generic represantation that is created by the backend based on the data from the different markets
+ * The id is the id of the market in the database
+*/
 export type Market = {
     _id: string;
     distributor: string;
