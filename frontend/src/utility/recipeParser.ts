@@ -44,21 +44,30 @@ const UNITS = [
 
 const normalizeUnit = (unit: string): string => {
     switch (unit.toLocaleLowerCase()) {
-        case 'kg' || 'kilogramm':
+        case 'kilogramm':
+        case 'kg':
             return 'kg';
-        case 'g' || 'gr' || 'gramm':
+        case 'gramm':
+        case 'gr':
+        case 'g':
             return 'g';
-        case 'litre' || 'l':
+        case 'litre':
+        case 'l':
             return 'l';
-        case 'millilitre' || 'ml':
+        case 'millilitre':
+        case 'ml':
             return 'ml';
-        case 'piece' || 'pcs':
+        case 'piece':
+        case 'pcs':
             return 'pcs';
-        case 'tsp' || 'teaspoon':
+        case 'teaspoon':
+        case 'tsp':
             return 'tsp';
-        case 'tbsp' || 'tablespoon':
+        case 'tablespoon':
+        case 'tbsp':
             return 'tbsp';
-        case 'cup' || 'cups':
+        case 'cups':
+        case 'cup':
             return 'cup';
         default:
             return unit.toLocaleLowerCase();
