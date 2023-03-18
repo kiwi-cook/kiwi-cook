@@ -19,56 +19,57 @@
             </ion-segment>
         </ion-toolbar>
 
-        <ion-content :fullscreen="true" class="ion-padding">
-            <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
-                <ion-refresher-content />
-            </ion-refresher>
+        <ion-content :fullscreen="true">
+            <div class="content">
+                <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
+                    <ion-refresher-content />
+                </ion-refresher>
 
-            <!-- Recipe Editor -->
-            <ion-accordion-group v-if="segment === 'recipes'" expand="inset">
-                <template v-for="recipe in filteredRecipes" :key="recipe._id ?? recipe._tmpId">
-                    <ion-accordion :value="recipe._id ?? recipe._tmpId">
-                        <ion-item slot="header" color="primary">
-                            <ion-label color="light">{{ recipe.name }}</ion-label>
-                            <ion-chip color="light" v-if="recipe._id || recipe._tmpId">
-                                {{ recipe._id ?? recipe._tmpId }}
-                            </ion-chip>
-                        </ion-item>
-                        <div slot="content">
-                            <RecipeEditor :recipe="recipe" />
-                        </div>
-                    </ion-accordion>
-                </template>
-            </ion-accordion-group>
-
-            <!-- Item Editor -->
-            <ion-accordion-group v-if="segment === 'items'" expand="inset">
-                <!-- Control panel for items -->
-                <ion-card>
-                    <ion-card-header>
-                        Control panel
-                    </ion-card-header>
-                    <ion-card-content>
-                        <ion-list>
-                            <ion-item v-if="filteredItems.length > 0">
-                                <ion-button @click="removeItemsWithoutRecipe">Remove items without recipe</ion-button>
+                <!-- Recipe Editor -->
+                <ion-accordion-group v-if="segment === 'recipes'" expand="inset">
+                    <template v-for="recipe in filteredRecipes" :key="recipe._id ?? recipe._tmpId">
+                        <ion-accordion :value="recipe._id ?? recipe._tmpId">
+                            <ion-item slot="header" color="primary">
+                                <ion-label color="light">{{ recipe.name }}</ion-label>
+                                <ion-chip color="light" v-if="recipe._id || recipe._tmpId">
+                                    {{ recipe._id ?? recipe._tmpId }}
+                                </ion-chip>
                             </ion-item>
-                        </ion-list>
-                    </ion-card-content>
-                </ion-card>
+                            <div slot="content">
+                                <RecipeEditor :recipe="recipe" />
+                            </div>
+                        </ion-accordion>
+                    </template>
+                </ion-accordion-group>
 
-                <template v-for="item in filteredItems" :key="item.getId()">
-                    <ion-accordion :value="item.getId()">
-                        <ion-item slot="header" color="primary">
-                            <ion-label color="light">{{ item.name }}</ion-label>
-                        </ion-item>
-                        <div slot="content">
-                            <ItemEditor :item="item" />
-                        </div>
-                    </ion-accordion>
-                </template>
-            </ion-accordion-group>
+                <!-- Item Editor -->
+                <ion-accordion-group v-if="segment === 'items'" expand="inset">
+                    <!-- Control panel for items -->
+                    <ion-card>
+                        <ion-card-header>
+                            Control panel
+                        </ion-card-header>
+                        <ion-card-content>
+                            <ion-list>
+                                <ion-item v-if="filteredItems.length > 0">
+                                    <ion-button @click="removeItemsWithoutRecipe">Remove items without recipe</ion-button>
+                                </ion-item>
+                            </ion-list>
+                        </ion-card-content>
+                    </ion-card>
 
+                    <template v-for="item in filteredItems" :key="item.getId()">
+                        <ion-accordion :value="item.getId()">
+                            <ion-item slot="header" color="primary">
+                                <ion-label color="light">{{ item.name }}</ion-label>
+                            </ion-item>
+                            <div slot="content">
+                                <ItemEditor :item="item" />
+                            </div>
+                        </ion-accordion>
+                    </template>
+                </ion-accordion-group>
+            </div>
             <ion-fab slot="fixed" vertical="bottom" horizontal="end">
                 <ion-fab-button @click="addNew()" color="tertiary">
                     <ion-icon :icon="add" color="light" />

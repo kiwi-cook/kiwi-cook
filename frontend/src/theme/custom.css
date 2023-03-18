@@ -1,0 +1,19 @@
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+}
+
+.content {
+    top: 0px !important;
+    bottom: 0px !important;
+    left: 0px !important;
+    right: 0px !important;
+    max-width: 1080px;
+    margin: unset !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
