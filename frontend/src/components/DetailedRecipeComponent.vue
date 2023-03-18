@@ -130,24 +130,14 @@ export default defineComponent({
     position: relative;
     height: 500px;
     overflow: hidden;
-}
-
-.hero-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     border-radius: 10px;
-    /* add border radius */
 }
 
 ion-img.hero-image::part(image) {
     width: 100%;
-    height: auto;
+    height: 100%;
     object-fit: cover;
     border-radius: 10px;
-    /* add border radius */
 }
 
 .hero-text {
@@ -181,4 +171,55 @@ ion-img.hero-image::part(image) {
     /* reduce font size for longer text */
     margin: 0;
 }
+
+@media only screen and (max-width: 768px) {
+
+    .hero {
+        height: 300px;
+    }
+
+    ion-img.hero-image::part(image) {
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .hero-text {
+        height: auto;
+        padding: 10px;
+    }
+
+    .hero-text h1 {
+        font-size: 2em;
+    }
+
+    .hero-text p {
+        font-size: 1em;
+    }
+}
+
+@media only screen and (max-width: 480px) {
+
+    .hero {
+        height: 200px;
+    }
+
+    ion-img.hero-image::part(image) {
+        object-fit: cover;
+        object-position: center;
+    }
+
+    .hero-text {
+        height: auto;
+        padding: 10px;
+    }
+
+    .hero-text h1 {
+        font-size: 1.5em;
+    }
+
+    .hero-text p {
+        font-size: 1em;
+    }
+}
+
 </style>
