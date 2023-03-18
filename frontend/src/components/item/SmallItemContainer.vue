@@ -25,7 +25,7 @@ export default {
     setup(props: any) {
         const { items } = toRefs(props);
 
-        const internalItems: ComputedRef<Item[]> = computed(() => items.value.map((stepItem: StepItem | Item) => stepItem instanceof StepItem ? stepItem.item : stepItem))
+        const internalItems: ComputedRef<Item[]> = computed(() => items.value?.map((stepItem: StepItem | Item) => stepItem instanceof StepItem ? stepItem.item : stepItem))
 
         return {
             internalItems
