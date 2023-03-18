@@ -1,56 +1,40 @@
 <template>
-    <ion-header>
-        <ion-toolbar color="primary">
-            <ion-title color="light">Profil</ion-title>
-            <ion-buttons slot="primary">
-                <ion-button>
-                    <ion-icon color="light" slot="icon-only" :ios="ellipsisHorizontal"
-                        :md="ellipsisVertical"></ion-icon>
-                </ion-button>
-            </ion-buttons>
-        </ion-toolbar>
-    </ion-header>
+    <ion-card>
+        <ion-row>
+            <ion-col size-md="9" size="12" class="welcome">
+                <ion-card-header>
+                    <ion-card-title color="success">Welcome!</ion-card-title>
+                </ion-card-header>
+                <ion-card-content color="success">
+                    <ion-label color="light">New to Taste Buddy?</ion-label>
+                    <ion-button shape="round" color="primary">Create an account</ion-button>
+                </ion-card-content>
+            </ion-col>
 
-    <ion-content>
-        <div class="card-container">
-            <ion-card>
-                <ion-row>
-                    <ion-col size-md="9" size="12" class="welcome">
-                        <ion-card-header>
-                            <ion-card-title color="success">Welcome!</ion-card-title>
-                        </ion-card-header>
-                        <ion-card-content color="success">
-                            <ion-label color="light">New to Taste Buddy?</ion-label>
-                            <ion-button shape="round" color="primary">Create an account</ion-button>
-                        </ion-card-content>
-                    </ion-col>
-
-                    <ion-col size-md="9" size="12" class="welcome">
-                        <ion-card-header>
-                            <ion-card-title color="success">Already have an account?</ion-card-title>
-                        </ion-card-header>
-                        <ion-card-content>
-                            <ion-label color="light">Then please</ion-label>
-                            <ion-button shape="round" color="primary">Sign in</ion-button>
-                        </ion-card-content>
-                    </ion-col>
-                </ion-row>
-            </ion-card>
-        </div>
-    </ion-content>
+            <ion-col size-md="9" size="12" class="welcome">
+                <ion-card-header>
+                    <ion-card-title color="success">Already have an account?</ion-card-title>
+                </ion-card-header>
+                <ion-card-content>
+                    <ion-label color="light">Then please</ion-label>
+                    <ion-button shape="round" color="primary">Sign in</ion-button>
+                </ion-card-content>
+            </ion-col>
+        </ion-row>
+    </ion-card>
 </template>
 
 <script lang="ts">
-import { IonCard, IonLabel, IonCardTitle, IonCardContent, IonCardHeader, IonRow, IonCol, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonButtons } from '@ionic/vue';
-import { add, colorPalette, document, globe, ellipsisHorizontal, ellipsisVertical } from 'ionicons/icons';
+import { IonCard, IonLabel, IonCardTitle, IonCardContent, IonCardHeader, IonRow, IonCol, IonButton } from '@ionic/vue';
+import { add, colorPalette, document, globe } from 'ionicons/icons';
 import { defineComponent } from 'vue';
 
 
 export default defineComponent({
     name: "LoginComponent",
-    components: { IonCardContent, IonLabel, IonCardTitle, IonCardHeader, IonCard, IonRow, IonCol, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonIcon, IonButtons },
+    components: { IonCardContent, IonLabel, IonCardTitle, IonCardHeader, IonCard, IonRow, IonCol, IonButton },
     setup() {
-        return { add, colorPalette, document, globe, ellipsisHorizontal, ellipsisVertical }
+        return { add, colorPalette, document, globe }
     }
 });
 </script>

@@ -1,98 +1,76 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar color="primary">
-                <ion-title color="light">Recipe Of the Day</ion-title>
-            </ion-toolbar>
-        </ion-header>
-
-        <ion-content :fullscreen="true">
-            <ion-header collapse="condense">
-                <ion-toolbar>
-                    <ion-title size="large">Recipe Of the Day</ion-title>
-                </ion-toolbar>
-            </ion-header>
-
-
-            <ion-list lines="full">
-                <ion-item>
-                    <div class="container">
-                        <div class="container-img">
-                            <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`"></ion-img>
-                            <div class="container-img-text">{{ recipeOfTheDay?.description }}</div>
-                        </div>
-                    </div>
-                </ion-item>
-                <ion-item>
-                    <div class="container">
-                        <div id="HeartSaveShareButton">
-                            <ion-button color="primary">
-                                <ion-icon slot="icon-only" :icon="heart"></ion-icon>
-                                3012 Likes
-                            </ion-button>
-                            <ion-button color="primary">
-                                <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
-                                Save
-                            </ion-button>
-                            <ion-button color="primary">
-                                <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"></ion-icon>
-                            </ion-button>
-                        </div>
-                    </div>
-                </ion-item>
-            </ion-list>
-
-            <ion-list lines="inset">
-                <ion-item color="primary">
-                    <ion-label color="light">Ingredients</ion-label>
-                </ion-item>
-
-                <div class="topic">
-                    <template v-for="ingredient in ingredients" :key="ingredient">
-                        <div class="element">
-                            <ion-avatar slot="start">
-                                <img :alt="ingredient.name" :src="ingredient.imgUrl" />
-                                {{ ingredient.name }}
-                            </ion-avatar>
-                        </div>
-                    </template>
+    <ion-list lines="none">
+        <ion-item>
+            <div class="container hero">
+                <div class="hero-image">
+                    <ion-img :src="recipeOfTheDay?.imgUrl" :alt="`Image of ${recipeOfTheDay?.name}`" />
                 </div>
-            </ion-list>
-            <ion-list lines="inset">
-                <ion-item color="primary">
-                    <ion-label color="light">Cooking utensils</ion-label>
-                </ion-item>
-                <div class="topic">
-                    <template v-for="equipment in equipments" :key="equipment">
-                        <div class="element">
-                            <ion-avatar slot="start">
-                                <img :alt="equipment.name" :src="'assets/ingredients/' + equipment.name + '.jpeg'" />
-                                {{ equipment }}
-                            </ion-avatar>
-                        </div>
-                    </template>
+                <div class="hero-text">
+                    <h1>{{ recipeOfTheDay?.name }}</h1>
+                    <p>{{ recipeOfTheDay?.description }}</p>
                 </div>
-            </ion-list>
-            <ion-list lines="inset">
-                <ion-item color="primary">
-                    <ion-label color="light">Calories</ion-label>
-                </ion-item>
-            </ion-list>
-        </ion-content>
-    </ion-page>
+            </div>
+        </ion-item>
+        <ion-item>
+            <div class="container">
+                <div id="HeartSaveShareButton">
+                    <ion-button color="primary">
+                        <ion-icon slot="icon-only" :icon="heart"></ion-icon>
+                        3012 Likes
+                    </ion-button>
+                    <ion-button color="primary">
+                        <ion-icon slot="icon-only" :icon="flagOutline">Save</ion-icon>
+                        Save
+                    </ion-button>
+                    <ion-button color="primary">
+                        <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"></ion-icon>
+                    </ion-button>
+                </div>
+            </div>
+        </ion-item>
+    </ion-list>
+
+    <ion-list lines="inset" v-if="ingredients?.length > 0">
+        <ion-item color="primary">
+            <ion-label color="light" class="topic">Ingredients</ion-label>
+        </ion-item>
+
+        <div class="topic-contents">
+            <SmallItemContainer :items="ingredients" />
+        </div>
+    </ion-list>
+    <ion-list lines="inset" v-if="equipments?.length > 0">
+        <ion-item color="primary">
+            <ion-label color="light" class="topic">Cooking utensils</ion-label>
+        </ion-item>
+        <div class="topic-content">
+            <SmallItemContainer :items="equipments" />
+        </div>
+    </ion-list>
+    <ion-list lines="inset" v-if="false">
+        <ion-item color="primary">
+            <ion-label color="light" class="topic">Calories</ion-label>
+        </ion-item>
+        <div class="topic-content">
+            <!-- -->
+        </div>
+    </ion-list>
 </template>
 
 <script lang="ts">
 import { computed, ComputedRef, defineComponent } from 'vue';
-import { IonPage, IonButton, IonIcon, IonHeader, IonToolbar, IonTitle, IonContent, IonItem, IonList, IonLabel, IonAvatar, IonImg } from '@ionic/vue';
+import { IonImg, IonButton, IonIcon, IonItem, IonList, IonLabel } from '@ionic/vue';
 import { heart, flagOutline, shareOutline } from 'ionicons/icons';
 import { Recipe, Item } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
+import SmallItemContainer from './item/SmallItemContainer.vue';
 
 export default defineComponent({
-    titel: 'Tab1Page',
-    components: { IonHeader, IonImg, IonIcon, IonButton, IonToolbar, IonTitle, IonContent, IonPage, IonItem, IonList, IonLabel, IonAvatar },
-
+    title: 'DetailedRecipePage',
+    components: {
+        SmallItemContainer,
+        IonImg, IonIcon, IonButton, IonItem, IonList, IonLabel,
+    },
     setup() {
         const store = useTasteBuddyStore();
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
@@ -117,7 +95,6 @@ export default defineComponent({
     object-fit: fill;
     width: 100%;
     height: 100%;
-
 }
 
 .element {
@@ -134,34 +111,74 @@ export default defineComponent({
     text-align: center;
 }
 
+/* Topic */
 .topic {
+    font-weight: bold;
+}
+
+.topic-content {
     /*background-color: blue;*/
     text-align: center;
-    color: lightgray;
-
 }
 
 #HeartSaveShareButton {
     margin-top: 2%;
 }
 
-.container-img {
-    object-fit: fill;
-    width: 100%;
-    height: 100%;
-    text-align: center;
+/* Hero image */
+.hero {
+    position: relative;
+    height: 500px;
+    overflow: hidden;
 }
 
-.container-img-text {
+.hero-image {
     position: absolute;
-    top: 95%;
-    left: 50%;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 15%;
-    color: white;
-    font-size: 20px;
-    text-size-adjust: initial;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 122, 0, 0.5)
+    height: 100%;
+    border-radius: 10px;
+    /* add border radius */
+}
+
+ion-img.hero-image::part(image) {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 10px;
+    /* add border radius */
+}
+
+.hero-text {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%);
+    color: #fff;
+    text-align: center;
+    display: flex;
+    /* add display flex */
+    flex-direction: column;
+    /* add flex direction column */
+    justify-content: center;
+    /* add justify content center */
+    height: 50%;
+    /* set height to 50% */
+}
+
+.hero-text h1 {
+    font-size: 3em;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.hero-text p {
+    font-size: 1.5em;
+    /* reduce font size for longer text */
+    margin: 0;
 }
 </style>

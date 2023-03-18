@@ -1,49 +1,18 @@
 <template>
-    <ionPage>
-        <ion-header>
-            <ion-toolbar color="primary">
-                <ion-title color="light">Search</ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleChange($event)"></ion-searchbar>
-        </ion-toolbar>
-        <div class="container">
-            <div class="filter-relevanz-button">
-                <ion-button color="primary">
-                    <ion-icon color="light" slot="icon-only" :icon="filter"></ion-icon>
-                    <ion-label color="light">
-                        Filter
-                    </ion-label>
-                </ion-button>
-                <ion-button color="primary">
-                    <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
-                    <ion-label color="light">
-                        Relevanz
-                    </ion-label>
-                </ion-button>
-            </div>
-        </div>
-
-        <ion-content class="ion-padding">
-            <template v-for="recipe in filteredRecipe" :key="recipe.name">
-                <ion-list :value="recipe.name">
-                    <ion-item slot="header" color="primary">
-                        <ion-label color="light">{{ recipe.name }}</ion-label>
-                    </ion-item>
-                    <div slot="content">
-                        <SmallItemContainer :items="getItemsFromRecipe(recipe)" />
-                    </div>
-                </ion-list>
-            </template>
-        </ion-content>
-    </ionPage>
+    <template v-for="recipe in filteredRecipe" :key="recipe.name">
+        <ion-list :value="recipe.name">
+            <ion-item slot="header" color="primary">
+                <ion-label color="light">{{ recipe.name }}</ion-label>
+            </ion-item>
+            <SmallItemContainer :items="getItemsFromRecipe(recipe)" />
+        </ion-list>
+    </template>
 </template>
 
 <script lang="ts">
-import { IonPage, IonList, IonItem, IonImg, IonTitle, IonIcon, IonButton, IonContent, IonHeader, IonToolbar, IonSearchbar, IonLabel } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
-import { filter, arrowDown } from 'ionicons/icons';
+import { IonList, IonItem, IonLabel } from '@ionic/vue';
+import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue';
+import { arrowDown } from 'ionicons/icons';
 import { useTasteBuddyStore } from '@/storage';
 import { Recipe } from '@/api/types';
 import { getItemsFromRecipe } from '@/api/utility';
@@ -52,18 +21,27 @@ import SmallItemContainer from './item/SmallItemContainer.vue';
 
 export default defineComponent({
     name: "SearchComponent",
+    props: {
+        filter: {
+            type: String,
+            required: false,
+            default: ''
+        }
+    },
     components: {
-        IonPage, IonList, IonItem, IonTitle, IonIcon, IonContent, IonButton, IonHeader, IonToolbar, IonSearchbar, IonLabel,
+        IonList, IonItem, IonLabel,
         SmallItemContainer
     },
-    setup() {
+    setup(props: any) {
+        const { filter } = toRefs(props)
+
         const store = useTasteBuddyStore();
         const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes);
 
         const filteredRecipe = ref(recipes.value);
 
-        const handleChange = (event: any) => {
-            const query = event.target.value.toLowerCase();
+        const handleFilter = () => {
+            const query = filter.value.toLowerCase();
             filteredRecipe.value = recipes.value.filter(recipe => {
                 const itemNames: string[] = getItemsFromRecipe(recipe).map(item => item.name.toLowerCase())
                 return itemNames.includes(query)
@@ -72,11 +50,11 @@ export default defineComponent({
 
         watch(recipes, () => {
             filteredRecipe.value = recipes.value;
-        })
+        }, { immediate: true })
 
         return {
             getItemsFromRecipe, filteredRecipe,
-            handleChange, filter,
+            handleFilter,
             arrowDown
         };
 
@@ -88,11 +66,6 @@ export default defineComponent({
 .container {
     text-align: center;
     /*background-color: aquamarine;*/
-}
-
-.filter-relevanz-button {
-    margin: 2%;
-    color: white;
 }
 
 .recipe-items {
