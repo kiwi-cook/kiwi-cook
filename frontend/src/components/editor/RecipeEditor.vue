@@ -132,8 +132,8 @@
                                     <ion-avatar v-if="stepItem.item.imgUrl">
                                         <img :src="stepItem.item.imgUrl" />
                                     </ion-avatar>
-                                    <ion-chip color="light" v-if="stepItem.item._id">
-                                        {{ stepItem.item._id }}
+                                    <ion-chip color="light" v-if="stepItem.item._id || stepItem.item._tmpId">
+                                        {{ stepItem.item._id ?? stepItem.item._tmpId }}
                                     </ion-chip>
                                 </ion-item>
                                 <ion-card-title color="primary">
