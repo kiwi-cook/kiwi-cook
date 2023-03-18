@@ -34,9 +34,9 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import './theme/custom.css';
 import 'ionicons/icons';
 
-import './theme/tbContent.css';
 
 const app = createApp(App)
   .use(IonicVue)
