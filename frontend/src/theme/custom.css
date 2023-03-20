@@ -1,3 +1,10 @@
+.center {
+    position: relative;
+    text-align: center;
+    object-fit: fill;
+    width: 100%;
+}
+
 .flex {
     display: flex;
 }
@@ -8,10 +15,10 @@
 }
 
 .content {
-    top: 0px !important;
-    bottom: 0px !important;
-    left: 0px !important;
-    right: 0px !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     max-width: 1080px;
     margin: unset !important;
     margin-left: auto !important;
