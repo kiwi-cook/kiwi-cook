@@ -1,6 +1,6 @@
 <template>
     <div class="small-item-container">
-        <template v-for="(item, itemIndex) in internalItems" :key="itemIndex">
+        <template v-for="(item, itemIndex) in items" :key="itemIndex">
             <SmallItem :item="item" class="small-item" />
         </template>
     </div>
@@ -8,7 +8,7 @@
 
 <script lang="ts">
 import { Item, StepItem } from '@/api/types';
-import { computed, ComputedRef, PropType, toRefs } from 'vue';
+import { PropType } from 'vue';
 import SmallItem from '@/components/item/SmallItem.vue';
 
 export default {
@@ -21,22 +21,18 @@ export default {
     },
     components: {
         SmallItem,
-    },
-    setup(props: any) {
-        const { items } = toRefs(props);
-
-        const internalItems: ComputedRef<Item[]> = computed(() => items.value?.map((stepItem: StepItem | Item) => stepItem instanceof StepItem ? stepItem.item : stepItem))
-
-        return {
-            internalItems
-        };
-    },
+    }
 };
 </script>
 
 <style scoped>
 .small-item-container {
-    display: flex;
-    flex-direction: row;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+.small-item {
+    display: inline-block;
+    margin: 0 5px;
 }
 </style>
