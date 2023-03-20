@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">Search</ion-title>
+                <ion-title color="light">Search Recipes</ion-title>
             </ion-toolbar>
         </ion-header>
         <ion-toolbar color="primary">
@@ -26,7 +26,7 @@
                     </ion-button>
                 </div>
 
-                <SearchComponent title="Discounts"></SearchComponent>
+                <SearchComponent :filter="filterInput"></SearchComponent>
             </div>
         </ion-content>
     </ion-page>
