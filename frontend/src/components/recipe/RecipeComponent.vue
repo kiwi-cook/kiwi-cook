@@ -22,6 +22,11 @@
         </ion-item>
     </ion-list>
 
+    <ion-item lines="none">
+        <ion-text color="primary">
+            <h1 class="recipe-subheader">Ingredients 🥕 and Equipment 🔪</h1>
+        </ion-text>
+    </ion-item>
     <ion-card v-if="ingredients?.length > 0">
         <ion-card-header>
             <ion-card-title color="light">
@@ -57,8 +62,13 @@
         </ion-card-content>
     </ion-card> -->
 
+    <ion-item lines="none">
+        <ion-text color="primary">
+            <h1 class="recipe-subheader">Steps</h1>
+        </ion-text>
+    </ion-item>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-         <StepComponent :step="step" :stepIndex="stepIndex" />
+        <StepComponent :step="step" :stepIndex="stepIndex"/>
     </template>
 
 </template>
@@ -108,6 +118,11 @@ export default defineComponent({
 <style scoped>
 #HeartSaveShareButton {
     margin-top: 2%;
+}
+
+.recipe-subheader {
+    margin-top: 2%;
+    font-weight: bold;
 }
 
 </style>
