@@ -1,8 +1,8 @@
 // Data types for the API
 
-import { State } from "@/storage";
-import { descriptionToSteps } from "@/utility/recipeParser";
-import { Store } from "vuex";
+import {State} from "@/storage";
+import {descriptionToSteps} from "@/utility/recipeParser";
+import {Store} from "vuex";
 
 // types for recipe
 
@@ -43,8 +43,8 @@ export class Item {
     /**
      * Initialize an item from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: Item): Item {
@@ -84,7 +84,7 @@ export class Item {
 
     /**
      * Update the item in the store
-     * @param store 
+     * @param store
      * @returns the item to allow chaining
      */
     public update(store: Store<State>): Item {
@@ -94,7 +94,7 @@ export class Item {
 
     /**
      * Save the item to the database
-     * @param store 
+     * @param store
      * @returns the item to allow chaining
      */
     public save(store: Store<State>): Item {
@@ -132,8 +132,8 @@ export class StepItem {
     /**
      * Initialize an stepItem from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: StepItem): StepItem {
@@ -167,8 +167,8 @@ export class Step {
     /**
      * Initialize an stepItem from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: Step): Step {
@@ -183,8 +183,8 @@ export class Step {
 
     /**
      * Create a step from a list of step items
-     * @param stepItems 
-     * @param description 
+     * @param stepItems
+     * @param description
      * @returns a new step
      */
     public static fromStepItems(stepItems: StepItem[], description?: string): Step {
@@ -196,7 +196,7 @@ export class Step {
 
     /**
      * Generate a list of steps from a description
-     * @param description 
+     * @param description
      * @returns a list of steps
      */
     public static fromDescription(description: string): Step[] {
@@ -210,7 +210,8 @@ export class Step {
     public getItems(): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        return [...new Set(this.items.flatMap((item: StepItem) => item.item))]
+        const items = this.items.flatMap((item: StepItem) => item.item)
+        return [...new Set(items)]
     }
 }
 
@@ -253,8 +254,8 @@ export class Recipe {
     /**
      * Initialize a recipe from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     public static fromJSON(json: Recipe): Recipe {
@@ -300,7 +301,7 @@ export class Recipe {
 
     /**
      * Updates the recipe in the store
-     * @param store 
+     * @param store
      * @returns the recipe to allow chaining
      */
     public update(store: Store<State>): Recipe {
@@ -311,7 +312,7 @@ export class Recipe {
 
     /**
      * Save the recipe to the database
-     * @param store 
+     * @param store
      * @returns the recipe to allow chaining
      */
     public save(store: Store<State>): Recipe {
@@ -322,8 +323,8 @@ export class Recipe {
 
     /**
      * Save the recipe to the database by its id
-     * @param store 
-     * @param id 
+     * @param store
+     * @param id
      */
     public static saveById(store: Store<State>, id: string): void {
         console.debug('[Recipe] saveById', id)
@@ -332,7 +333,7 @@ export class Recipe {
 
     /**
      * Delete the recipe from the database
-     * @param store 
+     * @param store
      */
     public delete(store: Store<State>): void {
         console.debug('[Recipe] delete', this.getId())
@@ -341,8 +342,8 @@ export class Recipe {
 
     /**
      * Add a step to the recipe
-     * @param step 
-     * @param stepIndex 
+     * @param step
+     * @param stepIndex
      * @returns the recipe to allow chaining
      */
     public addStep(step?: Step, stepIndex?: number): Recipe {
@@ -360,7 +361,7 @@ export class Recipe {
 
     /**
      * Add multiple steps to the recipe
-     * @param steps 
+     * @param steps
      * @returns the recipe to allow chaining
      */
     public addSteps(steps: Step[]): Recipe {
@@ -370,7 +371,7 @@ export class Recipe {
 
     /**
      * Remove a step from the recipe
-     * @param index 
+     * @param index
      * @returns the recipe to allow chaining
      */
     public removeStep(index: number): Recipe {
@@ -400,8 +401,8 @@ export class Recipe {
             this.steps[stepIndex].items[itemIndex].item = item;
         }
 
-        console.debug('addItem', { stepIndex, itemIndex, item, recipe: this })
-        return { item, recipe: this };
+        console.debug('addItem', {stepIndex, itemIndex, item, recipe: this})
+        return {item, recipe: this};
     }
 
     /**
@@ -411,12 +412,17 @@ export class Recipe {
     public getItems(): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        return [...new Set(this.steps.flatMap((step: Step) => step.getItems()))]
+        const items = this.steps.flatMap((step: Step) => step.getItems())
+        const uniqueItems: { [key: string]: Item } = {}
+        items.forEach(item => {
+            uniqueItems[item.getId()] = item
+        })
+        return Object.values(uniqueItems)
     }
 
     /**
      * Add a tag to the recipe
-     * @param tag 
+     * @param tag
      * @returns the recipe to allow chaining
      */
     public addTag(tag: string): Recipe {
@@ -451,7 +457,7 @@ export type Discount = {
  * A market represents a market where a product is sold
  * It is a generic represantation that is created by the backend based on the data from the different markets
  * The id is the id of the market in the database
-*/
+ */
 export type Market = {
     _id: string;
     distributor: string;
