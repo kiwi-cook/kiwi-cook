@@ -202,7 +202,21 @@ export class Step {
     public static fromDescription(description: string): Step[] {
         return descriptionToSteps(description)
     }
+
+    /**
+     * Get all unique items in the step
+     * @returns a list of all items in the step
+     */
+    public getItems(): Item[] {
+        // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
+        // use flatMap to get all items in the recipe
+        return [...new Set(this.items.flatMap((item: StepItem) => item.item))]
+    }
 }
+
+export const voilaStep = new Step()
+voilaStep.description = 'Voilà!'
+
 
 /**
  * Recipe
@@ -220,6 +234,7 @@ export class Recipe {
     tags: string[];
     cookingTime: number;
     steps: Step[];
+    likes: number;
 
     constructor() {
         this._isSaved = false
@@ -232,6 +247,7 @@ export class Recipe {
         this.tags = []
         this.cookingTime = 10
         this.steps = [new Step()]
+        this.likes = 0
     }
 
     /**
@@ -364,7 +380,9 @@ export class Recipe {
 
     /**
      * Add an item to a step
-     * @param options 
+     * @param stepIndex index of the step
+     * @param itemIndex index of the item
+     * @param item the item to add
      * @returns the recipe to allow chaining
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
@@ -393,7 +411,7 @@ export class Recipe {
     public getItems(): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        return [...new Set(this.steps.flatMap((step: Step) => step.items.map((item: StepItem) => item.item)))]
+        return [...new Set(this.steps.flatMap((step: Step) => step.getItems()))]
     }
 
     /**
