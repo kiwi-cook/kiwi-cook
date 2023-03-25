@@ -1,15 +1,19 @@
 <template>
     <ion-card>
-        <ion-img :src="step?.imgUrl"/>
+        <ion-img :src="step?.imgUrl" />
         <ion-card-header>
             <ion-card-title color="light">
                 Step {{ stepIndex + 1 }}
+                <ion-chip v-if="step?.preparationTime" color="primary">
+                    <ion-label>{{ step?.preparationTime }} min</ion-label>
+                </ion-chip>
             </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <SmallItemContainer :items="step?.items"/>
+            <SmallItemContainer :items="step?.items" />
+            <AdditionalStepInfo :step="step" />
             <ion-item lines="none">
-                <ion-text color="light">
+                <ion-text>
                     {{ step.description }}
                 </ion-text>
             </ion-item>
@@ -18,10 +22,11 @@
 </template>
 
 <script lang="ts">
-import {IonCard, IonCardContent, IonCardHeader, IonImg, IonItem, IonText} from '@ionic/vue';
-import {defineComponent, PropType} from "vue";
-import {Step} from "@/api/types";
+import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonImg, IonItem, IonLabel, IonText } from '@ionic/vue';
+import { defineComponent, PropType } from "vue";
+import { Step } from "@/api/types";
 import SmallItemContainer from "@/components/item/SmallItemContainer.vue";
+import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 
 export default defineComponent({
     name: 'RecipeStep',
@@ -36,8 +41,8 @@ export default defineComponent({
         }
     },
     components: {
-        SmallItemContainer,
-        IonCard, IonCardHeader, IonCardContent, IonItem, IonText, IonImg
+        SmallItemContainer, AdditionalStepInfo,
+        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonText, IonImg, IonChip, IonLabel
     },
     setup() {
         return {}

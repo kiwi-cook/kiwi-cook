@@ -1,9 +1,8 @@
 <template>
     <ion-list>
         <ion-item v-for="result in filteredIngredients" :key="result.val">
-            <ion-label color="light">{{ result.val }}</ion-label>
-            <ion-checkbox slot="end" color="light" @update:modelValue="result.isChecked = $event"
-                :modelValue="result?.isChecked">
+            <ion-label>{{ result.val }}</ion-label>
+            <ion-checkbox slot="end" @update:modelValue="result.isChecked = $event" :modelValue="result?.isChecked">
             </ion-checkbox>
         </ion-item>
     </ion-list>

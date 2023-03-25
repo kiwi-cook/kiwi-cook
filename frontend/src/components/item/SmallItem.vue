@@ -1,14 +1,15 @@
 <template>
     <ion-item lines="none" class="small-item">
-        <ion-img :src="itemImgUrl" class="small-item-img"/>
-        <ion-text color="light" class="small-item-name">{{ itemName }}</ion-text>
+        <ion-img :src="itemImgUrl" class="small-item-img" />
+        <ion-text class="small-item-name">{{ itemName }}</ion-text>
+        <ion-chip v-if="itemAmountUnit !== ''">{{ itemAmountUnit }}</ion-chip>
     </ion-item>
 </template>
 
 <script lang="ts">
-import {Item, StepItem} from '@/api/types';
-import {IonImg, IonItem} from '@ionic/vue';
-import {computed, defineComponent, PropType, toRefs} from 'vue';
+import { Item, StepItem } from '@/api/types';
+import { IonImg, IonItem, IonText, IonChip } from '@ionic/vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 
 export default defineComponent({
     name: 'SmallRecipe',
@@ -19,19 +20,19 @@ export default defineComponent({
         },
     },
     components: {
-        IonItem, IonImg
+        IonItem, IonImg, IonText, IonChip
     },
     setup(props: any) {
-        const {item} = toRefs(props);
+        const { item } = toRefs(props);
         const itemImgUrl = computed(() => item.value instanceof StepItem ? item.value?.item.imgUrl : item.value?.imgUrl);
-        const itemName = computed(() => {
-            const name = item.value instanceof StepItem ? item.value?.item.name : item.value?.name
+        const itemName = computed(() => item.value instanceof StepItem ? item.value?.item.name : item.value?.name);
+        const itemAmountUnit = computed(() => {
             const amount = item.value instanceof StepItem ? item.value?.amount : 0
             const unit = item.value instanceof StepItem ? item.value?.unit : ''
-            return `${name} ${amount > 1 ? `(${amount} ${unit})` : ''}`
-        });
+            return amount > 1 ? `${amount} ${unit}` : ''
+        })
         return {
-            itemName, itemImgUrl
+            itemName, itemAmountUnit, itemImgUrl
         }
     }
 });

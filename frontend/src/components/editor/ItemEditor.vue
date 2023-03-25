@@ -5,17 +5,17 @@
                 <ion-avatar v-if="mutableItem.imgUrl">
                     <img :src="mutableItem.imgUrl" />
                 </ion-avatar>
-                <ion-chip color="light" v-if="mutableItem._id">
+                <ion-chip v-if="mutableItem._id" color="light">
                     {{ mutableItem._id }}
                 </ion-chip>
             </ion-item>
             <ion-card-title color="primary">
                 <ion-item lines="none">
                     <div slot="start">
-                        <ion-label color="light" position="stacked">Name</ion-label>
+                        <ion-label position="stacked">Name</ion-label>
                         <ion-input :value="mutableItem.name" @keyup.enter="$event => mutableItem.name = $event.target.value"
                             @ion-blur="$event => mutableItem.name = ($event.target.value ?? '').toString()" :maxlength="40"
-                            color="light" placeholder="e.g. Baking powder" />
+                            placeholder="e.g. Baking powder" />
                     </div>
                     <div slot="end">
                         <ion-button fill="solid" color="danger" @click="removeItem()">
@@ -25,12 +25,12 @@
                 </ion-item>
 
                 <ion-item lines="none">
-                    <ion-label color="light" position="stacked">Image URL</ion-label>
-                    <ion-input color="light" v-model="mutableItem.imgUrl" />
+                    <ion-label position="stacked">Image URL</ion-label>
+                    <ion-input v-model="mutableItem.imgUrl" />
                 </ion-item>
 
                 <ion-item lines="none">
-                    <ion-select color="light" placeholder="Type" v-model="mutableItem.type">
+                    <ion-select placeholder="Type" v-model="mutableItem.type">
                         <ion-select-option value="ingredient">Ingredient</ion-select-option>
                         <ion-select-option value="tool">Tool</ion-select-option>
                     </ion-select>
@@ -43,7 +43,7 @@
                 Used in recipes:
                 <ion-list>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
-                        <ion-chip color="light">
+                        <ion-chip>
                             {{ recipe?.name }}
                         </ion-chip>
                     </template>

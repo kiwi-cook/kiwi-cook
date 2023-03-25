@@ -17,7 +17,7 @@ import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 
 export default defineComponent({
-  name: "SearchComponent",
+  name: 'RecipeList',
   props: {
     filter: {
       type: String,
