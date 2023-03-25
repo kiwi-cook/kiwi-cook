@@ -99,7 +99,7 @@ export function createVueStore() {
             }
         },
         actions: {
-            async fetchRecipes({ commit }) {
+            fetchRecipes({ commit }) {
                 getFromAPI<Recipe>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
                     .then((recipes: Recipe[] | false) => {
                         // map the recipes JSON to Recipe objects
@@ -110,7 +110,7 @@ export function createVueStore() {
                         }
                     });
             },
-            async saveRecipeById({ commit, getters }, recipeId: string) {
+            saveRecipeById({ getters }, recipeId: string) {
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
                     console.error('Recipe not found: ', recipeId)
@@ -118,7 +118,7 @@ export function createVueStore() {
                 }
                 this.dispatch('saveRecipe', recipe)
             },
-            async saveRecipe({ commit }, recipe: Recipe) {
+            saveRecipe({ commit }, recipe: Recipe) {
                 commit('updateRecipe', recipe)
                 getFromAPI(API_ROUTE.ADD_RECIPE, {
                     body: recipe,
@@ -129,7 +129,7 @@ export function createVueStore() {
                     }
                 });
             },
-            async deleteRecipe({ commit }, recipe: Recipe) {
+            deleteRecipe({ commit }, recipe: Recipe) {
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
                     getFromAPI(API_ROUTE.DELETE_RECIPE, {
@@ -138,7 +138,7 @@ export function createVueStore() {
                     })
                 }
             },
-            async fetchItems({ commit }) {
+            fetchItems({ commit }) {
                 getFromAPI<Item>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
                     .then((items: Item[] | false) => {
                         // map the items JSON to Item objects
@@ -149,7 +149,7 @@ export function createVueStore() {
                         }
                     });
             },
-            async saveItem({ commit }, item: Item) {
+            saveItem({ commit }, item: Item) {
                 commit('updateItem', item)
                 getFromAPI(API_ROUTE.ADD_ITEM, {
                     body: item,
@@ -160,7 +160,7 @@ export function createVueStore() {
                     }
                 });
             },
-            async deleteItem({ commit }, item: Item) {
+            deleteItem({ commit }, item: Item) {
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
                     getFromAPI(API_ROUTE.DELETE_ITEM, {
@@ -169,7 +169,7 @@ export function createVueStore() {
                     })
                 }
             },
-            async fetchDiscounts({ commit }, city: string) {
+            fetchDiscounts({ commit }, city: string) {
                 getFromAPI<Discount>(API_ROUTE.GET_DISCOUNTS, {
                     formatObject: { CITY: city }
                 }).then((discounts: Discount[] | false) => {
