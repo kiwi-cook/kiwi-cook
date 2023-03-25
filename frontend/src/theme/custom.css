@@ -24,3 +24,25 @@
     margin-left: auto !important;
     margin-right: auto !important;
 }
+
+ion-card.shadow {
+    /* nice shadow with light background and round corners */
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.19);
+}
+
+ion-card.hoverable {
+    /* hover effect */
+    transition: transform 0.2s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+ion-card.hoverable:hover {
+    /* move card up on hover */
+    transform: translateY(-1px);
+    /* change cursor on hover */
+    cursor: pointer;
+}
+
+ion-card.hoverable.shadow:hover {
+    /* change shadow on hover */
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3), 0 0 10px 0 rgba(0, 0, 0, 0.29);
+}
