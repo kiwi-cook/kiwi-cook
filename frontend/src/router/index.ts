@@ -1,5 +1,5 @@
-import {createRouter, createWebHistory} from '@ionic/vue-router';
-import {RouteRecordRaw} from 'vue-router';
+import { createRouter, createWebHistory } from '@ionic/vue-router';
+import { RouteRecordRaw } from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -17,8 +17,12 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/FridgePage.vue')
             },
             {
-                path: 'search',
-                component: () => import('@/views/recipe/SearchPage.vue')
+                path: 'recipe',
+                component: () => import('@/views/recipe/RecipesOverviewPage.vue'),
+            },
+            {
+                path: 'recipe/:id',
+                component: () => import('@/views/recipe/RecipePage.vue'),
             },
             {
                 path: 'shopping',
@@ -30,11 +34,7 @@ const routes: Array<RouteRecordRaw> = [
             },
             {
                 path: 'editor',
-                component: () => import('@/views/EditorPage.vue')
-            },
-            {
-                path: '/recipe/:id',
-                component: () => import('@/views/recipe/RecipePage.vue')
+                component: () => import('@/views/editor/EditorPage.vue')
             }
         ]
     }
