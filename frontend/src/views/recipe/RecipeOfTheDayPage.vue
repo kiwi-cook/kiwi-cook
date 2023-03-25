@@ -7,15 +7,13 @@
         </ion-header>
 
         <ion-content>
-            <div class="gradient">
-                <div class="content">
-                    <ion-header collapse="condense">
-                        <ion-toolbar>
-                            <ion-title size="large">Recipe of the Day</ion-title>
-                        </ion-toolbar>
-                    </ion-header>
-                    <RecipeComponent :recipe="recipeOfTheDay" />
-                </div>
+            <div class="content">
+                <ion-header collapse="condense">
+                    <ion-toolbar>
+                        <ion-title size="large">Recipe of the Day</ion-title>
+                    </ion-toolbar>
+                </ion-header>
+                <RecipeComponent :recipe="recipeOfTheDay" />
             </div>
         </ion-content>
     </ion-page>
