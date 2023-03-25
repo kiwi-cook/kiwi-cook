@@ -26,6 +26,7 @@
 
 <script lang="ts">
 import { BakingStepInformation, Step } from '@/api/types';
+import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, PropType, toRefs } from 'vue';
 
 export default defineComponent({
@@ -35,6 +36,9 @@ export default defineComponent({
             type: Object as PropType<Step>,
             required: true,
         },
+    },
+    components: {
+        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput,
     },
     setup(props: { step: Step }) {
         const { step } = toRefs(props);
