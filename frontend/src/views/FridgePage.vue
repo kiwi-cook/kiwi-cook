@@ -3,7 +3,7 @@
         <ion-page>
             <ion-header>
                 <ion-toolbar color="primary">
-                    <ion-title color="light">Fridge</ion-title>
+                    <ion-title>Fridge</ion-title>
                 </ion-toolbar>
                 <ion-toolbar color="primary">
                     <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />

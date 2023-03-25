@@ -2,29 +2,37 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">Search Recipes</ion-title>
+                <ion-title>Search Recipes</ion-title>
             </ion-toolbar>
-        </ion-header>
-        <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />
-        </ion-toolbar>
-
-        <ion-content>
-            <div class="content">
+            <ion-toolbar color="primary">
+                <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />
+            </ion-toolbar>
+            <ion-toolbar color="primary">
                 <div class="filter-relevanz-button">
                     <ion-button color="primary">
-                        <ion-icon color="light" slot="icon-only" :icon="filter"></ion-icon>
-                        <ion-label color="light">
+                        <ion-icon slot="icon-only" :icon="filter"></ion-icon>
+                        <ion-label>
                             Filter
                         </ion-label>
                     </ion-button>
                     <ion-button color="primary">
-                        <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
-                        <ion-label color="light">
+                        <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
+                        <ion-label>
                             Relevanz
                         </ion-label>
                     </ion-button>
                 </div>
+            </ion-toolbar>
+        </ion-header>
+
+        <ion-content :fullscreen="true">
+            <div class="content">
+                <ion-header collapse="condense">
+                    <ion-toolbar>
+                        <ion-title size="large">Search Recipes</ion-title>
+                    </ion-toolbar>
+                </ion-header>
+
 
                 <SearchComponent :filter="filterInput"></SearchComponent>
             </div>
@@ -34,12 +42,22 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent } from '@ionic/vue';
-import SearchComponent from '@/components/SearchComponent.vue'
+import {
+    IonButton,
+    IonContent,
+    IonHeader,
+    IonIcon,
+    IonLabel,
+    IonPage,
+    IonSearchbar,
+    IonTitle,
+    IonToolbar
+} from '@ionic/vue';
+import SearchComponent from '@/components/recipe/RecipeList.vue'
 import { arrowDown, filter } from 'ionicons/icons';
 
 export default defineComponent({
-    name: 'SearchPage',
+    name: 'RecipesOverviewPage',
     components: {
         IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent,
         SearchComponent

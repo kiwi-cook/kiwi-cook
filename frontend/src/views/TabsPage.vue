@@ -15,9 +15,9 @@
                     <ion-label>Fridge</ion-label>
                 </ion-tab-button>
 
-                <ion-tab-button tab="tab3" href="/search">
+                <ion-tab-button tab="tab3" href="/recipe">
                     <ion-icon :icon="search" />
-                    <ion-label>Search</ion-label>
+                    <ion-label>Recipes</ion-label>
                 </ion-tab-button>
 
                 <ion-tab-button tab="tab4" href="/shopping">

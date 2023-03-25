@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">{{ recipe?.name }}</ion-title>
+                <ion-title>{{ recipe?.name }}</ion-title>
             </ion-toolbar>
         </ion-header>
 
@@ -14,7 +14,7 @@
                             <ion-title size="large">{{ recipe?.name }}</ion-title>
                         </ion-toolbar>
                     </ion-header>
-                    <RecipeComponent :recipe="recipe"/>
+                    <RecipeComponent :recipe="recipe" />
                 </div>
             </div>
         </ion-content>
@@ -22,11 +22,11 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent} from 'vue';
-import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
-import RecipeComponent from "@/components/recipe/RecipeComponent.vue";
-import {useRoute} from "vue-router";
-import {useTasteBuddyStore} from "@/storage";
+import { computed, defineComponent } from 'vue';
+import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import RecipeComponent from "@/components/recipe/Recipe.vue";
+import { useRoute } from "vue-router";
+import { useTasteBuddyStore } from "@/storage";
 
 export default defineComponent({
     title: 'RecipePage',

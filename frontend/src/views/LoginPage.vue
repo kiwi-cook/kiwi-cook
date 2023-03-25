@@ -2,11 +2,10 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">Profil</ion-title>
+                <ion-title>Profile</ion-title>
                 <ion-buttons slot="primary">
                     <ion-button>
-                        <ion-icon color="light" slot="icon-only" :ios="ellipsisHorizontal"
-                            :md="ellipsisVertical"></ion-icon>
+                        <ion-icon slot="icon-only" :ios="ellipsisHorizontal" :md="ellipsisVertical"></ion-icon>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -14,15 +13,20 @@
 
         <ion-content>
             <div class="content">
-                <LoginComponent></LoginComponent>
+                <ion-header collapse="condense">
+                    <ion-toolbar>
+                        <ion-title size="large">Profile</ion-title>
+                    </ion-toolbar>
+                </ion-header>
+                <LoginComponent />
             </div>
         </ion-content>
     </ion-page>
 </template>
-  
+
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonButtons, IonButton } from '@ionic/vue';
+import { IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 
 import LoginComponent from '@/components/LoginComponent.vue';
 import { ellipsisHorizontal, ellipsisVertical } from 'ionicons/icons';
@@ -33,7 +37,7 @@ export default defineComponent({
         LoginComponent,
         IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonButtons, IonButton
     },
-    setup () {
+    setup() {
         return {
             ellipsisHorizontal, ellipsisVertical
         }

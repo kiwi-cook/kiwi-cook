@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title color="light">Editor</ion-title>
+                <ion-title>Editor</ion-title>
             </ion-toolbar>
         </ion-header>
 
@@ -21,6 +21,11 @@
 
         <ion-content :fullscreen="true">
             <div class="content">
+                <ion-header collapse="condense">
+                    <ion-toolbar>
+                        <ion-title size="large">Editor</ion-title>
+                    </ion-toolbar>
+                </ion-header>
                 <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
                     <ion-refresher-content />
                 </ion-refresher>
@@ -72,7 +77,7 @@
             </div>
             <ion-fab slot="fixed" vertical="bottom" horizontal="end">
                 <ion-fab-button @click="addNew()" color="tertiary">
-                    <ion-icon :icon="add" color="light" />
+                    <ion-icon :icon="add" />
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
