@@ -1,8 +1,8 @@
 // Data types for the API
 
-import {State} from "@/storage";
-import {descriptionToSteps} from "@/utility/recipeParser";
-import {Store} from "vuex";
+import { State } from "@/storage";
+import { descriptionToSteps } from "@/utility/recipeParser";
+import { Store } from "vuex";
 
 // types for recipe
 
@@ -145,6 +145,15 @@ export class StepItem {
     }
 }
 
+export type BakingStepInformation = {
+    informationType: "baking";
+    temperature: string;
+    duration: string;
+    bakingType: string;
+}
+
+export type AdditionalStepInformation = BakingStepInformation | { [key: string]: string }
+
 /**
  * Step of a recipe
  * It is a step with a list of StepItems
@@ -155,7 +164,7 @@ export class Step {
     imgUrl?: string;
     description: string;
     preparationTime?: number;
-    additional?: { [key: string]: string; }
+    additional?: AdditionalStepInformation
 
     constructor() {
         this.items = [new StepItem()]
@@ -210,14 +219,18 @@ export class Step {
     public getItems(): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        const items = this.items.flatMap((item: StepItem) => item.item)
+        const items: Item[] = this.items.flatMap((item: StepItem) => item.item)
         return [...new Set(items)]
     }
+
+    /**
+     * Get all step items in the step
+     * @returns a list of all step items in the step
+     */
+    public getStepItems(): StepItem[] {
+        return [...new Set(this.items)]
+    }
 }
-
-export const voilaStep = new Step()
-voilaStep.description = 'Voilà!'
-
 
 /**
  * Recipe
@@ -234,8 +247,9 @@ export class Recipe {
     imgUrl: string;
     tags: string[];
     cookingTime: number;
-    steps: Step[];
+    createdAt: Date;
     likes: number;
+    steps: Step[];
 
     constructor() {
         this._isSaved = false
@@ -247,8 +261,9 @@ export class Recipe {
         this.imgUrl = ''
         this.tags = []
         this.cookingTime = 10
-        this.steps = [new Step()]
+        this.createdAt = new Date()
         this.likes = 0
+        this.steps = [new Step()]
     }
 
     /**
@@ -273,6 +288,8 @@ export class Recipe {
         recipe.imgUrl = json.imgUrl
         recipe.tags = json.tags
         recipe.cookingTime = json.cookingTime
+        recipe.createdAt = new Date(json.createdAt)
+        recipe.likes = json.likes
         recipe.steps = json.steps.map(step => Step.fromJSON(step))
 
         return recipe
@@ -401,23 +418,40 @@ export class Recipe {
             this.steps[stepIndex].items[itemIndex].item = item;
         }
 
-        console.debug('addItem', {stepIndex, itemIndex, item, recipe: this})
-        return {item, recipe: this};
+        console.debug('addItem', { stepIndex, itemIndex, item, recipe: this })
+        return { item, recipe: this };
     }
 
     /**
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
-    public getItems(): Item[] {
+    public getItems(sorted = false): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        const items = this.steps.flatMap((step: Step) => step.getItems())
+        const items = this.getStepItems().map(stepItem => stepItem.item)
         const uniqueItems: { [key: string]: Item } = {}
         items.forEach(item => {
             uniqueItems[item.getId()] = item
         })
-        return Object.values(uniqueItems)
+        const result = Object.values(uniqueItems)
+        if (sorted) {
+            result.sort((a, b) => a.name.localeCompare(b.name))
+        }
+        return result
+    }
+
+    public getStepItems(sorted = false): StepItem[] {
+        const items = this.steps.flatMap((step: Step) => step.getStepItems())
+        const uniqueItems: { [key: string]: StepItem } = {}
+        items.forEach(item => {
+            uniqueItems[item.item.getId()] = item
+        })
+        const result = Object.values(uniqueItems)
+        if (sorted) {
+            result.sort((a, b) => a.item.name.localeCompare(b.item.name))
+        }
+        return result
     }
 
     /**
