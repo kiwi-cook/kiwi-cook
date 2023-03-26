@@ -14,6 +14,9 @@ export function deepCopy<T>(obj: T): T {
  * @param date 
  * @returns the formatted date
  */
-export function formatDate(date: Date): string {
+export function formatDate(date?: Date): string {
+    if (!date) {
+        return '';
+    }
     return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
 }
