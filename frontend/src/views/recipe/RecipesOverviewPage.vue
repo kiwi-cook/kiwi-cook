@@ -34,7 +34,7 @@
                 </ion-header>
 
 
-                <SearchComponent :filter="filterInput"></SearchComponent>
+                <RecipeList :filter="filterInput" />
             </div>
         </ion-content>
     </ion-page>
@@ -53,14 +53,14 @@ import {
     IonTitle,
     IonToolbar
 } from '@ionic/vue';
-import SearchComponent from '@/components/recipe/RecipeList.vue'
+import RecipeList from '@/components/recipe/RecipeList.vue'
 import { arrowDown, filter } from 'ionicons/icons';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
         IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent,
-        SearchComponent
+        RecipeList
     },
     setup() {
         const filterInput = ref('')
