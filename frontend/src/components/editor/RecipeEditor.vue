@@ -32,7 +32,7 @@
         <ion-card-content>
             <div class="flex">
                 <AttributeEditor label="Description">
-                    <ion-input v-model.lazy.trim="mutableRecipe.description"
+                    <ion-textarea v-model.lazy.trim="mutableRecipe.description"
                         placeholder="e.g. The best recipe in Germany" />
                 </AttributeEditor>
 
