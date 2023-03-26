@@ -1,17 +1,36 @@
 <template>
     <div class="hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.imgUrl" class="hero-image"/>
-        <div class="hero-text">
-            <h1>{{ recipe?.name }}</h1>
-            <p>{{ recipe?.description }}</p>
+        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.imgUrl" class="hero-image" />
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>{{ recipe?.name }}</h1>
+                <p>{{ recipe?.description }}</p>
+                <h2>{{ recipe?.author }}</h2>
+            </div>
+            <div class="hero-tags">
+                <div class="flex">
+                    <ion-chip v-for="tag in recipe?.tags" :key="tag" class="hero-tag" color="light">
+                        <ion-label>{{ tag }}</ion-label>
+                    </ion-chip>
+                </div>
+                <div class="flex">
+                    <ion-chip color="light">
+                        <ion-label>{{ recipe?.cookingTime }} min preparation time</ion-label>
+                    </ion-chip>
+                    <ion-chip color="light">
+                        {{ formatDate(recipe?.createdAt) }}
+                    </ion-chip>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from "vue";
-import {Recipe} from "@/api/types";
-import {IonImg} from "@ionic/vue";
+import { defineComponent, PropType } from "vue";
+import { Recipe } from "@/api/types";
+import { IonChip, IonImg, IonLabel } from "@ionic/vue";
+import { formatDate } from "@/utility/util";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -22,7 +41,12 @@ export default defineComponent({
         }
     },
     components: {
-        IonImg
+        IonImg, IonChip, IonLabel
+    },
+    setup() {
+        return {
+            formatDate
+        }
     }
 })
 </script>
@@ -43,13 +67,20 @@ export default defineComponent({
     border-radius: 10px;
 }
 
-.hero-text {
-    position: absolute;
-    bottom: 0;
+.hero-content {
     left: 0;
     right: 0;
-    padding: 20px;
+    bottom: 0;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    min-height: 250px;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%);
+}
+
+.hero-text {
+    padding: 30px;
     color: #fff;
     text-align: center;
     display: flex;
@@ -57,9 +88,6 @@ export default defineComponent({
     flex-direction: column;
     /* add flex direction column */
     justify-content: center;
-    /* add justify content center */
-    height: 50%;
-    /* set height to 50% */
 }
 
 .hero-text h1 {
@@ -70,8 +98,19 @@ export default defineComponent({
 
 .hero-text p {
     font-size: 1.5em;
-    /* reduce font size for longer text */
     margin: 0;
+}
+
+.hero-tags {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.hero-tag {
+    margin: 0 10px 0 0;
 }
 
 @media only screen and (max-width: 768px) {
