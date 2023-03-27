@@ -44,10 +44,7 @@ export default defineComponent({
         const { step } = toRefs(props);
 
         const isBakingStep: ComputedRef<boolean> = computed(() => {
-            if ("additional" in step.value && step.value.additional?.informationType === "baking") {
-                return true;
-            }
-            return false;
+            return "additional" in step.value && step.value.additional?.informationType === "baking";
         });
 
         const information: ComputedRef<BakingStepInformation> = computed(() => {

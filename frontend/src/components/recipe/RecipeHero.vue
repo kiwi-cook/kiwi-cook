@@ -1,24 +1,24 @@
 <template>
-    <div class="hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.imgUrl" class="hero-image" />
+    <div class="recipe-hero">
+        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props.imgUrl" class="hero-image" />
         <div class="hero-content">
             <div class="hero-text">
-                <h1>{{ recipe?.name }}</h1>
-                <p>{{ recipe?.description }}</p>
-                <h2>{{ recipe?.author }}</h2>
+                <h1 class="recipe-name">{{ recipe?.name }}</h1>
+                <p class="recipe-description">{{ recipe?.description }}</p>
+                <h2 class="recipe-author">{{ recipe?.author }}</h2>
             </div>
             <div class="hero-tags">
-                <div class="flex">
-                    <ion-chip v-for="tag in recipe?.tags" :key="tag" class="hero-tag" color="light">
+                <div class="flex" v-if="(recipe?.props?.tags?.length ?? 0) > 0">
+                    <ion-chip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
                         <ion-label>{{ tag }}</ion-label>
                     </ion-chip>
                 </div>
                 <div class="flex">
                     <ion-chip color="light">
-                        <ion-label>{{ recipe?.cookingTime }} min preparation time</ion-label>
+                        <ion-label>{{ recipe?.props.duration ?? 0 }} minutes preparation time</ion-label>
                     </ion-chip>
                     <ion-chip color="light">
-                        {{ formatDate(recipe?.createdAt) }}
+                        created on {{ formatDate(recipe?.props.createdAt) }}
                     </ion-chip>
                 </div>
             </div>
@@ -52,7 +52,7 @@ export default defineComponent({
 </script>
 
 <style>
-.hero {
+.recipe-hero {
     position: relative;
     height: 500px;
     width: 100%;
@@ -90,13 +90,18 @@ export default defineComponent({
     justify-content: center;
 }
 
-.hero-text h1 {
+.hero-text h1.recipe-name {
     font-size: 3em;
     font-weight: bold;
     margin: 0 0 10px;
 }
 
-.hero-text p {
+.hero-text h2.recipe-author {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.hero-text p.recipe-description {
     font-size: 1.5em;
     margin: 0;
 }
@@ -129,11 +134,16 @@ export default defineComponent({
         padding: 10px;
     }
 
-    .hero-text h1 {
+    .hero-text h1.recipe-name {
         font-size: 2em;
     }
 
-    .hero-text p {
+    .hero-text h2.recipe-author {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .hero-text p.recipe-description {
         font-size: 1em;
     }
 }
@@ -158,8 +168,8 @@ export default defineComponent({
         font-size: 1.5em;
     }
 
-    .hero-text p {
-        font-size: 1em;
+    .hero-text p.recipe-description {
+        font-size: 0.8em;
     }
 }
 </style>

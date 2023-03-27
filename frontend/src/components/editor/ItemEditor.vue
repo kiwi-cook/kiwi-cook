@@ -13,8 +13,8 @@
                 <ion-item lines="none">
                     <div slot="start">
                         <ion-label position="stacked">Name</ion-label>
-                        <ion-input :value="mutableItem.name" @keyup.enter="$event => mutableItem.name = $event.target.value"
-                            @ion-blur="$event => mutableItem.name = ($event.target.value ?? '').toString()" :maxlength="40"
+                        <ion-input :value="mutableItem.name" @keyup.enter="mutableItem.name = $event.target.value"
+                            @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()" :maxlength="40"
                             placeholder="e.g. Baking powder" />
                     </div>
                     <div slot="end">

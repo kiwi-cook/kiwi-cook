@@ -12,7 +12,6 @@ import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue'
 import { arrowDown } from 'ionicons/icons';
 import { useTasteBuddyStore } from '@/storage';
 import { Recipe } from '@/api/types';
-import { getItemsFromRecipe } from '@/api/utility';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 
@@ -50,7 +49,7 @@ export default defineComponent({
         })
 
         return {
-            getItemsFromRecipe, filteredRecipe,
+            filteredRecipe,
             handleFilter,
             arrowDown
         };

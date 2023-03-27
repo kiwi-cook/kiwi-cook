@@ -4,8 +4,8 @@
             <ion-grid>
                 <ion-row>
                     <ion-col size="auto">
-                        <ion-avatar v-if="mutableRecipe.imgUrl" class="recipe-preview-img">
-                            <img :src="mutableRecipe.imgUrl" :alt="`Image of ${mutableRecipe.name}`" />
+                        <ion-avatar v-if="mutableRecipe.props.imgUrl" class="recipe-preview-img">
+                            <img :src="mutableRecipe.props.imgUrl" :alt="`Image of ${mutableRecipe.name}`" />
                         </ion-avatar>
                     </ion-col>
                     <ion-col size="3">
@@ -21,8 +21,8 @@
                         </ion-chip>
                     </ion-col>
                     <ion-col size="auto">
-                        <ion-chip v-if="mutableRecipe.createdAt" color="light">
-                            Created at {{ formatDate(mutableRecipe.createdAt) }}
+                        <ion-chip v-if="mutableRecipe.props.createdAt" color="light">
+                            Created at {{ formatDate(mutableRecipe.props.createdAt) }}
                         </ion-chip>
                     </ion-col>
                 </ion-row>
@@ -41,12 +41,12 @@
                 </AttributeEditor>
 
                 <AttributeEditor label="Cooking time (minutes)">
-                    <ion-input v-model.number="mutableRecipe.cookingTime" max="9999" min="1" type="number" />
+                    <ion-input v-model.number="mutableRecipe.props.duration" max="9999" min="1" type="number" />
                 </AttributeEditor>
             </div>
 
             <AttributeEditor label="Image URL">
-                <ion-input v-model="mutableRecipe.imgUrl" />
+                <ion-input v-model="mutableRecipe.props.imgUrl" />
             </AttributeEditor>
 
             <!-- Item icons -->
@@ -54,9 +54,9 @@
 
             <ion-item class="tags-editor" lines="none">
                 <!-- Tags -->
-                <ion-chip v-for="(tag, index) in mutableRecipe.tags" :key="index" class="tag" color="light">
+                <ion-chip v-for="(tag, index) in mutableRecipe.props.tags" :key="index" class="tag" color="light">
                     <ion-label>{{ tag }}</ion-label>
-                    <ion-icon :icon="closeCircleOutline" @click="mutableRecipe.tags.splice(index, 1)" />
+                    <ion-icon :icon="closeCircleOutline" @click="mutableRecipe.props?.tags?.splice(index, 1)" />
                 </ion-chip>
                 <!-- Add tag to the list -->
                 <ion-chip class="tag" color="light">
@@ -117,7 +117,7 @@
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
                         :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
-                        <ion-card class="item-editor shadown">
+                        <ion-card class="item-editor shadow">
                             <ion-card-header>
                                 <ion-item lines="none">
                                     <ion-avatar v-if="stepItem.item.imgUrl">
@@ -301,7 +301,9 @@ export default defineComponent({
             // icons
             closeCircleOutline,
             // utility
-            formatDate
+            formatDate,
+            // types
+            Item
         };
     },
 })

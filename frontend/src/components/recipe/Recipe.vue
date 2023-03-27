@@ -1,13 +1,13 @@
 <template>
     <ion-list lines="none">
-        <ion-item lines="none">
+        <ion-item lines="none" v-if="recipe">
             <RecipeHero :recipe="recipe" />
         </ion-item>
         <ion-item lines="none">
             <div class="center">
                 <ion-button color="primary">
-                    {{ recipe?.likes ?? 0 }} <ion-icon :icon="heart"
-                        :aria-valuetext="`${recipe?.likes ?? 0} people like this`" />
+                    {{ recipe?.props.likes ?? 0 }} <ion-icon :icon="heart"
+                        :aria-valuetext="`${recipe?.props.likes ?? 0} people like this`" />
                 </ion-button>
                 <ion-button color="primary">
                     <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe" />
