@@ -2,15 +2,13 @@
 import { Storage } from '@ionic/storage';
 
 // Vue
-import { App } from 'vue'
-import { InjectionKey } from 'vue'
-import { createStore, useStore as baseUseStore, Store } from 'vuex';
+import { App, InjectionKey } from 'vue'
+import { createStore, Store, useStore as baseUseStore } from 'vuex';
 
 // Types
 import { Discount, Item, Recipe } from '@/api/types';
 import { API_ROUTE } from '@/api/constants';
 import { APIResponseBody, getFromAPI } from '@/api';
-
 
 
 // Type the store to use benefits of TypeScript
@@ -36,7 +34,7 @@ export function useTasteBuddyStore() {
 // Create the store
 // called by main.ts
 export function createVueStore() {
-    const store = createStore<State>({
+    return createStore<State>({
         state: {
             recipes: [],
             items: [],
@@ -103,7 +101,7 @@ export function createVueStore() {
                 getFromAPI<Recipe>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
                     .then((recipes: Recipe[] | false) => {
                         // map the recipes JSON to Recipe objects
-                        // this is because the JSON is not a valid Recipe object
+                        // this is because the JSON is not a valid Recipe object,
                         // and we need to use the Recipe class methods
                         if (recipes) {
                             commit('setRecipes', recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
@@ -142,7 +140,7 @@ export function createVueStore() {
                 getFromAPI<Item>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
                     .then((items: Item[] | false) => {
                         // map the items JSON to Item objects
-                        // this is because the JSON is not a valid Item object
+                        // this is because the JSON is not a valid Item object,
                         // and we need to use the Item class methods
                         if (items) {
                             commit('setItems', items.map((item: Item) => Item.fromJSON(item)))
@@ -205,8 +203,6 @@ export function createVueStore() {
             }
         },
     })
-
-    return store
 }
 
 
