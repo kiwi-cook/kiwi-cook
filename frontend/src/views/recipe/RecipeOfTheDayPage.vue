@@ -13,7 +13,9 @@
                         <ion-title size="large">Recipe of the Day</ion-title>
                     </ion-toolbar>
                 </ion-header>
-                <RecipeComponent :recipe="recipeOfTheDay" />
+                <template v-if="recipeOfTheDay">
+                    <RecipeComponent :recipe="recipeOfTheDay" />
+                </template>
             </div>
         </ion-content>
     </ion-page>

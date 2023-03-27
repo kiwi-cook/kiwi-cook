@@ -42,7 +42,7 @@
 import { defineComponent, ref } from 'vue';
 import { IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent } from '@ionic/vue';
 import ShoppingComponent from '@/components/ShoppingComponent.vue';
-import { arrowDown } from 'ionicons/icons';
+import { arrowDown, filter } from 'ionicons/icons';
 
 export default defineComponent({
     name: 'DiscountsPage',
@@ -55,7 +55,7 @@ export default defineComponent({
 
         return {
             filterInput,
-            arrowDown
+            arrowDown, filter
         }
     }
 });
