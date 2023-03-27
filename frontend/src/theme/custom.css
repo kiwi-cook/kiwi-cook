@@ -14,6 +14,10 @@
     justify-content: center;
 }
 
+.block {
+    display: block;
+}
+
 .content {
     top: 0 !important;
     bottom: 0 !important;
