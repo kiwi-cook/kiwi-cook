@@ -190,8 +190,6 @@ export default defineComponent({
     /*background-color: #F28705;*/
     max-width: fit-content;
     max-height: 250px;
-
-
 }
 
 /**Nicht beachten drunter */

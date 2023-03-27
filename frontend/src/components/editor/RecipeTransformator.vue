@@ -35,7 +35,7 @@
 import {useTasteBuddyStore} from '@/storage';
 import {deepCopy} from '@/utility/util';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {getFromAPI} from "@/api";
 import {API_ROUTE} from "@/api/constants";
 
