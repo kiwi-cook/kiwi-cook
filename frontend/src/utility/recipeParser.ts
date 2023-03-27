@@ -86,7 +86,7 @@ const JOINER = ['and', 'or', ',', 'then'];
 const ARTICLES = ['a', 'an', 'the'];
 const OTHERS = ['rid']
 
-const TIMINGPREPOSITIONS = ['until', 'for', 'while', 'during', 'after', 'before', 'till', 'by']
+const TIMING_PREPOSITIONS = ['until', 'for', 'while', 'during', 'after', 'before', 'till', 'by']
 const TIMINGUNITS = ['min', 'mins', 'minute', 'minutes', 'sec', 'secs', 'second', 'seconds', 'hour', 'hours', 'day', 'days', 'week', 'weeks'];
 
 const IGNORE = [
@@ -99,7 +99,7 @@ const IGNORE = [
     ...PREPOSITIONS,
     ...NOUNS,
     ...OTHERS,
-    ...TIMINGPREPOSITIONS,
+    ...TIMING_PREPOSITIONS,
     ...TIMINGUNITS,
     ...ARTICLES,
     ...JOINER
