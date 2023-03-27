@@ -244,12 +244,15 @@ export class Recipe {
     name: string;
     author: string;
     description: string;
-    imgUrl: string;
-    tags: string[];
-    cookingTime: number;
-    createdAt: Date;
-    likes: number;
     steps: Step[];
+    props: {
+        url?: string;
+        imgUrl?: string;
+        duration?: number;
+        createdAt: Date;
+        tags?: string[];
+        likes: number;
+    };
 
     constructor() {
         this._isSaved = false
@@ -258,11 +261,14 @@ export class Recipe {
         this.name = 'New Recipe'
         this.author = ''
         this.description = ''
-        this.imgUrl = ''
-        this.tags = []
-        this.cookingTime = 10
-        this.createdAt = new Date()
-        this.likes = 0
+        this.props = {
+            url: '',
+            imgUrl: '',
+            duration: 0,
+            createdAt: new Date(),
+            tags: [],
+            likes: 0
+        }
         this.steps = [new Step()]
     }
 
@@ -285,12 +291,13 @@ export class Recipe {
         recipe.name = json.name
         recipe.author = json.author
         recipe.description = json.description
-        recipe.imgUrl = json.imgUrl
-        recipe.tags = json.tags
-        recipe.cookingTime = json.cookingTime
-        recipe.createdAt = new Date(json.createdAt)
-        recipe.likes = json.likes
         recipe.steps = json.steps.map(step => Step.fromJSON(step))
+        // props
+        recipe.props.imgUrl = json.props.imgUrl
+        recipe.props.tags = json.props.tags
+        recipe.props.duration = json.props.duration
+        recipe.props.createdAt = new Date(json.props.createdAt)
+        recipe.props.likes = json.props.likes
 
         return recipe
     }
@@ -460,11 +467,11 @@ export class Recipe {
      * @returns the recipe to allow chaining
      */
     public addTag(tag: string): Recipe {
-        if (this.tags === undefined) {
+        if (this.props.tags === undefined) {
             // initialize the tags array if it is undefined
-            this.tags = []
+            this.props.tags = []
         }
-        this.tags.push(tag)
+        this.props.tags.push(tag)
         return this
     }
 }
