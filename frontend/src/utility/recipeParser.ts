@@ -116,6 +116,10 @@ const isTiming = (token: string): boolean => isNumber(token);
 const isTimingWithUnit = (token: string): boolean => !isNumber(token) && /^\d+\s*\w+$/.test(token) && TIMINGUNITS.some((unit: string) => token.includes(unit));
 const isDuration = (token: string): boolean => TIMINGUNITS.includes(token.toLocaleLowerCase());
 
+/**
+ * Check if a token is an ingredient
+ * @param token
+ */
 const isIngredient = (token: string): boolean => !isIgnore(token) &&
     !isNumber(token) &&
     !isAmountWithUnit(token) &&
@@ -124,10 +128,18 @@ const isIngredient = (token: string): boolean => !isIgnore(token) &&
     !isTimingWithUnit(token) &&
     !isDuration(token);
 
+/**
+ * Normalize an ingredient
+ * @param ingredient
+ */
 const normalizeIngredient = (ingredient: string): string => {
     return ingredient[0].toLocaleUpperCase() + ingredient.slice(1);
 }
 
+/**
+ * Convert a description to a list of step items
+ * @param description
+ */
 export const descriptionToItems = (description: string): StepItem[] => {
     // prepare and tokenize the description
     const tokens = description.trim()

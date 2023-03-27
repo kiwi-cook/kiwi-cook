@@ -277,18 +277,58 @@ export default defineComponent({
             mutableRecipe.value = newRecipe
         }, { deep: true })
 
+        /**
+         * Save recipe to the Backend API
+         */
         const saveRecipe = () => mutableRecipe.value.save(store)
+
+        /**
+         * Delete recipe from the Backend API
+         */
         const deleteRecipe = () => mutableRecipe.value.delete(store)
+
+        /**
+         * Add a step to the recipe
+         * @param stepIndex index of the step to add after
+         */
         const addStep = (stepIndex: number) => mutableRecipe.value.addStep(undefined, stepIndex)
+
+        /**
+         * Add steps to the recipe from a description
+         * @param description description to parse
+         */
         const addStepsFromDescription = (description: string) => mutableRecipe.value.addSteps(Step.fromDescription(description))
+
+        /**
+         * Remove a step from the recipe
+         * @param stepIndex index of the step to remove
+         */
         const removeStep = (stepIndex: number) => mutableRecipe.value.removeStep(stepIndex)
+
+        /**
+         * Add an item to a step
+         * @param stepIndex index of the step to add the item to
+         * @param itemIndex index of the item to add after
+         * @param itemName name of the item to add
+         */
         const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe.value.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
+
+        /**
+         * Add items to a step from a description
+         * @param stepIndex index of the step to add the items to
+         */
         const addItemsFromDescription = (stepIndex: number) => {
             const description: string = mutableRecipe.value.steps[stepIndex].description;
             descriptionToItems(description).forEach((stepItem: StepItem) => {
                 mutableRecipe.value.addStep(Step.fromStepItems([stepItem], description))
             })
         }
+
+        /**
+         * Remove an item from a step
+         * @param stepIndex index of the step to remove the item from
+         * @param itemIndex index of the item to remove
+         */
         const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value.steps[stepIndex].items.splice(itemIndex, 1);
 
         return {

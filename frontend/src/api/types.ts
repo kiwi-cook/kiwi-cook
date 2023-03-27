@@ -448,6 +448,10 @@ export class Recipe {
         return result
     }
 
+    /**
+     * Get all unique stepItems in the recipe
+     * @param sorted sort the items by name
+     */
     public getStepItems(sorted = false): StepItem[] {
         const items = this.steps.flatMap((step: Step) => step.getStepItems())
         const uniqueItems: { [key: string]: StepItem } = {}

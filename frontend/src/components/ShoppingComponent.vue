@@ -100,7 +100,9 @@ export default defineComponent({
             filteredMarkets.value = markets.value
         })
 
-        // Filter markets by query
+        /**
+         * Filters markets by query
+         */
         const handleShoppingFilter = () => {
             const query: string = filter.value.toLowerCase().trim();
             // return if query is empty
@@ -140,7 +142,10 @@ export default defineComponent({
 
         // List of selected items
         const selectedItems = ref<Discount[]>([])
-        // Handle item selection
+        /**
+         * Selects or deselects an item
+         * @param item
+         */
         const selectItem = (item: Discount) => {
             if (selectedItems.value.includes(item)) {
                 selectedItems.value = selectedItems.value.filter(selectedItem => selectedItem !== item)

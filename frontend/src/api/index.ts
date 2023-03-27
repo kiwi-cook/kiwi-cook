@@ -11,6 +11,11 @@ export type APIResponse = {
 }
 
 
+/**
+ * Present a toast to the user
+ * @param message the message to display
+ * @param duration the duration of the toast in milliseconds
+ */
 export const presentToast = async (message: string, duration = 1500) => {
     const toast = toastController.create({
         message: message,

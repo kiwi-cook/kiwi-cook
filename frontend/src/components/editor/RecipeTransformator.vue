@@ -57,6 +57,11 @@ export default defineComponent({
             [path: string]: string
         }
 
+        /**
+         * Generate a flat schema from a given object
+         * @param data the data to generate the schema from
+         * @param _parentPath the parent path
+         */
         const generateFlatSchema = (data: any, _parentPath = ''): FlatSchemaType => {
             if (Array.isArray(data)) {
                 // always use the first element to generate the schema
@@ -74,6 +79,12 @@ export default defineComponent({
             return schema
         }
 
+        /**
+         * Move a value from one path to another
+         * @param root the root object
+         * @param sourcePath the path to the value
+         * @param targetPath the path to the new value
+         */
         const moveValue = (root: any, sourcePath: string, targetPath: string): boolean => {
             console.debug(`Move value from ${sourcePath} to ${targetPath}`)
             // source
@@ -123,6 +134,11 @@ export default defineComponent({
             return true
         };
 
+        /**
+         * Transforms the data to the given schema
+         * @param data data that should be transformed
+         * @param schema schema that should be used to transform the data
+         */
         const transformDataToSchema = (data: any, schema: FlatSchemaType): any => {
             const schemaWithModifiedEntries: [string, string][] = Object.entries(schema).filter(([key, value]) => key !== value)
 
@@ -166,6 +182,9 @@ export default defineComponent({
             schemaColor.value = isValid ? 'success' : 'danger'
         }, {immediate: true})
 
+        /**
+         * Update the transformed recipes in the store
+         */
         const updateRecipes = () => {
             const isValid = isJSON(transformToSchema.value)
             if (isValid) {
@@ -173,6 +192,9 @@ export default defineComponent({
             }
         }
 
+        /**
+         * Save the recipes to the Backend API
+         */
         const saveRecipes = () => {
             updateRecipes()
             transformedRecipes.value.filter((recipe: any) => typeof recipe._tmpId === 'undefined').forEach((recipe: any) =>

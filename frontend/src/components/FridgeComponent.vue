@@ -31,6 +31,9 @@ export default defineComponent({
         const ingredients = [{ val: 'Mais', isChecked: false }, { val: 'Tomate', isChecked: false }, { val: 'Gurke', isChecked: false }, { val: 'Zwiebel', isChecked: false }, { val: 'Knoblauch', isChecked: false }, { val: 'Rotkohl', isChecked: false }, { val: 'Kidney Bohnen', isChecked: false }, { val: 'Paprika', isChecked: false }];
         const filteredIngredients = ref(ingredients);
 
+        /**
+         * Filter the ingredients
+         */
         const handleFilter = () => {
             const query = filter.value.toLowerCase();
             filteredIngredients.value = ingredients.filter(d => d.val.toLowerCase().indexOf(query) > -1);
