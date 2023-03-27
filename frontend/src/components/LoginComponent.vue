@@ -48,44 +48,11 @@ ion-button {
 
 }
 
-#LogIn {
-
-    padding: auto;
-    margin: auto;
-    text-align: center;
-}
-
-#LogIn a {
-    color: deepskyblue;
-}
-
-#ContainerBelow {
-    margin: auto;
-    padding: auto;
-    padding-bottom: 2%;
-    /* background-color: aqua;*/
-
-}
-
-#ContainerProfilText p {
+.container-profile-text p {
     font-size: 20px;
     color: deepskyblue;
     width: 75%;
-    /*background-color: red;*/
-    padding: auto;
     margin: auto;
     text-align: center;
-
-}
-
-#ContainerIMG {
-    width: 20%;
-    height: 20%;
-    padding: auto;
-    margin: auto;
-    margin-bottom: 1%;
-    text-align: center;
-    /*background-color: blue;*/
-
 }
 </style>
