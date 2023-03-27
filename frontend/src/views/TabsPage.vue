@@ -27,7 +27,7 @@
 
                 <ion-tab-button tab="tab5" href="/login">
                     <ion-icon :icon="person" />
-                    <ion-label>Profil</ion-label>
+                    <ion-label>Profile</ion-label>
                 </ion-tab-button>
 
                 <ion-tab-button tab="editor" href="/editor">
