@@ -16,6 +16,9 @@
                 <ion-segment-button value="items">
                     <ion-label>Items</ion-label>
                 </ion-segment-button>
+                <ion-segment-button value="recipeTransformator">
+                    <ion-label>Recipe Transformator</ion-label>
+                </ion-segment-button>
             </ion-segment>
         </ion-toolbar>
 
@@ -49,20 +52,6 @@
 
                 <!-- Item Editor -->
                 <ion-accordion-group v-if="segment === 'items'" expand="inset">
-                    <!-- Control panel for items -->
-                    <ion-card>
-                        <ion-card-header>
-                            Control panel
-                        </ion-card-header>
-                        <ion-card-content>
-                            <ion-list>
-                                <ion-item v-if="filteredItems.length > 0">
-                                    <ion-button @click="removeItemsWithoutRecipe">Remove items without recipe</ion-button>
-                                </ion-item>
-                            </ion-list>
-                        </ion-card-content>
-                    </ion-card>
-
                     <template v-for="item in filteredItems" :key="item.getId()">
                         <ion-accordion :value="item.getId()">
                             <ion-item slot="header" color="primary">
@@ -74,6 +63,9 @@
                         </ion-accordion>
                     </template>
                 </ion-accordion-group>
+
+                <!-- Recipe Transformator -->
+                <RecipeTransformator :recipe="recipes[0]" v-if="segment === 'recipeTransformator'" />
             </div>
             <ion-fab slot="fixed" vertical="bottom" horizontal="end">
                 <ion-fab-button @click="addNew()" color="tertiary">
@@ -89,15 +81,35 @@ import { Item, Recipe } from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
 import { useTasteBuddyStore } from '@/storage';
-import { IonChip, IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import { IonChip, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
 import { add } from 'ionicons/icons'
 import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, watch } from 'vue';
+import RecipeTransformator from '@/components/editor/RecipeTransformator.vue';
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonChip, IonCard, IonCardHeader, IonCardContent, IonList, IonButton, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel,
-        RecipeEditor, ItemEditor
+        IonChip,
+        IonFab,
+        IonFabButton,
+        IonIcon,
+        IonSegment,
+        IonSegmentButton,
+        IonRefresher,
+        IonRefresherContent,
+        IonPage,
+        IonHeader,
+        IonSearchbar,
+        IonToolbar,
+        IonTitle,
+        IonContent,
+        IonAccordion,
+        IonAccordionGroup,
+        IonItem,
+        IonLabel,
+        RecipeEditor,
+        ItemEditor,
+        RecipeTransformator
     },
     setup() {
         const store = useTasteBuddyStore()
@@ -164,7 +176,6 @@ export default defineComponent({
             event.preventDefault();
             if (segment.value === 'recipes') {
                 // save only recipes that are not new
-                console.log(filteredRecipes.value);
                 filteredRecipes.value.filter(recipe => typeof recipe._tmpId === 'undefined').forEach(recipe => recipe.update(store).save(store))
             }
         }
@@ -194,7 +205,7 @@ export default defineComponent({
             handleFilter,
             addNew,
             // recipes
-            filteredRecipes,
+            recipes, filteredRecipes,
             // items
             filteredItems, removeItemsWithoutRecipe,
             // icons
