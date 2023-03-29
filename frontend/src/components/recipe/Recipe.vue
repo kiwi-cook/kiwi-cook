@@ -90,10 +90,10 @@ export default defineComponent({
     setup(props: { recipe: Recipe }) {
         const { recipe } = toRefs(props);
 
-        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems());
+        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
         const ingredients: ComputedRef<StepItem[]> = computed(() => itemsFromRecipe.value)
         const equipment: ComputedRef<Item[]> = computed(() => []);
-        const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps)
+        const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
         return {
             ingredients, equipment, steps,

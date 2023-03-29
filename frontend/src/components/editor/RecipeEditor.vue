@@ -54,9 +54,9 @@
 
             <ion-item class="tags-editor" lines="none">
                 <!-- Tags -->
-                <ion-chip v-for="(tag, index) in mutableRecipe.props.tags" :key="index" class="tag" color="light">
+                <ion-chip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex" class="tag" color="light">
                     <ion-label>{{ tag }}</ion-label>
-                    <ion-icon :icon="closeCircleOutline" @click="mutableRecipe.props?.tags?.splice(index, 1)" />
+                    <ion-icon :icon="closeCircleOutline" @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)" />
                 </ion-chip>
                 <!-- Add tag to the list -->
                 <ion-chip class="tag" color="light">
@@ -116,7 +116,7 @@
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
-                        :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
+                        :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.item.name ?? ''">
                         <ion-card class="item-editor shadow">
                             <ion-card-header>
                                 <ion-item lines="none">
@@ -137,9 +137,9 @@
                                                 @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
                                                     <ion-label>
-                                                        {{ filteredItem.name }} {{
-                                                            filteredItem._id ? ' - ' +
-                                                        filteredItem._id :
+                                                        {{ (filteredItem as Item).name }} {{
+                                                            (filteredItem as Item)._id ? ' - ' +
+                                                                (filteredItem as Item)._id :
                                                             ''
                                                         }}
                                                     </ion-label>

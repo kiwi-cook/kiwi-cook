@@ -1,12 +1,12 @@
 <template>
     <ion-accordion-group expand="inset">
-        <template v-for="market in filteredMarkets" :key="market?.name">
-            <ion-accordion :value="market?.name">
+        <template v-for="(market, marketIndex) in filteredMarkets" :key="market?.name">
+            <ion-accordion :value="market?.name ?? marketIndex.toString()">
                 <ion-item slot="header" color="primary">
                     <ion-label>{{ market?.name }}</ion-label>
                 </ion-item>
                 <div slot="content" class="discount-items" style="background-color: #444953;">
-                    <template v-for="(item, itemIndex) in market?.items" :key="item?._id + itemIndex + market?.name">
+                    <template v-for="(item, itemIndex) in (market?.items ?? [])" :key="item?._id + itemIndex + market?.name">
                         <ion-card :button="true" class="discount-item" @click="selectItem(item)">
                             <ion-thumbnail>
                                 <img :alt="item?.title + ' Pic'" :src="item?.imageUrl" class="discount-img" />
@@ -104,7 +104,7 @@ export default defineComponent({
          * Filters markets by query
          */
         const handleShoppingFilter = () => {
-            const query: string = filter.value.toLowerCase().trim();
+            const query: string = filter.value?.toLowerCase()?.trim() ?? '';
             // return if query is empty
             if (query === "") {
                 filteredMarkets.value = markets.value

@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props.imgUrl" class="hero-image" />
+        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image" />
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
@@ -120,7 +120,7 @@ export default defineComponent({
 
 @media only screen and (max-width: 768px) {
 
-    .hero {
+    .recipe-hero {
         height: 300px;
     }
 
@@ -150,7 +150,7 @@ export default defineComponent({
 
 @media only screen and (max-width: 480px) {
 
-    .hero {
+    .recipe-hero{
         height: 200px;
     }
 

@@ -32,7 +32,7 @@ export default defineComponent({
         toggleDarkTheme(prefersDark.matches);
 
         // Add or remove the "dark" class based on if the media query matches
-        function toggleDarkTheme(shouldAdd: boolean | undefined) {
+        function toggleDarkTheme(shouldAdd: boolean) {
             document.body.classList.toggle('dark', shouldAdd);
         }
         

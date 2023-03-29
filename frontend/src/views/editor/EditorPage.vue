@@ -35,8 +35,8 @@
 
                 <!-- Recipe Editor -->
                 <ion-accordion-group v-if="segment === 'recipes'" expand="inset">
-                    <template v-for="recipe in filteredRecipes" :key="recipe._id ?? recipe._tmpId">
-                        <ion-accordion :value="recipe._id ?? recipe._tmpId">
+                    <template v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipe._id ?? recipe._tmpId">
+                        <ion-accordion :value="recipe._id ?? recipe._tmpId ?? recipeIndex.toString()">
                             <ion-item slot="header" color="primary">
                                 <ion-label color="light">{{ recipe.name }}</ion-label>
                                 <ion-chip color="light" v-if="recipe._id || recipe._tmpId">

@@ -40,7 +40,7 @@ export default defineComponent({
          * Filter the ingredients
          */
         const handleFilter = () => {
-            const query = filter.value.toLowerCase();
+            const query = filter.value?.toLowerCase() ?? '';
             filteredRecipe.value = recipes.value.filter((recipe: Recipe) => JSON.stringify(recipe).toLowerCase().includes(query))
         }
         watch(filter, () => {

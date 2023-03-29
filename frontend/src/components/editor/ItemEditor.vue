@@ -3,7 +3,7 @@
         <ion-card-header>
             <ion-item lines="none" v-if="mutableItem.imgUrl || mutableItem._id">
                 <ion-avatar v-if="mutableItem.imgUrl">
-                    <img :src="mutableItem.imgUrl" />
+                    <img :src="mutableItem.imgUrl" :alt="`Image of ${mutableItem.name}`" />
                 </ion-avatar>
                 <ion-chip v-if="mutableItem._id" color="light">
                     {{ mutableItem._id }}

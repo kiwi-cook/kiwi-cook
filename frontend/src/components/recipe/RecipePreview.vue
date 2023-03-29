@@ -40,7 +40,7 @@ export default defineComponent({
     },
     setup(props: any) {
         const {recipe} = toRefs(props)
-        const firstStep: ComputedRef<Step> = computed(() => recipe.value?.steps[0])
+        const firstStep: ComputedRef<Step|undefined> = computed(() => recipe.value?.steps[0])
         return {
             firstStep
         }

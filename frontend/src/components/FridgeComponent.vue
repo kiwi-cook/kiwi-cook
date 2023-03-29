@@ -35,7 +35,7 @@ export default defineComponent({
          * Filter the ingredients
          */
         const handleFilter = () => {
-            const query = filter.value.toLowerCase();
+            const query = filter.value?.toLowerCase() ?? '';
             filteredIngredients.value = ingredients.filter(d => d.val.toLowerCase().indexOf(query) > -1);
         }
 
