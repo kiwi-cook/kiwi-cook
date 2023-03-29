@@ -18,8 +18,8 @@ export type APIResponse = {
  */
 export const presentToast = async (message: string, duration = 1500) => {
     const toast = toastController.create({
-        message: message,
-        duration: duration,
+        message,
+        duration,
         position: 'top'
     });
     await (await toast).present()
