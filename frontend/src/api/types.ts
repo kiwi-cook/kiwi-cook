@@ -484,7 +484,7 @@ export class Recipe {
 
 /**
  * A discount represents a discount on a product
- * It is a generic represantation that is created by the backend based on the data from the different markets
+ * It is a generic representation that is created by the backend based on the data from the different markets
  * The id is the id of the discount in the database
  */
 export type Discount = {
@@ -500,7 +500,7 @@ export type Discount = {
 
 /**
  * A market represents a market where a product is sold
- * It is a generic represantation that is created by the backend based on the data from the different markets
+ * It is a generic representation that is created by the backend based on the data from the different markets
  * The id is the id of the market in the database
  */
 export type Market = {
