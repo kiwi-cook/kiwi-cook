@@ -22,7 +22,7 @@ export const presentToast = async (message: string, duration = 1500) => {
         duration: duration,
         position: 'top'
     });
-    (await toast).present()
+    await (await toast).present()
 }
 
 
