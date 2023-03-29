@@ -2,16 +2,13 @@
 import { Storage } from '@ionic/storage';
 
 // Vue
-import { App } from 'vue'
-import { InjectionKey } from 'vue'
-import { createStore, useStore as baseUseStore, Store } from 'vuex';
+import { App, InjectionKey } from 'vue'
+import { createStore, Store, useStore as baseUseStore } from 'vuex';
 
 // Types
 import { Discount, Item, Recipe } from '@/api/types';
 import { API_ROUTE } from '@/api/constants';
-import { getFromAPI } from '@/api';
-import { getItemsFromRecipe } from '@/api/utility';
-
+import { APIResponseBody, getFromAPI } from '@/api';
 
 
 // Type the store to use benefits of TypeScript
@@ -37,7 +34,7 @@ export function useTasteBuddyStore() {
 // Create the store
 // called by main.ts
 export function createVueStore() {
-    const store = createStore<State>({
+    return createStore<State>({
         state: {
             recipes: [],
             items: [],
@@ -97,19 +94,21 @@ export function createVueStore() {
                 })
 
                 state.recipesByItemId = recipesByItemId
-            } 
+            }
         },
         actions: {
-            async fetchRecipes({ commit }) {
-                getFromAPI<Recipe>(API_ROUTE.GET_RECIPES)
-                    .then((recipes: Recipe[]) => {
+            fetchRecipes({ commit }) {
+                getFromAPI<Recipe>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
+                    .then((recipes: Recipe[] | false) => {
                         // map the recipes JSON to Recipe objects
-                        // this is because the JSON is not a valid Recipe object
+                        // this is because the JSON is not a valid Recipe object,
                         // and we need to use the Recipe class methods
-                        commit('setRecipes', recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                        if (recipes) {
+                            commit('setRecipes', recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                        }
                     });
             },
-            async saveRecipeById({ commit, getters }, recipeId: string) {
+            saveRecipeById({ getters }, recipeId: string) {
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
                     console.error('Recipe not found: ', recipeId)
@@ -117,52 +116,64 @@ export function createVueStore() {
                 }
                 this.dispatch('saveRecipe', recipe)
             },
-            async saveRecipe({ commit }, recipe: Recipe) {
+            saveRecipe({ commit }, recipe: Recipe) {
                 commit('updateRecipe', recipe)
                 getFromAPI(API_ROUTE.ADD_RECIPE, {
-                    body: recipe
-                }).then(() => {
-                    this.dispatch('fetchRecipes')
+                    body: recipe,
+                    errorMessage: 'Could not save recipe in database. Please retry later!'
+                }).then((response: APIResponseBody | false) => {
+                    if (response) {
+                        this.dispatch('fetchRecipes')
+                    }
                 });
             },
-            async deleteRecipe({ commit }, recipe: Recipe) {
+            deleteRecipe({ commit }, recipe: Recipe) {
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
                     getFromAPI(API_ROUTE.DELETE_RECIPE, {
-                        formatObject: { RECIPE_ID: recipe._id ?? '' }
+                        formatObject: { RECIPE_ID: recipe._id ?? '' },
+                        errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
                     })
                 }
             },
-            async fetchItems({ commit }) {
-                getFromAPI<Item>(API_ROUTE.GET_ITEMS)
-                    .then((items: Item[]) => {
+            fetchItems({ commit }) {
+                getFromAPI<Item>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
+                    .then((items: Item[] | false) => {
                         // map the items JSON to Item objects
-                        // this is because the JSON is not a valid Item object
+                        // this is because the JSON is not a valid Item object,
                         // and we need to use the Item class methods
-                        commit('setItems', items.map((item: Item) => Item.fromJSON(item)))
+                        if (items) {
+                            commit('setItems', items.map((item: Item) => Item.fromJSON(item)))
+                        }
                     });
             },
-            async saveItem({ commit }, item: Item) {
+            saveItem({ commit }, item: Item) {
                 commit('updateItem', item)
                 getFromAPI(API_ROUTE.ADD_ITEM, {
-                    body: item
-                }).then(() => {
-                    this.dispatch('fetchItems')
+                    body: item,
+                    errorMessage: 'Could not save item in database. Please retry later!'
+                }).then((response: APIResponseBody | false) => {
+                    if (response) {
+                        this.dispatch('fetchItems')
+                    }
                 });
             },
-            async deleteItem({ commit }, item: Item) {
+            deleteItem({ commit }, item: Item) {
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
                     getFromAPI(API_ROUTE.DELETE_ITEM, {
-                        formatObject: { ITEM_ID: item._id ?? '' }
+                        formatObject: { ITEM_ID: item._id ?? '' },
+                        errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
                     })
                 }
             },
-            async fetchDiscounts({ commit }, city: string) {
+            fetchDiscounts({ commit }, city: string) {
                 getFromAPI<Discount>(API_ROUTE.GET_DISCOUNTS, {
                     formatObject: { CITY: city }
-                }).then((discounts: Discount[]) => {
-                    commit('setDiscounts', { discounts, city })
+                }).then((discounts: Discount[] | false) => {
+                    if (discounts) {
+                        commit('setDiscounts', { discounts, city })
+                    }
                 })
             },
             async mapRecipeIdsToItemIds({ commit, getters }) {
@@ -192,8 +203,6 @@ export function createVueStore() {
             }
         },
     })
-
-    return store
 }
 
 

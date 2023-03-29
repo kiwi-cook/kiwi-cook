@@ -18,10 +18,10 @@ export const descriptionToSteps = (description: string): Step[] => {
     // create step from tokens
     for (let i = 0; i < descriptions.length; i++) {
         const stepItems = descriptionToItems(descriptions[i]) ?? [];
-        steps.push({
-            description: descriptions[i],
-            items: stepItems
-        });
+        const newStep = new Step()
+        newStep.description = descriptions[i];
+        newStep.items = stepItems;
+        steps.push(newStep);
     }
 
     return steps;
@@ -86,7 +86,7 @@ const JOINER = ['and', 'or', ',', 'then'];
 const ARTICLES = ['a', 'an', 'the'];
 const OTHERS = ['rid']
 
-const TIMINGPREPOSITIONS = ['until', 'for', 'while', 'during', 'after', 'before', 'till', 'by']
+const TIMING_PREPOSITIONS = ['until', 'for', 'while', 'during', 'after', 'before', 'till', 'by']
 const TIMINGUNITS = ['min', 'mins', 'minute', 'minutes', 'sec', 'secs', 'second', 'seconds', 'hour', 'hours', 'day', 'days', 'week', 'weeks'];
 
 const IGNORE = [
@@ -99,7 +99,7 @@ const IGNORE = [
     ...PREPOSITIONS,
     ...NOUNS,
     ...OTHERS,
-    ...TIMINGPREPOSITIONS,
+    ...TIMING_PREPOSITIONS,
     ...TIMINGUNITS,
     ...ARTICLES,
     ...JOINER
@@ -116,6 +116,10 @@ const isTiming = (token: string): boolean => isNumber(token);
 const isTimingWithUnit = (token: string): boolean => !isNumber(token) && /^\d+\s*\w+$/.test(token) && TIMINGUNITS.some((unit: string) => token.includes(unit));
 const isDuration = (token: string): boolean => TIMINGUNITS.includes(token.toLocaleLowerCase());
 
+/**
+ * Check if a token is an ingredient
+ * @param token
+ */
 const isIngredient = (token: string): boolean => !isIgnore(token) &&
     !isNumber(token) &&
     !isAmountWithUnit(token) &&
@@ -124,10 +128,18 @@ const isIngredient = (token: string): boolean => !isIgnore(token) &&
     !isTimingWithUnit(token) &&
     !isDuration(token);
 
+/**
+ * Normalize an ingredient
+ * @param ingredient
+ */
 const normalizeIngredient = (ingredient: string): string => {
     return ingredient[0].toLocaleUpperCase() + ingredient.slice(1);
 }
 
+/**
+ * Convert a description to a list of step items
+ * @param description
+ */
 export const descriptionToItems = (description: string): StepItem[] => {
     // prepare and tokenize the description
     const tokens = description.trim()

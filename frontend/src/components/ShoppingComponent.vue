@@ -1,100 +1,80 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar color="primary">
-                <ion-title color="light">Shopping</ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleShoppingFilter($event)"></ion-searchbar>
-        </ion-toolbar>
-        <div class="container">
-            <div id="filter-relevanz-button">
-                <ion-button color="primary">
-                    <IonLabel color="light">
-                        Filter
-                    </IonLabel>
-                </ion-button>
-                <ion-button color="primary">
-                    <ion-icon color="light" slot="icon-only" :icon="arrowDown"></ion-icon>
-                    <IonLabel color="light">
-                        Relevanz
-                    </IonLabel>
-                </ion-button>
-            </div>
-        </div>
-
-        <ion-content>
-            <ion-accordion-group expand="inset">
-                <template v-for="market in filteredMarkets" :key="market.name">
-                    <ion-accordion :value="market.name">
-                        <ion-item slot="header" color="primary">
-                            <ion-label color="light">{{ market.name }}</ion-label>
-                        </ion-item>
-                        <div slot="content" class="discount-items" style="background-color: #444953;">
-                            <template v-for="(item, itemIndex) in market.items"
-                                :key="item.name + itemIndex + market.name">
-                                <ion-card class="discount-item" :button="true" @click="selectItem(item)">
-                                    <ion-thumbnail>
-                                        <img class="discount-img" :src="item.imageUrl" :alt="item.title + ' Pic'" />
-                                    </ion-thumbnail>
-                                    <ion-card-title color="light">
-                                        {{ item.title }}
-                                    </ion-card-title>
-                                    <ion-card-subtitle color="light">
-                                        {{ item.price }} €
-                                    </ion-card-subtitle>
-                                    <!-- <ion-label color="light" position="stacked">
-                                        {{ item. }}% reduziert
-                                    </ion-label> -->
-                                </ion-card>
-                            </template>
-                        </div>
-                    </ion-accordion>
-                </template>
-            </ion-accordion-group>
-
-            <div class="container">
-                <ion-list>
-                    <template v-for="item in selectedItems" :key="item.name">
-                        <ion-item color="primary">
-                            <ion-label>{{ item.title }}</ion-label> {{  item.marketName }}
-                        </ion-item>
+    <ion-accordion-group expand="inset">
+        <template v-for="(market, marketIndex) in filteredMarkets" :key="market?.name">
+            <ion-accordion :value="market?.name ?? marketIndex.toString()">
+                <ion-item slot="header" color="primary">
+                    <ion-label>{{ market?.name }}</ion-label>
+                </ion-item>
+                <div slot="content" class="discount-items" style="background-color: #444953;">
+                    <template v-for="(item, itemIndex) in (market?.items ?? [])" :key="item?._id + itemIndex + market?.name">
+                        <ion-card :button="true" class="discount-item" @click="selectItem(item)">
+                            <ion-thumbnail>
+                                <img :alt="item?.title + ' Pic'" :src="item?.imageUrl" class="discount-img" />
+                            </ion-thumbnail>
+                            <ion-card-title>
+                                {{ item?.title }}
+                            </ion-card-title>
+                            <ion-card-subtitle>
+                                {{ item?.price }} €
+                            </ion-card-subtitle>
+                            <!-- <ion-label  position="stacked">
+                              {{ item. }}% reduziert
+                          </ion-label> -->
+                        </ion-card>
                     </template>
-                </ion-list>
-                <ion-label v-if="selectedItems.length > 0" color="light">
-                    Gesamtpreis {{ price }} €
-                </ion-label>
-            </div>
-        </ion-content>
-    </ion-page>
+                </div>
+            </ion-accordion>
+        </template>
+    </ion-accordion-group>
+
+    <div class="center">
+        <ion-list>
+            <template v-for="item in selectedItems" :key="item._id">
+                <ion-item color="primary">
+                    <ion-label>{{ item.title }}</ion-label>
+                    {{ item.marketName }}
+                </ion-item>
+            </template>
+        </ion-list>
+        <ion-label v-if="selectedItems.length > 0">
+            Gesamtpreis {{ price }} €
+        </ion-label>
+    </div>
 </template>
 
 <script lang="ts">
 import { Discount } from '@/api/types';
 import { useTasteBuddyStore } from '@/storage';
-import { IonToolbar, IonSearchbar, IonContent, IonPage, IonTitle, IonIcon, IonHeader, IonButton, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
+import {
+    IonAccordion,
+    IonAccordionGroup,
+    IonCard,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonThumbnail
+} from '@ionic/vue';
 import { arrowDown } from 'ionicons/icons';
-import { computed, ComputedRef, defineComponent, ref, watch } from 'vue';
+import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue';
 
 
 export default defineComponent({
     name: 'ShoppingComponent',
-    components: {
-        IonContent,
-        IonSearchbar,
-        IonTitle,
-        IonPage,
-        IonIcon,
-        IonButton,
-        IonHeader,
-        IonToolbar,
-        IonAccordion,
-        IonAccordionGroup,
-        IonItem,
-        IonLabel
+    props: {
+        filter: {
+            type: String,
+            required: false,
+            default: ''
+        }
     },
-    setup() {
+    components: {
+        IonList, IonCard, IonCardTitle, IonThumbnail, IonCardSubtitle, IonAccordion, IonAccordionGroup, IonItem, IonLabel
+    },
+    setup(props: any) {
+        const { filter } = toRefs(props)
+
         const store = useTasteBuddyStore();
         // Get discounts from store
         const discounts = computed(() => store.getters.getDiscounts('Konstanz'));
@@ -120,9 +100,11 @@ export default defineComponent({
             filteredMarkets.value = markets.value
         })
 
-        // Filter markets by query
-        const handleShoppingFilter = (event: any) => {
-            const query: string = event.target.value.toLowerCase().trim();
+        /**
+         * Filters markets by query
+         */
+        const handleShoppingFilter = () => {
+            const query: string = filter.value?.toLowerCase()?.trim() ?? '';
             // return if query is empty
             if (query === "") {
                 filteredMarkets.value = markets.value
@@ -132,7 +114,7 @@ export default defineComponent({
             // split by separator, e.g. ","
             const queries: string[] = query.split(",").map((q: string) => q.trim())
             console.log(queries);
-            
+
 
             // filter markets
             filteredMarkets.value = markets.value
@@ -154,9 +136,16 @@ export default defineComponent({
                 .sort((a: Market, b: Market) => a.name.localeCompare(b.name))
         }
 
+        watch(filter, () => {
+            handleShoppingFilter()
+        }, { immediate: true })
+
         // List of selected items
         const selectedItems = ref<Discount[]>([])
-        // Handle item selection
+        /**
+         * Selects or deselects an item
+         * @param item
+         */
         const selectItem = (item: Discount) => {
             if (selectedItems.value.includes(item)) {
                 selectedItems.value = selectedItems.value.filter(selectedItem => selectedItem !== item)
@@ -201,8 +190,6 @@ export default defineComponent({
     /*background-color: #F28705;*/
     max-width: fit-content;
     max-height: 250px;
-
-
 }
 
 /**Nicht beachten drunter */

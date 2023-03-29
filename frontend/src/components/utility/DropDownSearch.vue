@@ -1,6 +1,6 @@
 <template>
     <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :value="inputValue" @input="handleInput($event)"
-        @keyup.enter="addItem()" :placeholder="placeholder" />
+        @keyup.enter="addItem()" :placeholder="placeholder ?? ''" />
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, Ref, ref, toRefs, watch } from 'vue';
+import {defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
 import { IonLabel, IonInput, IonList, IonItem, IonButton } from '@ionic/vue';
 
 export default defineComponent({
@@ -31,7 +31,7 @@ export default defineComponent({
             required: true
         },
         customMapper: {
-            type: Function,
+            type: Function as PropType<(item: any) => any>,
             required: false,
             default: (item: any) => item,
         },
@@ -54,13 +54,13 @@ export default defineComponent({
         IonLabel, IonInput, IonList, IonItem, IonButton
     },
     emits: ['update:modelValue', 'addItem'],
-    setup(props: { modelValue: any, customMapper: any, items: any[], maxItems: number }, ctx: { emit: any }) {
+    setup(props: { modelValue: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: { emit: any }) {
         const { modelValue, customMapper, items, maxItems } = toRefs(props)
 
-        const inputValue: Ref<string> = ref(customMapper.value(modelValue.value))
+        const inputValue: Ref<string> = ref(customMapper.value?.(modelValue.value))
         // update the input value when the value coming from the parent changes
         watch(modelValue, () => {
-            inputValue.value = customMapper.value(modelValue.value)
+            inputValue.value = customMapper.value?.(modelValue.value)
         })
         const filteredItems: Ref<any[]> = ref(items.value.slice(0, maxItems.value))
 
@@ -87,7 +87,7 @@ export default defineComponent({
         }
 
         const selectItem = (selectedItem: any) => {
-            inputValue.value = customMapper.value(selectedItem)
+            inputValue.value = customMapper.value?.(selectedItem)
             showItemsList.value = false
             isTemporaryInput.value = false
 

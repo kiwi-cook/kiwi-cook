@@ -33,10 +33,14 @@ import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
 /* Theme variables */
-import './theme/variables.css';
+import './theme/custom.css';
+import './theme/general.css';
+/* iOS */
+import './theme/ios.css';
+/* Android */
+import './theme/md.css';
 import 'ionicons/icons';
 
-import './theme/tbContent.css';
 
 const app = createApp(App)
   .use(IonicVue)

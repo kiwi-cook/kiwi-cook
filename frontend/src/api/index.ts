@@ -2,19 +2,27 @@ import { toastController } from '@ionic/vue';
 import { API_ROUTE, API_ROUTES, API_URL } from './constants';
 import { Recipe, Discount, Market, Item } from './types';
 
+export type APIResponseBody = Recipe[] | Item[] | Discount[] | Market[]
+
 export type APIResponse = {
     error: boolean
     message?: string
-    response?: Recipe[] | Item[] | Discount[] | Market[]
+    response?: APIResponseBody
 }
 
-const presentToast = async (message: string, duration = 1500) => {
+
+/**
+ * Present a toast to the user
+ * @param message the message to display
+ * @param duration the duration of the toast in milliseconds
+ */
+export const presentToast = async (message: string, duration = 1500) => {
     const toast = toastController.create({
         message: message,
         duration: duration,
         position: 'top'
     });
-    (await toast).present()
+    await (await toast).present()
 }
 
 
@@ -23,8 +31,9 @@ const presentToast = async (message: string, duration = 1500) => {
  * 
  * @param route enum value of API_ROUTE
  * @param options optional options object
+ * @return either APIResponseBody on success or false on error
  */
-export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options?: { formatObject?: { [key: string]: string | number }, body?: T }): Promise<T[]> {
+export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: API_ROUTE, options?: { formatObject?: { [key: string]: string | number }, body?: T, errorMessage?: string }): Promise<T[] | false> {
     let url = API_URL + API_ROUTES[route].url;
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
@@ -64,7 +73,9 @@ export function getFromAPI<T extends Recipe | Item | Discount | Market>(route: A
             console.error(error)
 
             // present a toast to the user
-            presentToast('An error occured', 5000)
-            return []
+            if (typeof options?.errorMessage !== 'undefined') {
+                presentToast(options?.errorMessage, 5000)
+            }
+            return false
         })
 }

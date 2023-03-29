@@ -43,8 +43,8 @@ export class Item {
     /**
      * Initialize an item from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: Item): Item {
@@ -84,7 +84,7 @@ export class Item {
 
     /**
      * Update the item in the store
-     * @param store 
+     * @param store
      * @returns the item to allow chaining
      */
     public update(store: Store<State>): Item {
@@ -94,7 +94,7 @@ export class Item {
 
     /**
      * Save the item to the database
-     * @param store 
+     * @param store
      * @returns the item to allow chaining
      */
     public save(store: Store<State>): Item {
@@ -132,8 +132,8 @@ export class StepItem {
     /**
      * Initialize an stepItem from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: StepItem): StepItem {
@@ -145,6 +145,15 @@ export class StepItem {
     }
 }
 
+export type BakingStepInformation = {
+    informationType: "baking";
+    temperature: string;
+    duration: string;
+    bakingType: string;
+}
+
+export type AdditionalStepInformation = BakingStepInformation | { [key: string]: string }
+
 /**
  * Step of a recipe
  * It is a step with a list of StepItems
@@ -154,21 +163,21 @@ export class Step {
     items: StepItem[];
     imgUrl?: string;
     description: string;
-    preparationTime?: number;
-    additional?: { [key: string]: string; }
+    duration?: number;
+    additional?: AdditionalStepInformation
 
     constructor() {
         this.items = [new StepItem()]
         this.imgUrl = ''
         this.description = 'New step description'
-        this.preparationTime = 0
+        this.duration = 0
     }
 
     /**
      * Initialize an stepItem from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     static fromJSON(json: Step): Step {
@@ -176,15 +185,15 @@ export class Step {
         item.items = json.items.map(item => StepItem.fromJSON(item))
         item.imgUrl = json.imgUrl
         item.description = json.description
-        item.preparationTime = json.preparationTime
+        item.duration = json.duration
         item.additional = json.additional
         return item
     }
 
     /**
      * Create a step from a list of step items
-     * @param stepItems 
-     * @param description 
+     * @param stepItems
+     * @param description
      * @returns a new step
      */
     public static fromStepItems(stepItems: StepItem[], description?: string): Step {
@@ -196,11 +205,30 @@ export class Step {
 
     /**
      * Generate a list of steps from a description
-     * @param description 
+     * @param description
      * @returns a list of steps
      */
     public static fromDescription(description: string): Step[] {
         return descriptionToSteps(description)
+    }
+
+    /**
+     * Get all unique items in the step
+     * @returns a list of all items in the step
+     */
+    public getItems(): Item[] {
+        // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
+        // use flatMap to get all items in the recipe
+        const items: Item[] = this.items.flatMap((item: StepItem) => item.item)
+        return [...new Set(items)]
+    }
+
+    /**
+     * Get all step items in the step
+     * @returns a list of all step items in the step
+     */
+    public getStepItems(): StepItem[] {
+        return [...new Set(this.items)]
     }
 }
 
@@ -216,10 +244,15 @@ export class Recipe {
     name: string;
     author: string;
     description: string;
-    imgUrl: string;
-    tags: string[];
-    cookingTime: number;
     steps: Step[];
+    props: {
+        url?: string;
+        imgUrl?: string;
+        duration?: number;
+        createdAt: Date;
+        tags?: string[];
+        likes: number;
+    };
 
     constructor() {
         this._isSaved = false
@@ -228,17 +261,22 @@ export class Recipe {
         this.name = 'New Recipe'
         this.author = ''
         this.description = ''
-        this.imgUrl = ''
-        this.tags = []
-        this.cookingTime = 10
+        this.props = {
+            url: '',
+            imgUrl: '',
+            duration: 0,
+            createdAt: new Date(),
+            tags: [],
+            likes: 0
+        }
         this.steps = [new Step()]
     }
 
     /**
      * Initialize a recipe from a json object
      * This is done because the json object does not have the methods of the class
-     * 
-     * @param json 
+     *
+     * @param json
      * @returns a new recipe
      */
     public static fromJSON(json: Recipe): Recipe {
@@ -253,10 +291,13 @@ export class Recipe {
         recipe.name = json.name
         recipe.author = json.author
         recipe.description = json.description
-        recipe.imgUrl = json.imgUrl
-        recipe.tags = json.tags
-        recipe.cookingTime = json.cookingTime
         recipe.steps = json.steps.map(step => Step.fromJSON(step))
+        // props
+        recipe.props.imgUrl = json.props.imgUrl
+        recipe.props.tags = json.props.tags
+        recipe.props.duration = json.props.duration
+        recipe.props.createdAt = new Date(json.props.createdAt)
+        recipe.props.likes = json.props.likes
 
         return recipe
     }
@@ -284,7 +325,7 @@ export class Recipe {
 
     /**
      * Updates the recipe in the store
-     * @param store 
+     * @param store
      * @returns the recipe to allow chaining
      */
     public update(store: Store<State>): Recipe {
@@ -295,7 +336,7 @@ export class Recipe {
 
     /**
      * Save the recipe to the database
-     * @param store 
+     * @param store
      * @returns the recipe to allow chaining
      */
     public save(store: Store<State>): Recipe {
@@ -306,8 +347,8 @@ export class Recipe {
 
     /**
      * Save the recipe to the database by its id
-     * @param store 
-     * @param id 
+     * @param store
+     * @param id
      */
     public static saveById(store: Store<State>, id: string): void {
         console.debug('[Recipe] saveById', id)
@@ -316,7 +357,7 @@ export class Recipe {
 
     /**
      * Delete the recipe from the database
-     * @param store 
+     * @param store
      */
     public delete(store: Store<State>): void {
         console.debug('[Recipe] delete', this.getId())
@@ -325,8 +366,8 @@ export class Recipe {
 
     /**
      * Add a step to the recipe
-     * @param step 
-     * @param stepIndex 
+     * @param step
+     * @param stepIndex
      * @returns the recipe to allow chaining
      */
     public addStep(step?: Step, stepIndex?: number): Recipe {
@@ -344,7 +385,7 @@ export class Recipe {
 
     /**
      * Add multiple steps to the recipe
-     * @param steps 
+     * @param steps
      * @returns the recipe to allow chaining
      */
     public addSteps(steps: Step[]): Recipe {
@@ -354,7 +395,7 @@ export class Recipe {
 
     /**
      * Remove a step from the recipe
-     * @param index 
+     * @param index
      * @returns the recipe to allow chaining
      */
     public removeStep(index: number): Recipe {
@@ -364,7 +405,9 @@ export class Recipe {
 
     /**
      * Add an item to a step
-     * @param options 
+     * @param stepIndex index of the step
+     * @param itemIndex index of the item
+     * @param item the item to add
      * @returns the recipe to allow chaining
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
@@ -390,23 +433,49 @@ export class Recipe {
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
-    public getItems(): Item[] {
+    public getItems(sorted = false): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        return [...new Set(this.steps.flatMap((step: Step) => step.items.map((item: StepItem) => item.item)))]
+        const items = this.getStepItems().map(stepItem => stepItem.item)
+        const uniqueItems: { [key: string]: Item } = {}
+        items.forEach(item => {
+            uniqueItems[item.getId()] = item
+        })
+        const result = Object.values(uniqueItems)
+        if (sorted) {
+            result.sort((a, b) => a.name.localeCompare(b.name))
+        }
+        return result
+    }
+
+    /**
+     * Get all unique stepItems in the recipe
+     * @param sorted sort the items by name
+     */
+    public getStepItems(sorted = false): StepItem[] {
+        const items = this.steps.flatMap((step: Step) => step.getStepItems())
+        const uniqueItems: { [key: string]: StepItem } = {}
+        items.forEach(item => {
+            uniqueItems[item.item.getId()] = item
+        })
+        const result = Object.values(uniqueItems)
+        if (sorted) {
+            result.sort((a, b) => a.item.name.localeCompare(b.item.name))
+        }
+        return result
     }
 
     /**
      * Add a tag to the recipe
-     * @param tag 
+     * @param tag
      * @returns the recipe to allow chaining
      */
     public addTag(tag: string): Recipe {
-        if (this.tags === undefined) {
+        if (this.props.tags === undefined) {
             // initialize the tags array if it is undefined
-            this.tags = []
+            this.props.tags = []
         }
-        this.tags.push(tag)
+        this.props.tags.push(tag)
         return this
     }
 }
@@ -415,7 +484,7 @@ export class Recipe {
 
 /**
  * A discount represents a discount on a product
- * It is a generic represantation that is created by the backend based on the data from the different markets
+ * It is a generic representation that is created by the backend based on the data from the different markets
  * The id is the id of the discount in the database
  */
 export type Discount = {
@@ -431,9 +500,9 @@ export type Discount = {
 
 /**
  * A market represents a market where a product is sold
- * It is a generic represantation that is created by the backend based on the data from the different markets
+ * It is a generic representation that is created by the backend based on the data from the different markets
  * The id is the id of the market in the database
-*/
+ */
 export type Market = {
     _id: string;
     distributor: string;

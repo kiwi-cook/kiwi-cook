@@ -17,19 +17,23 @@ type Recipe struct {
 	Name        string             `json:"name" bson:"name" binding:"required"`
 	Author      string             `json:"author" bson:"author" binding:"required"`
 	Description string             `json:"description" bson:"description" binding:"required"`
-	ImgUrl      string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Tags        []string           `json:"tags,omitempty" bson:"tags,omitempty"`
-	CookingTime int                `json:"cookingTime" bson:"cookingTime" binding:"required"`
 	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
-	CreatedAt   time.Time          `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
-	Deleted     bool               `json:"-" bson:"deleted,omitempty"`
+	Props       struct {
+		Url       string    `json:"url,omitempty" bson:"url,omitempty"`
+		ImgUrl    string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+		Duration  int       `json:"duration,omitempty" bson:"duration,omitempty"`
+		CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
+		Tags      []string  `json:"tags,omitempty" bson:"tags,omitempty"`
+		Likes     int       `json:"likes,omitempty" bson:"likes,omitempty"`
+	} `json:"props,omitempty" bson:"props,omitempty"`
+	Deleted bool `json:"-" bson:"deleted,omitempty"`
 }
 
 type Step struct {
 	Description               string                     `json:"description" bson:"description" binding:"required"`
 	Items                     []StepItem                 `json:"items" bson:"items" binding:"required"`
 	ImgUrl                    string                     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	PreparationTime           int                        `json:"preparationTime,omitempty" bson:"preparationTime,omitempty"`
+	Duration                  int                        `json:"duration,omitempty" bson:"duration,omitempty"`
 	AdditionalStepInformation *AdditionalStepInformation `json:"additional,omitempty" bson:"additional,omitempty"`
 }
 
@@ -39,9 +43,8 @@ type AdditionalStepInformation struct {
 }
 
 type BakingStepInformation struct {
-	Degrees    int    `json:"degrees,omitempty" bson:"degrees,omitempty"`
-	Time       int    `json:"time,omitempty" bson:"time,omitempty"`
-	BakingType string `json:"bakingType,omitempty" bson:"bakingType,omitempty"`
+	Temperature int    `json:"temperature,omitempty" bson:"temperature,omitempty"`
+	BakingType  string `json:"bakingType,omitempty" bson:"bakingType,omitempty"`
 }
 
 type StepItem struct {
@@ -355,7 +358,7 @@ func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) (primitive
 		// set createdAt to current time
 		LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name, "Add new recipe to database")
 		var result *mongo.InsertOneResult
-		newRecipe.CreatedAt = time.Now()
+		newRecipe.Props.CreatedAt = time.Now()
 		result, err = client.GetRecipesCollection().InsertOne(ctx, newRecipe)
 		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
