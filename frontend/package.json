@@ -39,7 +39,7 @@
     "@vue/eslint-config-typescript": "^11.0.2",
     "cypress": "^12.8.1",
     "eslint": "^8.36.0",
-    "eslint-plugin-vue": "^9.9.0",
+    "eslint-plugin-vue": "^9.10.0",
     "typescript": "^5.0.2"
   }
 }
