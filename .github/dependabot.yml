@@ -3,7 +3,7 @@
 
 version: 2
 updates:
- - package-ecosystem: "gomod"
+  - package-ecosystem: "gomod"
     directory: "/backend"
     schedule:
       interval: "weekly"
