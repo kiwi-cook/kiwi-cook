@@ -35,7 +35,7 @@ func (app *TasteBuddyApp) HandleGetDiscountsByCity(context *gin.Context) {
 	}
 }
 
-// HandleGetDiscounts gets called by router
+// HandleGetAllDiscounts gets called by router
 // Calls getDiscountsFromDB
 func (app *TasteBuddyApp) HandleGetAllDiscounts(context *gin.Context) {
 	Log("HandleGetAllDiscounts", "Get all discounts")

@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// Get the EDEKA markets for a city
+// GetEdekaMarkets returns all EDEKA markets for a city
 func GetEdekaMarkets(city string) ([]Market, error) {
 	body, err := GetFromUrl("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
 	if err != nil {
