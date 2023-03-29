@@ -4,8 +4,8 @@
         <ion-card-header>
             <ion-card-title color="light">
                 Step {{ stepIndex + 1 }}
-                <ion-chip v-if="step?.preparationTime" color="primary">
-                    <ion-label>{{ step?.preparationTime }} min</ion-label>
+                <ion-chip v-if="step?.duration" color="primary">
+                    <ion-label>{{ step?.duration }} min</ion-label>
                 </ion-chip>
             </ion-card-title>
         </ion-card-header>

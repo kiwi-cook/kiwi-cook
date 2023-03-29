@@ -163,14 +163,14 @@ export class Step {
     items: StepItem[];
     imgUrl?: string;
     description: string;
-    preparationTime?: number;
+    duration?: number;
     additional?: AdditionalStepInformation
 
     constructor() {
         this.items = [new StepItem()]
         this.imgUrl = ''
         this.description = 'New step description'
-        this.preparationTime = 0
+        this.duration = 0
     }
 
     /**
@@ -185,7 +185,7 @@ export class Step {
         item.items = json.items.map(item => StepItem.fromJSON(item))
         item.imgUrl = json.imgUrl
         item.description = json.description
-        item.preparationTime = json.preparationTime
+        item.duration = json.duration
         item.additional = json.additional
         return item
     }

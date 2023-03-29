@@ -102,7 +102,7 @@
                 </AttributeEditor>
 
                 <AttributeEditor label="Preparation time (minutes)">
-                    <ion-input v-model.number="step.preparationTime" max="9999" min="1" type="number" />
+                    <ion-input v-model.number="step.duration" max="9999" min="1" type="number" />
                 </AttributeEditor>
 
                 <AttributeEditor label="Image URL">
