@@ -78,7 +78,7 @@ func (client *TasteBuddyDatabase) GetDiscountsByCity(city string) ([]Discount, e
 
 	// there can be multiple copies of the same discount after the filter operation above
 	var discountsMap = make(map[string]Discount)
-	var filteredDiscounts = []Discount{}
+	var filteredDiscounts []Discount
 	for _, discount := range discounts {
 		// only add discount if it is not already in the map
 		if _, ok := discountsMap[discount.Title]; !ok {

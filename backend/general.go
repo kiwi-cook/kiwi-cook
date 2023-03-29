@@ -1,16 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type TasteBuddyApp struct {
 	client *TasteBuddyDatabase
-}
-
-type TasteBuddyContext struct {
-	*gin.Context
 }
 
 type TasteBuddyDatabase struct {
