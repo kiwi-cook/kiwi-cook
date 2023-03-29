@@ -9,7 +9,7 @@
         <ion-toolbar color="primary">
             <ion-searchbar color="secondary" :debounce="100" @ion-change="handleFilter($event)" />
 
-            <ion-segment value="default" @ion-change="handleSegment($event)">
+            <ion-segment value="recipes" @ion-change="handleSegment($event)">
                 <ion-segment-button value="recipes">
                     <ion-label>Recipes</ion-label>
                 </ion-segment-button>
