@@ -68,6 +68,7 @@ func main() {
 	// Set up gin
 	r := gin.Default()
 	r.Use(cors.Default())
+	// r.Use(Authentication())
 
 	// Routes
 	apiRoutes := r.Group("/api")
@@ -79,6 +80,15 @@ func main() {
 		v1.GET("/", func(context *gin.Context) {
 			context.Status(200)
 		})
+
+		// Authentication
+		authRoutes := v1.Group("/auth")
+		{
+			// Login
+			authRoutes.POST("/login", func(context *gin.Context) {
+				app.HandleLogin(context)
+			}
+		}
 
 		// Recipes
 		recipeRoutes := v1.Group("/recipe")
