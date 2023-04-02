@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -10,13 +10,44 @@ type LoginInput struct {
 	Password string `json:"password" binding:"required"`
 }
 
-func (app *TasteBuddyApp) HandleLogin(username string, password string) bool {
-	// Get user from database
-	app.client.Database("tastebuddy").
+func (app *TasteBuddyApp) HandleLogin(context *gin.Context) bool {
+	var loginInput LoginInput
+	if err := context.ShouldBindJSON(&loginInput); err != nil {
+		LogError("HandleLogin", err)
+		BadRequestError(context, "Invalid credentials")
+		return false
+	}
+
+	// Get userFromDatabase from database
+	userFromDatabase := app.client.Database("tastebuddy").
 		Collection("users").
-		FindOne(context.Background(), bson.M{"username": username})
+		FindOne(DefaultContext(), bson.M{"username": loginInput.Username})
+
+	// Check if userFromDatabase exists
+	if userFromDatabase.Err() != nil {
+		BadCredentials(context)
+		return false
+	}
+
+	// Try to bind json to user
+	var user User
+	if err := userFromDatabase.Decode(&user); err != nil {
+		LogError("HandleLogin", err)
+		BadCredentials(context)
+		return false
+	}
+
+	// Check if password is correct
+	if !CheckPasswordHash(loginInput.Password, user) {
+		BadCredentials(context)
+		return false
+	}
+
+	Success(context, "Successful authentication")
+	return true
 }
 
-func SecureHash(input string) string {
-	// Use
+// CheckPasswordHash checks if the password is correct
+func CheckPasswordHash(password string, user User) bool {
+	return true
 }

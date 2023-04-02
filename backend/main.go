@@ -87,7 +87,7 @@ func main() {
 			// Login
 			authRoutes.POST("/login", func(context *gin.Context) {
 				app.HandleLogin(context)
-			}
+			})
 		}
 
 		// Recipes

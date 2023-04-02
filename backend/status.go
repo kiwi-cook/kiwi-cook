@@ -19,6 +19,14 @@ func NotFoundError(context *gin.Context, itemName string) {
 	context.JSON(http.StatusNotFound, gin.H{"message": itemName + " not found.", "error": true})
 }
 
+func NotAuthenticated(context *gin.Context) {
+	context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
+}
+
+func BadCredentials(context *gin.Context) {
+	context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials.", "error": true})
+}
+
 func BadRequestError(context *gin.Context, message string) {
 	context.JSON(http.StatusBadRequest, gin.H{"message": message, "error": true})
 }
@@ -28,7 +36,7 @@ func ServerError(context *gin.Context, funny bool) {
 	if funny {
 		message = funnyErrorMessage()
 	} else {
-		message = "Internal Server ErrorMessage"
+		message = "Internal Server Error"
 	}
 	ErrorMessage(context, message)
 }
