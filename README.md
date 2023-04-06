@@ -1,13 +1,20 @@
-# app
-start backend
+# Taste Buddy App
 
-  - go to backend folder
-  - `go run .`
+## Getting started
+
+### Backend
+
+#### Start Backend
+
+1. Clone this repository
+2. `cd backend`
+3. `go run .`
   
- start frontend
- 
-  - go to frontend folder
-  - `npm install`
-  - `npm run serve`
-  
-if no go -> go ask @am9zZWY
+### Frontend
+
+#### Start Frontend
+
+1. Clone this repository
+2. `cd frontend`
+3. `npm install`
+4. `npm run serve`
