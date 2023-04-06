@@ -12,8 +12,10 @@
 </template>
 
 <script lang="ts">
+import { Item } from '@/api/types';
+import { useTasteBuddyStore } from '@/storage';
 import { IonCheckbox, IonButton, IonLabel, IonItem, IonList } from '@ionic/vue';
-import { defineComponent, ref, toRefs, watch } from 'vue';
+import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue';
 
 export default defineComponent({
     name: 'FridgeComponent',
@@ -28,15 +30,23 @@ export default defineComponent({
     setup(props: any) {
         const { filter } = toRefs(props)
 
-        const ingredients = [{ val: 'Mais', isChecked: false }, { val: 'Tomate', isChecked: false }, { val: 'Gurke', isChecked: false }, { val: 'Zwiebel', isChecked: false }, { val: 'Knoblauch', isChecked: false }, { val: 'Rotkohl', isChecked: false }, { val: 'Kidney Bohnen', isChecked: false }, { val: 'Paprika', isChecked: false }];
-        const filteredIngredients = ref(ingredients);
+        const store = useTasteBuddyStore();
+        const ingredients = computed(() => store.getters.getItems.map((item: Item) => {
+            return {
+                val: item.name,
+                isChecked: false
+            }
+        }
+        ));
+
+        const filteredIngredients = ref(ingredients.value.slice(0,12));
 
         /**
          * Filter the ingredients
          */
         const handleFilter = () => {
             const query = filter.value?.toLowerCase() ?? '';
-            filteredIngredients.value = ingredients.filter(d => d.val.toLowerCase().indexOf(query) > -1);
+            filteredIngredients.value = ingredients.value.filter((d: any) => d.val.toLowerCase().indexOf(query) > -1).slice(0,12);
         }
 
         watch(filter, () => {
