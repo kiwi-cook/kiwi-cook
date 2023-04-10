@@ -18,7 +18,7 @@
     "@capacitor/status-bar": "^4.1.1",
     "@ionic/storage": "^3.0.6",
     "@ionic/vue": "^7.0.0",
-    "@ionic/vue-router": "^7.0.0",
+    "@ionic/vue-router": "^7.0.1",
     "core-js": "^3.29.1",
     "ionicons": "^7.0.0",
     "register-service-worker": "^1.7.2",
