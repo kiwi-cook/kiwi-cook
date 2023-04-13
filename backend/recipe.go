@@ -340,7 +340,7 @@ func (client *TasteBuddyDatabase) GetRecipeById(id primitive.ObjectID) (Recipe, 
 }
 
 // AddOrUpdateRecipe adds a new recipe to the database of recipes
-// and returns all recipes from the database
+// and returns all the id of the new recipe or the old recipe
 func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
