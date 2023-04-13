@@ -20,11 +20,15 @@ func NotFoundError(context *gin.Context, itemName string) {
 }
 
 func NotAuthenticated(context *gin.Context) {
-	context.JSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
+}
+
+func WrongToken(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Wrong token.", "error": true})
 }
 
 func BadCredentials(context *gin.Context) {
-	context.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials.", "error": true})
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials.", "error": true})
 }
 
 func BadRequestError(context *gin.Context, message string) {
