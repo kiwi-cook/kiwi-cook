@@ -37,7 +37,7 @@ const (
 func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 	// Get the basic auth input from the header
 	var basicAuthInput = context.Request.Header.Get("Authorization")
-	if len(basicAuthInput) == 0 {
+	if basicAuthInput == "" {
 		NotAuthenticated(context)
 		return
 	}
