@@ -121,11 +121,6 @@ func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username string, p
 	return &user, true
 }
 
-// checkPasswordHash checks if the password is hashed correctly
-func checkPasswordHash(password string, user User) bool {
-	return password == user.Password
-}
-
 ////////////////////////////////////////////////////////////////////////
 // Session
 
