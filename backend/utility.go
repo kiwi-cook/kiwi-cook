@@ -91,3 +91,11 @@ func LogError(functionName string, err error) {
 
 	log.Printf("%sERROR%s [%s]: %s", colorRed, colorNone, functionName, err)
 }
+
+func FatalError() {
+	const colorRed = "\033[0;31m"
+	const colorNone = "\033[0m"
+
+	log.Printf("%sFATAL ERROR%s", colorRed, colorNone)
+	panic("FATAL ERROR")
+}
