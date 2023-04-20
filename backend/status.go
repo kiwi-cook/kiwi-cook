@@ -39,6 +39,10 @@ func BadRequestError(context *gin.Context, message string) {
 	context.JSON(http.StatusBadRequest, gin.H{"message": message, "error": true})
 }
 
+func TooManyRequests(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"message": "Too many requests.", "error": true})
+}
+
 func ServerError(context *gin.Context, funny bool) {
 	var message string
 	if funny {
