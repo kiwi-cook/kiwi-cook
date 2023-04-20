@@ -261,7 +261,7 @@ func (app *TasteBuddyApp) HandleDeleteItemById(context *gin.Context) {
 	Success(context, "Deleted item "+id)
 }
 
-// getRecipesCollection gets recipes collection from database
+// GetRecipesCollection gets recipes collection from database
 func (client *TasteBuddyDatabase) GetRecipesCollection() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("recipes")
 }
@@ -339,8 +339,8 @@ func (client *TasteBuddyDatabase) GetRecipeById(id primitive.ObjectID) (Recipe, 
 	return recipeFromDatabase, nil
 }
 
-// addRecipeToDB adds a new recipe to the database of recipes
-// and returns all recipes from the database
+// AddOrUpdateRecipe adds a new recipe to the database of recipes
+// and returns all the id of the new recipe or the old recipe
 func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
@@ -477,7 +477,7 @@ func (client *TasteBuddyDatabase) DeleteItemById(id primitive.ObjectID) (primiti
 	return id, nil
 }
 
-// addOrUpdateItemToDB adds or updates multiple items in the database of items
+// AddOrUpdateItems adds or updates multiple items in the database of items
 func (client *TasteBuddyDatabase) AddOrUpdateItems(newItems []Item) error {
 	for _, item := range newItems {
 		if _, err := client.AddOrUpdateItem(item); err != nil {
@@ -487,7 +487,7 @@ func (client *TasteBuddyDatabase) AddOrUpdateItems(newItems []Item) error {
 	return nil
 }
 
-// AddOrUpdate adds or updates an item in the database of items
+// AddOrUpdateItem adds or updates an item in the database of items
 func (client *TasteBuddyDatabase) AddOrUpdateItem(newItem Item) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
@@ -680,7 +680,8 @@ func (client *TasteBuddyDatabase) CleanUpUnusedAttributesInRecipes() error {
 	return nil
 }
 
-// GoRoutineCleanUpRecipes
+// GoRoutineCleanUpRecipes contains goroutines that are called every 6 hours
+// to clean up parts of the recipes
 func GoRoutineCleanUpRecipes(client *TasteBuddyDatabase) {
 	for {
 		client.CleanUpItemsInRecipes()

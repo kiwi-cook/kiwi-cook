@@ -19,8 +19,28 @@ func NotFoundError(context *gin.Context, itemName string) {
 	context.JSON(http.StatusNotFound, gin.H{"message": itemName + " not found.", "error": true})
 }
 
+func NotAuthenticated(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
+}
+
+func MissingRights(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Missing rights.", "error": true})
+}
+
+func WrongToken(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Wrong token.", "error": true})
+}
+
+func BadCredentials(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials.", "error": true})
+}
+
 func BadRequestError(context *gin.Context, message string) {
 	context.JSON(http.StatusBadRequest, gin.H{"message": message, "error": true})
+}
+
+func TooManyRequests(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"message": "Too many requests.", "error": true})
 }
 
 func ServerError(context *gin.Context, funny bool) {
@@ -28,13 +48,13 @@ func ServerError(context *gin.Context, funny bool) {
 	if funny {
 		message = funnyErrorMessage()
 	} else {
-		message = "Internal Server ErrorMessage"
+		message = "Internal Server Error"
 	}
 	ErrorMessage(context, message)
 }
 
 func ErrorMessage(context *gin.Context, message string) {
-	context.JSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
+	context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
 }
 
 func funnyErrorMessage() string {

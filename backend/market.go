@@ -53,12 +53,12 @@ func (app *TasteBuddyApp) HandleGetAllMarkets(context *gin.Context) {
 	}
 }
 
-// getMarketsCollection gets markets collection from database
+// GetMarketsCollection gets markets collection from database
 func (client *TasteBuddyDatabase) GetMarketsCollection() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("markets")
 }
 
-// getMarketsByCityFromDB gets all markets for a city from the db or the api
+// GetMarketsByCity gets all markets for a city from the db or the api
 func (client *TasteBuddyDatabase) GetMarketsByCity(city string) ([]Market, error) {
 	ctx := DefaultContext()
 	collection := client.GetMarketsCollection()
@@ -75,7 +75,7 @@ func (client *TasteBuddyDatabase) GetMarketsByCity(city string) ([]Market, error
 	return markets, nil
 }
 
-// getAllMarketsFromDB gets markets from database
+// GetAllMarkets gets markets from database
 func (client *TasteBuddyDatabase) GetAllMarkets() ([]Market, error) {
 	ctx := DefaultContext()
 	collection := client.GetMarketsCollection()

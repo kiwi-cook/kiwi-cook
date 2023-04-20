@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-// Get the REWE markets for a city
+// GetReweMarkets returns all REWE markets for a city
 func GetReweMarkets(city string) ([]Market, error) {
 	body, err := GetFromUrl("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
 	if err != nil {
@@ -45,7 +45,7 @@ func GetReweMarkets(city string) ([]Market, error) {
 	return markets, nil
 }
 
-// Get the discounts for a REWE market
+// GetReweDiscounts gets the discounts for a REWE market
 func GetReweDiscounts(market Market) ([]Discount, error) {
 	body, err := GetFromUrl("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificMarketID)
 	if err != nil {

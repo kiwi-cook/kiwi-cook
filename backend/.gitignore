@@ -2,5 +2,7 @@
 .idea
 .vscode
 
-# Certificates
+# Certificates, Keys, and other sensitive files
 *.pem
+*.key
+*.crt

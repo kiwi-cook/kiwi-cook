@@ -10,13 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create a default context with a timeout of 30 seconds
+// DefaultContext creates a default context with a timeout of 30 seconds
 func DefaultContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	return ctx
 }
 
-// Fetches bytes from a url
+// GetFromUrl fetches bytes from an url
 func GetFromUrl(url string) ([]byte, error) {
 	// fetch from url
 	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
@@ -49,6 +49,7 @@ func GetFromUrl(url string) ([]byte, error) {
 	return body, nil
 }
 
+// Log prints a simple log message
 func Log(functionName string, message ...any) {
 	if len(message) == 0 {
 		log.Printf("INFO [%s]", functionName)
@@ -60,6 +61,7 @@ func Log(functionName string, message ...any) {
 	log.Printf("INFO [%s]: %s", functionName, message)
 }
 
+// LogWarning prints a warning
 func LogWarning(functionName string, message ...any) {
 	const colorYellow = "\033[0;33m"
 	const colorNone = "\033[0m"
@@ -74,6 +76,7 @@ func LogWarning(functionName string, message ...any) {
 	log.Printf("%sWARNING%s [%s]: %s", colorYellow, colorNone, functionName, message)
 }
 
+// LogContextHandle prints an error message that is caused by the context
 func LogContextHandle(context *gin.Context, functionName string, message ...any) {
 	const colorBlue = "\033[0;34m"
 	const colorNone = "\033[0m"
@@ -81,10 +84,18 @@ func LogContextHandle(context *gin.Context, functionName string, message ...any)
 	log.Printf("%sHANDLE IP(%s)%s [%s]: %s", colorBlue, context.ClientIP(), colorNone, functionName, message)
 }
 
-// Log Error
+// LogError prints an error message
 func LogError(functionName string, err error) {
 	const colorRed = "\033[0;31m"
 	const colorNone = "\033[0m"
 
 	log.Printf("%sERROR%s [%s]: %s", colorRed, colorNone, functionName, err)
+}
+
+func FatalError() {
+	const colorRed = "\033[0;31m"
+	const colorNone = "\033[0m"
+
+	log.Printf("%sFATAL ERROR%s", colorRed, colorNone)
+	panic("FATAL ERROR")
 }
