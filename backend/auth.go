@@ -94,7 +94,7 @@ func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
 //     Hash password and check if the hashed password corresponds the hashed password from the database
 //     If not -> return false
 //     If yes -> return true
-func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username string, password string) (*User, bool) {
+func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username, password string) (*User, bool) {
 	// Try to get the user from the database
 	userFromDatabase := app.client.
 		GetUsersCollections().
