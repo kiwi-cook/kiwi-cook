@@ -284,7 +284,7 @@ var tokenPool = sync.Pool{
 func GenerateRandomToken() (string, error) {
 	// Generate 512 random bits
 	tokenBytes := tokenPool.Get().([]byte)
-	defer tokenPool.Put(tokenBytes)
+	defer tokenPool.Put(&tokenBytes)
 	if _, err := rand.Read(tokenBytes); err != nil {
 		return "", err
 	}
