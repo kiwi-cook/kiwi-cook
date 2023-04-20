@@ -2,10 +2,13 @@ package main
 
 import (
 	"crypto/rand"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,24 +32,24 @@ const (
 )
 
 // //////////////////////////////////////////////////////////////////////
-// Basic Authentication
-
-// BasicAuthInput is used to authenticate users via Username and Password
-type BasicAuthInput struct {
-	Username string `json:"username" binding:"required" bson:"-"`
-	Password string `json:"password" binding:"required" bson:"-"`
-}
 
 // HandleBasicAuthentication handles the authentication of a user
 func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
-	var authInput BasicAuthInput
-	if err := context.ShouldBindJSON(&authInput); err != nil {
+	// Get the basic auth input from the header
+	var basicAuthInput = context.Request.Header.Get("Authorization")
+	if len(basicAuthInput) == 0 {
+		NotAuthenticated(context)
+		return
+	}
+
+	username, password, err := DecodeBasicAuth(basicAuthInput)
+	if err != nil {
 		LogError("HandleBasicAuthentication", err)
 		ServerError(context, true)
 		return
 	}
 
-	if user, isValidCredentials := app.CheckBasicAuthenticationCredentials(authInput); isValidCredentials {
+	if user, isValidCredentials := app.CheckBasicAuthenticationCredentials(username, password); isValidCredentials {
 		// Generate session token for user and set session token cookie
 		app.HandleStartSession(context, *user)
 		SuccessJSON(context, "Successfully logged in")
@@ -54,6 +57,33 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 		// Return error
 		NotAuthenticated(context)
 	}
+}
+
+func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
+	// Check if "Basic" is in the string
+	if !strings.Contains(basicAuthInput, "Basic") {
+		LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
+		return "", "", errors.New("invalid basic auth input")
+	}
+
+	// Remove "Basic" from the string and trim spaces
+	basicAuthInput = strings.TrimSpace(strings.Replace(basicAuthInput, "Basic", "", 1))
+
+	// Decode base64 string
+	decoded, err := base64.StdEncoding.DecodeString(basicAuthInput)
+	if err != nil {
+		LogError("DecodeUsernameAndPassword", err)
+		return "", "", err
+	}
+
+	// Split username and password
+	split := strings.Split(string(decoded), ":")
+	if len(split) != 2 {
+		LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
+		return "", "", errors.New("invalid basic auth input")
+	}
+
+	return split[0], split[1], nil
 }
 
 // CheckBasicAuthenticationCredentials authenticates the user and internally sets the JWT token
@@ -64,11 +94,11 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 //     Hash password and check if the hashed password corresponds the hashed password from the database
 //     If not -> return false
 //     If yes -> return true
-func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(authInput BasicAuthInput) (*User, bool) {
+func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username string, password string) (*User, bool) {
 	// Try to get the user from the database
 	userFromDatabase := app.client.
 		GetUsersCollections().
-		FindOne(DefaultContext(), bson.M{"username": authInput.Username})
+		FindOne(DefaultContext(), bson.M{"username": username})
 
 	// Check if the user exists
 	if userFromDatabase.Err() != nil {
@@ -84,7 +114,7 @@ func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(authInput BasicAut
 	}
 
 	// Check if password is correct
-	if !checkPasswordHash(authInput.Password, user) {
+	if !user.CheckPassword(password) {
 		return nil, false
 	}
 
@@ -114,7 +144,6 @@ func (app *TasteBuddyApp) HandleSessionTokenMiddleware() gin.HandlerFunc {
 
 		// Check to see if the request has an existing session token
 		if cookie, err := context.Request.Cookie("session_token"); err == nil {
-			Log("HandleSessionTokenMiddleware", "Found session token cookie: "+cookie.Value)
 			sessionToken := cookie.Value
 			// Validate the session token
 			if app.client.ValidateSessionToken(sessionToken) {
@@ -221,13 +250,17 @@ func (client *TasteBuddyDatabase) ValidateSessionToken(sessionToken string) bool
 }
 
 func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Time, error) {
-	sessionToken := generateRandomToken()
+	sessionToken, err := GenerateRandomToken()
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
 	userId := user.ID
 	createdAt := time.Now()
 	expiresAt := time.Now().Add(14 * 24 * time.Hour)
 
 	// Insert session into database
-	_, err := client.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
+	_, err = client.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
 		"session_token": sessionToken,
 		"user_id":       userId,
 		"created_at":    createdAt,
@@ -246,15 +279,25 @@ func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Tim
 
 // Generation //
 
-// generateRandomToken generates a random string
-func generateRandomToken() string {
-	length := 256
-	b := make([]byte, length)
-	read, err := rand.Read(b)
-	if err != nil || read != length {
-		return ""
+var tokenPool = sync.Pool{
+	New: func() interface{} {
+		return make([]byte, 64)
+	},
+}
+
+// GenerateRandomToken generates a random string
+func GenerateRandomToken() (string, error) {
+	// Generate 512 random bits
+	tokenBytes := tokenPool.Get().([]byte)
+	defer tokenPool.Put(tokenBytes)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		return "", err
 	}
-	return fmt.Sprintf("%x", b)
+
+	// Encode the random bytes as a base64 string
+	token := base64.RawURLEncoding.EncodeToString(tokenBytes)
+
+	return token, nil
 }
 
 // GenerateJWTFromSessionToken generates a JWT token for the user
@@ -296,32 +339,42 @@ func (app *TasteBuddyApp) GenerateJWTFromSessionToken(sessionToken string) (stri
 
 // Validation, Checks, ... //
 
-// CheckJWTTokenMiddleware is a Middleware that checks if the user is allowed to access the route
-func (app *TasteBuddyApp) CheckJWTTokenMiddleware(level AuthLevel) gin.HandlerFunc {
+// CheckJWTMiddleware is a Middleware that checks whether the user is allowed to access the route
+func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		// Validate the JWT token.
+		// Get the internal JWT token.
 		JWT := context.GetString("JWT")
-		token, isValidToken := app.ParseJWT(JWT)
-
-		// If the token is valid, check the auth level.
-		if isValidToken {
-			claims, ok := token.Claims.(jwt.MapClaims)
-			if ok && token.Valid {
-				data := claims["data"].(map[string]interface{})
-				// Check if the user has the required auth level
-				authLevel, err := strconv.Atoi(data["auth_level"].(string))
-				if authLevel < int(level) || err != nil {
-					if err != nil {
-						LogError("CheckJWTTokenMiddleware", err)
-					}
-					MissingRights(context)
-				} else {
-					context.Next()
-				}
-			}
-		} else {
+		if JWT == "" {
 			NotAuthenticated(context)
+			return
 		}
+		// Parse and validate the JWT token.
+		token, isValidToken := app.ParseJWT(JWT)
+		if !isValidToken {
+			NotAuthenticated(context)
+			return
+		}
+
+		// Parse and validate the claims.
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			NotAuthenticated(context)
+			return
+		}
+
+		data := claims["data"].(map[string]interface{})
+		// Check if the user has the required auth level
+		authLevel, err := strconv.Atoi(data["auth_level"].(string))
+		if authLevel < int(level) || err != nil {
+			if err != nil {
+				LogError("CheckJWTMiddleware", err)
+			}
+			MissingRights(context)
+			return
+		}
+
+		// User is authenticated and has the required auth level
+		context.Next()
 	}
 }
 

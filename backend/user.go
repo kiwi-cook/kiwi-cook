@@ -5,6 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents a user in the database
@@ -13,6 +14,12 @@ type User struct {
 	Username  string             `json:"username" bson:"username" binding:"required"`
 	Password  string             `json:"password" bson:"password" binding:"required"`
 	UserLevel int                `json:"userLevel,omitempty" bson:"userLevel,omitempty"`
+}
+
+// CheckPassword checks if the password is correct
+func (user *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	return err == nil
 }
 
 // HandleRegisterUser gets called by router
@@ -40,6 +47,7 @@ func (client *TasteBuddyDatabase) GetUsersCollections() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("users")
 }
 
+// GetUserById gets a user by its id
 func (client *TasteBuddyDatabase) GetUserById(userId primitive.ObjectID) (User, error) {
 	var user User
 	ctx := DefaultContext()
@@ -49,6 +57,17 @@ func (client *TasteBuddyDatabase) GetUserById(userId primitive.ObjectID) (User, 
 		return user, err
 	}
 	return user, nil
+}
+
+// HashPassword hashes the password of a user
+// This is called before the user is added to the database
+func (user *User) HashPassword() error {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		return err
+	}
+	user.Password = string(bytes)
+	return nil
 }
 
 // AddOrUpdateUser adds a new user to the database of users
@@ -61,6 +80,10 @@ func (client *TasteBuddyDatabase) AddOrUpdateUser(newUser User) (primitive.Objec
 		// add new user
 		LogWarning("AddOrUpdateUser + user "+newUser.Username, "Add new user to database")
 		var result *mongo.InsertOneResult
+		if err := newUser.HashPassword(); err != nil {
+			LogError("AddOrUpdateUser + user "+newUser.Username, err)
+			return objectId, err
+		}
 		result, err = client.GetUsersCollections().InsertOne(ctx, newUser)
 		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
