@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"os"
 )
 
 func main() {
@@ -35,6 +35,16 @@ func main() {
 		PORT = "8081"
 	} else {
 		PORT = viper.GetString("PORT")
+	}
+
+	// Set JWT secret key
+	JWTSecretKey, err := os.ReadFile(viper.GetString("JWT_RSA_KEY"))
+	JWTPublicKey, err := os.ReadFile(viper.GetString("JWT_RSA_PUB_KEY"))
+	if err != nil {
+		LogError("main", err)
+	} else {
+		app.jwtSecretKey = JWTSecretKey
+		app.jwtPublicKey = JWTPublicKey
 	}
 
 	// Finish viper
@@ -68,10 +78,18 @@ func main() {
 	// Set up gin
 	r := gin.Default()
 	r.Use(cors.Default())
-	// r.Use(Authentication())
+	r.Use(app.HandleSessionTokenMiddleware())
 
 	// Routes
 	apiRoutes := r.Group("/api")
+
+	// Authentication
+	authRoutes := apiRoutes.Group("/auth")
+	{
+		authRoutes.POST("/", func(context *gin.Context) {
+			app.HandleBasicAuthentication(context)
+		})
+	}
 
 	// Version 1
 	v1 := apiRoutes.Group("/v1")
@@ -81,13 +99,21 @@ func main() {
 			context.Status(200)
 		})
 
-		// Authentication
-		authRoutes := v1.Group("/auth")
+		// Users
+		userRoutes := v1.Group("/user")
 		{
-			// Login
-			authRoutes.POST("/login", func(context *gin.Context) {
-				app.HandleLogin(context)
+			// Get all users
+			userRoutes.GET("/", app.CheckJWTTokenMiddleware(AdminLevel), func(context *gin.Context) {
+				// app.HandleGetAllUsers(context)
 			})
+
+			// Register user
+			registerRoutes := userRoutes.Group("/register")
+			{
+				registerRoutes.POST("/", func(context *gin.Context) {
+					app.HandleRegisterUser(context)
+				})
+			}
 		}
 
 		// Recipes
@@ -114,12 +140,12 @@ func main() {
 			})
 
 			// Add recipe to database
-			recipeRoutes.POST("/", func(context *gin.Context) {
+			recipeRoutes.POST("/", app.CheckJWTTokenMiddleware(ModeratorLevel), func(context *gin.Context) {
 				app.HandleAddRecipe(context)
 			})
 
 			// Delete recipe by id
-			recipeRoutes.DELETE("/:id", func(context *gin.Context) {
+			recipeRoutes.DELETE("/:id", app.CheckJWTTokenMiddleware(ModeratorLevel), func(context *gin.Context) {
 				app.HandleDeleteRecipeById(context)
 			})
 		}
@@ -138,12 +164,12 @@ func main() {
 			})
 
 			// Add recipe to database
-			itemRoutes.POST("/", func(context *gin.Context) {
+			itemRoutes.POST("/", app.CheckJWTTokenMiddleware(ModeratorLevel), func(context *gin.Context) {
 				app.HandleAddItem(context)
 			})
 
 			// Delete item by id
-			itemRoutes.DELETE("/:id", func(context *gin.Context) {
+			itemRoutes.DELETE("/:id", app.CheckJWTTokenMiddleware(ModeratorLevel), func(context *gin.Context) {
 				app.HandleDeleteItemById(context)
 			})
 		}
@@ -186,14 +212,11 @@ func main() {
 		}
 
 		// Admin routes
-		adminRoutes := v1.Group("/admin")
+		dbRoutes := v1.Group("/db")
 		{
-			dbRoutes := adminRoutes.Group("/db")
-			{
-				dbRoutes.GET("/dropAll", func(context *gin.Context) {
-					app.HandleDropAllCollections(context)
-				})
-			}
+			dbRoutes.POST("/dropAll", app.CheckJWTTokenMiddleware(AdminLevel), func(context *gin.Context) {
+				app.HandleDropAllCollections(context)
+			})
 		}
 	}
 

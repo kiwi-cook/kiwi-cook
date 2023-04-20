@@ -23,6 +23,10 @@ func NotAuthenticated(context *gin.Context) {
 	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
 }
 
+func MissingRights(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Missing rights.", "error": true})
+}
+
 func WrongToken(context *gin.Context) {
 	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Wrong token.", "error": true})
 }
@@ -46,7 +50,7 @@ func ServerError(context *gin.Context, funny bool) {
 }
 
 func ErrorMessage(context *gin.Context, message string) {
-	context.JSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
+	context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
 }
 
 func funnyErrorMessage() string {

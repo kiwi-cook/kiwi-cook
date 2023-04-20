@@ -5,7 +5,9 @@ import (
 )
 
 type TasteBuddyApp struct {
-	client *TasteBuddyDatabase
+	client       *TasteBuddyDatabase
+	jwtSecretKey []byte
+	jwtPublicKey []byte
 }
 
 type TasteBuddyDatabase struct {

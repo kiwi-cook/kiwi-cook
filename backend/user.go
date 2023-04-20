@@ -40,6 +40,17 @@ func (client *TasteBuddyDatabase) GetUsersCollections() *mongo.Collection {
 	return client.Database("tastebuddy").Collection("users")
 }
 
+func (client *TasteBuddyDatabase) GetUserById(userId primitive.ObjectID) (User, error) {
+	var user User
+	ctx := DefaultContext()
+	err := client.GetUsersCollections().FindOne(ctx, bson.D{{Key: "_id", Value: userId}}).Decode(&user)
+	if err != nil {
+		LogError("GetUserById", err)
+		return user, err
+	}
+	return user, nil
+}
+
 // AddOrUpdateUser adds a new user to the database of users
 func (client *TasteBuddyDatabase) AddOrUpdateUser(newUser User) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
