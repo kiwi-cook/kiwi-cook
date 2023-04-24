@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -274,17 +273,10 @@ func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Tim
 
 // Generation //
 
-var tokenPool = sync.Pool{
-	New: func() interface{} {
-		return make([]byte, 64)
-	},
-}
-
 // GenerateRandomToken generates a random string
 func GenerateRandomToken() (string, error) {
 	// Generate 512 random bits
-	tokenBytes := tokenPool.Get().([]byte)
-	defer tokenPool.Put(&tokenBytes)
+	tokenBytes := make([]byte, 64)
 	if _, err := rand.Read(tokenBytes); err != nil {
 		return "", err
 	}
