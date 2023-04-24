@@ -52,7 +52,7 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 	if user, isValidCredentials := app.CheckBasicAuthenticationCredentials(username, password); isValidCredentials {
 		// Generate session token for user and set session token cookie
 		app.HandleStartSession(context, *user)
-		SuccessJSON(context, "Successfully logged in")
+		Success(context, "Successfully logged in")
 	} else {
 		// Return error
 		NotAuthenticated(context)

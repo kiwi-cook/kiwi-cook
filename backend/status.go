@@ -8,7 +8,7 @@ import (
 )
 
 func Success(context *gin.Context, message string) {
-	context.JSON(http.StatusOK, gin.H{"message": message, "error": false})
+	context.JSON(http.StatusOK, gin.H{"response": message, "error": false})
 }
 
 func SuccessJSON(context *gin.Context, json interface{}) {
