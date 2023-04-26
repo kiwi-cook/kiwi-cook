@@ -1,11 +1,11 @@
 <template>
-    <BakingStepInfo :step="step" v-if="additionalComponent === 'baking'" />
+    <BakingStepInfo v-if="additionalComponent === 'baking'" :step="step"/>
     <!-- Add more -->
 </template>
 
 <script lang="ts">
-import { Step } from '@/api/types';
-import { PropType, toRefs, defineComponent, computed, ComputedRef } from 'vue';
+import {Step} from '@/api/types';
+import {computed, ComputedRef, defineComponent, PropType, toRefs} from 'vue';
 import BakingStepInfo from '../step/StepInfoBaking.vue';
 
 export default defineComponent({
@@ -16,11 +16,11 @@ export default defineComponent({
             required: true
         }
     },
-    components: { BakingStepInfo },
+    components: {BakingStepInfo},
     setup(props: {
         step: Step;
     }) {
-        const { step } = toRefs(props);
+        const {step} = toRefs(props);
         const additionalComponent: ComputedRef<string> = computed(() => {
             let additionalComponent = "";
             if ("additional" in step.value) {

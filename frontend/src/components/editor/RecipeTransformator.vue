@@ -36,7 +36,7 @@ import {useTasteBuddyStore} from '@/storage';
 import {deepCopy} from '@/utility/util';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {getFromAPI} from "@/api";
+import {sendToAPI} from "@/api";
 import {API_ROUTE} from "@/api/constants";
 
 export default defineComponent({
@@ -126,6 +126,7 @@ export default defineComponent({
             const targetKey = targetKeys[targetKeys.length - 1];
 
             // Remove the source object from its parent
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             delete sourceParent[sourceKey!]
 
             // Insert the source object into the target parent
@@ -140,10 +141,11 @@ export default defineComponent({
          * @param schema schema that should be used to transform the data
          */
         const transformDataToSchema = (data: any, schema: FlatSchemaType): any => {
-            const schemaWithModifiedEntries: [string, string][] = Object.entries(schema).filter(([key, value]) => key !== value)
+            const schemaWithModifiedEntries: [string, string][] = Object.entries(schema)
+                .filter(([key, value]) => key !== value)
 
-            for (let i = 0; i < schemaWithModifiedEntries.length; i++) {
-                const [fromPath, toPath] = schemaWithModifiedEntries[i]
+            for (const element of schemaWithModifiedEntries) {
+                const [fromPath, toPath] = element
                 console.log(moveValue(data, fromPath, toPath))
             }
             return data
@@ -198,7 +200,7 @@ export default defineComponent({
         const saveRecipes = () => {
             updateRecipes()
             transformedRecipes.value.filter((recipe: any) => typeof recipe._tmpId === 'undefined').forEach((recipe: any) =>
-                getFromAPI(API_ROUTE.ADD_RECIPE, {body: recipe})
+                sendToAPI(API_ROUTE.ADD_RECIPE, {body: recipe})
             )
         }
 

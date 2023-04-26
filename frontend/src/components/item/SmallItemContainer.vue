@@ -1,14 +1,14 @@
 <template>
     <div class="small-item-container">
         <template v-for="(item, itemIndex) in items" :key="itemIndex">
-            <SmallItem :item="item" class="small-item" />
+            <SmallItem :item="item" class="small-item"/>
         </template>
     </div>
 </template>
 
 <script lang="ts">
-import { Item, StepItem } from '@/api/types';
-import { PropType } from 'vue';
+import {Item, StepItem} from '@/api/types';
+import {PropType} from 'vue';
 import SmallItem from '@/components/item/SmallItem.vue';
 
 export default {

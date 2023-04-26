@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Recipe of the Day</ion-title>
+                <ion-title>{{ recipe?.name }}</ion-title>
             </ion-toolbar>
         </ion-header>
 
@@ -10,11 +10,11 @@
             <div class="content">
                 <ion-header collapse="condense">
                     <ion-toolbar>
-                        <ion-title size="large">Recipe of the Day</ion-title>
+                        <ion-title size="large">{{ recipe?.name }}</ion-title>
                     </ion-toolbar>
                 </ion-header>
-                <template v-if="recipeOfTheDay">
-                    <RecipeComponent :recipe="recipeOfTheDay"/>
+                <template v-if="recipe">
+                    <RecipeComponent :recipe="recipe"/>
                 </template>
             </div>
         </ion-content>
@@ -25,8 +25,9 @@
 import {computed, ComputedRef, defineComponent} from 'vue';
 import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
-import {Recipe} from "@/api/types";
 import {useTasteBuddyStore} from "@/storage";
+import {useRoute} from 'vue-router';
+import {Recipe} from '@/api/types';
 
 
 export default defineComponent({
@@ -36,11 +37,13 @@ export default defineComponent({
         IonPage, IonContent, IonHeader, IonToolbar, IonTitle
     },
     setup() {
-        const store = useTasteBuddyStore()
-        const recipeOfTheDay: ComputedRef<Recipe> = computed(() => store.getters.getRecipes[0])
+        const route = useRoute()
+        const recipeId: ComputedRef<string> = computed(() => (route.params.id ?? '') as string)
 
+        const store = useTasteBuddyStore()
+        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesById[recipeId.value])
         return {
-            recipeOfTheDay
+            recipe
         }
     }
 });

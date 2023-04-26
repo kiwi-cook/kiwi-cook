@@ -1,8 +1,8 @@
 // Data types for the API
 
-import { State } from "@/storage";
-import { descriptionToSteps } from "@/utility/recipeParser";
-import { Store } from "vuex";
+import {State} from "@/storage";
+import {descriptionToSteps} from "@/utility/recipeParser";
+import {Store} from "vuex";
 
 // types for recipe
 
@@ -25,19 +25,6 @@ export class Item {
         this.name = 'New Item'
         this.type = 'ingredient'
         this.imgUrl = ''
-    }
-
-    /**
-     * Get the id of the item
-     * @returns the id of the item
-     * @throws an error if the id is undefined
-     */
-    public getId(): string {
-        // if the id is undefined, throw an error
-        if (this._id === undefined && this._tmpId === undefined) {
-            throw new Error("item id is undefined")
-        }
-        return this._id ?? this._tmpId as string
     }
 
     /**
@@ -80,6 +67,19 @@ export class Item {
         const item = new Item()
         item.name = name ?? 'New Item'
         return item
+    }
+
+    /**
+     * Get the id of the item
+     * @returns the id of the item
+     * @throws an error if the id is undefined
+     */
+    public getId(): string {
+        // if the id is undefined, throw an error
+        if (this._id === undefined && this._tmpId === undefined) {
+            throw new Error("item id is undefined")
+        }
+        return this._id ?? this._tmpId as string
     }
 
     /**
@@ -303,6 +303,24 @@ export class Recipe {
     }
 
     /**
+     * Initialize a new recipe with a temporary id
+     * @returns a new recipe with a temporary id
+     */
+    public static newRecipe(): Recipe {
+        return new Recipe()
+    }
+
+    /**
+     * Save the recipe to the database by its id
+     * @param store
+     * @param id
+     */
+    public static saveById(store: Store<State>, id: string): void {
+        console.debug('[Recipe] saveById', id)
+        store.dispatch('saveRecipeById', id)
+    }
+
+    /**
      * Get the id of the recipe
      * @returns the id of the recipe
      * @throws an error if the id is undefined
@@ -313,14 +331,6 @@ export class Recipe {
             throw new Error("recipe id is undefined")
         }
         return this._id ?? this._tmpId as string
-    }
-
-    /**
-     * Initialize a new recipe with a temporary id
-     * @returns a new recipe with a temporary id
-     */
-    public static newRecipe(): Recipe {
-        return new Recipe()
     }
 
     /**
@@ -343,16 +353,6 @@ export class Recipe {
         console.debug('[Recipe] save', this.getId())
         store.dispatch('saveRecipe', this)
         return this
-    }
-
-    /**
-     * Save the recipe to the database by its id
-     * @param store
-     * @param id
-     */
-    public static saveById(store: Store<State>, id: string): void {
-        console.debug('[Recipe] saveById', id)
-        store.dispatch('saveRecipeById', id)
     }
 
     /**
@@ -425,8 +425,8 @@ export class Recipe {
             this.steps[stepIndex].items[itemIndex].item = item;
         }
 
-        console.debug('addItem', { stepIndex, itemIndex, item, recipe: this })
-        return { item, recipe: this };
+        console.debug('addItem', {stepIndex, itemIndex, item, recipe: this})
+        return {item, recipe: this};
     }
 
     /**

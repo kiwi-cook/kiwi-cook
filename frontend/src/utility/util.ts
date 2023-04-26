@@ -2,7 +2,7 @@
  * Create a deep copy of an object
  * This is done by serializing the object to JSON and then parsing it back to an object
  * It does not copy functions
- * @param obj 
+ * @param obj
  * @returns the deep copy of the object
  */
 export function deepCopy<T>(obj?: T): T {
@@ -11,7 +11,7 @@ export function deepCopy<T>(obj?: T): T {
 
 /**
  * Format a date to DD.MM.YYYY, e.g. 1.1.2020
- * @param date 
+ * @param date
  * @returns the formatted date
  */
 export function formatDate(date?: Date): string {
@@ -19,4 +19,15 @@ export function formatDate(date?: Date): string {
         return '';
     }
     return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+}
+
+
+/**
+ * Set the cookie details
+ * @param cookie
+ * @param value
+ * @param expirationDate
+ */
+export function setCookie(cookie: string, value: string, expirationDate: Date) {
+    document.cookie = cookie + "=" + value + ";path=/;expires=" + expirationDate.toUTCString();
 }

@@ -1,5 +1,5 @@
-import { Step, StepItem } from '@/api/types';
-import { deepCopy } from './util';
+import {Step, StepItem} from '@/api/types';
+import {deepCopy} from './util';
 
 enum State {
     Ignore,

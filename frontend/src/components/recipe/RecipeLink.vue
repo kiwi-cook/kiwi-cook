@@ -5,9 +5,9 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from "vue";
-import { Recipe } from "@/api/types";
-import { IonButton } from "@ionic/vue";
+import {computed, defineComponent, PropType, toRefs} from "vue";
+import {Recipe} from "@/api/types";
+import {IonButton} from "@ionic/vue";
 
 export default defineComponent({
     name: 'RecipeLink',
@@ -21,7 +21,7 @@ export default defineComponent({
         IonButton
     },
     setup(props: any) {
-        const { recipe } = toRefs(props);
+        const {recipe} = toRefs(props);
         const recipeLink = computed(() => `/recipe/${recipe.value?._id ?? ''}`)
 
         return {

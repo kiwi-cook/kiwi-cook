@@ -5,7 +5,7 @@
                 <ion-title>Discounts</ion-title>
             </ion-toolbar>
             <ion-toolbar color="primary">
-                <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />
+                <ion-searchbar v-model="filterInput" :debounce="100" color="secondary"/>
             </ion-toolbar>
             <ion-toolbar color="primary">
                 <div class="filter-relevanz-button">
@@ -32,17 +32,27 @@
                         <ion-title size="large">Discounts</ion-title>
                     </ion-toolbar>
                 </ion-header>
-                <ShoppingComponent :filter="filterInput" />
+                <ShoppingComponent :filter="filterInput"/>
             </div>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent } from '@ionic/vue';
+import {defineComponent, ref} from 'vue';
+import {
+    IonButton,
+    IonContent,
+    IonHeader,
+    IonIcon,
+    IonLabel,
+    IonPage,
+    IonSearchbar,
+    IonTitle,
+    IonToolbar
+} from '@ionic/vue';
 import ShoppingComponent from '@/components/ShoppingComponent.vue';
-import { arrowDown, filter } from 'ionicons/icons';
+import {arrowDown, filter} from 'ionicons/icons';
 
 export default defineComponent({
     name: 'DiscountsPage',

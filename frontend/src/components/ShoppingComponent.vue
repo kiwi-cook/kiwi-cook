@@ -6,10 +6,11 @@
                     <ion-label>{{ market?.name }}</ion-label>
                 </ion-item>
                 <div slot="content" class="discount-items" style="background-color: #444953;">
-                    <template v-for="(item, itemIndex) in (market?.items ?? [])" :key="item?._id + itemIndex + market?.name">
+                    <template v-for="(item, itemIndex) in (market?.items ?? [])"
+                              :key="item?._id + itemIndex + market?.name">
                         <ion-card :button="true" class="discount-item" @click="selectItem(item)">
                             <ion-thumbnail>
-                                <img :alt="item?.title + ' Pic'" :src="item?.imageUrl" class="discount-img" />
+                                <img :alt="item?.title + ' Pic'" :src="item?.imageUrl" class="discount-img"/>
                             </ion-thumbnail>
                             <ion-card-title>
                                 {{ item?.title }}
@@ -43,8 +44,8 @@
 </template>
 
 <script lang="ts">
-import { Discount } from '@/api/types';
-import { useTasteBuddyStore } from '@/storage';
+import {Discount} from '@/api/types';
+import {useTasteBuddyStore} from '@/storage';
 import {
     IonAccordion,
     IonAccordionGroup,
@@ -56,8 +57,8 @@ import {
     IonList,
     IonThumbnail
 } from '@ionic/vue';
-import { arrowDown } from 'ionicons/icons';
-import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue';
+import {arrowDown} from 'ionicons/icons';
+import {computed, ComputedRef, defineComponent, ref, toRefs, watch} from 'vue';
 
 
 export default defineComponent({
@@ -70,10 +71,18 @@ export default defineComponent({
         }
     },
     components: {
-        IonList, IonCard, IonCardTitle, IonThumbnail, IonCardSubtitle, IonAccordion, IonAccordionGroup, IonItem, IonLabel
+        IonList,
+        IonCard,
+        IonCardTitle,
+        IonThumbnail,
+        IonCardSubtitle,
+        IonAccordion,
+        IonAccordionGroup,
+        IonItem,
+        IonLabel
     },
     setup(props: any) {
-        const { filter } = toRefs(props)
+        const {filter} = toRefs(props)
 
         const store = useTasteBuddyStore();
         // Get discounts from store
@@ -88,7 +97,7 @@ export default defineComponent({
             if (market) {
                 market.items.push(discount);
             } else {
-                markets.push({ name: discount.marketName, items: [discount] });
+                markets.push({name: discount.marketName, items: [discount]});
             }
             return markets;
         }, []));
@@ -126,7 +135,7 @@ export default defineComponent({
                     // check if items were found
                     if (filteredItems.length > 0) {
                         // if items were found, return already filteredMarkets and add market with filtered items
-                        return [...filteredMarkets, { name: market.name, items: filteredItems }]
+                        return [...filteredMarkets, {name: market.name, items: filteredItems}]
                     }
 
                     // if not, just return filtered markets
@@ -138,7 +147,7 @@ export default defineComponent({
 
         watch(filter, () => {
             handleShoppingFilter()
-        }, { immediate: true })
+        }, {immediate: true})
 
         // List of selected items
         const selectedItems = ref<Discount[]>([])

@@ -7,7 +7,7 @@
         </ion-header>
 
         <ion-toolbar color="primary">
-            <ion-searchbar color="secondary" :debounce="100" @ion-change="handleFilter($event)" />
+            <ion-searchbar :debounce="100" color="secondary" @ion-change="handleFilter($event)"/>
 
             <ion-segment value="recipes" @ion-change="handleSegment($event)">
                 <ion-segment-button value="recipes">
@@ -30,7 +30,7 @@
                     </ion-toolbar>
                 </ion-header>
                 <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
-                    <ion-refresher-content />
+                    <ion-refresher-content/>
                 </ion-refresher>
 
                 <!-- Recipe Editor -->
@@ -39,12 +39,12 @@
                         <ion-accordion :value="recipe._id ?? recipe._tmpId ?? recipeIndex.toString()">
                             <ion-item slot="header" color="primary">
                                 <ion-label color="light">{{ recipe.name }}</ion-label>
-                                <ion-chip color="light" v-if="recipe._id || recipe._tmpId">
+                                <ion-chip v-if="recipe._id || recipe._tmpId" color="light">
                                     {{ recipe._id ?? recipe._tmpId }}
                                 </ion-chip>
                             </ion-item>
                             <div slot="content">
-                                <RecipeEditor :recipe="recipe" />
+                                <RecipeEditor :recipe="recipe"/>
                             </div>
                         </ion-accordion>
                     </template>
@@ -58,18 +58,18 @@
                                 <ion-label color="light">{{ item.name }}</ion-label>
                             </ion-item>
                             <div slot="content">
-                                <ItemEditor :item="item" />
+                                <ItemEditor :item="item"/>
                             </div>
                         </ion-accordion>
                     </template>
                 </ion-accordion-group>
 
                 <!-- Recipe Transformator -->
-                <RecipeTransformator :recipe="recipes[0]" v-if="segment === 'recipeTransformator'" />
+                <RecipeTransformator v-if="segment === 'recipeTransformator'" :recipe="recipes[0]"/>
             </div>
-            <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-                <ion-fab-button @click="addNew()" color="tertiary">
-                    <ion-icon :icon="add" />
+            <ion-fab slot="fixed" horizontal="end" vertical="bottom">
+                <ion-fab-button color="tertiary" @click="addNew()">
+                    <ion-icon :icon="add"/>
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -77,13 +77,32 @@
 </template>
 
 <script lang="ts">
-import { Item, Recipe } from '@/api/types';
+import {Item, Recipe} from '@/api/types';
 import RecipeEditor from '@/components/editor/RecipeEditor.vue';
 import ItemEditor from '@/components/editor/ItemEditor.vue'
-import { useTasteBuddyStore } from '@/storage';
-import { IonChip, IonFab, IonFabButton, IonIcon, IonSegment, IonSegmentButton, IonRefresher, IonRefresherContent, IonPage, IonHeader, IonSearchbar, IonToolbar, IonTitle, IonContent, IonAccordion, IonAccordionGroup, IonItem, IonLabel } from '@ionic/vue';
-import { add } from 'ionicons/icons'
-import { computed, ComputedRef, defineComponent, onMounted, Ref, ref, watch } from 'vue';
+import {useTasteBuddyStore} from '@/storage';
+import {
+    IonAccordion,
+    IonAccordionGroup,
+    IonChip,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonHeader,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonPage,
+    IonRefresher,
+    IonRefresherContent,
+    IonSearchbar,
+    IonSegment,
+    IonSegmentButton,
+    IonTitle,
+    IonToolbar
+} from '@ionic/vue';
+import {add} from 'ionicons/icons'
+import {computed, ComputedRef, defineComponent, onMounted, Ref, ref, watch} from 'vue';
 import RecipeTransformator from '@/components/editor/RecipeTransformator.vue';
 
 export default defineComponent({
@@ -150,11 +169,11 @@ export default defineComponent({
 
         watch(recipes, () => {
             filteredRecipes.value = recipes.value
-        }, { deep: true })
+        }, {deep: true})
 
         watch(items, () => {
             filteredItems.value = items.value
-        }, { deep: true })
+        }, {deep: true})
 
         const handleFilter = (event: any) => {
             const query: string = event.target.value.toLowerCase().trim();
@@ -176,7 +195,8 @@ export default defineComponent({
             event.preventDefault();
             if (segment.value === 'recipes') {
                 // save only recipes that are not new
-                filteredRecipes.value.filter(recipe => typeof recipe._tmpId === 'undefined').forEach(recipe => recipe.update(store).save(store))
+                const nonTemporaryRecipes = filteredRecipes.value.filter(recipe => typeof recipe._tmpId === 'undefined')
+                nonTemporaryRecipes.forEach(recipe => recipe.update(store).save(store))
             }
         }
 

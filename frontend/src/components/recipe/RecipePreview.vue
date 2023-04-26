@@ -3,7 +3,7 @@
         <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
         <ion-card-content>
             <SmallItemContainer :items="recipe.getItems()"/>
-            <div class="recipe-step-preview" v-if="firstStep?.description">
+            <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
                     {{ firstStep?.description }}
@@ -40,7 +40,7 @@ export default defineComponent({
     },
     setup(props: any) {
         const {recipe} = toRefs(props)
-        const firstStep: ComputedRef<Step|undefined> = computed(() => recipe.value?.steps[0])
+        const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
         return {
             firstStep
         }

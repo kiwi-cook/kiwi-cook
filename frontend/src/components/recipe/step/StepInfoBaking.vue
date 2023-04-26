@@ -7,27 +7,29 @@
         </ion-card-header>
         <ion-card-content>
             <ion-item>
-                <ion-label position="stacked">Bake at</ion-label>
-                <ion-input type="number" placeholder="Temperature" :value="information.temperature" readonly></ion-input>
-                <ion-label position="stacked">°C</ion-label>
+                <ion-input :value="information.temperature" label="Bake at" label-placement="stacked"
+                           placeholder="Temperature" readonly type="number"/>
+                °C
             </ion-item>
             <ion-item>
-                <ion-label position="stacked">for</ion-label>
-                <ion-input type="number" placeholder="Time" :value="information.duration" readonly></ion-input>
-                <ion-label position="stacked">min</ion-label>
+                <ion-input :value="information.duration" label="for" label-placement="stacked" placeholder="Time"
+                           readonly
+                           type="number"/>
+                minutes
             </ion-item>
             <ion-item>
-                <ion-label position="stacked">using</ion-label>
-                <ion-input type="text" placeholder="Temperature" :value="information.bakingType" readonly />
+                <ion-input :value="information.bakingType" label="using" label-placement="stacked"
+                           placeholder="Temperature" readonly
+                           type="text"/>
             </ion-item>
         </ion-card-content>
     </ion-card>
 </template>
 
 <script lang="ts">
-import { BakingStepInformation, Step } from '@/api/types';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, PropType, toRefs } from 'vue';
+import {BakingStepInformation, Step} from '@/api/types';
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem} from '@ionic/vue';
+import {computed, ComputedRef, defineComponent, PropType, toRefs} from 'vue';
 
 export default defineComponent({
     name: 'BakingStepInfo',
@@ -38,10 +40,10 @@ export default defineComponent({
         },
     },
     components: {
-        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonLabel, IonInput,
+        IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonInput,
     },
     setup(props: { step: Step }) {
-        const { step } = toRefs(props);
+        const {step} = toRefs(props);
 
         const isBakingStep: ComputedRef<boolean> = computed(() => {
             return "additional" in step.value && step.value.additional?.informationType === "baking";

@@ -1,17 +1,17 @@
 <template>
     <ion-list>
         <template v-for="recipe in filteredRecipe" :key="recipe.name">
-            <RecipePreview :recipe="recipe" />
+            <RecipePreview :recipe="recipe"/>
         </template>
     </ion-list>
 </template>
 
 <script lang="ts">
-import { IonList } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, ref, toRefs, watch } from 'vue';
-import { arrowDown } from 'ionicons/icons';
-import { useTasteBuddyStore } from '@/storage';
-import { Recipe } from '@/api/types';
+import {IonList} from '@ionic/vue';
+import {computed, ComputedRef, defineComponent, ref, toRefs, watch} from 'vue';
+import {arrowDown} from 'ionicons/icons';
+import {useTasteBuddyStore} from '@/storage';
+import {Recipe} from '@/api/types';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 
@@ -29,7 +29,7 @@ export default defineComponent({
         IonList,
     },
     setup(props: any) {
-        const { filter } = toRefs(props)
+        const {filter} = toRefs(props)
 
         const store = useTasteBuddyStore();
         const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes);
@@ -45,7 +45,7 @@ export default defineComponent({
         }
         watch(filter, () => {
             handleFilter();
-        }, { immediate: true })
+        }, {immediate: true})
 
         watch(recipes, () => {
             filteredRecipe.value = recipes.value;

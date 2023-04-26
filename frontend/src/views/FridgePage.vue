@@ -6,13 +6,13 @@
                     <ion-title>Fridge</ion-title>
                 </ion-toolbar>
                 <ion-toolbar color="primary">
-                    <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />
+                    <ion-searchbar v-model="filterInput" :debounce="100" color="secondary"/>
                 </ion-toolbar>
             </ion-header>
 
             <ion-content>
                 <div class="content">
-                    <FridgeComponent :filter="filterInput" />
+                    <FridgeComponent :filter="filterInput"/>
                 </div>
             </ion-content>
         </ion-page>
@@ -20,8 +20,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { IonTitle, IonSearchbar, IonContent, IonHeader, IonPage, IonToolbar } from '@ionic/vue';
+import {defineComponent, ref} from 'vue';
+import {IonContent, IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar} from '@ionic/vue';
 import FridgeComponent from '@/components/FridgeComponent.vue';
 
 

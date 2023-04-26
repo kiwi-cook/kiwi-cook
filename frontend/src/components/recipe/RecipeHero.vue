@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image" />
+        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image"/>
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
@@ -8,7 +8,7 @@
                 <h2 class="recipe-author">{{ recipe?.author }}</h2>
             </div>
             <div class="hero-tags">
-                <div class="flex" v-if="(recipe?.props?.tags?.length ?? 0) > 0">
+                <div v-if="(recipe?.props?.tags?.length ?? 0) > 0" class="flex">
                     <ion-chip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
                         <ion-label>{{ tag }}</ion-label>
                     </ion-chip>
@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { Recipe } from "@/api/types";
-import { IonChip, IonImg, IonLabel } from "@ionic/vue";
-import { formatDate } from "@/utility/util";
+import {defineComponent, PropType} from "vue";
+import {Recipe} from "@/api/types";
+import {IonChip, IonImg, IonLabel} from "@ionic/vue";
+import {formatDate} from "@/utility/util";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -150,7 +150,7 @@ export default defineComponent({
 
 @media only screen and (max-width: 480px) {
 
-    .recipe-hero{
+    .recipe-hero {
         height: 200px;
     }
 
