@@ -7,8 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Success(context *gin.Context, message string) {
-	context.JSON(http.StatusOK, gin.H{"response": message, "error": false})
+func responseJSON(response interface{}, error bool) gin.H {
+	return gin.H{"response": response, "error": error}
+}
+
+// Success returns a 200 success with a message
+func Success(context *gin.Context, response interface{}) {
+	context.JSON(http.StatusOK, responseJSON(response, false))
 }
 
 func SuccessJSON(context *gin.Context, json interface{}) {

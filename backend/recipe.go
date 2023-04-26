@@ -70,7 +70,7 @@ func (app *TasteBuddyApp) HandleGetAllRecipes(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	SuccessJSON(context, recipes)
+	Success(context, recipes)
 }
 
 func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
@@ -90,7 +90,7 @@ func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	SuccessJSON(context, recipe)
+	Success(context, recipe)
 }
 
 // HandleGetRandomRecipe gets called by router
@@ -111,7 +111,7 @@ func (app *TasteBuddyApp) HandleGetRandomRecipe(context *gin.Context) {
 
 	// get random recipe
 	randomIndex := rand.Intn(len(recipes))
-	SuccessJSON(context, recipes[randomIndex])
+	Success(context, recipes[randomIndex])
 }
 
 // HandleAddRecipe gets called by router
@@ -176,7 +176,7 @@ func (app *TasteBuddyApp) HandleFindRecipesByItemNames(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	SuccessJSON(context, recipes)
+	Success(context, recipes)
 }
 
 // HandleGetAllItems gets called by router
@@ -188,7 +188,7 @@ func (app *TasteBuddyApp) HandleGetAllItems(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	SuccessJSON(context, items)
+	Success(context, items)
 }
 
 // HandleGetItemById gets called by router
@@ -211,7 +211,7 @@ func (app *TasteBuddyApp) HandleGetItemById(context *gin.Context) {
 		return
 	}
 
-	SuccessJSON(context, item)
+	Success(context, item)
 }
 
 // HandleAddItem gets called by router

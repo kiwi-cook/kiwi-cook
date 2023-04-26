@@ -31,7 +31,7 @@ func (app *TasteBuddyApp) HandleGetDiscountsByCity(context *gin.Context) {
 		LogError("HandleGetDiscountsByCity + "+city, err)
 		ServerError(context, true)
 	} else {
-		SuccessJSON(context, discounts)
+		Success(context, discounts)
 	}
 }
 
@@ -43,7 +43,7 @@ func (app *TasteBuddyApp) HandleGetAllDiscounts(context *gin.Context) {
 		LogError("HandleGetAllDiscounts", err)
 		ServerError(context, true)
 	} else {
-		SuccessJSON(context, discounts)
+		Success(context, discounts)
 	}
 }
 
