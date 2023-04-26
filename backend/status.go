@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func responseJSON(response interface{}, error bool) gin.H {
-	return gin.H{"response": response, "error": error}
+func responseJSON(response interface{}, isError bool) gin.H {
+	return gin.H{"response": response, "error": isError}
 }
 
 // Success returns a 200 success with a message
