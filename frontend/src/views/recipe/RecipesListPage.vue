@@ -5,7 +5,7 @@
                 <ion-title>Search Recipes</ion-title>
             </ion-toolbar>
             <ion-toolbar color="primary">
-                <ion-searchbar color="secondary" :debounce="100" v-model="filterInput" />
+                <ion-searchbar v-model="filterInput" :debounce="100" color="secondary"/>
             </ion-toolbar>
             <ion-toolbar color="primary">
                 <div class="filter-relevanz-button">
@@ -34,14 +34,14 @@
                 </ion-header>
 
 
-                <RecipeList :filter="filterInput" />
+                <RecipeList :filter="filterInput"/>
             </div>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import {defineComponent, ref} from 'vue';
 import {
     IonButton,
     IonContent,
@@ -54,7 +54,7 @@ import {
     IonToolbar
 } from '@ionic/vue';
 import RecipeList from '@/components/recipe/RecipeList.vue'
-import { arrowDown, filter } from 'ionicons/icons';
+import {arrowDown, filter} from 'ionicons/icons';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',

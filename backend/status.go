@@ -7,42 +7,46 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Success(context *gin.Context, message string) {
-	context.JSON(http.StatusOK, gin.H{"message": message, "error": false})
+func responseJSON(response interface{}, isError bool) gin.H {
+	return gin.H{"response": response, "error": isError}
 }
 
-func SuccessJSON(context *gin.Context, json interface{}) {
-	context.JSON(http.StatusOK, gin.H{"response": json, "error": false})
+// Success returns a 200 success with a message
+func Success(context *gin.Context, response interface{}) {
+	context.JSON(http.StatusOK, responseJSON(response, false))
 }
 
-func NotFoundError(context *gin.Context, itemName string) {
-	context.JSON(http.StatusNotFound, gin.H{"message": itemName + " not found.", "error": true})
+// Created returns a 201 success with a message
+func Created(context *gin.Context, response interface{}) {
+	context.JSON(http.StatusCreated, responseJSON(response, false))
 }
 
+// BadRequestError returns a 400 error with a message
+func BadRequestError(context *gin.Context, response string) {
+	context.JSON(http.StatusBadRequest, responseJSON(response, true))
+}
+
+// NotAuthenticated returns a 401 error with a message
 func NotAuthenticated(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authenticated.", "error": true})
+	context.AbortWithStatusJSON(http.StatusUnauthorized, responseJSON("Not authenticated.", true))
 }
 
+// MissingRights returns a 401 error with a message
 func MissingRights(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Missing rights.", "error": true})
+	context.AbortWithStatusJSON(http.StatusUnauthorized, responseJSON("Missing rights.", true))
 }
 
-func WrongToken(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Wrong token.", "error": true})
+// NotFoundError returns a 404 error with a message
+func NotFoundError(context *gin.Context, itemName string) {
+	context.JSON(http.StatusNotFound, responseJSON(itemName+" not found.", true))
 }
 
-func BadCredentials(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Invalid credentials.", "error": true})
-}
-
-func BadRequestError(context *gin.Context, message string) {
-	context.JSON(http.StatusBadRequest, gin.H{"message": message, "error": true})
-}
-
+// TooManyRequests returns a 429 error with a message
 func TooManyRequests(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusTooManyRequests, gin.H{"message": "Too many requests.", "error": true})
+	context.AbortWithStatusJSON(http.StatusTooManyRequests, responseJSON("Too many requests.", true))
 }
 
+// ServerError returns a 500 error with a message
 func ServerError(context *gin.Context, funny bool) {
 	var message string
 	if funny {
@@ -53,8 +57,9 @@ func ServerError(context *gin.Context, funny bool) {
 	ErrorMessage(context, message)
 }
 
+// ErrorMessage returns a 500 error with a message
 func ErrorMessage(context *gin.Context, message string) {
-	context.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"message": message, "error": true})
+	context.AbortWithStatusJSON(http.StatusInternalServerError, responseJSON(message, true))
 }
 
 func funnyErrorMessage() string {

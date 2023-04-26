@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -51,14 +50,15 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 
 	if user, isValidCredentials := app.CheckBasicAuthenticationCredentials(username, password); isValidCredentials {
 		// Generate session token for user and set session token cookie
-		app.HandleStartSession(context, *user)
-		SuccessJSON(context, "Successfully logged in")
+		app.HandleStartSessionForUser(context, *user)
+		Success(context, "Successfully logged in")
 	} else {
 		// Return error
 		NotAuthenticated(context)
 	}
 }
 
+// DecodeBasicAuth decodes the basic auth input
 func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
 	// Check if "Basic" is in the string
 	if !strings.Contains(basicAuthInput, "Basic") {
@@ -122,7 +122,7 @@ func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username, password
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Session
+// Session, JWT and Cookies
 
 // Session is used to store the session of a user
 type Session struct {
@@ -132,55 +132,128 @@ type Session struct {
 	ExpiresAt    time.Time          `json:"expires_at" bson:"expires_at"`
 }
 
-// HandleSessionTokenMiddleware checks if the session is valid
-func (app *TasteBuddyApp) HandleSessionTokenMiddleware() gin.HandlerFunc {
+// CheckSessionTokenMiddleware checks if the session is valid
+func (app *TasteBuddyApp) CheckSessionTokenMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
-		Log("HandleSessionTokenMiddleware", "Checking session token...")
+		cookie, err := context.Request.Cookie("session_token")
 
-		// Check to see if the request has an existing session token
-		if cookie, err := context.Request.Cookie("session_token"); err == nil {
-			sessionToken := cookie.Value
-			// Validate the session token
-			if app.client.ValidateSessionToken(sessionToken) {
-				Log("HandleSessionTokenMiddleware", "Session token is valid")
-				// Generate a JWT from the session token
-				if JWT, err := app.GenerateJWTFromSessionToken(sessionToken); err == nil {
-					// Ignore errors that might occur
-					// If there was no error, set the JWT as a context variable
-					context.Set("JWT", JWT)
-				} else {
-					LogError("HandleSessionTokenMiddleware/GenerateJWT", err)
-				}
-			} else {
-				// If the session token is invalid, remove it from the request
-				LogError("HandleSessionTokenMiddleware", errors.New("session token is invalid"))
-				cookie.MaxAge = -1
-				http.SetCookie(context.Writer, cookie)
-			}
+		if err != nil {
+			context.Next()
+			return
 		}
+
+		sessionToken := cookie.Value
+		// Validate the session token
+		isValidSessionToken := app.client.ValidateSessionToken(sessionToken)
+		if isValidSessionToken {
+			// If the session token is valid, set the session token as a context variable
+			context.Set("SessionToken", sessionToken)
+		} else {
+			LogError("CheckSessionTokenMiddleware", errors.New("session token is invalid"))
+		}
+		context.Next()
 	}
 }
 
-// HandleStartSession starts a session for the user and sets the session token cookie
-func (app *TasteBuddyApp) HandleStartSession(context *gin.Context, user User) {
-	// Generate session token and save it in the database
-	sessionToken, expiresAt, err := app.client.SetSessionForUser(user)
+// GenerateJWTMiddleware generates a JWT from the session token
+func (app *TasteBuddyApp) GenerateJWTMiddleware() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		// Get the session token from the context
+		sessionToken := context.GetString("SessionToken")
+		if sessionToken != "" {
+			if JWT, err := app.GenerateJWTFromSessionToken(sessionToken); err == nil {
+				// Ignore errors that might occur
+				// If there was no error, set the JWT as a context variable
+				context.Set("JWT", JWT)
+			}
+		}
+		context.Next()
+	}
+}
+
+// CheckJWTMiddleware is a Middleware that checks whether the user is allowed to access the route
+func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		// Get the internal JWT token.
+		JWT := context.GetString("JWT")
+		if JWT == "" {
+			NotAuthenticated(context)
+			return
+		}
+		// Parse and validate the JWT token.
+		token, isValidToken := app.ParseJWT(JWT)
+		if !isValidToken {
+			NotAuthenticated(context)
+			return
+		}
+
+		// Parse and validate the claims.
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			NotAuthenticated(context)
+			return
+		}
+
+		data := claims["data"].(map[string]interface{})
+		// Check if the user has the required auth level
+		authLevel, err := strconv.Atoi(data["auth_level"].(string))
+		if authLevel < int(level) || err != nil {
+			if err != nil {
+				LogError("CheckJWTMiddleware", err)
+			}
+			MissingRights(context)
+			return
+		}
+
+		// User is authenticated and has the required auth level
+		context.Next()
+	}
+}
+
+// HandleCheckSessionToken checks if the session is valid
+func (app *TasteBuddyApp) HandleCheckSessionToken(context *gin.Context) {
+	cookie, err := context.Request.Cookie("session_token")
+
 	if err != nil {
-		LogError("HandleStartSession", err)
+		NotAuthenticated(context)
+		return
+	}
+
+	sessionToken := cookie.Value
+	// Validate the session token
+	isValidSessionToken := app.client.ValidateSessionToken(sessionToken)
+	if isValidSessionToken {
+		Success(context, "Session token is valid")
+	} else {
+		// If the session token is invalid, remove it from the request
+		LogError("HandleCheckSessionToken", errors.New("session token is invalid"))
+		NotAuthenticated(context)
+	}
+}
+
+// HandleStartSessionForUser starts a session for the user and sets the session token cookie
+func (app *TasteBuddyApp) HandleStartSessionForUser(context *gin.Context, user User) {
+	// Generate session token and save it in the database
+	sessionToken, expiresAt, maxAge, err := app.client.SetSessionForUser(user)
+	if err != nil {
+		LogError("HandleStartSessionForUser", err)
 		ServerError(context, true)
 		return
 	}
 
 	// Generate cookie
 	cookie := &http.Cookie{
-		Name:    "session_token",
-		Value:   sessionToken,
-		Expires: expiresAt,
-		Path:    "/",
+		Name:     "session_token",
+		Value:    sessionToken,
+		MaxAge:   maxAge,
+		Expires:  expiresAt,
+		Path:     "/",
+		Secure:   false,
+		HttpOnly: false,
 	}
 
 	// Set cookie
-	http.SetCookie(context.Writer, cookie)
+	context.SetCookie(cookie.Name, cookie.Value, cookie.MaxAge, cookie.Path, cookie.Domain, cookie.Secure, cookie.HttpOnly)
 }
 
 // GetSessionsCollection returns the sessions collection
@@ -218,6 +291,34 @@ func (client *TasteBuddyDatabase) GetUserBySessionToken(sessionToken string) (*U
 	}
 }
 
+// SetSessionForUser sets a session for the user
+func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Time, int, error) {
+	sessionToken, err := GenerateRandomSessionToken()
+	if err != nil {
+		return "", time.Time{}, -1, err
+	}
+
+	userId := user.ID
+	createdAt := time.Now()
+	expiresAt := time.Now().Add(14 * 24 * time.Hour)
+	maxAge := int(expiresAt.Sub(createdAt).Seconds())
+
+	// Insert session into database
+	_, err = client.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
+		"session_token": sessionToken,
+		"user_id":       userId,
+		"created_at":    createdAt,
+		"expires_at":    expiresAt,
+	})
+
+	if err != nil {
+		return "", time.Time{}, -1, err
+	}
+
+	return sessionToken, expiresAt, maxAge, nil
+}
+
+// ValidateSessionToken checks if the session token is valid
 func (client *TasteBuddyDatabase) ValidateSessionToken(sessionToken string) bool {
 	// Get session from database
 	session := client.GetSession(sessionToken)
@@ -244,47 +345,10 @@ func (client *TasteBuddyDatabase) ValidateSessionToken(sessionToken string) bool
 	return true
 }
 
-func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Time, error) {
-	sessionToken, err := GenerateRandomToken()
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	userId := user.ID
-	createdAt := time.Now()
-	expiresAt := time.Now().Add(14 * 24 * time.Hour)
-
-	// Insert session into database
-	_, err = client.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
-		"session_token": sessionToken,
-		"user_id":       userId,
-		"created_at":    createdAt,
-		"expires_at":    expiresAt,
-	})
-
-	if err != nil {
-		return "", time.Time{}, err
-	}
-
-	return sessionToken, expiresAt, nil
-}
-
-////////////////////////////////////////////////////////////////////////
-// Tokens
-
-// Generation //
-
-var tokenPool = sync.Pool{
-	New: func() interface{} {
-		return make([]byte, 64)
-	},
-}
-
-// GenerateRandomToken generates a random string
-func GenerateRandomToken() (string, error) {
+// GenerateRandomSessionToken generates a random string
+func GenerateRandomSessionToken() (string, error) {
 	// Generate 512 random bits
-	tokenBytes := tokenPool.Get().([]byte)
-	defer tokenPool.Put(&tokenBytes)
+	tokenBytes := make([]byte, 64)
 	if _, err := rand.Read(tokenBytes); err != nil {
 		return "", err
 	}
@@ -330,47 +394,6 @@ func (app *TasteBuddyApp) GenerateJWTFromSessionToken(sessionToken string) (stri
 	}
 
 	return jwtString, nil
-}
-
-// Validation, Checks, ... //
-
-// CheckJWTMiddleware is a Middleware that checks whether the user is allowed to access the route
-func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		// Get the internal JWT token.
-		JWT := context.GetString("JWT")
-		if JWT == "" {
-			NotAuthenticated(context)
-			return
-		}
-		// Parse and validate the JWT token.
-		token, isValidToken := app.ParseJWT(JWT)
-		if !isValidToken {
-			NotAuthenticated(context)
-			return
-		}
-
-		// Parse and validate the claims.
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok || !token.Valid {
-			NotAuthenticated(context)
-			return
-		}
-
-		data := claims["data"].(map[string]interface{})
-		// Check if the user has the required auth level
-		authLevel, err := strconv.Atoi(data["auth_level"].(string))
-		if authLevel < int(level) || err != nil {
-			if err != nil {
-				LogError("CheckJWTMiddleware", err)
-			}
-			MissingRights(context)
-			return
-		}
-
-		// User is authenticated and has the required auth level
-		context.Next()
-	}
 }
 
 // ParseJWT validates the JWT token

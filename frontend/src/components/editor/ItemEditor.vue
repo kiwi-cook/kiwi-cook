@@ -1,9 +1,9 @@
 <template>
     <ion-card>
         <ion-card-header>
-            <ion-item lines="none" v-if="mutableItem.imgUrl || mutableItem._id">
+            <ion-item v-if="mutableItem.imgUrl || mutableItem._id" lines="none">
                 <ion-avatar v-if="mutableItem.imgUrl">
-                    <img :src="mutableItem.imgUrl" :alt="`Image of ${mutableItem.name}`" />
+                    <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl"/>
                 </ion-avatar>
                 <ion-chip v-if="mutableItem._id" color="light">
                     {{ mutableItem._id }}
@@ -12,25 +12,24 @@
             <ion-card-title color="primary">
                 <ion-item lines="none">
                     <div slot="start">
-                        <ion-label position="stacked">Name</ion-label>
-                        <ion-input :value="mutableItem.name" @keyup.enter="mutableItem.name = $event.target.value"
-                            @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()" :maxlength="40"
-                            placeholder="e.g. Baking powder" />
+                        <ion-input :maxlength="40" :value="mutableItem.name"
+                                   label="Name"
+                                   label-placement="floating" placeholder="e.g. Baking powder"
+                                   type="text" @keyup.enter="mutableItem.name = $event.target.value" @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
                     </div>
                     <div slot="end">
-                        <ion-button fill="solid" color="danger" @click="removeItem()">
+                        <ion-button color="danger" fill="solid" @click="removeItem()">
                             Delete item
                         </ion-button>
                     </div>
                 </ion-item>
 
                 <ion-item lines="none">
-                    <ion-label position="stacked">Image URL</ion-label>
-                    <ion-input v-model="mutableItem.imgUrl" />
+                    <ion-input v-model="mutableItem.imgUrl" label="Image URL" label-placement="floating" type="text"/>
                 </ion-item>
 
                 <ion-item lines="none">
-                    <ion-select placeholder="Type" v-model="mutableItem.type">
+                    <ion-select v-model="mutableItem.type" label="Type" label-placement="floating" placeholder="Type">
                         <ion-select-option value="ingredient">Ingredient</ion-select-option>
                         <ion-select-option value="tool">Tool</ion-select-option>
                     </ion-select>
@@ -58,10 +57,23 @@
 </template>
 
 <script lang="ts">
-import { Item, Recipe } from '@/api/types';
-import { IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
-import { useTasteBuddyStore } from '@/storage';
+import {Item, Recipe} from '@/api/types';
+import {
+    IonAvatar,
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonInput,
+    IonItem,
+    IonList,
+    IonSelect,
+    IonSelectOption
+} from '@ionic/vue';
+import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {useTasteBuddyStore} from '@/storage';
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -72,11 +84,22 @@ export default defineComponent({
         }
     },
     components: {
-        IonSelect, IonSelectOption, IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonList, IonLabel, IonInput, IonChip, IonAvatar, IonButton
+        IonSelect,
+        IonSelectOption,
+        IonCard,
+        IonCardHeader,
+        IonCardTitle,
+        IonCardContent,
+        IonItem,
+        IonList,
+        IonInput,
+        IonChip,
+        IonAvatar,
+        IonButton
     },
     emits: ['remove'],
     setup(props) {
-        const { item } = toRefs(props)
+        const {item} = toRefs(props)
         const store = useTasteBuddyStore()
 
         const mutableItem: Ref<Item> = ref(item.value)

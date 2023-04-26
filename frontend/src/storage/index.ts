@@ -1,14 +1,14 @@
 // Ionic
-import { Storage } from '@ionic/storage';
+import {Storage} from '@ionic/storage';
 
 // Vue
-import { App, InjectionKey } from 'vue'
-import { createStore, Store, useStore as baseUseStore } from 'vuex';
+import {App, InjectionKey} from 'vue'
+import {createStore, Store, useStore as baseUseStore} from 'vuex';
 
 // Types
-import { Discount, Item, Recipe } from '@/api/types';
-import { API_ROUTE } from '@/api/constants';
-import { APIResponseBody, getFromAPI } from '@/api';
+import {Discount, Item, Recipe} from '@/api/types';
+import {API_ROUTE} from '@/api/constants';
+import {APIResponse, presentToast, sendToAPI} from '@/api';
 
 
 // Type the store to use benefits of TypeScript
@@ -19,7 +19,8 @@ export interface State {
     recipes: Recipe[],
     items: Item[],
     discounts: { [city: string]: Discount[] },
-    recipesByItemId: { [itemId: string]: string[] }
+    recipesByItemId: { [itemId: string]: string[] },
+    authenticated: boolean
 }
 
 // Define injection key
@@ -33,23 +34,26 @@ export function useTasteBuddyStore() {
 
 // Create the store
 // called by main.ts
-export function createVueStore() {
+export function createTasteBuddyStore() {
     return createStore<State>({
         state: {
             recipes: [],
             items: [],
             discounts: {},
-            recipesByItemId: {}
+            recipesByItemId: {},
+            authenticated: false
         },
         mutations: {
+            setAuthenticated(state, authenticated: boolean) {
+                state.authenticated = authenticated
+            },
             setRecipes(state, recipes: Recipe[]) {
-                state.recipes = recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
+                recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
+                state.recipes = recipes
             },
             updateRecipe(state, recipe: Recipe) {
                 // try to find the recipe in the list
                 const recipeIndex = state.recipes.findIndex((r: Recipe) => (r._id === undefined && r._tmpId === recipe._tmpId) || (r._tmpId === undefined && r._id === recipe._id))
-                console.log('recipeIndex', recipeIndex);
-                console.log(state.recipes)
                 if (recipeIndex !== -1) {
                     state.recipes[recipeIndex] = recipe
                 } else {
@@ -77,7 +81,7 @@ export function createVueStore() {
                 state.items = state.items.filter((i: Item) => i._id !== item._id)
             },
             setDiscounts(state, payload: { city: string, discounts: Discount[] }) {
-                const { city, discounts } = payload
+                const {city, discounts} = payload
                 state.discounts[city] = discounts
             },
             mapRecipeIdsToItemIds(state, recipes: Recipe[]) {
@@ -97,18 +101,55 @@ export function createVueStore() {
             }
         },
         actions: {
-            fetchRecipes({ commit }) {
-                getFromAPI<Recipe>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
-                    .then((recipes: Recipe[] | false) => {
+            /**
+             * Authenticate the user using the session cookie
+             * @param commit
+             */
+            sessionAuth({commit}) {
+                return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
+                    .then((apiResponse: APIResponse<string>) => {
+                        commit('setAuthenticated', !apiResponse.error)
+                        return !apiResponse.error
+                    })
+            },
+            /**
+             * Authenticate the user using the username and password
+             * @param commit
+             * @param payload username and password
+             * @returns true if the authentication was successful, false otherwise
+             */
+            basicAuth({commit}, payload: { username: string, password: string }): Promise<boolean> {
+                const {username, password} = payload
+                return sendToAPI<string>(API_ROUTE.POST_AUTH, {
+                    headers: [
+                        {
+                            key: 'Authorization',
+                            value: 'Basic ' + btoa(username + ':' + password)
+                        }
+                    ],
+                    errorMessage: 'Could not log in'
+                }).then((apiResponse: APIResponse<string>) => {
+                    commit('setAuthenticated', !apiResponse.error)
+                    // return true if the authentication was successful, false otherwise
+                    return !apiResponse.error
+                })
+            },
+            /**
+             * Fetch the recipes from the API and store them in the store
+             * @param commit
+             */
+            fetchRecipes({commit}) {
+                return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
+                    .then((apiResponse: APIResponse<Recipe[]>) => {
                         // map the recipes JSON to Recipe objects
                         // this is because the JSON is not a valid Recipe object,
                         // and we need to use the Recipe class methods
-                        if (recipes) {
-                            commit('setRecipes', recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                        if (!apiResponse.error) {
+                            commit('setRecipes', apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
                         }
                     });
             },
-            saveRecipeById({ getters }, recipeId: string) {
+            saveRecipeById({getters}, recipeId: string) {
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
                     console.error('Recipe not found: ', recipeId)
@@ -116,74 +157,95 @@ export function createVueStore() {
                 }
                 this.dispatch('saveRecipe', recipe)
             },
-            saveRecipe({ commit }, recipe: Recipe) {
+            saveRecipe({commit}, recipe: Recipe) {
                 commit('updateRecipe', recipe)
-                getFromAPI(API_ROUTE.ADD_RECIPE, {
+                return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                     body: recipe,
                     errorMessage: 'Could not save recipe in database. Please retry later!'
-                }).then((response: APIResponseBody | false) => {
-                    if (response) {
+                }).then((apiResponse: APIResponse<string>) => {
+                    if (!apiResponse.error) {
                         this.dispatch('fetchRecipes')
                     }
                 });
             },
-            deleteRecipe({ commit }, recipe: Recipe) {
+            deleteRecipe({commit}, recipe: Recipe) {
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
-                    getFromAPI(API_ROUTE.DELETE_RECIPE, {
-                        formatObject: { RECIPE_ID: recipe._id ?? '' },
+                    return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
+                        formatObject: {RECIPE_ID: recipe._id ?? ''},
                         errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
+                    }).then((apiResponse: APIResponse<string>) => {
+                        return presentToast(apiResponse.response)
                     })
                 }
             },
-            fetchItems({ commit }) {
-                getFromAPI<Item>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
-                    .then((items: Item[] | false) => {
+            fetchItems({commit}) {
+                return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
+                    .then((apiResponse: APIResponse<Item[]>) => {
                         // map the items JSON to Item objects
                         // this is because the JSON is not a valid Item object,
                         // and we need to use the Item class methods
-                        if (items) {
-                            commit('setItems', items.map((item: Item) => Item.fromJSON(item)))
+                        if (!apiResponse.error) {
+                            commit('setItems', apiResponse.response.map((item: Item) => Item.fromJSON(item)))
                         }
                     });
             },
-            saveItem({ commit }, item: Item) {
+            saveItem({commit}, item: Item) {
                 commit('updateItem', item)
-                getFromAPI(API_ROUTE.ADD_ITEM, {
+                return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
                     body: item,
                     errorMessage: 'Could not save item in database. Please retry later!'
-                }).then((response: APIResponseBody | false) => {
-                    if (response) {
-                        this.dispatch('fetchItems')
-                    }
-                });
+                })
+                    .then((apiResponse: APIResponse<string>) => {
+                        if (!apiResponse.error) {
+                            this.dispatch('fetchItems')
+                        }
+                    });
             },
-            deleteItem({ commit }, item: Item) {
+            deleteItem({commit}, item: Item) {
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
-                    getFromAPI(API_ROUTE.DELETE_ITEM, {
-                        formatObject: { ITEM_ID: item._id ?? '' },
+                    return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
+                        formatObject: {ITEM_ID: item._id ?? ''},
                         errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
+                    }).then((apiResponse: APIResponse<string>) => {
+                        return presentToast(apiResponse.response)
                     })
                 }
             },
-            fetchDiscounts({ commit }, city: string) {
-                getFromAPI<Discount>(API_ROUTE.GET_DISCOUNTS, {
-                    formatObject: { CITY: city }
-                }).then((discounts: Discount[] | false) => {
-                    if (discounts) {
-                        commit('setDiscounts', { discounts, city })
+            fetchDiscounts({commit}, city: string) {
+                return sendToAPI<Discount[]>(API_ROUTE.GET_DISCOUNTS, {
+                    formatObject: {CITY: city}
+                }).then((apiResponse: APIResponse<Discount[]>) => {
+                    if (!apiResponse.error) {
+                        commit('setDiscounts', {discounts: apiResponse.response, city})
                     }
                 })
             },
-            async mapRecipeIdsToItemIds({ commit, getters }) {
+            mapRecipeIdsToItemIds({commit, getters}) {
                 commit('mapRecipeIdsToItemIds', getters.getRecipes)
             }
         },
         getters: {
+            /**
+             * Check if the user is authenticated
+             * @param state
+             */
+            isAuthenticated(state): boolean {
+                return state.authenticated ?? false
+            },
+            /**
+             * Get the recipes
+             * @param state
+             */
             getRecipes(state): Recipe[] {
                 return state.recipes ?? []
             },
+            /**
+             * Get the recipes mapped by their id
+             * @param _
+             * @param getters
+             */
             getRecipesById: (_, getters): { [recipeId: string]: Recipe } => {
                 return getters.getRecipes.reduce((recipeMap: { [recipeId: string]: Recipe }, recipe: Recipe) => {
                     if (typeof recipe._id !== 'undefined') {
@@ -192,14 +254,26 @@ export function createVueStore() {
                     return recipeMap
                 }, {})
             },
+            /**
+             * Get the recipes by the item id
+             * @param state
+             */
+            getRecipesByItemId: (state) => (itemId?: string): string[] => {
+                return state.recipesByItemId[itemId ?? ''] ?? []
+            },
+            /**
+             * Get the items
+             * @param state
+             */
             getItems(state): Item[] {
                 return state.items ?? []
             },
+            /**
+             * Get discounts
+             * @param state
+             */
             getDiscounts: (state) => (city: string): Discount[] => {
                 return state.discounts[city] ?? []
-            },
-            getRecipesByItemId: (state) => (itemId?: string): string[] => {
-                return state.recipesByItemId[itemId ?? ''] ?? []
             }
         },
     })

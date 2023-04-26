@@ -1,18 +1,17 @@
 // Ionic
-import { IonicVue } from '@ionic/vue';
+import {IonicVue} from '@ionic/vue';
 
 // Vue + App
-import { createApp } from 'vue'
+import {createApp} from 'vue'
 import App from './App.vue'
 
 // Router
-import router from './router';
+import {createTasteBuddyRouter} from './router';
 
 // Storage
-import { createVueStore, ionicStorageVuePlugin, storeKey } from './storage';
+import {createTasteBuddyStore, ionicStorageVuePlugin, storeKey} from './storage';
 
 // Styles
-
 /* Add service worker */
 import './registerServiceWorker';
 
@@ -41,13 +40,19 @@ import './theme/ios.css';
 import './theme/md.css';
 import 'ionicons/icons';
 
+/* Initialize store */
+const tasteBuddyStore = createTasteBuddyStore();
 
+/* Initialize and configure router */
+const tasteBuddyRouter = createTasteBuddyRouter(tasteBuddyStore);
+
+/* Initialize app */
 const app = createApp(App)
-  .use(IonicVue)
-  .use(router)
-  .use(createVueStore(), storeKey)
-  .use(ionicStorageVuePlugin)
+    .use(IonicVue)
+    .use(tasteBuddyStore, storeKey)
+    .use(tasteBuddyRouter)
+    .use(ionicStorageVuePlugin)
 
-router.isReady().then(() => {
-  app.mount('#app');
+tasteBuddyRouter.isReady().then(() => {
+    app.mount('#app');
 });

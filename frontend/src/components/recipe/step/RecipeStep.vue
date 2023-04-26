@@ -1,6 +1,6 @@
 <template>
     <ion-card>
-        <ion-img :src="step?.imgUrl ?? ''" />
+        <ion-img :src="step?.imgUrl ?? ''"/>
         <ion-card-header>
             <ion-card-title color="light">
                 Step {{ stepIndex + 1 }}
@@ -10,8 +10,8 @@
             </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <SmallItemContainer :items="step?.items ?? []" />
-            <AdditionalStepInfo :step="step" />
+            <SmallItemContainer :items="step?.items ?? []"/>
+            <AdditionalStepInfo :step="step"/>
             <ion-item lines="none">
                 <ion-text>
                     {{ step.description }}
@@ -22,9 +22,19 @@
 </template>
 
 <script lang="ts">
-import { IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonImg, IonItem, IonLabel, IonText } from '@ionic/vue';
-import { defineComponent, PropType } from "vue";
-import { Step } from "@/api/types";
+import {
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonImg,
+    IonItem,
+    IonLabel,
+    IonText
+} from '@ionic/vue';
+import {defineComponent, PropType} from "vue";
+import {Step} from "@/api/types";
 import SmallItemContainer from "@/components/item/SmallItemContainer.vue";
 import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 

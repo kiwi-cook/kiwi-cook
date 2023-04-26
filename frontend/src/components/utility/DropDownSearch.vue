@@ -1,12 +1,13 @@
 <template>
-    <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :value="inputValue" @input="handleInput($event)"
-        @keyup.enter="addItem()" :placeholder="placeholder ?? ''" />
+    <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :placeholder="placeholder ?? ''" :value="inputValue"
+               type="text"
+               @input="handleInput($event)" @keyup.enter="addItem()"/>
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
             <ion-item>
                 <ion-button @click="selectItem(filteredItem)">
-                    <slot name="item" :filteredItem="filteredItem">
+                    <slot :filteredItem="filteredItem" name="item">
                         <ion-label color="light">{{ filteredItem }}</ion-label>
                     </slot>
                 </ion-button>
@@ -21,7 +22,7 @@
 
 <script lang="ts">
 import {defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
-import { IonLabel, IonInput, IonList, IonItem, IonButton } from '@ionic/vue';
+import {IonButton, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
 
 export default defineComponent({
     name: 'DropDownSearch',
@@ -54,8 +55,10 @@ export default defineComponent({
         IonLabel, IonInput, IonList, IonItem, IonButton
     },
     emits: ['update:modelValue', 'addItem'],
-    setup(props: { modelValue: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: { emit: any }) {
-        const { modelValue, customMapper, items, maxItems } = toRefs(props)
+    setup(props: { modelValue: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: {
+        emit: any
+    }) {
+        const {modelValue, customMapper, items, maxItems} = toRefs(props)
 
         const inputValue: Ref<string> = ref(customMapper.value?.(modelValue.value))
         // update the input value when the value coming from the parent changes

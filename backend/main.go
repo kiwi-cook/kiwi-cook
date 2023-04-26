@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 func main() {
@@ -29,9 +30,16 @@ func main() {
 	////////////////////////////////////////////////////////////////////////
 	// Set up gin
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8080"},
+		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+	r.Use(app.CheckSessionTokenMiddleware())
 	r.Use(LimitRequestsMiddleware())
-	r.Use(app.HandleSessionTokenMiddleware())
+	r.Use(app.GenerateJWTMiddleware())
 
 	// API Routes
 	apiRoutes := r.Group("/api")
@@ -47,6 +55,12 @@ func main() {
 		// Authentication
 		authRoutes := v1.Group("/auth")
 		{
+			// Check session
+			authRoutes.GET("/", func(context *gin.Context) {
+				app.HandleCheckSessionToken(context)
+			})
+
+			// Login
 			authRoutes.POST("/", func(context *gin.Context) {
 				app.HandleBasicAuthentication(context)
 			})

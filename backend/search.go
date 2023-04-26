@@ -53,7 +53,7 @@ func (app *TasteBuddyApp) HandleSearch(context *gin.Context) {
 		return
 	}
 
-	SuccessJSON(context, result)
+	Success(context, result)
 }
 
 // search searches for recipes and items by using goroutines

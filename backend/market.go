@@ -38,7 +38,7 @@ func (app *TasteBuddyApp) HandleGetMarketsByCity(context *gin.Context) {
 		LogError("HandleGetMarketsByCity", err)
 		ServerError(context, true)
 	} else {
-		SuccessJSON(context, markets)
+		Success(context, markets)
 	}
 }
 
@@ -49,7 +49,7 @@ func (app *TasteBuddyApp) HandleGetAllMarkets(context *gin.Context) {
 		LogError("HandleGetAllMarkets", err)
 		ServerError(context, true)
 	} else {
-		SuccessJSON(context, markets)
+		Success(context, markets)
 	}
 }
 

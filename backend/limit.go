@@ -58,6 +58,13 @@ func LimitRequestsMiddleware() gin.HandlerFunc {
 	}()
 
 	return func(c *gin.Context) {
+		// Skip API limitation, if the request is authenticated
+		sessionToken := c.GetString("SessionToken")
+		if sessionToken != "" {
+			c.Next()
+			return
+		}
+
 		ip := c.ClientIP()
 
 		if count := counter.increment(ip); count > maxRequestsPerIP {

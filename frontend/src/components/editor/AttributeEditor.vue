@@ -6,8 +6,8 @@
 </template>
 
 <script lang="ts">
-import { IonItem, IonLabel } from '@ionic/vue';
-import { defineComponent } from "vue";
+import {IonItem, IonLabel} from '@ionic/vue';
+import {defineComponent} from "vue";
 
 export default defineComponent({
     name: 'AttributeEditor',
