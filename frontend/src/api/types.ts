@@ -182,7 +182,7 @@ export class Step {
      */
     static fromJSON(json: Step): Step {
         const item = new Step()
-        item.items = json.items.map(item => StepItem.fromJSON(item))
+        item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? [new StepItem()]
         item.imgUrl = json.imgUrl
         item.description = json.description
         item.duration = json.duration
@@ -291,7 +291,7 @@ export class Recipe {
         recipe.name = json.name
         recipe.author = json.author
         recipe.description = json.description
-        recipe.steps = json.steps.map(step => Step.fromJSON(step))
+        recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
         // props
         recipe.props.imgUrl = json.props.imgUrl
         recipe.props.tags = json.props.tags

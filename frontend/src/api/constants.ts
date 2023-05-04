@@ -36,19 +36,19 @@ type API_ROUTE_OPTIONS = {
 }
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
-    [API_ROUTE.POST_AUTH]: {url: '/auth/', method: 'POST', contentType: 'application/x-www-form-urlencoded'},
-    [API_ROUTE.GET_AUTH]: {url: '/auth/', method: 'GET', contentType: 'application/json'},
+    [API_ROUTE.POST_AUTH]: {url: '/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded'},
+    [API_ROUTE.GET_AUTH]: {url: '/auth', method: 'GET', contentType: 'application/json'},
     [API_ROUTE.POST_REGISTER]: {
         url: '/user/register',
         method: 'POST',
         contentType: 'application/x-www-form-urlencoded'
     },
-    [API_ROUTE.GET_RECIPES]: {url: '/recipe/', method: 'GET', contentType: 'application/json'},
-    [API_ROUTE.ADD_RECIPE]: {url: '/recipe/', method: 'POST', contentType: 'application/json'},
+    [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: 'application/json'},
+    [API_ROUTE.ADD_RECIPE]: {url: '/recipe', method: 'POST', contentType: 'application/json'},
     [API_ROUTE.DELETE_RECIPE]: {url: '/recipe/RECIPE_ID', method: 'DELETE'},
     [API_ROUTE.SEARCH_RECIPES]: {url: '/search', method: 'POST', contentType: 'application/json'},
-    [API_ROUTE.GET_ITEMS]: {url: '/item/', method: 'GET', contentType: 'application/json'},
-    [API_ROUTE.ADD_ITEM]: {url: '/item/', method: 'POST', contentType: 'application/json'},
+    [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: 'application/json'},
+    [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: 'application/json'},
     [API_ROUTE.DELETE_ITEM]: {url: '/item/ITEM_ID', method: 'DELETE', contentType: 'application/json'},
     [API_ROUTE.GET_DISCOUNTS]: {url: '/discount/CITY', method: 'GET', contentType: 'application/json'},
     [API_ROUTE.GET_MARKETS]: {url: '/discount/markets/CITY', method: 'GET', contentType: 'application/json'},
