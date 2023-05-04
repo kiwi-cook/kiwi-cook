@@ -1,3 +1,6 @@
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -17,6 +20,7 @@ type Recipe struct {
 	Name        string             `json:"name" bson:"name" binding:"required"`
 	Author      string             `json:"author" bson:"author" binding:"required"`
 	Description string             `json:"description" bson:"description" binding:"required"`
+	Items       []StepItem         `json:"items,omitempty" bson:"items,omitempty"`
 	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
 	Props       struct {
 		Url       string    `json:"url,omitempty" bson:"url,omitempty"`
@@ -31,10 +35,20 @@ type Recipe struct {
 
 type Step struct {
 	Description               string                     `json:"description" bson:"description" binding:"required"`
-	Items                     []StepItem                 `json:"items" bson:"items" binding:"required"`
+	Items                     []StepItem                 `json:"items,omitempty" bson:"items,omitempty"`
 	ImgUrl                    string                     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Duration                  int                        `json:"duration,omitempty" bson:"duration,omitempty"`
 	AdditionalStepInformation *AdditionalStepInformation `json:"additional,omitempty" bson:"additional,omitempty"`
+}
+
+func StepFromDescription(description string) Step {
+	step := Step{}
+	step.Description = description
+	step.Items = []StepItem{}
+	step.Duration = 0
+	step.ImgUrl = ""
+	step.AdditionalStepInformation = nil
+	return step
 }
 
 type AdditionalStepInformation struct {
@@ -63,30 +77,30 @@ type Item struct {
 
 // HandleGetAllRecipes gets called by router
 // Calls getRecipesFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetAllRecipes(context *gin.Context) {
-	recipes, err := app.client.GetAllRecipes()
+func (server *TasteBuddyServer) HandleGetAllRecipes(context *gin.Context) {
+	recipes, err := server.GetAllRecipes()
 	if err != nil {
-		LogError("HandleGetAllRecipes", err)
+		server.LogError("HandleGetAllRecipes", err)
 		ServerError(context, true)
 		return
 	}
 	Success(context, recipes)
 }
 
-func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
+func (server *TasteBuddyServer) HandleGetRecipeById(context *gin.Context) {
 	id := context.Param("id")
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		LogError("HandleGetRecipeById", err)
+		server.LogError("HandleGetRecipeById", err)
 		ServerError(context, true)
 		return
 	}
 
-	recipe, err := app.client.GetRecipeById(objectID)
+	recipe, err := server.GetRecipeById(objectID)
 	if err != nil {
-		LogError("HandleGetRecipeById", err)
+		server.LogError("HandleGetRecipeById", err)
 		ServerError(context, true)
 		return
 	}
@@ -95,10 +109,10 @@ func (app *TasteBuddyApp) HandleGetRecipeById(context *gin.Context) {
 
 // HandleGetRandomRecipe gets called by router
 // Calls getRecipesFromDB and selects a random recipe
-func (app *TasteBuddyApp) HandleGetRandomRecipe(context *gin.Context) {
-	recipes, err := app.client.GetAllRecipes()
+func (server *TasteBuddyServer) HandleGetRandomRecipe(context *gin.Context) {
+	recipes, err := server.GetAllRecipes()
 	if err != nil {
-		LogError("HandleGetRandomRecipe", err)
+		server.LogError("HandleGetRandomRecipe", err)
 		ServerError(context, true)
 		return
 	}
@@ -116,172 +130,87 @@ func (app *TasteBuddyApp) HandleGetRandomRecipe(context *gin.Context) {
 
 // HandleAddRecipe gets called by router
 // Calls addRecipeToDB and handles the context
-func (app *TasteBuddyApp) HandleAddRecipe(context *gin.Context) {
-	LogContextHandle(context, "HandleAddRecipe", "Trying to add/update recipe")
+func (server *TasteBuddyServer) HandleAddRecipe(context *gin.Context) {
+	server.LogContextHandle(context, "HandleAddRecipe", "Trying to add/update recipe")
 
 	// try to bind json to recipe
 	var newRecipe Recipe
 	if err := context.BindJSON(&newRecipe); err != nil {
-		LogError("HandleAddRecipe", err)
+		server.LogError("HandleAddRecipe", err)
 		BadRequestError(context, "Invalid Recipe")
 		return
 	}
 
 	var recipeId primitive.ObjectID
 	var err error
-	if recipeId, err = app.client.AddOrUpdateRecipe(newRecipe); err != nil {
-		LogError("HandleAddRecipe", err)
+	if recipeId, err = server.AddOrUpdateRecipe(newRecipe); err != nil {
+		server.LogError("HandleAddRecipe", err)
 		ServerError(context, true)
 		return
 	}
-	LogContextHandle(context, "HandleAddRecipe", "Added/Updated recipe "+newRecipe.Name+" ("+newRecipe.ID.Hex()+")")
+	server.LogContextHandle(context, "HandleAddRecipe", "Added/Updated recipe "+newRecipe.Name+" ("+newRecipe.ID.Hex()+")")
 	Success(context, "Saved recipe "+recipeId.Hex())
 }
 
 // HandleDeleteRecipeById gets called by router
 // Calls DeleteRecipeById and handles the context
-func (app *TasteBuddyApp) HandleDeleteRecipeById(context *gin.Context) {
+func (server *TasteBuddyServer) HandleDeleteRecipeById(context *gin.Context) {
 	id := context.Param("id")
-	LogContextHandle(context, "HandleDeleteRecipeById", "Trying to delete recipe "+id)
+	server.LogContextHandle(context, "HandleDeleteRecipeById", "Trying to delete recipe "+id)
 
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		LogError("HandleDeleteRecipeById", err)
+		server.LogError("HandleDeleteRecipeById", err)
 		ServerError(context, true)
 		return
 	}
 
 	// delete recipe
-	if _, err := app.client.DeleteRecipeById(objectID); err != nil {
-		LogError("HandleDeleteRecipeById", err)
+	if _, err := server.DeleteRecipeById(objectID); err != nil {
+		server.LogError("HandleDeleteRecipeById", err)
 		ServerError(context, true)
 		return
 	}
-	LogContextHandle(context, "HandleDeleteRecipeById", "Deleted recipe "+id)
+	server.LogContextHandle(context, "HandleDeleteRecipeById", "Deleted recipe "+id)
 	Success(context, "Deleted recipe "+id)
 }
 
 // HandleFindRecipesByItemNames gets called by router
 // Calls GetRecipesByItemNames and handles the context
-func (app *TasteBuddyApp) HandleFindRecipesByItemNames(context *gin.Context) {
+func (server *TasteBuddyServer) HandleFindRecipesByItemNames(context *gin.Context) {
 	itemIds := context.Param("itemIds")
 
 	// split itemIds string into array
 	splitItemIds := strings.Split(itemIds, ",")
 
-	recipes, err := app.client.GetRecipesByItemNames(splitItemIds)
+	recipes, err := server.GetRecipesByItemNames(splitItemIds)
 	if err != nil {
-		LogError("HandleFindRecipesByItemNames", err)
 		ServerError(context, true)
-		return
+		server.LogError("HandleFindRecipesByItemNames", err)
 	}
 	Success(context, recipes)
 }
 
-// HandleGetAllItems gets called by router
-// Calls getRecipesFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetAllItems(context *gin.Context) {
-	items, err := app.client.GetAllItems()
-	if err != nil {
-		LogError("HandleGetAllItems", err)
-		ServerError(context, true)
-		return
-	}
-	Success(context, items)
-}
-
-// HandleGetItemById gets called by router
-// Calls getItemByIdFromDB and handles the context
-func (app *TasteBuddyApp) HandleGetItemById(context *gin.Context) {
-	id := context.Param("id")
-
-	// convert id to primitive.ObjectID
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		LogError("HandleGetItemById", err)
-		ServerError(context, true)
-		return
-	}
-
-	item, err := app.client.GetItemById(objectID)
-	if err != nil {
-		LogError("HandleGetItemById", err)
-		ServerError(context, true)
-		return
-	}
-
-	Success(context, item)
-}
-
-// HandleAddItem gets called by router
-// Calls addItemToDB and handles the context
-func (app *TasteBuddyApp) HandleAddItem(context *gin.Context) {
-	LogContextHandle(context, "HandleAddItem", "Trying to add/update item")
-
-	var newItem Item
-	if err := context.BindJSON(&newItem); err != nil {
-		LogError("HandleAddItem", err)
-		BadRequestError(context, "Invalid item")
-		return
-	}
-
-	var itemId primitive.ObjectID
-	var err error
-	if itemId, err = app.client.AddOrUpdateItem(newItem); err != nil {
-		LogError("HandleAddItem", err)
-		ServerError(context, true)
-		return
-	}
-	LogContextHandle(context, "HandleAddItem", "Added/Updated item "+newItem.Name+" ("+newItem.ID.Hex()+")")
-	Success(context, "Saved item "+itemId.Hex())
-}
-
-// HandleDeleteItemById gets called by router
-// Calls DeleteItemById and handles the context
-func (app *TasteBuddyApp) HandleDeleteItemById(context *gin.Context) {
-	id := context.Param("id")
-	LogContextHandle(context, "HandleDeleteItemById", "Trying to delete item "+id)
-
-	// convert id to primitive.ObjectID
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		LogError("HandleDeleteItemById", err)
-		ServerError(context, true)
-		return
-	}
-
-	// delete recipe
-	if _, err := app.client.DeleteItemById(objectID); err != nil {
-		LogError("HandleDeleteItemById", err)
-		ServerError(context, true)
-		return
-	}
-	LogContextHandle(context, "HandleDeleteItemById", "Deleted item "+id)
-	Success(context, "Deleted item "+id)
-}
-
 // GetRecipesCollection gets recipes collection from database
-func (client *TasteBuddyDatabase) GetRecipesCollection() *mongo.Collection {
-	return client.Database("tastebuddy").Collection("recipes")
+func (app *TasteBuddyApp) GetRecipesCollection() *mongo.Collection {
+	return app.client.Database("tastebuddy").Collection("recipes")
 }
 
 // GetAllRecipes gets all recipes from database
-func (client *TasteBuddyDatabase) GetAllRecipes() ([]Recipe, error) {
+func (app *TasteBuddyApp) GetAllRecipes() ([]Recipe, error) {
 	ctx := DefaultContext()
 
 	// get all recipes from database that are not deleted
-	cursor, err := client.GetRecipesCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
+	cursor, err := app.GetRecipesCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
 	if err != nil {
-		LogError("GetAllRecipes", err)
-		return []Recipe{}, err
+		return []Recipe{}, app.LogError("GetAllRecipes", err)
 	}
 
 	// try to get all recipes from database and bind them to recipesFromDatabase
 	var recipesFromDatabase []Recipe
 	if err = cursor.All(ctx, &recipesFromDatabase); err != nil {
-		LogError("GetAllRecipes", err)
-		return []Recipe{}, err
+		return []Recipe{}, app.LogError("GetAllRecipes", err)
 	}
 
 	if recipesFromDatabase == nil {
@@ -290,22 +219,20 @@ func (client *TasteBuddyDatabase) GetAllRecipes() ([]Recipe, error) {
 	}
 
 	// get all items from database
-	items, err := client.GetAllItems()
+	items, err := app.GetAllItems()
 	if err != nil {
-		LogError("GetAllRecipes", err)
-		return []Recipe{}, err
+		return []Recipe{}, app.LogError("GetAllRecipes", err)
 	}
 
 	// prepare items for each recipe
 	for i := range recipesFromDatabase {
-		MapItemIdsToItem(&recipesFromDatabase[i], items)
+		recipesFromDatabase[i].MapItemIdsToItem(items)
 	}
 
 	return recipesFromDatabase, nil
 }
 
-func MapItemIdsToItem(recipe *Recipe, items []Item) {
-
+func (recipe *Recipe) MapItemIdsToItem(items []Item) {
 	// create map of items
 	itemsMap := make(map[primitive.ObjectID]Item)
 	for i := range items {
@@ -320,20 +247,18 @@ func MapItemIdsToItem(recipe *Recipe, items []Item) {
 	}
 }
 
-func (client *TasteBuddyDatabase) GetRecipeById(id primitive.ObjectID) (Recipe, error) {
+func (app *TasteBuddyApp) GetRecipeById(id primitive.ObjectID) (Recipe, error) {
 	ctx := DefaultContext()
 	// try to get collection of recipes
-	recipe := client.GetRecipesCollection().FindOne(ctx, bson.M{"_id": id})
+	recipe := app.GetRecipesCollection().FindOne(ctx, bson.M{"_id": id})
 
 	if recipe.Err() != nil {
-		LogError("GetRecipeById", recipe.Err())
-		return Recipe{}, recipe.Err()
+		return Recipe{}, app.LogError("GetRecipeById", recipe.Err())
 	}
 
 	var recipeFromDatabase Recipe
 	if err := recipe.Decode(&recipeFromDatabase); err != nil {
-		LogError("GetRecipeById", err)
-		return Recipe{}, err
+		return Recipe{}, app.LogError("GetRecipeById", err)
 	}
 
 	return recipeFromDatabase, nil
@@ -341,71 +266,64 @@ func (client *TasteBuddyDatabase) GetRecipeById(id primitive.ObjectID) (Recipe, 
 
 // AddOrUpdateRecipe adds a new recipe to the database of recipes
 // and returns all the id of the new recipe or the old recipe
-func (client *TasteBuddyDatabase) AddOrUpdateRecipe(newRecipe Recipe) (primitive.ObjectID, error) {
+func (app *TasteBuddyApp) AddOrUpdateRecipe(newRecipe Recipe) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
 	var objectId primitive.ObjectID
 
 	// get the items from the recipe and add them to the database
-	err = newRecipe.PrepareForDB(client)
-	if err != nil {
-		LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name, err)
-		return objectId, err
+	if err = app.PrepareRecipeForDB(newRecipe); err != nil {
+		return objectId, app.LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name, err)
 	}
 
 	if newRecipe.ID.IsZero() {
 		// add new recipe
 		// set createdAt to current time
-		LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name, "Add new recipe to database")
+		app.LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name, "Add new recipe to database")
 		var result *mongo.InsertOneResult
 		newRecipe.Props.CreatedAt = time.Now()
-		result, err = client.GetRecipesCollection().InsertOne(ctx, newRecipe)
+		result, err = app.GetRecipesCollection().InsertOne(ctx, newRecipe)
 		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
 		// update recipe
-		LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+newRecipe.ID.Hex()+")", "Update existing recipe in database")
-		_, err = client.GetRecipesCollection().UpdateOne(ctx,
+		app.LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+newRecipe.ID.Hex()+")", "Update existing recipe in database")
+		_, err = app.GetRecipesCollection().UpdateOne(ctx,
 			bson.D{{Key: "_id", Value: newRecipe.ID}},
 			bson.D{{Key: "$set", Value: newRecipe}})
 		objectId = newRecipe.ID
 	}
 	if err != nil {
-		LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.Hex()+")", err)
-		return objectId, err
+		return objectId, app.LogError("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.Hex()+")", err)
 	}
 
-	LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.Hex()+")", "Successful operation")
+	app.LogWarning("AddOrUpdateRecipe + recipe "+newRecipe.Name+"("+objectId.Hex()+")", "Successful operation")
 	return objectId, nil
 }
 
-func (client *TasteBuddyDatabase) DeleteRecipeById(id primitive.ObjectID) (primitive.ObjectID, error) {
+func (app *TasteBuddyApp) DeleteRecipeById(id primitive.ObjectID) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
-	var err error
 
 	// delete recipe by setting deleted to true
-	LogWarning("DeleteRecipeById", "Delete recipe "+id.Hex()+" from database")
-	_, err = client.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
-	if err != nil {
-		LogError("DeleteRecipeById", err)
-		return id, err
+	app.LogWarning("DeleteRecipeById", "Delete recipe "+id.Hex()+" from database")
+	if _, err := app.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}}); err != nil {
+		return id, app.LogError("DeleteRecipeById", err)
 	}
 
 	return id, nil
 }
 
-func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {
+func (app *TasteBuddyApp) PrepareRecipeForDB(recipe Recipe) error {
 	// normalize all items in recipe
 	for stepIndex, step := range recipe.Steps {
 		for itemIndex, stepItem := range step.Items {
 			var err error
 
 			// if item in stepItem has an id, it is already in the database
-			itemId, err := client.AddOrUpdateItem(stepItem.Item)
+			itemId, err := app.AddOrUpdateItem(stepItem.Item)
 			if err != nil {
-				LogError("PrepareForDB + "+recipe.Name+" + "+stepItem.Item.Name, err)
-				return err
+				return app.LogError("PrepareForDB + "+recipe.Name+" + "+stepItem.Item.Name, err)
 			}
-			Log("PrepareForDB + recipe "+recipe.Name+"("+recipe.ID.Hex()+")", "Map "+stepItem.Item.Name+" to "+itemId.Hex())
+			app.Log("PrepareForDB + recipe "+recipe.Name+"("+recipe.ID.Hex()+")", "Map "+stepItem.Item.Name+" to "+itemId.Hex())
 			stepItem.ItemID = itemId
 			stepItem.Item = Item{}
 			recipe.Steps[stepIndex].Items[itemIndex] = stepItem
@@ -414,138 +332,24 @@ func (recipe *Recipe) PrepareForDB(client *TasteBuddyDatabase) error {
 	return nil
 }
 
-// GetItemsCollection gets recipes from database
-func (client *TasteBuddyDatabase) GetItemsCollection() *mongo.Collection {
-	return client.Database("tastebuddy").Collection("items")
-}
-
-// GetAllItems gets all items from database
-func (client *TasteBuddyDatabase) GetAllItems() ([]Item, error) {
-	ctx := DefaultContext()
-
-	// get all items from database that are not deleted
-	cursor, err := client.GetItemsCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
-	if err != nil {
-		LogError("GetAllItems", err)
-		return []Item{}, err
-	}
-	var itemsFromDatabase []Item
-	if err = cursor.All(ctx, &itemsFromDatabase); err != nil {
-		LogError("GetAllItems", err)
-		return []Item{}, err
-	}
-
-	if itemsFromDatabase == nil {
-		// return void array if nil
-		itemsFromDatabase = []Item{}
-	}
-	return itemsFromDatabase, nil
-}
-
-// GetItemById gets item from database by id
-func (client *TasteBuddyDatabase) GetItemById(id primitive.ObjectID) (Item, error) {
-	ctx := DefaultContext()
-
-	items := client.GetItemsCollection().FindOne(ctx, bson.M{"_id": id})
-
-	if items.Err() != nil {
-		LogError("GetItemById", items.Err())
-		return Item{}, items.Err()
-	}
-
-	var itemFromDatabase Item
-	if err := items.Decode(&itemFromDatabase); err != nil {
-		LogError("GetAllItems", err)
-		return Item{}, err
-	}
-
-	return itemFromDatabase, nil
-}
-
-func (client *TasteBuddyDatabase) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
-	ctx := DefaultContext()
-	var err error
-
-	// delete recipe by setting deleted to true
-	LogWarning("DeleteItemById", "Delete item "+id.Hex()+" from database")
-	_, err = client.GetItemsCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}})
-	if err != nil {
-		LogError("DeleteItemById + "+id.Hex(), err)
-		return id, err
-	}
-
-	return id, nil
-}
-
-// AddOrUpdateItems adds or updates multiple items in the database of items
-func (client *TasteBuddyDatabase) AddOrUpdateItems(newItems []Item) error {
-	for _, item := range newItems {
-		if _, err := client.AddOrUpdateItem(item); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// AddOrUpdateItem adds or updates an item in the database of items
-func (client *TasteBuddyDatabase) AddOrUpdateItem(newItem Item) (primitive.ObjectID, error) {
-	ctx := DefaultContext()
-	var err error
-	var objectId primitive.ObjectID
-
-	if newItem.ID.IsZero() {
-		// add item
-		var result *mongo.InsertOneResult
-		LogWarning("AddOrUpdateItem + "+newItem.Name, "Add new item to database")
-		result, err = client.GetItemsCollection().InsertOne(ctx, newItem)
-		objectId = result.InsertedID.(primitive.ObjectID)
-	} else {
-		// update item
-		LogWarning("AddOrUpdateItem + "+newItem.Name+"("+newItem.ID.Hex()+")", "Update existing item in database")
-		_, err = client.GetItemsCollection().UpdateOne(ctx,
-			bson.D{{Key: "_id", Value: newItem.ID}},
-			bson.D{{Key: "$set", Value: newItem}})
-		objectId = newItem.ID
-	}
-	if err != nil {
-		LogError("AddOrUpdateItem + "+newItem.Name, err)
-		return objectId, err
-	}
-	LogWarning("AddOrUpdateItem + "+newItem.Name+"("+objectId.Hex()+")", "Successful operation")
-	return objectId, nil
-}
-
-// ExtractItems gets all items used in a recipe
-func (recipe *Recipe) ExtractItems() []Item {
-	var items []Item
-
-	for _, step := range recipe.Steps {
-		for _, stepItem := range step.Items {
-			items = append(items, stepItem.Item)
-		}
-	}
-	return items
-}
-
 // GetRecipesByItemNames gets the recipes in which the given items are used
-func (client *TasteBuddyDatabase) GetRecipesByItemNames(splitItemIds []string) ([]Recipe, error) {
+func (app *TasteBuddyApp) GetRecipesByItemNames(splitItemIds []string) ([]Recipe, error) {
 	// use map since its easier to avoid duplicates
 	var recipesMap = make(map[string]Recipe)
 
 	// get all recipes from database
-	recipes, err := client.GetAllRecipes()
+	recipes, err := app.GetAllRecipes()
 	if err != nil {
-		LogError("GetRecipesByItemNames", err)
-		return []Recipe{}, err
+		return []Recipe{}, app.LogError("GetRecipesByItemNames", err)
 	}
 
 	for _, itemID := range splitItemIds {
 		for _, recipe := range recipes {
 			// iterate through each item used in recipe
 			var itemsByRecipe = recipe.ExtractItems()
-			for _, recipeItemID := range itemsByRecipe {
-				// add recipe to map if not already added and if itemID corresponds to recipeItemID
-				if _, ok := recipesMap[recipe.ID.Hex()]; !ok && itemID == recipeItemID.ID.Hex() {
+			for _, recipeItem := range itemsByRecipe {
+				// add recipe to map if not already added and if itemID corresponds to recipeItem.ID
+				if _, ok := recipesMap[recipe.ID.Hex()]; !ok && itemID == recipeItem.ID.Hex() {
 					recipesMap[recipe.ID.Hex()] = recipe
 				}
 			}
@@ -563,17 +367,16 @@ func (client *TasteBuddyDatabase) GetRecipesByItemNames(splitItemIds []string) (
 
 // CleanUpItemsInRecipes removes all items from recipes that are not in the database
 // and replaces them with the best item from the database
-func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
+func (app *TasteBuddyApp) CleanUpItemsInRecipes() error {
 	var err error
 
 	var items []Item
 	var recipes []Recipe
 
 	// get items
-	items, err = client.GetAllItems()
+	items, err = app.GetAllItems()
 	if err != nil {
-		LogError("CleanUpItemsInRecipes", err)
-		return err
+		return app.LogError("CleanUpItemsInRecipes", err)
 	}
 
 	// create map of the "best" item for each name
@@ -582,10 +385,10 @@ func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
 		// check if map already contains item
 		if itemFromMap, ok := itemMap[item.Name]; ok {
 			// check if item is better than item in map
-			if GetItemQuality(item) > GetItemQuality(itemFromMap) {
+			if item.GetItemQuality() > itemFromMap.GetItemQuality() {
 				// replace item in map
 				itemMap[item.Name] = item
-				Log("CleanUpItemsInRecipes", fmt.Sprintf("replace %s with %s", itemFromMap.ID.Hex(), item.ID.Hex()))
+				app.Log("CleanUpItemsInRecipes", fmt.Sprintf("replace %s with %s", itemFromMap.ID.Hex(), item.ID.Hex()))
 			}
 		} else {
 			// add item to map
@@ -594,10 +397,9 @@ func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
 	}
 
 	// get recipes
-	recipes, err = client.GetAllRecipes()
+	recipes, err = app.GetAllRecipes()
 	if err != nil {
-		LogError("CleanUpItemsInRecipes", err)
-		return err
+		return app.LogError("CleanUpItemsInRecipes", err)
 	}
 
 	// go through all recipes
@@ -619,61 +421,27 @@ func (client *TasteBuddyDatabase) CleanUpItemsInRecipes() error {
 
 	// update recipes
 	for _, recipe := range recipes {
-		_, err = client.AddOrUpdateRecipe(recipe)
-		if err != nil {
-			LogError("CleanUpItemsInRecipes", err)
-			return err
+		if _, err = app.AddOrUpdateRecipe(recipe); err != nil {
+			return app.LogError("CleanUpItemsInRecipes", err)
 		}
 	}
 
-	Log("CleanUpItemsInRecipes", fmt.Sprintf("Clean up %d recipes...", amountCleanedUp))
+	app.Log("CleanUpItemsInRecipes", fmt.Sprintf("Clean up %d recipes...", amountCleanedUp))
 
 	return nil
 }
 
-// GetItemQuality gets the quality of an item
-// 0 = empty (low quality)
-// 1 = ID (medium quality)
-// 2 = name (medium quality)
-// 3 = name + type (medium quality)
-// 4 = name + type + imgurl (high quality)
-func GetItemQuality(item Item) int {
-	var itemQuality = 0
-
-	if !item.ID.IsZero() {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.ImgUrl != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.Name != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	// check if url is not empty
-	if item.Type != "" {
-		itemQuality = itemQuality + 1
-	}
-
-	return itemQuality
-}
-
-// CleanUpUnusedAttributesInRecipes marshals and unmarshals all recipes and
+// CleanUpUnusedAttributesInRecipes marshals and unmarshal all recipes and
 // tries to remove all unused attributes
-func (client *TasteBuddyDatabase) CleanUpUnusedAttributesInRecipes() error {
-	recipes, err := client.GetAllRecipes()
+func (app *TasteBuddyApp) CleanUpUnusedAttributesInRecipes() error {
+	recipes, err := app.GetAllRecipes()
 	if err != nil {
-		LogError("CleanUpUnusedAttributesInRecipes", err)
-		return err
+		return app.LogError("CleanUpUnusedAttributesInRecipes", err)
 	}
 
 	for _, recipe := range recipes {
-		if _, err := client.AddOrUpdateRecipe(recipe); err != nil {
-			return err
+		if _, err := app.AddOrUpdateRecipe(recipe); err != nil {
+			return app.LogError("CleanUpUnusedAttributesInRecipes", err)
 		}
 	}
 
@@ -682,10 +450,10 @@ func (client *TasteBuddyDatabase) CleanUpUnusedAttributesInRecipes() error {
 
 // GoRoutineCleanUpRecipes contains goroutines that are called every 6 hours
 // to clean up parts of the recipes
-func GoRoutineCleanUpRecipes(client *TasteBuddyDatabase) {
+func GoRoutineCleanUpRecipes(app *TasteBuddyApp) {
 	for {
-		client.CleanUpItemsInRecipes()
-		client.CleanUpUnusedAttributesInRecipes()
+		app.CleanUpItemsInRecipes()
+		app.CleanUpUnusedAttributesInRecipes()
 		// clean up recipes every 6 hours
 		time.Sleep(6 * time.Hour)
 	}

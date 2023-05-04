@@ -1,3 +1,7 @@
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -24,16 +28,16 @@ func (user *User) CheckPassword(password string) bool {
 
 // HandleRegisterUser gets called by router
 // Calls AddOrUpdateUser and handles the context
-func (app *TasteBuddyApp) HandleRegisterUser(context *gin.Context) {
+func (server *TasteBuddyServer) HandleRegisterUser(context *gin.Context) {
 	var user User
 	if err := context.ShouldBindJSON(&user); err != nil {
-		LogError("HandleRegisterUser", err)
+		server.LogError("HandleRegisterUser", err)
 		ServerError(context, true)
 		return
 	}
 
 	// Update user in database
-	_, err := app.client.AddOrUpdateUser(user)
+	_, err := server.AddOrUpdateUser(user)
 	if err != nil {
 		ServerError(context, true)
 		return
@@ -43,17 +47,17 @@ func (app *TasteBuddyApp) HandleRegisterUser(context *gin.Context) {
 }
 
 // GetUsersCollections returns the users collection
-func (client *TasteBuddyDatabase) GetUsersCollections() *mongo.Collection {
-	return client.Database("tastebuddy").Collection("users")
+func (app *TasteBuddyApp) GetUsersCollections() *mongo.Collection {
+	return app.client.Database("tastebuddy").Collection("users")
 }
 
 // GetUserById gets a user by its id
-func (client *TasteBuddyDatabase) GetUserById(userId primitive.ObjectID) (User, error) {
+func (app *TasteBuddyApp) GetUserById(userId primitive.ObjectID) (User, error) {
 	var user User
 	ctx := DefaultContext()
-	err := client.GetUsersCollections().FindOne(ctx, bson.D{{Key: "_id", Value: userId}}).Decode(&user)
+	err := app.GetUsersCollections().FindOne(ctx, bson.D{{Key: "_id", Value: userId}}).Decode(&user)
 	if err != nil {
-		LogError("GetUserById", err)
+		app.LogError("GetUserById", err)
 		return user, err
 	}
 	return user, nil
@@ -71,35 +75,35 @@ func (user *User) HashPassword() error {
 }
 
 // AddOrUpdateUser adds a new user to the database of users
-func (client *TasteBuddyDatabase) AddOrUpdateUser(newUser User) (primitive.ObjectID, error) {
+func (app *TasteBuddyApp) AddOrUpdateUser(newUser User) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
 	var objectId primitive.ObjectID
 
 	if newUser.ID.IsZero() {
 		// add new user
-		LogWarning("AddOrUpdateUser + user "+newUser.Username, "Add new user to database")
+		app.LogWarning("AddOrUpdateUser + user "+newUser.Username, "Add new user to database")
 		var result *mongo.InsertOneResult
 		if err := newUser.HashPassword(); err != nil {
-			LogError("AddOrUpdateUser + user "+newUser.Username, err)
+			app.LogError("AddOrUpdateUser + user "+newUser.Username, err)
 			return objectId, err
 		}
-		result, err = client.GetUsersCollections().InsertOne(ctx, newUser)
+		result, err = app.GetUsersCollections().InsertOne(ctx, newUser)
 		objectId = result.InsertedID.(primitive.ObjectID)
 	} else {
 		// update user
-		LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+newUser.ID.Hex()+")", "Update existing user in database")
-		_, err = client.GetUsersCollections().UpdateOne(ctx,
+		app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+newUser.ID.Hex()+")", "Update existing user in database")
+		_, err = app.GetUsersCollections().UpdateOne(ctx,
 			bson.D{{Key: "_id", Value: newUser.ID}},
 			bson.D{{Key: "$set", Value: newUser}})
 		objectId = newUser.ID
 	}
 	if err != nil {
-		LogError("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", err)
+		app.LogError("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", err)
 		return objectId, err
 	}
 
-	LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", "Successful operation")
+	app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", "Successful operation")
 	return objectId, nil
 }
 
@@ -107,11 +111,11 @@ func (client *TasteBuddyDatabase) AddOrUpdateUser(newUser User) (primitive.Objec
 // 0 -> GuestLevel
 // 1 -> UserLevel
 // 2 -> AdminLevel
-func (client *TasteBuddyDatabase) SetUserLevel(user *User, userLevel AuthLevel) error {
+func (app *TasteBuddyApp) SetUserLevel(user *User, userLevel AuthLevel) error {
 	user.UserLevel = int(userLevel)
 
 	// Update user in database
-	_, err := client.GetUsersCollections().UpdateOne(DefaultContext(),
+	_, err := app.GetUsersCollections().UpdateOne(DefaultContext(),
 		bson.D{{Key: "_id", Value: user.ID}}, bson.D{{Key: "$set", Value: user}})
 
 	return err

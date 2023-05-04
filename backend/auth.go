@@ -1,3 +1,7 @@
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -33,7 +37,7 @@ const (
 // //////////////////////////////////////////////////////////////////////
 
 // HandleBasicAuthentication handles the authentication of a user
-func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
+func (server *TasteBuddyServer) HandleBasicAuthentication(context *gin.Context) {
 	// Get the basic auth input from the header
 	var basicAuthInput = context.Request.Header.Get("Authorization")
 	if basicAuthInput == "" {
@@ -41,16 +45,16 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 		return
 	}
 
-	username, password, err := DecodeBasicAuth(basicAuthInput)
+	username, password, err := server.DecodeBasicAuth(basicAuthInput)
 	if err != nil {
-		LogError("HandleBasicAuthentication", err)
+		server.LogError("HandleBasicAuthentication", err)
 		ServerError(context, true)
 		return
 	}
 
-	if user, isValidCredentials := app.CheckBasicAuthenticationCredentials(username, password); isValidCredentials {
+	if user, isValidCredentials := server.CheckBasicAuthenticationCredentials(username, password); isValidCredentials {
 		// Generate session token for user and set session token cookie
-		app.HandleStartSessionForUser(context, *user)
+		server.HandleStartSessionForUser(context, *user)
 		Success(context, "Successfully logged in")
 	} else {
 		// Return error
@@ -59,10 +63,10 @@ func (app *TasteBuddyApp) HandleBasicAuthentication(context *gin.Context) {
 }
 
 // DecodeBasicAuth decodes the basic auth input
-func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
+func (server *TasteBuddyServer) DecodeBasicAuth(basicAuthInput string) (string, string, error) {
 	// Check if "Basic" is in the string
 	if !strings.Contains(basicAuthInput, "Basic") {
-		LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
+		server.LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
 		return "", "", errors.New("invalid basic auth input")
 	}
 
@@ -72,14 +76,14 @@ func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
 	// Decode base64 string
 	decoded, err := base64.StdEncoding.DecodeString(basicAuthInput)
 	if err != nil {
-		LogError("DecodeUsernameAndPassword", err)
+		server.LogError("DecodeUsernameAndPassword", err)
 		return "", "", err
 	}
 
 	// Split username and password
 	split := strings.Split(string(decoded), ":")
 	if len(split) != 2 {
-		LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
+		server.LogError("DecodeUsernameAndPassword", errors.New("invalid basic auth input"))
 		return "", "", errors.New("invalid basic auth input")
 	}
 
@@ -94,22 +98,22 @@ func DecodeBasicAuth(basicAuthInput string) (string, string, error) {
 //     Hash password and check if the hashed password corresponds the hashed password from the database
 //     If not -> return false
 //     If yes -> return true
-func (app *TasteBuddyApp) CheckBasicAuthenticationCredentials(username, password string) (*User, bool) {
+func (server *TasteBuddyServer) CheckBasicAuthenticationCredentials(username, password string) (*User, bool) {
 	// Try to get the user from the database
-	userFromDatabase := app.client.
+	userFromDatabase := server.
 		GetUsersCollections().
 		FindOne(DefaultContext(), bson.M{"username": username})
 
 	// Check if the user exists
 	if userFromDatabase.Err() != nil {
-		LogError("CheckBasicAuthenticationCredentials", userFromDatabase.Err())
+		server.LogError("CheckBasicAuthenticationCredentials", userFromDatabase.Err())
 		return nil, false
 	}
 
 	// Try to decode user from database into struct
 	var user User
 	if err := userFromDatabase.Decode(&user); err != nil {
-		LogError("CheckBasicAuthenticationCredentials", err)
+		server.LogError("CheckBasicAuthenticationCredentials", err)
 		return nil, false
 	}
 
@@ -133,7 +137,7 @@ type Session struct {
 }
 
 // CheckSessionTokenMiddleware checks if the session is valid
-func (app *TasteBuddyApp) CheckSessionTokenMiddleware() gin.HandlerFunc {
+func (server *TasteBuddyServer) CheckSessionTokenMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		cookie, err := context.Request.Cookie("session_token")
 
@@ -144,24 +148,24 @@ func (app *TasteBuddyApp) CheckSessionTokenMiddleware() gin.HandlerFunc {
 
 		sessionToken := cookie.Value
 		// Validate the session token
-		isValidSessionToken := app.client.ValidateSessionToken(sessionToken)
+		isValidSessionToken := server.ValidateSessionToken(sessionToken)
 		if isValidSessionToken {
 			// If the session token is valid, set the session token as a context variable
 			context.Set("SessionToken", sessionToken)
 		} else {
-			LogError("CheckSessionTokenMiddleware", errors.New("session token is invalid"))
+			server.LogError("CheckSessionTokenMiddleware", errors.New("session token is invalid"))
 		}
 		context.Next()
 	}
 }
 
 // GenerateJWTMiddleware generates a JWT from the session token
-func (app *TasteBuddyApp) GenerateJWTMiddleware() gin.HandlerFunc {
+func (server *TasteBuddyServer) GenerateJWTMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// Get the session token from the context
 		sessionToken := context.GetString("SessionToken")
 		if sessionToken != "" {
-			if JWT, err := app.GenerateJWTFromSessionToken(sessionToken); err == nil {
+			if JWT, err := server.GenerateJWTFromSessionToken(sessionToken); err == nil {
 				// Ignore errors that might occur
 				// If there was no error, set the JWT as a context variable
 				context.Set("JWT", JWT)
@@ -172,7 +176,7 @@ func (app *TasteBuddyApp) GenerateJWTMiddleware() gin.HandlerFunc {
 }
 
 // CheckJWTMiddleware is a Middleware that checks whether the user is allowed to access the route
-func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
+func (server *TasteBuddyServer) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
 	return func(context *gin.Context) {
 		// Get the internal JWT token.
 		JWT := context.GetString("JWT")
@@ -181,7 +185,7 @@ func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
 			return
 		}
 		// Parse and validate the JWT token.
-		token, isValidToken := app.ParseJWT(JWT)
+		token, isValidToken := server.ParseJWT(JWT)
 		if !isValidToken {
 			NotAuthenticated(context)
 			return
@@ -199,7 +203,7 @@ func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
 		authLevel, err := strconv.Atoi(data["auth_level"].(string))
 		if authLevel < int(level) || err != nil {
 			if err != nil {
-				LogError("CheckJWTMiddleware", err)
+				server.LogError("CheckJWTMiddleware", err)
 			}
 			MissingRights(context)
 			return
@@ -211,7 +215,7 @@ func (app *TasteBuddyApp) CheckJWTMiddleware(level AuthLevel) gin.HandlerFunc {
 }
 
 // HandleCheckSessionToken checks if the session is valid
-func (app *TasteBuddyApp) HandleCheckSessionToken(context *gin.Context) {
+func (server *TasteBuddyServer) HandleCheckSessionToken(context *gin.Context) {
 	cookie, err := context.Request.Cookie("session_token")
 
 	if err != nil {
@@ -221,22 +225,22 @@ func (app *TasteBuddyApp) HandleCheckSessionToken(context *gin.Context) {
 
 	sessionToken := cookie.Value
 	// Validate the session token
-	isValidSessionToken := app.client.ValidateSessionToken(sessionToken)
+	isValidSessionToken := server.ValidateSessionToken(sessionToken)
 	if isValidSessionToken {
 		Success(context, "Session token is valid")
 	} else {
 		// If the session token is invalid, remove it from the request
-		LogError("HandleCheckSessionToken", errors.New("session token is invalid"))
+		server.LogError("HandleCheckSessionToken", errors.New("session token is invalid"))
 		NotAuthenticated(context)
 	}
 }
 
 // HandleStartSessionForUser starts a session for the user and sets the session token cookie
-func (app *TasteBuddyApp) HandleStartSessionForUser(context *gin.Context, user User) {
+func (server *TasteBuddyServer) HandleStartSessionForUser(context *gin.Context, user User) {
 	// Generate session token and save it in the database
-	sessionToken, expiresAt, maxAge, err := app.client.SetSessionForUser(user)
+	sessionToken, expiresAt, maxAge, err := server.SetSessionForUser(user)
 	if err != nil {
-		LogError("HandleStartSessionForUser", err)
+		server.LogError("HandleStartSessionForUser", err)
 		ServerError(context, true)
 		return
 	}
@@ -257,34 +261,34 @@ func (app *TasteBuddyApp) HandleStartSessionForUser(context *gin.Context, user U
 }
 
 // GetSessionsCollection returns the sessions collection
-func (client *TasteBuddyDatabase) GetSessionsCollection() *mongo.Collection {
-	return client.Database("tastebuddy").Collection("sessions")
+func (server *TasteBuddyServer) GetSessionsCollection() *mongo.Collection {
+	return server.client.Database("tastebuddy").Collection("sessions")
 }
 
 // GetSession returns the session by the session token
-func (client *TasteBuddyDatabase) GetSession(sessionToken string) *mongo.SingleResult {
-	return client.GetSessionsCollection().FindOne(DefaultContext(), bson.M{"session_token": sessionToken})
+func (server *TasteBuddyServer) GetSession(sessionToken string) *mongo.SingleResult {
+	return server.GetSessionsCollection().FindOne(DefaultContext(), bson.M{"session_token": sessionToken})
 }
 
 // GetUserBySessionToken returns the user by the session token
-func (client *TasteBuddyDatabase) GetUserBySessionToken(sessionToken string) (*User, error) {
-	session := client.GetSession(sessionToken)
+func (server *TasteBuddyServer) GetUserBySessionToken(sessionToken string) (*User, error) {
+	session := server.GetSession(sessionToken)
 
 	// Check if session exists in database
 	if session.Err() != nil {
-		LogError("GetUserBySessionToken", session.Err())
+		server.LogError("GetUserBySessionToken", session.Err())
 		return nil, session.Err()
 	}
 
 	// Unmarshal session data
 	var sessionData Session
 	if err := session.Decode(&sessionData); err != nil {
-		LogError("GetUserBySessionToken", err)
+		server.LogError("GetUserBySessionToken", err)
 		return nil, err
 	}
 
-	if user, err := client.GetUserById(sessionData.UserID); err != nil {
-		LogError("GetUserBySessionToken", err)
+	if user, err := server.GetUserById(sessionData.UserID); err != nil {
+		server.LogError("GetUserBySessionToken", err)
 		return nil, err
 	} else {
 		return &user, nil
@@ -292,7 +296,7 @@ func (client *TasteBuddyDatabase) GetUserBySessionToken(sessionToken string) (*U
 }
 
 // SetSessionForUser sets a session for the user
-func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Time, int, error) {
+func (server *TasteBuddyServer) SetSessionForUser(user User) (string, time.Time, int, error) {
 	sessionToken, err := GenerateRandomSessionToken()
 	if err != nil {
 		return "", time.Time{}, -1, err
@@ -304,7 +308,7 @@ func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Tim
 	maxAge := int(expiresAt.Sub(createdAt).Seconds())
 
 	// Insert session into database
-	_, err = client.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
+	_, err = server.GetSessionsCollection().InsertOne(DefaultContext(), bson.M{
 		"session_token": sessionToken,
 		"user_id":       userId,
 		"created_at":    createdAt,
@@ -319,20 +323,20 @@ func (client *TasteBuddyDatabase) SetSessionForUser(user User) (string, time.Tim
 }
 
 // ValidateSessionToken checks if the session token is valid
-func (client *TasteBuddyDatabase) ValidateSessionToken(sessionToken string) bool {
+func (server *TasteBuddyServer) ValidateSessionToken(sessionToken string) bool {
 	// Get session from database
-	session := client.GetSession(sessionToken)
+	session := server.GetSession(sessionToken)
 
 	// Check if session exists in database
 	if session.Err() != nil {
-		LogError("ValidateSessionToken", session.Err())
+		server.LogError("ValidateSessionToken", session.Err())
 		return false
 	}
 
 	// Unmarshal session data
 	var sessionData Session
 	if err := session.Decode(&sessionData); err != nil {
-		LogError("ValidateSessionToken", err)
+		server.LogError("ValidateSessionToken", err)
 		return false
 	}
 
@@ -361,17 +365,17 @@ func GenerateRandomSessionToken() (string, error) {
 
 // GenerateJWTFromSessionToken generates a JWT token for the user
 // Used code from https://stackoverflow.com/a/61284284/6604114
-func (app *TasteBuddyApp) GenerateJWTFromSessionToken(sessionToken string) (string, error) {
+func (server *TasteBuddyServer) GenerateJWTFromSessionToken(sessionToken string) (string, error) {
 	// Get user from session JWT
-	user, err := app.client.GetUserBySessionToken(sessionToken)
+	user, err := server.GetUserBySessionToken(sessionToken)
 	if err != nil {
-		LogError("GenerateJWTFromSessionToken/GetSessionToken", err)
+		server.LogError("GenerateJWTFromSessionToken/GetSessionToken", err)
 		return "", err
 	}
 
-	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(app.jwtSecretKey)
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(server.jwtSecretKey)
 	if err != nil {
-		LogError("GenerateJWTFromSessionToken/ParsePrivateKey", err)
+		server.LogError("GenerateJWTFromSessionToken/ParsePrivateKey", err)
 		return "", err
 	}
 
@@ -389,7 +393,7 @@ func (app *TasteBuddyApp) GenerateJWTFromSessionToken(sessionToken string) (stri
 
 	jwtString, err := JWT.SignedString(privateKey)
 	if err != nil {
-		LogError("GenerateJWTFromSessionToken/Sign", err)
+		server.LogError("GenerateJWTFromSessionToken/Sign", err)
 		return "", err
 	}
 
@@ -397,10 +401,10 @@ func (app *TasteBuddyApp) GenerateJWTFromSessionToken(sessionToken string) (stri
 }
 
 // ParseJWT validates the JWT token
-func (app *TasteBuddyApp) ParseJWT(tokenString string) (*jwt.Token, bool) {
-	key, err := jwt.ParseRSAPublicKeyFromPEM(app.jwtPublicKey)
+func (server *TasteBuddyServer) ParseJWT(tokenString string) (*jwt.Token, bool) {
+	key, err := jwt.ParseRSAPublicKeyFromPEM(server.jwtPublicKey)
 	if err != nil {
-		LogError("ParseJWT", err)
+		server.LogError("ParseJWT", err)
 		return nil, false
 	}
 
@@ -414,7 +418,7 @@ func (app *TasteBuddyApp) ParseJWT(tokenString string) (*jwt.Token, bool) {
 
 	// If there is an error, the token is invalid, return nil and false
 	if err != nil {
-		LogError("ParseJWT", err)
+		server.LogError("ParseJWT", err)
 		return nil, false
 	}
 

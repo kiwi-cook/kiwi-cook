@@ -1,3 +1,7 @@
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -5,8 +9,8 @@ import (
 )
 
 // GetReweMarkets returns all REWE markets for a city
-func GetReweMarkets(city string) ([]Market, error) {
-	body, err := GetFromUrl("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
+func (app *TasteBuddyApp) GetReweMarkets(city string) ([]Market, error) {
+	body, err := app.GetFromUrl("https://www.rewe.de/api/marketsearch?searchTerm=" + city)
 	if err != nil {
 		return []Market{}, err
 	}
@@ -22,10 +26,8 @@ func GetReweMarkets(city string) ([]Market, error) {
 
 	// unmarshal json
 	var reweMarketSearch []ReweMarketSearch
-	err = json.Unmarshal(body, &reweMarketSearch)
-	if err != nil {
-		LogError("GetReweMarkets", err)
-		return []Market{}, err
+	if err = json.Unmarshal(body, &reweMarketSearch); err != nil {
+		return []Market{}, app.LogError("GetReweMarkets", err)
 	}
 
 	// create markets
@@ -46,8 +48,8 @@ func GetReweMarkets(city string) ([]Market, error) {
 }
 
 // GetReweDiscounts gets the discounts for a REWE market
-func GetReweDiscounts(market Market) ([]Discount, error) {
-	body, err := GetFromUrl("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificMarketID)
+func (app *TasteBuddyApp) GetReweDiscounts(market Market) ([]Discount, error) {
+	body, err := app.GetFromUrl("https://mobile-api.rewe.de/api/v3/all-offers?marketCode=" + market.DistributorSpecificMarketID)
 	if err != nil {
 		return []Discount{}, err
 	}
@@ -71,8 +73,7 @@ func GetReweDiscounts(market Market) ([]Discount, error) {
 
 	err = json.Unmarshal(body, &reweDiscounts)
 	if err != nil {
-		LogError("GetReweDiscounts", err)
-		return []Discount{}, err
+		return []Discount{}, app.LogError("GetReweDiscounts", err)
 	}
 
 	// create discounts

@@ -1,3 +1,7 @@
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -6,8 +10,8 @@ import (
 )
 
 // GetEdekaMarkets returns all EDEKA markets for a city
-func GetEdekaMarkets(city string) ([]Market, error) {
-	body, err := GetFromUrl("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
+func (app *TasteBuddyApp) GetEdekaMarkets(city string) ([]Market, error) {
+	body, err := app.GetFromUrl("https://www.edeka.de/api/marketsearch/markets?searchstring=" + city)
 	if err != nil {
 		return []Market{}, err
 	}
@@ -36,10 +40,8 @@ func GetEdekaMarkets(city string) ([]Market, error) {
 
 	// unmarshal json
 	var edekaMarketSearch EdekaMarketSearch
-	err = json.Unmarshal(body, &edekaMarketSearch)
-	if err != nil {
-		LogError("GetEdekaMarkets", err)
-		return []Market{}, err
+	if err = json.Unmarshal(body, &edekaMarketSearch); err != nil {
+		return []Market{}, app.LogError("GetEdekaMarkets", err)
 	}
 
 	// create markets
@@ -48,13 +50,13 @@ func GetEdekaMarkets(city string) ([]Market, error) {
 		// parse coordinates
 		lat, err := strconv.ParseFloat(market.Coordinates.Latitude, 32)
 		if err != nil {
-			LogError("GetEdekaMarkets", err)
+			app.LogError("GetEdekaMarkets", err)
 			lat = 0
 		}
 
 		lon, err := strconv.ParseFloat(market.Coordinates.Longitude, 32)
 		if err != nil {
-			LogError("GetEdekaMarkets", err)
+			app.LogError("GetEdekaMarkets", err)
 			lon = 0
 		}
 
@@ -76,8 +78,8 @@ func GetEdekaMarkets(city string) ([]Market, error) {
 	return markets, nil
 }
 
-func GetEdekaDiscounts(market Market) ([]Discount, error) {
-	body, err := GetFromUrl("https://www.edeka.de/eh/service/eh/offers?marketId=" + market.DistributorSpecificMarketID)
+func (app *TasteBuddyApp) GetEdekaDiscounts(market Market) ([]Discount, error) {
+	body, err := app.GetFromUrl("https://www.edeka.de/eh/service/eh/offers?marketId=" + market.DistributorSpecificMarketID)
 	if err != nil {
 		return []Discount{}, err
 	}
@@ -92,10 +94,8 @@ func GetEdekaDiscounts(market Market) ([]Discount, error) {
 		} `json:"docs"`
 	}
 
-	err = json.Unmarshal(body, &edekaDiscounts)
-	if err != nil {
-		LogError("GetEdekaDiscounts", err)
-		return []Discount{}, err
+	if err = json.Unmarshal(body, &edekaDiscounts); err != nil {
+		return []Discount{}, app.LogError("GetEdekaDiscounts", err)
 	}
 
 	// create discounts

@@ -1,3 +1,7 @@
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
 package main
 
 import (
@@ -8,7 +12,7 @@ import (
 )
 
 type TasteBuddyApp struct {
-	port         string
+	logLevel     LogLevel
 	client       *TasteBuddyDatabase
 	jwtSecretKey []byte
 	jwtPublicKey []byte
@@ -22,8 +26,7 @@ type TasteBuddyDatabase struct {
 func TasteBuddyAppFactory() *TasteBuddyApp {
 	app := &TasteBuddyApp{}
 	return app.SetupViper().
-		SetPort(nil).
-		SetDatebase(nil).
+		SetDatabase(nil).
 		SetJWTKeys()
 }
 
@@ -34,42 +37,32 @@ func (app *TasteBuddyApp) SetupViper() *TasteBuddyApp {
 	viper.AutomaticEnv()
 	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
-		LogError("setupViper", err)
-		FatalError()
+		app.FatalError("setupViper", err)
 	}
 	return app
 }
 
-// SetPort sets the port for the app
-// Return TasteBuddyApp for chaining
-func (app *TasteBuddyApp) SetPort(port *string) *TasteBuddyApp {
-	if viper.GetString("PORT") != "" && port == nil {
-		app.port = viper.GetString("PORT")
-	} else if port != nil {
-		app.port = *port
-	} else {
-		// Default port
-		app.port = "8081"
-	}
+// SetLogLevel sets the log level
+func (app *TasteBuddyApp) SetLogLevel(logLevel int) *TasteBuddyApp {
+	app.logLevel = LogLevel(logLevel)
 	return app
 }
 
-func (app *TasteBuddyApp) SetDatebase(dbConnectionString *string) *TasteBuddyApp {
+// SetDatabase initializes the database connection and registers the client
+func (app *TasteBuddyApp) SetDatabase(dbConnectionString *string) *TasteBuddyApp {
 	DbConnectionString := ""
 	if viper.GetString("DB_CONNSTRING") != "" && dbConnectionString == nil {
 		DbConnectionString = viper.GetString("DB_CONNSTRING")
 	} else if dbConnectionString != nil {
 		DbConnectionString = *dbConnectionString
 	} else {
-		LogError("SetDatebase", errors.New("no database connection string provided"))
-		FatalError()
+		app.FatalError("SetDatabase", errors.New("no database connection string provided"))
 	}
 
 	// Connect to database
-	databaseClient, err := ConnectToDatabase(DbConnectionString)
+	databaseClient, err := app.ConnectToDatabase(DbConnectionString)
 	if err != nil {
-		LogError("SetDatebase", err)
-		FatalError()
+		app.FatalError("SetDatabase", err)
 	}
 
 	// Register database client
@@ -77,20 +70,44 @@ func (app *TasteBuddyApp) SetDatebase(dbConnectionString *string) *TasteBuddyApp
 	return app
 }
 
+// SetJWTKeys sets the JWT keys
 func (app *TasteBuddyApp) SetJWTKeys() *TasteBuddyApp {
 	// Set JWT secret key
 	JWTSecretKey, err := os.ReadFile(viper.GetString("JWT_RSA_KEY"))
 	if err != nil {
-		LogError("main", err)
-		FatalError()
+		app.FatalError("SetJWTKeys", err)
 	}
 	JWTPublicKey, err := os.ReadFile(viper.GetString("JWT_RSA_PUB_KEY"))
 	if err != nil {
-		LogError("main", err)
-		FatalError()
+		app.FatalError("SetJWTKeys", err)
 	}
 
 	app.jwtSecretKey = JWTSecretKey
 	app.jwtPublicKey = JWTPublicKey
 	return app
+}
+
+type TasteBuddyServer struct {
+	port string
+	*TasteBuddyApp
+}
+
+func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
+	server := &TasteBuddyServer{}
+	server.TasteBuddyApp = app
+	return server.SetPort(nil)
+}
+
+// SetPort sets the port for the app
+// Return TasteBuddyApp for chaining
+func (server *TasteBuddyServer) SetPort(port *string) *TasteBuddyServer {
+	if viper.GetString("PORT") != "" && port == nil {
+		server.port = viper.GetString("PORT")
+	} else if port != nil {
+		server.port = *port
+	} else {
+		// Default port
+		server.port = "8081"
+	}
+	return server
 }
