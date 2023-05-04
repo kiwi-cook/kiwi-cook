@@ -37,7 +37,7 @@
     "@vue/cli-plugin-typescript": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-typescript": "^11.0.3",
-    "cypress": "^12.9.0",
+    "cypress": "^12.11.0",
     "eslint": "^8.39.0",
     "eslint-plugin-vue": "^9.11.0",
     "typescript": "^5.0.4"
