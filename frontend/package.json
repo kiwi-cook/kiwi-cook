@@ -17,7 +17,7 @@
     "@capacitor/keyboard": "^4.1.1",
     "@capacitor/status-bar": "^4.1.1",
     "@ionic/storage": "^3.0.6",
-    "@ionic/vue": "^7.0.4",
+    "@ionic/vue": "^7.0.5",
     "@ionic/vue-router": "^7.0.3",
     "core-js": "^3.30.1",
     "ionicons": "^7.0.0",
