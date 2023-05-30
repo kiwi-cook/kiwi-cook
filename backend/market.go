@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 )
@@ -57,8 +56,8 @@ func (server *TasteBuddyServer) HandleGetAllMarkets(context *gin.Context) {
 }
 
 // GetMarketsCollection gets markets collection from database
-func (app *TasteBuddyApp) GetMarketsCollection() *mongo.Collection {
-	return app.client.Database("tastebuddy").Collection("markets")
+func (app *TasteBuddyApp) GetMarketsCollection() *TBCollection {
+	return app.GetDBCollection("markets")
 }
 
 // GetMarketsByCity gets all markets for a city from the db or the api

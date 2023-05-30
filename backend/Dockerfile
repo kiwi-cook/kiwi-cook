@@ -36,4 +36,4 @@ USER small-user:small-user
 ENV PORT 8081
 EXPOSE ${PORT}
 
-CMD [ "/app" ]
+CMD [ "/app", "serve" ]

@@ -18,19 +18,6 @@ func (server *TasteBuddyServer) Serve() {
 	////////////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////////////
-	// Goroutines
-	go func() {
-		// Markets must be saved before discounts
-		// GoRoutineSaveMarketsToDB(client)
-		// Discounts must be saved after markets
-		// GoRoutineSaveDiscountsToDB(client)
-		// Clean up the recipes
-		// GoRoutineCleanUpRecipes(client)
-	}()
-	// Finish Goroutines
-	////////////////////////////////////////////////////////////////////////
-
-	////////////////////////////////////////////////////////////////////////
 	// Set up gin
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
@@ -41,7 +28,6 @@ func (server *TasteBuddyServer) Serve() {
 		MaxAge:           12 * time.Hour,
 	}))
 	r.Use(server.CheckSessionTokenMiddleware())
-	r.Use(LimitRequestsMiddleware())
 	r.Use(server.GenerateJWTMiddleware())
 
 	// API Routes
@@ -72,15 +58,10 @@ func (server *TasteBuddyServer) Serve() {
 		// Users
 		userRoutes := v1.Group("/user")
 		{
-			// Get all users
-			userRoutes.GET("", server.CheckJWTMiddleware(AdminLevel), func(context *gin.Context) {
-				// server.HandleGetAllUsers(context)
-			})
-
 			// Register user
 			registerRoutes := userRoutes.Group("/register")
 			{
-				registerRoutes.POST("", func(context *gin.Context) {
+				registerRoutes.POST("", server.CheckServerModeMiddleware(ADMIN), func(context *gin.Context) {
 					server.HandleRegisterUser(context)
 				})
 			}
@@ -89,34 +70,24 @@ func (server *TasteBuddyServer) Serve() {
 		// Recipes
 		recipeRoutes := v1.Group("/recipe")
 		{
-			// Get all recipes
+			// Get list of all recipes
 			recipeRoutes.GET("", func(context *gin.Context) {
 				server.HandleGetAllRecipes(context)
 			})
 
-			// Get random recipe
-			recipeRoutes.GET("/random", func(context *gin.Context) {
-				server.HandleGetRandomRecipe(context)
-			})
-
 			// Get recipe by id
-			recipeRoutes.GET("/byId/:id", func(context *gin.Context) {
+			recipeRoutes.GET("/:id", func(context *gin.Context) {
 				server.HandleGetRecipeById(context)
-			})
-
-			// Get recipe by item ids
-			recipeRoutes.GET("/byItem/:itemIds", func(context *gin.Context) {
-				server.HandleFindRecipesByItemNames(context)
-			})
-
-			// Add recipe to database
-			recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleAddRecipe(context)
 			})
 
 			// Delete recipe by id
 			recipeRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
 				server.HandleDeleteRecipeById(context)
+			})
+
+			// Add recipe to database
+			recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+				server.HandleAddRecipe(context)
 			})
 		}
 
@@ -129,63 +100,27 @@ func (server *TasteBuddyServer) Serve() {
 			})
 
 			// Get item by id
-			itemRoutes.GET("/byId/:id", func(context *gin.Context) {
+			itemRoutes.GET("/:id", func(context *gin.Context) {
 				server.HandleGetItemById(context)
-			})
-
-			// Add recipe to database
-			itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleAddItem(context)
 			})
 
 			// Delete item by id
 			itemRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
 				server.HandleDeleteItemById(context)
 			})
+
+			// Add recipe to database
+			itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+				server.HandleAddItem(context)
+			})
 		}
 
-		// Search routes
-		searchRoutes := v1.Group("/search")
+		// Suggestions
+		searchRoutes := v1.Group("/s")
 		{
-			// Search
+			// Get suggestions
 			searchRoutes.POST("", func(context *gin.Context) {
-				// server.HandleSearch(context)
-			})
-		}
-
-		// Discount routes
-		discountRoutes := v1.Group("/discount")
-		{
-			// Get all discounts
-			discountRoutes.GET("", func(context *gin.Context) {
-				server.HandleGetAllDiscounts(context)
-			})
-
-			// Get all discounts by city
-			discountRoutes.GET("/:city", func(context *gin.Context) {
-				server.HandleGetDiscountsByCity(context)
-			})
-		}
-
-		// Market routes
-		marketRoutes := v1.Group("/market")
-		{
-			// Get all markets
-			marketRoutes.GET("", func(context *gin.Context) {
-				server.HandleGetAllMarkets(context)
-			})
-
-			// Get all markets by city
-			marketRoutes.GET("/:city", func(context *gin.Context) {
-				server.HandleGetMarketsByCity(context)
-			})
-		}
-
-		// Admin routes
-		dbRoutes := v1.Group("/db")
-		{
-			dbRoutes.POST("/dropAll", server.CheckJWTMiddleware(AdminLevel), func(context *gin.Context) {
-				server.HandleDropAllCollections(context)
+				server.HandleSuggestion(context)
 			})
 		}
 	}

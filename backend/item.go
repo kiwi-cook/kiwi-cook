@@ -11,6 +11,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+type Item struct {
+	ID     primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name   string             `json:"name" bson:"name" binding:"required"`
+	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
+	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+}
+
 // HandleGetAllItems gets called by router
 // Calls getRecipesFromDB and handles the context
 func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
@@ -94,47 +101,23 @@ func (server *TasteBuddyServer) HandleDeleteItemById(context *gin.Context) {
 }
 
 // GetItemsCollection gets recipes from database
-func (app *TasteBuddyApp) GetItemsCollection() *mongo.Collection {
-	return app.client.Database("tastebuddy").Collection("items")
+func (app *TasteBuddyApp) GetItemsCollection() *TBCollection {
+	return app.GetDBCollection("items")
 }
 
 // GetAllItems gets all items from database
 func (app *TasteBuddyApp) GetAllItems() ([]Item, error) {
-	ctx := DefaultContext()
-
 	// get all items from database that are not deleted
-	cursor, err := app.GetItemsCollection().Find(ctx, bson.M{"deleted": bson.M{"$ne": true}})
-	if err != nil {
-		return []Item{}, app.LogError("GetAllItems", err)
-	}
 	var itemsFromDatabase []Item
-	if err = cursor.All(ctx, &itemsFromDatabase); err != nil {
-		return []Item{}, app.LogError("GetAllItems", err)
-	}
-
-	if itemsFromDatabase == nil {
-		// return void array if nil
-		itemsFromDatabase = []Item{}
-	}
-	return itemsFromDatabase, nil
+	err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{})
+	return itemsFromDatabase, err
 }
 
 // GetItemById gets item from database by id
 func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
-	ctx := DefaultContext()
-
-	items := app.GetItemsCollection().FindOne(ctx, bson.M{"_id": id})
-
-	if items.Err() != nil {
-		return Item{}, app.LogError("GetItemById", items.Err())
-	}
-
 	var itemFromDatabase Item
-	if err := items.Decode(&itemFromDatabase); err != nil {
-		return Item{}, app.LogError("GetAllItems", err)
-	}
-
-	return itemFromDatabase, nil
+	err := app.GetItemsCollection().FindOneWithDefault(bson.M{"_id": id}, &itemFromDatabase, Item{})
+	return itemFromDatabase, err
 }
 
 func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
@@ -187,14 +170,20 @@ func (app *TasteBuddyApp) AddOrUpdateItem(newItem Item) (primitive.ObjectID, err
 	return objectId, nil
 }
 
-// ExtractItems gets all items used in a recipe
-func (recipe *Recipe) ExtractItems() []Item {
-	var items []Item
-
+// GetItems gets all items used in a recipe
+func (recipe *Recipe) GetItems() []Item {
+	// add all items to map
+	var itemsMap = make(map[primitive.ObjectID]Item)
 	for _, step := range recipe.Steps {
 		for _, stepItem := range step.Items {
-			items = append(items, stepItem.Item)
+			itemsMap[stepItem.ID] = stepItem.Item
 		}
+	}
+
+	// convert map to array
+	var items []Item
+	for _, item := range itemsMap {
+		items = append(items, item)
 	}
 	return items
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"strconv"
 )
@@ -52,8 +51,8 @@ func (server *TasteBuddyServer) HandleGetAllDiscounts(context *gin.Context) {
 }
 
 // GetDiscountsCollection gets discounts collection from database
-func (app *TasteBuddyApp) GetDiscountsCollection() *mongo.Collection {
-	return app.client.Database("tastebuddy").Collection("discounts")
+func (app *TasteBuddyApp) GetDiscountsCollection() *TBCollection {
+	return app.GetDBCollection("discounts")
 }
 
 // GetDiscountsByCity gets discounts by city from database
