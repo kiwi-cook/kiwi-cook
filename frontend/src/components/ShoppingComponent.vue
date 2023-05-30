@@ -44,7 +44,8 @@
 </template>
 
 <script lang="ts">
-import {Discount} from '@/api/types';
+import {Discount} from '@/tastebuddy/types';
+import { logDebug } from '@/tastebuddy';
 import {useTasteBuddyStore} from '@/storage';
 import {
     IonAccordion,
@@ -122,7 +123,7 @@ export default defineComponent({
 
             // split by separator, e.g. ","
             const queries: string[] = query.split(",").map((q: string) => q.trim())
-            console.log(queries);
+            logDebug("queries", JSON.stringify(queries))
 
 
             // filter markets

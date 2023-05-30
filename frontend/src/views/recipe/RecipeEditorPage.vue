@@ -24,7 +24,7 @@
 <script lang="ts">
 import {computed, defineComponent, onMounted, ref, watch} from 'vue';
 import {useRoute, useRouter} from 'vue-router';
-import {Recipe} from '@/api/types';
+import {Recipe} from '@/tastebuddy/types';
 import {useTasteBuddyStore} from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 import {

@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import {BakingStepInformation, Step} from '@/api/types';
+import {BakingStepInformation, Step} from '@/tastebuddy/types';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from 'vue';
 

@@ -58,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import {Item, Recipe} from '@/api/types';
+import {Item, Recipe} from '@/tastebuddy/types';
 import {
     IonAvatar,
     IonButton,

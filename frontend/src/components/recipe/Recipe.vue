@@ -68,7 +68,7 @@ import {
     IonText
 } from '@ionic/vue';
 import {flagOutline, heart, shareOutline} from 'ionicons/icons';
-import {Item, Recipe, Step, StepItem} from '@/api/types';
+import {Item, Recipe, Step, StepItem} from '@/tastebuddy/types';
 import SmallItemContainer from '../item/SmallItemContainer.vue';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";

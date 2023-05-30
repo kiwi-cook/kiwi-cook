@@ -20,13 +20,18 @@ func (server *TasteBuddyServer) Serve() {
 	////////////////////////////////////////////////////////////////////////
 	// Set up gin
 	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:8080"},
+	corsConfig := cors.Config{
+		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
-	}))
+	}
+	if server.mode == DEV {
+		corsConfig.AllowAllOrigins = false
+		corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+	}
+	r.Use(cors.New(corsConfig))
 	r.Use(server.CheckSessionTokenMiddleware())
 	r.Use(server.GenerateJWTMiddleware())
 

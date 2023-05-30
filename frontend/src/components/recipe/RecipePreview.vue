@@ -19,7 +19,7 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
-import {Recipe, Step} from "@/api/types";
+import {Recipe, Step} from "@/tastebuddy/types";
 import {IonCard, IonCardContent} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";

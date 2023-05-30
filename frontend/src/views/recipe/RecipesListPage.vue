@@ -1,5 +1,5 @@
 <template>
-    <ion-page>
+    <ion-page id="recipe-list-page">
         <ion-header>
             <ion-toolbar color="primary">
                 <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
@@ -12,14 +12,6 @@
 
         <ion-content :fullscreen="true">
             <div class="content">
-                <ion-header collapse="condense">
-                    <ion-toolbar>
-                        <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
-                        <ion-title>Recipes</ion-title>
-                    </ion-toolbar>
-                </ion-header>
-
-
                 <RecipeList :filter="filterInput"/>
             </div>
         </ion-content>

@@ -14,7 +14,7 @@ import {IonInfiniteScroll, IonInfiniteScrollContent, IonList} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {arrowDown} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
-import {Recipe} from '@/api/types';
+import {Recipe} from '@/tastebuddy/types';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 

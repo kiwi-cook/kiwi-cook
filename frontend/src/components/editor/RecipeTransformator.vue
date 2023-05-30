@@ -36,8 +36,9 @@ import {useTasteBuddyStore} from '@/storage';
 import {deepCopy} from '@/utility/util';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {sendToAPI} from "@/api";
-import {API_ROUTE} from "@/api/constants";
+import {sendToAPI} from "@/tastebuddy";
+import {API_ROUTE} from "@/tastebuddy/constants";
+import { logDebug } from '@/tastebuddy';
 
 export default defineComponent({
     name: 'RecipeTransformator',
@@ -50,7 +51,7 @@ export default defineComponent({
     components: {
         IonTextarea, IonGrid, IonRow, IonCol, IonButton
     },
-    setup(props: { recipe: any }) {
+    setup(props: any) {
         const {recipe} = toRefs(props);
 
         type FlatSchemaType = {
@@ -86,7 +87,6 @@ export default defineComponent({
          * @param targetPath the path to the new value
          */
         const moveValue = (root: any, sourcePath: string, targetPath: string): boolean => {
-            console.debug(`Move value from ${sourcePath} to ${targetPath}`)
             // source
             const sourceKeys = sourcePath.split(".").slice(1)
             let sourceParent: any = root
@@ -103,7 +103,6 @@ export default defineComponent({
             for (let i = 0; i < sourceKeys.length; i++) {
                 sourceKey = sourceKeys[i]
                 if (!Object.hasOwn(sourceParent, sourceKey)) {
-                    console.debug('Parent', sourceParent, 'has no key', sourceKey)
                     return false
                 }
 
@@ -112,7 +111,6 @@ export default defineComponent({
                 if (typeof sourceObject === 'object' && i + 1 < sourceKeys.length) {
                     sourceParent = sourceObject;
                 }
-                console.debug('Parent', deepCopy(sourceParent))
             }
 
             // Find the target parent and key
@@ -146,7 +144,7 @@ export default defineComponent({
 
             for (const element of schemaWithModifiedEntries) {
                 const [fromPath, toPath] = element
-                console.log(moveValue(data, fromPath, toPath))
+                logDebug('transformDataToSchema', `move ${fromPath} to ${toPath}`)
             }
             return data
         }

@@ -3,6 +3,7 @@
 import {State} from "@/storage";
 import {descriptionToSteps} from "@/utility/recipeParser";
 import {Store} from "vuex";
+import { log, logDebug } from ".";
 
 // types for recipe
 
@@ -327,7 +328,7 @@ export class Recipe {
      * @param id
      */
     public static saveById(store: Store<State>, id: string): void {
-        console.debug('[Recipe] saveById', id)
+        logDebug('saveById', id)
         store.dispatch('saveRecipeById', id)
     }
 
@@ -344,13 +345,17 @@ export class Recipe {
         return this._id ?? this._tmpId as string
     }
 
+    public getDuration(): number {
+        return this.steps.reduce((acc, step) => acc + (step.duration ?? 0), 0)
+    }
+
     /**
      * Updates the recipe in the store
      * @param store
      * @returns the recipe to allow chaining
      */
     public update(store: Store<State>): Recipe {
-        console.debug('[Recipe] update', this.getId())
+        logDebug('update', this.getId())
         store.commit('updateRecipe', this)
         return this
     }
@@ -361,7 +366,7 @@ export class Recipe {
      * @returns the recipe to allow chaining
      */
     public save(store: Store<State>): Recipe {
-        console.debug('[Recipe] save', this.getId())
+        logDebug('save', this.getId())
         store.dispatch('saveRecipe', this)
         return this
     }
@@ -371,7 +376,7 @@ export class Recipe {
      * @param store
      */
     public delete(store: Store<State>): void {
-        console.debug('[Recipe] delete', this.getId())
+        logDebug('delete', this.getId())
         store.dispatch('deleteRecipe', this)
     }
 
@@ -435,8 +440,6 @@ export class Recipe {
             // update the item at the specified index
             this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
-
-        console.debug('addItem', {stepIndex, itemIndex, item, recipe: this})
         return {item, recipe: this};
     }
 

@@ -34,7 +34,7 @@ import {
     IonText
 } from '@ionic/vue';
 import {defineComponent, PropType} from "vue";
-import {Step} from "@/api/types";
+import {Step} from "@/tastebuddy/types";
 import SmallItemContainer from "@/components/item/SmallItemContainer.vue";
 import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 
