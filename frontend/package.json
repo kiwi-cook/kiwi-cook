@@ -9,26 +9,26 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@capacitor/android": "5.0.0",
+    "@capacitor/android": "5.0.3",
     "@capacitor/app": "5.0.0",
-    "@capacitor/core": "5.0.0",
-    "@capacitor/haptics": "5.0.0",
+    "@capacitor/core": "5.0.4",
+    "@capacitor/haptics": "5.0.1",
     "@capacitor/ios": "5.0.0",
-    "@capacitor/keyboard": "5.0.0",
+    "@capacitor/keyboard": "5.0.2",
     "@capacitor/status-bar": "5.0.0",
-    "@ionic/storage": "^3.0.6",
-    "@ionic/vue": "^7.0.4",
-    "@ionic/vue-router": "^7.0.5",
-    "core-js": "^3.30.1",
+    "@ionic/storage": "^4.0.0",
+    "@ionic/vue": "^7.0.6",
+    "@ionic/vue-router": "^7.0.9",
+    "core-js": "^3.30.2",
     "ionicons": "^7.0.0",
     "register-service-worker": "^1.7.2",
-    "vue": "^3.2.47",
+    "vue": "^3.3.4",
     "vue-router": "^4.1.6",
     "vuex": "^4.1.0"
   },
   "devDependencies": {
     "@capacitor/cli": "5.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.59.2",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
     "@typescript-eslint/parser": "^5.59.1",
     "@vue/cli-plugin-babel": "~5.0.8",
     "@vue/cli-plugin-eslint": "~5.0.8",
@@ -38,8 +38,8 @@
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-typescript": "^11.0.3",
     "cypress": "^12.11.0",
-    "eslint": "^8.39.0",
-    "eslint-plugin-vue": "^9.11.0",
+    "eslint": "^8.40.0",
+    "eslint-plugin-vue": "^9.12.0",
     "typescript": "^5.0.4"
   }
 }
