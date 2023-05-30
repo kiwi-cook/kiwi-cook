@@ -8,7 +8,7 @@
 
 1. Clone this repository
 2. `cd backend`
-3. `go run .`
+3. `go run . serve`
   
 ### Frontend
 
