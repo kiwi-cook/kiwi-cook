@@ -207,7 +207,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
             is: (token: string) => isIngredient(token),
             action: (token: string, nextToken: string) => {
                 const ingredient = normalizeIngredient(token);
-                stepItem.item.name = stepItem.item.name === '' ? ingredient : `${stepItem.item.name} ${ingredient}`;
+                stepItem.name = stepItem.name === '' ? ingredient : `${stepItem.name} ${ingredient}`;
                 if (!isIngredient(nextToken)) {
                     console.debug(deepCopy(stepItem))
                     stepItems.push(deepCopy(stepItem));

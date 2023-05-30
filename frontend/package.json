@@ -2,7 +2,7 @@
   "name": "taste-buddy",
   "version": "0.0.1",
   "private": true,
-  "description": "An Ionic project",
+  "description": "Taste Buddy helps you cook with what you have in your fridge",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",

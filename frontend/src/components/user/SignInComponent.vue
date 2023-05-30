@@ -5,17 +5,14 @@
         </ion-card-header>
         <ion-card-content>
             <ion-item>
-                <ion-input v-model="username" label="Username" label-placement="floating" type="text"
-                           autocomplete="username" :clear-input="true"/>
+                <ion-input v-model="username" :clear-input="true" autocomplete="username" label="Username"
+                           label-placement="floating" type="text"/>
             </ion-item>
             <ion-item>
-                <ion-input v-model="password" label="Password" label-placement="floating"
-                           autocomplete="current-password" type="password"/>
+                <ion-input v-model="password" autocomplete="current-password" label="Password"
+                           label-placement="floating" type="password"/>
             </ion-item>
-            <ion-button expand="block" @click="authenticate()" :disabled="isDisabled">Login</ion-button>
-            <p class="signup-link">Don't have an account?
-                <router-link to="/register">Sign up</router-link>
-            </p>
+            <ion-button :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</ion-button>
         </ion-card-content>
     </ion-card>
 </template>
@@ -28,7 +25,7 @@ import {useTasteBuddyStore} from '@/storage';
 import {useRoute, useRouter} from 'vue-router';
 
 export default {
-    name: 'Login',
+    name: 'SignIn',
     components: {
         IonButton,
         IonCard,

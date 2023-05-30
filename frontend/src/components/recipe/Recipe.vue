@@ -29,7 +29,7 @@
             </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <SmallItemContainer :items="ingredients"/>
+            <SmallItemList :items="ingredients"/>
         </ion-card-content>
     </ion-card>
 
@@ -43,20 +43,6 @@
             <SmallItemContainer :items="equipment"/>
         </ion-card-content>
     </ion-card>
-
-    <!-- This is not yet implemented -->
-    <!-- <ion-card>
-        <ion-card-header>
-            <ion-card-title >
-                Nutritional Values
-            </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <ion-item>
-
-            </ion-item>
-        </ion-card-content>
-    </ion-card> -->
 
     <ion-item v-if="steps?.length > 0" lines="none">
         <ion-text color="primary">
@@ -86,6 +72,7 @@ import {Item, Recipe, Step, StepItem} from '@/api/types';
 import SmallItemContainer from '../item/SmallItemContainer.vue';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
+import SmallItemList from "@/components/item/SmallItemList.vue";
 
 export default defineComponent({
     title: 'Recipe',
@@ -96,10 +83,11 @@ export default defineComponent({
         },
     },
     components: {
+        SmallItemList,
         RecipeHero, SmallItemContainer, RecipeStep,
         IonIcon, IonButton, IonItem, IonList, IonText, IonCard, IonCardContent, IonCardHeader, IonCardTitle
     },
-    setup(props: { recipe: Recipe }) {
+    setup(props: any) {
         const {recipe} = toRefs(props);
 
         const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);

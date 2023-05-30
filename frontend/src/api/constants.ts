@@ -8,7 +8,7 @@ async function checkURL(URL: string) {
 }
 
 // Try to find a reachable API_URL
-const possibleAPI_URLS = ['http://localhost:8081/api/v1', 'http://taste-buddy.sh1.hidora.net:8080/api/v1']
+const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app/api/v1', 'http://localhost:8081/api/v1']
 export const API_URL = possibleAPI_URLS.find(checkURL) ?? ''
 if (API_URL === '') {
     console.error('No API_URL found!')
@@ -17,6 +17,7 @@ if (API_URL === '') {
 export enum API_ROUTE {
     POST_AUTH,
     GET_AUTH,
+    POST_LOGOUT,
     POST_REGISTER,
     GET_RECIPES,
     ADD_RECIPE,
@@ -37,6 +38,7 @@ type API_ROUTE_OPTIONS = {
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.POST_AUTH]: {url: '/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded'},
+    [API_ROUTE.POST_LOGOUT]: {url: '/auth', method: 'POST', contentType: 'application/json'},
     [API_ROUTE.GET_AUTH]: {url: '/auth', method: 'GET', contentType: 'application/json'},
     [API_ROUTE.POST_REGISTER]: {
         url: '/user/register',

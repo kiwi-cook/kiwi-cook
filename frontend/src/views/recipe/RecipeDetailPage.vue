@@ -1,5 +1,5 @@
 <template>
-    <ion-page>
+    <ion-page id="recipe-detail-page">
         <ion-header>
             <ion-toolbar color="primary">
                 <ion-title>{{ recipe?.name }}</ion-title>
@@ -17,22 +17,29 @@
                     <RecipeComponent :recipe="recipe"/>
                 </template>
             </div>
+            <ion-fab slot="fixed" horizontal="start" vertical="bottom">
+                <ion-fab-button color="tertiary" @click="goBack()">
+                    <ion-icon :icon="arrowBack"/>
+                </ion-fab-button>
+            </ion-fab>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent} from 'vue';
-import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
+import {IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useTasteBuddyStore} from "@/storage";
-import {useRoute} from 'vue-router';
+import {useRoute, useRouter} from 'vue-router';
 import {Recipe} from '@/api/types';
+import {arrowBack} from "ionicons/icons";
 
 
 export default defineComponent({
     title: 'RecipeOfTheDayPage',
     components: {
+        IonFabButton, IonIcon, IonFab,
         RecipeComponent,
         IonPage, IonContent, IonHeader, IonToolbar, IonTitle
     },
@@ -42,8 +49,13 @@ export default defineComponent({
 
         const store = useTasteBuddyStore()
         const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesById[recipeId.value])
+
+        const router = useRouter()
+        const goBack = () => router.go(-1)
+
         return {
-            recipe
+            recipe,
+            goBack, arrowBack
         }
     }
 });

@@ -2,7 +2,7 @@
     <ion-item class="small-item" lines="none">
         <ion-img :src="itemImgUrl ?? ''" class="small-item-img"/>
         <ion-text class="small-item-name">{{ itemName }}</ion-text>
-        <ion-chip v-if="itemAmountUnit !== ''">{{ itemAmountUnit }}</ion-chip>
+        <ion-chip v-if="itemAmountUnit !== ''" color="light">{{ itemAmountUnit }}</ion-chip>
     </ion-item>
 </template>
 
@@ -24,8 +24,8 @@ export default defineComponent({
     },
     setup(props: any) {
         const {item} = toRefs(props);
-        const itemImgUrl = computed(() => item.value instanceof StepItem ? item.value?.item.imgUrl : (item.value as Item)?.imgUrl);
-        const itemName = computed(() => item.value instanceof StepItem ? item.value?.item.name : (item.value as Item)?.name);
+        const itemImgUrl = computed(() => item.value instanceof StepItem ? item.value?.imgUrl : (item.value as Item)?.imgUrl);
+        const itemName = computed(() => item.value instanceof StepItem ? item.value?.name : (item.value as Item)?.name);
         const itemAmountUnit = computed(() => {
             const amount = item.value instanceof StepItem ? item.value?.amount : 0
             const unit = item.value instanceof StepItem ? item.value?.unit : ''
@@ -50,15 +50,14 @@ export default defineComponent({
 }
 
 .small-item-img::part(image) {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     margin-right: 10px;
 }
 
 ion-text.small-item-name {
-    font-size: 1.2rem;
-    font-weight: 500;
+    font-size: 1rem;
     margin: 0;
 }
 </style>

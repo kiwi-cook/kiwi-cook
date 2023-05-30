@@ -29,7 +29,11 @@ export default defineComponent({
     props: {
         modelValue: {
             type: Object,
-            required: true
+            required: false
+        },
+        item: {
+            type: Object,
+            required: false
         },
         customMapper: {
             type: Function as PropType<(item: any) => any>,
@@ -54,17 +58,26 @@ export default defineComponent({
     components: {
         IonLabel, IonInput, IonList, IonItem, IonButton
     },
-    emits: ['update:modelValue', 'addItem'],
-    setup(props: { modelValue: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: {
+    emits: ['update:modelValue', 'addItem', 'selectItem'],
+    setup(props: { modelValue: any, item: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: {
         emit: any
     }) {
-        const {modelValue, customMapper, items, maxItems} = toRefs(props)
+        const {modelValue, item, customMapper, items, maxItems} = toRefs(props)
 
-        const inputValue: Ref<string> = ref(customMapper.value?.(modelValue.value))
+        // define the input value
+        const inputValue: Ref<string> = ref('')
         // update the input value when the value coming from the parent changes
         watch(modelValue, () => {
-            inputValue.value = customMapper.value?.(modelValue.value)
-        })
+            if (modelValue.value) {
+                inputValue.value = customMapper.value?.(modelValue.value)
+            }
+        }, {immediate: true})
+        watch(item, () => {
+            if (item.value) {
+                inputValue.value = customMapper.value?.(item.value)
+            }
+        }, {immediate: true})
+
         const filteredItems: Ref<any[]> = ref(items.value.slice(0, maxItems.value))
 
         // show the items list only if the input value is not empty
@@ -93,6 +106,8 @@ export default defineComponent({
             inputValue.value = customMapper.value?.(selectedItem)
             showItemsList.value = false
             isTemporaryInput.value = false
+
+            ctx.emit('selectItem', selectedItem)
 
             // v-model
             // emit the selected item to the parent component and update the item

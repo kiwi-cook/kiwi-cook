@@ -2,7 +2,7 @@
     <ion-card class="recipe-preview-card">
         <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
         <ion-card-content>
-            <SmallItemContainer :items="recipe.getItems()"/>
+            <SmallItemList :items="recipe.getItems()"/>
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
@@ -23,7 +23,7 @@ import {Recipe, Step} from "@/api/types";
 import {IonCard, IonCardContent} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
-import SmallItemContainer from "@/components/item/SmallItemContainer.vue";
+import SmallItemList from "@/components/item/SmallItemList.vue";
 
 export default defineComponent({
     name: 'RecipePreview',
@@ -34,7 +34,7 @@ export default defineComponent({
         }
     },
     components: {
-        SmallItemContainer,
+        SmallItemList,
         RecipeHero, RecipeLink,
         IonCard, IonCardContent
     },

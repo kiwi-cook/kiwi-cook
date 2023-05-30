@@ -15,7 +15,8 @@
                         <ion-input :maxlength="40" :value="mutableItem.name"
                                    label="Name"
                                    label-placement="floating" placeholder="e.g. Baking powder"
-                                   type="text" @keyup.enter="mutableItem.name = $event.target.value" @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
+                                   type="text" @keyup.enter="mutableItem.name = $event.target.value"
+                                   @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
                     </div>
                     <div slot="end">
                         <ion-button color="danger" fill="solid" @click="removeItem()">

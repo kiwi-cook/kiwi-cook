@@ -45,7 +45,6 @@ export default defineComponent({
         })
 
 
-
         /**
          * Filter the ingredients
          */
