@@ -25,11 +25,6 @@ type TBCollection struct {
 	hasError bool
 }
 
-type TBSingleResult struct {
-	*mongo.SingleResult
-	hasError bool
-}
-
 func (app *TasteBuddyApp) GetDBCollection(collectionName string) *TBCollection {
 	if app.client == nil {
 		app.LogError("GetDBCollection", errors.New("mongoDB client is nil"))
@@ -94,15 +89,49 @@ func (collection *TBCollection) All(filter interface{}, results interface{}) err
 	return collection.AllWithDefault(filter, results, nil)
 }
 
-func (app *TasteBuddyApp) ConnectToDatabase(uri string) (*TasteBuddyDatabase, error) {
-	// create new mongo client
-	app.Log("ConnectToDatabase", "Connecting to Database at "+uri+" ...")
+type DatabaseAuthMode int
 
-	credential := options.Credential{
-		AuthMechanism: "MONGODB-X509",
+const (
+	AuthModePW = iota
+	AuthModeX509
+)
+
+type DatabaseAuth struct {
+	DatabaseAuthMode DatabaseAuthMode
+	URI              string
+	Username         string
+	Password         string
+}
+
+func DatabaseAuthPW(uri string, username string, password string) DatabaseAuth {
+	return DatabaseAuth{AuthModePW, uri, username, password}
+}
+
+func DatabaseAuthX509(uri string) DatabaseAuth {
+	return DatabaseAuth{AuthModeX509, uri, "", ""}
+}
+
+func (app *TasteBuddyApp) ConnectToDatabase(databaseAuth DatabaseAuth) (*TasteBuddyDatabase, error) {
+	URI := databaseAuth.URI
+
+	// create new mongo client
+	app.Log("ConnectToDatabase", "Connecting to Database at "+URI+" ...")
+
+	credential := options.Credential{}
+	switch databaseAuth.DatabaseAuthMode {
+	case AuthModePW:
+		credential = options.Credential{
+			Username:      databaseAuth.Username,
+			Password:      databaseAuth.Password,
+			AuthMechanism: "SCRAM-SHA-1",
+		}
+	case AuthModeX509:
+		credential = options.Credential{
+			AuthMechanism: "MONGODB-X509",
+		}
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri).SetAuth(credential))
+	client, err := mongo.NewClient(options.Client().ApplyURI(URI).SetAuth(credential))
 	if err != nil {
 		return nil, app.LogError("ConnectToDatabase", err)
 	}

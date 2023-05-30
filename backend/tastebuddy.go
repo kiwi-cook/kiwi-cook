@@ -29,7 +29,7 @@ func (app *TasteBuddyApp) Default() *TasteBuddyApp {
 	return app.
 		SetupViper().
 		SetLogger("default").
-		SetDatabase(nil).
+		SetDatabase().
 		SetJWTKeys()
 }
 
@@ -59,20 +59,30 @@ func (app *TasteBuddyApp) SetLogger(logLevel string) *TasteBuddyApp {
 }
 
 // SetDatabase initializes the database connection and registers the client
-func (app *TasteBuddyApp) SetDatabase(dbConnectionString *string) *TasteBuddyApp {
+func (app *TasteBuddyApp) SetDatabase() *TasteBuddyApp {
 	app.LogDebug("SetDatabase", "setting up database connection")
 
-	DbConnectionString := ""
-	if viper.GetString("DB_CONNSTRING") != "" && dbConnectionString == nil {
-		DbConnectionString = viper.GetString("DB_CONNSTRING")
-	} else if dbConnectionString != nil {
-		DbConnectionString = *dbConnectionString
+	// Check if DB_URI is set
+	if viper.GetString("DB_URI") == "" {
+		app.FatalError("SetDatabase", errors.New("DB_URI not set"))
+	}
+	URI := viper.GetString("DB_URI")
+
+	// Initialize database authentication
+	var databaseAuth DatabaseAuth
+
+	if viper.GetString("DB_USER") != "" && viper.GetString("DB_PASSWORD") != "" {
+		// Username and password authentication
+		username := viper.GetString("DB_USER")
+		password := viper.GetString("DB_PASSWORD")
+		databaseAuth = DatabaseAuthPW(URI, username, password)
 	} else {
-		app.FatalError("SetDatabase", errors.New("no database connection string provided"))
+		// X509 authentication
+		databaseAuth = DatabaseAuthX509(URI)
 	}
 
 	// Connect to database
-	databaseClient, err := app.ConnectToDatabase(DbConnectionString)
+	databaseClient, err := app.ConnectToDatabase(databaseAuth)
 	if err != nil {
 		app.FatalError("SetDatabase", err)
 	}
