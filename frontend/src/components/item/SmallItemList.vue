@@ -11,7 +11,7 @@
 <script lang="ts">
 import SmallItem from "@/components/item/SmallItem.vue";
 import {defineComponent, PropType} from "vue";
-import {Item, StepItem} from "@/api/types";
+import {Item, StepItem} from "@/tastebuddy/types";
 
 export default defineComponent({
     name: 'SmallItemList',

@@ -1,7 +1,7 @@
 import {createRouter, createWebHistory} from '@ionic/vue-router';
 import {Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
-import {checkAuthMiddleware} from "@/router/middleware";
+import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
 import {State} from '@/storage';
 import {Store} from 'vuex';
 
@@ -65,6 +65,7 @@ export function createTasteBuddyRouter(store: Store<State>): Router {
     })
 
     router.beforeEach((to, from, next) => {
+        logMiddleware(to, from);
         checkAuthMiddleware(to, from, next, store, '/login');
     })
 

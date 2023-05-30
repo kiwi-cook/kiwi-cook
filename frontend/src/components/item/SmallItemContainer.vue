@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import {Item, StepItem} from '@/api/types';
+import {Item, StepItem} from '@/tastebuddy/types';
 import {PropType} from 'vue';
 import SmallItem from '@/components/item/SmallItem.vue';
 

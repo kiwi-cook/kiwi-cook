@@ -7,7 +7,7 @@
 </template>
 
 <script lang="ts">
-import {Item, StepItem} from '@/api/types';
+import {Item, StepItem} from '@/tastebuddy/types';
 import {IonChip, IonImg, IonItem, IonText} from '@ionic/vue';
 import {computed, defineComponent, PropType, toRefs} from 'vue';
 

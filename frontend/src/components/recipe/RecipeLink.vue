@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Recipe} from "@/api/types";
+import {Recipe} from "@/tastebuddy/types";
 import {IonButton} from "@ionic/vue";
 
 export default defineComponent({

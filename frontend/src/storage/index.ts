@@ -6,9 +6,9 @@ import {App, InjectionKey} from 'vue'
 import {createStore, Store, useStore as baseUseStore} from 'vuex';
 
 // Types
-import {Discount, Item, Recipe} from '@/api/types';
-import {API_ROUTE} from '@/api/constants';
-import {APIResponse, presentToast, sendToAPI} from '@/api';
+import {Discount, Item, Recipe} from '@/tastebuddy/types';
+import {API_ROUTE} from '@/tastebuddy/constants';
+import {APIResponse, log, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
 
 
 // Type the store to use benefits of TypeScript
@@ -111,6 +111,7 @@ export function createTasteBuddyStore() {
              * @param commit
              */
             sessionAuth({commit}) {
+                logDebug('sessionAuth', 'logging in')
                 return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
                     .then((apiResponse: APIResponse<string>) => {
                         commit('setAuthenticated', !apiResponse.error)
@@ -124,6 +125,7 @@ export function createTasteBuddyStore() {
              * @returns true if the authentication was successful, false otherwise
              */
             basicAuth({commit}, payload: { username: string, password: string }): Promise<boolean> {
+                logDebug('basicAuth', 'logging in')
                 const {username, password} = payload
                 return sendToAPI<string>(API_ROUTE.POST_AUTH, {
                     headers: [
@@ -140,6 +142,7 @@ export function createTasteBuddyStore() {
                 })
             },
             logout({commit}) {
+                logDebug('logout', 'logging out')
                 return sendToAPI<string>(API_ROUTE.POST_LOGOUT, {errorMessage: 'Could not log out'})
                     .then((apiResponse: APIResponse<string>) => {
                         commit('setAuthenticated', false)
@@ -151,6 +154,7 @@ export function createTasteBuddyStore() {
              * @param commit
              */
             fetchRecipes({commit}) {
+                logDebug('fetchRecipes', 'fetching recipes')
                 return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
                     .then((apiResponse: APIResponse<Recipe[]>) => {
                         // map the recipes JSON to Recipe objects
@@ -162,15 +166,16 @@ export function createTasteBuddyStore() {
                     });
             },
             saveRecipeById({getters}, recipeId: string) {
+                logDebug('saveRecipeById', recipeId)
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
-                    console.error('Recipe not found: ', recipeId)
+                    logError('Recipe not found: ', recipeId)
                     return
                 }
                 this.dispatch('saveRecipe', recipe)
             },
             saveRecipe({commit}, recipe: Recipe) {
-                console.log('Saving recipe: ', recipe)
+                logDebug('saveRecipe', recipe)
                 commit('updateRecipe', recipe)
                 return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                     body: recipe,
@@ -182,6 +187,7 @@ export function createTasteBuddyStore() {
                 });
             },
             deleteRecipe({commit}, recipe: Recipe) {
+                logDebug('deleteRecipe', recipe)
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
                     return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
@@ -193,6 +199,7 @@ export function createTasteBuddyStore() {
                 }
             },
             fetchItems({commit}) {
+                logDebug('fetchItems', 'fetching items')
                 return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
                     .then((apiResponse: APIResponse<Item[]>) => {
                         // map the items JSON to Item objects
@@ -204,6 +211,7 @@ export function createTasteBuddyStore() {
                     });
             },
             saveItem({commit}, item: Item) {
+                logDebug('saveItem', item)
                 commit('updateItem', item)
                 return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
                     body: item,
@@ -216,6 +224,7 @@ export function createTasteBuddyStore() {
                     });
             },
             deleteItem({commit}, item: Item) {
+                logDebug('deleteItem', item)
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
                     return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
@@ -227,6 +236,7 @@ export function createTasteBuddyStore() {
                 }
             },
             fetchDiscounts({commit}, city: string) {
+                logDebug('fetchDiscounts', 'fetching discounts')
                 return sendToAPI<Discount[]>(API_ROUTE.GET_DISCOUNTS, {
                     formatObject: {CITY: city}
                 }).then((apiResponse: APIResponse<Discount[]>) => {
@@ -236,6 +246,7 @@ export function createTasteBuddyStore() {
                 })
             },
             mapRecipeIdsToItemIds({commit, getters}) {
+                logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
                 commit('mapRecipeIdsToItemIds', getters.getRecipes)
             }
         },

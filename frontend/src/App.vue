@@ -8,6 +8,8 @@
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
 import {defineComponent} from 'vue';
 import {useTasteBuddyStore} from './storage';
+import { logClick, logDebug } from './tastebuddy';
+import { API_URL } from './tastebuddy/constants';
 
 export default defineComponent({
     name: 'App',
@@ -20,7 +22,6 @@ export default defineComponent({
         const store = useTasteBuddyStore();
         store.dispatch('fetchRecipes')
         store.dispatch('fetchItems')
-        store.dispatch('sessionAuth')
 
         // Use matchMedia to check the user preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -37,6 +38,10 @@ export default defineComponent({
             document.body.classList.toggle('dark', shouldAdd);
         }
 
+        // Log everything
+        document.getElementsByTagName('body')[0].addEventListener('click', (e) => {
+            logClick(e.target)
+        })
         return {}
     }
 });

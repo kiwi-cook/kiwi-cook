@@ -1,4 +1,4 @@
-import {Step, StepItem} from '@/api/types';
+import {Step, StepItem} from '@/tastebuddy/types';
 import {deepCopy} from './util';
 
 enum State {
@@ -209,7 +209,6 @@ export const descriptionToItems = (description: string): StepItem[] => {
                 const ingredient = normalizeIngredient(token);
                 stepItem.name = stepItem.name === '' ? ingredient : `${stepItem.name} ${ingredient}`;
                 if (!isIngredient(nextToken)) {
-                    console.debug(deepCopy(stepItem))
                     stepItems.push(deepCopy(stepItem));
                     stepItem = deepCopy(new StepItem());
                 }
@@ -227,8 +226,6 @@ export const descriptionToItems = (description: string): StepItem[] => {
         const token = tokens[i];
 
         if (states[state].is(token)) {
-            console.debug(`token: ${token}`, `currentState: ${state}`)
-
             // execute action for the current state
             states[state].action?.(token, tokens[i + 1] ?? '');
 
@@ -239,7 +236,6 @@ export const descriptionToItems = (description: string): StepItem[] => {
 
             // check if the token next token is valid for the current state
             state = states[state].next.find((nextState: State) => {
-                console.debug(`possible nextState: ${nextState}`, states[nextState].is(tokens[i + 1] ?? ''));
                 return states[nextState].is(tokens[i + 1] ?? '')
             }) ?? State.Ignore;
         } else {

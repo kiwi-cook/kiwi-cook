@@ -4,7 +4,7 @@
 </template>
 
 <script lang="ts">
-import {Step} from '@/api/types';
+import {Step} from '@/tastebuddy/types';
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from 'vue';
 import BakingStepInfo from '../step/StepInfoBaking.vue';
 

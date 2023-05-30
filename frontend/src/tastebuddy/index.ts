@@ -1,6 +1,6 @@
-import {toastController} from '@ionic/vue';
-import {API_ROUTE, API_ROUTES, API_URL} from './constants';
-import {Discount, Item, Market, Recipe} from './types';
+import { toastController } from '@ionic/vue';
+import { API_ROUTE, API_ROUTES, API_URL } from './constants';
+import { Discount, Item, Market, Recipe } from './types';
 
 type APIResponseBody = Recipe[] | Item[] | Discount[] | Market[] | string
 
@@ -25,6 +25,44 @@ export const presentToast = async (message: string, duration = 1500) => {
         position: 'top'
     });
     await (await toast).present()
+}
+
+/**
+ * Log a message to the console
+ * @param functionName the name of the function
+ * @param message the message to log
+ */
+export const log = (functionName: string, message?: any) => {
+    console.log(`[${functionName}]:`, message)
+}
+/**
+ * Debug a message to the console
+ * @param functionName the name of the function
+ * @param message the message to log
+ */
+export const logDebug = (functionName: string, message: any) => {
+    console.debug(`[${functionName}]:`, message)
+}
+
+/**
+ * Log a click to the console
+ * @param element 
+ */
+export const logClick = (element: any) => {
+    // logDebug('click', element)
+}
+
+/**
+ * Log an error to the console
+ * @param functionName the name of the function that threw the error
+ * @param error the error to log
+ */
+export const logError = (functionName: string, error: any) => {
+    if (error instanceof Error) {
+        console.error(`[${functionName}]: ${error.message}`)
+    } else {
+        console.error(`[${functionName}]:`, error)
+    }
 }
 
 
@@ -69,37 +107,35 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
             headers.append(header.key, header.value);
         }
     }
-    headers.append('Host', window.location.host)
 
     const fetchOptions: RequestInit = {
         method: API_ROUTES[route].method ?? 'GET',
         headers: headers,
-        credentials: 'include'
-    }
-
-    if (options?.body) {
-        fetchOptions.body = JSON.stringify(options.body)
+        credentials: API_ROUTES[route].credentials ?? undefined,
+        body: options?.body ? JSON.stringify(options.body) : null
     }
 
     // call fetch
-    return fetch(url, fetchOptions)
-        .then(async (response: Response) => {
-            // set cookie if it is in the response
-            if (response.headers.has('set-cookie')) {
-                const cookie = response.headers.get('set-cookie')
-                if (cookie) {
-                    document.cookie = cookie
-                }
+    logDebug('sendToAPI ' + route, fetchOptions)
+    return fetch(url, fetchOptions).then(async (response: Response) => {
+        // set cookie if it is in the response
+        if (response.headers.has('set-cookie')) {
+            const cookie = response.headers.get('set-cookie')
+            if (cookie) {
+                document.cookie = cookie
             }
+        }
 
-            // return a promise that resolves to the response
-            return response.json().then((json: APIResponse<R>) => {
-                return json
-            })
+        return response
+    })
+        .then((response) => {
+            const jsonResponse = response.json()
+            logDebug('sendToAPI ' + route, jsonResponse)
+            return jsonResponse
         })
         .catch(error => {
             // log the error
-            console.error(error)
+            logError('sendToAPI ' + route, error)
 
             // present a toast to the user
             if (typeof options?.errorMessage !== 'undefined') {

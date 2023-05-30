@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import {Item} from '@/api/types';
+import {Item} from '@/tastebuddy/types';
 import {useTasteBuddyStore} from '@/storage';
 import {IonButton, IonCheckbox, IonItem, IonLabel, IonList} from '@ionic/vue';
 import {computed, defineComponent, ref, toRefs, watch} from 'vue';

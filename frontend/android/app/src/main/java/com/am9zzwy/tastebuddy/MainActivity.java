@@ -1,4 +1,4 @@
-package io.ionic.starter;
+package com.am9zzwy.tastebuddy;
 
 import com.getcapacitor.BridgeActivity;
 

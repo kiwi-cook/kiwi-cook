@@ -1,6 +1,10 @@
 {
-	"appId": "io.ionic.starter",
+	"appId": "com.am9zzwy.tastebuddy",
 	"appName": "Taste-Buddy",
 	"webDir": "dist",
-	"bundledWebRuntime": false
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		}
+	}
 }

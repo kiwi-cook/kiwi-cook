@@ -15,7 +15,7 @@
                 </div>
                 <div class="flex">
                     <ion-chip color="light">
-                        <ion-label>{{ recipe?.props.duration ?? 0 }} minutes preparation time</ion-label>
+                        <ion-label>{{ recipe?.getDuration() }} minutes preparation time</ion-label>
                     </ion-chip>
                     <ion-chip color="light">
                         created on {{ formatDate(recipe?.props.createdAt) }}
@@ -28,7 +28,7 @@
 
 <script lang="ts">
 import {defineComponent, PropType} from "vue";
-import {Recipe} from "@/api/types";
+import {Recipe} from "@/tastebuddy/types";
 import {IonChip, IonImg, IonLabel} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
 

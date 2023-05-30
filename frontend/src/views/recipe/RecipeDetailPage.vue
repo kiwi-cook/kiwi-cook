@@ -6,7 +6,7 @@
             </ion-toolbar>
         </ion-header>
 
-        <ion-content>
+        <ion-content :fullscreen="true">
             <div class="content">
                 <ion-header collapse="condense">
                     <ion-toolbar>
@@ -32,7 +32,7 @@ import {IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle,
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useTasteBuddyStore} from "@/storage";
 import {useRoute, useRouter} from 'vue-router';
-import {Recipe} from '@/api/types';
+import {Recipe} from '@/tastebuddy/types';
 import {arrowBack} from "ionicons/icons";
 
 

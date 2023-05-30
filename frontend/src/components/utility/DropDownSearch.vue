@@ -1,7 +1,7 @@
 <template>
     <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :placeholder="placeholder ?? ''" :value="inputValue"
                type="text"
-               @input="handleInput($event)" @keyup.enter="addItem()"/>
+               @input="handleInput($event)" @keyup.enter="addItem()" :aria-label="inputValue" />
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
