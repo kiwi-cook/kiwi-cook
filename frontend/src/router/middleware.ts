@@ -15,7 +15,7 @@ export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<
     if (!isAuthenticated) {
         if (to.meta.auth) {
             const redirect = to.query.redirect ? to.query.redirect : to.path;
-            next({path: loginRoute, query: {redirect: redirect} });
+            next({path: loginRoute, query: {redirect: redirect}});
         } else {
             next();
         }

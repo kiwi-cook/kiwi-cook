@@ -14,62 +14,45 @@ const routes: Array<RouteRecordRaw> = [
             {
                 path: 'recipe',
                 component: () => import('@/views/recipe/RecipePage.vue'),
+                redirect: 'recipe/saved',
                 children: [
-                    {
-                        path: '',
-                        component: () => import('@/views/recipe/RecipesListPage.vue')
-                    },
-                    {
-                        path: 'of-the-day',
-                        component: () => import('@/views/recipe/RecipeOfTheDayPage.vue')
-                    },
                     {
                         path: ':id',
                         component: () => import('@/views/recipe/RecipeDetailPage.vue')
+                    },
+                    {
+                        path: ':id/edit',
+                        meta: {
+                            auth: true,
+                        },
+                        component: () => import('@/views/recipe/RecipeEditorPage.vue'),
                     }
                 ]
             },
+            /* {
+                path: 'recipe/suggestions',
+                component: () => import('@/views/recipe/RecipeSuggestionsPage.vue')
+            }, */
             {
-                path: 'fridge',
-                component: () => import('@/views/FridgePage.vue')
+                path: 'recipe/of-the-day',
+                component: () => import('@/views/recipe/RecipeOfTheDayPage.vue')
             },
             {
-                path: 'shopping',
-                component: () => import('@/views/ShoppingPage.vue'),
-            },
-            {
-                path: 'user',
-                component: () => import('@/views/user/UserPage.vue'),
-                meta: {
-                    auth: true,
-                }
+                path: 'recipe/saved',
+                component: () => import('@/views/recipe/RecipesListPage.vue')
             },
             {
                 path: 'login',
-                component: () => import('@/views/user/LoginPage.vue')
+                component: () => import('@/views/user/SignInPage.vue')
             },
+            /* 404 */
             {
-                path: 'register',
-                component: () => import('@/views/user/RegisterPage.vue')
+                path: '/:pathMatch(.*)*',
+                redirect: '/recipe/saved'
             }
         ]
     }
 ]
-
-if (process.env.NODE_ENV === 'development') {
-    const devRoutes = [
-        {
-            path: '/editor',
-            component: () => import('@/views/editor/EditorPage.vue'),
-            meta: {
-                auth: true,
-            }
-        }
-    ]
-
-    routes.push(...devRoutes);
-}
-
 
 /**
  * Create router

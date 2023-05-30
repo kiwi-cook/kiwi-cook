@@ -1,11 +1,15 @@
 <template>
-    <ion-page>
+    <ion-menu content-id="login-page">
+        <ion-content class="ion-padding">
+        </ion-content>
+    </ion-menu>
+    <ion-page id="login-page">
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Welcome</ion-title>
+                <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
                 <ion-buttons slot="primary">
                     <ion-button>
-                        <ion-icon slot="icon-only" :ios="ellipsisHorizontal" :md="ellipsisVertical"></ion-icon>
+                        <ion-menu-button></ion-menu-button>
                     </ion-button>
                 </ion-buttons>
             </ion-toolbar>
@@ -15,11 +19,11 @@
             <div class="content">
                 <ion-header collapse="condense">
                     <ion-toolbar>
-                        <ion-title size="large">Welcome</ion-title>
+                        <ion-title size="large">Sign in</ion-title>
                     </ion-toolbar>
                 </ion-header>
 
-                <Login />
+                <SignIn/>
             </div>
         </ion-content>
     </ion-page>
@@ -27,15 +31,27 @@
 
 <script lang="ts">
 import {defineComponent} from 'vue';
-import {IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
+import {
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonMenu,
+    IonMenuButton,
+    IonPage,
+    IonTitle,
+    IonToolbar
+} from '@ionic/vue';
 import {ellipsisHorizontal, ellipsisVertical} from "ionicons/icons";
-import Login from "@/components/user/LoginComponent.vue";
+import SignIn from "@/components/user/SignInComponent.vue";
+import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 
 export default defineComponent({
     name: 'LoginPage',
     components: {
-        Login,
-        IonToolbar, IonIcon, IonHeader, IonContent, IonButton, IonButtons, IonTitle,
+        TasteBuddyLogo,
+        SignIn,
+        IonToolbar, IonHeader, IonContent, IonButton, IonButtons, IonTitle, IonMenuButton, IonMenu,
         IonPage
     },
     setup() {

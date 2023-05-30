@@ -50,7 +50,7 @@
             </AttributeEditor>
 
             <!-- Item icons -->
-            <SmallItemContainer :items="mutableRecipe.getStepItems()"/>
+            <SmallItemList :items="mutableRecipe.getStepItems()"/>
 
             <ion-item class="tags-editor" lines="none">
                 <!-- Tags -->
@@ -120,24 +120,25 @@
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
-                              :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.item.name ?? ''">
+                              :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
                         <ion-card class="item-editor shadow">
                             <ion-card-header>
                                 <ion-item lines="none">
-                                    <ion-avatar v-if="stepItem.item.imgUrl">
-                                        <img :alt="`Image of ${stepItem.item.name}`" :src="stepItem.item.imgUrl"/>
+                                    <ion-avatar v-if="stepItem.imgUrl">
+                                        <img :alt="`Image of ${stepItem.name}`" :src="stepItem.imgUrl"/>
                                     </ion-avatar>
-                                    <ion-chip v-if="stepItem.item._id || stepItem.item._tmpId" color="light">
-                                        {{ stepItem.item._id ?? stepItem.item._tmpId }}
+                                    <ion-chip v-if="stepItem._id || stepItem._tmpId" color="light">
+                                        {{ stepItem._id ?? stepItem._tmpId }}
                                     </ion-chip>
                                 </ion-item>
                                 <ion-card-title color="primary">
                                     <ion-item lines="none">
                                         <div slot="start">
                                             <ion-label position="stacked">Name</ion-label>
-                                            <DropDownSearch v-model="stepItem.item"
+                                            <DropDownSearch :item="stepItem"
                                                             :custom-mapper="(item: Item) => item.name" :items="allItems"
                                                             placeholder="e.g. Baking powder"
+                                                            @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                             @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
                                                     <ion-label>
@@ -162,10 +163,9 @@
 
                             <ion-card-content>
                                 <ion-item lines="none">
-                                    <ion-label position="stacked">Image URL</ion-label>
-                                    <ion-input v-model.trim="stepItem.item.imgUrl"
+                                    <ion-input v-model.trim="stepItem.imgUrl"
                                                :placeholder="`e.g. https://source.unsplash.com/`"
-                                               type="url"/>
+                                               type="url" label="Image URL" label-placement="stacked"/>
                                 </ion-item>
 
                                 <ion-item lines="none">
@@ -177,8 +177,9 @@
                                                            max="9999" min="0" type="number"/>
                                             </ion-col>
                                             <ion-col size="8">
-                                                <ion-select v-model="stepItem.unit" placeholder="Unit" label="Unit"
-                                                            label-placement="floating">
+                                                <ion-select v-model="stepItem.unit" label="Unit"
+                                                            label-placement="floating"
+                                                            placeholder="Unit">
                                                     <ion-select-option value="ml">ml</ion-select-option>
                                                     <ion-select-option value="l">l</ion-select-option>
                                                     <ion-select-option value="g">g</ion-select-option>
@@ -191,7 +192,8 @@
                                 </ion-item>
 
                                 <ion-item lines="none">
-                                    <ion-select v-model="stepItem.item.type" placeholder="Type" label="Type" label-placement="floating">
+                                    <ion-select v-model="stepItem.type" label="Type" label-placement="floating"
+                                                placeholder="Type">
                                         <ion-select-option value="ingredient">Ingredient</ion-select-option>
                                         <ion-select-option value="tool">Tool</ion-select-option>
                                     </ion-select>
@@ -240,6 +242,7 @@ import SmallItemContainer from '@/components/item/SmallItemContainer.vue';
 import {descriptionToItems} from '@/utility/recipeParser';
 import AttributeEditor from './AttributeEditor.vue';
 import {formatDate} from '@/utility/util';
+import SmallItemList from "@/components/item/SmallItemList.vue";
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -250,6 +253,7 @@ export default defineComponent({
         },
     },
     components: {
+        SmallItemList,
         IonGrid,
         IonRow,
         IonCol,
@@ -321,6 +325,14 @@ export default defineComponent({
         const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe.value.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
 
         /**
+         * Select an item in a step and update it
+         * @param stepIndex index of the step to select the item in
+         * @param itemIndex index of the item to select
+         * @param item item to update
+         */
+        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe.value.steps[stepIndex].items[itemIndex].updateItem(item)
+
+        /**
          * Add items to a step from a description
          * @param stepIndex index of the step to add the items to
          */
@@ -344,7 +356,7 @@ export default defineComponent({
             // steps
             addStep, removeStep, addStepsFromDescription,
             // items
-            allItems, addItem, removeItem, addItemsFromDescription,
+            allItems, addItem, selectItem, removeItem, addItemsFromDescription,
             // icons
             closeCircleOutline,
             // utility

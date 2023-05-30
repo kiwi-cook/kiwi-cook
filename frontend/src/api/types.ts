@@ -18,13 +18,13 @@ export class Item {
     type: string;
     imgUrl: string;
 
-    constructor() {
+    constructor(item?: Item) {
         this._isSaved = false
         // create a temporary id to identify the item in the store before it is saved
-        this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
-        this.name = 'New Item'
-        this.type = 'ingredient'
-        this.imgUrl = ''
+        this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+        this.name = item?.name ?? 'New Item'
+        this.type = item?.type ?? 'ingredient'
+        this.imgUrl = item?.imgUrl ?? ''
     }
 
     /**
@@ -39,10 +39,6 @@ export class Item {
         item._id = json._id
         // remove the temporary id
         delete item._tmpId
-        // if the id is undefined, throw an error
-        if (item._id === undefined) {
-            throw new Error("item id is undefined")
-        }
         item._isSaved = true
         item.name = json.name
         item.type = json.type
@@ -118,15 +114,14 @@ export class Item {
  * It is used in a step
  * This is done to make the item reusable
  */
-export class StepItem {
+export class StepItem extends Item {
     amount: number;
     unit: string;
-    item: Item;
 
     constructor(item?: Item) {
+        super(item)
         this.amount = 1
         this.unit = 'pcs'
-        this.item = item ?? new Item()
     }
 
     /**
@@ -140,8 +135,24 @@ export class StepItem {
         const stepItem = new StepItem()
         stepItem.amount = json.amount
         stepItem.unit = json.unit
-        stepItem.item = Item.fromJSON(json.item)
+        stepItem._id = json._id
+        stepItem._isSaved = json._isSaved
+        stepItem.name = json.name
+        stepItem.type = json.type
+        stepItem.imgUrl = json.imgUrl
         return stepItem
+    }
+
+    /**
+     * Update the item in the step
+     * @param item
+     */
+    updateItem(item: Item): void {
+        this._id = item._id
+        this._isSaved = item._isSaved
+        this.name = item.name
+        this.type = item.type
+        this.imgUrl = item.imgUrl
     }
 }
 
@@ -182,7 +193,7 @@ export class Step {
      */
     static fromJSON(json: Step): Step {
         const item = new Step()
-        item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? [new StepItem()]
+        item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
         item.description = json.description
         item.duration = json.duration
@@ -219,7 +230,7 @@ export class Step {
     public getItems(): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        const items: Item[] = this.items.flatMap((item: StepItem) => item.item)
+        const items: Item[] = this.items.flatMap((item: StepItem) => item)
         return [...new Set(items)]
     }
 
@@ -412,7 +423,7 @@ export class Recipe {
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
         item = item || new Item();
-        const stepItem = new StepItem(item);
+        const stepItem = new StepItem();
 
         if (stepIndex === undefined) {
             // add a new step if no step is specified
@@ -422,7 +433,7 @@ export class Recipe {
             this.steps[stepIndex].items.push(stepItem);
         } else {
             // update the item at the specified index
-            this.steps[stepIndex].items[itemIndex].item = item;
+            this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
 
         console.debug('addItem', {stepIndex, itemIndex, item, recipe: this})
@@ -436,7 +447,7 @@ export class Recipe {
     public getItems(sorted = false): Item[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        const items = this.getStepItems().map(stepItem => stepItem.item)
+        const items = this.getStepItems().map(stepItem => stepItem)
         const uniqueItems: { [key: string]: Item } = {}
         items.forEach(item => {
             uniqueItems[item.getId()] = item
@@ -456,11 +467,11 @@ export class Recipe {
         const items = this.steps.flatMap((step: Step) => step.getStepItems())
         const uniqueItems: { [key: string]: StepItem } = {}
         items.forEach(item => {
-            uniqueItems[item.item.getId()] = item
+            uniqueItems[item.getId()] = item
         })
         const result = Object.values(uniqueItems)
         if (sorted) {
-            result.sort((a, b) => a.item.name.localeCompare(b.item.name))
+            result.sort((a, b) => a.name.localeCompare(b.name))
         }
         return result
     }

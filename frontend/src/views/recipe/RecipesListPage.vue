@@ -2,26 +2,11 @@
     <ion-page>
         <ion-header>
             <ion-toolbar color="primary">
-                <ion-title>Search Recipes</ion-title>
+                <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
+                <ion-title>Recipes</ion-title>
             </ion-toolbar>
             <ion-toolbar color="primary">
-                <ion-searchbar v-model="filterInput" :debounce="100" color="secondary"/>
-            </ion-toolbar>
-            <ion-toolbar color="primary">
-                <div class="filter-relevanz-button">
-                    <ion-button color="primary">
-                        <ion-icon slot="icon-only" :icon="filter"></ion-icon>
-                        <ion-label>
-                            Filter
-                        </ion-label>
-                    </ion-button>
-                    <ion-button color="primary">
-                        <ion-icon slot="icon-only" :icon="arrowDown"></ion-icon>
-                        <ion-label>
-                            Relevanz
-                        </ion-label>
-                    </ion-button>
-                </div>
+                <ion-searchbar v-model="filterInput" :debounce="500" color="secondary"/>
             </ion-toolbar>
         </ion-header>
 
@@ -29,7 +14,8 @@
             <div class="content">
                 <ion-header collapse="condense">
                     <ion-toolbar>
-                        <ion-title size="large">Search Recipes</ion-title>
+                        <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
+                        <ion-title>Recipes</ion-title>
                     </ion-toolbar>
                 </ion-header>
 
@@ -43,11 +29,8 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue';
 import {
-    IonButton,
     IonContent,
     IonHeader,
-    IonIcon,
-    IonLabel,
     IonPage,
     IonSearchbar,
     IonTitle,
@@ -55,11 +38,13 @@ import {
 } from '@ionic/vue';
 import RecipeList from '@/components/recipe/RecipeList.vue'
 import {arrowDown, filter} from 'ionicons/icons';
+import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
-        IonButton, IonHeader, IonIcon, IonLabel, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent,
+        TasteBuddyLogo,
+        IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent,
         RecipeList
     },
     setup() {

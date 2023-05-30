@@ -16,11 +16,14 @@ import {APIResponse, presentToast, sendToAPI} from '@/api';
 
 // Define typings for the store state
 export interface State {
+    user: {
+        username?: string,
+        authenticated: boolean,
+    }
     recipes: Recipe[],
     items: Item[],
     discounts: { [city: string]: Discount[] },
     recipesByItemId: { [itemId: string]: string[] },
-    authenticated: boolean
 }
 
 // Define injection key
@@ -37,15 +40,17 @@ export function useTasteBuddyStore() {
 export function createTasteBuddyStore() {
     return createStore<State>({
         state: {
+            user: {
+                authenticated: false
+            },
             recipes: [],
             items: [],
             discounts: {},
             recipesByItemId: {},
-            authenticated: false
         },
         mutations: {
             setAuthenticated(state, authenticated: boolean) {
-                state.authenticated = authenticated
+                state.user.authenticated = authenticated
             },
             setRecipes(state, recipes: Recipe[]) {
                 recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
@@ -134,6 +139,13 @@ export function createTasteBuddyStore() {
                     return !apiResponse.error
                 })
             },
+            logout({commit}) {
+                return sendToAPI<string>(API_ROUTE.POST_LOGOUT, {errorMessage: 'Could not log out'})
+                    .then((apiResponse: APIResponse<string>) => {
+                        commit('setAuthenticated', false)
+                        return !apiResponse.error
+                    })
+            },
             /**
              * Fetch the recipes from the API and store them in the store
              * @param commit
@@ -158,6 +170,7 @@ export function createTasteBuddyStore() {
                 this.dispatch('saveRecipe', recipe)
             },
             saveRecipe({commit}, recipe: Recipe) {
+                console.log('Saving recipe: ', recipe)
                 commit('updateRecipe', recipe)
                 return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                     body: recipe,
@@ -228,11 +241,19 @@ export function createTasteBuddyStore() {
         },
         getters: {
             /**
+             * Get the user's username
+             * @param state
+             */
+            getUsername(state): string {
+                return state.user.username ?? ''
+            },
+
+            /**
              * Check if the user is authenticated
              * @param state
              */
             isAuthenticated(state): boolean {
-                return state.authenticated ?? false
+                return state.user.authenticated ?? false
             },
             /**
              * Get the recipes
