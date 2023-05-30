@@ -36,19 +36,18 @@ func (app *TasteBuddyApp) Default() *TasteBuddyApp {
 // SetupViper sets up viper to handle different environments
 // Return TasteBuddyApp for chaining
 func (app *TasteBuddyApp) SetupViper() *TasteBuddyApp {
+
 	// Check if .env file exists
-	if !checkIfFileExists(".env") {
-		app.LogWarning("SetupViper", "no .env file found. Using environment variables.")
-		return app
+	if checkIfFileExists(".env") {
+		app.Log("SetupViper", "using .env file")
+		viper.SetConfigFile(".env")
+		viper.AddConfigPath(".")
+		if err := viper.ReadInConfig(); err != nil {
+			app.FatalError("SetupViper", err)
+		}
 	}
 
-	// Set up viper
-	viper.SetConfigFile(".env")
-	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
-	if err := viper.ReadInConfig(); err != nil {
-		app.FatalError("setupViper", err)
-	}
 	return app
 }
 
