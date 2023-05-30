@@ -6,3 +6,5 @@
 *.pem
 *.key
 *.crt
+
+.space

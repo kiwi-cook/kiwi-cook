@@ -1,0 +1,139 @@
+// Package src
+// Package src
+/*
+Copyright © 2023 JOSEF MUELLER
+*/
+package main
+
+import (
+	"errors"
+	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+)
+
+type TasteBuddyDatabase struct {
+	*mongo.Client
+	*TasteBuddyLogger
+	hasError bool
+}
+
+type TBCollection struct {
+	*mongo.Collection
+	*TasteBuddyLogger
+	hasError bool
+}
+
+type TBSingleResult struct {
+	*mongo.SingleResult
+	hasError bool
+}
+
+func (app *TasteBuddyApp) GetDBCollection(collectionName string) *TBCollection {
+	if app.client == nil {
+		app.LogError("GetDBCollection", errors.New("mongoDB client is nil"))
+		return &TBCollection{nil, app.logger, true}
+	}
+
+	// Get the database and collection
+	return &TBCollection{app.client.Database("tastebuddy").Collection(collectionName), app.logger, false}
+}
+
+func (collection *TBCollection) FindOneWithDefault(filter interface{}, result interface{}, defaultValue interface{}) error {
+	singleResult := collection.Collection.FindOne(DefaultContext(), filter)
+	if singleResult.Err() != nil {
+		result = defaultValue
+		return collection.LogError("FindOneWithDefault[FindOne]", singleResult.Err())
+	}
+
+	if err := singleResult.Decode(result); err != nil {
+		result = defaultValue
+		return collection.LogError("FindOneWithDefault[Decode]", err)
+	}
+
+	// If no results are found, return the default value
+	if result == nil {
+		result = defaultValue
+	}
+
+	return nil
+}
+
+func (collection *TBCollection) FindOne(filter interface{}, result interface{}) error {
+	return collection.FindOneWithDefault(filter, result, nil)
+}
+
+func (collection *TBCollection) AllWithDefault(filter interface{}, results interface{}, defaultValue interface{}) error {
+	if results == nil || filter == nil || collection.Collection == nil {
+		collection.hasError = true
+		return collection.LogError("AllWithDefault[CheckConnection]", errors.New("cannot process nil values"))
+	}
+
+	cursor, err := collection.Collection.Find(DefaultContext(), filter)
+	if err != nil {
+		collection.hasError = true
+		results = defaultValue
+		collection.LogError("AllWithDefault[Find]", err)
+		return err
+	}
+	defer cursor.Close(DefaultContext())
+	if err = cursor.All(DefaultContext(), results); err != nil {
+		collection.hasError = true
+		results = defaultValue
+	}
+
+	// If no results are found, return the default value
+	if results == nil {
+		results = defaultValue
+	}
+	return err
+}
+
+func (collection *TBCollection) All(filter interface{}, results interface{}) error {
+	return collection.AllWithDefault(filter, results, nil)
+}
+
+func (app *TasteBuddyApp) ConnectToDatabase(uri string) (*TasteBuddyDatabase, error) {
+	// create new mongo client
+	app.Log("ConnectToDatabase", "Connecting to Database at "+uri+" ...")
+
+	credential := options.Credential{
+		AuthMechanism: "MONGODB-X509",
+	}
+
+	client, err := mongo.NewClient(options.Client().ApplyURI(uri).SetAuth(credential))
+	if err != nil {
+		return nil, app.LogError("ConnectToDatabase", err)
+	}
+	ctx := DefaultContext()
+
+	// connect to MongoDB via mongo client
+	if err = client.Connect(ctx); err != nil {
+		return nil, app.LogError("ConnectToDatabase", err)
+	}
+
+	// try to ping MongoDB to see if connection is established
+	if err = client.Ping(ctx, readpref.Primary()); err != nil {
+		return nil, app.LogError("ConnectToDatabase", err)
+	}
+	app.Log("ConnectToDatabase", "Successfully connected to MongoDB")
+	return &TasteBuddyDatabase{client, app.logger, false}, nil
+}
+
+func (server *TasteBuddyServer) HandleDropAllCollections(context *gin.Context) {
+	if err := server.DropAll(); err != nil {
+		server.LogError("HandleDropAllCollections", err)
+		ServerError(context, false)
+		return
+	}
+	Success(context, "Successfully dropped all collections")
+}
+
+func (app *TasteBuddyApp) DropAll() error {
+	ctx := DefaultContext()
+	if err := app.client.Database("tastebuddy").Drop(ctx); err != nil {
+		return app.LogError("DropAll", err)
+	}
+	return nil
+}

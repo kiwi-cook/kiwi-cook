@@ -17,7 +17,7 @@ type User struct {
 	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
 	Username  string             `json:"username" bson:"username" binding:"required"`
 	Password  string             `json:"password" bson:"password" binding:"required"`
-	UserLevel int                `json:"userLevel,omitempty" bson:"userLevel,omitempty"`
+	UserLevel int                `json:"userLevel" bson:"userLevel"`
 }
 
 // CheckPassword checks if the password is correct
@@ -47,15 +47,14 @@ func (server *TasteBuddyServer) HandleRegisterUser(context *gin.Context) {
 }
 
 // GetUsersCollections returns the users collection
-func (app *TasteBuddyApp) GetUsersCollections() *mongo.Collection {
-	return app.client.Database("tastebuddy").Collection("users")
+func (app *TasteBuddyApp) GetUsersCollections() *TBCollection {
+	return app.GetDBCollection("users")
 }
 
 // GetUserById gets a user by its id
 func (app *TasteBuddyApp) GetUserById(userId primitive.ObjectID) (User, error) {
 	var user User
-	ctx := DefaultContext()
-	err := app.GetUsersCollections().FindOne(ctx, bson.D{{Key: "_id", Value: userId}}).Decode(&user)
+	err := app.GetUsersCollections().FindOne(bson.D{{Key: "_id", Value: userId}}, &user)
 	if err != nil {
 		app.LogError("GetUserById", err)
 		return user, err

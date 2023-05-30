@@ -18,7 +18,6 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // AuthLevel defines authentication levels as int type / Enum
@@ -100,20 +99,8 @@ func (server *TasteBuddyServer) DecodeBasicAuth(basicAuthInput string) (string, 
 //     If yes -> return true
 func (server *TasteBuddyServer) CheckBasicAuthenticationCredentials(username, password string) (*User, bool) {
 	// Try to get the user from the database
-	userFromDatabase := server.
-		GetUsersCollections().
-		FindOne(DefaultContext(), bson.M{"username": username})
-
-	// Check if the user exists
-	if userFromDatabase.Err() != nil {
-		server.LogError("CheckBasicAuthenticationCredentials", userFromDatabase.Err())
-		return nil, false
-	}
-
-	// Try to decode user from database into struct
 	var user User
-	if err := userFromDatabase.Decode(&user); err != nil {
-		server.LogError("CheckBasicAuthenticationCredentials", err)
+	if err := server.GetUsersCollections().FindOneWithDefault(bson.M{"username": username}, &user, User{}); err != nil {
 		return nil, false
 	}
 
@@ -141,7 +128,7 @@ func (server *TasteBuddyServer) CheckSessionTokenMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		cookie, err := context.Request.Cookie("session_token")
 
-		if err != nil {
+		if err != nil || !server.HasEnvFile() {
 			context.Next()
 			return
 		}
@@ -261,33 +248,28 @@ func (server *TasteBuddyServer) HandleStartSessionForUser(context *gin.Context, 
 }
 
 // GetSessionsCollection returns the sessions collection
-func (server *TasteBuddyServer) GetSessionsCollection() *mongo.Collection {
-	return server.client.Database("tastebuddy").Collection("sessions")
+func (server *TasteBuddyServer) GetSessionsCollection() *TBCollection {
+	return server.GetDBCollection("sessions")
 }
 
 // GetSession returns the session by the session token
-func (server *TasteBuddyServer) GetSession(sessionToken string) *mongo.SingleResult {
-	return server.GetSessionsCollection().FindOne(DefaultContext(), bson.M{"session_token": sessionToken})
+func (server *TasteBuddyServer) GetSession(sessionToken string) *Session {
+	var session Session
+	if err := server.GetSessionsCollection().FindOneWithDefault(bson.M{"session_token": sessionToken}, &session, nil); err != nil {
+		server.LogError("GetSession", err)
+		return nil
+	}
+	return &session
 }
 
 // GetUserBySessionToken returns the user by the session token
 func (server *TasteBuddyServer) GetUserBySessionToken(sessionToken string) (*User, error) {
 	session := server.GetSession(sessionToken)
-
-	// Check if session exists in database
-	if session.Err() != nil {
-		server.LogError("GetUserBySessionToken", session.Err())
-		return nil, session.Err()
+	if session == nil {
+		return nil, errors.New("session token is invalid")
 	}
 
-	// Unmarshal session data
-	var sessionData Session
-	if err := session.Decode(&sessionData); err != nil {
-		server.LogError("GetUserBySessionToken", err)
-		return nil, err
-	}
-
-	if user, err := server.GetUserById(sessionData.UserID); err != nil {
+	if user, err := server.GetUserById(session.UserID); err != nil {
 		server.LogError("GetUserBySessionToken", err)
 		return nil, err
 	} else {
@@ -326,22 +308,12 @@ func (server *TasteBuddyServer) SetSessionForUser(user User) (string, time.Time,
 func (server *TasteBuddyServer) ValidateSessionToken(sessionToken string) bool {
 	// Get session from database
 	session := server.GetSession(sessionToken)
-
-	// Check if session exists in database
-	if session.Err() != nil {
-		server.LogError("ValidateSessionToken", session.Err())
-		return false
-	}
-
-	// Unmarshal session data
-	var sessionData Session
-	if err := session.Decode(&sessionData); err != nil {
-		server.LogError("ValidateSessionToken", err)
+	if session == nil {
 		return false
 	}
 
 	// Check if session token is expired or created in the future
-	if sessionData.ExpiresAt.Before(time.Now()) || sessionData.CreatedAt.After(time.Now()) {
+	if session.ExpiresAt.Before(time.Now()) || session.CreatedAt.After(time.Now()) {
 		return false
 	}
 

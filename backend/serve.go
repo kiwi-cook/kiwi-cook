@@ -13,13 +13,21 @@ var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Run the web server",
 	Run: func(cmd *cobra.Command, args []string) {
-		app := TasteBuddyAppFactory()
-
-		// Get the port from the command line
 		port, _ := cmd.Flags().GetString("port")
-		server := TasteBuddyServerFactory(app)
-		server.SetPort(&port)
-		server.Serve()
+		logLevel, _ := cmd.Flags().GetString("loglevel")
+		mode, _ := cmd.Flags().GetString("mode")
+		// configFilePath, _ := cmd.Flags().GetString("config")
+
+		// Create the TasteBuddyApp
+		app := TasteBuddyAppFactory()
+		app.SetLogger(logLevel)
+		app.Default()
+
+		// Create the server
+		TasteBuddyServerFactory(app).
+			SetPort(&port).
+			SetMode(mode).
+			Serve()
 	},
 }
 
@@ -35,5 +43,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	serveCmd.Flags().StringP("port", "p", "8081", "Set the port to use")
-	serveCmd.Flags().StringP("loglevel", "l", "", "Set the database connection string")
+	serveCmd.Flags().StringP("loglevel", "l", "default", "Set the log level")
+	serveCmd.Flags().StringP("mode", "m", "prod", "Set the mode")
+	serveCmd.Flags().StringP("config", "c", "", "Set the config file")
 }

@@ -40,6 +40,11 @@ func MissingRights(context *gin.Context) {
 	context.AbortWithStatusJSON(http.StatusUnauthorized, responseJSON("Missing rights.", true))
 }
 
+// ForbiddenError returns a 403 error with a message
+func ForbiddenError(context *gin.Context) {
+	context.AbortWithStatusJSON(http.StatusForbidden, responseJSON("Forbidden.", true))
+}
+
 // NotFoundError returns a 404 error with a message
 func NotFoundError(context *gin.Context, itemName string) {
 	context.JSON(http.StatusNotFound, responseJSON(itemName+" not found.", true))

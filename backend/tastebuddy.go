@@ -6,26 +6,29 @@ package main
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"go.mongodb.org/mongo-driver/mongo"
 	"os"
+	"strconv"
 )
 
 type TasteBuddyApp struct {
-	logLevel     LogLevel
+	logger       *TasteBuddyLogger
 	client       *TasteBuddyDatabase
 	jwtSecretKey []byte
 	jwtPublicKey []byte
 }
 
-type TasteBuddyDatabase struct {
-	*mongo.Client
-}
-
 // TasteBuddyAppFactory creates a new TasteBuddyApp
 func TasteBuddyAppFactory() *TasteBuddyApp {
-	app := &TasteBuddyApp{}
-	return app.SetupViper().
+	return &TasteBuddyApp{}
+}
+
+// Default sets up the TasteBuddyApp with default values
+func (app *TasteBuddyApp) Default() *TasteBuddyApp {
+	return app.
+		SetupViper().
+		SetLogger("default").
 		SetDatabase(nil).
 		SetJWTKeys()
 }
@@ -33,23 +36,32 @@ func TasteBuddyAppFactory() *TasteBuddyApp {
 // SetupViper sets up viper to handle different environments
 // Return TasteBuddyApp for chaining
 func (app *TasteBuddyApp) SetupViper() *TasteBuddyApp {
+	// Check if .env file exists
+	if !checkIfFileExists(".env") {
+		app.LogWarning("SetupViper", "no .env file found. Using environment variables.")
+		return app
+	}
+
+	// Set up viper
+	viper.SetConfigFile(".env")
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
-	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
 		app.FatalError("setupViper", err)
 	}
 	return app
 }
 
-// SetLogLevel sets the log level
-func (app *TasteBuddyApp) SetLogLevel(logLevel int) *TasteBuddyApp {
-	app.logLevel = LogLevel(logLevel)
+// SetLogger sets the log level
+func (app *TasteBuddyApp) SetLogger(logLevel string) *TasteBuddyApp {
+	app.logger = &TasteBuddyLogger{LogLevel(logLevel)}
 	return app
 }
 
 // SetDatabase initializes the database connection and registers the client
 func (app *TasteBuddyApp) SetDatabase(dbConnectionString *string) *TasteBuddyApp {
+	app.LogDebug("SetDatabase", "setting up database connection")
+
 	DbConnectionString := ""
 	if viper.GetString("DB_CONNSTRING") != "" && dbConnectionString == nil {
 		DbConnectionString = viper.GetString("DB_CONNSTRING")
@@ -72,25 +84,59 @@ func (app *TasteBuddyApp) SetDatabase(dbConnectionString *string) *TasteBuddyApp
 
 // SetJWTKeys sets the JWT keys
 func (app *TasteBuddyApp) SetJWTKeys() *TasteBuddyApp {
-	// Set JWT secret key
-	JWTSecretKey, err := os.ReadFile(viper.GetString("JWT_RSA_KEY"))
-	if err != nil {
-		app.FatalError("SetJWTKeys", err)
-	}
-	JWTPublicKey, err := os.ReadFile(viper.GetString("JWT_RSA_PUB_KEY"))
-	if err != nil {
-		app.FatalError("SetJWTKeys", err)
+	// Check if JWT keys are set
+	if viper.GetString("JWT_RSA_KEY") == "" || viper.GetString("JWT_RSA_PUB_KEY") == "" {
+		app.FatalError("SetJWTKeys", errors.New("JWT_RSA_KEY or JWT_RSA_PUB_KEY not set"))
 	}
 
+	// Set JWT keys
+	var JWTSecretKey = []byte(viper.GetString("JWT_RSA_KEY"))
+	var JWTPublicKey = []byte(viper.GetString("JWT_RSA_PUB_KEY"))
+
+	// Check if JWT keys are filepaths
+	if checkIfPathIsFile(viper.GetString("JWT_RSA_KEY")) && checkIfPathIsFile(viper.GetString("JWT_RSA_PUB_KEY")) {
+		var err error
+		// Set JWT secret key
+		JWTSecretKey, err = os.ReadFile(viper.GetString("JWT_RSA_KEY"))
+		if err != nil {
+			app.FatalError("SetJWTKeys", err)
+		}
+		JWTPublicKey, err = os.ReadFile(viper.GetString("JWT_RSA_PUB_KEY"))
+		if err != nil {
+			app.FatalError("SetJWTKeys", err)
+		}
+	}
+
+	// Set JWT keys
 	app.jwtSecretKey = JWTSecretKey
 	app.jwtPublicKey = JWTPublicKey
 	return app
 }
 
+func (app *TasteBuddyApp) HasEnvFile() bool {
+	return viper.ConfigFileUsed() != ""
+}
+
+func (app *TasteBuddyApp) Exit(code int) {
+	app.Log("Exit", "exiting with code "+strconv.Itoa(code))
+	os.Exit(code)
+}
+
+// TasteBuddyServer is the web server
+
 type TasteBuddyServer struct {
 	port string
+	mode ServerMode
 	*TasteBuddyApp
 }
+
+type ServerMode string
+
+const (
+	PROD  = "prod"
+	DEV   = "dev"
+	ADMIN = "admin"
+)
 
 func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
 	server := &TasteBuddyServer{}
@@ -110,4 +156,51 @@ func (server *TasteBuddyServer) SetPort(port *string) *TasteBuddyServer {
 		server.port = "8081"
 	}
 	return server
+}
+
+// SetMode sets the mode for the app
+// Return TasteBuddyApp for chaining
+func (server *TasteBuddyServer) SetMode(mode string) *TasteBuddyServer {
+	switch mode {
+	case "dev":
+		server.SetLogger("debug")
+	case "prod":
+		server.SetLogger("default")
+	case "admin":
+		server.SetLogger("debug")
+	default:
+		server.SetLogger("debug")
+	}
+
+	server.mode = ServerMode(mode)
+
+	return server
+}
+
+// CheckServerModeMiddleware checks the server mode
+func (server *TasteBuddyServer) CheckServerModeMiddleware(serverMode ServerMode) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		if (server.mode == ADMIN && serverMode == ADMIN) ||
+			(server.mode == DEV && (serverMode == PROD || serverMode == DEV)) ||
+			(server.mode == PROD && serverMode == PROD) {
+			context.Next()
+			return
+		}
+		ForbiddenError(context)
+	}
+}
+
+func checkIfPathIsFile(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return !info.IsDir()
+}
+
+func checkIfFileExists(path string) bool {
+	if _, err := os.ReadFile(path); err != nil {
+		return false
+	}
+	return true
 }

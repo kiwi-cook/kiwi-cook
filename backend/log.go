@@ -14,72 +14,90 @@ const (
 	VerboseLogLevel LogLevel = "verbose" // Verbose logging. Logs everything
 )
 
-// Log prints a simple log message
+const colorNone = "\033[0m"
+const colorRed = "\033[31m"
+const colorGreen = "\033[32m"
+const colorYellow = "\033[33m"
+const colorBlue = "\033[34m"
+
+type TasteBuddyLogger struct {
+	logLevel LogLevel
+}
+
 func (app *TasteBuddyApp) Log(functionName string, message ...any) {
-	if len(message) == 0 {
-		app.Printf(DefaultLogLevel, "INFO [%s]", functionName)
-		return
-	} else if len(message) == 1 {
-		app.Printf(DefaultLogLevel, "INFO [%s]: %v", functionName, message[0])
-		return
-	}
-	app.Printf(DefaultLogLevel, "INFO [%s]: %s", functionName, message)
+	app.logger.Log(functionName, message...)
+}
+
+// Log prints a simple log message
+func (logger *TasteBuddyLogger) Log(functionName string, message ...any) {
+	logger.Printf(DefaultLogLevel, "LOG", colorNone, functionName, message...)
 }
 
 func (app *TasteBuddyApp) LogDebug(functionName string, message ...any) {
-	if len(message) == 0 {
-		app.Printf(DebugLogLevel, "DEBUG [%s]", functionName)
-		return
-	} else if len(message) == 1 {
-		app.Printf(DebugLogLevel, "DEBUG [%s]: %v", functionName, message[0])
-		return
-	}
-	app.Printf(DebugLogLevel, "DEBUG [%s]: %s", functionName, message)
+	app.logger.LogDebug(functionName, message...)
+}
+
+func (logger *TasteBuddyLogger) LogDebug(functionName string, message ...any) {
+	logger.Printf(DebugLogLevel, "DEBUG", colorNone, functionName, message...)
+}
+
+func (app *TasteBuddyApp) LogWarning(functionName string, message ...any) {
+	app.logger.LogWarning(functionName, message...)
 }
 
 // LogWarning prints a warning
-func (app *TasteBuddyApp) LogWarning(functionName string, message ...any) {
-	const colorYellow = "\033[0;33m"
-	const colorNone = "\033[0m"
+func (logger *TasteBuddyLogger) LogWarning(functionName string, message ...any) {
+	logger.Printf(WarnLogLevel, "WARNING", colorYellow, functionName, message...)
+}
 
-	if len(message) == 0 {
-		app.Printf(WarnLogLevel, "%sWARNING%s [%s]", colorYellow, colorNone, functionName)
-		return
-	} else if len(message) == 1 {
-		app.Printf(WarnLogLevel, "%sWARNING%s [%s]: %v", colorYellow, colorNone, functionName, message[0])
-		return
-	}
-	app.Printf(WarnLogLevel, "%sWARNING%s [%s]: %s", colorYellow, colorNone, functionName, message)
+func (app *TasteBuddyApp) LogContextHandle(context *gin.Context, functionName string, message ...any) {
+	app.logger.LogContextHandle(context, functionName, message...)
 }
 
 // LogContextHandle prints an error message that is caused by the context
-func (app *TasteBuddyApp) LogContextHandle(context *gin.Context, functionName string, message ...any) {
-	const colorBlue = "\033[0;34m"
-	const colorNone = "\033[0m"
+func (logger *TasteBuddyLogger) LogContextHandle(context *gin.Context, functionName string, message ...any) {
+	logger.Printf(DefaultLogLevel, "LOG "+context.ClientIP(), colorNone, functionName, message...)
+}
 
-	app.Printf(DefaultLogLevel, "%sHANDLE IP(%s)%s [%s]: %s", colorBlue, context.ClientIP(), colorNone, functionName, message)
+func (app *TasteBuddyApp) LogError(functionName string, err error) error {
+	return app.logger.LogError(functionName, err)
 }
 
 // LogError prints an error message
-func (app *TasteBuddyApp) LogError(functionName string, err error) error {
-	const colorRed = "\033[0;31m"
-	const colorNone = "\033[0m"
-
-	app.Printf(DefaultLogLevel, "%sERROR%s [%s]: %s", colorRed, colorNone, functionName, err)
+func (logger *TasteBuddyLogger) LogError(functionName string, err error) error {
+	logger.Printf(DefaultLogLevel, "ERROR", colorRed, functionName, err)
 	return err
 }
 
-// FatalError prints an error message and panics
+// FatalError prints an error message and exits the program
 func (app *TasteBuddyApp) FatalError(functionName string, err error) {
-	const colorRed = "\033[0;31m"
-	const colorNone = "\033[0m"
-	app.Printf(DefaultLogLevel, "%sFATAL ERROR%s [%s]: %s", colorRed, colorNone, functionName, err)
-	panic("FATAL ERROR")
+	app.logger.FatalError(functionName, err)
+	app.Exit(1)
+}
+
+// FatalError prints an error message and panics
+func (logger *TasteBuddyLogger) FatalError(functionName string, err error) {
+	logger.Printf(DefaultLogLevel, "FATAL", colorRed, functionName, err)
 }
 
 // Printf prints a message if the log level is high enough
-func (app *TasteBuddyApp) Printf(logLevel LogLevel, format string, v ...any) {
-	if logLevel <= app.logLevel {
-		log.Printf(format, v...)
+func (logger *TasteBuddyLogger) Printf(logLevel LogLevel, logType string, color string, functionName string, message ...any) {
+	var format = color + logType + " [" + functionName + "]" + colorNone + ": "
+	if len(message) > 0 {
+		format += "%v"
+	}
+	switch logger.logLevel {
+	case DefaultLogLevel:
+		log.Printf(format, message...)
+	case WarnLogLevel:
+		if logLevel == WarnLogLevel || logLevel == DefaultLogLevel {
+			log.Printf(format, message...)
+		}
+	case DebugLogLevel:
+		if logLevel == DebugLogLevel || logLevel == WarnLogLevel || logLevel == DefaultLogLevel {
+			log.Printf(format, message...)
+		}
+	case VerboseLogLevel:
+		log.Printf(format, message...)
 	}
 }
