@@ -4,13 +4,13 @@
         <ion-card-header>
             <ion-card-title color="light">
                 Step {{ stepIndex + 1 }}
-                <ion-chip v-if="step?.duration" color="primary">
-                    <ion-label>{{ step?.duration }} min</ion-label>
+                <ion-chip v-if="step?.duration" color="light">
+                    <ion-label>{{ step?.duration }} minutes</ion-label>
                 </ion-chip>
             </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <SmallItemContainer :items="step?.items ?? []"/>
+            <SmallItemContainer :items="step.getItems()"/>
             <AdditionalStepInfo :step="step"/>
             <ion-item lines="none">
                 <ion-text>
