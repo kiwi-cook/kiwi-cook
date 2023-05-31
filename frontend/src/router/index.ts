@@ -1,5 +1,5 @@
 import {createRouter, createWebHistory} from '@ionic/vue-router';
-import {Router, RouteRecordRaw} from 'vue-router';
+import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
 import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
 import {State} from '@/storage';
@@ -60,7 +60,7 @@ const routes: Array<RouteRecordRaw> = [
  */
 export function createTasteBuddyRouter(store: Store<State>): Router {
     const router = createRouter({
-        history: createWebHistory(process.env.BASE_URL),
+        history: createWebHashHistory(process.env.BASE_URL),
         routes
     })
 
