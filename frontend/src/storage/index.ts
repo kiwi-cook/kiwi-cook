@@ -1,14 +1,14 @@
 // Ionic
-import {Storage} from '@ionic/storage';
+import { Storage } from '@ionic/storage';
 
 // Vue
-import {App, InjectionKey} from 'vue'
-import {createStore, Store, useStore as baseUseStore} from 'vuex';
+import { App, InjectionKey } from 'vue'
+import { createStore, Store, useStore as baseUseStore } from 'vuex';
 
 // Types
-import {Discount, Item, Recipe} from '@/tastebuddy/types';
-import {API_ROUTE} from '@/tastebuddy/constants';
-import {APIResponse, log, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
+import { Discount, Item, Recipe } from '@/tastebuddy/types';
+import { API_ROUTE } from '@/tastebuddy/constants';
+import { APIResponse, log, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
 
 
 // Type the store to use benefits of TypeScript
@@ -86,7 +86,7 @@ export function createTasteBuddyStore() {
                 state.items = state.items.filter((i: Item) => i._id !== item._id)
             },
             setDiscounts(state, payload: { city: string, discounts: Discount[] }) {
-                const {city, discounts} = payload
+                const { city, discounts } = payload
                 state.discounts[city] = discounts
             },
             mapRecipeIdsToItemIds(state, recipes: Recipe[]) {
@@ -110,9 +110,15 @@ export function createTasteBuddyStore() {
              * Authenticate the user using the session cookie
              * @param commit
              */
-            sessionAuth({commit}) {
+            sessionAuth({ commit, getters }) {
                 logDebug('sessionAuth', 'logging in')
-                return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
+                // if the user is already authenticated, return true
+                if (getters.isAuthenticated) {
+                    return Promise.resolve(true)
+                }
+
+                // try to authenticate the user using the session cookie
+                return sendToAPI<string>(API_ROUTE.GET_AUTH, { errorMessage: 'Could not log in' })
                     .then((apiResponse: APIResponse<string>) => {
                         commit('setAuthenticated', !apiResponse.error)
                         return !apiResponse.error
@@ -124,9 +130,9 @@ export function createTasteBuddyStore() {
              * @param payload username and password
              * @returns true if the authentication was successful, false otherwise
              */
-            basicAuth({commit}, payload: { username: string, password: string }): Promise<boolean> {
+            basicAuth({ commit }, payload: { username: string, password: string }): Promise<boolean> {
                 logDebug('basicAuth', 'logging in')
-                const {username, password} = payload
+                const { username, password } = payload
                 return sendToAPI<string>(API_ROUTE.POST_AUTH, {
                     headers: [
                         {
@@ -141,9 +147,9 @@ export function createTasteBuddyStore() {
                     return !apiResponse.error
                 })
             },
-            logout({commit}) {
+            logout({ commit }) {
                 logDebug('logout', 'logging out')
-                return sendToAPI<string>(API_ROUTE.POST_LOGOUT, {errorMessage: 'Could not log out'})
+                return sendToAPI<string>(API_ROUTE.POST_LOGOUT, { errorMessage: 'Could not log out' })
                     .then((apiResponse: APIResponse<string>) => {
                         commit('setAuthenticated', false)
                         return !apiResponse.error
@@ -153,9 +159,9 @@ export function createTasteBuddyStore() {
              * Fetch the recipes from the API and store them in the store
              * @param commit
              */
-            fetchRecipes({commit}) {
+            fetchRecipes({ commit }) {
                 logDebug('fetchRecipes', 'fetching recipes')
-                return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
+                return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
                     .then((apiResponse: APIResponse<Recipe[]>) => {
                         // map the recipes JSON to Recipe objects
                         // this is because the JSON is not a valid Recipe object,
@@ -165,7 +171,7 @@ export function createTasteBuddyStore() {
                         }
                     });
             },
-            saveRecipeById({getters}, recipeId: string) {
+            saveRecipeById({ getters }, recipeId: string) {
                 logDebug('saveRecipeById', recipeId)
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
@@ -174,7 +180,7 @@ export function createTasteBuddyStore() {
                 }
                 this.dispatch('saveRecipe', recipe)
             },
-            saveRecipe({commit}, recipe: Recipe) {
+            saveRecipe({ commit }, recipe: Recipe) {
                 logDebug('saveRecipe', recipe)
                 commit('updateRecipe', recipe)
                 return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
@@ -186,21 +192,21 @@ export function createTasteBuddyStore() {
                     }
                 });
             },
-            deleteRecipe({commit}, recipe: Recipe) {
+            deleteRecipe({ commit }, recipe: Recipe) {
                 logDebug('deleteRecipe', recipe)
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
                     return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
-                        formatObject: {RECIPE_ID: recipe._id ?? ''},
+                        formatObject: { RECIPE_ID: recipe._id ?? '' },
                         errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
                     }).then((apiResponse: APIResponse<string>) => {
                         return presentToast(apiResponse.response)
                     })
                 }
             },
-            fetchItems({commit}) {
+            fetchItems({ commit }) {
                 logDebug('fetchItems', 'fetching items')
-                return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
+                return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
                     .then((apiResponse: APIResponse<Item[]>) => {
                         // map the items JSON to Item objects
                         // this is because the JSON is not a valid Item object,
@@ -210,7 +216,7 @@ export function createTasteBuddyStore() {
                         }
                     });
             },
-            saveItem({commit}, item: Item) {
+            saveItem({ commit }, item: Item) {
                 logDebug('saveItem', item)
                 commit('updateItem', item)
                 return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
@@ -223,29 +229,29 @@ export function createTasteBuddyStore() {
                         }
                     });
             },
-            deleteItem({commit}, item: Item) {
+            deleteItem({ commit }, item: Item) {
                 logDebug('deleteItem', item)
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
                     return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
-                        formatObject: {ITEM_ID: item._id ?? ''},
+                        formatObject: { ITEM_ID: item._id ?? '' },
                         errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
                     }).then((apiResponse: APIResponse<string>) => {
                         return presentToast(apiResponse.response)
                     })
                 }
             },
-            fetchDiscounts({commit}, city: string) {
+            fetchDiscounts({ commit }, city: string) {
                 logDebug('fetchDiscounts', 'fetching discounts')
                 return sendToAPI<Discount[]>(API_ROUTE.GET_DISCOUNTS, {
-                    formatObject: {CITY: city}
+                    formatObject: { CITY: city }
                 }).then((apiResponse: APIResponse<Discount[]>) => {
                     if (!apiResponse.error) {
-                        commit('setDiscounts', {discounts: apiResponse.response, city})
+                        commit('setDiscounts', { discounts: apiResponse.response, city })
                     }
                 })
             },
-            mapRecipeIdsToItemIds({commit, getters}) {
+            mapRecipeIdsToItemIds({ commit, getters }) {
                 logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
                 commit('mapRecipeIdsToItemIds', getters.getRecipes)
             }

@@ -345,8 +345,25 @@ export class Recipe {
         return this._id ?? this._tmpId as string
     }
 
+    /**
+     * Get the duration of the recipe. It is the sum of the duration of all steps.
+     * @returns the duration of the recipe
+     */
     public getDuration(): number {
         return this.steps.reduce((acc, step) => acc + (step.duration ?? 0), 0)
+    }
+
+    /**
+     * Get the short description of the recipe. It is the first two sentences of the description.
+     * @returns the short description of the recipe
+     */
+    public getShortDescription(): string {
+        let shortDescription = this.description.split('.').slice(0, 2).join('.')
+        const lastChar = shortDescription.charAt(shortDescription.length - 1)
+        if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
+            shortDescription += '.'
+        }
+        return shortDescription
     }
 
     /**

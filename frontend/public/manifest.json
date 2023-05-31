@@ -1,7 +1,8 @@
 {
     "name": "Taste Buddy",
-    "short_name": "taste-buddy",
-    "theme_color": "#f4f5f8",
+    "short_name": "Taste Buddy",
+    "description": "A simple app to help you find the best recipes for your ingredients.",
+    "theme_color": "#F28705",
     "icons": [
       {
         "src": "./img/icons/android-chrome-192x192.png",

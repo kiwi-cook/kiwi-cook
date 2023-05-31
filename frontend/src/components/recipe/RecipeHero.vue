@@ -4,7 +4,7 @@
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
-                <p class="recipe-description">{{ recipe?.description }}</p>
+                <p class="recipe-description">{{ recipe?.getShortDescription() }}</p>
                 <h2 class="recipe-author">{{ recipe?.author }}</h2>
             </div>
             <div class="hero-tags">
