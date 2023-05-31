@@ -1,5 +1,5 @@
 import { State } from "@/storage";
-import { logDebug } from "@/tastebuddy";
+import { log, logDebug } from "@/tastebuddy";
 import { Store } from "vuex";
 
 export const logMiddleware = (to: any, from: any) => {
@@ -16,18 +16,17 @@ export const logMiddleware = (to: any, from: any) => {
  * @param loginRoute
  */
 export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<State>, loginRoute: string) => {
-    const isAuthenticated = store.getters.isAuthenticated;
-    logDebug('router', `checking auth for ${to.path} (isAuthenticated: ${isAuthenticated})`)
     if (to.meta.auth) {
-        if (isAuthenticated) {
-            store.dispatch('sessionAuth').then(next())
-            const redirect = to.query.redirect ? to.query.redirect : to.path;
-            next({ path: loginRoute, query: { redirect: redirect } });
-        } else {
-            next();
-        }
-    } else if (to.path === '/login' && isAuthenticated) {
-        next({ path: '/' });
+        logDebug('router', `auth required for ${to.path}`)
+        store.dispatch('sessionAuth').then((isAuthenticated: boolean) => {
+            logDebug('router', `auth required for ${to.path} -> ${isAuthenticated}`)
+            if (isAuthenticated) {
+                next()
+            } else {
+                const redirect = to.query.redirect ? to.query.redirect : to.path;
+                next({ path: loginRoute, query: { redirect: redirect } });
+            }
+        })
     } else {
         next();
     }

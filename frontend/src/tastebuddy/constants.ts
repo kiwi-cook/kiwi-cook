@@ -30,7 +30,7 @@ type API_ROUTE_OPTIONS = {
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.POST_AUTH]: { url: '/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded', credentials: 'include' },
     [API_ROUTE.POST_LOGOUT]: { url: '/auth', method: 'POST', contentType: 'application/json' },
-    [API_ROUTE.GET_AUTH]: { url: '/auth', method: 'GET', contentType: 'application/json' },
+    [API_ROUTE.GET_AUTH]: { url: '/auth', method: 'GET', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.GET_RECIPES]: { url: '/recipe', method: 'GET', contentType: 'application/json' },
     [API_ROUTE.ADD_RECIPE]: { url: '/recipe', method: 'POST', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.DELETE_RECIPE]: { url: '/recipe/RECIPE_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
