@@ -1,13 +1,13 @@
 <template>
-    <ion-button :router-link="recipeLink">
-        <slot></slot>
+    <ion-button color="tertiary" @click="toRecipe()">
+        <slot />
     </ion-button>
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Recipe} from "@/tastebuddy/types";
-import {IonButton} from "@ionic/vue";
+import { defineComponent, PropType, toRefs } from "vue";
+import { Recipe } from "@/tastebuddy/types";
+import { IonButton, useIonRouter } from "@ionic/vue";
 
 export default defineComponent({
     name: 'RecipeLink',
@@ -21,11 +21,14 @@ export default defineComponent({
         IonButton
     },
     setup(props: any) {
-        const {recipe} = toRefs(props);
-        const recipeLink = computed(() => `/recipe/${recipe.value?._id ?? ''}`)
+        const { recipe } = toRefs(props);
+        const router = useIonRouter();
+        const toRecipe = () => {
+            router.push({ name: 'Recipe', params: { id: recipe.value?.getId() } })
+        }
 
         return {
-            recipeLink
+            toRecipe
         }
     }
 })

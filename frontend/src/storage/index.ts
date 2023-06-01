@@ -7,8 +7,8 @@ import { createStore, Store, useStore as baseUseStore } from 'vuex';
 
 // Types
 import { Discount, Item, Recipe } from '@/tastebuddy/types';
-import { API_ROUTE } from '@/tastebuddy/constants';
-import { APIResponse, log, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
+import { API_ROUTE, DURATIONS } from '@/tastebuddy/constants';
+import { APIResponse, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
 
 
 // Type the store to use benefits of TypeScript
@@ -20,8 +20,8 @@ export interface State {
         username?: string,
         authenticated: boolean,
     }
-    recipes: Recipe[],
-    items: Item[],
+    recipes: { [id: string]: Recipe },
+    items: { [id: string]: Item },
     discounts: { [city: string]: Discount[] },
     recipesByItemId: { [itemId: string]: string[] },
 }
@@ -43,8 +43,8 @@ export function createTasteBuddyStore() {
             user: {
                 authenticated: false
             },
-            recipes: [],
-            items: [],
+            recipes: {},
+            items: {},
             discounts: {},
             recipesByItemId: {},
         },
@@ -53,37 +53,22 @@ export function createTasteBuddyStore() {
                 state.user.authenticated = authenticated
             },
             setRecipes(state, recipes: Recipe[]) {
-                recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
-                state.recipes = recipes
+                state.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({ [recipe.getId()]: recipe })))
             },
             updateRecipe(state, recipe: Recipe) {
-                // try to find the recipe in the list
-                const recipeIndex = state.recipes.findIndex((r: Recipe) => (r._id === undefined && r._tmpId === recipe._tmpId) || (r._tmpId === undefined && r._id === recipe._id))
-                if (recipeIndex !== -1) {
-                    state.recipes[recipeIndex] = recipe
-                } else {
-                    state.recipes.push(recipe)
-                }
-                state.recipes = state.recipes.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
+                state.recipes[recipe.getId()] = recipe
             },
             removeRecipe(state, recipe: Recipe) {
-                state.recipes = state.recipes.filter((r: Recipe) => r._id !== recipe._id)
+                delete state.recipes[recipe.getId()]
             },
             setItems(state, items: Item[]) {
-                state.items = items.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
+                state.items = Object.assign({}, ...items.map((item: Item) => ({ [item.getId()]: item })))
             },
             updateItem(state, item: Item) {
-                // try to find the item in the list
-                const itemIndex = state.items.findIndex((i: Item) => i._tmpId === item._tmpId || i._id === item._id)
-                if (itemIndex !== -1) {
-                    state.items[itemIndex] = item
-                } else {
-                    state.items.push(item)
-                }
-                state.items = state.items.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
+                state.items[item.getId()] = item
             },
             removeItem(state, item: Item) {
-                state.items = state.items.filter((i: Item) => i._id !== item._id)
+                delete state.items[item.getId()]
             },
             setDiscounts(state, payload: { city: string, discounts: Discount[] }) {
                 const { city, discounts } = payload
@@ -178,7 +163,7 @@ export function createTasteBuddyStore() {
                     logError('Recipe not found: ', recipeId)
                     return
                 }
-                this.dispatch('saveRecipe', recipe)
+                return this.dispatch('saveRecipe', recipe)
             },
             saveRecipe({ commit }, recipe: Recipe) {
                 logDebug('saveRecipe', recipe)
@@ -186,11 +171,17 @@ export function createTasteBuddyStore() {
                 return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                     body: recipe,
                     errorMessage: 'Could not save recipe in database. Please retry later!'
-                }).then((apiResponse: APIResponse<string>) => {
-                    if (!apiResponse.error) {
-                        this.dispatch('fetchRecipes')
-                    }
-                });
+                })
+                    .then((apiResponse: APIResponse<string>) => {
+                        presentToast(apiResponse.response, apiResponse.error, apiResponse.error ? DURATIONS.LONG : DURATIONS.SHORT)
+                        return apiResponse
+                    })
+                    .then((apiResponse: APIResponse<string>) => {
+                        if (!apiResponse.error) {
+                            return this.dispatch('fetchRecipes')
+                        }
+                        return []
+                    })
             },
             deleteRecipe({ commit }, recipe: Recipe) {
                 logDebug('deleteRecipe', recipe)
@@ -253,10 +244,18 @@ export function createTasteBuddyStore() {
             },
             mapRecipeIdsToItemIds({ commit, getters }) {
                 logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
-                commit('mapRecipeIdsToItemIds', getters.getRecipes)
+                commit('mapRecipeIdsToItemIds', getters.getRecipesAsList)
             }
         },
         getters: {
+            /**
+             * Get the current app state
+             * @param state 
+             * @returns 
+             */
+            isDevMode(_): boolean {
+                return process.env.NODE_ENV === 'development'
+            },
             /**
              * Get the user's username
              * @param state
@@ -264,7 +263,6 @@ export function createTasteBuddyStore() {
             getUsername(state): string {
                 return state.user.username ?? ''
             },
-
             /**
              * Check if the user is authenticated
              * @param state
@@ -273,30 +271,25 @@ export function createTasteBuddyStore() {
                 return state.user.authenticated ?? false
             },
             /**
-             * Get the recipes
+             * Get the recipes as list
              * @param state
              */
-            getRecipes(state): Recipe[] {
-                return state.recipes ?? []
+            getRecipesAsList(state): Recipe[] {
+                const recipesAsArray: Recipe[] = Object.values(state.recipes ?? {})
+                return recipesAsArray.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
             },
             /**
              * Get the recipes mapped by their id
-             * @param _
-             * @param getters
+             * @param state
              */
-            getRecipesById: (_, getters): { [recipeId: string]: Recipe } => {
-                return getters.getRecipes.reduce((recipeMap: { [recipeId: string]: Recipe }, recipe: Recipe) => {
-                    if (typeof recipe._id !== 'undefined') {
-                        recipeMap[recipe._id] = recipe
-                    }
-                    return recipeMap
-                }, {})
+            getRecipesAsMap(state): { [id: string]: Recipe } {
+                return state.recipes ?? {}
             },
             /**
              * Get the recipes by the item id
              * @param state
              */
-            getRecipesByItemId: (state) => (itemId?: string): string[] => {
+            getRecipesAsListByItemId: (state) => (itemId?: string): string[] => {
                 return state.recipesByItemId[itemId ?? ''] ?? []
             },
             /**
@@ -304,7 +297,13 @@ export function createTasteBuddyStore() {
              * @param state
              */
             getItems(state): Item[] {
-                return state.items ?? []
+                const itemsAsArray: Item[] = Object.values(state.items ?? {})
+                return itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
+            },
+            getTags(_, getters): string[] {
+                return getters.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
+                    return [...tags, ...(recipe.props.tags ?? [])]
+                }, [])
             },
             /**
              * Get discounts

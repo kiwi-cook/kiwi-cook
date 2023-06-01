@@ -14,26 +14,32 @@
                     </ion-toolbar>
                 </ion-header>
                 <template v-if="recipe">
-                    <RecipeComponent :recipe="recipe"/>
+                    <RecipeComponent :recipe="recipe" />
                 </template>
             </div>
             <ion-fab slot="fixed" horizontal="start" vertical="bottom">
                 <ion-fab-button color="tertiary" @click="goBack()">
-                    <ion-icon :icon="arrowBack"/>
+                    <ion-icon :icon="arrowBack" />
                 </ion-fab-button>
+                <template v-if="isDevMode">
+                    <ion-fab-button color="primary" @click="editRecipe()">
+                        <ion-icon :icon="createOutline" />
+                    </ion-fab-button>
+                </template>
             </ion-fab>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent} from 'vue';
-import {IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
+import { computed, ComputedRef, defineComponent } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
-import {useTasteBuddyStore} from "@/storage";
-import {useRoute, useRouter} from 'vue-router';
-import {Recipe} from '@/tastebuddy/types';
-import {arrowBack} from "ionicons/icons";
+import { useTasteBuddyStore } from "@/storage";
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
+import { Recipe } from '@/tastebuddy/types';
+import { arrowBack, createOutline } from "ionicons/icons";
 
 
 export default defineComponent({
@@ -48,13 +54,22 @@ export default defineComponent({
         const recipeId: ComputedRef<string> = computed(() => (route.params.id ?? '') as string)
 
         const store = useTasteBuddyStore()
-        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesById[recipeId.value])
+        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesAsMap[recipeId.value])
+        const isDevMode = computed(() => store.getters.isDevMode)
+        const editRecipe = () => {
+            if (isDevMode.value) {
+                router.push({ name: 'RecipeEditor', params: { id: recipeId.value } })
+            }
+        }
 
-        const router = useRouter()
-        const goBack = () => router.go(-1)
+
+        const router = useIonRouter()
+        const goBack = () => router.back()
 
         return {
-            recipe,
+            // recipe
+            recipe, isDevMode, editRecipe, createOutline,
+            // navigation
             goBack, arrowBack
         }
     }

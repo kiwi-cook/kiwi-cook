@@ -5,7 +5,7 @@
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
                 <p class="recipe-description">{{ recipe?.getShortDescription() }}</p>
-                <h2 class="recipe-author">{{ recipe?.author }}</h2>
+                <h2 class="recipe-author">By {{ recipe?.author }}</h2>
             </div>
             <div class="hero-tags">
                 <div v-if="(recipe?.props?.tags?.length ?? 0) > 0" class="flex">

@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from '@ionic/vue-router';
+import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
 import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
@@ -9,19 +9,22 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: TabsPage,
-        redirect: 'recipe/of-the-day',
+        redirect: () => ({ name: 'RecipeOfTheDay'}),
         children: [
             {
-                path: 'recipe',
+                name: 'Home',
+                path: 'recipe/',
                 component: () => import('@/views/recipe/RecipePage.vue'),
-                redirect: 'recipe/saved',
+                redirect: to => ({ name: 'RecipeOfTheDay' }),
                 children: [
                     {
-                        path: ':id',
+                        name: 'Recipe',
+                        path: 's/:id',
                         component: () => import('@/views/recipe/RecipeDetailPage.vue')
                     },
                     {
-                        path: ':id/edit',
+                        name: 'RecipeEditor',
+                        path: 'e/:id',
                         meta: {
                             auth: true,
                         },
@@ -29,26 +32,31 @@ const routes: Array<RouteRecordRaw> = [
                     }
                 ]
             },
-            /* {
+            {
+                name: 'RecipeSuggestions',
                 path: 'recipe/suggestions',
                 component: () => import('@/views/recipe/RecipeSuggestionsPage.vue')
-            }, */
+            },
             {
+                name: 'RecipeOfTheDay',
                 path: 'recipe/of-the-day',
                 component: () => import('@/views/recipe/RecipeOfTheDayPage.vue')
             },
             {
+                name: 'SavedRecipes',
                 path: 'recipe/saved',
                 component: () => import('@/views/recipe/RecipesListPage.vue')
             },
             {
+                name: 'Login',
                 path: 'login',
                 component: () => import('@/views/user/SignInPage.vue')
             },
             /* 404 */
             {
+                name: 'NotFound',
                 path: '/:pathMatch(.*)*',
-                redirect: '/recipe/saved'
+                redirect: to => ({ name: 'SavedRecipes' }),
             }
         ]
     }

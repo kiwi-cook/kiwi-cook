@@ -1,7 +1,8 @@
 <template>
-    <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :placeholder="placeholder ?? ''" :value="inputValue"
-               type="text"
-               @input="handleInput($event)" @keyup.enter="addItem()" :aria-label="inputValue" />
+    <ion-item lines="none">
+        <ion-input :color="isTemporaryInput ? 'medium' : 'light'" :placeholder="placeholder ?? ''" :value="inputValue"
+            type="text" @input="handleInput($event)" @keyup.enter="addItem()" :aria-label="inputValue" />
+    </ion-item>
 
     <ion-list v-if="showItemsList">
         <template v-for="(filteredItem, index) in filteredItems" :key="index">
@@ -21,8 +22,8 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
-import {IonButton, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
+import { defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
+import { IonButton, IonInput, IonItem, IonLabel, IonList } from '@ionic/vue';
 
 export default defineComponent({
     name: 'DropDownSearch',
@@ -54,15 +55,20 @@ export default defineComponent({
             required: false,
             default: 'Search for an item',
         },
+        resetAfter: {
+            type: Boolean,
+            required: false,
+            default: false,
+        },
     },
     components: {
         IonLabel, IonInput, IonList, IonItem, IonButton
     },
     emits: ['update:modelValue', 'addItem', 'selectItem'],
-    setup(props: { modelValue: any, item: any, customMapper: (item: any) => any, items: any[], maxItems: number }, ctx: {
+    setup(props: { modelValue: any, item: any, customMapper: (item: any) => any, items: any[], maxItems: number, resetAfter: boolean }, ctx: {
         emit: any
     }) {
-        const {modelValue, item, customMapper, items, maxItems} = toRefs(props)
+        const { modelValue, item, customMapper, items, maxItems, resetAfter } = toRefs(props)
 
         // define the input value
         const inputValue: Ref<string> = ref('')
@@ -71,12 +77,12 @@ export default defineComponent({
             if (modelValue.value) {
                 inputValue.value = customMapper.value?.(modelValue.value)
             }
-        }, {immediate: true})
+        }, { immediate: true })
         watch(item, () => {
             if (item.value) {
                 inputValue.value = customMapper.value?.(item.value)
             }
-        }, {immediate: true})
+        }, { immediate: true })
 
         const filteredItems: Ref<any[]> = ref(items.value.slice(0, maxItems.value))
 
@@ -112,6 +118,11 @@ export default defineComponent({
             // v-model
             // emit the selected item to the parent component and update the item
             ctx.emit('update:modelValue', selectedItem)
+
+            // reset the input value after selecting an item
+            if (resetAfter.value) {
+                inputValue.value = ''
+            }
         }
 
         const addItem = () => {
@@ -120,6 +131,11 @@ export default defineComponent({
 
             // emit the input value to the parent component and add the item
             ctx.emit('addItem', inputValue.value)
+
+            // reset the input value after selecting an item
+            if (resetAfter.value) {
+                inputValue.value = ''
+            }
         }
 
         return {

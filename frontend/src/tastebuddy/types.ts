@@ -1,9 +1,10 @@
 // Data types for the API
 
-import {State} from "@/storage";
-import {descriptionToSteps} from "@/utility/recipeParser";
-import {Store} from "vuex";
+import { State } from "@/storage";
+import { descriptionToSteps } from "@/utility/recipeParser";
+import { Store } from "vuex";
 import { log, logDebug } from ".";
+import { CanShareResult, Share } from "@capacitor/share";
 
 // types for recipe
 
@@ -225,6 +226,19 @@ export class Step {
     }
 
     /**
+     * Get the short description of the recipe. It is the first two sentences of the description.
+     * @returns the short description of the recipe
+     */
+    public getShortDescription(maxLength = 2): string {
+        let shortDescription = this.description.split('.').slice(0, maxLength).join('.')
+        const lastChar = shortDescription.charAt(shortDescription.length - 1)
+        if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
+            shortDescription += '.'
+        }
+        return shortDescription
+    }
+
+    /**
      * Get all unique items in the step
      * @returns a list of all items in the step
      */
@@ -380,21 +394,22 @@ export class Recipe {
     /**
      * Save the recipe to the database
      * @param store
-     * @returns the recipe to allow chaining
+     * @returns the id of the recipe
      */
-    public save(store: Store<State>): Recipe {
+    public save(store: Store<State>): Promise<string> {
         logDebug('save', this.getId())
-        store.dispatch('saveRecipe', this)
-        return this
+        return store.dispatch('saveRecipe', this).then((id: string) => id)
     }
 
     /**
      * Delete the recipe from the database
      * @param store
      */
-    public delete(store: Store<State>): void {
+    public delete(store: Store<State>): Promise<Recipe> {
         logDebug('delete', this.getId())
-        store.dispatch('deleteRecipe', this)
+        return store.dispatch('deleteRecipe', this).then(() => {
+            return this
+        })
     }
 
     /**
@@ -457,7 +472,7 @@ export class Recipe {
             // update the item at the specified index
             this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
-        return {item, recipe: this};
+        return { item, recipe: this };
     }
 
     /**
@@ -508,6 +523,26 @@ export class Recipe {
         }
         this.props.tags.push(tag)
         return this
+    }
+
+    /**
+     * Share the recipe with buddies
+     * This will open the share dialog of the device
+     * @returns a promise that resolves when the share dialog is closed
+     */
+    public async share() {
+        return Share.canShare().then((canShare: CanShareResult) => {
+            if (!canShare.value) {
+                return
+            }
+
+            return Share.share({
+                title: 'Share with your recipe with buddies',
+                text: `Check out this recipe for ${this.name} on Taste Buddy!`,
+                url: '#/recipe/s/' + this.getId(),
+                dialogTitle: 'Share with buddies',
+            })
+        })
     }
 }
 

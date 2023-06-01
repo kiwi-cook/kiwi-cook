@@ -1,5 +1,5 @@
 import { toastController } from '@ionic/vue';
-import { API_ROUTE, API_ROUTES, API_URL } from './constants';
+import { API_ROUTE, API_ROUTES, API_URL, DURATIONS } from './constants';
 import { Discount, Item, Market, Recipe } from './types';
 
 type APIResponseBody = Recipe[] | Item[] | Discount[] | Market[] | string
@@ -9,7 +9,8 @@ type APIResponseBody = Recipe[] | Item[] | Discount[] | Market[] | string
  */
 export interface APIResponse<T extends APIResponseBody> {
     error: boolean
-    response: T
+    response: T,
+    id?: string
 }
 
 
@@ -18,11 +19,12 @@ export interface APIResponse<T extends APIResponseBody> {
  * @param message the message to display
  * @param duration the duration of the toast in milliseconds
  */
-export const presentToast = async (message: string, duration = 1500) => {
+export const presentToast = async (message: string, isError = false, duration = DURATIONS.SHORT) => {
     const toast = toastController.create({
         message,
         duration,
-        position: 'top'
+        position: 'top',
+        color: isError ? 'danger' : 'success'
     });
     await (await toast).present()
 }
@@ -128,7 +130,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
 
         return response
     })
-        .then((response) => {
+        .then((response: Response) => {
             const jsonResponse = response.json()
             logDebug('sendToAPI ' + route, jsonResponse)
             return jsonResponse
@@ -139,7 +141,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
 
             // present a toast to the user
             if (typeof options?.errorMessage !== 'undefined') {
-                presentToast(options?.errorMessage, 5000)
+                presentToast(options?.errorMessage, true, DURATIONS.LONG)
             }
             return {
                 error: true,

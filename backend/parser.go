@@ -240,7 +240,7 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 
 	// add recipe to database
 	for _, parsedRecipe := range parsedRecipes {
-		_, err := app.AddOrUpdateRecipe(parsedRecipe)
+		_, _, err := app.AddOrUpdateRecipe(parsedRecipe)
 		if err != nil {
 			return app.LogError("ParseAndSaveRecipe", err)
 		}
