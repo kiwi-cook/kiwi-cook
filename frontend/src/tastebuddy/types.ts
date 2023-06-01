@@ -539,7 +539,7 @@ export class Recipe {
             return Share.share({
                 title: 'Share with your recipe with buddies',
                 text: `Check out this recipe for ${this.name} on Taste Buddy!`,
-                url: '/recipe/s/' + this.getId(),
+                url: '#/recipe/s/' + this.getId(),
                 dialogTitle: 'Share with buddies',
             })
         })
