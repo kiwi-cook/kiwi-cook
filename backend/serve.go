@@ -27,6 +27,7 @@ var serveCmd = &cobra.Command{
 		TasteBuddyServerFactory(app).
 			SetPort(&port).
 			SetMode(mode).
+			SetGin().
 			Serve()
 	},
 }

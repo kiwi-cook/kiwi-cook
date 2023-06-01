@@ -7,19 +7,35 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	"time"
 )
 
-// Serve starts the server
-func (server *TasteBuddyServer) Serve() {
-	////////////////////////////////////////////////////////////////////////
-	server.Log("Serve", "Starting Taste-Buddy Server")
-	// Finish Initialize App
-	////////////////////////////////////////////////////////////////////////
+// TasteBuddyServer is the web server
 
-	////////////////////////////////////////////////////////////////////////
-	// Set up gin
-	r := gin.Default()
+type TasteBuddyServer struct {
+	port string
+	mode ServerMode
+	gin  *gin.Engine
+	*TasteBuddyApp
+}
+
+type ServerMode string
+
+const (
+	PROD  = "prod"
+	DEV   = "dev"
+	ADMIN = "admin"
+)
+
+func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
+	server := &TasteBuddyServer{}
+	server.TasteBuddyApp = app
+	return server
+}
+
+func (server *TasteBuddyServer) SetGin() *TasteBuddyServer {
+	gin := gin.Default()
 	corsConfig := cors.Config{
 		AllowAllOrigins:  true,
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
@@ -31,7 +47,71 @@ func (server *TasteBuddyServer) Serve() {
 		corsConfig.AllowAllOrigins = false
 		corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	}
-	r.Use(cors.New(corsConfig))
+	gin.Use(cors.New(corsConfig))
+	server.gin = gin
+	return server
+}
+
+// SetPort sets the port for the app
+// Return TasteBuddyApp for chaining
+func (server *TasteBuddyServer) SetPort(port *string) *TasteBuddyServer {
+	if viper.GetString("PORT") != "" && port == nil {
+		server.port = viper.GetString("PORT")
+	} else if port != nil {
+		server.port = *port
+	} else {
+		// Default port
+		server.port = "8081"
+	}
+	return server
+}
+
+// SetMode sets the mode for the app
+// Return TasteBuddyApp for chaining
+func (server *TasteBuddyServer) SetMode(mode string) *TasteBuddyServer {
+	switch mode {
+	case "dev":
+		// server.SetLogger("debug")
+		gin.SetMode(gin.DebugMode)
+	case "prod":
+		// server.SetLogger("default")
+		gin.SetMode(gin.ReleaseMode)
+	case "admin":
+		// server.SetLogger("debug")
+		gin.SetMode(gin.DebugMode)
+	default:
+		// server.SetLogger("debug")
+		gin.SetMode(gin.DebugMode)
+	}
+
+	server.mode = ServerMode(mode)
+
+	return server
+}
+
+// CheckServerModeMiddleware checks the server mode
+func (server *TasteBuddyServer) CheckServerModeMiddleware(serverMode ServerMode) gin.HandlerFunc {
+	return func(context *gin.Context) {
+		if (server.mode == ADMIN && serverMode == ADMIN) ||
+			(server.mode == DEV && (serverMode == PROD || serverMode == DEV)) ||
+			(server.mode == PROD && serverMode == PROD) {
+			context.Next()
+			return
+		}
+		ForbiddenError(context)
+	}
+}
+
+// Serve starts the server
+func (server *TasteBuddyServer) Serve() {
+	////////////////////////////////////////////////////////////////////////
+	server.Log("Serve", "Starting Taste-Buddy Server")
+	// Finish Initialize App
+	////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////////////////////////////////////////////
+	// Set up gin
+	r := server.gin
 	r.Use(server.CheckSessionTokenMiddleware())
 	r.Use(server.GenerateJWTMiddleware())
 
@@ -133,7 +213,7 @@ func (server *TasteBuddyServer) Serve() {
 	server.Log("Serve", "DONE preparing server")
 
 	// Start server
-	if err := r.Run(":" + server.port); err != nil {
+	if err := server.gin.Run(":" + server.port); err != nil {
 		server.LogError("Serve", err)
 		return
 	}

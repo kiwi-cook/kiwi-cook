@@ -84,6 +84,7 @@ func (logger *TasteBuddyLogger) Printf(logLevel LogLevel, logType string, color 
 	if len(message) > 0 {
 		format += "%v"
 	}
+
 	switch logger.logLevel {
 	case DefaultLogLevel:
 		log.Printf(format, message...)
