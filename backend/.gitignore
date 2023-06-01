@@ -7,4 +7,6 @@
 *.key
 *.crt
 
+# deta.space
 .space
+Spacefile
