@@ -4,6 +4,7 @@ import { State } from "@/storage";
 import { descriptionToSteps } from "@/utility/recipeParser";
 import { Store } from "vuex";
 import { log, logDebug } from ".";
+import { CanShareResult, Share } from "@capacitor/share";
 
 // types for recipe
 
@@ -228,14 +229,14 @@ export class Step {
      * Get the short description of the recipe. It is the first two sentences of the description.
      * @returns the short description of the recipe
      */
-        public getShortDescription(maxLength = 2): string {
-            let shortDescription = this.description.split('.').slice(0, maxLength).join('.')
-            const lastChar = shortDescription.charAt(shortDescription.length - 1)
-            if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
-                shortDescription += '.'
-            }
-            return shortDescription
+    public getShortDescription(maxLength = 2): string {
+        let shortDescription = this.description.split('.').slice(0, maxLength).join('.')
+        const lastChar = shortDescription.charAt(shortDescription.length - 1)
+        if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
+            shortDescription += '.'
         }
+        return shortDescription
+    }
 
     /**
      * Get all unique items in the step
@@ -522,6 +523,26 @@ export class Recipe {
         }
         this.props.tags.push(tag)
         return this
+    }
+
+    /**
+     * Share the recipe with buddies
+     * This will open the share dialog of the device
+     * @returns a promise that resolves when the share dialog is closed
+     */
+    public async share() {
+        return Share.canShare().then((canShare: CanShareResult) => {
+            if (!canShare.value) {
+                return
+            }
+
+            return Share.share({
+                title: 'Share with your recipe with buddies',
+                text: `Check out this recipe for ${this.name} on Taste Buddy!`,
+                url: '/recipe/s/' + this.getId(),
+                dialogTitle: 'Share with buddies',
+            })
+        })
     }
 }
 
