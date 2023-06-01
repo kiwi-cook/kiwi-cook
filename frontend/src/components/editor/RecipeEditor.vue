@@ -1,5 +1,5 @@
 <template>
-    <ion-card class="recipe-editor">
+    <ion-card class="recipe-editor" v-if="mutableRecipe">
         <ion-card-header>
             <ion-grid>
                 <ion-row>
@@ -46,7 +46,7 @@
                                 label="Author" label-placement="stacked" />
                         </ion-col>
                         <ion-col size="auto">
-                            {{  mutableRecipe.getDuration() }} minutes
+                            {{ mutableRecipe.getDuration() }} minutes
                         </ion-col>
                     </ion-row>
                 </ion-grid>
@@ -65,10 +65,14 @@
                     <ion-icon :icon="closeCircleOutline" @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)" />
                 </ion-chip>
                 <!-- Add tag to the list -->
-                <ion-chip class="tag" color="light">
-                    <ion-input placeholder="Add tag" type="text"
-                        @keyup.enter="($event) => { mutableRecipe.addTag($event.target.value); $event.target.value = '' }" aria-label="Tag" />
-                </ion-chip>
+                <DropDownSearch :items="allTags" placeholder="e.g. vegan" @select-item="mutableRecipe.addTag($event)"
+                    @add-item="mutableRecipe.addTag($event)" :reset-after="true">
+                    <template #item="{ filteredItem }">
+                        <ion-chip class="tag" color="light">
+                            <ion-label>{{ filteredItem }}</ion-label>
+                        </ion-chip>
+                    </template>
+                </DropDownSearch>
             </ion-item>
 
             <!-- <ion-item>
@@ -229,13 +233,14 @@ import {
     IonSelectOption,
     IonTextarea
 } from '@ionic/vue';
-import { computed, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
 import SmallItemContainer from '@/components/item/SmallItemContainer.vue';
 import { descriptionToItems } from '@/utility/recipeParser';
 import { formatDate } from '@/utility/util';
 import SmallItemList from "@/components/item/SmallItemList.vue";
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -267,9 +272,11 @@ export default defineComponent({
         DropDownSearch,
         SmallItemContainer
     },
-    emits: ['remove'],
-    setup(props) {
+    emits: ['update:recipe'],
+    setup(props, { emit}) {
         const { recipe } = toRefs(props)
+
+        const router = useRouter();
 
         const store = useTasteBuddyStore();
         const allItems = computed(() => store.getters.getItems);
@@ -278,35 +285,38 @@ export default defineComponent({
         // update recipe and steps when prop changes
         watch(recipe, (newRecipe: Recipe) => {
             mutableRecipe.value = newRecipe
-        }, { deep: true })
+        })
 
         /**
          * Save recipe to the Backend API
          */
-        const saveRecipe = () => mutableRecipe.value.save(store)
+        const saveRecipe = () => mutableRecipe.value?.save(store)
 
         /**
          * Delete recipe from the Backend API
+         * Redirect to SavedRecipes
          */
-        const deleteRecipe = () => mutableRecipe.value.delete(store)
+        const deleteRecipe = () => mutableRecipe.value?.delete(store).then(() => {
+            router.push({ name: 'SavedRecipes' })
+        })
 
         /**
          * Add a step to the recipe
          * @param stepIndex index of the step to add after
          */
-        const addStep = (stepIndex: number) => mutableRecipe.value.addStep(undefined, stepIndex)
+        const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, stepIndex)
 
         /**
          * Add steps to the recipe from a description
          * @param description description to parse
          */
-        const addStepsFromDescription = (description: string) => mutableRecipe.value.addSteps(Step.fromDescription(description))
+        const addStepsFromDescription = (description: string) => mutableRecipe.value?.addSteps(Step.fromDescription(description))
 
         /**
          * Remove a step from the recipe
          * @param stepIndex index of the step to remove
          */
-        const removeStep = (stepIndex: number) => mutableRecipe.value.removeStep(stepIndex)
+        const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIndex)
 
         /**
          * Add an item to a step
@@ -314,7 +324,7 @@ export default defineComponent({
          * @param itemIndex index of the item to add after
          * @param itemName name of the item to add
          */
-        const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe.value.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
+        const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe.value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
 
         /**
          * Select an item in a step and update it
@@ -322,14 +332,14 @@ export default defineComponent({
          * @param itemIndex index of the item to select
          * @param item item to update
          */
-        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe.value.steps[stepIndex].items[itemIndex].updateItem(item)
+        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe.value?.steps[stepIndex].items[itemIndex].updateItem(item)
 
         /**
          * Add items to a step from a description
          * @param stepIndex index of the step to add the items to
          */
         const addItemsFromDescription = (stepIndex: number) => {
-            const description: string = mutableRecipe.value.steps[stepIndex].description;
+            const description: string = mutableRecipe.value?.steps[stepIndex].description;
             descriptionToItems(description).forEach((stepItem: StepItem) => {
                 mutableRecipe.value.addStep(Step.fromStepItems([stepItem], description))
             })
@@ -340,7 +350,12 @@ export default defineComponent({
          * @param stepIndex index of the step to remove the item from
          * @param itemIndex index of the item to remove
          */
-        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value.steps[stepIndex].items.splice(itemIndex, 1);
+        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value?.steps[stepIndex].items.splice(itemIndex, 1);
+
+        /**
+         * Get all tags from the store
+         */
+        const allTags: ComputedRef<string[]> = computed(() => store.getters.getTags);
 
         return {
             // recipe
@@ -349,6 +364,8 @@ export default defineComponent({
             addStep, removeStep, addStepsFromDescription,
             // items
             allItems, addItem, selectItem, removeItem, addItemsFromDescription,
+            // tags
+            allTags,
             // icons
             closeCircleOutline,
             // utility

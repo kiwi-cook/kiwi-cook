@@ -110,8 +110,8 @@ export default defineComponent({
             mutableItem.value = item.value
         })
 
-        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesByItemId(item.value._id)
-            .map((recipeId: string) => store.getters.getRecipesById[recipeId]))
+        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesAsListByItemId(item.value._id)
+            .map((recipeId: string) => store.getters.getRecipesAsMap[recipeId]))
 
         const saveItem = () => mutableItem.value.save(store)
         const deleteItem = () => mutableItem.value.delete(store)

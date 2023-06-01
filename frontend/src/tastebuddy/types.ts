@@ -1,8 +1,8 @@
 // Data types for the API
 
-import {State} from "@/storage";
-import {descriptionToSteps} from "@/utility/recipeParser";
-import {Store} from "vuex";
+import { State } from "@/storage";
+import { descriptionToSteps } from "@/utility/recipeParser";
+import { Store } from "vuex";
 import { log, logDebug } from ".";
 
 // types for recipe
@@ -380,21 +380,22 @@ export class Recipe {
     /**
      * Save the recipe to the database
      * @param store
-     * @returns the recipe to allow chaining
+     * @returns the id of the recipe
      */
-    public save(store: Store<State>): Recipe {
+    public save(store: Store<State>): Promise<string> {
         logDebug('save', this.getId())
-        store.dispatch('saveRecipe', this)
-        return this
+        return store.dispatch('saveRecipe', this).then((id: string) => id)
     }
 
     /**
      * Delete the recipe from the database
      * @param store
      */
-    public delete(store: Store<State>): void {
+    public delete(store: Store<State>): Promise<Recipe> {
         logDebug('delete', this.getId())
-        store.dispatch('deleteRecipe', this)
+        return store.dispatch('deleteRecipe', this).then(() => {
+            return this
+        })
     }
 
     /**
@@ -457,7 +458,7 @@ export class Recipe {
             // update the item at the specified index
             this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
-        return {item, recipe: this};
+        return { item, recipe: this };
     }
 
     /**

@@ -36,7 +36,7 @@ export default defineComponent({
         const {filter} = toRefs(props)
 
         const store = useTasteBuddyStore();
-        const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipes);
+        const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesAsList);
         const loadedRecipes: Ref<Recipe[]> = ref([]);
         const loadedFilteredRecipes: Ref<Recipe[]> = ref([]);
         const loadedRecipesIndex = ref(0);

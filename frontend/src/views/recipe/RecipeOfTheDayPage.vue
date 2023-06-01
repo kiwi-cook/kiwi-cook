@@ -46,7 +46,7 @@ export default defineComponent({
     },
     setup() {
         const store = useTasteBuddyStore()
-        const recipeOfTheDay: ComputedRef<Recipe> = computed(() => (store.getters.getRecipes ?? [{}])[0])
+        const recipeOfTheDay: ComputedRef<Recipe> = computed(() => (store.getters.getRecipesAsList ?? [{}])[0])
 
         return {
             recipeOfTheDay

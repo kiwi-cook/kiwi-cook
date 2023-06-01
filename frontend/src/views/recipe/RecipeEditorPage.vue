@@ -52,7 +52,7 @@ export default defineComponent({
         const route = useRoute();
         const recipeId = ref(route.params.id as string);
         const store = useTasteBuddyStore();
-        const recipe = computed(() => store.getters.getRecipesById[recipeId.value]);
+        const recipe = computed(() => store.getters.getRecipesAsMap[recipeId.value]);
         const mutableRecipe = ref<Recipe>(recipe.value);
 
         watch(recipe, (newRecipe) => {

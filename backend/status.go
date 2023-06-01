@@ -9,10 +9,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func responseJSON(response interface{}, isError bool) gin.H {
 	return gin.H{"response": response, "error": isError}
+}
+
+func responseJSONwithID(response interface{}, isError bool, id string) gin.H {
+	return gin.H{"response": response, "error": isError, "id": id}
 }
 
 // Success returns a 200 success with a message
@@ -20,9 +25,14 @@ func Success(context *gin.Context, response interface{}) {
 	context.JSON(http.StatusOK, responseJSON(response, false))
 }
 
+// Updated returns a 200 success with a message
+func Updated(context *gin.Context, t string, id primitive.ObjectID) {
+	context.JSON(http.StatusOK, responseJSONwithID("Updated "+t+" with ID "+id.Hex(), false, id.Hex()))
+}
+
 // Created returns a 201 success with a message
-func Created(context *gin.Context, response interface{}) {
-	context.JSON(http.StatusCreated, responseJSON(response, false))
+func Created(context *gin.Context, t string, id primitive.ObjectID) {
+	context.JSON(http.StatusCreated, responseJSONwithID("Created "+t+" with ID "+id.Hex(), false, id.Hex()))
 }
 
 // BadRequestError returns a 400 error with a message
@@ -56,6 +66,7 @@ func TooManyRequests(context *gin.Context) {
 }
 
 // ServerError returns a 500 error with a message
+// If funny is true, a funny message is returned
 func ServerError(context *gin.Context, funny bool) {
 	var message string
 	if funny {

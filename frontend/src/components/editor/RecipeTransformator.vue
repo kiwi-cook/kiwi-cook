@@ -169,7 +169,7 @@ export default defineComponent({
         })
 
         const store = useTasteBuddyStore()
-        const recipes: ComputedRef<any[]> = computed(() => store.getters.getRecipes)
+        const recipes: ComputedRef<any[]> = computed(() => store.getters.getRecipesAsList)
         const transformedRecipes: Ref = ref(recipes.value)
         watch(recipes, (newRecipes) => {
             transformedRecipes.value = newRecipes

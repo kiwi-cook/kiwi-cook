@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from '@ionic/vue-router';
+import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
 import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
@@ -12,15 +12,18 @@ const routes: Array<RouteRecordRaw> = [
         redirect: 'recipe/of-the-day',
         children: [
             {
+                name: 'Home',
                 path: 'recipe',
                 component: () => import('@/views/recipe/RecipePage.vue'),
                 redirect: 'recipe/saved',
                 children: [
                     {
+                        name: 'Recipe',
                         path: ':id',
                         component: () => import('@/views/recipe/RecipeDetailPage.vue')
                     },
                     {
+                        name: 'RecipeEditor',
                         path: ':id/edit',
                         meta: {
                             auth: true,
@@ -38,6 +41,7 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/recipe/RecipeOfTheDayPage.vue')
             },
             {
+                name: 'SavedRecipes',
                 path: 'recipe/saved',
                 component: () => import('@/views/recipe/RecipesListPage.vue')
             },

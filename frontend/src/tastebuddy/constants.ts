@@ -41,3 +41,9 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.GET_DISCOUNTS]: { url: '/discount/CITY', method: 'GET', contentType: 'application/json' },
     [API_ROUTE.GET_MARKETS]: { url: '/discount/markets/CITY', method: 'GET', contentType: 'application/json' },
 }
+
+export const DURATIONS = {
+    SHORT: 3000,
+    MEDIUM: 5000,
+    LONG: 20000,
+}

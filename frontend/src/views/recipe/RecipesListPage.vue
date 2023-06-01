@@ -14,37 +14,61 @@
             <div class="content">
                 <RecipeList :filter="filterInput"/>
             </div>
+            <ion-fab slot="fixed" horizontal="start" vertical="bottom">
+                <ion-fab-button color="tertiary" @click="addRecipe()">
+                    <ion-icon :icon="addOutline"/>
+                </ion-fab-button>
+            </ion-fab>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import {defineComponent, ref} from 'vue';
+import {computed, defineComponent, ref} from 'vue';
 import {
     IonContent,
     IonHeader,
     IonPage,
     IonSearchbar,
     IonTitle,
-    IonToolbar
+    IonToolbar,
+    IonFab,
+IonFabButton,
+IonIcon,
 } from '@ionic/vue';
 import RecipeList from '@/components/recipe/RecipeList.vue'
-import {arrowDown, filter} from 'ionicons/icons';
+import {addOutline, filter} from 'ionicons/icons';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
+import { useTasteBuddyStore } from '@/storage';
+import { Recipe } from '@/tastebuddy/types';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
         TasteBuddyLogo,
-        IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent,
+        IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent, IonFab, IonFabButton, IonIcon,
         RecipeList
     },
     setup() {
         const filterInput = ref('')
 
+
+        const router = useRouter()
+        const store = useTasteBuddyStore()
+        const isDevMode = computed(() => store.getters.isDevMode)
+        const addRecipe = () => {
+            if (isDevMode.value) {
+                const newRecipeId =  Recipe.newRecipe().update(store)._tmpId
+                router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+            }
+        }
+
         return {
-            arrowDown, filter,
-            filterInput
+            // recipe
+            addOutline, addRecipe,
+            // filter
+            filterInput, filter
         }
     }
 });

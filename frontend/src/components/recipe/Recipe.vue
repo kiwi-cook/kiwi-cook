@@ -1,9 +1,9 @@
 <template>
     <ion-list lines="none">
-        <ion-item v-if="recipe" lines="none">
+        <ion-item lines="none" v-if="recipe">
             <RecipeHero :recipe="recipe" />
         </ion-item>
-        <ion-item lines="none">
+        <ion-item lines="none" v-if="recipe">
             <div class="center">
                 <ion-button color="primary">
                     {{ recipe?.props.likes ?? 0 }}
@@ -22,7 +22,7 @@
         </ion-text>
     </ion-item>
 
-    <ion-grid>
+    <ion-grid v-if="ingredients.length > 0 || tools.length > 0">
         <ion-row>
             <ion-col size-lg="6" size="12">
                 <ion-card v-if="ingredients?.length > 0">
