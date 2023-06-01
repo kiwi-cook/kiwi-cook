@@ -18,14 +18,17 @@
                 </template>
             </div>
             <ion-fab slot="fixed" horizontal="start" vertical="bottom">
-                <ion-fab-button color="tertiary" @click="goBack()">
-                    <ion-icon :icon="arrowBack" />
+                <ion-fab-button color="tertiary" size="small">
+                    <ion-icon :icon="addOutline" />
                 </ion-fab-button>
-                <template v-if="isDevMode">
-                    <ion-fab-button color="primary" @click="editRecipe()">
+                <ion-fab-list side="end">
+                    <ion-fab-button color="primary" @click="goBack()">
+                        <ion-icon :icon="arrowBack" />
+                    </ion-fab-button>
+                    <ion-fab-button v-if="isDevMode" color="primary" @click="editRecipe()">
                         <ion-icon :icon="createOutline" />
                     </ion-fab-button>
-                </template>
+                </ion-fab-list>
             </ion-fab>
         </ion-content>
     </ion-page>
@@ -33,21 +36,20 @@
 
 <script lang="ts">
 import { computed, ComputedRef, defineComponent } from 'vue';
-import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import { IonContent, IonFab, IonFabButton, IonFabList, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import { useTasteBuddyStore } from "@/storage";
 import { useRoute } from 'vue-router';
 import { useIonRouter } from '@ionic/vue';
 import { Recipe } from '@/tastebuddy/types';
-import { arrowBack, createOutline } from "ionicons/icons";
+import { addOutline, arrowBack, createOutline } from "ionicons/icons";
 
 
 export default defineComponent({
     title: 'RecipeOfTheDayPage',
     components: {
-        IonFabButton, IonIcon, IonFab,
         RecipeComponent,
-        IonPage, IonContent, IonHeader, IonToolbar, IonTitle
+        IonPage, IonContent, IonHeader, IonToolbar, IonTitle, IonFabButton, IonIcon, IonFab, IonFabList,
     },
     setup() {
         const route = useRoute()
@@ -69,8 +71,8 @@ export default defineComponent({
         return {
             // recipe
             recipe, isDevMode, editRecipe, createOutline,
-            // navigation
-            goBack, arrowBack
+            // fab
+            goBack, arrowBack, addOutline
         }
     }
 });

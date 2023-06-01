@@ -34,10 +34,10 @@
             <div class="flex">
                 <ion-grid>
                     <ion-row>
-                        <ion-col size="auto">
-                            <ion-textarea v-model.lazy.trim="mutableRecipe.description" :auto-grow="true"
-                                placeholder="e.g. The best recipe in Germany" label="Description"
-                                label-placement="stacked" />
+                        <ion-col size="12">
+                            <ion-textarea v-model.trim="mutableRecipe.description"
+                                placeholder="e.g. The best recipe in Germany" label="Description" label-placement="stacked"
+                                :counter="true" :spellcheck="true" wrap="soft" :rows="3" :cols="6" />
                         </ion-col>
                     </ion-row>
                     <ion-row>
@@ -103,9 +103,9 @@
             </ion-card-header>
 
             <ion-card-content>
-                <ion-textarea v-model.trim="step.description" :auto-grow="true"
-                    placeholder="e.g. Mix the ingredients together" @keyup.enter="addItemsFromDescription(stepIndex)"
-                    label="Description" label-placement="stacked" />
+                <ion-textarea v-model.trim="step.description" placeholder="e.g. Mix the ingredients together"
+                    label="Description" label-placement="stacked" :counter="true" :spellcheck="true" wrap="soft" :rows="3"
+                    :cols="6" />
 
                 <ion-input v-model.number="step.duration" max="9999" min="1" type="number"
                     label="Preparation time (minutes)" label-placement="stacked" />
@@ -190,8 +190,8 @@
                                 </ion-item>
 
                                 <ion-item lines="none">
-                                    <ion-select v-model="stepItem.type" label="Type" label-placement="floating"
-                                        placeholder="Type">
+                                    <ion-select v-model="stepItem.type" label="Type" label-placement="floating" interface="popover"
+                                        placeholder="Type" color="light">
                                         <ion-select-option value="ingredient">Ingredient</ion-select-option>
                                         <ion-select-option value="tool">Tool</ion-select-option>
                                     </ion-select>
@@ -377,6 +377,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-textarea {
+    width: 100%;
+    height: 100px;
+}
+
 ion-card {
     /* nice shadow with light background and round corners */
     box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.19);

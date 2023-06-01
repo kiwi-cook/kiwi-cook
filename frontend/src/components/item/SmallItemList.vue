@@ -2,7 +2,7 @@
     <ul>
         <template v-for="(item, itemIndex) in items" :key="itemIndex">
             <li>
-                <SmallItem :item="item" class="small-item"/>
+                <SmallItem :item="item" class="small-item" />
             </li>
         </template>
     </ul>
@@ -10,8 +10,8 @@
 
 <script lang="ts">
 import SmallItem from "@/components/item/SmallItem.vue";
-import {defineComponent, PropType} from "vue";
-import {Item, StepItem} from "@/tastebuddy/types";
+import { defineComponent, PropType } from "vue";
+import { Item, StepItem } from "@/tastebuddy/types";
 
 export default defineComponent({
     name: 'SmallItemList',
