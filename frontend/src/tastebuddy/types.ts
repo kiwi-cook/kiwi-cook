@@ -225,6 +225,19 @@ export class Step {
     }
 
     /**
+     * Get the short description of the recipe. It is the first two sentences of the description.
+     * @returns the short description of the recipe
+     */
+        public getShortDescription(maxLength = 2): string {
+            let shortDescription = this.description.split('.').slice(0, maxLength).join('.')
+            const lastChar = shortDescription.charAt(shortDescription.length - 1)
+            if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
+                shortDescription += '.'
+            }
+            return shortDescription
+        }
+
+    /**
      * Get all unique items in the step
      * @returns a list of all items in the step
      */

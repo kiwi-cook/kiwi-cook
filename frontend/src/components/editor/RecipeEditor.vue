@@ -240,7 +240,7 @@ import SmallItemContainer from '@/components/item/SmallItemContainer.vue';
 import { descriptionToItems } from '@/utility/recipeParser';
 import { formatDate } from '@/utility/util';
 import SmallItemList from "@/components/item/SmallItemList.vue";
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -272,11 +272,10 @@ export default defineComponent({
         DropDownSearch,
         SmallItemContainer
     },
-    emits: ['update:recipe'],
-    setup(props, { emit}) {
+    setup(props) {
         const { recipe } = toRefs(props)
 
-        const router = useRouter();
+        const router = useIonRouter();
 
         const store = useTasteBuddyStore();
         const allItems = computed(() => store.getters.getItems);
@@ -285,7 +284,7 @@ export default defineComponent({
         // update recipe and steps when prop changes
         watch(recipe, (newRecipe: Recipe) => {
             mutableRecipe.value = newRecipe
-        })
+        }, { immediate: true })
 
         /**
          * Save recipe to the Backend API

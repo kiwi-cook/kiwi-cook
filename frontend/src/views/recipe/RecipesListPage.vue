@@ -41,7 +41,7 @@ import {addOutline, filter} from 'ionicons/icons';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 import { useTasteBuddyStore } from '@/storage';
 import { Recipe } from '@/tastebuddy/types';
-import { useRouter } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
@@ -54,7 +54,7 @@ export default defineComponent({
         const filterInput = ref('')
 
 
-        const router = useRouter()
+        const router = useIonRouter()
         const store = useTasteBuddyStore()
         const isDevMode = computed(() => store.getters.isDevMode)
         const addRecipe = () => {

@@ -10,7 +10,7 @@
                     <ion-label>Today</ion-label>
                 </ion-tab-button>
 
-                <ion-tab-button href="/recipe/finder" tab="recipe-finder">
+                <ion-tab-button href="/recipe/suggestions" tab="recipe-finder">
                     <ion-icon :icon="sparklesOutline"/>
                     <ion-label>Suggestions</ion-label>
                 </ion-tab-button>

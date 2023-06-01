@@ -6,7 +6,7 @@
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
-                    {{ firstStep?.description }}
+                    {{ firstStep?.getShortDescription() }}..
                 </p>
                 ...
             </div>

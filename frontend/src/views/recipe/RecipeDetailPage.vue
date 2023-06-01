@@ -36,7 +36,8 @@ import { computed, ComputedRef, defineComponent } from 'vue';
 import { IonContent, IonFab, IonFabButton, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import { useTasteBuddyStore } from "@/storage";
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 import { Recipe } from '@/tastebuddy/types';
 import { arrowBack, createOutline } from "ionicons/icons";
 
@@ -62,8 +63,8 @@ export default defineComponent({
         }
 
 
-        const router = useRouter()
-        const goBack = () => router.go(-1)
+        const router = useIonRouter()
+        const goBack = () => router.back()
 
         return {
             // recipe

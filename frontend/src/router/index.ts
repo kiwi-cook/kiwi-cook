@@ -9,22 +9,22 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: TabsPage,
-        redirect: 'recipe/of-the-day',
+        redirect: () => ({ name: 'RecipeOfTheDay'}),
         children: [
             {
                 name: 'Home',
-                path: 'recipe',
+                path: 'recipe/',
                 component: () => import('@/views/recipe/RecipePage.vue'),
-                redirect: 'recipe/saved',
+                redirect: to => ({ name: 'RecipeOfTheDay' }),
                 children: [
                     {
                         name: 'Recipe',
-                        path: ':id',
+                        path: 's/:id',
                         component: () => import('@/views/recipe/RecipeDetailPage.vue')
                     },
                     {
                         name: 'RecipeEditor',
-                        path: ':id/edit',
+                        path: 'e/:id',
                         meta: {
                             auth: true,
                         },
@@ -32,11 +32,13 @@ const routes: Array<RouteRecordRaw> = [
                     }
                 ]
             },
-            /* {
+            {
+                name: 'RecipeSuggestions',
                 path: 'recipe/suggestions',
                 component: () => import('@/views/recipe/RecipeSuggestionsPage.vue')
-            }, */
+            },
             {
+                name: 'RecipeOfTheDay',
                 path: 'recipe/of-the-day',
                 component: () => import('@/views/recipe/RecipeOfTheDayPage.vue')
             },
@@ -46,13 +48,15 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/recipe/RecipesListPage.vue')
             },
             {
+                name: 'Login',
                 path: 'login',
                 component: () => import('@/views/user/SignInPage.vue')
             },
             /* 404 */
             {
+                name: 'NotFound',
                 path: '/:pathMatch(.*)*',
-                redirect: '/recipe/saved'
+                redirect: to => ({ name: 'SavedRecipes' }),
             }
         ]
     }

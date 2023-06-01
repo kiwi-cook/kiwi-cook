@@ -8,13 +8,13 @@
         <ion-content :fullscreen="true">
             <div class="content">
                 <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
-                    <ion-refresher-content/>
+                    <ion-refresher-content />
                 </ion-refresher>
-                <RecipeEditor v-if="recipe" :recipe="recipe"/>
+                <RecipeEditor v-if="recipe" :recipe="recipe" :key="recipe?.getId()" />
             </div>
             <ion-fab slot="fixed" horizontal="start" vertical="bottom">
                 <ion-fab-button color="tertiary" @click="goBack()">
-                    <ion-icon :icon="arrowBack"/>
+                    <ion-icon :icon="arrowBack" />
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -22,10 +22,11 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, onMounted, ref, watch} from 'vue';
-import {useRoute, useRouter} from 'vue-router';
-import {Recipe} from '@/tastebuddy/types';
-import {useTasteBuddyStore} from '@/storage';
+import { ComputedRef, computed, defineComponent, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
+import { Recipe } from '@/tastebuddy/types';
+import { useTasteBuddyStore } from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 import {
     IonContent,
@@ -38,7 +39,7 @@ import {
     IonTitle,
     IonToolbar
 } from "@ionic/vue";
-import {arrowBack} from "ionicons/icons";
+import { arrowBack } from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
@@ -52,7 +53,7 @@ export default defineComponent({
         const route = useRoute();
         const recipeId = ref(route.params.id as string);
         const store = useTasteBuddyStore();
-        const recipe = computed(() => store.getters.getRecipesAsMap[recipeId.value]);
+        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesAsMap[recipeId.value]);
         const mutableRecipe = ref<Recipe>(recipe.value);
 
         watch(recipe, (newRecipe) => {
@@ -84,7 +85,7 @@ export default defineComponent({
         }
 
 
-        const router = useRouter()
+        const router = useIonRouter()
         const goBack = () => router.back()
 
         return {

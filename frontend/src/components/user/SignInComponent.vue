@@ -1,16 +1,16 @@
 <template>
     <ion-card class="login-card">
         <ion-card-header>
-            <TasteBuddyLogo/>
+            <TasteBuddyLogo />
         </ion-card-header>
         <ion-card-content>
             <ion-item>
                 <ion-input v-model="username" :clear-input="true" autocomplete="username" label="Username"
-                           label-placement="floating" type="text"/>
+                    label-placement="floating" type="text" />
             </ion-item>
             <ion-item>
-                <ion-input v-model="password" autocomplete="current-password" label="Password"
-                           label-placement="floating" type="password"/>
+                <ion-input v-model="password" autocomplete="current-password" label="Password" label-placement="floating"
+                    type="password" />
             </ion-item>
             <ion-button :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</ion-button>
         </ion-card-content>
@@ -18,11 +18,12 @@
 </template>
 
 <script lang="ts">
-import {computed, ref, watch} from 'vue';
-import {IonButton, IonCard, IonCardContent, IonCardHeader, IonInput, IonItem} from '@ionic/vue';
+import { computed, ref, watch } from 'vue';
+import { IonButton, IonCard, IonCardContent, IonCardHeader, IonInput, IonItem } from '@ionic/vue';
 import TasteBuddyLogo from '@/components/general/TasteBuddyLogo.vue'
-import {useTasteBuddyStore} from '@/storage';
-import {useRoute, useRouter} from 'vue-router';
+import { useTasteBuddyStore } from '@/storage';
+import { useRoute } from 'vue-router';
+import { useIonRouter } from '@ionic/vue';
 
 export default {
     name: 'SignIn',
@@ -41,7 +42,7 @@ export default {
         const isDisabled = computed(() => username.value.length === 0 || password.value.length === 0)
 
         const route = useRoute()
-        const router = useRouter()
+        const router = useIonRouter()
         const redirect = computed(() => (route.query.redirect ?? '') as string)
 
         const store = useTasteBuddyStore();
