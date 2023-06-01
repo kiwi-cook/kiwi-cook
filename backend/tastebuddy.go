@@ -6,7 +6,6 @@ package main
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"os"
 	"strconv"
@@ -129,74 +128,6 @@ func (app *TasteBuddyApp) HasEnvFile() bool {
 func (app *TasteBuddyApp) Exit(code int) {
 	app.Log("Exit", "exiting with code "+strconv.Itoa(code))
 	os.Exit(code)
-}
-
-// TasteBuddyServer is the web server
-
-type TasteBuddyServer struct {
-	port string
-	mode ServerMode
-	*TasteBuddyApp
-}
-
-type ServerMode string
-
-const (
-	PROD  = "prod"
-	DEV   = "dev"
-	ADMIN = "admin"
-)
-
-func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
-	server := &TasteBuddyServer{}
-	server.TasteBuddyApp = app
-	return server.SetPort(nil)
-}
-
-// SetPort sets the port for the app
-// Return TasteBuddyApp for chaining
-func (server *TasteBuddyServer) SetPort(port *string) *TasteBuddyServer {
-	if viper.GetString("PORT") != "" && port == nil {
-		server.port = viper.GetString("PORT")
-	} else if port != nil {
-		server.port = *port
-	} else {
-		// Default port
-		server.port = "8081"
-	}
-	return server
-}
-
-// SetMode sets the mode for the app
-// Return TasteBuddyApp for chaining
-func (server *TasteBuddyServer) SetMode(mode string) *TasteBuddyServer {
-	switch mode {
-	case "dev":
-		server.SetLogger("debug")
-	case "prod":
-		server.SetLogger("default")
-	case "admin":
-		server.SetLogger("debug")
-	default:
-		server.SetLogger("debug")
-	}
-
-	server.mode = ServerMode(mode)
-
-	return server
-}
-
-// CheckServerModeMiddleware checks the server mode
-func (server *TasteBuddyServer) CheckServerModeMiddleware(serverMode ServerMode) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		if (server.mode == ADMIN && serverMode == ADMIN) ||
-			(server.mode == DEV && (serverMode == PROD || serverMode == DEV)) ||
-			(server.mode == PROD && serverMode == PROD) {
-			context.Next()
-			return
-		}
-		ForbiddenError(context)
-	}
 }
 
 func checkIfPathIsFile(path string) bool {
