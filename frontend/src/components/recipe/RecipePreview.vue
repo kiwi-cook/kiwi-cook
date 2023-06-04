@@ -1,12 +1,12 @@
 <template>
-    <ion-card class="recipe-preview-card">
-        <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
+    <ion-card class="recipe-preview-card" @click="toRecipe()">
+        <RecipeHero :recipe="recipe" class="recipe-preview-hero" />
         <ion-card-content>
-            <SmallItemList :items="recipe.getItems()"/>
+            <SmallItemList :items="recipe?.getItems()" />
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
-                    {{ firstStep?.getShortDescription() }}..
+                    {{ firstStep?.getShortDescription() }}
                 </p>
                 ...
             </div>
@@ -18,9 +18,9 @@
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
-import {Recipe, Step} from "@/tastebuddy/types";
-import {IonCard, IonCardContent} from "@ionic/vue";
+import { computed, ComputedRef, defineComponent, PropType, toRefs } from "vue";
+import { Recipe, Step } from "@/tastebuddy/types";
+import { IonCard, IonCardContent, useIonRouter } from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
 import SmallItemList from "@/components/item/SmallItemList.vue";
@@ -39,10 +39,17 @@ export default defineComponent({
         IonCard, IonCardContent
     },
     setup(props: any) {
-        const {recipe} = toRefs(props)
+        const { recipe } = toRefs(props)
         const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
+
+        const router = useIonRouter();
+        const toRecipe = () => {
+            router.push({ name: 'Recipe', params: { id: recipe.value?.getId() } })
+        }
+
         return {
-            firstStep
+            firstStep,
+            toRecipe
         }
     }
 });
@@ -72,6 +79,7 @@ export default defineComponent({
     --margin: 16px;
     --ion-button-color: #FFF;
     --ion-button-background-color: #F28705;
+    cursor: pointer;
 }
 
 .recipe-step-preview {

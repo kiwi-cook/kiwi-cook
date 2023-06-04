@@ -2,21 +2,21 @@
     <ion-page id="recipe-list-page">
         <ion-header>
             <ion-toolbar color="primary">
-                <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
+                <TasteBuddyLogo size="tiny" with-left-margin slot="start" />
                 <ion-title>Recipes</ion-title>
             </ion-toolbar>
             <ion-toolbar color="primary">
-                <ion-searchbar v-model="filterInput" :debounce="500" color="secondary"/>
+                <ion-searchbar v-model="filterInput" :debounce="500" color="secondary" />
             </ion-toolbar>
         </ion-header>
 
         <ion-content :fullscreen="true">
             <div class="content">
-                <RecipeList :filter="filterInput"/>
+                <RecipeList :filter="filterInput" />
             </div>
             <ion-fab slot="fixed" horizontal="start" vertical="bottom">
                 <ion-fab-button color="tertiary" @click="addRecipe()">
-                    <ion-icon :icon="addOutline"/>
+                    New
                 </ion-fab-button>
             </ion-fab>
         </ion-content>
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, ref} from 'vue';
+import { computed, defineComponent, ref } from 'vue';
 import {
     IonContent,
     IonHeader,
@@ -33,11 +33,10 @@ import {
     IonTitle,
     IonToolbar,
     IonFab,
-IonFabButton,
-IonIcon,
+    IonFabButton,
 } from '@ionic/vue';
 import RecipeList from '@/components/recipe/RecipeList.vue'
-import {addOutline, filter} from 'ionicons/icons';
+import { addOutline, filter } from 'ionicons/icons';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 import { useTasteBuddyStore } from '@/storage';
 import { Recipe } from '@/tastebuddy/types';
@@ -47,7 +46,7 @@ export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
         TasteBuddyLogo,
-        IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent, IonFab, IonFabButton, IonIcon,
+        IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent, IonFab, IonFabButton,
         RecipeList
     },
     setup() {
@@ -59,8 +58,8 @@ export default defineComponent({
         const isDevMode = computed(() => store.getters.isDevMode)
         const addRecipe = () => {
             if (isDevMode.value) {
-                const newRecipeId =  Recipe.newRecipe().update(store)._tmpId
-                router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+                const newRecipeId = Recipe.newRecipe().update(store)._tmpId
+                router.push({ name: 'RecipeEditor', params: { id: newRecipeId } })
             }
         }
 

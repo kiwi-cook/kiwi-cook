@@ -74,7 +74,7 @@ export function createTasteBuddyRouter(store: Store<State>): Router {
 
     router.beforeEach((to, from, next) => {
         logMiddleware(to, from);
-        checkAuthMiddleware(to, from, next, store, '/login');
+        checkAuthMiddleware(to, from, next, store);
     })
 
     return router;

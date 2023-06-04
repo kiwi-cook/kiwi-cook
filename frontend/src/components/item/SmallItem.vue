@@ -1,15 +1,17 @@
 <template>
     <ion-item class="small-item" lines="none">
-        <ion-img :src="itemImgUrl ?? ''" class="small-item-img"/>
-        <ion-text class="small-item-name">{{ itemName }}</ion-text>
-        <ion-chip v-if="itemAmountUnit !== ''" color="light">{{ itemAmountUnit }}</ion-chip>
+        <ion-img :src="itemImgUrl ?? ''" class="small-item-img" />
+        <ion-text class="small-item-name">
+            <ion-chip v-if="itemAmountUnit !== ''" color="light">
+                {{ itemAmountUnit }}</ion-chip>{{ itemName }}
+        </ion-text>
     </ion-item>
 </template>
 
 <script lang="ts">
-import {Item, StepItem} from '@/tastebuddy/types';
-import {IonChip, IonImg, IonItem, IonText} from '@ionic/vue';
-import {computed, defineComponent, PropType, toRefs} from 'vue';
+import { Item, StepItem } from '@/tastebuddy/types';
+import { IonChip, IonImg, IonItem, IonText } from '@ionic/vue';
+import { computed, defineComponent, PropType, toRefs } from 'vue';
 
 export default defineComponent({
     name: 'SmallRecipe',
@@ -23,13 +25,16 @@ export default defineComponent({
         IonItem, IonImg, IonText, IonChip
     },
     setup(props: any) {
-        const {item} = toRefs(props);
+        const { item } = toRefs(props);
         const itemImgUrl = computed(() => item.value instanceof StepItem ? item.value?.imgUrl : (item.value as Item)?.imgUrl);
         const itemName = computed(() => item.value instanceof StepItem ? item.value?.name : (item.value as Item)?.name);
         const itemAmountUnit = computed(() => {
-            const amount = item.value instanceof StepItem ? item.value?.amount : 0
-            const unit = item.value instanceof StepItem ? item.value?.unit : ''
-            return amount > 1 ? `${amount} ${unit}` : ''
+            if (item.value.type === 'ingredient') {
+                const amount = item.value instanceof StepItem ? item.value?.amount : 0
+                const unit = item.value instanceof StepItem ? item.value?.unit : ''
+                return amount > 0 ? `${amount} ${unit}` : ''
+            }
+            return ''
         })
         return {
             itemName, itemAmountUnit, itemImgUrl

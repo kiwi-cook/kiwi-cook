@@ -8,14 +8,13 @@
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
 import {defineComponent} from 'vue';
 import {useTasteBuddyStore} from './storage';
-import { logClick, logDebug } from './tastebuddy';
-import { API_URL } from './tastebuddy/constants';
+import { logClick } from './tastebuddy';
 
 export default defineComponent({
     name: 'App',
     components: {
         IonApp,
-        IonRouterOutlet
+        IonRouterOutlet,
     },
     setup() {
         // Initialize the store
