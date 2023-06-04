@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image"/>
+        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image" />
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
@@ -15,9 +15,9 @@
                 </div>
                 <div class="flex">
                     <ion-chip color="light">
-                        <ion-label>{{ recipe?.getDuration() }} minutes preparation time</ion-label>
+                        <ion-label>{{ recipe?.getDuration() }} minutes</ion-label>
                     </ion-chip>
-                    <ion-chip color="light">
+                    <ion-chip color="light" class="recipe-created-date">
                         created on {{ formatDate(recipe?.props.createdAt) }}
                     </ion-chip>
                 </div>
@@ -27,10 +27,10 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from "vue";
-import {Recipe} from "@/tastebuddy/types";
-import {IonChip, IonImg, IonLabel} from "@ionic/vue";
-import {formatDate} from "@/utility/util";
+import { defineComponent, PropType } from "vue";
+import { Recipe } from "@/tastebuddy/types";
+import { IonChip, IonImg, IonLabel } from "@ionic/vue";
+import { formatDate } from "@/utility/util";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -155,7 +155,7 @@ export default defineComponent({
     }
 
     ion-img.hero-image::part(image) {
-        object-fit: cover;
+        object-fit: scale-down;
         object-position: center;
     }
 
@@ -169,7 +169,16 @@ export default defineComponent({
     }
 
     .hero-text p.recipe-description {
-        font-size: 0.8em;
+        display: none;
+    }
+
+    .hero-text h2.recipe-author {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .recipe-created-date {
+        display: none;
     }
 }
 </style>
