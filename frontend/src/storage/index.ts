@@ -20,6 +20,7 @@ export interface State {
         username?: string,
         authenticated: boolean,
     }
+    isLoading: { [key: string]: boolean },
     recipes: { [id: string]: Recipe },
     items: { [id: string]: Item },
     discounts: { [city: string]: Discount[] },
@@ -43,12 +44,19 @@ export function createTasteBuddyStore() {
             user: {
                 authenticated: false
             },
+            isLoading: {},
             recipes: {},
             items: {},
             discounts: {},
             recipesByItemId: {},
         },
         mutations: {
+            addLoading(state, key: string) {
+                state.isLoading[key] = true
+            },
+            finishLoading(state, key: string) {
+                state.isLoading[key] = false
+            },
             setAuthenticated(state, authenticated: boolean) {
                 state.user.authenticated = authenticated
             },
@@ -145,6 +153,7 @@ export function createTasteBuddyStore() {
              * @param commit
              */
             fetchRecipes({ commit }) {
+                commit('addLoading', 'fetchRecipes')
                 logDebug('fetchRecipes', 'fetching recipes')
                 return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
                     .then((apiResponse: APIResponse<Recipe[]>) => {
@@ -154,18 +163,23 @@ export function createTasteBuddyStore() {
                         if (!apiResponse.error) {
                             commit('setRecipes', apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
                         }
+                        commit('finishLoading', 'fetchRecipes')
                     });
             },
-            saveRecipeById({ getters }, recipeId: string) {
+            saveRecipeById({ commit, getters }, recipeId: string) {
+                commit('addLoading', 'saveRecipeById')
                 logDebug('saveRecipeById', recipeId)
                 const recipe: Recipe = getters.getRecipeById[recipeId]
                 if (typeof recipe === 'undefined') {
                     logError('Recipe not found: ', recipeId)
                     return
                 }
-                return this.dispatch('saveRecipe', recipe)
+                return this.dispatch('saveRecipe', recipe).then(() => {
+                    commit('finishLoading', 'saveRecipeById')
+                })
             },
             saveRecipe({ commit }, recipe: Recipe) {
+                commit('addLoading', 'saveRecipe')
                 logDebug('saveRecipe', recipe)
                 commit('updateRecipe', recipe)
                 return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
@@ -177,6 +191,7 @@ export function createTasteBuddyStore() {
                         return apiResponse
                     })
                     .then((apiResponse: APIResponse<string>) => {
+                        commit('finishLoading', 'saveRecipe')
                         if (!apiResponse.error) {
                             return this.dispatch('fetchRecipes')
                         }
@@ -184,6 +199,7 @@ export function createTasteBuddyStore() {
                     })
             },
             deleteRecipe({ commit }, recipe: Recipe) {
+                commit('addLoading', 'deleteRecipe')
                 logDebug('deleteRecipe', recipe)
                 commit('removeRecipe', recipe)
                 if (typeof recipe._id !== 'undefined') {
@@ -191,11 +207,13 @@ export function createTasteBuddyStore() {
                         formatObject: { RECIPE_ID: recipe._id ?? '' },
                         errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
                     }).then((apiResponse: APIResponse<string>) => {
+                        commit('finishLoading', 'deleteRecipe')
                         return presentToast(apiResponse.response)
                     })
                 }
             },
             fetchItems({ commit }) {
+                commit('addLoading', 'fetchItems')
                 logDebug('fetchItems', 'fetching items')
                 return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
                     .then((apiResponse: APIResponse<Item[]>) => {
@@ -205,6 +223,7 @@ export function createTasteBuddyStore() {
                         if (!apiResponse.error) {
                             commit('setItems', apiResponse.response.map((item: Item) => Item.fromJSON(item)))
                         }
+                        commit('finishLoading', 'fetchItems')
                     });
             },
             saveItem({ commit }, item: Item) {
@@ -248,6 +267,9 @@ export function createTasteBuddyStore() {
             }
         },
         getters: {
+            isLoading(state): boolean {
+                return Object.values(state.isLoading).some((isLoading: boolean) => isLoading)
+            },
             /**
              * Get the current app state
              * @param state 
