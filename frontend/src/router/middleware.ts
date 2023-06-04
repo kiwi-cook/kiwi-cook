@@ -13,9 +13,8 @@ export const logMiddleware = (to: any, from: any) => {
  * @param from
  * @param next
  * @param store
- * @param loginRoute
  */
-export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<State>, loginRoute: string) => {
+export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<State>) => {
     if (to.meta.auth) {
         logDebug('router', `auth required for ${to.path}`)
         store.dispatch('sessionAuth').then((isAuthenticated: boolean) => {
@@ -24,7 +23,7 @@ export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<
                 next()
             } else {
                 const redirect = to.query.redirect ? to.query.redirect : to.path;
-                next({ path: loginRoute, query: { redirect: redirect } });
+                next({ name: 'Login', query: { redirect: redirect } });
             }
         })
     } else {
