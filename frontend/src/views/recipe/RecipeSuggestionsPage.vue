@@ -33,8 +33,6 @@
                     </ion-card-content>
                 </ion-card>
 
-                {{ recipeSuggestions }}
-
                 <RecipeList :recipe-list="recipeSuggestions" />
             </div>
         </ion-content>
