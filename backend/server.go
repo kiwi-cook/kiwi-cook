@@ -5,10 +5,11 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
-	"time"
 )
 
 // TasteBuddyServer is the web server
@@ -120,96 +121,80 @@ func (server *TasteBuddyServer) Serve() {
 
 	// Version 1
 	v1 := apiRoutes.Group("/v1")
-	{
-		// Check
-		v1.GET("", func(context *gin.Context) {
-			context.Status(200)
-		})
+	// Check
+	v1.GET("", func(context *gin.Context) {
+		context.Status(200)
+	})
 
-		// Authentication
-		authRoutes := v1.Group("/auth")
-		{
-			// Check session
-			authRoutes.GET("", func(context *gin.Context) {
-				server.HandleCheckSessionToken(context)
-			})
+	////////////////////////////////////////////////////////////////////////
+	// Users
+	userRoutes := v1.Group("/user")
+	// Check session
+	userRoutes.GET("/auth", func(context *gin.Context) {
+		server.HandleCheckSessionToken(context)
+	})
+	// Login user
+	userRoutes.POST("/auth", func(context *gin.Context) {
+		server.HandleBasicAuthentication(context)
+	})
+	// Register user
+	userRoutes.POST("/register", server.CheckServerModeMiddleware(ADMIN), func(context *gin.Context) {
+		server.HandleRegisterUser(context)
+	})
+	////////////////////////////////////////////////////////////////////////
 
-			// Login
-			authRoutes.POST("", func(context *gin.Context) {
-				server.HandleBasicAuthentication(context)
-			})
-		}
+	////////////////////////////////////////////////////////////////////////
+	// Recipes
+	recipeRoutes := v1.Group("/recipe")
+	// Get list of all recipes
+	recipeRoutes.GET("", func(context *gin.Context) {
+		server.HandleGetAllRecipes(context)
+	})
+	// Get recipe by id
+	recipeRoutes.GET("/:id", func(context *gin.Context) {
+		server.HandleGetRecipeById(context)
+	})
+	// Delete recipe by id
+	recipeRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleDeleteRecipeById(context)
+	})
+	// Add recipe to database
+	recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleAddRecipe(context)
+	})
+	////////////////////////////////////////////////////////////////////////
 
-		// Users
-		userRoutes := v1.Group("/user")
-		{
-			// Register user
-			registerRoutes := userRoutes.Group("/register")
-			{
-				registerRoutes.POST("", server.CheckServerModeMiddleware(ADMIN), func(context *gin.Context) {
-					server.HandleRegisterUser(context)
-				})
-			}
-		}
+	////////////////////////////////////////////////////////////////////////
+	// Items
+	itemRoutes := v1.Group("/item")
+	// Get list of all items
+	itemRoutes.GET("", func(context *gin.Context) {
+		server.HandleGetAllItems(context)
+	})
+	// Get item by id
+	itemRoutes.GET("/:id", func(context *gin.Context) {
+		server.HandleGetItemById(context)
+	})
+	// Delete item by id
+	itemRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleDeleteItemById(context)
+	})
+	// Add recipe to database
+	itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleAddItem(context)
+	})
+	////////////////////////////////////////////////////////////////////////
 
-		// Recipes
-		recipeRoutes := v1.Group("/recipe")
-		{
-			// Get list of all recipes
-			recipeRoutes.GET("", func(context *gin.Context) {
-				server.HandleGetAllRecipes(context)
-			})
+	////////////////////////////////////////////////////////////////////////
+	// Suggestions
+	suggestionRoutes := v1.Group("/suggest")
+	// Suggest recipes
+	suggestionRoutes.POST("/recipe", func(context *gin.Context) {
+		server.HandleRecipeSuggestions(context)
+	})
+	////////////////////////////////////////////////////////////////////////
 
-			// Get recipe by id
-			recipeRoutes.GET("/:id", func(context *gin.Context) {
-				server.HandleGetRecipeById(context)
-			})
-
-			// Delete recipe by id
-			recipeRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleDeleteRecipeById(context)
-			})
-
-			// Add recipe to database
-			recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleAddRecipe(context)
-			})
-		}
-
-		// Items
-		itemRoutes := v1.Group("/item")
-		{
-			// Get list of all items
-			itemRoutes.GET("", func(context *gin.Context) {
-				server.HandleGetAllItems(context)
-			})
-
-			// Get item by id
-			itemRoutes.GET("/:id", func(context *gin.Context) {
-				server.HandleGetItemById(context)
-			})
-
-			// Delete item by id
-			itemRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleDeleteItemById(context)
-			})
-
-			// Add recipe to database
-			itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-				server.HandleAddItem(context)
-			})
-		}
-
-		// Suggestions
-		searchRoutes := v1.Group("/s")
-		{
-			// Get suggestions
-			searchRoutes.POST("", func(context *gin.Context) {
-				server.HandleSuggestion(context)
-			})
-		}
-	}
-
+	////////////////////////////////////////////////////////////////////////
 	server.Log("Serve", "DONE preparing server")
 
 	// Start server
