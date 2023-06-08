@@ -1,8 +1,8 @@
 import { toastController } from '@ionic/vue';
 import { API_ROUTE, API_ROUTES, API_URL, DURATIONS } from './constants';
-import { Discount, Item, Market, Recipe } from './types';
+import { Item, Recipe, RecipeSuggestion } from './types';
 
-type APIResponseBody = Recipe[] | Item[] | Discount[] | Market[] | string
+type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 
 /**
  * This is a response from the API

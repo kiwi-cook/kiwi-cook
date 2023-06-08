@@ -6,7 +6,7 @@ import { App, InjectionKey } from 'vue'
 import { createStore, Store, useStore as baseUseStore } from 'vuex';
 
 // Types
-import { Discount, Item, Recipe } from '@/tastebuddy/types';
+import { Discount, Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery } from '@/tastebuddy/types';
 import { API_ROUTE, DURATIONS } from '@/tastebuddy/constants';
 import { APIResponse, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
 
@@ -22,8 +22,8 @@ export interface State {
     }
     isLoading: { [key: string]: boolean },
     recipes: { [id: string]: Recipe },
+    recipeSuggestions: Recipe[],
     items: { [id: string]: Item },
-    discounts: { [city: string]: Discount[] },
     recipesByItemId: { [itemId: string]: string[] },
 }
 
@@ -46,8 +46,8 @@ export function createTasteBuddyStore() {
             },
             isLoading: {},
             recipes: {},
+            recipeSuggestions: [],
             items: {},
-            discounts: {},
             recipesByItemId: {},
         },
         mutations: {
@@ -69,6 +69,9 @@ export function createTasteBuddyStore() {
             removeRecipe(state, recipe: Recipe) {
                 delete state.recipes[recipe.getId()]
             },
+            setRecipeSuggestions(state, recipeSuggestions: string[]) {
+                state.recipeSuggestions = recipeSuggestions.map((recipeId: string) => state.recipes[recipeId])
+            },
             setItems(state, items: Item[]) {
                 state.items = Object.assign({}, ...items.map((item: Item) => ({ [item.getId()]: item })))
             },
@@ -77,10 +80,6 @@ export function createTasteBuddyStore() {
             },
             removeItem(state, item: Item) {
                 delete state.items[item.getId()]
-            },
-            setDiscounts(state, payload: { city: string, discounts: Discount[] }) {
-                const { city, discounts } = payload
-                state.discounts[city] = discounts
             },
             mapRecipeIdsToItemIds(state, recipes: Recipe[]) {
                 const recipesByItemId: { [key: string]: string[] } = {}
@@ -140,14 +139,6 @@ export function createTasteBuddyStore() {
                     return !apiResponse.error
                 })
             },
-            logout({ commit }) {
-                logDebug('logout', 'logging out')
-                return sendToAPI<string>(API_ROUTE.POST_LOGOUT, { errorMessage: 'Could not log out' })
-                    .then((apiResponse: APIResponse<string>) => {
-                        commit('setAuthenticated', false)
-                        return !apiResponse.error
-                    })
-            },
             /**
              * Fetch the recipes from the API and store them in the store
              * @param commit
@@ -192,6 +183,8 @@ export function createTasteBuddyStore() {
                     })
                     .then((apiResponse: APIResponse<string>) => {
                         commit('finishLoading', 'saveRecipe')
+                        return apiResponse
+                    }).then((apiResponse: APIResponse<string>) => {
                         if (!apiResponse.error) {
                             return this.dispatch('fetchRecipes')
                         }
@@ -211,6 +204,24 @@ export function createTasteBuddyStore() {
                         return presentToast(apiResponse.response)
                     })
                 }
+            },
+            /**
+             * Fetch the suggestions for the recipe search
+             * @param commit
+             */
+            fetchRecipeSuggestions({ commit }, query: RecipeSuggestionQuery) {
+                commit('addLoading', 'fetchRecipeSuggestions')
+                logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
+                return sendToAPI<string[]>(API_ROUTE.POST_SUGGEST_RECIPE, { body: query, errorMessage: 'Could not fetch recipe suggestions' })
+                    .then((apiResponse: APIResponse<RecipeSuggestion[]>) => {
+                        // map the recipes JSON to Recipe objects
+                        // this is because the JSON is not a valid Recipe object,
+                        // and we need to use the Recipe class methods
+                        if (!apiResponse.error) {
+                            commit('setRecipeSuggestions', apiResponse.response)
+                        }
+                        commit('finishLoading', 'fetchRecipeSuggestions')
+                    });
             },
             fetchItems({ commit }) {
                 commit('addLoading', 'fetchItems')
@@ -250,16 +261,6 @@ export function createTasteBuddyStore() {
                         return presentToast(apiResponse.response)
                     })
                 }
-            },
-            fetchDiscounts({ commit }, city: string) {
-                logDebug('fetchDiscounts', 'fetching discounts')
-                return sendToAPI<Discount[]>(API_ROUTE.GET_DISCOUNTS, {
-                    formatObject: { CITY: city }
-                }).then((apiResponse: APIResponse<Discount[]>) => {
-                    if (!apiResponse.error) {
-                        commit('setDiscounts', { discounts: apiResponse.response, city })
-                    }
-                })
             },
             mapRecipeIdsToItemIds({ commit, getters }) {
                 logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
@@ -315,6 +316,14 @@ export function createTasteBuddyStore() {
                 return state.recipesByItemId[itemId ?? ''] ?? []
             },
             /**
+             * Get the recipe suggestions
+             * @param state
+             * @returns a list of recipes
+             */
+            getRecipeSuggestions(state): Recipe[] {
+                return state.recipeSuggestions ?? []
+            },
+            /**
              * Get the items
              * @param state
              */
@@ -322,18 +331,14 @@ export function createTasteBuddyStore() {
                 const itemsAsArray: Item[] = Object.values(state.items ?? {})
                 return itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
             },
+            getItemsById(state): { [id: string]: Item } {
+                return state.items ?? {}
+            },
             getTags(_, getters): string[] {
                 return getters.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
                     return [...tags, ...(recipe.props.tags ?? [])]
                 }, [])
             },
-            /**
-             * Get discounts
-             * @param state
-             */
-            getDiscounts: (state) => (city: string): Discount[] => {
-                return state.discounts[city] ?? []
-            }
         },
     })
 }

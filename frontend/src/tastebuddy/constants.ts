@@ -8,7 +8,6 @@ export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS
 export enum API_ROUTE {
     POST_AUTH,
     GET_AUTH,
-    POST_LOGOUT,
     GET_RECIPES,
     ADD_RECIPE,
     DELETE_RECIPE,
@@ -16,8 +15,7 @@ export enum API_ROUTE {
     GET_ITEMS,
     ADD_ITEM,
     DELETE_ITEM,
-    GET_DISCOUNTS,
-    GET_MARKETS,
+    POST_SUGGEST_RECIPE
 }
 
 type API_ROUTE_OPTIONS = {
@@ -28,9 +26,8 @@ type API_ROUTE_OPTIONS = {
 }
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
-    [API_ROUTE.POST_AUTH]: { url: '/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded', credentials: 'include' },
-    [API_ROUTE.POST_LOGOUT]: { url: '/auth', method: 'POST', contentType: 'application/json' },
-    [API_ROUTE.GET_AUTH]: { url: '/auth', method: 'GET', contentType: 'application/json', credentials: 'include' },
+    [API_ROUTE.POST_AUTH]: { url: '/user/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded', credentials: 'include' },
+    [API_ROUTE.GET_AUTH]: { url: '/user/auth', method: 'GET', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.GET_RECIPES]: { url: '/recipe', method: 'GET', contentType: 'application/json' },
     [API_ROUTE.ADD_RECIPE]: { url: '/recipe', method: 'POST', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.DELETE_RECIPE]: { url: '/recipe/RECIPE_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
@@ -38,8 +35,7 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.GET_ITEMS]: { url: '/item', method: 'GET', contentType: 'application/json' },
     [API_ROUTE.ADD_ITEM]: { url: '/item', method: 'POST', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.DELETE_ITEM]: { url: '/item/ITEM_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.GET_DISCOUNTS]: { url: '/discount/CITY', method: 'GET', contentType: 'application/json' },
-    [API_ROUTE.GET_MARKETS]: { url: '/discount/markets/CITY', method: 'GET', contentType: 'application/json' },
+    [API_ROUTE.POST_SUGGEST_RECIPE]: { url: '/suggest/recipe', method: 'POST', contentType: 'application/json', credentials: 'include' },
 }
 
 export const DURATIONS = {

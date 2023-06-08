@@ -3,7 +3,7 @@
 import { State } from "@/storage";
 import { descriptionToSteps } from "@/utility/recipeParser";
 import { Store } from "vuex";
-import { log, logDebug } from ".";
+import { logDebug } from ".";
 import { CanShareResult, Share } from "@capacitor/share";
 
 // types for recipe
@@ -545,6 +545,42 @@ export class Recipe {
         })
     }
 }
+
+// types for suggestion
+export type RecipeSuggestionQuery = {
+    item_query: {
+        id: string;
+        name: string;
+        exclude: boolean;
+    }[]
+}
+
+export type RecipeSuggestion = string
+
+export class Suggestion {
+
+    /**
+     * Suggest recipes based on the given query
+     * @param store 
+     * @param query 
+     * @returns a promise that resolves to a list of recipe suggestions
+     */
+    public static suggestRecipes(store: Store<State>, itemIds: string[]) {
+        const query: RecipeSuggestionQuery = {
+            item_query: itemIds.map(id => {
+                return {
+                    id,
+                    name: '',
+                    exclude: false
+                }
+            })
+        }
+
+        return store.dispatch('fetchRecipeSuggestions', query)
+    }
+}
+
+
 
 // types for discounts
 

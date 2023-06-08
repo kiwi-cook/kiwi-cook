@@ -15,7 +15,7 @@
                 <RecipeList :filter="filterInput" />
             </div>
             <ion-fab slot="fixed" horizontal="start" vertical="bottom">
-                <ion-fab-button color="tertiary" @click="addRecipe()">
+                <ion-fab-button color="tertiary" @click="addRecipe()" v-if="isDevMode">
                     New
                 </ion-fab-button>
             </ion-fab>
@@ -65,7 +65,7 @@ export default defineComponent({
 
         return {
             // recipe
-            addOutline, addRecipe,
+            addOutline, addRecipe, isDevMode,
             // filter
             filterInput, filter
         }
