@@ -1,17 +1,13 @@
 # Development scripts
 
-This folder contains scripts which start and stop backend containers.
+## Windows
 
-## Usage
-
-### Start the backend containers
-
-```shell
-./start-docker.sh
+```cmd
+./start-dev.bat
 ```
 
-### Stop the backend containers
+## Unix
 
-```shell
-./stop-docker.sh
+```sh
+./start-dev.sh
 ```
