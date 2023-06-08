@@ -1,5 +1,5 @@
 <template>
-    <ion-img :style="{ width: pixelSize, height: pixelSize }" :class="['taste-buddy-logo', { 'margin': withLeftMargin}]" src="./assets/logo/logo.png"/>
+    <ion-img :style="{ width: pixelSize, height: pixelSize }" :class="['taste-buddy-logo', { 'margin': withLeftMargin}]" src="./img/icon.png"/>
 </template>
 
 <script lang="ts">

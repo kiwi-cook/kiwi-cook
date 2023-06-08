@@ -71,7 +71,6 @@ export default defineComponent({
 
 <style scoped>
 .recipe-preview-card {
-    --background: var(--ion-color-light-shade);
     --color: var(--ion-color-dark);
     --border-radius: 8px;
     --box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);

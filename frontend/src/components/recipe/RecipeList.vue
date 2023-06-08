@@ -1,7 +1,9 @@
 <template>
     <ion-list>
-        <template v-for="recipe in loadedFilteredRecipes" :key="recipe.name">
-            <RecipePreview :recipe="recipe"/>
+        <template v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()">
+            <div class="recipe-preview-container">
+                <RecipePreview :recipe="recipe" />
+            </div>
         </template>
     </ion-list>
     <ion-infinite-scroll @ionInfinite="ionInfinite">
@@ -10,11 +12,11 @@
 </template>
 
 <script lang="ts">
-import {IonInfiniteScroll, IonInfiniteScrollContent, IonList} from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {arrowDown} from 'ionicons/icons';
-import {useTasteBuddyStore} from '@/storage';
-import {Recipe} from '@/tastebuddy/types';
+import { IonInfiniteScroll, IonInfiniteScrollContent, IonList } from '@ionic/vue';
+import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
+import { arrowDown } from 'ionicons/icons';
+import { useTasteBuddyStore } from '@/storage';
+import { Recipe } from '@/tastebuddy/types';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 
@@ -25,6 +27,11 @@ export default defineComponent({
             type: String,
             required: false,
             default: ''
+        },
+        recipeList: {
+            type: Object as PropType<Recipe[]>,
+            required: false,
+            default: null
         }
     },
     components: {
@@ -32,11 +39,11 @@ export default defineComponent({
         IonList, IonInfiniteScroll, IonInfiniteScrollContent
 
     },
-    setup(props: any) {
-        const {filter} = toRefs(props)
+    setup(props: { filter: string, recipeList: Recipe[] }) {
+        const { filter, recipeList } = toRefs(props)
 
         const store = useTasteBuddyStore();
-        const recipes: ComputedRef<Recipe[]> = computed(() => store.getters.getRecipesAsList);
+        const recipes: ComputedRef<Recipe[]> = computed(() => (recipeList.value ? (recipeList.value ?? []) : store.getters.getRecipesAsList));
         const loadedRecipes: Ref<Recipe[]> = ref([]);
         const loadedFilteredRecipes: Ref<Recipe[]> = ref([]);
         const loadedRecipesIndex = ref(0);
@@ -70,16 +77,15 @@ export default defineComponent({
         watch(recipes, () => {
             loadedRecipesIndex.value = 0;
             loadNextRecipes()
-        }, {immediate: true})
+        }, { immediate: true })
 
         watch(loadedRecipes, () => {
             loadedFilteredRecipes.value = loadedRecipes.value;
-        }, {immediate: true})
+        }, { immediate: true })
 
         return {
             ionInfinite,
             loadedFilteredRecipes,
-            handleFilter,
             arrowDown
         };
 
@@ -87,3 +93,10 @@ export default defineComponent({
 });
 </script>
 
+<style scoped>
+.recipe-preview-container {
+    margin-bottom: 1rem;
+}
+
+</style>
+```

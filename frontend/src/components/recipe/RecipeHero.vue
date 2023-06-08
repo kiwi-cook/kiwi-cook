@@ -14,10 +14,10 @@
                     </ion-chip>
                 </div>
                 <div class="flex">
-                    <ion-chip color="light">
+                    <ion-chip color="light" class="hero-tag">
                         <ion-label>{{ recipe?.getDuration() }} minutes</ion-label>
                     </ion-chip>
-                    <ion-chip color="light" class="recipe-created-date">
+                    <ion-chip color="light" class="hero-tag recipe-created-date">
                         created on {{ formatDate(recipe?.props.createdAt) }}
                     </ion-chip>
                 </div>
@@ -75,7 +75,6 @@ export default defineComponent({
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
-    min-height: 250px;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0) 100%);
 }
 
@@ -155,7 +154,7 @@ export default defineComponent({
     }
 
     ion-img.hero-image::part(image) {
-        object-fit: scale-down;
+        object-fit: cover;
         object-position: center;
     }
 
@@ -173,8 +172,15 @@ export default defineComponent({
     }
 
     .hero-text h2.recipe-author {
-        font-size: 1.5em;
+        margin-top: 0;
+        margin-bottom: 0;
+        font-size: 1em;
         font-weight: bold;
+    }
+
+
+    .hero-tags {
+        margin-top: 0;
     }
 
     .recipe-created-date {
