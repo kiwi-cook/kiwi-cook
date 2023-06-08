@@ -1,7 +1,9 @@
 <template>
     <ion-list>
         <template v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()">
-            <RecipePreview :recipe="recipe" />
+            <div class="recipe-preview-container">
+                <RecipePreview :recipe="recipe" />
+            </div>
         </template>
     </ion-list>
     <ion-infinite-scroll @ionInfinite="ionInfinite">
@@ -91,3 +93,10 @@ export default defineComponent({
 });
 </script>
 
+<style scoped>
+.recipe-preview-container {
+    margin-bottom: 1rem;
+}
+
+</style>
+```
