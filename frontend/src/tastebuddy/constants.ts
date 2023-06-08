@@ -35,7 +35,7 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.GET_ITEMS]: { url: '/item', method: 'GET', contentType: 'application/json' },
     [API_ROUTE.ADD_ITEM]: { url: '/item', method: 'POST', contentType: 'application/json', credentials: 'include' },
     [API_ROUTE.DELETE_ITEM]: { url: '/item/ITEM_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.POST_SUGGEST_RECIPE]: { url: '/suggest/recipe', method: 'POST', contentType: 'application/json', credentials: 'include' },
+    [API_ROUTE.POST_SUGGEST_RECIPE]: { url: '/suggest/recipe', method: 'POST', contentType: 'application/json' },
 }
 
 export const DURATIONS = {
