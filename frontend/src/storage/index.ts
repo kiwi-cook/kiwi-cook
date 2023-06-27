@@ -1,377 +1,308 @@
 // Ionic
-import { Storage } from '@ionic/storage';
-
 // Vue
-import { App, InjectionKey } from 'vue'
-import { createStore, Store, useStore as baseUseStore } from 'vuex';
+import {defineStore} from 'pinia'
 
 // Types
-import { Discount, Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery } from '@/tastebuddy/types';
-import { API_ROUTE, DURATIONS } from '@/tastebuddy/constants';
-import { APIResponse, log, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
-
-
-// Type the store to use benefits of TypeScript
-// https://vuex.vuejs.org/guide/typescript-support.html
+import {Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery} from '@/tastebuddy/types';
+import {API_ROUTE, DURATIONS} from '@/tastebuddy/constants';
+import {APIResponse, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
 
 // Define typings for the store state
-export interface State {
+
+interface UserState {
     user: {
-        username?: string,
-        authenticated: boolean,
+        authenticated: boolean
     }
-    isLoading: { [key: string]: boolean },
-    recipes: { [id: string]: Recipe },
-    recipeSuggestions: Recipe[],
-    items: { [id: string]: Item },
-    recipesByItemId: { [itemId: string]: string[] },
 }
 
-// Define injection key
-export const storeKey: InjectionKey<Store<State>> = Symbol("Taste Buddy Store")
+export const useUserStore = defineStore('user', {
+    state: (): UserState => ({
+        user: {
+            authenticated: false
+        }
+    }),
+    getters: {
+        isAuthenticated: (state): boolean => state.user.authenticated ?? false,
+    },
+    actions: {
+        /**
+         * Authenticate the user using the session cookie
+         */
+        sessionAuth() {
+            logDebug('sessionAuth', 'logging in')
+            // if the user is already authenticated, return true
+            if (this.isAuthenticated) {
+                return Promise.resolve(true)
+            }
 
-// Custom Vuex Store
-// https://vuex.vuejs.org/guide/typescript-support.html#simplifying-usestore-usage
-export function useTasteBuddyStore() {
-    return baseUseStore(storeKey)
+            // try to authenticate the user using the session cookie
+            return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
+                .then((apiResponse: APIResponse<string>) => {
+                    logDebug('sessionAuth', `got response: ${JSON.stringify(apiResponse)}`)
+                    this.user.authenticated = !apiResponse.error
+                    return !apiResponse.error
+                })
+        },
+        /**
+         * Authenticate the user using the username and password
+         * @param payload username and password
+         * @returns true if the authentication was successful, false otherwise
+         */
+        basicAuth(payload: { username: string, password: string }): Promise<boolean> {
+            logDebug('basicAuth', 'logging in')
+            const {username, password} = payload
+            return sendToAPI<string>(API_ROUTE.POST_AUTH, {
+                headers: [
+                    {
+                        key: 'Authorization',
+                        value: 'Basic ' + btoa(username + ':' + password)
+                    }
+                ],
+                errorMessage: 'Could not log in'
+            }).then((apiResponse: APIResponse<string>) => {
+                logDebug('basicAuth', `got response: ${JSON.stringify(apiResponse)}`)
+                this.user.authenticated = !apiResponse.error
+                // return true if the authentication was successful, false otherwise
+                return !apiResponse.error
+            })
+        },
+    }
+})
+
+interface RecipeState {
+    loading: { [key: string]: boolean }
+    recipes: { [id: string]: Recipe }
+    recipeSuggestions: Recipe[]
+    items: { [id: string]: Item }
+    recipesByItemId: { [itemId: string]: string[] }
 }
 
 // Create the store
 // called by main.ts
-export function createTasteBuddyStore() {
-    return createStore<State>({
-        state: {
-            user: {
-                authenticated: false
-            },
-            isLoading: {},
-            recipes: {},
-            recipeSuggestions: [],
-            items: {},
-            recipesByItemId: {},
+export const useTasteBuddyStore = defineStore('recipes', {
+    state: (): RecipeState => ({
+        loading: {},
+        recipes: {},
+        recipeSuggestions: [],
+        items: {},
+        recipesByItemId: {},
+    }),
+    getters: {
+        isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
+        /**
+         * Get the current app state
+         * @returns
+         */
+        isDevMode: (): boolean => process.env.NODE_ENV === 'development',
+        /**
+         * Get the recipes as list
+         * @param state
+         */
+        getRecipesAsList: (state): Recipe[] => {
+            const recipesAsList: Recipe[] = Object.values(state.recipes ?? {})
+            recipesAsList.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
+            return recipesAsList
         },
-        mutations: {
-            addLoading(state, key: string) {
-                state.isLoading[key] = true
-            },
-            finishLoading(state, key: string) {
-                state.isLoading[key] = false
-            },
-            setAuthenticated(state, authenticated: boolean) {
-                state.user.authenticated = authenticated
-            },
-            setRecipes(state, recipes: Recipe[]) {
-                state.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({ [recipe.getId()]: recipe })))
-            },
-            updateRecipe(state, recipe: Recipe) {
-                state.recipes[recipe.getId()] = recipe
-            },
-            removeRecipe(state, recipe: Recipe) {
-                delete state.recipes[recipe.getId()]
-            },
-            setRecipeSuggestions(state, recipeSuggestions: string[]) {
-                state.recipeSuggestions = recipeSuggestions.map((recipeId: string) => state.recipes[recipeId])
-            },
-            setItems(state, items: Item[]) {
-                state.items = Object.assign({}, ...items.map((item: Item) => ({ [item.getId()]: item })))
-            },
-            updateItem(state, item: Item) {
-                state.items[item.getId()] = item
-            },
-            removeItem(state, item: Item) {
-                delete state.items[item.getId()]
-            },
-            removeItems(state, items: Item[]) {
+        /**
+         * Get the recipes mapped by their id
+         * @param state
+         */
+        getRecipesAsMap: (state): { [key: string]: Recipe } => state.recipes ?? {},
+        getRecipesByItemIds(): { [key: string]: string[] } {
+            const recipes = this.getRecipesAsList ?? []
+            const recipesByItemId: { [key: string]: string[] } = {}
+
+            recipes.forEach((recipe: Recipe) => {
+                const items = recipe.getItems()
                 items.forEach((item: Item) => {
-                    delete state.items[item.getId()]
+                    if (!(item.getId() in recipesByItemId)) {
+                        recipesByItemId[item.getId()] = []
+                    }
+                    recipesByItemId[item.getId()].push(recipe.getId())
                 })
-            }
-        },
-        actions: {
-            /**
-             * Authenticate the user using the session cookie
-             * @param commit
-             */
-            sessionAuth({ commit, getters }) {
-                logDebug('sessionAuth', 'logging in')
-                // if the user is already authenticated, return true
-                if (getters.isAuthenticated) {
-                    return Promise.resolve(true)
-                }
+            })
+            logDebug('getRecipesByItemIds', recipesByItemId)
 
-                // try to authenticate the user using the session cookie
-                return sendToAPI<string>(API_ROUTE.GET_AUTH, { errorMessage: 'Could not log in' })
-                    .then((apiResponse: APIResponse<string>) => {
-                        commit('setAuthenticated', !apiResponse.error)
-                        return !apiResponse.error
-                    })
-            },
-            /**
-             * Authenticate the user using the username and password
-             * @param commit
-             * @param payload username and password
-             * @returns true if the authentication was successful, false otherwise
-             */
-            basicAuth({ commit }, payload: { username: string, password: string }): Promise<boolean> {
-                logDebug('basicAuth', 'logging in')
-                const { username, password } = payload
-                return sendToAPI<string>(API_ROUTE.POST_AUTH, {
-                    headers: [
-                        {
-                            key: 'Authorization',
-                            value: 'Basic ' + btoa(username + ':' + password)
-                        }
-                    ],
-                    errorMessage: 'Could not log in'
+            return recipesByItemId
+        },
+        /**
+         * Get the recipes by the item id
+         * @param state
+         */
+        getRecipesAsListByItemId: (state) => (itemId?: string): string[] => state.recipesByItemId[itemId ?? ''] ?? [],
+        /**
+         * Get the recipe suggestions
+         * @param state
+         * @returns a list of recipes
+         */
+        getRecipeSuggestions: (state): Recipe[] => state.recipeSuggestions ?? [],
+        /**
+         * Get the items
+         * @param state
+         */
+        getItems: (state): Item[] => {
+            const itemsAsArray: Item[] = Object.values(state.items ?? {})
+            itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
+            return itemsAsArray
+        },
+        getItemsById: (state): { [id: string]: Item } => state.items ?? {},
+        getTags(): string[] {
+            return this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
+                return [...tags, ...(recipe.props.tags ?? [])]
+            }, [])
+        },
+    },
+    actions: {
+        setRecipes(recipes: Recipe[]) {
+            this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
+        },
+        updateRecipe(recipe: Recipe) {
+            this.recipes[recipe.getId()] = recipe
+        },
+        setItems(items: Item[]) {
+            this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
+        },
+        updateItem(item: Item) {
+            this.items[item.getId()] = item
+        },
+        removeItem(item: Item) {
+            delete this.items[item.getId()]
+        },
+        addLoading(key: string) {
+            this.loading[key] = true
+        },
+        finishLoading(key: string) {
+            this.loading[key] = false
+        },
+        /**
+         * Fetch the recipes from the API and store them in the store
+         */
+        fetchRecipes(): Promise<Recipe[]> {
+            this.addLoading('fetchRecipes')
+            logDebug('fetchRecipes', 'fetching recipes')
+            return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
+                .then((apiResponse: APIResponse<Recipe[]>) => {
+                    // map the recipes JSON to Recipe objects
+                    // this is because the JSON is not a valid Recipe object,
+                    // and we need to use the Recipe class methods
+                    if (!apiResponse.error) {
+                        this.setRecipes(apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                    }
+                    this.finishLoading('fetchRecipes')
+                    return apiResponse.response
+                });
+        },
+        saveRecipeById(recipeId: string) {
+            this.addLoading('saveRecipeById')
+            logDebug('saveRecipeById', recipeId)
+            const recipe: Recipe = this.getRecipesAsMap[recipeId]
+            if (typeof recipe === 'undefined') {
+                logError('Recipe not found: ', recipeId)
+                return
+            }
+            return this.saveRecipe(recipe).then(() => {
+                this.finishLoading('saveRecipeById')
+            })
+        },
+        saveRecipe(recipe: Recipe) {
+            this.addLoading('saveRecipe')
+            logDebug('saveRecipe', recipe)
+            this.updateRecipe(recipe)
+            return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
+                body: recipe,
+                errorMessage: 'Could not save recipe in database. Please retry later!'
+            })
+                .then((apiResponse: APIResponse<string>) => {
+                    presentToast(apiResponse.response, apiResponse.error, apiResponse.error ? DURATIONS.LONG : DURATIONS.SHORT)
+                    return apiResponse
+                })
+                .then((apiResponse: APIResponse<string>) => {
+                    this.finishLoading('saveRecipe')
+                    return apiResponse
                 }).then((apiResponse: APIResponse<string>) => {
-                    commit('setAuthenticated', !apiResponse.error)
-                    // return true if the authentication was successful, false otherwise
-                    return !apiResponse.error
+                    if (!apiResponse.error) {
+                        return this.fetchRecipes()
+                    }
+                    return []
                 })
-            },
-            /**
-             * Fetch the recipes from the API and store them in the store
-             * @param commit
-             */
-            fetchRecipes({ commit }) {
-                commit('addLoading', 'fetchRecipes')
-                logDebug('fetchRecipes', 'fetching recipes')
-                return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
-                    .then((apiResponse: APIResponse<Recipe[]>) => {
-                        // map the recipes JSON to Recipe objects
-                        // this is because the JSON is not a valid Recipe object,
-                        // and we need to use the Recipe class methods
-                        if (!apiResponse.error) {
-                            commit('setRecipes', apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
-                        }
-                        commit('finishLoading', 'fetchRecipes')
-                    });
-            },
-            saveRecipeById({ commit, getters }, recipeId: string) {
-                commit('addLoading', 'saveRecipeById')
-                logDebug('saveRecipeById', recipeId)
-                const recipe: Recipe = getters.getRecipeById[recipeId]
-                if (typeof recipe === 'undefined') {
-                    logError('Recipe not found: ', recipeId)
-                    return
-                }
-                return this.dispatch('saveRecipe', recipe).then(() => {
-                    commit('finishLoading', 'saveRecipeById')
+        },
+        deleteRecipe(recipe: Recipe) {
+            this.addLoading('deleteRecipe')
+            logDebug('deleteRecipe', recipe)
+            delete this.recipes[recipe.getId()]
+            if (typeof recipe._id !== 'undefined') {
+                return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
+                    formatObject: {RECIPE_ID: recipe._id ?? ''},
+                    errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
+                }).then((apiResponse: APIResponse<string>) => {
+                    this.finishLoading('deleteRecipe')
+                    return presentToast(apiResponse.response)
                 })
-            },
-            saveRecipe({ commit }, recipe: Recipe) {
-                commit('addLoading', 'saveRecipe')
-                logDebug('saveRecipe', recipe)
-                commit('updateRecipe', recipe)
-                return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
-                    body: recipe,
-                    errorMessage: 'Could not save recipe in database. Please retry later!'
-                })
-                    .then((apiResponse: APIResponse<string>) => {
-                        presentToast(apiResponse.response, apiResponse.error, apiResponse.error ? DURATIONS.LONG : DURATIONS.SHORT)
-                        return apiResponse
-                    })
-                    .then((apiResponse: APIResponse<string>) => {
-                        commit('finishLoading', 'saveRecipe')
-                        return apiResponse
-                    }).then((apiResponse: APIResponse<string>) => {
-                        if (!apiResponse.error) {
-                            return this.dispatch('fetchRecipes')
-                        }
-                        return []
-                    })
-            },
-            deleteRecipe({ commit }, recipe: Recipe) {
-                commit('addLoading', 'deleteRecipe')
-                logDebug('deleteRecipe', recipe)
-                commit('removeRecipe', recipe)
-                if (typeof recipe._id !== 'undefined') {
-                    return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
-                        formatObject: { RECIPE_ID: recipe._id ?? '' },
-                        errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
-                    }).then((apiResponse: APIResponse<string>) => {
-                        commit('finishLoading', 'deleteRecipe')
-                        return presentToast(apiResponse.response)
-                    })
-                }
-            },
-            /**
-             * Fetch the suggestions for the recipe search
-             * @param commit
-             */
-            fetchRecipeSuggestions({ commit }, query: RecipeSuggestionQuery) {
-                commit('addLoading', 'fetchRecipeSuggestions')
-                logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
-                return sendToAPI<string[]>(API_ROUTE.POST_SUGGEST_RECIPE, { body: query, errorMessage: 'Could not fetch recipe suggestions' })
-                    .then((apiResponse: APIResponse<RecipeSuggestion[]>) => {
-                        // map the recipes JSON to Recipe objects
-                        // this is because the JSON is not a valid Recipe object,
-                        // and we need to use the Recipe class methods
-                        if (!apiResponse.error) {
-                            commit('setRecipeSuggestions', apiResponse.response)
-                        }
-                        commit('finishLoading', 'fetchRecipeSuggestions')
-                    });
-            },
-            fetchItems({ commit }) {
-                commit('addLoading', 'fetchItems')
-                logDebug('fetchItems', 'fetching items')
-                return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, { errorMessage: 'Could not fetch items' })
-                    .then((apiResponse: APIResponse<Item[]>) => {
-                        // map the items JSON to Item objects
-                        // this is because the JSON is not a valid Item object,
-                        // and we need to use the Item class methods
-                        if (!apiResponse.error) {
-                            commit('setItems', apiResponse.response.map((item: Item) => Item.fromJSON(item)))
-                        }
-                        commit('finishLoading', 'fetchItems')
-                    });
-            },
-            saveItem({ commit }, item: Item) {
-                logDebug('saveItem', item)
-                commit('updateItem', item)
-                return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
-                    body: item,
-                    errorMessage: 'Could not save item in database. Please retry later!'
-                })
-                    .then((apiResponse: APIResponse<string>) => {
-                        if (!apiResponse.error) {
-                            this.dispatch('fetchItems')
-                        }
-                    });
-            },
-            deleteItem({ commit }, item: Item) {
-                logDebug('deleteItem', item)
-                commit('addLoading', 'deleteItem')
-                commit('removeItem', item)
-                if (typeof item._id !== 'undefined') {
-                    return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
-                        formatObject: { ITEM_ID: item._id ?? '' },
-                        errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
-                    }).then((apiResponse: APIResponse<string>) => {
-                        commit('finishLoading', 'deleteItem')
-                        return presentToast(apiResponse.response)
-                    })
-                }
-            },
-            bulkDeleteItems({ commit }, items: Item[]) {
-                logDebug('bulkDeleteItems', items)
-                commit('removeItems', items)
-                items.map((item: Item) => item._id ?? '').forEach((itemId: string) => {
-                    sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
-                        formatObject: { ITEM_ID: itemId },
-                        errorMessage: `Could not delete item ${itemId} from database. Please retry later!`
-                    }).then((apiResponse: APIResponse<string>) => {
-                        return presentToast(apiResponse.response)
-                    })
-                })
-            },
-            mapRecipeIdsToItemIds({ commit, getters }) {
-                logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
-                commit('mapRecipeIdsToItemIds', getters.getRecipesAsList)
             }
         },
-        getters: {
-            isLoading(state): boolean {
-                return Object.values(state.isLoading).some((isLoading: boolean) => isLoading)
-            },
-            /**
-             * Get the current app state
-             * @param state 
-             * @returns 
-             */
-            isDevMode(_): boolean {
-                return process.env.NODE_ENV === 'development'
-            },
-            /**
-             * Get the user's username
-             * @param state
-             */
-            getUsername(state): string {
-                return state.user.username ?? ''
-            },
-            /**
-             * Check if the user is authenticated
-             * @param state
-             */
-            isAuthenticated(state): boolean {
-                return state.user.authenticated ?? false
-            },
-            /**
-             * Get the recipes as list
-             * @param state
-             */
-            getRecipesAsList(state): Recipe[] {
-                const recipesAsArray: Recipe[] = Object.values(state.recipes ?? {})
-                return recipesAsArray.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
-            },
-            /**
-             * Get the recipes mapped by their id
-             * @param state
-             */
-            getRecipesAsMap(state): { [id: string]: Recipe } {
-                return state.recipes ?? {}
-            },
-            /**
-             * Get the recipes by the item id
-             * @param state
-             */
-            getRecipesAsListByItemId: (state) => (itemId?: string): string[] => {
-                return state.recipesByItemId[itemId ?? ''] ?? []
-            },
-            getRecipesByItemIds(state, getters): { [key: string]: string[] } {
-                const recipesByItemId: { [key: string]: string[] } = {}
-                const recipes = getters.getRecipesAsList ?? []
-
-                recipes.forEach((recipe: Recipe) => {
-                    const items = recipe.getItems()
-                    items.forEach((item: Item) => {
-                        if (!(item.getId() in recipesByItemId)) {
-                            recipesByItemId[item.getId()] = []
-                        }
-                        recipesByItemId[item.getId()].push(recipe.getId())
-                    })
-                })
-                logDebug('getRecipesByItemIds', recipesByItemId)
-
-                return recipesByItemId
-            },
-            /**
-             * Get the recipe suggestions
-             * @param state
-             * @returns a list of recipes
-             */
-            getRecipeSuggestions(state): Recipe[] {
-                return state.recipeSuggestions ?? []
-            },
-            /**
-             * Get the items
-             * @param state
-             */
-            getItems(state): Item[] {
-                const itemsAsArray: Item[] = Object.values(state.items ?? {})
-                return itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
-            },
-            getItemsById(state): { [id: string]: Item } {
-                return state.items ?? {}
-            },
-            getTags(_, getters): string[] {
-                return getters.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
-                    return [...tags, ...(recipe.props.tags ?? [])]
-                }, [])
-            },
+        /**
+         * Fetch the suggestions for the recipe search
+         * @param query
+         */
+        fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<Recipe[]> {
+            this.addLoading('fetchRecipeSuggestions')
+            logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
+            return sendToAPI<string[]>(API_ROUTE.POST_SUGGEST_RECIPE, {
+                body: query,
+                errorMessage: 'Could not fetch recipe suggestions'
+            })
+                .then((apiResponse: APIResponse<RecipeSuggestion[]>) => {
+                    // map the recipes JSON to Recipe objects
+                    // this is because the JSON is not a valid Recipe object,
+                    // and we need to use the Recipe class methods
+                    if (!apiResponse.error) {
+                        this.recipeSuggestions = apiResponse.response.map((recipeId: string) => this.recipes[recipeId])
+                    }
+                    this.finishLoading('fetchRecipeSuggestions')
+                    return this.getRecipeSuggestions
+                });
         },
-    })
-}
-
-
-// Create Vue plugin for Ionic storage
-// https://stackoverflow.com/a/69043844
-export async function ionicStorageVuePlugin(app: App) {
-    const storage = new Storage()
-    const storageInstance = await storage.create()
-
-    app.config.globalProperties.$ionicStorage = storageInstance
-    // Access the ionic storage instance in Vuex store actions
-    app.config.globalProperties.$store.$ionicStorage = storageInstance
-}
+        fetchItems(): Promise<Item[]> {
+            this.addLoading('fetchItems')
+            logDebug('fetchItems', 'fetching items')
+            return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
+                .then((apiResponse: APIResponse<Item[]>) => {
+                    // map the items JSON to Item objects
+                    // this is because the JSON is not a valid Item object,
+                    // and we need to use the Item class methods
+                    if (!apiResponse.error) {
+                        this.setItems(apiResponse.response.map((item: Item) => Item.fromJSON(item)))
+                    }
+                    this.finishLoading('fetchItems')
+                    return apiResponse.response
+                });
+        },
+        saveItem(item: Item) {
+            logDebug('saveItem', item)
+            this.updateItem(item)
+            return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
+                body: item,
+                errorMessage: 'Could not save item in database. Please retry later!'
+            })
+                .then((apiResponse: APIResponse<string>) => {
+                    if (!apiResponse.error) {
+                        return this.fetchItems()
+                    }
+                });
+        },
+        deleteItem(item: Item) {
+            logDebug('deleteItem', item)
+            this.addLoading('deleteItem')
+            this.removeItem(item)
+            if (typeof item._id !== 'undefined') {
+                return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
+                    formatObject: {ITEM_ID: item._id ?? ''},
+                    errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
+                }).then((apiResponse: APIResponse<string>) => {
+                    this.finishLoading('deleteItem')
+                    return presentToast(apiResponse.response)
+                })
+            }
+        }
+    },
+})

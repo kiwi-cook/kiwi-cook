@@ -1,219 +1,225 @@
 <template>
-    <ion-card class="recipe-editor" v-if="mutableRecipe">
-        <ion-card-header>
-            <ion-grid>
-                <ion-row>
-                    <ion-col size="auto">
-                        <ion-avatar v-if="mutableRecipe.props.imgUrl" class="recipe-preview-img">
-                            <img :alt="`Image of ${mutableRecipe.name}`" :src="mutableRecipe.props.imgUrl" />
-                        </ion-avatar>
-                    </ion-col>
-                    <ion-col size="3">
-                        <ion-card-title color="light">
-                            <ion-input :maxlength="40" :value="mutableRecipe.name" type="text"
-                                @keyup.enter="mutableRecipe.name = $event.target.value"
-                                @ion-blur="mutableRecipe.name = ($event.target.value ?? '').toString()"
-                                aria-label="Recipe name" />
-                        </ion-card-title>
-                    </ion-col>
-                    <ion-col size="auto">
-                        <ion-chip v-if="mutableRecipe._id || mutableRecipe._tmpId" color="light">
+    <IonCard v-if="mutableRecipe" class="recipe-editor">
+        <IonCardHeader>
+            <IonGrid>
+                <IonRow>
+                    <IonCol size="auto">
+                        <IonAvatar v-if="mutableRecipe.props.imgUrl" class="recipe-preview-img">
+                            <img :alt="`Image of ${mutableRecipe.name}`" :src="mutableRecipe.props.imgUrl"/>
+                        </IonAvatar>
+                    </IonCol>
+                    <IonCol size="3">
+                        <IonCardTitle color="light">
+                            <IonInput :maxlength="40" :value="mutableRecipe.name" aria-label="Recipe name"
+                                      type="text"
+                                      @keyup.enter="mutableRecipe.name = $event.target.value"
+                                      @ion-blur="mutableRecipe.name = ($event.target.value ?? '').toString()"/>
+                        </IonCardTitle>
+                    </IonCol>
+                    <IonCol size="auto">
+                        <IonChip v-if="mutableRecipe._id || mutableRecipe._tmpId" color="light">
                             {{ mutableRecipe._id ?? mutableRecipe._tmpId }}
-                        </ion-chip>
-                    </ion-col>
-                    <ion-col size="auto">
-                        <ion-chip v-if="mutableRecipe.props.createdAt" color="light">
+                        </IonChip>
+                    </IonCol>
+                    <IonCol size="auto">
+                        <IonChip v-if="mutableRecipe.props.createdAt" color="light">
                             Created at {{ formatDate(mutableRecipe.props.createdAt) }}
-                        </ion-chip>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
-        </ion-card-header>
+                        </IonChip>
+                    </IonCol>
+                </IonRow>
+            </IonGrid>
+        </IonCardHeader>
 
-        <ion-card-content>
+        <IonCardContent>
             <div class="flex">
-                <ion-grid>
-                    <ion-row>
-                        <ion-col size="12">
-                            <ion-textarea v-model.trim="mutableRecipe.description"
-                                placeholder="e.g. The best recipe in Germany" label="Description" label-placement="stacked"
-                                :counter="true" :spellcheck="true" wrap="soft" :rows="3" :cols="6" />
-                        </ion-col>
-                    </ion-row>
-                    <ion-row>
-                        <ion-col size="auto">
-                            <ion-input v-model.trim="mutableRecipe.author" placeholder="e.g. Vasilij & Josef" type="text"
-                                label="Author" label-placement="stacked" />
-                        </ion-col>
-                        <ion-col size="auto">
+                <IonGrid>
+                    <IonRow>
+                        <IonCol size="12">
+                            <IonTextarea v-model.trim="mutableRecipe.description"
+                                         :cols="6" :counter="true"
+                                         :rows="3"
+                                         :spellcheck="true" label="Description" label-placement="stacked"
+                                         placeholder="e.g. The best recipe in Germany" wrap="soft"/>
+                        </IonCol>
+                    </IonRow>
+                    <IonRow>
+                        <IonCol size="auto">
+                            <IonInput v-model.trim="mutableRecipe.author" label="Author"
+                                      label-placement="stacked"
+                                      placeholder="e.g. Vasilij & Josef" type="text"/>
+                        </IonCol>
+                        <IonCol size="auto">
                             {{ mutableRecipe.getDuration() }} minutes
-                        </ion-col>
-                    </ion-row>
-                </ion-grid>
+                        </IonCol>
+                    </IonRow>
+                </IonGrid>
             </div>
 
-            <ion-input v-model="mutableRecipe.props.imgUrl" type="url" label="Image URL" label-placement="stacked" />
+            <IonInput v-model="mutableRecipe.props.imgUrl" label="Image URL" label-placement="stacked" type="url"/>
 
             <!-- Item icons -->
-            <ItemList :items="mutableRecipe.getStepItems()" />
+            <ItemList :items="mutableRecipe.getStepItems()"/>
 
-            <ion-item class="tags-editor" lines="none">
+            <IonItem class="tags-editor" lines="none">
                 <!-- Tags -->
-                <ion-chip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex" class="tag"
-                    color="light">
-                    <ion-label>{{ tag }}</ion-label>
-                    <ion-icon :icon="closeCircleOutline" @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)" />
-                </ion-chip>
+                <IonChip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex" class="tag"
+                         color="light">
+                    <IonLabel>{{ tag }}</IonLabel>
+                    <IonIcon :icon="closeCircleOutline"
+                             @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)"/>
+                </IonChip>
                 <!-- Add tag to the list -->
-                <DropDownSearch :items="allTags" placeholder="e.g. vegan" @select-item="mutableRecipe.addTag($event)"
-                    @add-item="mutableRecipe.addTag($event)" :reset-after="true">
+                <DropDownSearch :items="allTags" :reset-after="true" placeholder="e.g. vegan"
+                                @select-item="mutableRecipe.addTag($event)" @add-item="mutableRecipe.addTag($event)">
                     <template #item="{ filteredItem }">
-                        <ion-chip class="tag" color="light">
-                            <ion-label>{{ filteredItem }}</ion-label>
-                        </ion-chip>
+                        <IonChip class="tag" color="light">
+                            <IonLabel>{{ filteredItem }}</IonLabel>
+                        </IonChip>
                     </template>
                 </DropDownSearch>
-            </ion-item>
+            </IonItem>
+        </IonCardContent>
+    </IonCard>
 
-            <!-- <ion-item>
-                <ion-label color="primary">Servings</ion-label>
-                <ion-input  min="1" max="9999" type="number" v-model.number="mutableRecipe.servings" />
-            </ion-item> -->
-        </ion-card-content>
-    </ion-card>
-
-    <ion-card class="shadow">
-        <ion-card-content>
-            <ion-textarea placeholder="e.g. Add 500 gr flour and 5 egg to a bowl." :auto-grow="true"
-                @keyup.enter="addStepsFromDescription($event.target.value)" label="Steps from description" />
-        </ion-card-content>
-    </ion-card>
+    <IonCard class="shadow">
+        <IonCardContent>
+            <IonTextarea :auto-grow="true" label="Steps from description"
+                         placeholder="e.g. Add 500 gr flour and 5 egg to a bowl."
+                         @keyup.enter="addStepsFromDescription($event.target.value)"/>
+        </IonCardContent>
+    </IonCard>
 
     <!-- Steps -->
-    <ion-button fill="clear" @click="addStep(-1)">Add step</ion-button>
+    <IonButton fill="clear" @click="addStep(-1)">Add step</IonButton>
     <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
-        <ion-card class="step-editor shadow">
-            <ion-card-header>
-                <ion-item lines="none">
-                    <ion-card-title color="primary">Step {{ stepIndex + 1 }}</ion-card-title>
-                    <ion-button color="danger" fill="solid" @click="removeStep(stepIndex)">
+        <IonCard class="step-editor shadow">
+            <IonCardHeader>
+                <IonItem lines="none">
+                    <IonCardTitle color="primary">Step {{ stepIndex + 1 }}</IonCardTitle>
+                    <IonButton color="danger" fill="solid" @click="removeStep(stepIndex)">
                         Remove step
-                    </ion-button>
-                </ion-item>
-            </ion-card-header>
+                    </IonButton>
+                </IonItem>
+            </IonCardHeader>
 
-            <ion-card-content>
-                <ion-textarea v-model.trim="step.description" placeholder="e.g. Mix the ingredients together"
-                    label="Description" label-placement="stacked" :counter="true" :spellcheck="true" wrap="soft" :rows="3"
-                    :cols="6" />
+            <IonCardContent>
+                <IonTextarea v-model.trim="step.description" :cols="6"
+                             :counter="true" :rows="3" :spellcheck="true" label="Description"
+                             label-placement="stacked" placeholder="e.g. Mix the ingredients together"
+                             wrap="soft"/>
 
-                <ion-input v-model.number="step.duration" max="9999" min="1" type="number"
-                    label="Preparation time (minutes)" label-placement="stacked" />
+                <IonInput v-model.number="step.duration" label="Preparation time (minutes)" label-placement="stacked"
+                          max="9999"
+                          min="1" type="number"/>
 
-                <ion-input v-model.trim="step.imgUrl" :placeholder="`e.g. https://source.unsplash.com/`" type="url"
-                    label="Image URL" label-placement="stacked" />
+                <IonInput v-model.trim="step.imgUrl" :placeholder="`e.g. https://source.unsplash.com/`"
+                          label="Image URL"
+                          label-placement="stacked" type="url"/>
 
                 <!-- Item icons -->
-                <ItemList :items="step.getStepItems()" />
+                <ItemList :items="step.getStepItems()"/>
 
 
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
-                        :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
-                        <ion-card class="item-editor shadow">
-                            <ion-card-header>
-                                <ion-item lines="none">
-                                    <ion-avatar v-if="stepItem.imgUrl">
-                                        <img :alt="`Image of ${stepItem.name}`" :src="stepItem.imgUrl" />
-                                    </ion-avatar>
-                                    <ion-chip v-if="stepItem._id || stepItem._tmpId" color="light">
+                              :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
+                        <IonCard class="item-editor shadow">
+                            <IonCardHeader>
+                                <IonItem lines="none">
+                                    <IonAvatar v-if="stepItem.imgUrl">
+                                        <img :alt="`Image of ${stepItem.name}`" :src="stepItem.imgUrl"/>
+                                    </IonAvatar>
+                                    <IonChip v-if="stepItem._id || stepItem._tmpId" color="light">
                                         {{ stepItem._id ?? stepItem._tmpId }}
-                                    </ion-chip>
-                                </ion-item>
-                                <ion-card-title color="primary">
-                                    <ion-item lines="none">
+                                    </IonChip>
+                                </IonItem>
+                                <IonCardTitle color="primary">
+                                    <IonItem lines="none">
                                         <div slot="start">
-                                            <ion-label position="stacked">Name</ion-label>
-                                            <DropDownSearch :item="stepItem" :custom-mapper="(item: Item) => item.name"
-                                                :items="allItems" placeholder="e.g. Baking powder"
-                                                @select-item="selectItem(stepIndex, itemIndex, $event)"
-                                                @add-item="addItem(stepIndex, itemIndex, $event)">
+                                            <IonLabel position="stacked">Name</IonLabel>
+                                            <DropDownSearch :custom-mapper="(item: Item) => item.name" :item="stepItem"
+                                                            :items="allItems" placeholder="e.g. Baking powder"
+                                                            @select-item="selectItem(stepIndex, itemIndex, $event)"
+                                                            @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
-                                                    <ion-label>
+                                                    <IonLabel>
                                                         {{ (filteredItem as Item).name }} {{
                                                             (filteredItem as Item)._id ? ' - ' +
-                                                        (filteredItem as Item)._id :
-                                                            ''
+                                                                (filteredItem as Item)._id :
+                                                                ''
                                                         }}
-                                                    </ion-label>
+                                                    </IonLabel>
                                                 </template>
                                             </DropDownSearch>
                                         </div>
                                         <div slot="end">
-                                            <ion-button color="danger" fill="solid"
-                                                @click="removeItem(stepIndex, itemIndex)">
+                                            <IonButton color="danger" fill="solid"
+                                                       @click="removeItem(stepIndex, itemIndex)">
                                                 Remove item
-                                            </ion-button>
+                                            </IonButton>
                                         </div>
-                                    </ion-item>
-                                </ion-card-title>
-                            </ion-card-header>
+                                    </IonItem>
+                                </IonCardTitle>
+                            </IonCardHeader>
 
-                            <ion-card-content>
-                                <ion-item lines="none">
-                                    <ion-input v-model.trim="stepItem.imgUrl"
-                                        :placeholder="`e.g. https://source.unsplash.com/`" type="url" label="Image URL"
-                                        label-placement="stacked" />
-                                </ion-item>
+                            <IonCardContent>
+                                <IonItem lines="none">
+                                    <IonInput v-model.trim="stepItem.imgUrl"
+                                              :placeholder="`e.g. https://source.unsplash.com/`" label="Image URL"
+                                              label-placement="stacked"
+                                              type="url"/>
+                                </IonItem>
 
-                                <ion-item lines="none">
-                                    <ion-grid>
-                                        <ion-row>
-                                            <ion-col size="auto">
-                                                <ion-input v-model.number="stepItem.amount" inputmode="numeric"
-                                                    label="Amount" label-placement="floating" max="9999" min="0"
-                                                    type="number" />
-                                            </ion-col>
-                                            <ion-col size="8">
-                                                <ion-select v-model="stepItem.unit" label="Unit" label-placement="floating"
-                                                    placeholder="Unit">
-                                                    <ion-select-option value="ml">ml</ion-select-option>
-                                                    <ion-select-option value="l">l</ion-select-option>
-                                                    <ion-select-option value="g">g</ion-select-option>
-                                                    <ion-select-option value="kg">kg</ion-select-option>
-                                                    <ion-select-option value="pcs">pcs</ion-select-option>
-                                                </ion-select>
-                                            </ion-col>
-                                        </ion-row>
-                                    </ion-grid>
-                                </ion-item>
+                                <IonItem lines="none">
+                                    <IonGrid>
+                                        <IonRow>
+                                            <IonCol size="auto">
+                                                <IonInput v-model.number="stepItem.amount" inputmode="numeric"
+                                                          label="Amount" label-placement="floating" max="9999" min="0"
+                                                          type="number"/>
+                                            </IonCol>
+                                            <IonCol size="8">
+                                                <IonSelect v-model="stepItem.unit" label="Unit"
+                                                           label-placement="floating"
+                                                           placeholder="Unit">
+                                                    <IonSelectOption value="ml">ml</IonSelectOption>
+                                                    <IonSelectOption value="l">l</IonSelectOption>
+                                                    <IonSelectOption value="g">g</IonSelectOption>
+                                                    <IonSelectOption value="kg">kg</IonSelectOption>
+                                                    <IonSelectOption value="pcs">pcs</IonSelectOption>
+                                                </IonSelect>
+                                            </IonCol>
+                                        </IonRow>
+                                    </IonGrid>
+                                </IonItem>
 
-                                <ion-item lines="none">
-                                    <ion-select v-model="stepItem.type" label="Type" label-placement="floating" interface="popover"
-                                        placeholder="Type" color="light">
-                                        <ion-select-option value="ingredient">Ingredient</ion-select-option>
-                                        <ion-select-option value="tool">Tool</ion-select-option>
-                                    </ion-select>
-                                </ion-item>
-                            </ion-card-content>
-                        </ion-card>
+                                <IonItem lines="none">
+                                    <IonSelect v-model="stepItem.type" color="light" interface="popover"
+                                               label="Type"
+                                               label-placement="floating" placeholder="Type">
+                                        <IonSelectOption value="ingredient">Ingredient</IonSelectOption>
+                                        <IonSelectOption value="tool">Tool</IonSelectOption>
+                                    </IonSelect>
+                                </IonItem>
+                            </IonCardContent>
+                        </IonCard>
                     </template>
                 </div>
-            </ion-card-content>
-            <ion-button fill="clear" @click="addItem(stepIndex)">Add item</ion-button>
-        </ion-card>
-        <ion-button fill="clear" @click="addStep(stepIndex)">Add step</ion-button>
+            </IonCardContent>
+            <IonButton fill="clear" @click="addItem(stepIndex)">Add item</IonButton>
+        </IonCard>
+        <IonButton fill="clear" @click="addStep(stepIndex)">Add step</IonButton>
     </template>
-    <ion-item>
-        <ion-button @click="saveRecipe()">Save recipe</ion-button>
-        <ion-button color="danger" fill="solid" @click="deleteRecipe()">Delete recipe</ion-button>
-    </ion-item>
+    <IonItem>
+        <IonButton @click="saveRecipe()">Save recipe</IonButton>
+        <IonButton color="danger" fill="solid" @click="deleteRecipe()">Delete recipe</IonButton>
+    </IonItem>
 </template>
 
 <script lang="ts">
-import { Item, Recipe, Step, StepItem } from '@/tastebuddy/types';
-import { useTasteBuddyStore } from '@/storage';
+import {Item, Recipe, Step, StepItem} from '@/tastebuddy/types';
+import {useTasteBuddyStore} from '@/storage';
 import {
     IonAvatar,
     IonButton,
@@ -231,15 +237,15 @@ import {
     IonRow,
     IonSelect,
     IonSelectOption,
-    IonTextarea
+    IonTextarea,
+    useIonRouter
 } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
-import { closeCircleOutline } from 'ionicons/icons';
+import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {closeCircleOutline} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
-import { descriptionToItems } from '@/utility/recipeParser';
-import { formatDate } from '@/utility/util';
+import {descriptionToItems} from '@/utility/recipeParser';
+import {formatDate} from '@/utility/util';
 import ItemList from "@/components/recipe/ItemList.vue";
-import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -271,18 +277,18 @@ export default defineComponent({
         DropDownSearch
     },
     setup(props) {
-        const { recipe } = toRefs(props)
+        const {recipe} = toRefs(props)
 
         const router = useIonRouter();
 
         const store = useTasteBuddyStore();
-        const allItems = computed(() => store.getters.getItems);
+        const allItems = computed(() => store.getItems);
 
         const mutableRecipe: Ref<Recipe> = ref<Recipe>(recipe.value)
         // update recipe and steps when prop changes
         watch(recipe, (newRecipe: Recipe) => {
             mutableRecipe.value = newRecipe
-        }, { immediate: true })
+        }, {immediate: true})
 
         /**
          * Save recipe to the Backend API
@@ -294,7 +300,7 @@ export default defineComponent({
          * Redirect to SavedRecipes
          */
         const deleteRecipe = () => mutableRecipe.value?.delete(store).then(() => {
-            router.push({ name: 'SavedRecipes' })
+            router.push({name: 'SavedRecipes'})
         })
 
         /**
@@ -307,7 +313,8 @@ export default defineComponent({
          * Add steps to the recipe from a description
          * @param description description to parse
          */
-        const addStepsFromDescription = (description: string) => mutableRecipe.value?.addSteps(Step.fromDescription(description))
+        const addStepsFromDescription = (description: string) => mutableRecipe
+            .value?.addSteps(Step.fromDescription(description))
 
         /**
          * Remove a step from the recipe
@@ -321,7 +328,8 @@ export default defineComponent({
          * @param itemIndex index of the item to add after
          * @param itemName name of the item to add
          */
-        const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe.value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
+        const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe
+            .value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
 
         /**
          * Select an item in a step and update it
@@ -329,14 +337,15 @@ export default defineComponent({
          * @param itemIndex index of the item to select
          * @param item item to update
          */
-        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe.value?.steps[stepIndex].items[itemIndex].updateItem(item)
+        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe
+            .value?.steps[stepIndex].items[itemIndex].updateItem(item)
 
         /**
          * Add items to a step from a description
          * @param stepIndex index of the step to add the items to
          */
         const addItemsFromDescription = (stepIndex: number) => {
-            const description: string = mutableRecipe.value?.steps[stepIndex].description;
+            const description: string = mutableRecipe.value?.steps[stepIndex].description ?? '';
             descriptionToItems(description).forEach((stepItem: StepItem) => {
                 mutableRecipe.value.addStep(Step.fromStepItems([stepItem], description))
             })
@@ -347,12 +356,13 @@ export default defineComponent({
          * @param stepIndex index of the step to remove the item from
          * @param itemIndex index of the item to remove
          */
-        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value?.steps[stepIndex].items.splice(itemIndex, 1);
+        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
+            .value?.steps[stepIndex].items.splice(itemIndex, 1);
 
         /**
          * Get all tags from the store
          */
-        const allTags: ComputedRef<string[]> = computed(() => store.getters.getTags);
+        const allTags: ComputedRef<string[]> = computed(() => store.getTags);
 
         return {
             // recipe

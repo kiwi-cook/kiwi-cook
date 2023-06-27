@@ -1,23 +1,23 @@
 <template>
-    <ion-list v-if="loadedFilteredRecipes.length > 0">
+    <IonList v-if="loadedFilteredRecipes.length > 0">
         <div v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()" class="recipe-preview-container">
-            <RecipePreview :recipe="recipe" />
+            <RecipePreview :recipe="recipe"/>
         </div>
-    </ion-list>
-    <ion-item v-else>
+    </IonList>
+    <IonItem v-else>
         {{ noRecipesMessage }}
-    </ion-item>
-    <ion-infinite-scroll @ionInfinite="ionInfinite">
-        <ion-infinite-scroll-content></ion-infinite-scroll-content>
-    </ion-infinite-scroll>
+    </IonItem>
+    <IonInfiniteScroll @ionInfinite="ionInfinite">
+        <IonInfiniteScrollContent></IonInfiniteScrollContent>
+    </IonInfiniteScroll>
 </template>
 
 <script lang="ts">
-import { IonInfiniteScroll, IonInfiniteScrollContent, IonList, IonItem } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
-import { arrowDown } from 'ionicons/icons';
-import { useTasteBuddyStore } from '@/storage';
-import { Recipe } from '@/tastebuddy/types';
+import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList} from '@ionic/vue';
+import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {arrowDown} from 'ionicons/icons';
+import {useTasteBuddyStore} from '@/storage';
+import {Recipe} from '@/tastebuddy/types';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 
@@ -38,18 +38,20 @@ export default defineComponent({
             type: String,
             required: false,
             default: 'No recipes found'
-        }
+        },
     },
     components: {
         RecipePreview,
         IonList, IonInfiniteScroll, IonInfiniteScrollContent, IonItem
 
     },
-    setup(props: { filter: string, recipeList: Recipe[] }) {
-        const { filter, recipeList } = toRefs(props)
+    setup(props: any) {
+        const {filter, recipeList} = toRefs(props)
 
         const store = useTasteBuddyStore();
-        const recipes: ComputedRef<Recipe[]> = computed(() => (recipeList.value ? (recipeList.value ?? []) : store.getters.getRecipesAsList));
+        const recipes: ComputedRef<Recipe[]> = computed(() => (recipeList.value
+            ? (recipeList.value ?? [])
+            : store.getRecipesAsList));
         const loadedRecipes: Ref<Recipe[]> = ref([]);
         const loadedFilteredRecipes: Ref<Recipe[]> = ref([]);
         const loadedRecipesIndex = ref(0);
@@ -75,19 +77,24 @@ export default defineComponent({
             loadedRecipesIndex.value += amountLoaded;
         };
 
+        const resetLoadedRecipes = () => {
+            loadedRecipes.value = [];
+            loadedRecipesIndex.value = 0;
+        }
+
         const ionInfinite = (ev: any) => {
             loadNextRecipes();
             setTimeout(() => ev.target.complete(), 1000);
         };
 
         watch(recipes, () => {
-            loadedRecipesIndex.value = 0;
+            resetLoadedRecipes()
             loadNextRecipes()
-        }, { immediate: true })
+        }, {immediate: true})
 
         watch(loadedRecipes, () => {
             loadedFilteredRecipes.value = loadedRecipes.value;
-        }, { immediate: true })
+        }, {immediate: true})
 
         return {
             ionInfinite,

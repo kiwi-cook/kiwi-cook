@@ -1,24 +1,24 @@
 <template>
-    <ion-card>
-        <ion-img :src="step?.imgUrl ?? ''"/>
-        <ion-card-header>
-            <ion-card-title color="light">
+    <IonCard>
+        <IonImg :src="step?.imgUrl ?? ''"/>
+        <IonCardHeader>
+            <IonCardTitle color="light">
                 Step {{ stepIndex + 1 }}
-                <ion-chip v-if="step?.duration" color="light">
-                    <ion-label>{{ step?.duration }} minutes</ion-label>
-                </ion-chip>
-            </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
+                <IonChip v-if="step?.duration" color="light">
+                    <IonLabel>{{ step?.duration }} minutes</IonLabel>
+                </IonChip>
+            </IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
             <ItemList :items="step.getItems()"/>
             <AdditionalStepInfo :step="step"/>
-            <ion-item lines="none">
-                <ion-text>
+            <IonItem lines="none">
+                <IonText>
                     {{ step.description }}
-                </ion-text>
-            </ion-item>
-        </ion-card-content>
-    </ion-card>
+                </IonText>
+            </IonItem>
+        </IonCardContent>
+    </IonCard>
 </template>
 
 <script lang="ts">

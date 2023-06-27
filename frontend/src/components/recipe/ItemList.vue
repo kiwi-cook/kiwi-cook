@@ -2,22 +2,24 @@
     <ul>
         <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
             <li>
-                <ion-item class="small-item" lines="none" @click="select(item.id)">
-                    <ion-img :src="item.imgUrl ?? ''" class="small-item-img" />
-                    <ion-text class="small-item-name">
-                        <ion-chip v-if="item.showAmountUnit" color="light">
-                            {{ item.amount }} {{ item.unit }}</ion-chip>{{ item.name }}
-                    </ion-text>
-                </ion-item>
+                <IonItem class="small-item" lines="none" @click="select(item.id)">
+                    <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
+                    <IonText class="small-item-name">
+                        <IonChip v-if="item.showAmountUnit" color="light">
+                            {{ item.amount }} {{ item.unit }}
+                        </IonChip>
+                        {{ item.name }}
+                    </IonText>
+                </IonItem>
             </li>
         </template>
     </ul>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, PropType, toRefs } from "vue";
-import { Item, StepItem } from "@/tastebuddy/types";
-import { IonItem, IonImg, IonText, IonChip } from "@ionic/vue";
+import {computed, defineComponent, PropType, toRefs} from "vue";
+import {Item, StepItem} from "@/tastebuddy/types";
+import {IonChip, IonImg, IonItem, IonText} from "@ionic/vue";
 
 export default defineComponent({
     name: 'ItemList',
@@ -26,25 +28,33 @@ export default defineComponent({
             type: Array as PropType<(StepItem[] | Item[])>,
             required: true,
         },
+        type: {
+            type: Array as PropType<string[]>,
+            required: false,
+            default: () => ['ingredient', 'tool']
+        }
     },
     emits: ['select'],
     components: {
         IonItem, IonImg, IonText, IonChip
     },
-    setup (props: any, { emit }) {
-        const { items } = toRefs(props);
-        const mappedItems = computed(() => items.value.map((item: Item) => {
-            const amount = item instanceof StepItem ? item.servingAmount : 0;
-            return {
-                id: item.getId(),
-                name: item.name,
-                imgUrl: item.imgUrl,
-                amount,
-                unit: item instanceof StepItem ? item.unit : '',
-                showAmountUnit: item.type === 'ingredient' && amount > 0,
-                type: item.type
-            }
-        }))
+    setup(props: any, {emit}) {
+        const {items, type} = toRefs(props);
+        const mappedItems = computed(() => items.value
+            .map((item: Item) => {
+                const amount = item instanceof StepItem ? item.servingAmount : 0;
+                return {
+                    id: item.getId(),
+                    name: item.name,
+                    imgUrl: item.imgUrl,
+                    amount,
+                    unit: item instanceof StepItem ? item.unit : '',
+                    showAmountUnit: item.type === 'ingredient' && amount > 0,
+                    type: item.type
+                }
+            })
+            .filter((item: any) => (type.value as string[]).includes(item.type))
+        );
 
         const select = (itemId: string) => {
             emit('select', itemId)

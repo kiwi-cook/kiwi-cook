@@ -1,10 +1,8 @@
 // Data types for the API
 
-import { State } from "@/storage";
-import { descriptionToSteps } from "@/utility/recipeParser";
-import { Store } from "vuex";
-import { log, logDebug } from ".";
-import { CanShareResult, Share } from "@capacitor/share";
+import {descriptionToSteps} from "@/utility/recipeParser";
+import {logDebug} from ".";
+import {CanShareResult, Share} from "@capacitor/share";
 
 // types for recipe
 
@@ -85,7 +83,7 @@ export class Item {
      * @param store
      * @returns the item to allow chaining
      */
-    public update(store: Store<State>): Item {
+    public update(store: any): this {
         store.commit('updateItem', this)
         return this
     }
@@ -95,7 +93,7 @@ export class Item {
      * @param store
      * @returns the item to allow chaining
      */
-    public save(store: Store<State>): Item {
+    public save(store: any): this {
         // remove the temporary id
         store.dispatch('saveItem', this)
         return this
@@ -105,7 +103,7 @@ export class Item {
      * Delete the item from the database
      * @param store
      */
-    public delete(store: Store<State>): void {
+    public delete(store: any): void {
         store.dispatch('deleteItem', this)
     }
 }
@@ -265,7 +263,7 @@ export class Step {
      * @param servings
      * @returns the step to allow chaining
      */
-    public updateServings(servings = 1): Step {
+    public updateServings(servings = 1): this {
         this.items.forEach(item => {
             item.servingAmount = item.amount * servings
         })
@@ -357,7 +355,7 @@ export class Recipe {
      * @param store
      * @param id
      */
-    public static saveById(store: Store<State>, id: string): void {
+    public static saveById(store: any, id: string): void {
         logDebug('saveById', id)
         store.dispatch('saveRecipeById', id)
     }
@@ -401,7 +399,7 @@ export class Recipe {
      * @param store
      * @returns the recipe to allow chaining
      */
-    public update(store: Store<State>): Recipe {
+    public update(store: any): this {
         logDebug('update', this.getId())
         store.commit('updateRecipe', this)
         return this
@@ -412,7 +410,7 @@ export class Recipe {
      * @param store
      * @returns the id of the recipe
      */
-    public save(store: Store<State>): Promise<string> {
+    public save(store: any): Promise<string> {
         logDebug('save', this.getId())
         return store.dispatch('saveRecipe', this).then((id: string) => id)
     }
@@ -421,7 +419,7 @@ export class Recipe {
      * Delete the recipe from the database
      * @param store
      */
-    public delete(store: Store<State>): Promise<Recipe> {
+    public delete(store: any): Promise<Recipe> {
         logDebug('delete', this.getId())
         return store.dispatch('deleteRecipe', this).then(() => {
             return this
@@ -434,7 +432,7 @@ export class Recipe {
      * @param stepIndex
      * @returns the recipe to allow chaining
      */
-    public addStep(step?: Step, stepIndex?: number): Recipe {
+    public addStep(step?: Step, stepIndex?: number): this {
         const _step: Step = step ?? new Step()
 
         if (stepIndex !== undefined) {
@@ -452,7 +450,7 @@ export class Recipe {
      * @param steps
      * @returns the recipe to allow chaining
      */
-    public addSteps(steps: Step[]): Recipe {
+    public addSteps(steps: Step[]): this {
         this.steps.push(...steps)
         return this
     }
@@ -462,7 +460,7 @@ export class Recipe {
      * @param index
      * @returns the recipe to allow chaining
      */
-    public removeStep(index: number): Recipe {
+    public removeStep(index: number): this {
         this.steps.splice(index, 1)
         return this
     }
@@ -472,10 +470,10 @@ export class Recipe {
      * @param stepIndex index of the step
      * @param itemIndex index of the item
      * @param item the item to add
-     * @returns the recipe to allow chaining
+     * @returns the recipe and the item
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
-        item = item || new Item();
+        item = item ?? new Item();
         const stepItem = new StepItem();
 
         if (stepIndex === undefined) {
@@ -488,7 +486,7 @@ export class Recipe {
             // update the item at the specified index
             this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
-        return { item, recipe: this };
+        return {item, recipe: this};
     }
 
     /**
@@ -517,7 +515,7 @@ export class Recipe {
     public getStepItems(sorted = false): StepItem[] {
         const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
             .flatMap((step: Step) => step.getStepItems())
-            .map(stepItem => ({ [stepItem.getId()]: stepItem }))
+            .map(stepItem => ({[stepItem.getId()]: stepItem}))
         ))
 
         if (sorted) {
@@ -531,7 +529,7 @@ export class Recipe {
      * @param tag
      * @returns the recipe to allow chaining
      */
-    public addTag(tag: string): Recipe {
+    public addTag(tag: string): this {
         if (this.props.tags === undefined) {
             // initialize the tags array if it is undefined
             this.props.tags = []
@@ -583,11 +581,11 @@ export class Suggestion {
 
     /**
      * Suggest recipes based on the given query
-     * @param store 
-     * @param query 
+     * @param store
+     * @param itemIds
      * @returns a promise that resolves to a list of recipe suggestions
      */
-    public static suggestRecipes(store: Store<State>, itemIds: string[]) {
+    public static suggestRecipes(store: any, itemIds: string[]) {
         const query: RecipeSuggestionQuery = {
             item_query: itemIds.map(id => {
                 return {
@@ -598,10 +596,9 @@ export class Suggestion {
             })
         }
 
-        return store.dispatch('fetchRecipeSuggestions', query)
+        return store.fetchRecipeSuggestions(query)
     }
 }
-
 
 
 // types for discounts

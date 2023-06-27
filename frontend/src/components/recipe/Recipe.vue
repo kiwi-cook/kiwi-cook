@@ -1,73 +1,71 @@
 <template>
-    <ion-list lines="none">
-        <ion-item lines="none" v-if="recipe">
-            <RecipeHero :recipe="recipe" />
-        </ion-item>
-        <ion-item lines="none" v-if="recipe">
+    <IonList lines="none">
+        <IonItem v-if="recipe" lines="none">
+            <RecipeHero :recipe="recipe"/>
+        </IonItem>
+        <IonItem v-if="recipe" lines="none">
             <div class="center">
-                <ion-button color="primary">
+                <IonButton color="primary">
                     {{ recipe?.props.likes ?? 0 }}
-                    <ion-icon :aria-valuetext="`${recipe?.props.likes ?? 0} people like this`" :icon="heart" />
-                </ion-button>
-                <ion-button v-if="canShareRecipe" color="primary" @click="shareRecipe()">
-                    <ion-icon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe" />
-                </ion-button>
+                    <IonIcon :aria-valuetext="`${recipe?.props.likes ?? 0} people like this`" :icon="heart"/>
+                </IonButton>
+                <IonButton v-if="canShareRecipe" color="primary" @click="shareRecipe()">
+                    <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
+                </IonButton>
             </div>
-        </ion-item>
-    </ion-list>
+        </IonItem>
+    </IonList>
 
-    <ion-item v-if="ingredients.length > 0 || tools.length > 0" lines="none">
-        <ion-text color="primary">
+    <IonItem v-if="itemsFromRecipe.length > 0" lines="none">
+        <IonText color="primary">
             <h1 class="recipe-subheader">Ingredients and Equipment</h1>
-        </ion-text>
-    </ion-item>
+        </IonText>
+    </IonItem>
 
-    <ion-grid v-if="ingredients.length > 0 || tools.length > 0">
-        <ion-row>
-            <ion-col size-lg="6" size="12">
-                <ion-card v-if="ingredients?.length > 0">
-                    <ion-card-header>
-                        <ion-card-title color="light">
-                            Ingredients
-                        </ion-card-title>
-                    </ion-card-header>
-                    <ion-card-content>
-                        <ion-item class="servings-counter">
-                            <ion-input type="number" min="1" max="15" label="Servings" label-placement="stacked" color="light"
-                            v-model="servings" />
-                        </ion-item>
-                        <ItemList :items="ingredients" />
-                    </ion-card-content>
-                </ion-card>
-            </ion-col>
+    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+        <template #left>
+            <IonCard>
+                <IonCardHeader>
+                    <IonCardTitle color="light">
+                        Ingredients
+                    </IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                    <IonItem class="servings-counter">
+                        <IonInput v-model="servings" color="light" label="Servings" label-placement="stacked" max="15"
+                                  min="1"
+                                  type="number"/>
+                    </IonItem>
+                    <ItemList :items="itemsFromRecipe" :type="['ingredient']"/>
+                </IonCardContent>
+            </IonCard>
+        </template>
+        <template #right>
+            <IonCard>
+                <IonCardHeader>
+                    <IonCardTitle color="light">
+                        Equipment
+                    </IonCardTitle>
+                </IonCardHeader>
+                <IonCardContent>
+                    <ItemList :items="itemsFromRecipe" :type="['tool']"/>
+                </IonCardContent>
+            </IonCard>
+        </template>
+    </TwoColumnLayout>
 
-            <ion-col size-lg="6" size="12">
-                <ion-card v-if="tools?.length > 0">
-                    <ion-card-header>
-                        <ion-card-title color="light">
-                            Equipment
-                        </ion-card-title>
-                    </ion-card-header>
-                    <ion-card-content>
-                        <ItemList :items="tools" />
-                    </ion-card-content>
-                </ion-card>
-            </ion-col>
-        </ion-row>
-    </ion-grid>
-
-    <ion-item v-if="steps?.length > 0" lines="none">
-        <ion-text color="primary">
+    <IonItem v-if="steps?.length > 0" lines="none">
+        <IonText color="primary">
             <h1 class="recipe-subheader">Steps</h1>
-        </ion-text>
-    </ion-item>
+        </IonText>
+    </IonItem>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-        <RecipeStep :step="step" :stepIndex="stepIndex" />
+        <RecipeStep :step="step" :stepIndex="stepIndex"/>
     </template>
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch } from 'vue';
+import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
 import {
     IonButton,
     IonCard,
@@ -75,18 +73,18 @@ import {
     IonCardHeader,
     IonCardTitle,
     IonIcon,
+    IonInput,
     IonItem,
     IonList,
-    IonText,
-    IonGrid, IonRow, IonCol, IonInput
+    IonText
 } from '@ionic/vue';
-import { flagOutline, heart, shareOutline } from 'ionicons/icons';
-import { Item, Recipe, Step, StepItem } from '@/tastebuddy/types';
+import {flagOutline, heart, shareOutline} from 'ionicons/icons';
+import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
-import { CanShareResult, Share } from '@capacitor/share';
-import { deepCopy } from '@/utility/util';
+import {CanShareResult, Share} from '@capacitor/share';
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
 export default defineComponent({
     title: 'Recipe',
@@ -97,16 +95,25 @@ export default defineComponent({
         },
     },
     components: {
+        TwoColumnLayout,
         ItemList,
-        RecipeHero, RecipeStep,
-        IonIcon, IonButton, IonItem, IonList, IonText, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol, IonInput
+        RecipeHero,
+        RecipeStep,
+        IonIcon,
+        IonButton,
+        IonItem,
+        IonList,
+        IonText,
+        IonCard,
+        IonCardContent,
+        IonCardHeader,
+        IonCardTitle,
+        IonInput
     },
-    setup(props: { recipe: Recipe }) {
-        const { recipe } = toRefs(props);
+    setup(props: any) {
+        const {recipe} = toRefs(props);
 
         const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
-        const ingredients: ComputedRef<StepItem[]> = computed(() => itemsFromRecipe.value.filter(item => item.type === 'ingredient'))
-        const tools: ComputedRef<Item[]> = computed(() => itemsFromRecipe.value.filter(item => item.type === 'tool'));
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
         const servings = ref(1)
@@ -130,7 +137,7 @@ export default defineComponent({
             // steps
             steps,
             // items
-            ingredients, tools,
+            itemsFromRecipe,
             // share
             canShareRecipe, shareRecipe, shareOutline,
             // icons

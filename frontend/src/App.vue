@@ -1,14 +1,14 @@
 <template>
-    <ion-app>
-        <ion-router-outlet/>
-    </ion-app>
+    <IonApp>
+        <IonRouterOutlet/>
+    </IonApp>
 </template>
 
 <script lang="ts">
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
 import {defineComponent} from 'vue';
 import {useTasteBuddyStore} from './storage';
-import { logClick } from './tastebuddy';
+import {logClick} from './tastebuddy';
 
 export default defineComponent({
     name: 'App',
@@ -19,8 +19,8 @@ export default defineComponent({
     setup() {
         // Initialize the store
         const store = useTasteBuddyStore();
-        store.dispatch('fetchRecipes')
-        store.dispatch('fetchItems')
+        store.fetchRecipes()
+        store.fetchItems()
 
         // Use matchMedia to check the user preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');

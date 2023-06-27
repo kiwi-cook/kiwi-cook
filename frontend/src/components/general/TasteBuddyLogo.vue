@@ -1,5 +1,6 @@
 <template>
-    <ion-img :style="{ width: pixelSize, height: pixelSize }" :class="['taste-buddy-logo', { 'margin': withLeftMargin}]" src="./img/icon.png"/>
+    <IonImg :class="['taste-buddy-logo', { 'margin': withLeftMargin}]" :style="{ width: pixelSize, height: pixelSize }"
+            src="./img/icon.png"/>
 </template>
 
 <script lang="ts">
@@ -60,7 +61,6 @@ export default {
 .taste-buddy-logo.margin {
     margin: 5px;
 }
-
 
 
 /* shadow root styles */

@@ -1,46 +1,55 @@
 <template>
-    <ion-page id="recipe-list-page">
-        <ion-header>
-            <ion-toolbar color="primary">
-                <TasteBuddyLogo size="tiny" with-left-margin slot="start" />
-                <ion-title>Suggestions</ion-title>
-            </ion-toolbar>
-            <ion-toolbar color="primary">
-                <ion-searchbar v-model="filterInput" :debounce="500" color="secondary" />
-            </ion-toolbar>
-        </ion-header>
+    <IonPage id="recipe-list-page">
+        <IonHeader>
+            <IonToolbar color="primary">
+                <TasteBuddyLogo slot="start" size="tiny" with-left-margin/>
+                <IonTitle>Suggestions</IonTitle>
+            </IonToolbar>
+            <IonToolbar color="primary">
+                <IonSearchbar v-model="filterInput" :debounce="500" color="secondary"/>
+            </IonToolbar>
+        </IonHeader>
 
-        <ion-content :fullscreen="true">
+        <IonContent :fullscreen="true">
             <div class="content">
-                <ion-card>
-                    <ion-card-header>
-                        <ion-card-title color="primary">Items</ion-card-title>
-                    </ion-card-header>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle color="primary">Items</IonCardTitle>
+                    </IonCardHeader>
 
-                    <ion-card-content>
-                        <ItemList :items="filteredItems" @select="$event => selectItem($event)" />
-                    </ion-card-content>
-                    <ion-button color="tertiary" fill="clear" @click="suggest()">Suggest</ion-button>
-                </ion-card>
+                    <IonCardContent>
+                        <TwoColumnLayout>
+                            <template #left>
+                                <ItemList key="ingredient" :items="filteredItems" :type="['ingredient']"
+                                          @select="selectItem($event)"/>
+                            </template>
+                            <template #right>
+                                <ItemList key="tool" :items="filteredItems" :type="['tool']"
+                                          @select="selectItem($event)"/>
+                            </template>
+                        </TwoColumnLayout>
+                    </IonCardContent>
+                    <IonButton color="tertiary" fill="clear" @click="suggestRecipes()">Suggest</IonButton>
+                </IonCard>
 
-                <ion-card>
-                    <ion-card-header>
+                <IonCard>
+                    <IonCardHeader>
                         Selected Items
-                    </ion-card-header>
+                    </IonCardHeader>
 
-                    <ion-card-content>
-                        <ItemList :items="selectedItems" @select="$event => selectItem($event)" />
-                    </ion-card-content>
-                </ion-card>
+                    <IonCardContent>
+                        <ItemList :items="selectedItems" @select="selectItem($event)"/>
+                    </IonCardContent>
+                </IonCard>
 
-                <RecipeList :recipe-list="recipeSuggestions" :no-recipes-message="noRecipesMessage" />
+                <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="recipeSuggestions"/>
             </div>
-        </ion-content>
-    </ion-page>
+        </IonContent>
+    </IonPage>
 </template>
 
 <script lang="ts">
-import { ComputedRef, computed, defineComponent, ref, watch } from 'vue';
+import {computed, ComputedRef, defineComponent, Ref, ref, watch} from 'vue';
 import {
     IonButton,
     IonCard,
@@ -56,14 +65,15 @@ import {
 } from '@ionic/vue';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 import RecipeList from "@/components/recipe/RecipeList.vue";
-import { useTasteBuddyStore } from '@/storage';
-import { Item, Suggestion } from '@/tastebuddy/types';
+import {useTasteBuddyStore} from '@/storage';
+import {Item, Recipe, Suggestion} from '@/tastebuddy/types';
 import ItemList from '@/components/recipe/ItemList.vue';
-import { filter } from 'ionicons/icons';
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
+        TwoColumnLayout,
         TasteBuddyLogo,
         IonHeader,
         IonPage,
@@ -81,7 +91,7 @@ export default defineComponent({
     },
     setup() {
         const store = useTasteBuddyStore()
-        const itemsById = computed(() => store.getters.getItemsById)
+        const itemsById = computed(() => store.getItemsById)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
         const filteredItems = ref([] as Item[])
@@ -90,9 +100,10 @@ export default defineComponent({
             if (filterInput.value === '') {
                 filteredItems.value = items.value
             } else {
-                filteredItems.value = (items.value ?? []).filter(item => item.name.toLowerCase().includes(filterInput.value.toLowerCase()))
+                filteredItems.value = (items.value ?? [])
+                    .filter(item => item.name.toLowerCase().includes(filterInput.value.toLowerCase()))
             }
-        }, { immediate: true })
+        }, {immediate: true})
 
         const selectedItemIds = new Set<string>()
         const selectedItems = ref([] as Item[])
@@ -105,8 +116,9 @@ export default defineComponent({
             selectedItems.value = Array.from(selectedItemIds).map(id => itemsById.value[id])
         }
 
-        const suggest = () => Suggestion.suggestRecipes(store, Array.from(selectedItemIds))
-        const recipeSuggestions = computed(() => store.getters.getRecipeSuggestions)
+        const recipeSuggestions: Ref<Recipe[]> = ref([])
+        const suggestRecipes = () => Suggestion.suggestRecipes(store, Array.from(selectedItemIds))
+            .then((recipes: Recipe[]) => recipeSuggestions.value = recipes)
         const noRecipesMessage = computed(() => {
             if (selectedItems.value.length === 0) {
                 return 'Select items'
@@ -118,7 +130,7 @@ export default defineComponent({
         return {
             filterInput,
             selectItem, filteredItems, selectedItems,
-            suggest, recipeSuggestions, noRecipesMessage
+            suggestRecipes, recipeSuggestions, noRecipesMessage
         }
     }
 });

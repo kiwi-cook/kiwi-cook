@@ -1,21 +1,19 @@
-import { createRouter } from '@ionic/vue-router';
-import { createWebHashHistory, Router, RouteRecordRaw } from 'vue-router';
+import {createRouter} from '@ionic/vue-router';
+import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
-import { checkAuthMiddleware, logMiddleware } from "@/router/middleware";
-import { State } from '@/storage';
-import { Store } from 'vuex';
+import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: TabsPage,
-        redirect: () => ({ name: 'RecipeOfTheDay' }),
+        redirect: () => ({name: 'RecipeOfTheDay'}),
         children: [
             {
                 name: 'Home',
                 path: 'recipe/',
                 component: () => import('@/views/recipe/RecipePage.vue'),
-                redirect: to => ({ name: 'RecipeOfTheDay' }),
+                redirect: () => ({name: 'RecipeOfTheDay'}),
                 children: [
                     {
                         name: 'Recipe',
@@ -64,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'NotFound',
                 path: '/:pathMatch(.*)*',
-                redirect: to => ({ name: 'SavedRecipes' }),
+                redirect: () => ({name: 'SavedRecipes'}),
             }
         ]
     }
@@ -74,7 +72,7 @@ const routes: Array<RouteRecordRaw> = [
  * Create router
  * @returns {Router}
  */
-export function createTasteBuddyRouter(store: Store<State>): Router {
+export function createTasteBuddyRouter(store: any): Router {
     const router = createRouter({
         history: createWebHashHistory(process.env.BASE_URL),
         routes

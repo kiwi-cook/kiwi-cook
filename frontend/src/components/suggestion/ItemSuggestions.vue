@@ -1,18 +1,19 @@
 <template>
-    <ion-list>
-        <ion-item v-for="item in itemsWithImgUrl" :key="item.getId()" @click="select(item.getId())" class="suggested-item">
-            <ion-thumbnail slot="start" v-if="item.imgUrl !== ''">
-                <img :alt="`Image of ${item.name}`" :src="item.imgUrl" />
-            </ion-thumbnail>
-            <ion-label>{{ item.name }}</ion-label>
-        </ion-item>
-    </ion-list>
+    <IonList>
+        <IonItem v-for="item in itemsWithImgUrl" :key="item.getId()" class="suggested-item"
+                 @click="select(item.getId())">
+            <IonThumbnail v-if="item.imgUrl !== ''" slot="start">
+                <img :alt="`Image of ${item.name}`" :src="item.imgUrl"/>
+            </IonThumbnail>
+            <IonLabel>{{ item.name }}</IonLabel>
+        </IonItem>
+    </IonList>
 </template>
 
 <script lang="ts">
-import { Item } from '@/tastebuddy/types';
-import { IonItem, IonLabel, IonList, IonThumbnail } from '@ionic/vue';
-import { PropType, computed, defineComponent, toRefs } from 'vue';
+import {Item} from '@/tastebuddy/types';
+import {IonItem, IonLabel, IonList, IonThumbnail} from '@ionic/vue';
+import {computed, defineComponent, PropType, toRefs} from 'vue';
 
 export default defineComponent({
     name: 'ItemSuggestions',
@@ -26,8 +27,8 @@ export default defineComponent({
         IonList, IonThumbnail, IonLabel, IonItem
     },
     emits: ['select'],
-    setup(props: { items: Item[] }, { emit }) {
-        const { items } = toRefs(props)
+    setup(props: { items: Item[] }, {emit}) {
+        const {items} = toRefs(props)
         const itemsWithImgUrl = computed(() => items.value.filter((item: Item) => (item.imgUrl ?? '') !== ''))
 
         const select = (itemID: string) => {

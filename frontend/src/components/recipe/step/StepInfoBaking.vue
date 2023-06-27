@@ -1,29 +1,29 @@
 <template>
-    <ion-card v-if="isBakingStep">
-        <ion-card-header>
-            <ion-card-title>
+    <IonCard v-if="isBakingStep">
+        <IonCardHeader>
+            <IonCardTitle>
                 Baking
-            </ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-            <ion-item>
-                <ion-input :value="information.temperature" label="Bake at" label-placement="stacked"
-                           placeholder="Temperature" readonly type="number"/>
+            </IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+            <IonItem>
+                <IonInput :value="information.temperature" label="Bake at" label-placement="stacked"
+                          placeholder="Temperature" readonly type="number"/>
                 °C
-            </ion-item>
-            <ion-item>
-                <ion-input :value="information.duration" label="for" label-placement="stacked" placeholder="Time"
-                           readonly
-                           type="number"/>
+            </IonItem>
+            <IonItem>
+                <IonInput :value="information.duration" label="for" label-placement="stacked" placeholder="Time"
+                          readonly
+                          type="number"/>
                 minutes
-            </ion-item>
-            <ion-item>
-                <ion-input :value="information.bakingType" label="using" label-placement="stacked"
-                           placeholder="Temperature" readonly
-                           type="text"/>
-            </ion-item>
-        </ion-card-content>
-    </ion-card>
+            </IonItem>
+            <IonItem>
+                <IonInput :value="information.bakingType" label="using" label-placement="stacked"
+                          placeholder="Temperature" readonly
+                          type="text"/>
+            </IonItem>
+        </IonCardContent>
+    </IonCard>
 </template>
 
 <script lang="ts">

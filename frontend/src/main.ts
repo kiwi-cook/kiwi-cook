@@ -8,9 +8,6 @@ import App from './App.vue'
 // Router
 import {createTasteBuddyRouter} from './router';
 
-// Storage
-import {createTasteBuddyStore, ionicStorageVuePlugin, storeKey} from './storage';
-
 // Styles
 /* Add service worker */
 import './registerServiceWorker';
@@ -39,19 +36,19 @@ import './theme/ios.css';
 /* Android */
 import './theme/md.css';
 import 'ionicons/icons';
+import {createPinia} from "pinia";
 
 /* Initialize store */
-const tasteBuddyStore = createTasteBuddyStore();
+const pinia = createPinia()
 
 /* Initialize and configure router */
-const tasteBuddyRouter = createTasteBuddyRouter(tasteBuddyStore);
+const tasteBuddyRouter = createTasteBuddyRouter(pinia);
 
 /* Initialize app */
 const app = createApp(App)
     .use(IonicVue)
-    .use(tasteBuddyStore, storeKey)
+    .use(pinia)
     .use(tasteBuddyRouter)
-    .use(ionicStorageVuePlugin)
 
 tasteBuddyRouter.isReady().then(() => {
     app.mount('#app');

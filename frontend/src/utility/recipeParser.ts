@@ -171,7 +171,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
         },
         [State.Amount]: {
             is: (token: string) => isNumber(token),
-            action: (token: string, _: string) => {
+            action: (token: string) => {
                 stepItem.amount = parseInt(token);
             },
             next: [
@@ -181,7 +181,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
         },
         [State.Unit]: {
             is: (token: string) => isUnit(token),
-            action: (token: string, _: string) => {
+            action: (token: string) => {
                 stepItem.unit = normalizeUnit(token);
             },
             next: [
@@ -191,7 +191,7 @@ export const descriptionToItems = (description: string): StepItem[] => {
         },
         [State.AmountWithUnit]: {
             is: (token: string) => isAmountWithUnit(token),
-            action: (token: string, _: string) => {
+            action: (token: string) => {
                 const number = (token.match(/\d+/) ?? ['1'])[0];
                 const unit = (token.match(/[a-zA-Z]+/) ?? ['pcs'])[0]
 

@@ -1,60 +1,60 @@
 <template>
-    <ion-card>
-        <ion-card-header>
-            <ion-item v-if="mutableItem.imgUrl || mutableItem._id" lines="none">
-                <ion-avatar v-if="mutableItem.imgUrl">
-                    <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl" />
-                </ion-avatar>
-                <ion-chip v-if="mutableItem._id" color="light">
+    <IonCard>
+        <IonCardHeader>
+            <IonItem v-if="mutableItem.imgUrl || mutableItem._id" lines="none">
+                <IonAvatar v-if="mutableItem.imgUrl">
+                    <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl"/>
+                </IonAvatar>
+                <IonChip v-if="mutableItem._id" color="light">
                     {{ mutableItem._id }}
-                </ion-chip>
-                <ion-button @click="saveItem()">Save item</ion-button>
-            </ion-item>
-            <ion-card-title color="primary">
-                <ion-item lines="none">
+                </IonChip>
+                <IonButton @click="saveItem()">Save item</IonButton>
+            </IonItem>
+            <IonCardTitle color="primary">
+                <IonItem lines="none">
                     <div slot="start">
-                        <ion-input :maxlength="40" :value="mutableItem.name" label="Name" label-placement="stacked"
-                            placeholder="e.g. Baking powder" type="text"
-                            @keyup.enter="mutableItem.name = $event.target.value"
-                            @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()" />
+                        <IonInput :maxlength="40" :value="mutableItem.name" label="Name" label-placement="stacked"
+                                  placeholder="e.g. Baking powder" type="text"
+                                  @keyup.enter="mutableItem.name = $event.target.value"
+                                  @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
                     </div>
                     <div slot="end">
-                        <ion-button color="danger" fill="solid" @click="removeItem()">
+                        <IonButton color="danger" fill="solid" @click="removeItem()">
                             Delete item
-                        </ion-button>
+                        </IonButton>
                     </div>
-                </ion-item>
+                </IonItem>
 
-                <ion-item lines="none">
-                    <ion-input v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="text" />
-                </ion-item>
+                <IonItem lines="none">
+                    <IonInput v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="text"/>
+                </IonItem>
 
-                <ion-item lines="none">
-                    <ion-select v-model="mutableItem.type" label="Type" label-placement="stacked" placeholder="Type">
-                        <ion-select-option value="ingredient">Ingredient</ion-select-option>
-                        <ion-select-option value="tool">Tool</ion-select-option>
-                    </ion-select>
-                </ion-item>
-            </ion-card-title>
-        </ion-card-header>
+                <IonItem lines="none">
+                    <IonSelect v-model="mutableItem.type" label="Type" label-placement="stacked" placeholder="Type">
+                        <IonSelectOption value="ingredient">Ingredient</IonSelectOption>
+                        <IonSelectOption value="tool">Tool</IonSelectOption>
+                    </IonSelect>
+                </IonItem>
+            </IonCardTitle>
+        </IonCardHeader>
 
-        <ion-card-content>
+        <IonCardContent>
             Used in {{ usedInRecipes.length }} recipes
             <template v-if="usedInRecipes.length > 0">
-                <ion-list>
+                <IonList>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
-                        <ion-chip>
+                        <IonChip color="light">
                             {{ recipe?.name }}
-                        </ion-chip>
+                        </IonChip>
                     </template>
-                </ion-list>
+                </IonList>
             </template>
-        </ion-card-content>
-    </ion-card>
+        </IonCardContent>
+    </IonCard>
 </template>
 
 <script lang="ts">
-import { Item, Recipe } from '@/tastebuddy/types';
+import {Item, Recipe} from '@/tastebuddy/types';
 import {
     IonAvatar,
     IonButton,
@@ -69,8 +69,8 @@ import {
     IonSelect,
     IonSelectOption
 } from '@ionic/vue';
-import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
-import { useTasteBuddyStore } from '@/storage';
+import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {useTasteBuddyStore} from '@/storage';
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -96,7 +96,7 @@ export default defineComponent({
     },
     emits: ['remove'],
     setup(props) {
-        const { item } = toRefs(props)
+        const {item} = toRefs(props)
         const store = useTasteBuddyStore()
 
         const mutableItem: Ref<Item> = ref(item.value)
@@ -108,12 +108,12 @@ export default defineComponent({
 
 
         const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
-            const recipesByItemIds = store.getters.getRecipesByItemIds
+            const recipesByItemIds = store.getRecipesByItemIds
             if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
                 return []
             }
             return recipesByItemIds[item.value?.getId() ?? '']
-                .map((recipeId: string) => store.getters.getRecipesAsMap[recipeId])
+                .map((recipeId: string) => store.getRecipesAsMap[recipeId])
         })
 
         const saveItem = () => mutableItem.value.save(store)

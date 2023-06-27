@@ -1,8 +1,8 @@
 <template>
-    <ion-card class="recipe-preview-card" @click="toRecipe()">
-        <RecipeHero :recipe="recipe" class="recipe-preview-hero" />
-        <ion-card-content>
-            <ItemList :items="recipe?.getItems()" />
+    <IonCard class="recipe-preview-card" @click="toRecipe()">
+        <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
+        <IonCardContent>
+            <ItemList :items="recipe?.getItems()"/>
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
@@ -13,14 +13,14 @@
             <RecipeLink :recipe="recipe">
                 View Full Recipe
             </RecipeLink>
-        </ion-card-content>
-    </ion-card>
+        </IonCardContent>
+    </IonCard>
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType, toRefs } from "vue";
-import { Recipe, Step } from "@/tastebuddy/types";
-import { IonCard, IonCardContent, useIonRouter } from "@ionic/vue";
+import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
+import {Recipe, Step} from "@/tastebuddy/types";
+import {IonCard, IonCardContent, useIonRouter} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
@@ -39,12 +39,12 @@ export default defineComponent({
         IonCard, IonCardContent
     },
     setup(props: any) {
-        const { recipe } = toRefs(props)
+        const {recipe} = toRefs(props)
         const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
 
         const router = useIonRouter();
         const toRecipe = () => {
-            router.push({ name: 'Recipe', params: { id: recipe.value?.getId() } })
+            router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
         }
 
         return {

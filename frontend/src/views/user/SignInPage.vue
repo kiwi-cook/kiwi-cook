@@ -1,32 +1,32 @@
 <template>
-    <ion-menu content-id="login-page">
-        <ion-content class="ion-padding">
-        </ion-content>
-    </ion-menu>
-    <ion-page id="login-page">
-        <ion-header>
-            <ion-toolbar color="primary">
-                <TasteBuddyLogo size="tiny" with-left-margin slot="start"/>
-                <ion-buttons slot="primary">
-                    <ion-button>
-                        <ion-menu-button></ion-menu-button>
-                    </ion-button>
-                </ion-buttons>
-            </ion-toolbar>
-        </ion-header>
+    <IonMenu content-id="login-page">
+        <IonContent class="ion-padding">
+        </IonContent>
+    </IonMenu>
+    <IonPage id="login-page">
+        <IonHeader>
+            <IonToolbar color="primary">
+                <TasteBuddyLogo slot="start" size="tiny" with-left-margin/>
+                <IonButtons slot="primary">
+                    <IonButton>
+                        <IonMenuButton></IonMenuButton>
+                    </IonButton>
+                </IonButtons>
+            </IonToolbar>
+        </IonHeader>
 
-        <ion-content :fullscreen="true">
+        <IonContent :fullscreen="true">
             <div class="content">
-                <ion-header collapse="condense">
-                    <ion-toolbar>
-                        <ion-title size="large">Sign in</ion-title>
-                    </ion-toolbar>
-                </ion-header>
+                <IonHeader collapse="condense">
+                    <IonToolbar>
+                        <IonTitle size="large">Sign in</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
 
                 <SignIn/>
             </div>
-        </ion-content>
-    </ion-page>
+        </IonContent>
+    </IonPage>
 </template>
 
 <script lang="ts">

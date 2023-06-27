@@ -22,20 +22,35 @@ type API_ROUTE_OPTIONS = {
     url: string;
     method: string;
     contentType?: 'application/json' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
-    credentials?: 'include' | 'omit' | 'same-origin' | undefined;
+    credentials?: 'include' | 'omit' | 'same-origin';
 }
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
-    [API_ROUTE.POST_AUTH]: { url: '/user/auth', method: 'POST', contentType: 'application/x-www-form-urlencoded', credentials: 'include' },
-    [API_ROUTE.GET_AUTH]: { url: '/user/auth', method: 'GET', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.GET_RECIPES]: { url: '/recipe', method: 'GET', contentType: 'application/json' },
-    [API_ROUTE.ADD_RECIPE]: { url: '/recipe', method: 'POST', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.DELETE_RECIPE]: { url: '/recipe/RECIPE_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.SEARCH_RECIPES]: { url: '/search', method: 'POST', contentType: 'application/json' },
-    [API_ROUTE.GET_ITEMS]: { url: '/item', method: 'GET', contentType: 'application/json' },
-    [API_ROUTE.ADD_ITEM]: { url: '/item', method: 'POST', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.DELETE_ITEM]: { url: '/item/ITEM_ID', method: 'DELETE', contentType: 'application/json', credentials: 'include' },
-    [API_ROUTE.POST_SUGGEST_RECIPE]: { url: '/suggest/recipe', method: 'POST', contentType: 'application/json' },
+    [API_ROUTE.POST_AUTH]: {
+        url: '/user/auth',
+        method: 'POST',
+        contentType: 'application/x-www-form-urlencoded',
+        credentials: 'include'
+    },
+    [API_ROUTE.GET_AUTH]: {url: '/user/auth', method: 'GET', contentType: 'application/json', credentials: 'include'},
+    [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: 'application/json'},
+    [API_ROUTE.ADD_RECIPE]: {url: '/recipe', method: 'POST', contentType: 'application/json', credentials: 'include'},
+    [API_ROUTE.DELETE_RECIPE]: {
+        url: '/recipe/RECIPE_ID',
+        method: 'DELETE',
+        contentType: 'application/json',
+        credentials: 'include'
+    },
+    [API_ROUTE.SEARCH_RECIPES]: {url: '/search', method: 'POST', contentType: 'application/json'},
+    [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: 'application/json'},
+    [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: 'application/json', credentials: 'include'},
+    [API_ROUTE.DELETE_ITEM]: {
+        url: '/item/ITEM_ID',
+        method: 'DELETE',
+        contentType: 'application/json',
+        credentials: 'include'
+    },
+    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/suggest/recipe', method: 'POST', contentType: 'application/json'},
 }
 
 export const DURATIONS = {

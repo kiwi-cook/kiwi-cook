@@ -1,44 +1,52 @@
 <template>
-    <ion-page>
-        <ion-tabs>
+    <IonPage>
+        <IonTabs>
             <!-- Router views -->
-            <ion-router-outlet />
+            <IonRouterOutlet/>
 
-            <ion-progress-bar type="indeterminate" v-if="loadingState" />
-            <ion-tab-bar slot="bottom">
-                <ion-tab-button href="/recipe/of-the-day" tab="recipe-of-the-day">
-                    <ion-icon :icon="fastFood" />
-                    <ion-label>Today</ion-label>
-                </ion-tab-button>
+            <IonProgressBar v-if="loadingState" type="indeterminate"/>
+            <IonTabBar slot="bottom">
+                <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
+                    <IonIcon :icon="fastFood"/>
+                    <IonLabel>Today</IonLabel>
+                </IonTabButton>
 
-                <ion-tab-button href="/recipe/suggestions" tab="recipe-finder">
-                    <ion-icon :icon="sparklesOutline" />
-                    <ion-label>Suggestions</ion-label>
-                </ion-tab-button>
+                <IonTabButton href="/recipe/suggestions" tab="recipe-finder">
+                    <IonIcon :icon="sparklesOutline"/>
+                    <IonLabel>Suggestions</IonLabel>
+                </IonTabButton>
 
-                <ion-tab-button href="/recipe/saved" tab="saved-recipes">
-                    <ion-icon :icon="heart" />
-                    <ion-label>Saved</ion-label>
-                </ion-tab-button>
-            </ion-tab-bar>
-        </ion-tabs>
-    </ion-page>
+                <IonTabButton href="/recipe/saved" tab="saved-recipes">
+                    <IonIcon :icon="heart"/>
+                    <IonLabel>Saved</IonLabel>
+                </IonTabButton>
+            </IonTabBar>
+        </IonTabs>
+    </IonPage>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import { IonIcon, IonLabel, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs, } from '@ionic/vue';
-import { fastFood, heart, sparklesOutline } from 'ionicons/icons';
-import { useTasteBuddyStore } from '@/storage';
-import { computed } from 'vue';
+import {computed, defineComponent} from 'vue';
+import {
+    IonIcon,
+    IonLabel,
+    IonPage,
+    IonProgressBar,
+    IonRouterOutlet,
+    IonTabBar,
+    IonTabButton,
+    IonTabs,
+} from '@ionic/vue';
+import {fastFood, heart, sparklesOutline} from 'ionicons/icons';
+import {useTasteBuddyStore} from '@/storage';
 
 export default defineComponent({
     name: 'TabsPage',
-    components: { IonLabel, IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar },
+    components: {IonLabel, IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar},
     setup() {
 
         const store = useTasteBuddyStore()
-        const loadingState = computed(() => store.getters.isLoading ?? false)
+        const loadingState = computed(() => store.isLoading ?? false)
 
         return {
             loadingState,

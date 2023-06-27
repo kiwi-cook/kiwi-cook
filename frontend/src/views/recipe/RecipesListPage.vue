@@ -1,46 +1,46 @@
 <template>
-    <ion-page id="recipe-list-page">
-        <ion-header>
-            <ion-toolbar color="primary">
-                <TasteBuddyLogo size="tiny" with-left-margin slot="start" />
-                <ion-title>Recipes</ion-title>
-            </ion-toolbar>
-            <ion-toolbar color="primary">
-                <ion-searchbar v-model="filterInput" :debounce="500" color="secondary" />
-            </ion-toolbar>
-        </ion-header>
+    <IonPage id="recipe-list-page">
+        <IonHeader>
+            <IonToolbar color="primary">
+                <TasteBuddyLogo slot="start" size="tiny" with-left-margin/>
+                <IonTitle>Recipes</IonTitle>
+            </IonToolbar>
+            <IonToolbar color="primary">
+                <IonSearchbar v-model="filterInput" :debounce="500" color="secondary"/>
+            </IonToolbar>
+        </IonHeader>
 
-        <ion-content :fullscreen="true">
+        <IonContent :fullscreen="true">
             <div class="content">
-                <RecipeList :filter="filterInput" />
+                <RecipeList :filter="filterInput"/>
             </div>
-            <ion-fab slot="fixed" horizontal="start" vertical="bottom">
-                <ion-fab-button color="tertiary" @click="addRecipe()" v-if="isDevMode">
+            <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
                     New
-                </ion-fab-button>
-            </ion-fab>
-        </ion-content>
-    </ion-page>
+                </IonFabButton>
+            </IonFab>
+        </IonContent>
+    </IonPage>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
+import {computed, defineComponent, ref} from 'vue';
 import {
     IonContent,
+    IonFab,
+    IonFabButton,
     IonHeader,
     IonPage,
     IonSearchbar,
     IonTitle,
     IonToolbar,
-    IonFab,
-    IonFabButton,
+    useIonRouter
 } from '@ionic/vue';
 import RecipeList from '@/components/recipe/RecipeList.vue'
-import { addOutline, filter } from 'ionicons/icons';
+import {addOutline, filter} from 'ionicons/icons';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
-import { useTasteBuddyStore } from '@/storage';
-import { Recipe } from '@/tastebuddy/types';
-import { useIonRouter } from '@ionic/vue';
+import {useTasteBuddyStore} from '@/storage';
+import {Recipe} from '@/tastebuddy/types';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
@@ -55,11 +55,11 @@ export default defineComponent({
 
         const router = useIonRouter()
         const store = useTasteBuddyStore()
-        const isDevMode = computed(() => store.getters.isDevMode)
+        const isDevMode = computed(() => store.isDevMode)
         const addRecipe = () => {
             if (isDevMode.value) {
                 const newRecipeId = Recipe.newRecipe().update(store)._tmpId
-                router.push({ name: 'RecipeEditor', params: { id: newRecipeId } })
+                router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
             }
         }
 

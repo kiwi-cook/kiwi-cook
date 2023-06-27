@@ -1,48 +1,58 @@
 <template>
-    <ion-page id="recipe-detail-page">
-        <ion-header>
-            <ion-toolbar color="primary">
-                <ion-title>{{ recipe?.name }}</ion-title>
-            </ion-toolbar>
-        </ion-header>
+    <IonPage id="recipe-detail-page">
+        <IonHeader>
+            <IonToolbar color="primary">
+                <IonTitle>{{ recipe?.name }}</IonTitle>
+            </IonToolbar>
+        </IonHeader>
 
-        <ion-content :fullscreen="true">
+        <IonContent :fullscreen="true">
             <div class="content">
-                <ion-header collapse="condense">
-                    <ion-toolbar>
-                        <ion-title size="large">{{ recipe?.name }}</ion-title>
-                    </ion-toolbar>
-                </ion-header>
+                <IonHeader collapse="condense">
+                    <IonToolbar>
+                        <IonTitle size="large">{{ recipe?.name }}</IonTitle>
+                    </IonToolbar>
+                </IonHeader>
                 <template v-if="recipe">
-                    <RecipeComponent :recipe="recipe" />
+                    <RecipeComponent :recipe="recipe"/>
                 </template>
             </div>
-            <ion-fab slot="fixed" horizontal="start" vertical="bottom">
-                <ion-fab-button color="tertiary" size="small">
-                    <ion-icon :icon="addOutline" />
-                </ion-fab-button>
-                <ion-fab-list side="end">
-                    <ion-fab-button color="primary" @click="goBack()">
-                        <ion-icon :icon="arrowBack" />
-                    </ion-fab-button>
-                    <ion-fab-button v-if="isDevMode" color="primary" @click="editRecipe()">
-                        <ion-icon :icon="createOutline" />
-                    </ion-fab-button>
-                </ion-fab-list>
-            </ion-fab>
-        </ion-content>
-    </ion-page>
+            <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                <IonFabButton color="tertiary" size="small">
+                    <IonIcon :icon="addOutline"/>
+                </IonFabButton>
+                <IonFabList side="end">
+                    <IonFabButton color="primary" @click="goBack()">
+                        <IonIcon :icon="arrowBack"/>
+                    </IonFabButton>
+                    <IonFabButton v-if="isDevMode" color="primary" @click="editRecipe()">
+                        <IonIcon :icon="createOutline"/>
+                    </IonFabButton>
+                </IonFabList>
+            </IonFab>
+        </IonContent>
+    </IonPage>
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent } from 'vue';
-import { IonContent, IonFab, IonFabButton, IonFabList, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar } from '@ionic/vue';
+import {computed, ComputedRef, defineComponent} from 'vue';
+import {
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonHeader,
+    IonIcon,
+    IonPage,
+    IonTitle,
+    IonToolbar,
+    useIonRouter
+} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
-import { useTasteBuddyStore } from "@/storage";
-import { useRoute } from 'vue-router';
-import { useIonRouter } from '@ionic/vue';
-import { Recipe } from '@/tastebuddy/types';
-import { addOutline, arrowBack, createOutline } from "ionicons/icons";
+import {useTasteBuddyStore} from "@/storage";
+import {useRoute} from 'vue-router';
+import {Recipe} from '@/tastebuddy/types';
+import {addOutline, arrowBack, createOutline} from "ionicons/icons";
 
 
 export default defineComponent({
@@ -56,11 +66,11 @@ export default defineComponent({
         const recipeId: ComputedRef<string> = computed(() => (route.params.id ?? '') as string)
 
         const store = useTasteBuddyStore()
-        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesAsMap[recipeId.value])
-        const isDevMode = computed(() => store.getters.isDevMode)
+        const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeId.value])
+        const isDevMode = computed(() => store.isDevMode)
         const editRecipe = () => {
             if (isDevMode.value) {
-                router.push({ name: 'RecipeEditor', params: { id: recipeId.value } })
+                router.push({name: 'RecipeEditor', params: {id: recipeId.value}})
             }
         }
 

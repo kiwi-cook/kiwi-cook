@@ -1,13 +1,13 @@
 <template>
-    <ion-list>
-        <ion-item v-for="result in filteredIngredients" :key="result.val">
-            <ion-label>{{ result.val }}</ion-label>
-            <ion-checkbox slot="end" :modelValue="result?.isChecked" @update:modelValue="result.isChecked = $event">
-            </ion-checkbox>
-        </ion-item>
-    </ion-list>
+    <IonList>
+        <IonItem v-for="result in filteredIngredients" :key="result.val">
+            <IonLabel>{{ result.val }}</IonLabel>
+            <IonCheckbox slot="end" :modelValue="result?.isChecked" @update:modelValue="result.isChecked = $event">
+            </IonCheckbox>
+        </IonItem>
+    </IonList>
     <div class="SearchButton">
-        <ion-button color="primary">Search</ion-button>
+        <IonButton color="primary">Search</IonButton>
     </div>
 </template>
 
@@ -31,7 +31,7 @@ export default defineComponent({
         const {filter} = toRefs(props)
 
         const store = useTasteBuddyStore();
-        const ingredients = computed(() => store.getters.getItems.map((item: Item) => {
+        const ingredients = computed(() => store.getItems.map((item: Item) => {
                 return {
                     val: item.name,
                     isChecked: false

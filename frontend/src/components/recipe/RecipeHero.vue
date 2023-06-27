@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-hero">
-        <ion-img :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image" />
+        <IonImg :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image"/>
         <div class="hero-content">
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
@@ -9,17 +9,14 @@
             </div>
             <div class="hero-tags">
                 <div v-if="(recipe?.props?.tags ?? []).length > 0" class="flex">
-                    <ion-chip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
-                        <ion-label>{{ tag }}</ion-label>
-                    </ion-chip>
+                    <IonChip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
+                        <IonLabel>{{ tag }}</IonLabel>
+                    </IonChip>
                 </div>
                 <div class="flex">
-                    <ion-chip color="light" class="hero-tag">
-                        <ion-label>{{ recipe?.getDuration() }} minutes</ion-label>
-                    </ion-chip>
-                    <!-- <ion-chip color="light" class="hero-tag recipe-created-date">
-                        created on {{ formatDate(recipe?.props.createdAt) }}
-                    </ion-chip> -->
+                    <IonChip class="hero-tag" color="light">
+                        <IonLabel>{{ recipe?.getDuration() }} minutes</IonLabel>
+                    </IonChip>
                 </div>
             </div>
         </div>
@@ -27,10 +24,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
-import { Recipe } from "@/tastebuddy/types";
-import { IonChip, IonImg, IonLabel } from "@ionic/vue";
-import { formatDate } from "@/utility/util";
+import {defineComponent, PropType} from "vue";
+import {Recipe} from "@/tastebuddy/types";
+import {IonChip, IonImg, IonLabel} from "@ionic/vue";
+import {formatDate} from "@/utility/util";
 
 export default defineComponent({
     name: 'RecipeHero',

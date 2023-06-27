@@ -1,45 +1,46 @@
 <template>
-    <ion-page id="recipe-editor-page">
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Recipe Editor</ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content :fullscreen="true">
+    <IonPage id="recipe-editor-page">
+        <IonHeader>
+            <IonToolbar>
+                <IonTitle>Recipe Editor</IonTitle>
+            </IonToolbar>
+        </IonHeader>
+        <IonContent :fullscreen="true">
             <div class="content">
-                <ion-refresher slot="fixed" @ion-refresh="handleRefresh($event)">
-                    <ion-refresher-content />
-                </ion-refresher>
-                <RecipeEditor v-if="recipe" :recipe="recipe" :key="recipe?.getId()" />
+                <IonRefresher slot="fixed" @ion-refresh="handleRefresh($event)">
+                    <IonRefresherContent/>
+                </IonRefresher>
+                <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
             </div>
-            <ion-fab slot="fixed" horizontal="start" vertical="bottom">
-                <ion-fab-button color="tertiary" @click="goBack()">
-                    <ion-icon :icon="arrowBack" />
-                </ion-fab-button>
-            </ion-fab>
-        </ion-content>
-    </ion-page>
+            <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                <IonFabButton color="tertiary" @click="goBack()">
+                    <IonIcon :icon="arrowBack"/>
+                </IonFabButton>
+            </IonFab>
+        </IonContent>
+    </IonPage>
 </template>
 
 <script lang="ts">
-import { ComputedRef, computed, defineComponent, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import { useIonRouter } from '@ionic/vue';
-import { Recipe } from '@/tastebuddy/types';
-import { useTasteBuddyStore } from '@/storage';
-import RecipeEditor from "@/components/editor/RecipeEditor.vue";
+import {computed, ComputedRef, defineComponent, onMounted, ref, watch} from 'vue';
+import {useRoute} from 'vue-router';
 import {
     IonContent,
     IonFab,
     IonFabButton,
     IonHeader,
     IonIcon,
-    IonPage, IonRefresher,
+    IonPage,
+    IonRefresher,
     IonRefresherContent,
     IonTitle,
-    IonToolbar
-} from "@ionic/vue";
-import { arrowBack } from "ionicons/icons";
+    IonToolbar,
+    useIonRouter
+} from '@ionic/vue';
+import {Recipe} from '@/tastebuddy/types';
+import {useTasteBuddyStore} from '@/storage';
+import RecipeEditor from "@/components/editor/RecipeEditor.vue";
+import {arrowBack} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
@@ -53,7 +54,7 @@ export default defineComponent({
         const route = useRoute();
         const recipeId = ref(route.params.id as string);
         const store = useTasteBuddyStore();
-        const recipe: ComputedRef<Recipe> = computed(() => store.getters.getRecipesAsMap[recipeId.value]);
+        const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeId.value]);
         const mutableRecipe = ref<Recipe>(recipe.value);
 
         watch(recipe, (newRecipe) => {
@@ -75,7 +76,7 @@ export default defineComponent({
         })
 
         const handleRefresh = async (event: any) => {
-            store.dispatch('fetchRecipes').then(() => {
+            store.fetchRecipes().then(() => {
                 // set timeout to avoid sus behaviour :)
                 setTimeout(() => {
                     // 'complete' tells the refresher to close itself

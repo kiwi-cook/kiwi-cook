@@ -1,44 +1,42 @@
 <template>
-    <ion-grid>
-        <ion-row>
-            <ion-col size="6">
+    <IonGrid>
+        <IonRow>
+            <IonCol size="6">
                 <!-- Flat Schema -->
-                <ion-textarea :auto-grow="true" :value="flatRecipeSchema" readonly/>
-            </ion-col>
-            <ion-col size="6">
-                <ion-textarea v-model="transformToSchema" :auto-grow="true" :color="schemaColor"/>
-            </ion-col>
-        </ion-row>
-        <ion-row>
-            <ion-col size="3">
-                <ion-button @click="updateRecipes()">
+                <IonTextarea :auto-grow="true" :value="flatRecipeSchema" readonly/>
+            </IonCol>
+            <IonCol size="6">
+                <IonTextarea v-model="transformToSchema" :auto-grow="true" :color="schemaColor"/>
+            </IonCol>
+        </IonRow>
+        <IonRow>
+            <IonCol size="3">
+                <IonButton @click="updateRecipes()">
                     Update Recipes
-                </ion-button>
-            </ion-col>
-            <ion-col size="3">
-                <ion-button @click="saveRecipes()">
+                </IonButton>
+            </IonCol>
+            <IonCol size="3">
+                <IonButton @click="saveRecipes()">
                     Save Recipes
-                </ion-button>
-            </ion-col>
-        </ion-row>
+                </IonButton>
+            </IonCol>
+        </IonRow>
         <template v-for="(transformedRecipe, index) in transformedRecipes" :key="index">
-            <ion-row>
-                <ion-col size="6">
-                    <ion-textarea :auto-grow="true" :value="JSON.stringify(transformedRecipe, null, 4)" readonly/>
-                </ion-col>
-            </ion-row>
+            <IonRow>
+                <IonCol size="6">
+                    <IonTextarea :auto-grow="true" :value="JSON.stringify(transformedRecipe, null, 4)" readonly/>
+                </IonCol>
+            </IonRow>
         </template>
-    </ion-grid>
+    </IonGrid>
 </template>
 
 <script lang="ts">
 import {useTasteBuddyStore} from '@/storage';
-import {deepCopy} from '@/utility/util';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {sendToAPI} from "@/tastebuddy";
+import {logDebug, sendToAPI} from "@/tastebuddy";
 import {API_ROUTE} from "@/tastebuddy/constants";
-import { logDebug } from '@/tastebuddy';
 
 export default defineComponent({
     name: 'RecipeTransformator',
@@ -86,52 +84,53 @@ export default defineComponent({
          * @param sourcePath the path to the value
          * @param targetPath the path to the new value
          */
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const moveValue = (root: any, sourcePath: string, targetPath: string): boolean => {
-            // source
-            const sourceKeys = sourcePath.split(".").slice(1)
-            let sourceParent: any = root
-            let sourceObject: any
-            let sourceKey: string;
-            // target
-            const targetKeys = targetPath.split(".").slice(1)
-            let targetParent = root;
+                // source
+                const sourceKeys = sourcePath.split(".").slice(1)
+                let sourceParent: any = root
+                let sourceObject: any
+                let sourceKey: string;
+                // target
+                const targetKeys = targetPath.split(".").slice(1)
+                let targetParent = root;
 
-            if (sourceKeys.length === 0) {
-                return false
-            }
-
-            for (let i = 0; i < sourceKeys.length; i++) {
-                sourceKey = sourceKeys[i]
-                if (!Object.hasOwn(sourceParent, sourceKey)) {
+                if (sourceKeys.length === 0) {
                     return false
                 }
 
-                sourceObject = sourceParent[sourceKey];
-                // check if sourceParent should be updated
-                if (typeof sourceObject === 'object' && i + 1 < sourceKeys.length) {
-                    sourceParent = sourceObject;
+                for (let i = 0; i < sourceKeys.length; i++) {
+                    sourceKey = sourceKeys[i]
+                    if (!Object.hasOwn(sourceParent, sourceKey)) {
+                        return false
+                    }
+
+                    sourceObject = sourceParent[sourceKey];
+                    // check if sourceParent should be updated
+                    if (typeof sourceObject === 'object' && i + 1 < sourceKeys.length) {
+                        sourceParent = sourceObject;
+                    }
                 }
-            }
 
-            // Find the target parent and key
-            for (let i = 0; i < targetKeys.length - 1; i++) {
-                const key = targetKeys[i];
-                if (!Object.hasOwn(targetParent, key)) {
-                    return false
+                // Find the target parent and key
+                for (let i = 0; i < targetKeys.length - 1; i++) {
+                    const key = targetKeys[i];
+                    if (!Object.hasOwn(targetParent, key)) {
+                        return false
+                    }
+                    targetParent = targetParent[key];
                 }
-                targetParent = targetParent[key];
-            }
-            const targetKey = targetKeys[targetKeys.length - 1];
+                const targetKey = targetKeys[targetKeys.length - 1];
 
-            // Remove the source object from its parent
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            delete sourceParent[sourceKey!]
+                // Remove the source object from its parent
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                delete sourceParent[sourceKey!]
 
-            // Insert the source object into the target parent
-            targetParent[targetKey] = sourceObject;
+                // Insert the source object into the target parent
+                targetParent[targetKey] = sourceObject;
 
-            return true
-        };
+                return true
+            };
 
         /**
          * Transforms the data to the given schema
@@ -169,7 +168,7 @@ export default defineComponent({
         })
 
         const store = useTasteBuddyStore()
-        const recipes: ComputedRef<any[]> = computed(() => store.getters.getRecipesAsList)
+        const recipes: ComputedRef<any[]> = computed(() => store.getRecipesAsList)
         const transformedRecipes: Ref = ref(recipes.value)
         watch(recipes, (newRecipes) => {
             transformedRecipes.value = newRecipes
@@ -188,7 +187,8 @@ export default defineComponent({
         const updateRecipes = () => {
             const isValid = isJSON(transformToSchema.value)
             if (isValid) {
-                transformedRecipes.value = recipes.value.map((recipe: any) => transformDataToSchema(recipe, JSON.parse(transformToSchema.value) as FlatSchemaType))
+                transformedRecipes.value = recipes.value.map((recipe: any) =>
+                    transformDataToSchema(recipe, JSON.parse(transformToSchema.value) as FlatSchemaType))
             }
         }
 
@@ -197,9 +197,10 @@ export default defineComponent({
          */
         const saveRecipes = () => {
             updateRecipes()
-            transformedRecipes.value.filter((recipe: any) => typeof recipe._tmpId === 'undefined').forEach((recipe: any) =>
-                sendToAPI(API_ROUTE.ADD_RECIPE, {body: recipe})
-            )
+            transformedRecipes.value.filter((recipe: any) => typeof recipe._tmpId === 'undefined')
+                .forEach((recipe: any) =>
+                    sendToAPI(API_ROUTE.ADD_RECIPE, {body: recipe})
+                )
         }
 
         return {

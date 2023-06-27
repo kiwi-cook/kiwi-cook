@@ -1,6 +1,6 @@
-import { toastController } from '@ionic/vue';
-import { API_ROUTE, API_ROUTES, API_URL, DURATIONS } from './constants';
-import { Item, Recipe, RecipeSuggestion } from './types';
+import {toastController} from '@ionic/vue';
+import {API_ROUTE, API_ROUTES, API_URL, DURATIONS} from './constants';
+import {Item, Recipe, RecipeSuggestion} from './types';
 
 type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 
@@ -47,14 +47,6 @@ export const logDebug = (functionName: string, message: any) => {
 }
 
 /**
- * Log a click to the console
- * @param element 
- */
-export const logClick = (element: any) => {
-    // logDebug('click', element)
-}
-
-/**
  * Log an error to the console
  * @param functionName the name of the function that threw the error
  * @param error the error to log
@@ -67,6 +59,7 @@ export const logError = (functionName: string, error: any) => {
     }
 }
 
+const controller = new AbortController()
 
 /**
  * Get different data from the API by providing the API_ROUTE
@@ -114,7 +107,8 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         method: API_ROUTES[route].method ?? 'GET',
         headers: headers,
         credentials: API_ROUTES[route].credentials ?? undefined,
-        body: options?.body ? JSON.stringify(options.body) : null
+        body: options?.body ? JSON.stringify(options.body) : null,
+        signal: controller.signal
     }
 
     // call fetch
