@@ -2,7 +2,7 @@
     <ion-card class="recipe-preview-card" @click="toRecipe()">
         <RecipeHero :recipe="recipe" class="recipe-preview-hero" />
         <ion-card-content>
-            <SmallItemList :items="recipe?.getItems()" />
+            <ItemList :items="recipe?.getItems()" />
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
@@ -23,7 +23,7 @@ import { Recipe, Step } from "@/tastebuddy/types";
 import { IonCard, IonCardContent, useIonRouter } from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
-import SmallItemList from "@/components/item/SmallItemList.vue";
+import ItemList from "@/components/recipe/ItemList.vue";
 
 export default defineComponent({
     name: 'RecipePreview',
@@ -34,7 +34,7 @@ export default defineComponent({
         }
     },
     components: {
-        SmallItemList,
+        ItemList,
         RecipeHero, RecipeLink,
         IonCard, IonCardContent
     },
@@ -83,6 +83,7 @@ export default defineComponent({
 
 .recipe-step-preview {
     margin-top: 16px;
+    color: var(--ion-color-light);
 }
 
 .recipe-preview-card ion-card-content {

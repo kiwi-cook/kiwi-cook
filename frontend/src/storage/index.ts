@@ -8,7 +8,7 @@ import { createStore, Store, useStore as baseUseStore } from 'vuex';
 // Types
 import { Discount, Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery } from '@/tastebuddy/types';
 import { API_ROUTE, DURATIONS } from '@/tastebuddy/constants';
-import { APIResponse, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
+import { APIResponse, log, logDebug, logError, presentToast, sendToAPI } from '@/tastebuddy';
 
 
 // Type the store to use benefits of TypeScript
@@ -81,20 +81,10 @@ export function createTasteBuddyStore() {
             removeItem(state, item: Item) {
                 delete state.items[item.getId()]
             },
-            mapRecipeIdsToItemIds(state, recipes: Recipe[]) {
-                const recipesByItemId: { [key: string]: string[] } = {}
-
-                recipes.forEach((recipe: Recipe) => {
-                    const items = recipe.getItems()
-                    items.forEach((item: Item) => {
-                        if (!(item.getId() in recipesByItemId)) {
-                            recipesByItemId[item.getId()] = []
-                        }
-                        recipesByItemId[item.getId()].push(recipe.getId())
-                    })
+            removeItems(state, items: Item[]) {
+                items.forEach((item: Item) => {
+                    delete state.items[item.getId()]
                 })
-
-                state.recipesByItemId = recipesByItemId
             }
         },
         actions: {
@@ -252,15 +242,29 @@ export function createTasteBuddyStore() {
             },
             deleteItem({ commit }, item: Item) {
                 logDebug('deleteItem', item)
+                commit('addLoading', 'deleteItem')
                 commit('removeItem', item)
                 if (typeof item._id !== 'undefined') {
                     return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
                         formatObject: { ITEM_ID: item._id ?? '' },
                         errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
                     }).then((apiResponse: APIResponse<string>) => {
+                        commit('finishLoading', 'deleteItem')
                         return presentToast(apiResponse.response)
                     })
                 }
+            },
+            bulkDeleteItems({ commit }, items: Item[]) {
+                logDebug('bulkDeleteItems', items)
+                commit('removeItems', items)
+                items.map((item: Item) => item._id ?? '').forEach((itemId: string) => {
+                    sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
+                        formatObject: { ITEM_ID: itemId },
+                        errorMessage: `Could not delete item ${itemId} from database. Please retry later!`
+                    }).then((apiResponse: APIResponse<string>) => {
+                        return presentToast(apiResponse.response)
+                    })
+                })
             },
             mapRecipeIdsToItemIds({ commit, getters }) {
                 logDebug('mapRecipeIdsToItemIds', 'mapping recipe ids to item ids')
@@ -314,6 +318,23 @@ export function createTasteBuddyStore() {
              */
             getRecipesAsListByItemId: (state) => (itemId?: string): string[] => {
                 return state.recipesByItemId[itemId ?? ''] ?? []
+            },
+            getRecipesByItemIds(state, getters): { [key: string]: string[] } {
+                const recipesByItemId: { [key: string]: string[] } = {}
+                const recipes = getters.getRecipesAsList ?? []
+
+                recipes.forEach((recipe: Recipe) => {
+                    const items = recipe.getItems()
+                    items.forEach((item: Item) => {
+                        if (!(item.getId() in recipesByItemId)) {
+                            recipesByItemId[item.getId()] = []
+                        }
+                        recipesByItemId[item.getId()].push(recipe.getId())
+                    })
+                })
+                logDebug('getRecipesByItemIds', recipesByItemId)
+
+                return recipesByItemId
             },
             /**
              * Get the recipe suggestions

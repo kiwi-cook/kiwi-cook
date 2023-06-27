@@ -32,7 +32,11 @@
                         </ion-card-title>
                     </ion-card-header>
                     <ion-card-content>
-                        <SmallItemList :items="ingredients" />
+                        <ion-item class="servings-counter">
+                            <ion-input type="number" min="1" max="15" label="Servings" label-placement="stacked" color="light"
+                            v-model="servings" />
+                        </ion-item>
+                        <ItemList :items="ingredients" />
                     </ion-card-content>
                 </ion-card>
             </ion-col>
@@ -45,7 +49,7 @@
                         </ion-card-title>
                     </ion-card-header>
                     <ion-card-content>
-                        <SmallItemList :items="tools" />
+                        <ItemList :items="tools" />
                     </ion-card-content>
                 </ion-card>
             </ion-col>
@@ -63,7 +67,7 @@
 </template>
 
 <script lang="ts">
-import { computed, ComputedRef, defineComponent, PropType, ref, toRefs } from 'vue';
+import { computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch } from 'vue';
 import {
     IonButton,
     IonCard,
@@ -74,14 +78,15 @@ import {
     IonItem,
     IonList,
     IonText,
-    IonGrid, IonRow, IonCol
+    IonGrid, IonRow, IonCol, IonInput
 } from '@ionic/vue';
 import { flagOutline, heart, shareOutline } from 'ionicons/icons';
 import { Item, Recipe, Step, StepItem } from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
-import SmallItemList from "@/components/item/SmallItemList.vue";
+import ItemList from "@/components/recipe/ItemList.vue";
 import { CanShareResult, Share } from '@capacitor/share';
+import { deepCopy } from '@/utility/util';
 
 export default defineComponent({
     title: 'Recipe',
@@ -92,9 +97,9 @@ export default defineComponent({
         },
     },
     components: {
-        SmallItemList,
+        ItemList,
         RecipeHero, RecipeStep,
-        IonIcon, IonButton, IonItem, IonList, IonText, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol
+        IonIcon, IonButton, IonItem, IonList, IonText, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonGrid, IonRow, IonCol, IonInput
     },
     setup(props: { recipe: Recipe }) {
         const { recipe } = toRefs(props);
@@ -103,6 +108,13 @@ export default defineComponent({
         const ingredients: ComputedRef<StepItem[]> = computed(() => itemsFromRecipe.value.filter(item => item.type === 'ingredient'))
         const tools: ComputedRef<Item[]> = computed(() => itemsFromRecipe.value.filter(item => item.type === 'tool'));
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
+
+        const servings = ref(1)
+        watch(servings, (newServings, oldServings) => {
+            if (newServings !== oldServings) {
+                recipe.value?.updateServings(newServings);
+            }
+        });
 
         // share
         const shareRecipe = () => recipe.value?.share();
@@ -114,6 +126,7 @@ export default defineComponent({
 
         return {
             // recipe
+            servings,
             // steps
             steps,
             // items
@@ -131,5 +144,9 @@ export default defineComponent({
 .recipe-subheader {
     margin-top: 2%;
     font-weight: bold;
+}
+
+.servings-counter {
+    max-width: 100px;
 }
 </style>

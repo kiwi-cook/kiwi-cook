@@ -1,15 +1,15 @@
-import {createRouter} from '@ionic/vue-router';
-import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
+import { createRouter } from '@ionic/vue-router';
+import { createWebHashHistory, Router, RouteRecordRaw } from 'vue-router';
 import TabsPage from '../views/TabsPage.vue'
-import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
-import {State} from '@/storage';
-import {Store} from 'vuex';
+import { checkAuthMiddleware, logMiddleware } from "@/router/middleware";
+import { State } from '@/storage';
+import { Store } from 'vuex';
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         component: TabsPage,
-        redirect: () => ({ name: 'RecipeOfTheDay'}),
+        redirect: () => ({ name: 'RecipeOfTheDay' }),
         children: [
             {
                 name: 'Home',
@@ -28,9 +28,17 @@ const routes: Array<RouteRecordRaw> = [
                         meta: {
                             auth: true,
                         },
-                        component: () => import('@/views/recipe/RecipeEditorPage.vue'),
-                    }
+                        component: () => import('@/views/editor/RecipeEditorPage.vue'),
+                    },
                 ]
+            },
+            {
+                name: 'ItemEditor',
+                path: 'item/e/',
+                meta: {
+                    auth: true,
+                },
+                component: () => import('@/views/editor/ItemsEditorPage.vue'),
             },
             {
                 name: 'RecipeSuggestions',

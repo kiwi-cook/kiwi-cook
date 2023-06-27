@@ -1,18 +1,19 @@
 <template>
-    <ion-list>
-        <template v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()">
-            <div class="recipe-preview-container">
-                <RecipePreview :recipe="recipe" />
-            </div>
-        </template>
+    <ion-list v-if="loadedFilteredRecipes.length > 0">
+        <div v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()" class="recipe-preview-container">
+            <RecipePreview :recipe="recipe" />
+        </div>
     </ion-list>
+    <ion-item v-else>
+        {{ noRecipesMessage }}
+    </ion-item>
     <ion-infinite-scroll @ionInfinite="ionInfinite">
         <ion-infinite-scroll-content></ion-infinite-scroll-content>
     </ion-infinite-scroll>
 </template>
 
 <script lang="ts">
-import { IonInfiniteScroll, IonInfiniteScrollContent, IonList } from '@ionic/vue';
+import { IonInfiniteScroll, IonInfiniteScrollContent, IonList, IonItem } from '@ionic/vue';
 import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { arrowDown } from 'ionicons/icons';
 import { useTasteBuddyStore } from '@/storage';
@@ -32,11 +33,16 @@ export default defineComponent({
             type: Object as PropType<Recipe[]>,
             required: false,
             default: null
+        },
+        noRecipesMessage: {
+            type: String,
+            required: false,
+            default: 'No recipes found'
         }
     },
     components: {
         RecipePreview,
-        IonList, IonInfiniteScroll, IonInfiniteScrollContent
+        IonList, IonInfiniteScroll, IonInfiniteScrollContent, IonItem
 
     },
     setup(props: { filter: string, recipeList: Recipe[] }) {
@@ -97,6 +103,5 @@ export default defineComponent({
 .recipe-preview-container {
     margin-bottom: 1rem;
 }
-
 </style>
 ```

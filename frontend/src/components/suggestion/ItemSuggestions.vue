@@ -1,21 +1,17 @@
 <template>
-    <!-- Show multiple images of items using ionic -->
-    <div class="image-container">
-        <div class="image-wrapper" v-for="item in itemsWithImgUrl" :key="item._id" @click="select(item.getId())">
-            <ion-card>
-                <ion-img :src="item.imgUrl" class="image" />
-                <ion-card-header>
-                    <ion-card-title color="light">{{ item.name }}</ion-card-title>
-                    <ion-card-subtitle>{{ item.type }}</ion-card-subtitle>
-                </ion-card-header>
-            </ion-card>
-        </div>
-    </div>
+    <ion-list>
+        <ion-item v-for="item in itemsWithImgUrl" :key="item.getId()" @click="select(item.getId())" class="suggested-item">
+            <ion-thumbnail slot="start" v-if="item.imgUrl !== ''">
+                <img :alt="`Image of ${item.name}`" :src="item.imgUrl" />
+            </ion-thumbnail>
+            <ion-label>{{ item.name }}</ion-label>
+        </ion-item>
+    </ion-list>
 </template>
 
 <script lang="ts">
 import { Item } from '@/tastebuddy/types';
-import { IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonImg } from '@ionic/vue';
+import { IonItem, IonLabel, IonList, IonThumbnail } from '@ionic/vue';
 import { PropType, computed, defineComponent, toRefs } from 'vue';
 
 export default defineComponent({
@@ -27,7 +23,7 @@ export default defineComponent({
         }
     },
     components: {
-        IonCard, IonCardHeader, IonCardTitle, IonCardSubtitle, IonImg
+        IonList, IonThumbnail, IonLabel, IonItem
     },
     emits: ['select'],
     setup(props: { items: Item[] }, { emit }) {
@@ -47,37 +43,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.image-container {
+.suggested-item {
     display: flex;
     overflow-x: scroll;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
     white-space: nowrap;
     cursor: pointer;
-}
-
-.image-wrapper {
-    flex-shrink: 0;
-    max-width: 200px;
-    margin: 0 5px;
-    position: relative;
-}
-
-.image {
-    width: 100px;
-    height: auto;
-    object-fit: cover;
-}
-
-.image-title {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 8px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    font-size: 14px;
-    text-align: center;
 }
 </style>

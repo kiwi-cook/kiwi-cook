@@ -14,11 +14,11 @@
             <div class="content">
                 <ion-card>
                     <ion-card-header>
-                        <ion-card-title color="primary">Select Items</ion-card-title>
+                        <ion-card-title color="primary">Items</ion-card-title>
                     </ion-card-header>
 
                     <ion-card-content>
-                        <ItemSuggestions :items="items" @select="$event => selectItem($event)" />
+                        <ItemList :items="filteredItems" @select="$event => selectItem($event)" />
                     </ion-card-content>
                     <ion-button color="tertiary" fill="clear" @click="suggest()">Suggest</ion-button>
                 </ion-card>
@@ -29,18 +29,18 @@
                     </ion-card-header>
 
                     <ion-card-content>
-                        <SmallItemContainer :items="selectedItems" />
+                        <ItemList :items="selectedItems" @select="$event => selectItem($event)" />
                     </ion-card-content>
                 </ion-card>
 
-                <RecipeList :recipe-list="recipeSuggestions" />
+                <RecipeList :recipe-list="recipeSuggestions" :no-recipes-message="noRecipesMessage" />
             </div>
         </ion-content>
     </ion-page>
 </template>
 
 <script lang="ts">
-import { ComputedRef, computed, defineComponent, ref } from 'vue';
+import { ComputedRef, computed, defineComponent, ref, watch } from 'vue';
 import {
     IonButton,
     IonCard,
@@ -56,10 +56,10 @@ import {
 } from '@ionic/vue';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 import RecipeList from "@/components/recipe/RecipeList.vue";
-import ItemSuggestions from '@/components/suggestion/ItemSuggestions.vue';
 import { useTasteBuddyStore } from '@/storage';
 import { Item, Suggestion } from '@/tastebuddy/types';
-import SmallItemContainer from '@/components/item/SmallItemContainer.vue';
+import ItemList from '@/components/recipe/ItemList.vue';
+import { filter } from 'ionicons/icons';
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
@@ -72,20 +72,27 @@ export default defineComponent({
         IonToolbar,
         IonContent,
         RecipeList,
-        ItemSuggestions,
         IonCard,
         IonCardHeader,
         IonCardTitle,
         IonCardContent,
         IonButton,
-        SmallItemContainer
+        ItemList
     },
     setup() {
         const store = useTasteBuddyStore()
         const itemsById = computed(() => store.getters.getItemsById)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
+        const filteredItems = ref([] as Item[])
         const filterInput = ref('')
+        watch([filterInput, items], () => {
+            if (filterInput.value === '') {
+                filteredItems.value = items.value
+            } else {
+                filteredItems.value = (items.value ?? []).filter(item => item.name.toLowerCase().includes(filterInput.value.toLowerCase()))
+            }
+        }, { immediate: true })
 
         const selectedItemIds = new Set<string>()
         const selectedItems = ref([] as Item[])
@@ -100,11 +107,18 @@ export default defineComponent({
 
         const suggest = () => Suggestion.suggestRecipes(store, Array.from(selectedItemIds))
         const recipeSuggestions = computed(() => store.getters.getRecipeSuggestions)
+        const noRecipesMessage = computed(() => {
+            if (selectedItems.value.length === 0) {
+                return 'Select items'
+            } else {
+                return 'No recipes found'
+            }
+        })
 
         return {
             filterInput,
-            selectItem, items, selectedItems,
-            suggest, recipeSuggestions
+            selectItem, filteredItems, selectedItems,
+            suggest, recipeSuggestions, noRecipesMessage
         }
     }
 });
