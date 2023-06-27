@@ -16,7 +16,6 @@ export const logMiddleware = (to: any, from: any) => {
  */
 export const checkAuthMiddleware = (to: any, from: any, next: any, store: Store<State>) => {
     if (to.meta.auth) {
-        logDebug('router', `auth required for ${to.path}`)
         store.dispatch('sessionAuth').then((isAuthenticated: boolean) => {
             logDebug('router', `auth required for ${to.path} -> ${isAuthenticated}`)
             if (isAuthenticated) {

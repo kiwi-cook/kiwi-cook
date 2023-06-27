@@ -8,7 +8,7 @@
                 <h2 class="recipe-author">By {{ recipe?.author }}</h2>
             </div>
             <div class="hero-tags">
-                <div v-if="(recipe?.props?.tags?.length ?? 0) > 0" class="flex">
+                <div v-if="(recipe?.props?.tags ?? []).length > 0" class="flex">
                     <ion-chip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
                         <ion-label>{{ tag }}</ion-label>
                     </ion-chip>
@@ -17,9 +17,9 @@
                     <ion-chip color="light" class="hero-tag">
                         <ion-label>{{ recipe?.getDuration() }} minutes</ion-label>
                     </ion-chip>
-                    <ion-chip color="light" class="hero-tag recipe-created-date">
+                    <!-- <ion-chip color="light" class="hero-tag recipe-created-date">
                         created on {{ formatDate(recipe?.props.createdAt) }}
-                    </ion-chip>
+                    </ion-chip> -->
                 </div>
             </div>
         </div>
@@ -44,6 +44,8 @@ export default defineComponent({
         IonImg, IonChip, IonLabel
     },
     setup() {
+
+
         return {
             formatDate
         }

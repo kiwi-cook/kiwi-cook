@@ -3,7 +3,7 @@
 import { State } from "@/storage";
 import { descriptionToSteps } from "@/utility/recipeParser";
 import { Store } from "vuex";
-import { logDebug } from ".";
+import { log, logDebug } from ".";
 import { CanShareResult, Share } from "@capacitor/share";
 
 // types for recipe
@@ -118,11 +118,13 @@ export class Item {
  */
 export class StepItem extends Item {
     amount: number;
+    servingAmount: number;
     unit: string;
 
     constructor(item?: Item) {
         super(item)
         this.amount = 1
+        this.servingAmount = 1
         this.unit = 'pcs'
     }
 
@@ -136,6 +138,7 @@ export class StepItem extends Item {
     static fromJSON(json: StepItem): StepItem {
         const stepItem = new StepItem()
         stepItem.amount = json.amount
+        stepItem.servingAmount = json.amount
         stepItem.unit = json.unit
         stepItem._id = json._id
         stepItem._isSaved = json._isSaved
@@ -256,6 +259,18 @@ export class Step {
     public getStepItems(): StepItem[] {
         return [...new Set(this.items)]
     }
+
+    /**
+     * Update the servings of the step
+     * @param servings
+     * @returns the step to allow chaining
+     */
+    public updateServings(servings = 1): Step {
+        this.items.forEach(item => {
+            item.servingAmount = item.amount * servings
+        })
+        return this
+    }
 }
 
 /**
@@ -279,6 +294,7 @@ export class Recipe {
         tags?: string[];
         likes: number;
     };
+    servings: number;
 
     constructor() {
         this._isSaved = false
@@ -296,6 +312,7 @@ export class Recipe {
             likes: 0
         }
         this.steps = [new Step()]
+        this.servings = 1
     }
 
     /**
@@ -324,7 +341,6 @@ export class Recipe {
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
         recipe.props.likes = json.props.likes
-
         return recipe
     }
 
@@ -499,16 +515,15 @@ export class Recipe {
      * @param sorted sort the items by name
      */
     public getStepItems(sorted = false): StepItem[] {
-        const items = this.steps.flatMap((step: Step) => step.getStepItems())
-        const uniqueItems: { [key: string]: StepItem } = {}
-        items.forEach(item => {
-            uniqueItems[item.getId()] = item
-        })
-        const result = Object.values(uniqueItems)
+        const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
+            .flatMap((step: Step) => step.getStepItems())
+            .map(stepItem => ({ [stepItem.getId()]: stepItem }))
+        ))
+
         if (sorted) {
-            result.sort((a, b) => a.name.localeCompare(b.name))
+            items.sort((a, b) => a.name.localeCompare(b.name))
         }
-        return result
+        return items
     }
 
     /**
@@ -542,6 +557,13 @@ export class Recipe {
                 url: '#/recipe/s/' + this.getId(),
                 dialogTitle: 'Share with buddies',
             })
+        })
+    }
+
+    public updateServings(servings: number) {
+        this.servings = servings
+        this.steps.forEach(step => {
+            step.updateServings(servings)
         })
     }
 }

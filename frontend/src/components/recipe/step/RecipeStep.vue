@@ -10,7 +10,7 @@
             </ion-card-title>
         </ion-card-header>
         <ion-card-content>
-            <SmallItemContainer :items="step.getItems()"/>
+            <ItemList :items="step.getItems()"/>
             <AdditionalStepInfo :step="step"/>
             <ion-item lines="none">
                 <ion-text>
@@ -35,7 +35,7 @@ import {
 } from '@ionic/vue';
 import {defineComponent, PropType} from "vue";
 import {Step} from "@/tastebuddy/types";
-import SmallItemContainer from "@/components/item/SmallItemContainer.vue";
+import ItemList from "@/components/recipe/ItemList.vue";
 import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 
 export default defineComponent({
@@ -51,7 +51,7 @@ export default defineComponent({
         }
     },
     components: {
-        SmallItemContainer, AdditionalStepInfo,
+        ItemList, AdditionalStepInfo,
         IonCard, IonCardHeader, IonCardTitle, IonCardContent, IonItem, IonText, IonImg, IonChip, IonLabel
     },
     setup() {

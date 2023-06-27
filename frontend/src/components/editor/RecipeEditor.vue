@@ -55,7 +55,7 @@
             <ion-input v-model="mutableRecipe.props.imgUrl" type="url" label="Image URL" label-placement="stacked" />
 
             <!-- Item icons -->
-            <SmallItemList :items="mutableRecipe.getStepItems()" />
+            <ItemList :items="mutableRecipe.getStepItems()" />
 
             <ion-item class="tags-editor" lines="none">
                 <!-- Tags -->
@@ -114,7 +114,7 @@
                     label="Image URL" label-placement="stacked" />
 
                 <!-- Item icons -->
-                <SmallItemContainer :items="step.getStepItems()" />
+                <ItemList :items="step.getStepItems()" />
 
 
                 <!-- Items -->
@@ -236,10 +236,9 @@ import {
 import { computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch } from 'vue';
 import { closeCircleOutline } from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
-import SmallItemContainer from '@/components/item/SmallItemContainer.vue';
 import { descriptionToItems } from '@/utility/recipeParser';
 import { formatDate } from '@/utility/util';
-import SmallItemList from "@/components/item/SmallItemList.vue";
+import ItemList from "@/components/recipe/ItemList.vue";
 import { useIonRouter } from '@ionic/vue';
 
 export default defineComponent({
@@ -251,7 +250,7 @@ export default defineComponent({
         },
     },
     components: {
-        SmallItemList,
+        ItemList,
         IonGrid,
         IonRow,
         IonCol,
@@ -269,8 +268,7 @@ export default defineComponent({
         IonSelect,
         IonSelectOption,
         IonChip,
-        DropDownSearch,
-        SmallItemContainer
+        DropDownSearch
     },
     setup(props) {
         const { recipe } = toRefs(props)
