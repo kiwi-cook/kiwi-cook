@@ -6,6 +6,8 @@ package main
 
 import (
 	"errors"
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -142,6 +144,16 @@ func (app *TasteBuddyApp) AddDiscounts(discounts []Discount) error {
 	return nil
 }
 
+// GetDiscountsByMarket gets discounts by market from database
+func (app *TasteBuddyApp) GetDiscountsByMarket(market *Market) ([]Discount, error) {
+	var discounts []Discount
+	if err := app.GetDiscountsCollection().All(bson.M{"internalMarketId": market.ID.Hex()}, &discounts); err != nil {
+		return []Discount{}, app.LogError("GetDiscountsByMarket + "+market.ID.Hex(), err)
+	}
+	app.LogDebug("GetDiscountsByMarket", "Return "+strconv.Itoa(len(discounts))+" discounts from database")
+	return discounts, nil
+}
+
 // GetDiscountsByCityFromAPI gets all discounts for a city from the market's APIs
 func (app *TasteBuddyApp) GetDiscountsByCityFromAPI(city string) []Discount {
 	if markets, err := app.GetMarketsByCity(city); err != nil {
@@ -161,16 +173,23 @@ func (app *TasteBuddyApp) GetDiscountsByCityFromAPI(city string) []Discount {
 	}
 }
 
+func (item *Item) FindMatchingDiscount(discounts []Discount) (*Discount, bool) {
+	matchedDiscount := &Discount{}
+	matchedDiscountSimilarity := 0.0
+	threshold := 0.3
+	for _, discount := range discounts {
+		similarity := strutil.Similarity(item.Name, discount.Title, metrics.NewHamming())
+		if similarity > threshold && similarity > matchedDiscountSimilarity {
+			matchedDiscount = &discount
+			matchedDiscountSimilarity = similarity
+		}
+	}
+	return matchedDiscount, matchedDiscountSimilarity > threshold
+}
+
 // GoRoutineSaveDiscountsToDB save discounts from different cities to the database
 // Is Goroutine
-func GoRoutineSaveDiscountsToDB(app *TasteBuddyApp) {
-	cities := []string{
-		"Konstanz",
-		"Berlin",
-		"Hamburg",
-		"Muenchen",
-	}
-
+func (app *TasteBuddyApp) GoRoutineSaveDiscountsToDB(cities []string) {
 	app.Log("GoRoutineSaveDiscountsToDB", "Start saving discounts to database")
 	for _, city := range cities {
 		go app.SaveDiscountsFromAPI(city)

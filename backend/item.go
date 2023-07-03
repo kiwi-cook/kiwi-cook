@@ -9,6 +9,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"math"
+	"strconv"
 )
 
 type Item struct {
@@ -174,10 +176,8 @@ func (app *TasteBuddyApp) AddOrUpdateItem(newItem Item) (primitive.ObjectID, err
 func (recipe *Recipe) GetItems() []Item {
 	// add all items to map
 	var itemsMap = make(map[primitive.ObjectID]Item)
-	for _, step := range recipe.Steps {
-		for _, stepItem := range step.Items {
-			itemsMap[stepItem.ID] = stepItem.Item
-		}
+	for _, stepItem := range recipe.GetStepItemsList() {
+		itemsMap[stepItem.ID] = Item{}
 	}
 
 	// convert map to array
@@ -186,6 +186,30 @@ func (recipe *Recipe) GetItems() []Item {
 		items = append(items, item)
 	}
 	return items
+}
+
+// CalculateItemPriceForMarket calculates the price of a recipe for a market
+func (app *TasteBuddyApp) CalculateItemPriceForMarket(item *Item, market Market) (float64, bool) {
+	discounts, err := app.GetDiscountsByMarket(&market)
+	if err != nil {
+		app.LogError("CalculateRecipePrice", err)
+		return 0, false
+	}
+
+	discount, successful := item.FindMatchingDiscount(discounts)
+	price, err := strconv.ParseFloat(discount.Price, 32)
+	if err != nil || !successful {
+		price = 0
+	}
+	return math.Max(price, 0), successful
+}
+
+func ToItemIds(items []StepItem) []primitive.ObjectID {
+	var itemIds []primitive.ObjectID
+	for _, item := range items {
+		itemIds = append(itemIds, item.ID)
+	}
+	return itemIds
 }
 
 // GetItemQuality gets the quality of an item

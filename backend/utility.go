@@ -6,6 +6,8 @@ package main
 
 import (
 	"context"
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"io"
 	"net/http"
 	"time"
@@ -50,4 +52,17 @@ func (app *TasteBuddyApp) GetFromUrl(url string) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func MostSimilarString(str string, strings []string, threshold float64) string {
+	// Get city whose name is most similar to the given city
+	mostSimilarString := ""
+	var mostSimilarity float64 = 0
+	for _, s := range strings {
+		if similarity := strutil.Similarity(str, s, metrics.NewHamming()); similarity > mostSimilarity && similarity > threshold {
+			mostSimilarString = s
+			mostSimilarity = similarity
+		}
+	}
+	return mostSimilarString
 }

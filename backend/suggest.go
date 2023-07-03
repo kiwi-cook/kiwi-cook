@@ -5,25 +5,46 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type RecipeSuggestionQuery struct {
-	ItemQuery []ItemQuery `json:"item_query,omitempty"`
-}
-
+// ItemQuery is used to query items
 type ItemQuery struct {
 	ItemID  primitive.ObjectID `json:"id,omitempty"`
 	Name    string             `json:"name,omitempty"`
 	Exclude bool               `json:"exclude,omitempty"`
 }
 
+// RecipeQuery is used to query recipes
 type RecipeQuery struct {
 	RecipeID primitive.ObjectID `json:"id,omitempty"`
 	Exclude  bool               `json:"exclude,omitempty"`
+}
+
+type RecipeSuggestionQuery struct {
+	ItemQuery   []ItemQuery   `json:"item_query,omitempty"`
+	RecipeQuery []RecipeQuery `json:"recipe_query,omitempty"`
+	Price       float64       `json:"price,omitempty"`
+	City        string        `json:"city,omitempty"`
+}
+
+type MatchedRecipe struct {
+	RecipeID           primitive.ObjectID  `json:"recipe_id,omitempty"`
+	MissingRecipeItems []MissingRecipeItem `json:"missing_items,omitempty"`
+}
+
+type RecipeSuggestion struct {
+	RecipeID       primitive.ObjectID  `json:"recipe_id,omitempty"`
+	RecipePrice    float64             `json:"recipe_price,omitempty"`
+	MarketForPrice *Market             `json:"market_for_price,omitempty"`
+	MissingItems   []MissingRecipeItem `json:"missing_items,omitempty"`
+}
+
+type MissingRecipeItem struct {
+	Item   primitive.ObjectID `json:"item,omitempty"`
+	Amount float64            `json:"amount,omitempty"`
+	Price  float64            `json:"price,omitempty"`
 }
 
 // HandleRecipeSuggestions gets called by router
@@ -36,7 +57,8 @@ func (server *TasteBuddyServer) HandleRecipeSuggestions(context *gin.Context) {
 		return
 	}
 
-	// suggest recipes
+	// Suggest recipes
+	// result is a list of recipe ids
 	result, err := server.SuggestRecipes(recipeSuggestionQuery)
 	if err != nil {
 		server.LogError("HandleSuggestion", err)
@@ -48,29 +70,9 @@ func (server *TasteBuddyServer) HandleRecipeSuggestions(context *gin.Context) {
 }
 
 // SuggestRecipes suggests recipes based on the given query
-func (app *TasteBuddyApp) SuggestRecipes(recipeSuggestionQuery RecipeSuggestionQuery) ([]primitive.ObjectID, error) {
-
-	var err error = nil
-	// Search recipes by items
-	recipesMap, err := app.SearchRecipesByItems(recipeSuggestionQuery.ItemQuery)
-	if err != nil {
-		return []primitive.ObjectID{}, err
-	}
-
-	// Convert map to slice
-	var suggestedRecipes []primitive.ObjectID
-	for _, recipe := range recipesMap {
-		suggestedRecipes = append(suggestedRecipes, recipe)
-	}
-
-	if len(suggestedRecipes) == 0 {
-		return []primitive.ObjectID{}, nil
-	}
-
-	return suggestedRecipes, err
-}
-
-func (app *TasteBuddyApp) SearchRecipesByItems(itemQuery []ItemQuery) (map[primitive.ObjectID]primitive.ObjectID, error) {
+// and returns a list of recipe ids
+// @TODO Build a map of items mapped to recipes to improve performance
+func (app *TasteBuddyApp) SuggestRecipes(recipeSuggestionQuery RecipeSuggestionQuery) ([]RecipeSuggestion, error) {
 	// Get all recipes
 	recipes, err := app.GetAllRecipes()
 	if err != nil {
@@ -78,52 +80,82 @@ func (app *TasteBuddyApp) SearchRecipesByItems(itemQuery []ItemQuery) (map[primi
 	}
 
 	// Check if there are any items
+	itemQuery := recipeSuggestionQuery.ItemQuery
 	if len(itemQuery) == 0 {
 		return nil, nil
 	}
 
-	// Create channel for recipes
-	recipeChannel := make(chan *primitive.ObjectID)
-
-	// Put all recipes into channel
+	// Create channel for recipes to be put into
+	// and put all recipes into it
+	recipeChannel := make(chan *MatchedRecipe)
 	for _, recipe := range recipes {
 		go func(recipe Recipe, itemQuery []ItemQuery) {
 			// Check if recipe matches the query
 			// If so, put it into the channel
 			// If not, put nil into the channel
-			recipeChannel <- recipe.MatchesByItems(itemQuery)
+			recipeChannel <- matchesByItems(recipe, itemQuery)
 		}(recipe, itemQuery)
 	}
 
 	// Wait for all recipes to be found
-	var recipesMap = make(map[primitive.ObjectID]primitive.ObjectID)
+	var matchedRecipesMap = make(map[primitive.ObjectID]*MatchedRecipe)
 	for i := 0; i < len(recipes); i++ {
-		recipeID := <-recipeChannel
+		recipe := <-recipeChannel
 		// skip nil recipes
-		if recipeID == nil {
+		if recipe == nil {
 			continue
 		}
-		recipesMap[*recipeID] = *recipeID
+		matchedRecipesMap[recipe.RecipeID] = recipe
 	}
 
-	return recipesMap, nil
+	var suggestedRecipes []RecipeSuggestion
+	for _, matchedRecipe := range matchedRecipesMap {
+		recipe, err := app.GetRecipeById(matchedRecipe.RecipeID)
+		if err != nil {
+			continue
+		}
+
+		suggestedRecipe := RecipeSuggestion{
+			RecipeID:     matchedRecipe.RecipeID,
+			MissingItems: matchedRecipe.MissingRecipeItems,
+		}
+
+		// Calculate the price of the recipe
+		if calculatedRecipePrice, market, err := app.CalculateLowestRecipePriceInCity(&recipe, recipeSuggestionQuery.City); err == nil {
+			app.LogDebug("SuggestRecipes", "Market is "+market.MarketName)
+			// Calculate the price of the missing items
+			itemsMap := recipe.GetStepItems()
+			for index, missingRecipeItem := range matchedRecipe.MissingRecipeItems {
+				item := itemsMap[missingRecipeItem.Item]
+				missingRecipeItem.Price, _ = app.CalculateItemPriceForMarket(&item.Item, *market)
+				matchedRecipe.MissingRecipeItems[index] = missingRecipeItem
+			}
+			suggestedRecipe.RecipePrice = calculatedRecipePrice
+			suggestedRecipe.MarketForPrice = market
+		}
+
+		suggestedRecipes = append(suggestedRecipes, suggestedRecipe)
+	}
+
+	return suggestedRecipes, err
 }
 
-// MatchesByItems checks if the given recipe matches the given item query
-func (recipe *Recipe) MatchesByItems(itemQuery []ItemQuery) *primitive.ObjectID {
-	var suggestedRecipeID *primitive.ObjectID = nil
+// matchesByItems checks if the given recipe matches the given item query
+// and returns the recipe id if it does and the item ids of missing items
+func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
+	var suggestedRecipeID primitive.ObjectID
 
 	matchesAllItems := true
-	recipeItems := recipe.GetItems()
-	if len(recipeItems) == 0 {
-		return nil
+	recipeItemsMap := recipe.GetStepItems()
+	if len(recipeItemsMap) == 0 {
+		return &MatchedRecipe{}
 	}
 
+	// Check if recipe matches the query
 	for _, query := range itemQuery {
 		hasItem := false
-		for _, item := range recipeItems {
+		for _, item := range recipeItemsMap {
 			if item.ID == query.ItemID {
-				fmt.Printf("Recipe %s has item %s\n", recipe.Name, item.Name)
 				hasItem = true
 				if query.Exclude {
 					matchesAllItems = false
@@ -137,9 +169,32 @@ func (recipe *Recipe) MatchesByItems(itemQuery []ItemQuery) *primitive.ObjectID 
 	}
 
 	// Create suggested recipe
+	var missingItems []MissingRecipeItem
 	if matchesAllItems {
-		suggestedRecipeID = &recipe.ID
+		suggestedRecipeID = recipe.ID
+
+		// Get the items that were not in the query
+		for _, recipeItem := range recipeItemsMap {
+			hasItem := false
+			for _, query := range itemQuery {
+				if recipeItem.ID == query.ItemID {
+					hasItem = true
+					break
+				}
+			}
+			if !hasItem {
+				missingItems = append(missingItems, MissingRecipeItem{
+					Item:   recipeItem.ID,
+					Amount: recipeItem.Amount,
+				})
+			}
+		}
 	}
 
-	return suggestedRecipeID
+	var matchedRecipe = MatchedRecipe{
+		RecipeID:           suggestedRecipeID,
+		MissingRecipeItems: missingItems,
+	}
+
+	return &matchedRecipe
 }

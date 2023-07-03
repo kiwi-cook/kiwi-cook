@@ -23,6 +23,11 @@ var serveCmd = &cobra.Command{
 		app.SetLogger(logLevel)
 		app.Default()
 
+		// Run go routines
+		// cities := []string{"Tuebingen", "Stuttgart", "Reutlingen"}
+		// app.GoRoutineSaveMarketsToDB(cities)
+		// app.GoRoutineSaveDiscountsToDB(cities)
+
 		// Create the server
 		TasteBuddyServerFactory(app).
 			SetPort(&port).

@@ -4,7 +4,9 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"errors"
 	"fmt"
+	"math"
 	"math/rand"
 	"time"
 
@@ -333,6 +335,86 @@ func (app *TasteBuddyApp) GetRecipesByItemNames(splitItemIds []string) ([]Recipe
 	}
 
 	return filteredRecipes, nil
+}
+
+// GetStepItemsList returns a list of all items used in the recipe
+func (recipe *Recipe) GetStepItemsList() []StepItem {
+	var stepItems []StepItem
+	for _, step := range recipe.Steps {
+		stepItems = append(stepItems, step.Items...)
+	}
+	return stepItems
+}
+
+// GetStepItems returns a map of all items used in the recipe
+func (recipe *Recipe) GetStepItems() map[primitive.ObjectID]StepItem {
+	var stepItems = make(map[primitive.ObjectID]StepItem)
+	for _, stepItem := range recipe.GetStepItemsList() {
+		stepItems[stepItem.ID] = stepItem
+	}
+	return stepItems
+}
+
+// CalculateLowestRecipePriceInCity calculates the lowest price of a recipe for a city
+func (app *TasteBuddyApp) CalculateLowestRecipePriceInCity(recipe *Recipe, city string) (float64, *Market, error) {
+	markets, err := app.GetMarketsByCity(city)
+	if err != nil {
+		app.LogError("CalculateRecipePriceInCity", err)
+		return 0, nil, err
+	}
+
+	// Create channel for price calculation
+	priceChannel := make(chan *struct {
+		price  float64
+		market *Market
+	})
+	for _, market := range markets {
+		go func(recipe *Recipe, market Market) {
+			price, successful := app.CalculateRecipePriceForMarket(recipe, market)
+			if !successful {
+				priceChannel <- nil
+				return
+			}
+			priceChannel <- &struct {
+				price  float64
+				market *Market
+			}{price, &market}
+		}(recipe, market)
+	}
+
+	// Wait for all markets to be found
+	var lowestPrice = math.MaxFloat64
+	var lowestPriceMarket Market
+	successful := false
+	for i := 0; i < len(markets); i++ {
+		priceMarket := <-priceChannel
+		// skip nil values
+		if priceMarket == nil {
+			continue
+		}
+		if priceMarket.price < lowestPrice {
+			lowestPrice = priceMarket.price
+			lowestPriceMarket = *priceMarket.market
+			successful = true
+		}
+	}
+
+	if !successful {
+		return 0, nil, app.LogError("CalculateRecipePriceInCity", errors.New("no market found for "+recipe.Name+" in "+city))
+	}
+	app.LogDebug("CalculateRecipePriceInCity", "Lowest price for "+recipe.Name+" in "+city+" is "+fmt.Sprintf("%.2f", lowestPrice)+" at "+lowestPriceMarket.MarketName)
+	return lowestPrice, &lowestPriceMarket, nil
+}
+
+// CalculateRecipePriceForMarket calculates the price of a recipe for a market
+func (app *TasteBuddyApp) CalculateRecipePriceForMarket(recipe *Recipe, market Market) (float64, bool) {
+	var price float64 = 0
+	stepItems := recipe.GetStepItemsList()
+	for _, stepItem := range stepItems {
+		discountPrice, _ := app.CalculateItemPriceForMarket(&stepItem.Item, market)
+		price += discountPrice * stepItem.Amount
+	}
+	return math.Max(price, 0), price > 0
 }
 
 // CleanUpItemsInRecipes removes all items from recipes that are not in the database

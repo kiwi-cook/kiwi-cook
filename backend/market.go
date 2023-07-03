@@ -5,6 +5,7 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -60,9 +61,26 @@ func (app *TasteBuddyApp) GetMarketsCollection() *TBCollection {
 	return app.GetDBCollection("markets")
 }
 
+func (app *TasteBuddyApp) GetCitiesWithMarkets() []string {
+	if citiesInterface, err := app.GetMarketsCollection().Distinct(DefaultContext(), "location.city", bson.D{}); err != nil {
+		app.LogError("GetCities", err)
+		return []string{}
+	} else {
+		cities := make([]string, len(citiesInterface))
+		for i, v := range citiesInterface {
+			cities[i] = fmt.Sprint(v)
+		}
+		app.LogDebug("GetCities", "Found "+strconv.Itoa(len(cities))+" cities with markets")
+		return cities
+	}
+}
+
 // GetMarketsByCity gets all markets for a city from the db or the api
 func (app *TasteBuddyApp) GetMarketsByCity(city string) ([]Market, error) {
 	ctx := DefaultContext()
+	city = MostSimilarString(city, app.GetCitiesWithMarkets(), 0.5)
+	app.Log("GetMarketsByCity", "Get markets for "+city)
+
 	collection := app.GetMarketsCollection()
 	cursor, err := collection.Find(ctx, bson.D{{Key: "location.city", Value: city}})
 	if err != nil {
@@ -148,14 +166,7 @@ func (app *TasteBuddyApp) GetMarketsByCityFromAPI(city string) []Market {
 
 // GoRoutineSaveMarketsToDB saves markets from different cities to database
 // Is Goroutine
-func GoRoutineSaveMarketsToDB(app *TasteBuddyApp) {
-	cities := []string{
-		"Konstanz",
-		"Berlin",
-		"Hamburg",
-		"Muenchen",
-	}
-
+func (app *TasteBuddyApp) GoRoutineSaveMarketsToDB(cities []string) {
 	app.Log("GoRoutineSaveMarketsToDB", "Start saving markets to database")
 	for _, city := range cities {
 		go app.SaveMarketsFromAPI(city)
