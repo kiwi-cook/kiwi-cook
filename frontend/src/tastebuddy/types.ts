@@ -84,7 +84,7 @@ export class Item {
      * @returns the item to allow chaining
      */
     public update(store: any): this {
-        store.commit('updateItem', this)
+        store.updateItem(this)
         return this
     }
 
@@ -95,7 +95,7 @@ export class Item {
      */
     public save(store: any): this {
         // remove the temporary id
-        store.dispatch('saveItem', this)
+        store.saveItem(this)
         return this
     }
 
@@ -104,7 +104,7 @@ export class Item {
      * @param store
      */
     public delete(store: any): void {
-        store.dispatch('deleteItem', this)
+        store.deleteItem(this)
     }
 }
 
@@ -357,7 +357,7 @@ export class Recipe {
      */
     public static saveById(store: any, id: string): void {
         logDebug('saveById', id)
-        store.dispatch('saveRecipeById', id)
+        store.saveRecipeById(id)
     }
 
     /**
@@ -401,7 +401,7 @@ export class Recipe {
      */
     public update(store: any): this {
         logDebug('update', this.getId())
-        store.commit('updateRecipe', this)
+        store.updateRecipe(this)
         return this
     }
 
@@ -410,9 +410,9 @@ export class Recipe {
      * @param store
      * @returns the id of the recipe
      */
-    public save(store: any): Promise<string> {
+    public save(store: any) {
         logDebug('save', this.getId())
-        return store.dispatch('saveRecipe', this).then((id: string) => id)
+        return store.saveRecipe(this)
     }
 
     /**
@@ -421,9 +421,7 @@ export class Recipe {
      */
     public delete(store: any): Promise<Recipe> {
         logDebug('delete', this.getId())
-        return store.dispatch('deleteRecipe', this).then(() => {
-            return this
-        })
+        return store.deleteRecipe(this).then(() => this)
     }
 
     /**
@@ -552,12 +550,23 @@ export class Recipe {
             return Share.share({
                 title: 'Share with your recipe with buddies',
                 text: `Check out this recipe for ${this.name} on Taste Buddy!`,
-                url: '#/recipe/s/' + this.getId(),
+                url: '#/' + this.route(),
                 dialogTitle: 'Share with buddies',
             })
         })
     }
 
+    /**
+     * Get the route to the recipe
+     */
+    public route(): string {
+        return '/recipe/s/' + this.getId()
+    }
+
+    /**
+     * Update the servings of the recipe
+     * @param servings
+     */
     public updateServings(servings: number) {
         this.servings = servings
         this.steps.forEach(step => {

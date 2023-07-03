@@ -13,6 +13,7 @@ git add -A
 # change user config
 git config user.name "taste-buddy"
 git config user.email ""
+git config --local commit.gpgsign false
 
 # deploy
 git commit -m 'deploy'

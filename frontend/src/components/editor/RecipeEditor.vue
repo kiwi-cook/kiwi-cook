@@ -146,8 +146,7 @@
                                                     <IonLabel>
                                                         {{ (filteredItem as Item).name }} {{
                                                             (filteredItem as Item)._id ? ' - ' +
-                                                                (filteredItem as Item)._id :
-                                                                ''
+                                                                (filteredItem as Item)._id : ''
                                                         }}
                                                     </IonLabel>
                                                 </template>

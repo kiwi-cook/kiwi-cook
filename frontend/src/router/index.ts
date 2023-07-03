@@ -72,7 +72,7 @@ const routes: Array<RouteRecordRaw> = [
  * Create router
  * @returns {Router}
  */
-export function createTasteBuddyRouter(store: any): Router {
+export function createTasteBuddyRouter(): Router {
     const router = createRouter({
         history: createWebHashHistory(process.env.BASE_URL),
         routes
@@ -80,7 +80,7 @@ export function createTasteBuddyRouter(store: any): Router {
 
     router.beforeEach((to, from, next) => {
         logMiddleware(to, from);
-        checkAuthMiddleware(to, from, next, store);
+        checkAuthMiddleware(to, from, next);
     })
 
     return router;

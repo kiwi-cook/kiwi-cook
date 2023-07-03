@@ -43,9 +43,11 @@
             <template v-if="usedInRecipes.length > 0">
                 <IonList>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
-                        <IonChip color="light">
-                            {{ recipe?.name }}
-                        </IonChip>
+                        <router-link :to="recipe.route()">
+                            <IonChip color="light">
+                                {{ recipe?.name }}
+                            </IonChip>
+                        </router-link>
                     </template>
                 </IonList>
             </template>

@@ -8,7 +8,6 @@
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
 import {defineComponent} from 'vue';
 import {useTasteBuddyStore} from './storage';
-import {logClick} from './tastebuddy';
 
 export default defineComponent({
     name: 'App',
@@ -37,10 +36,6 @@ export default defineComponent({
             document.body.classList.toggle('dark', shouldAdd);
         }
 
-        // Log everything
-        document.getElementsByTagName('body')[0].addEventListener('click', (e) => {
-            logClick(e.target)
-        })
         return {}
     }
 });

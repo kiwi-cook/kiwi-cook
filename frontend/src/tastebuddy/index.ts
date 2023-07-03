@@ -35,7 +35,9 @@ export const presentToast = async (message: string, isError = false, duration = 
  * @param message the message to log
  */
 export const log = (functionName: string, message?: any) => {
-    console.log(`[${functionName}]:`, message)
+    if (process.env.NODE_ENV === 'development') {
+        console.log(`[${functionName}]:`, message)
+    }
 }
 /**
  * Debug a message to the console
@@ -43,7 +45,9 @@ export const log = (functionName: string, message?: any) => {
  * @param message the message to log
  */
 export const logDebug = (functionName: string, message: any) => {
-    console.debug(`[${functionName}]:`, message)
+    if (process.env.NODE_ENV === 'development') {
+        console.debug(`[${functionName}]:`, message)
+    }
 }
 
 /**

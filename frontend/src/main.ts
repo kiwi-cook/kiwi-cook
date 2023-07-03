@@ -42,14 +42,14 @@ import {createPinia} from "pinia";
 const pinia = createPinia()
 
 /* Initialize and configure router */
-const tasteBuddyRouter = createTasteBuddyRouter(pinia);
+const router = createTasteBuddyRouter();
 
 /* Initialize app */
 const app = createApp(App)
     .use(IonicVue)
     .use(pinia)
-    .use(tasteBuddyRouter)
+    .use(router)
 
-tasteBuddyRouter.isReady().then(() => {
+router.isReady().then(() => {
     app.mount('#app');
 });

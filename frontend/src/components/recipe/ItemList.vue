@@ -1,19 +1,21 @@
 <template>
-    <ul>
-        <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
-            <li>
-                <IonItem class="small-item" lines="none" @click="select(item.id)">
-                    <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
-                    <IonText class="small-item-name">
-                        <IonChip v-if="item.showAmountUnit" color="light">
-                            {{ item.amount }} {{ item.unit }}
-                        </IonChip>
-                        {{ item.name }}
-                    </IonText>
-                </IonItem>
-            </li>
-        </template>
-    </ul>
+    <div class="item-list-wrapper">
+        <ul class="item-list">
+            <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
+                <li>
+                    <IonItem class="small-item" lines="none" @click="select(item.id)">
+                        <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
+                        <IonText class="small-item-name">
+                            <IonChip v-if="item.showAmountUnit" color="light">
+                                {{ item.amount }} {{ item.unit }}
+                            </IonChip>
+                            {{ item.name }}
+                        </IonText>
+                    </IonItem>
+                </li>
+            </template>
+        </ul>
+    </div>
 </template>
 
 <script lang="ts">
@@ -69,6 +71,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.item-list-wrapper {
+    max-height: 30vh;
+    overflow-y: scroll;
+}
+
 ul {
     list-style-type: none;
     padding: 0;

@@ -14,7 +14,7 @@
             <div class="content">
                 <IonCard>
                     <IonCardHeader>
-                        <IonCardTitle color="primary">Items</IonCardTitle>
+                        <IonCardTitle color="primary">Ingredients and Tools</IonCardTitle>
                     </IonCardHeader>
 
                     <IonCardContent>
@@ -42,7 +42,19 @@
                     </IonCardContent>
                 </IonCard>
 
-                <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="recipeSuggestions"/>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle color="primary">Suggested Recipes</IonCardTitle>
+                    </IonCardHeader>
+                    <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="recipeSuggestions"/>
+                </IonCard>
+
+                <IonCard v-if="recipeSuggestions.length > 0">
+                    <IonCardHeader>
+                        <IonCardTitle color="primary">More Recipes</IonCardTitle>
+                    </IonCardHeader>
+                    <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="moreRecipes"/>
+                </IonCard>
             </div>
         </IonContent>
     </IonPage>
@@ -105,6 +117,7 @@ export default defineComponent({
             }
         }, {immediate: true})
 
+        /* Selected Items */
         const selectedItemIds = new Set<string>()
         const selectedItems = ref([] as Item[])
         const selectItem = (itemID: string) => {
@@ -116,6 +129,7 @@ export default defineComponent({
             selectedItems.value = Array.from(selectedItemIds).map(id => itemsById.value[id])
         }
 
+        /* Recipes Suggestion */
         const recipeSuggestions: Ref<Recipe[]> = ref([])
         const suggestRecipes = () => Suggestion.suggestRecipes(store, Array.from(selectedItemIds))
             .then((recipes: Recipe[]) => recipeSuggestions.value = recipes)
@@ -127,10 +141,19 @@ export default defineComponent({
             }
         })
 
+        /* Recipes */
+        const moreRecipes = computed(() => store.getRecipesAsList
+            .filter((recipe: Recipe) => recipeSuggestions.value
+                .every((suggestion: Recipe) => suggestion.getId() !== recipe.getId())))
+
         return {
             filterInput,
+            /* Items */
             selectItem, filteredItems, selectedItems,
-            suggestRecipes, recipeSuggestions, noRecipesMessage
+            /* Suggestions */
+            suggestRecipes, recipeSuggestions, noRecipesMessage,
+            /* Recipes */
+            moreRecipes
         }
     }
 });

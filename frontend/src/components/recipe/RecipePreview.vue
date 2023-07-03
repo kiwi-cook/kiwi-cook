@@ -2,7 +2,14 @@
     <IonCard class="recipe-preview-card" @click="toRecipe()">
         <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
         <IonCardContent>
-            <ItemList :items="recipe?.getItems()"/>
+            <TwoColumnLayout>
+                <template #left>
+                    <ItemList key="ingredient" :items="recipe?.getItems() ?? []" :type="['ingredient']"/>
+                </template>
+                <template #right>
+                    <ItemList key="tool" :items="recipe?.getItems() ?? []" :type="['tool']"/>
+                </template>
+            </TwoColumnLayout>
             <div v-if="firstStep?.description" class="recipe-step-preview">
                 <p>
                     <strong>Step 1</strong>
@@ -24,6 +31,7 @@ import {IonCard, IonCardContent, useIonRouter} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
+import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
 export default defineComponent({
     name: 'RecipePreview',
@@ -34,6 +42,7 @@ export default defineComponent({
         }
     },
     components: {
+        TwoColumnLayout,
         ItemList,
         RecipeHero, RecipeLink,
         IonCard, IonCardContent
