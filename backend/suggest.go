@@ -25,7 +25,6 @@ type RecipeQuery struct {
 type RecipeSuggestionQuery struct {
 	ItemQuery   []ItemQuery   `json:"item_query,omitempty"`
 	RecipeQuery []RecipeQuery `json:"recipe_query,omitempty"`
-	Price       float64       `json:"price,omitempty"`
 	City        string        `json:"city,omitempty"`
 }
 
@@ -42,7 +41,7 @@ type RecipeSuggestion struct {
 }
 
 type MissingRecipeItem struct {
-	Item   primitive.ObjectID `json:"item,omitempty"`
+	ItemID primitive.ObjectID `json:"item_id,omitempty"`
 	Amount float64            `json:"amount,omitempty"`
 	Price  float64            `json:"price,omitempty"`
 }
@@ -121,17 +120,19 @@ func (app *TasteBuddyApp) SuggestRecipes(recipeSuggestionQuery RecipeSuggestionQ
 		}
 
 		// Calculate the price of the recipe
-		if calculatedRecipePrice, market, err := app.CalculateLowestRecipePriceInCity(&recipe, recipeSuggestionQuery.City); err == nil {
-			app.LogDebug("SuggestRecipes", "Market is "+market.MarketName)
-			// Calculate the price of the missing items
-			itemsMap := recipe.GetStepItems()
-			for index, missingRecipeItem := range matchedRecipe.MissingRecipeItems {
-				item := itemsMap[missingRecipeItem.Item]
-				missingRecipeItem.Price, _ = app.CalculateItemPriceForMarket(&item.Item, *market)
-				matchedRecipe.MissingRecipeItems[index] = missingRecipeItem
+		if recipeSuggestionQuery.City != "" {
+			if calculatedRecipePrice, market, err := app.CalculateLowestRecipePriceInCity(&recipe, recipeSuggestionQuery.City); err == nil {
+				app.LogDebug("SuggestRecipes", "Market is "+market.MarketName)
+				// Calculate the price of the missing items
+				itemsMap := recipe.GetStepItems()
+				for index, missingRecipeItem := range matchedRecipe.MissingRecipeItems {
+					item := itemsMap[missingRecipeItem.ItemID]
+					missingRecipeItem.Price, _ = app.CalculateItemPriceForMarket(&item.Item, *market)
+					matchedRecipe.MissingRecipeItems[index] = missingRecipeItem
+				}
+				suggestedRecipe.RecipePrice = calculatedRecipePrice
+				suggestedRecipe.MarketForPrice = market
 			}
-			suggestedRecipe.RecipePrice = calculatedRecipePrice
-			suggestedRecipe.MarketForPrice = market
 		}
 
 		suggestedRecipes = append(suggestedRecipes, suggestedRecipe)
@@ -184,7 +185,7 @@ func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
 			}
 			if !hasItem {
 				missingItems = append(missingItems, MissingRecipeItem{
-					Item:   recipeItem.ID,
+					ItemID: recipeItem.ID,
 					Amount: recipeItem.Amount,
 				})
 			}
