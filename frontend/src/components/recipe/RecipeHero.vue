@@ -13,6 +13,11 @@
                         <IonLabel>{{ tag }}</IonLabel>
                     </IonChip>
                 </div>
+                <div v-if="(additionalTags ?? []).length > 0" class="flex">
+                    <IonChip v-for="tag in additionalTags" :key="tag" class="hero-tag" color="light">
+                        <IonLabel>{{ tag }}</IonLabel>
+                    </IonChip>
+                </div>
                 <div class="flex">
                     <IonChip class="hero-tag" color="light">
                         <IonLabel>{{ recipe?.getDuration() }} minutes</IonLabel>
@@ -35,6 +40,10 @@ export default defineComponent({
         recipe: {
             type: Object as PropType<Recipe>,
             required: true
+        },
+        additionalTags: {
+            type: Array as PropType<string[]>,
+            default: () => []
         }
     },
     components: {

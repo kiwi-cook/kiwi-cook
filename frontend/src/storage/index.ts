@@ -72,7 +72,7 @@ export const useUserStore = defineStore('user', {
 interface RecipeState {
     loading: { [key: string]: boolean }
     recipes: { [id: string]: Recipe }
-    recipeSuggestions: Recipe[]
+    recipeSuggestions: RecipeSuggestion[]
     items: { [id: string]: Item }
     recipesByItemId: { [itemId: string]: string[] }
 }
@@ -107,7 +107,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
          * Get the recipes mapped by their id
          * @param state
          */
-        getRecipesAsMap: (state): { [key: string]: Recipe } => state.recipes ?? {},
+        getRecipesAsMap: (state): { [id: string]: Recipe } => state.recipes ?? {},
         getRecipesByItemIds(): { [key: string]: string[] } {
             const recipes = this.getRecipesAsList ?? []
             const recipesByItemId: { [key: string]: string[] } = {}
@@ -135,7 +135,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
          * @param state
          * @returns a list of recipes
          */
-        getRecipeSuggestions: (state): Recipe[] => state.recipeSuggestions ?? [],
+        getRecipeSuggestions: (state): RecipeSuggestion[] => state.recipeSuggestions ?? [],
         /**
          * Get the items
          * @param state
@@ -145,7 +145,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
             itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
             return itemsAsArray
         },
-        getItemsById: (state): { [id: string]: Item } => state.items ?? {},
+        getItemsAsMap: (state): { [id: string]: Item } => state.items ?? {},
         getTags(): string[] {
             return this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
@@ -244,10 +244,10 @@ export const useTasteBuddyStore = defineStore('recipes', {
          * Fetch the suggestions for the recipe search
          * @param query
          */
-        fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<Recipe[]> {
+        fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<RecipeSuggestion[]> {
             this.addLoading('fetchRecipeSuggestions')
             logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
-            return sendToAPI<string[]>(API_ROUTE.POST_SUGGEST_RECIPE, {
+            return sendToAPI<RecipeSuggestion[]>(API_ROUTE.POST_SUGGEST_RECIPE, {
                 body: query,
                 errorMessage: 'Could not fetch recipe suggestions'
             })
@@ -256,7 +256,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
                     // this is because the JSON is not a valid Recipe object,
                     // and we need to use the Recipe class methods
                     if (!apiResponse.error) {
-                        this.recipeSuggestions = apiResponse.response.map((recipeId: string) => this.recipes[recipeId])
+                        this.recipeSuggestions = apiResponse.response.map((recipeSuggestion: RecipeSuggestion) => RecipeSuggestion.fromJSON(recipeSuggestion))
                     }
                     this.finishLoading('fetchRecipeSuggestions')
                     return this.getRecipeSuggestions

@@ -12,7 +12,11 @@
 
         <IonContent :fullscreen="true">
             <div class="content">
-                <RecipeList :filter="filterInput"/>
+                <List :item-list="recipes">
+                    <template #item="{item}">
+                        <RecipePreview :recipe="item"/>
+                    </template>
+                </List>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
@@ -36,18 +40,18 @@ import {
     IonToolbar,
     useIonRouter
 } from '@ionic/vue';
-import RecipeList from '@/components/recipe/RecipeList.vue'
 import {addOutline, filter} from 'ionicons/icons';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
 import {useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
+import List from "@/components/utility/List.vue";
+import RecipePreview from "@/components/recipe/RecipePreview.vue";
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
-        TasteBuddyLogo,
+        RecipePreview, List, TasteBuddyLogo,
         IonHeader, IonPage, IonSearchbar, IonTitle, IonToolbar, IonContent, IonFab, IonFabButton,
-        RecipeList
     },
     setup() {
         const filterInput = ref('')
@@ -55,6 +59,7 @@ export default defineComponent({
 
         const router = useIonRouter()
         const store = useTasteBuddyStore()
+        const recipes = computed(() => store.getRecipesAsList)
         const isDevMode = computed(() => store.isDevMode)
         const addRecipe = () => {
             if (isDevMode.value) {
@@ -65,7 +70,7 @@ export default defineComponent({
 
         return {
             // recipe
-            addOutline, addRecipe, isDevMode,
+            recipes, addOutline, addRecipe, isDevMode,
             // filter
             filterInput, filter
         }

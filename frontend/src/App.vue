@@ -2,17 +2,20 @@
     <IonApp>
         <IonRouterOutlet/>
     </IonApp>
+    <IonText color="primary"> 
+        Made with ♥️ by Josef & Vasilij
+    </IonText>
 </template>
 
 <script lang="ts">
-import {IonApp, IonRouterOutlet} from '@ionic/vue';
+import {IonApp, IonRouterOutlet, IonText} from '@ionic/vue';
 import {defineComponent} from 'vue';
 import {useTasteBuddyStore} from './storage';
 
 export default defineComponent({
     name: 'App',
     components: {
-        IonApp,
+        IonApp, IonText,
         IonRouterOutlet,
     },
     setup() {

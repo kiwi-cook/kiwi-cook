@@ -3,6 +3,7 @@
 import {descriptionToSteps} from "@/utility/recipeParser";
 import {logDebug} from ".";
 import {CanShareResult, Share} from "@capacitor/share";
+import {useTasteBuddyStore} from "@/storage";
 
 // types for recipe
 
@@ -581,20 +582,65 @@ export type RecipeSuggestionQuery = {
         id: string;
         name: string;
         exclude: boolean;
-    }[]
+    }[];
+    city?: string;
 }
 
-export type RecipeSuggestion = string
 
-export class Suggestion {
+export class RecipeSuggestion {
+
+    recipe_id: string;
+    recipe?: Recipe;
+    recipe_price?: number;
+    market_for_price?: Market;
+    missing_items: {
+        item_id: string;
+        item?: Item;
+        amount: number;
+        price?: number;
+    }[]
+
+    constructor() {
+        this.recipe_id = ''
+        this.recipe_price = 0
+        this.market_for_price = undefined
+        this.missing_items = []
+    }
+
+    /**
+     * Initialize a recipe suggestion from a json object
+     * This is done because the json object does not have the methods of the class
+     *
+     * @param json
+     * @returns a new suggestion
+     */
+    public static fromJSON(json: RecipeSuggestion): RecipeSuggestion {
+        const suggestion = new RecipeSuggestion()
+        const store = useTasteBuddyStore()
+        suggestion.recipe_id = json.recipe_id
+        suggestion.recipe = store.getRecipesAsMap[json.recipe_id]
+        suggestion.recipe_price = json.recipe_price
+        suggestion.market_for_price = json.market_for_price
+        suggestion.missing_items = json.missing_items.map((missing_item) => {
+            return {
+                item_id: missing_item.item_id,
+                item: store.getItemsAsMap[missing_item.item_id],
+                amount: missing_item.amount,
+                price: missing_item.price
+            }
+        })
+        console.log(suggestion)
+        return suggestion
+    }
 
     /**
      * Suggest recipes based on the given query
      * @param store
      * @param itemIds
+     * @param city
      * @returns a promise that resolves to a list of recipe suggestions
      */
-    public static suggestRecipes(store: any, itemIds: string[]) {
+    public static suggestRecipes(store: any, itemIds: string[], city?: string): Promise<RecipeSuggestion[]> {
         const query: RecipeSuggestionQuery = {
             item_query: itemIds.map(id => {
                 return {
@@ -602,10 +648,22 @@ export class Suggestion {
                     name: '',
                     exclude: false
                 }
-            })
+            }),
+            city: city ?? undefined
         }
 
         return store.fetchRecipeSuggestions(query)
+    }
+
+    /**
+     * Get the recipe of the suggestion
+     */
+    public getRecipe(): Recipe {
+        return this.recipe ?? new Recipe()
+    }
+
+    public getMissingItems(): Item[] {
+        return this.missing_items.map(missing_item => missing_item.item ?? new Item())
     }
 }
 

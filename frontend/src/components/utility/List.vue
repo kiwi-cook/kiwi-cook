@@ -1,11 +1,13 @@
 <template>
-    <IonList v-if="loadedFilteredRecipes.length > 0">
-        <div v-for="recipe in loadedFilteredRecipes" :key="recipe.getId()" class="recipe-preview-container">
-            <RecipePreview :recipe="recipe"/>
+    <IonList v-if="loadedFilteredItems.length > 0">
+        <div v-for="(item, itemIndex) in loadedFilteredItems" :key="itemIndex" class="recipe-preview-container">
+            <slot :item="item" name="item">
+                <RecipePreview :recipe="item as Recipe"/>
+            </slot>
         </div>
     </IonList>
     <IonItem v-else>
-        {{ noRecipesMessage }}
+        {{ noItemsMessage }}
     </IonItem>
     <IonInfiniteScroll @ionInfinite="ionInfinite">
         <IonInfiniteScrollContent></IonInfiniteScrollContent>
@@ -14,27 +16,27 @@
 
 <script lang="ts">
 import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList} from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {arrowDown} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
-import {Recipe} from '@/tastebuddy/types';
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
+import {Recipe} from "@/tastebuddy/types";
 
 
 export default defineComponent({
-    name: 'RecipeList',
+    name: 'List',
     props: {
         filter: {
             type: String,
             required: false,
             default: ''
         },
-        recipeList: {
-            type: Object as PropType<Recipe[]>,
+        itemList: {
+            type: Array,
             required: false,
             default: null
         },
-        noRecipesMessage: {
+        noItemsMessage: {
             type: String,
             required: false,
             default: 'No recipes found'
@@ -46,23 +48,23 @@ export default defineComponent({
 
     },
     setup(props: any) {
-        const {filter, recipeList} = toRefs(props)
+        const {filter, itemList} = toRefs(props)
 
         const store = useTasteBuddyStore();
-        const recipes: ComputedRef<Recipe[]> = computed(() => (recipeList.value
-            ? (recipeList.value ?? [])
+        const items: ComputedRef<unknown[]> = computed(() => (itemList.value
+            ? (itemList.value ?? [])
             : store.getRecipesAsList));
-        const loadedRecipes: Ref<Recipe[]> = ref([]);
-        const loadedFilteredRecipes: Ref<Recipe[]> = ref([]);
-        const loadedRecipesIndex = ref(0);
+        const loadedItems: Ref<unknown[]> = ref([]);
+        const loadedFilteredItems: Ref<unknown[]> = ref([]);
+        const loadedItemsIndex = ref(0);
 
         /**
          * Filter the ingredients
          */
         const handleFilter = () => {
             const query = filter.value?.toLowerCase() ?? '';
-            loadedFilteredRecipes.value = recipes.value.filter((recipe: Recipe) => {
-                return JSON.stringify(recipe)
+            loadedFilteredItems.value = items.value.filter((listItem: unknown) => {
+                return JSON.stringify(listItem)
                     .toLowerCase()
                     .includes(query)
             })
@@ -71,35 +73,36 @@ export default defineComponent({
             handleFilter();
         })
 
-        const loadNextRecipes = (amountLoaded = 15) => {
-            loadedRecipes.value.push(...recipes.value.slice(loadedRecipesIndex.value,
-                loadedRecipesIndex.value + amountLoaded))
-            loadedRecipesIndex.value += amountLoaded;
+        const loadNextItems = (amountLoaded = 15) => {
+            loadedItems.value.push(...items.value.slice(loadedItemsIndex.value,
+                loadedItemsIndex.value + amountLoaded))
+            loadedItemsIndex.value += amountLoaded;
         };
 
-        const resetLoadedRecipes = () => {
-            loadedRecipes.value = [];
-            loadedRecipesIndex.value = 0;
+        const resetLoadedItems = () => {
+            loadedItems.value = [];
+            loadedItemsIndex.value = 0;
         }
 
         const ionInfinite = (ev: any) => {
-            loadNextRecipes();
+            loadNextItems();
             setTimeout(() => ev.target.complete(), 1000);
         };
 
-        watch(recipes, () => {
-            resetLoadedRecipes()
-            loadNextRecipes()
+        watch(items, () => {
+            resetLoadedItems()
+            loadNextItems()
         }, {immediate: true})
 
-        watch(loadedRecipes, () => {
-            loadedFilteredRecipes.value = loadedRecipes.value;
+        watch(loadedItems, () => {
+            loadedFilteredItems.value = loadedItems.value;
         }, {immediate: true})
 
         return {
             ionInfinite,
-            loadedFilteredRecipes,
-            arrowDown
+            loadedFilteredItems,
+            arrowDown,
+            Recipe
         };
 
     }

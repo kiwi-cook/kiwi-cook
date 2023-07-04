@@ -28,8 +28,11 @@
                                           @select="selectItem($event)"/>
                             </template>
                         </TwoColumnLayout>
+
+                        <IonInput v-model="city" placeholder="e.g. Tuebingen" color="primary" label="City"
+                                  label-placement="floating"/>
                     </IonCardContent>
-                    <IonButton color="tertiary" fill="clear" @click="suggestRecipes()">Suggest</IonButton>
+                    <IonButton color="tertiary" fill="clear" @click="suggestRecipes()" :disabled="selectedItems.length === 0">Suggest</IonButton>
                 </IonCard>
 
                 <IonCard>
@@ -46,14 +49,22 @@
                     <IonCardHeader>
                         <IonCardTitle color="primary">Suggested Recipes</IonCardTitle>
                     </IonCardHeader>
-                    <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="recipeSuggestions"/>
+                    <List :no-items-message="noRecipesMessage" :item-list="recipeSuggestions">
+                        <template #item="{item}">
+                            <RecipeSuggestionPreview :recipe-suggestion="item as RecipeSuggestion"/>
+                        </template>
+                    </List>
                 </IonCard>
 
                 <IonCard v-if="recipeSuggestions.length > 0">
                     <IonCardHeader>
                         <IonCardTitle color="primary">More Recipes</IonCardTitle>
                     </IonCardHeader>
-                    <RecipeList :no-recipes-message="noRecipesMessage" :recipe-list="moreRecipes"/>
+                    <List :no-items-message="noRecipesMessage" :item-list="moreRecipes">
+                        <template #item="{item}">
+                            <RecipePreview :recipe="item as Recipe"/>
+                        </template>
+                    </List>
                 </IonCard>
             </div>
         </IonContent>
@@ -64,6 +75,7 @@
 import {computed, ComputedRef, defineComponent, Ref, ref, watch} from 'vue';
 import {
     IonButton,
+    IonInput,
     IonCard,
     IonCardContent,
     IonCardHeader,
@@ -76,24 +88,29 @@ import {
     IonToolbar,
 } from '@ionic/vue';
 import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
-import RecipeList from "@/components/recipe/RecipeList.vue";
 import {useTasteBuddyStore} from '@/storage';
-import {Item, Recipe, Suggestion} from '@/tastebuddy/types';
+import {Item, Recipe, RecipeSuggestion} from '@/tastebuddy/types';
 import ItemList from '@/components/recipe/ItemList.vue';
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
+import List from "@/components/utility/List.vue";
+import RecipePreview from "@/components/recipe/RecipePreview.vue";
+import RecipeSuggestionPreview from "@/components/recipe/RecipeSuggestionPreview.vue";
 
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
+        RecipeSuggestionPreview,
+        RecipePreview,
+        List,
         TwoColumnLayout,
         TasteBuddyLogo,
         IonHeader,
+        IonInput,
         IonPage,
         IonSearchbar,
         IonTitle,
         IonToolbar,
         IonContent,
-        RecipeList,
         IonCard,
         IonCardHeader,
         IonCardTitle,
@@ -103,7 +120,7 @@ export default defineComponent({
     },
     setup() {
         const store = useTasteBuddyStore()
-        const itemsById = computed(() => store.getItemsById)
+        const itemsById = computed(() => store.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
         const filteredItems = ref([] as Item[])
@@ -130,9 +147,10 @@ export default defineComponent({
         }
 
         /* Recipes Suggestion */
-        const recipeSuggestions: Ref<Recipe[]> = ref([])
-        const suggestRecipes = () => Suggestion.suggestRecipes(store, Array.from(selectedItemIds))
-            .then((recipes: Recipe[]) => recipeSuggestions.value = recipes)
+        const city = ref('')
+        const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
+        const suggestRecipes = () => RecipeSuggestion.suggestRecipes(store, Array.from(selectedItemIds), city.value)
+            .then((fetchedRecipeSuggestions: RecipeSuggestion[]) => recipeSuggestions.value = fetchedRecipeSuggestions)
         const noRecipesMessage = computed(() => {
             if (selectedItems.value.length === 0) {
                 return 'Select items'
@@ -144,14 +162,15 @@ export default defineComponent({
         /* Recipes */
         const moreRecipes = computed(() => store.getRecipesAsList
             .filter((recipe: Recipe) => recipeSuggestions.value
-                .every((suggestion: Recipe) => suggestion.getId() !== recipe.getId())))
+                .every((suggestion: RecipeSuggestion) => suggestion.getRecipe().getId() !== recipe.getId())))
 
         return {
             filterInput,
             /* Items */
             selectItem, filteredItems, selectedItems,
             /* Suggestions */
-            suggestRecipes, recipeSuggestions, noRecipesMessage,
+            city,
+            RecipeSuggestion, suggestRecipes, recipeSuggestions, noRecipesMessage,
             /* Recipes */
             moreRecipes
         }
