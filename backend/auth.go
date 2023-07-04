@@ -100,6 +100,7 @@ func (server *TasteBuddyServer) DecodeBasicAuth(basicAuthInput string) (string, 
 func (server *TasteBuddyServer) CheckBasicAuthenticationCredentials(username, password string) (*User, bool) {
 	// Try to get the user from the database
 	var user User
+	server.LogDebug("CheckBasicAuthenticationCredentials", fmt.Sprintf("username: %s", username))
 	if err := server.GetUsersCollections().FindOneWithDefault(bson.M{"username": username}, &user, User{}); err != nil {
 		return nil, false
 	}
@@ -255,6 +256,7 @@ func (server *TasteBuddyServer) GetSessionsCollection() *TBCollection {
 // GetSession returns the session by the session token
 func (server *TasteBuddyServer) GetSession(sessionToken string) *Session {
 	var session Session
+	server.LogDebug("GetSession", "sessionToken", sessionToken)
 	if err := server.GetSessionsCollection().FindOneWithDefault(bson.M{"session_token": sessionToken}, &session, nil); err != nil {
 		server.LogError("GetSession", err)
 		return nil

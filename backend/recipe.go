@@ -191,6 +191,7 @@ func (app *TasteBuddyApp) GetRecipesCollection() *TBCollection {
 // GetAllRecipes gets all recipes from database
 func (app *TasteBuddyApp) GetAllRecipes() ([]Recipe, error) {
 	var recipesFromDatabase []Recipe
+	app.LogDebug("GetAllRecipes", "Getting all recipes from database")
 	if err := app.GetRecipesCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &recipesFromDatabase, []Recipe{}); err != nil {
 		return []Recipe{}, app.LogError("GetAllRecipes", err)
 	}
@@ -224,6 +225,7 @@ func (recipe *Recipe) MapItemIdsToItem(itemsMap map[primitive.ObjectID]Item) {
 
 func (app *TasteBuddyApp) GetRecipeById(id primitive.ObjectID) (Recipe, error) {
 	var recipeFromDatabase Recipe
+	app.LogDebug("GetRecipeById", "Getting recipe with id "+id.Hex())
 	err := app.GetRecipesCollection().FindOneWithDefault(bson.M{"_id": id}, &recipeFromDatabase, Recipe{})
 	return recipeFromDatabase, err
 }
@@ -502,11 +504,11 @@ func (app *TasteBuddyApp) CleanUpUnusedAttributesInRecipes() error {
 
 // GoRoutineCleanUpRecipes contains goroutines that are called every 6 hours
 // to clean up parts of the recipes
-func GoRoutineCleanUpRecipes(app *TasteBuddyApp) {
+func (app *TasteBuddyApp) GoRoutineCleanUpRecipes() {
 	for {
 		app.CleanUpItemsInRecipes()
 		app.CleanUpUnusedAttributesInRecipes()
-		// clean up recipes every 6 hours
-		time.Sleep(6 * time.Hour)
+		// clean up recipes every 7 days
+		time.Sleep(7 * 24 * time.Hour)
 	}
 }

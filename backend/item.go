@@ -118,6 +118,7 @@ func (app *TasteBuddyApp) GetAllItems() ([]Item, error) {
 // GetItemById gets item from database by id
 func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
 	var itemFromDatabase Item
+	app.LogDebug("GetItemById", "Get item "+id.Hex()+" from database")
 	err := app.GetItemsCollection().FindOneWithDefault(bson.M{"_id": id}, &itemFromDatabase, Item{})
 	return itemFromDatabase, err
 }

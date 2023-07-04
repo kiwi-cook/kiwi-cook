@@ -97,17 +97,17 @@ func (app *TasteBuddyApp) SuggestRecipes(recipeSuggestionQuery RecipeSuggestionQ
 	}
 
 	// Wait for all recipes to be found
-	var matchedRecipesMap = make(map[primitive.ObjectID]*MatchedRecipe)
-	for i := 0; i < len(recipes); i++ {
+	var matchedRecipesMap = make(map[primitive.ObjectID]MatchedRecipe)
+	for range recipes {
 		recipe := <-recipeChannel
 		// skip nil recipes
 		if recipe == nil {
 			continue
 		}
-		matchedRecipesMap[recipe.RecipeID] = recipe
+		matchedRecipesMap[recipe.RecipeID] = *recipe
 	}
 
-	var suggestedRecipes []RecipeSuggestion
+	var suggestedRecipes = make([]RecipeSuggestion, 0)
 	for _, matchedRecipe := range matchedRecipesMap {
 		recipe, err := app.GetRecipeById(matchedRecipe.RecipeID)
 		if err != nil {
@@ -149,7 +149,7 @@ func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
 	matchesAllItems := true
 	recipeItemsMap := recipe.GetStepItems()
 	if len(recipeItemsMap) == 0 {
-		return &MatchedRecipe{}
+		return nil
 	}
 
 	// Check if recipe matches the query
@@ -167,6 +167,10 @@ func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
 		if !hasItem {
 			matchesAllItems = false
 		}
+	}
+
+	if !matchesAllItems {
+		return nil
 	}
 
 	// Create suggested recipe
@@ -190,6 +194,10 @@ func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
 				})
 			}
 		}
+	}
+
+	if suggestedRecipeID.IsZero() {
+		return nil
 	}
 
 	var matchedRecipe = MatchedRecipe{
