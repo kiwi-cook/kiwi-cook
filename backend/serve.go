@@ -27,7 +27,7 @@ var serveCmd = &cobra.Command{
 		// cities := []string{"Tuebingen", "Stuttgart", "Reutlingen"}
 		// app.GoRoutineSaveMarketsToDB(cities)
 		// app.GoRoutineSaveDiscountsToDB(cities)
-		app.GoRoutineCleanUpRecipes()
+		// app.GoRoutineCleanUpRecipes()
 
 		// Create the server
 		TasteBuddyServerFactory(app).

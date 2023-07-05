@@ -5,6 +5,10 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"errors"
+	"fmt"
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -107,12 +111,18 @@ func (app *TasteBuddyApp) GetItemsCollection() *TBCollection {
 	return app.GetDBCollection("items")
 }
 
+var items []Item
+
 // GetAllItems gets all items from database
 func (app *TasteBuddyApp) GetAllItems() ([]Item, error) {
 	// get all items from database that are not deleted
-	var itemsFromDatabase []Item
-	err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{})
-	return itemsFromDatabase, err
+	if items == nil {
+		var itemsFromDatabase []Item
+		err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{})
+		items = itemsFromDatabase
+		return itemsFromDatabase, err
+	}
+	return items, nil
 }
 
 // GetItemById gets item from database by id
@@ -123,6 +133,45 @@ func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
 	return itemFromDatabase, err
 }
 
+// GetMostSimilarItem compares which item is most similar to the given item name
+func (app *TasteBuddyApp) GetMostSimilarItem(itemName string) (Item, error) {
+	items, err := app.GetAllItems()
+	if err != nil {
+		return Item{}, err
+	}
+
+	var mostSimilarItem Item
+	var mostSimilarity float64 = 0
+	for _, item := range items {
+		if similarity := strutil.Similarity(item.Name, itemName, metrics.NewHamming()); similarity > 0.6 && similarity > mostSimilarity {
+			mostSimilarItem = item
+			mostSimilarity = similarity
+		}
+	}
+
+	if mostSimilarity < 0.6 {
+		err = errors.New("no similar item found")
+	} else {
+		app.LogDebug("GetMostSimilarItem", "Found most similar item "+mostSimilarItem.Name+" to "+itemName+" with similarity "+fmt.Sprintf("%f", mostSimilarity))
+	}
+
+	return mostSimilarItem, err
+}
+
+// MatchItemToStepItem selects the most similar item from the given step items
+func (app *TasteBuddyApp) MatchItemToStepItem(item Item, stepItems []StepItem) (StepItem, error) {
+	var mostSimilarItem StepItem
+	var mostSimilarity float64 = 0
+	for _, stepItem := range stepItems {
+		if similarity := strutil.Similarity(item.Name, stepItem.Name, metrics.NewHamming()); similarity > 0.6 && similarity > mostSimilarity {
+			mostSimilarItem = stepItem
+		}
+	}
+
+	return mostSimilarItem, nil
+}
+
+// DeleteItemById deletes item from database by id
 func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
 	var err error
@@ -141,6 +190,16 @@ func (app *TasteBuddyApp) AddOrUpdateItems(newItems []Item) error {
 	for _, item := range newItems {
 		if _, err := app.AddOrUpdateItem(item); err != nil {
 			return app.LogError("AddOrUpdateItems", err)
+		}
+	}
+	return nil
+}
+
+// AddOrUpdateStepItems adds or updates multiple step items in the database of items
+func (app *TasteBuddyApp) AddOrUpdateStepItems(newStepItems []StepItem) error {
+	for _, stepItem := range newStepItems {
+		if _, err := app.AddOrUpdateItem(stepItem.Item); err != nil {
+			return app.LogError("AddOrUpdateStepItems", err)
 		}
 	}
 	return nil

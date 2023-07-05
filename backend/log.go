@@ -82,7 +82,7 @@ func (logger *TasteBuddyLogger) FatalError(functionName string, err error) {
 func (logger *TasteBuddyLogger) Printf(logLevel LogLevel, logType string, color string, functionName string, message ...any) {
 	var format = color + logType + " [" + functionName + "]" + colorNone + ": "
 	if len(message) > 0 {
-		format += "%v"
+		format += "%v\n"
 	}
 
 	switch logger.logLevel {

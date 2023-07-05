@@ -7,14 +7,17 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type RecipeParser func(string) ([]Recipe, error)
-type IngredientParser func(string) (float64, string, string)
+type IngredientParser func(string) (StepItem, error)
 
 func (app *TasteBuddyApp) ParseRecipe(file string, parser string) {
 	recipeParser := RecipeParser(nil)
@@ -46,6 +49,8 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string) ([]Recipe, erro
 		Date        string   `json:"date_modified"`
 		Steps       []string `json:"instructions"`
 		Items       []string `json:"ingredients"`
+		Type        string   `json:"type_of_dish"`
+		Course      string   `json:"course"`
 	}
 	var recipes []CookstrRecipe
 
@@ -55,6 +60,7 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string) ([]Recipe, erro
 	if err != nil {
 		return []Recipe{}, app.LogError("CookstrRecipeParser", err)
 	}
+	// recipes = recipes[0:1]
 
 	// parse recipes
 	var parsedRecipes []Recipe
@@ -70,34 +76,51 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string) ([]Recipe, erro
 			return []Recipe{}, app.LogError("CookstrRecipeParser", err)
 		}
 		stepsDescriptions := recipe.Steps
+		stepItems := ParseItems(recipe.Items, CookstrIngredientParser)
+		app.AddOrUpdateStepItems(stepItems)
 		for _, description := range stepsDescriptions {
-			parsedRecipe.Steps = append(parsedRecipe.Steps, StepFromDescription(description))
+			parsedRecipe.Steps = append(parsedRecipe.Steps, app.StepFromDescription(description, stepItems))
 		}
-		parsedRecipe.Items = ParseIngredients(recipe.Items, CookstrIngredientParser)
 		parsedRecipes = append(parsedRecipes, parsedRecipe)
 	}
 
 	return parsedRecipes, nil
 }
 
-type Ingredient struct {
-	Amount   float64
-	Unit     string
-	Name     string
-	Modifier string
+func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []StepItem) Step {
+	step := Step{}
+	descriptionTokens := strings.Fields(description)
+	var stepItemsInDescription []StepItem
+	for _, token := range descriptionTokens {
+		if item, err := app.GetMostSimilarItem(token); err != nil {
+			continue
+		} else {
+			if stepItem, err := app.MatchItemToStepItem(item, stepItems); err != nil {
+				continue
+			} else {
+				stepItemsInDescription = append(stepItemsInDescription, stepItem)
+			}
+		}
+	}
+	step.Items = stepItemsInDescription
+	step.Duration = 0
+	step.ImgUrl = ""
+	step.AdditionalStepInformation = nil
+
+	return step
 }
 
-func ParseIngredients(ingredients []string, parser IngredientParser) []StepItem {
+func ParseItems(items []string, parser IngredientParser) []StepItem {
 	var stepItems []StepItem
 
-	for _, ingredient := range ingredients {
+	for _, ingredient := range items {
 		stepItem := StepItem{}
 
 		// parse ingredient
-		amount, unit, ingredientName := parser(ingredient)
-		stepItem.Amount = amount
-		stepItem.Unit = unit
-		stepItem.Name = ingredientName
+		stepItem, err := parser(ingredient)
+		if err != nil {
+			continue
+		}
 		stepItem.Type = "ingredient"
 
 		stepItems = append(stepItems, stepItem)
@@ -106,13 +129,13 @@ func ParseIngredients(ingredients []string, parser IngredientParser) []StepItem 
 	return stepItems
 }
 
-func CookstrIngredientParser(ingredientStr string) (float64, string, string) {
+func CookstrIngredientParser(ingredientStr string) (StepItem, error) {
 	// Regex pattern to match amount and unit
 	re := regexp.MustCompile(`^(?P<amount>([\d/.½¼¾\-]|(\s*to\s*))+)\s*(?P<unit>(tablespoons?|teaspoons?|cups?|ounces?|kg|(kilo)?gr(ams)?|ml|(milli)?l(itres)?)?)\s+(?P<ingredient>.*)$`)
 
 	match := re.FindStringSubmatch(ingredientStr)
 	if match == nil {
-		return 0.0, "", ""
+		return StepItem{}, errors.New("invalid ingredient")
 	}
 	names := re.SubexpNames()
 
@@ -125,9 +148,17 @@ func CookstrIngredientParser(ingredientStr string) (float64, string, string) {
 
 	amount := ParseAmount(result["amount"])
 	unit := ParseUnit(result["unit"])
-	ingredient := result["ingredient"]
+	ingredient := cases.Title(language.English, cases.Compact).String(result["ingredient"])
 
-	return amount, unit, ingredient
+	stepItem := StepItem{
+		Amount: amount,
+		Unit:   unit,
+		Item: Item{
+			Name: ingredient,
+		},
+	}
+
+	return stepItem, nil
 }
 
 // ParseAmount converts a string amount to a float64
@@ -240,6 +271,8 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 
 	// add recipe to database
 	for _, parsedRecipe := range parsedRecipes {
+		app.LogDebug("ParseAndSaveRecipe", "Adding recipe: "+parsedRecipe.Name)
+		app.LogDebug("ParseAndSaveRecipe", "Recipe: %+v", parsedRecipe)
 		_, _, err := app.AddOrUpdateRecipe(parsedRecipe)
 		if err != nil {
 			return app.LogError("ParseAndSaveRecipe", err)

@@ -29,15 +29,16 @@ type Recipe struct {
 	Name        string             `json:"name" bson:"name" binding:"required"`
 	Author      string             `json:"author" bson:"author" binding:"required"`
 	Description string             `json:"description" bson:"description" binding:"required"`
-	Items       []StepItem         `json:"items,omitempty" bson:"items,omitempty"`
-	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
-	Props       struct {
+	// Items       []StepItem         `json:"items,omitempty" bson:"items,omitempty"`
+	Steps []Step `json:"steps" bson:"steps" binding:"required"`
+	Props struct {
 		Url       string    `json:"url,omitempty" bson:"url,omitempty"`
 		ImgUrl    string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 		Duration  int       `json:"duration,omitempty" bson:"duration,omitempty"`
 		CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
 		Tags      []string  `json:"tags,omitempty" bson:"tags,omitempty"`
 		Likes     int       `json:"likes,omitempty" bson:"likes,omitempty"`
+		Copyright string    `json:"copyRight,omitempty" bson:"copyRight,omitempty"`
 	} `json:"props,omitempty" bson:"props,omitempty"`
 	Deleted bool `json:"-" bson:"deleted,omitempty"`
 }
@@ -48,16 +49,6 @@ type Step struct {
 	ImgUrl                    string                     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Duration                  int                        `json:"duration,omitempty" bson:"duration,omitempty"`
 	AdditionalStepInformation *AdditionalStepInformation `json:"additional,omitempty" bson:"additional,omitempty"`
-}
-
-func StepFromDescription(description string) Step {
-	step := Step{}
-	step.Description = description
-	step.Items = []StepItem{}
-	step.Duration = 0
-	step.ImgUrl = ""
-	step.AdditionalStepInformation = nil
-	return step
 }
 
 type AdditionalStepInformation struct {
@@ -190,7 +181,7 @@ func (app *TasteBuddyApp) GetRecipesCollection() *TBCollection {
 
 // GetAllRecipes gets all recipes from database
 func (app *TasteBuddyApp) GetAllRecipes() ([]Recipe, error) {
-	var recipesFromDatabase []Recipe
+	var recipesFromDatabase = make([]Recipe, 0)
 	app.LogDebug("GetAllRecipes", "Getting all recipes from database")
 	if err := app.GetRecipesCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &recipesFromDatabase, []Recipe{}); err != nil {
 		return []Recipe{}, app.LogError("GetAllRecipes", err)
@@ -209,6 +200,10 @@ func (app *TasteBuddyApp) GetAllRecipes() ([]Recipe, error) {
 	}
 	for i := range recipesFromDatabase {
 		recipesFromDatabase[i].MapItemIdsToItem(itemsMap)
+	}
+
+	if len(recipesFromDatabase) == 0 || recipesFromDatabase == nil {
+		recipesFromDatabase = []Recipe{}
 	}
 
 	return recipesFromDatabase, nil

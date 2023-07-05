@@ -22,7 +22,12 @@ go.work
 
 # Cache
 .dccache
+.DS_Store
 
 # Firebase
 firebase-debug.log
 frontend/public/assets/login.jpg
+
+# Editor
+.idea
+.vscode
