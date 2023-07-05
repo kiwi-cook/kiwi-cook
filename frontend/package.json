@@ -9,9 +9,9 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "@capacitor/android": "5.0.4",
+    "@capacitor/android": "5.0.5",
     "@capacitor/app": "5.0.5",
-    "@capacitor/core": "5.0.4",
+    "@capacitor/core": "5.0.5",
     "@capacitor/haptics": "5.0.5",
     "@capacitor/ios": "5.0.5",
     "@capacitor/keyboard": "5.0.4",
@@ -19,7 +19,7 @@
     "@capacitor/status-bar": "5.0.4",
     "@ionic/storage": "^4.0.0",
     "@ionic/vue": "^7.1.1",
-    "@ionic/vue-router": "^7.0.11",
+    "@ionic/vue-router": "^7.0.12",
     "core-js": "^3.31.0",
     "ionicons": "^7.1.2",
     "pinia": "^2.1.4",
