@@ -151,14 +151,16 @@ func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 		if err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{}); err != nil {
 			return itemsFromDatabase, app.LogError("GetAllItems", err)
 		}
-		if len(itemsFromDatabase) == 0 {
-			cachedItems = []Item{}
-			return itemsFromDatabase, errors.New("no items found")
-		}
 		cachedItems = itemsFromDatabase
 	} else {
 		app.LogTrace("GetAllItems", "Get all items from cache")
 	}
+
+	if len(cachedItems) == 0 {
+		cachedItems = []Item{}
+		return cachedItems, errors.New("no items found")
+	}
+
 	return cachedItems, nil
 }
 
@@ -202,11 +204,22 @@ func (app *TasteBuddyApp) GetItemByName(name string) (error, Item) {
 // If no item is found, a new item is created
 // If threshold is -1, the default threshold of 0.7 is used
 func (app *TasteBuddyApp) MatchOrNewItem(itemName string, threshold float64) *ItemResult {
+	if itemName == "" {
+		return NewItemErrorResult(errors.New("item name is empty"))
+	}
+
+	// get all items
 	items, err := app.GetAllItems(true)
 	if err != nil {
 		return NewItemErrorResult(err)
 	}
 
+	// if no items are found, return error
+	if len(items) == 0 {
+		return NewItemErrorResult(errors.New("no items found"))
+	}
+
+	// if threshold is -1, use default threshold
 	if threshold == -1 {
 		threshold = 0.7
 	}
@@ -214,6 +227,12 @@ func (app *TasteBuddyApp) MatchOrNewItem(itemName string, threshold float64) *It
 	var mostSimilarItem = Item{Name: itemName}
 	var mostSimilarity float64 = 0
 	for _, item := range items {
+		// if item name is equal to itemName, return item
+		if itemName == item.Name {
+			return NewItemResult(item, true)
+		}
+
+		// calculate similarity
 		if similarity := strutil.Similarity(item.Name, itemName, metrics.NewHamming()); similarity >= threshold && similarity > mostSimilarity {
 			mostSimilarItem = item
 			mostSimilarity = similarity
@@ -264,6 +283,19 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 
 	// Split items into items with and without ids
 	for _, item := range itemsMap {
+		if matchResult := app.MatchOrNewItem(item.Name, 0.90); matchResult.success {
+			app.LogTrace("AddOrUpdateItems", "Item "+item.Name+" has match "+matchResult.Name+", ignore!")
+			continue
+		}
+
+		// Check if item name is empty
+		if item.Name == "" {
+			app.LogError("AddOrUpdateItems", errors.New("item name is empty"))
+			continue
+		}
+
+		app.LogTrace("AddOrUpdateItems", "Item "+item.Name+" has no match, add to database")
+
 		if item.ID.IsZero() {
 			itemsWithoutIds = append(itemsWithoutIds, item)
 		} else {
@@ -280,13 +312,17 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 	}
 
 	// Update items with ids in database
-	for _, item := range itemsWithIds {
-		if _, err := app.GetItemsCollection().UpdateByID(DefaultContext(), item.(Item).ID, item); err != nil {
-			return app.LogError("AddOrUpdateItems", err)
+	if len(itemsWithIds) > 0 {
+		for _, item := range itemsWithIds {
+			if _, err := app.GetItemsCollection().UpdateByID(DefaultContext(), item.(Item).ID, item); err != nil {
+				return app.LogError("AddOrUpdateItems", err)
+			}
 		}
+		app.Log("AddOrUpdateItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
 	}
 
-	app.Log("AddOrUpdateItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
+	app.Log("AddOrUpdateItems", "Finished adding or updating "+fmt.Sprintf("%d", len(itemsWithIds)+len(itemsWithoutIds))+" items")
+
 	return nil
 }
 

@@ -10,6 +10,7 @@ import (
 	"github.com/adrg/strutil/metrics"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -245,6 +246,43 @@ func (app *TasteBuddyApp) DeleteRecipeById(id primitive.ObjectID) (primitive.Obj
 	}
 
 	return id, nil
+}
+
+// StepFromDescription parses step from description
+func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []StepItem) Step {
+	app.LogTrace("StepFromDescription", "Parsing step from description "+description)
+
+	step := Step{}
+	descriptionTokens := strings.Fields(description)
+	// Make map of step items
+	var stepItemsInDescription = make(map[string]StepItem)
+	for _, token := range descriptionTokens {
+		similarResult := app.MatchOrNewItem(token, 0.9)
+		if similarResult.error != nil {
+			app.LogError("StepFromDescription[MatchOrNewItem]", similarResult.error)
+			continue
+		}
+
+		matchResult := app.MatchItemToStepItem(similarResult.Item, stepItems, 0.5)
+		if matchResult.error != nil {
+			app.LogError("StepFromDescription[MatchItemToStepItem]", matchResult.error)
+			continue
+		}
+
+		if matchResult.success {
+			stepItemsInDescription[matchResult.Item.Name] = matchResult.StepItem
+		}
+	}
+	step.Description = description
+	for _, stepItem := range stepItemsInDescription {
+		step.Items = append(step.Items, stepItem)
+	}
+	step.Duration = 0
+	step.ImgUrl = ""
+	step.AdditionalStepInformation = nil
+
+	app.LogTrace("StepFromDescription", "Finished parsing step from description "+description)
+	return step
 }
 
 // AddItemIdsToRecipes adds item ids to recipes

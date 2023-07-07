@@ -12,34 +12,78 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
 
-type RecipeParser func(string, chan Recipe)
+type RecipeParser func(string, chan Recipe) error
+type ItemParser func(string, chan Item) error
 type IngredientParser func(string) (error, StepItem)
 
-func (app *TasteBuddyApp) ParseRecipe(file string, parser string) {
-	app.Log("ParseRecipe", "Parsing recipe "+file)
+func (app *TasteBuddyApp) Parse(file string, parser string) {
+	app.Log("Parse", "Parsing "+file)
 	recipeParser := RecipeParser(nil)
+	itemParser := ItemParser(nil)
 
 	switch parser {
 	case "cookstr":
 		recipeParser = app.CookstrRecipeParser
+	case "static_items":
+		itemParser = app.StaticItemParser
 	default:
-		app.LogError("ParseRecipe", errors.New("invalid parser"))
+		app.LogError("Parse", errors.New("invalid parser"))
 		return
 	}
 
-	if err := app.ParseAndSaveRecipe(file, recipeParser); err != nil {
-		app.LogError("ParseRecipe", err)
-		return
+	var err error
+	if itemParser != nil {
+		err = app.ParseAndSaveItems(file, itemParser)
 	}
-	app.Log("ParseRecipe", "Finished parsing recipe "+file)
+	if recipeParser != nil {
+		err = app.ParseAndSaveRecipe(file, recipeParser)
+	}
+	if err != nil {
+		app.LogError("Parse", err)
+	}
+	app.Log("Parse", "Finished parsing "+file)
 }
 
-func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel chan Recipe) {
+// ParseAndSaveRecipe parses a recipe file and saves it to the database
+func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipeParser) error {
+	var err error
+
+	// Create channel for recipes
+	var recipes []Recipe
+	recipeChannel := make(chan Recipe)
+	recipeParser(file, recipeChannel)
+
+	// Receive recipes from channel
+	for recipe := range recipeChannel {
+		app.LogDebug("ParseAndSaveRecipe", "Received recipe: ", recipe)
+		recipes = append(recipes, recipe)
+	}
+
+	// Save items to database
+	var items []Item
+	for _, recipe := range recipes {
+		items = append(items, recipe.GetItems()...)
+	}
+	if err = app.AddOrUpdateItems(items); err != nil {
+		return app.LogError("ParseAndSaveRecipe", errors.New("error saving items to database: "+err.Error()))
+	}
+
+	// Save recipes to database
+	var itemsMap map[string]Item
+	itemsMap, err = app.GetAllItemsMappedByName(false)
+	recipes = app.AddItemIdsToRecipes(recipes, itemsMap)
+	if err = app.AddOrUpdateRecipes(recipes); err != nil {
+		return app.LogError("ParseAndSaveRecipe", errors.New("error saving recipes to database: "+err.Error()))
+	}
+
+	return err
+}
+
+func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel chan Recipe) error {
 	app.LogTrace("CookstrRecipeParser", "Parsing recipe "+recipeFile)
 	// Read the opened jsonFile as a byte array.
 	bytes, _ := os.ReadFile(recipeFile)
@@ -61,7 +105,7 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 	// Parse json to struct
 	err := json.Unmarshal(bytes, &recipes)
 	if err != nil {
-		return
+		return app.LogError("CookstrRecipeParser", errors.New("error parsing json: "+err.Error()))
 	}
 	recipes = recipes[:100]
 
@@ -95,7 +139,7 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 				app.LogError("CookstrRecipeParser", err)
 				return
 			}
-			stepItems := app.ParseItems(recipe.Items, CookstrIngredientParser)
+			stepItems := parseItems(recipe.Items, CookstrIngredientParser)
 			stepsDescriptions := recipe.Steps
 			for _, description := range stepsDescriptions {
 				parsedRecipe.Steps = append(parsedRecipe.Steps, app.StepFromDescription(description, stepItems))
@@ -105,47 +149,42 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 		}(recipe)
 	}
 	app.LogTrace("CookstrRecipeParser", "Finished parsing recipes")
+	return nil
 }
 
-func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []StepItem) Step {
-	app.LogTrace("StepFromDescription", "Parsing step from description "+description)
+func CookstrIngredientParser(ingredientStr string) (error, StepItem) {
+	// Regex pattern to match amount and unit
+	re := regexp.MustCompile(`^(?P<amount>([\d.½¼¾\-]|(\s*to\s*))+)\s*(?P<unit>(tablespoons?|teaspoons?|cups?|ounces?|kg|(kilo)?gr(ams)?|ml|(milli)?l(itres)?)?)\s+(?P<ingredient>.*)$`)
 
-	step := Step{}
-	descriptionTokens := strings.Fields(description)
-	// Make map of step items
-	var stepItemsInDescription = make(map[string]StepItem)
-	for _, token := range descriptionTokens {
-		similarResult := app.MatchOrNewItem(token, 0.9)
-		if similarResult.error != nil {
-			app.LogError("StepFromDescription[MatchOrNewItem]", similarResult.error)
-			continue
-		}
+	match := re.FindStringSubmatch(ingredientStr)
+	if match == nil {
+		return errors.New("invalid ingredient"), StepItem{}
+	}
+	names := re.SubexpNames()
 
-		matchResult := app.MatchItemToStepItem(similarResult.Item, stepItems, 0.5)
-		if matchResult.error != nil {
-			app.LogError("StepFromDescription[MatchItemToStepItem]", matchResult.error)
-			continue
-		}
-
-		if matchResult.success {
-			stepItemsInDescription[matchResult.Item.Name] = matchResult.StepItem
+	result := make(map[string]string)
+	for i, name := range names {
+		if i != 0 && name != "" {
+			result[name] = match[i]
 		}
 	}
-	step.Description = description
-	for _, stepItem := range stepItemsInDescription {
-		step.Items = append(step.Items, stepItem)
-	}
-	step.Duration = 0
-	step.ImgUrl = ""
-	step.AdditionalStepInformation = nil
 
-	app.LogTrace("StepFromDescription", "Finished parsing step from description "+description)
-	return step
+	amount := parseAmount(result["amount"])
+	unit := parseUnit(result["unit"])
+	ingredient := cases.Title(language.English, cases.Compact).String(result["ingredient"])
+
+	stepItem := StepItem{
+		Amount: amount,
+		Unit:   unit,
+		Item: Item{
+			Name: ingredient,
+		},
+	}
+
+	return nil, stepItem
 }
 
-func (app *TasteBuddyApp) ParseItems(items []string, parser IngredientParser) []StepItem {
-	app.LogTrace("ParseItems", "Parsing items")
-
+func parseItems(items []string, parser IngredientParser) []StepItem {
 	var stepItems []StepItem
 	var err error
 
@@ -161,46 +200,11 @@ func (app *TasteBuddyApp) ParseItems(items []string, parser IngredientParser) []
 		stepItems = append(stepItems, stepItem)
 	}
 
-	app.LogTrace("ParseItems", "Finished parsing items")
-	app.LogDebug("ParseItems", "Parsed ", stepItems)
-
 	return stepItems
 }
 
-func CookstrIngredientParser(ingredientStr string) (error, StepItem) {
-	// Regex pattern to match amount and unit
-	re := regexp.MustCompile(`^(?P<amount>([\d/.½¼¾\-]|(\s*to\s*))+)\s*(?P<unit>(tablespoons?|teaspoons?|cups?|ounces?|kg|(kilo)?gr(ams)?|ml|(milli)?l(itres)?)?)\s+(?P<ingredient>.*)$`)
-
-	match := re.FindStringSubmatch(ingredientStr)
-	if match == nil {
-		return errors.New("invalid ingredient"), StepItem{}
-	}
-	names := re.SubexpNames()
-
-	result := make(map[string]string)
-	for i, name := range names {
-		if i != 0 && name != "" {
-			result[name] = match[i]
-		}
-	}
-
-	amount := ParseAmount(result["amount"])
-	unit := ParseUnit(result["unit"])
-	ingredient := cases.Title(language.English, cases.Compact).String(result["ingredient"])
-
-	stepItem := StepItem{
-		Amount: amount,
-		Unit:   unit,
-		Item: Item{
-			Name: ingredient,
-		},
-	}
-
-	return nil, stepItem
-}
-
-// ParseAmount converts a string amount to a float64
-func ParseAmount(amount string) float64 {
+// parseAmount converts a string amount to a float64
+func parseAmount(amount string) float64 {
 	var errorAmount = 0.0
 	re := regexp.MustCompile(`((?P<comFraction>(?P<factor>\d*)(?P<fraction>[½¼¾⅓⅔⅛⅜]))|(?P<number>[\d\.]+))`)
 	match := re.FindStringSubmatch(amount)
@@ -250,8 +254,8 @@ func ParseAmount(amount string) float64 {
 	return amountFloat
 }
 
-// ParseUnit parses a unit string and returns a standard unit
-func ParseUnit(unit string) string {
+// parseUnit parses a unit string and returns a standard unit
+func parseUnit(unit string) string {
 	switch unit {
 	case "tablespoon":
 		return "tbsp"
@@ -300,37 +304,73 @@ func ParseUnit(unit string) string {
 	}
 }
 
-// ParseAndSaveRecipe parses a recipe from an interface{} and adds it to the database
-func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipeParser) error {
+// ParseAndSaveItems parses a file and saves the items to the database
+func (app *TasteBuddyApp) ParseAndSaveItems(file string, itemParser ItemParser) error {
 	var err error
 
 	// Create channel for recipes
-	var recipes []Recipe
-	recipeChannel := make(chan Recipe)
-	recipeParser(file, recipeChannel)
+	itemChannel := make(chan Item)
+	itemParser(file, itemChannel)
 
 	// Receive recipes from channel
-	for recipe := range recipeChannel {
-		app.LogDebug("ParseAndSaveRecipe", "Received recipe: ", recipe)
-		recipes = append(recipes, recipe)
+	var items []Item
+	for item := range itemChannel {
+		items = append(items, item)
 	}
 
-	// Save items to database
-	var items []Item
-	for _, recipe := range recipes {
-		items = append(items, recipe.GetItems()...)
-	}
-	if err := app.AddOrUpdateItems(items); err != nil {
+	// Add or update items in database
+	if err = app.AddOrUpdateItems(items); err != nil {
 		return app.LogError("ParseAndSaveRecipe", errors.New("error saving items to database: "+err.Error()))
 	}
 
-	// Save recipes to database
-	var itemsMap map[string]Item
-	itemsMap, err = app.GetAllItemsMappedByName(false)
-	recipes = app.AddItemIdsToRecipes(recipes, itemsMap)
-	if err := app.AddOrUpdateRecipes(recipes); err != nil {
-		return app.LogError("ParseAndSaveRecipe", errors.New("error saving recipes to database: "+err.Error()))
+	return err
+}
+
+// StaticItemParser parses a json item file and sends the items to the item channel
+func (app *TasteBuddyApp) StaticItemParser(itemFile string, itemChannel chan Item) error {
+	app.LogTrace("StaticItemParser", "Parsing item "+itemFile)
+	// Read the opened jsonFile as a byte array.
+	bytes, _ := os.ReadFile(itemFile)
+
+	type StaticItem struct {
+		Name   string `json:"name"`
+		ImgUrl string `json:"img_url,omitempty"`
+		Type   string `json:"type"`
+	}
+	var items []StaticItem
+
+	// Parse json to struct
+	err := json.Unmarshal(bytes, &items)
+	if err != nil {
+		return app.LogError("StaticItemParser", errors.New("error parsing json: "+err.Error()))
 	}
 
-	return err
+	// Pre-cache all items
+	app.GetAllItems(false)
+
+	// Create a wait group
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(len(items))
+
+	// Close the item channel when all items are parsed
+	go func() {
+		waitGroup.Wait()
+		close(itemChannel)
+	}()
+
+	// Parse items
+	for _, item := range items {
+		go func(item StaticItem) {
+			// Defer the wait group
+			defer waitGroup.Done()
+
+			parsedItem := Item{}
+			parsedItem.Name = item.Name
+			parsedItem.Type = item.Type
+			parsedItem.ImgUrl = item.ImgUrl
+			itemChannel <- parsedItem
+		}(item)
+	}
+	app.LogTrace("StaticItemParser", "Finished parsing item "+itemFile)
+	return nil
 }

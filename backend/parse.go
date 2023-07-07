@@ -36,7 +36,7 @@ one or multiple recipes. The recipe parser then saves the recipes in a database.
 		}
 
 		// Call the parse function
-		app.ParseRecipe(file, formatter)
+		app.Parse(file, formatter)
 	},
 }
 
