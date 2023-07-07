@@ -7,7 +7,7 @@
             </IonCardHeader>
             <TwoColumnLayout>
                 <template #left>
-                    <ItemList key="ingredient" :items="possessedItems ?? []" />
+                    <ItemList key="ingredient" :items="possessedItems ?? []"/>
                 </template>
                 <template #right>
                     <ItemList key="tool" :items="missingItems ?? []"/>
@@ -23,7 +23,7 @@
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion} from "@/tastebuddy/types";
-import {IonCard, IonCardContent, IonCardTitle, useIonRouter} from "@ionic/vue";
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, useIonRouter} from "@ionic/vue";
 import RecipeLink from "@/components/recipe/RecipeLink.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
@@ -31,7 +31,16 @@ import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
 export default defineComponent({
     name: 'RecipeSuggestionPreview',
-    components: {TwoColumnLayout, RecipeHero, ItemList, RecipeLink, IonCard, IonCardContent, IonCardTitle},
+    components: {
+        TwoColumnLayout,
+        RecipeHero,
+        ItemList,
+        RecipeLink,
+        IonCard,
+        IonCardContent,
+        IonCardHeader,
+        IonCardTitle
+    },
     props: {
         recipeSuggestion: {
             type: Object as PropType<RecipeSuggestion>,

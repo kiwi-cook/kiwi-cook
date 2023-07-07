@@ -593,7 +593,7 @@ export class RecipeSuggestion {
     recipe?: Recipe;
     recipe_price?: number;
     market_for_price?: Market;
-    missing_items: {
+    missing_items?: {
         item_id: string;
         item?: Item;
         amount: number;
@@ -621,7 +621,8 @@ export class RecipeSuggestion {
         suggestion.recipe = store.getRecipesAsMap[json.recipe_id]
         suggestion.recipe_price = json.recipe_price
         suggestion.market_for_price = json.market_for_price
-        suggestion.missing_items = json.missing_items.map((missing_item) => {
+        suggestion.missing_items = json.missing_items
+        suggestion.missing_items = suggestion.missing_items?.map((missing_item) => {
             return {
                 item_id: missing_item.item_id,
                 item: store.getItemsAsMap[missing_item.item_id],
@@ -629,7 +630,6 @@ export class RecipeSuggestion {
                 price: missing_item.price
             }
         })
-        console.log(suggestion)
         return suggestion
     }
 
@@ -663,7 +663,7 @@ export class RecipeSuggestion {
     }
 
     public getMissingItems(): Item[] {
-        return this.missing_items.map(missing_item => missing_item.item ?? new Item())
+        return this.missing_items?.map(missing_item => missing_item.item ?? new Item()) ?? []
     }
 }
 
