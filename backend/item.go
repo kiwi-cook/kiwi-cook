@@ -162,6 +162,18 @@ func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 	return cachedItems, nil
 }
 
+func (app *TasteBuddyApp) GetAllItemsMappedByName(cached bool) (map[string]Item, error) {
+	items, err := app.GetAllItems(cached)
+	if err != nil {
+		return nil, app.LogError("GetAllItemsMappedByName", err)
+	}
+	mappedItems := make(map[string]Item)
+	for _, item := range items {
+		mappedItems[item.Name] = item
+	}
+	return mappedItems, nil
+}
+
 // GetItemById gets item from database by id
 func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
 	var itemFromDatabase Item

@@ -302,6 +302,7 @@ func ParseUnit(unit string) string {
 
 // ParseAndSaveRecipe parses a recipe from an interface{} and adds it to the database
 func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipeParser) error {
+	var err error
 
 	// Create channel for recipes
 	var recipes []Recipe
@@ -324,9 +325,12 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 	}
 
 	// Save recipes to database
+	var itemsMap map[string]Item
+	itemsMap, err = app.GetAllItemsMappedByName(false)
+	recipes = app.AddItemIdsToRecipes(recipes, itemsMap)
 	if err := app.AddOrUpdateRecipes(recipes); err != nil {
 		return app.LogError("ParseAndSaveRecipe", errors.New("error saving recipes to database: "+err.Error()))
 	}
 
-	return nil
+	return err
 }
