@@ -20,8 +20,8 @@ one or multiple recipes. The recipe parser then saves the recipes in a database.
 
 		// Create the TasteBuddyApp
 		app := TasteBuddyAppFactory()
-		app.SetLogger(logLevel)
 		app.Default()
+		app.SetLogger(logLevel)
 
 		// Get the file name from the command line
 		file, err := cmd.Flags().GetString("file")

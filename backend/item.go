@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"math"
 	"strconv"
 )
@@ -24,10 +23,31 @@ type Item struct {
 	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
+type ItemResult struct {
+	Item
+	error   error
+	success bool
+}
+
+func NewItemResult(item Item, success bool) *ItemResult {
+	return &ItemResult{
+		Item:    item,
+		error:   nil,
+		success: success,
+	}
+}
+
+func NewItemErrorResult(err error) *ItemResult {
+	return &ItemResult{
+		error:   err,
+		success: false,
+	}
+}
+
 // HandleGetAllItems gets called by router
 // Calls getRecipesFromDB and handles the context
 func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
-	items, err := server.GetAllItems()
+	items, err := server.GetAllItems(false)
 	if err != nil {
 		server.LogError("HandleGetAllItems", err)
 		ServerError(context, true)
@@ -72,8 +92,7 @@ func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
 	}
 
 	var itemId primitive.ObjectID
-	var err error
-	if itemId, err = server.AddOrUpdateItem(newItem); err != nil {
+	if err := server.AddOrUpdateItem(newItem); err != nil {
 		server.LogError("HandleAddItem", err)
 		ServerError(context, true)
 		return
@@ -111,18 +130,36 @@ func (app *TasteBuddyApp) GetItemsCollection() *TBCollection {
 	return app.GetDBCollection("items")
 }
 
-var items []Item
+var (
+	cachedItems []Item
+)
+
+func (app *TasteBuddyApp) UpdateItemCache() error {
+	app.LogTrace("UpdateItemCache", "Update item cache")
+	if _, err := app.GetAllItems(false); err != nil {
+		return app.LogError("UpdateItemCache", err)
+	}
+	return nil
+}
 
 // GetAllItems gets all items from database
-func (app *TasteBuddyApp) GetAllItems() ([]Item, error) {
+func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 	// get all items from database that are not deleted
-	if items == nil {
+	if cachedItems == nil || !cached {
+		app.LogDatabase("GetAllItems", "Get all items from database")
 		var itemsFromDatabase []Item
-		err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{})
-		items = itemsFromDatabase
-		return itemsFromDatabase, err
+		if err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{}); err != nil {
+			return itemsFromDatabase, app.LogError("GetAllItems", err)
+		}
+		if len(itemsFromDatabase) == 0 {
+			cachedItems = []Item{}
+			return itemsFromDatabase, errors.New("no items found")
+		}
+		cachedItems = itemsFromDatabase
+	} else {
+		app.LogTrace("GetAllItems", "Get all items from cache")
 	}
-	return items, nil
+	return cachedItems, nil
 }
 
 // GetItemById gets item from database by id
@@ -133,42 +170,53 @@ func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
 	return itemFromDatabase, err
 }
 
-// GetMostSimilarItem compares which item is most similar to the given item name
-func (app *TasteBuddyApp) GetMostSimilarItem(itemName string) (Item, error) {
-	items, err := app.GetAllItems()
+// GetItemByName gets item from database by name
+func (app *TasteBuddyApp) GetItemByName(name string) (error, Item) {
+	var item Item
+	items, err := app.GetAllItems(true)
 	if err != nil {
-		return Item{}, err
+		return app.LogError("GetItemByName", err), item
+	}
+	for _, i := range items {
+		if i.Name == name {
+			return nil, i
+		}
+	}
+	return errors.New("no item found with name " + name), item
+}
+
+// MatchOrNewItem compares which item is most similar to the given item name
+// and returns the item with the highest similarity
+// If no item is found, a new item is created
+// If threshold is -1, the default threshold of 0.7 is used
+func (app *TasteBuddyApp) MatchOrNewItem(itemName string, threshold float64) *ItemResult {
+	items, err := app.GetAllItems(true)
+	if err != nil {
+		return NewItemErrorResult(err)
 	}
 
-	var mostSimilarItem Item
+	if threshold == -1 {
+		threshold = 0.7
+	}
+
+	var mostSimilarItem = Item{Name: itemName}
 	var mostSimilarity float64 = 0
 	for _, item := range items {
-		if similarity := strutil.Similarity(item.Name, itemName, metrics.NewHamming()); similarity > 0.6 && similarity > mostSimilarity {
+		if similarity := strutil.Similarity(item.Name, itemName, metrics.NewHamming()); similarity >= threshold && similarity > mostSimilarity {
 			mostSimilarItem = item
 			mostSimilarity = similarity
 		}
 	}
 
-	if mostSimilarity < 0.6 {
-		err = errors.New("no similar item found")
+	var success = false
+	if mostSimilarity < threshold {
+		app.LogDebug("MatchOrNewItem", "No similar item found for "+itemName+" with threshold "+fmt.Sprintf("%f", threshold))
 	} else {
-		app.LogDebug("GetMostSimilarItem", "Found most similar item "+mostSimilarItem.Name+" to "+itemName+" with similarity "+fmt.Sprintf("%f", mostSimilarity))
+		success = true
+		app.LogDebug("MatchOrNewItem", "Found most similar item "+mostSimilarItem.Name+" to "+itemName+" with similarity "+fmt.Sprintf("%f", mostSimilarity))
 	}
 
-	return mostSimilarItem, err
-}
-
-// MatchItemToStepItem selects the most similar item from the given step items
-func (app *TasteBuddyApp) MatchItemToStepItem(item Item, stepItems []StepItem) (StepItem, error) {
-	var mostSimilarItem StepItem
-	var mostSimilarity float64 = 0
-	for _, stepItem := range stepItems {
-		if similarity := strutil.Similarity(item.Name, stepItem.Name, metrics.NewHamming()); similarity > 0.6 && similarity > mostSimilarity {
-			mostSimilarItem = stepItem
-		}
-	}
-
-	return mostSimilarItem, nil
+	return NewItemResult(mostSimilarItem, success)
 }
 
 // DeleteItemById deletes item from database by id
@@ -185,65 +233,59 @@ func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.Objec
 	return id, nil
 }
 
+func (app *TasteBuddyApp) AddOrUpdateItem(item Item) error {
+	return app.AddOrUpdateItems([]Item{item})
+}
+
 // AddOrUpdateItems adds or updates multiple items in the database of items
-func (app *TasteBuddyApp) AddOrUpdateItems(newItems []Item) error {
-	for _, item := range newItems {
-		if _, err := app.AddOrUpdateItem(item); err != nil {
+// If an item has not an id, it will be added
+func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
+	app.Log("AddOrUpdateItems", "Add or update "+fmt.Sprintf("%d", len(items))+" items")
+	var itemsWithIds []interface{}
+	var itemsWithoutIds []interface{}
+
+	// Only unique items
+	itemsMap := make(map[string]Item)
+	for _, item := range items {
+		itemsMap[item.Name] = item
+	}
+
+	// Split items into items with and without ids
+	for _, item := range itemsMap {
+		if item.ID.IsZero() {
+			itemsWithoutIds = append(itemsWithoutIds, item)
+		} else {
+			itemsWithIds = append(itemsWithIds, item)
+		}
+	}
+
+	// Add items without ids to database
+	if len(itemsWithoutIds) > 0 {
+		if _, err := app.GetItemsCollection().InsertMany(DefaultContext(), itemsWithoutIds); err != nil {
+			return app.LogError("AddOrUpdateItems", err)
+		}
+		app.Log("AddOrUpdateItems", "Added "+strconv.Itoa(len(itemsWithoutIds))+" items without ids to database")
+	}
+
+	// Update items with ids in database
+	for _, item := range itemsWithIds {
+		if _, err := app.GetItemsCollection().UpdateByID(DefaultContext(), item.(Item).ID, item); err != nil {
 			return app.LogError("AddOrUpdateItems", err)
 		}
 	}
+
+	app.Log("AddOrUpdateItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
 	return nil
-}
-
-// AddOrUpdateStepItems adds or updates multiple step items in the database of items
-func (app *TasteBuddyApp) AddOrUpdateStepItems(newStepItems []StepItem) error {
-	for _, stepItem := range newStepItems {
-		if _, err := app.AddOrUpdateItem(stepItem.Item); err != nil {
-			return app.LogError("AddOrUpdateStepItems", err)
-		}
-	}
-	return nil
-}
-
-// AddOrUpdateItem adds or updates an item in the database of items
-func (app *TasteBuddyApp) AddOrUpdateItem(newItem Item) (primitive.ObjectID, error) {
-	ctx := DefaultContext()
-	var err error
-	var objectId primitive.ObjectID
-
-	if newItem.ID.IsZero() {
-		// add item
-		var result *mongo.InsertOneResult
-		app.LogWarning("AddOrUpdateItem + "+newItem.Name, "Add new item to database")
-		result, err = app.GetItemsCollection().InsertOne(ctx, newItem)
-		objectId = result.InsertedID.(primitive.ObjectID)
-	} else {
-		// update item
-		app.LogWarning("AddOrUpdateItem + "+newItem.Name+"("+newItem.ID.Hex()+")", "Update existing item in database")
-		_, err = app.GetItemsCollection().UpdateOne(ctx,
-			bson.D{{Key: "_id", Value: newItem.ID}},
-			bson.D{{Key: "$set", Value: newItem}})
-		objectId = newItem.ID
-	}
-	if err != nil {
-		return objectId, app.LogError("AddOrUpdateItem + "+newItem.Name, err)
-	}
-	app.LogWarning("AddOrUpdateItem + "+newItem.Name+"("+objectId.Hex()+")", "Successful operation")
-	return objectId, nil
 }
 
 // GetItems gets all items used in a recipe
 func (recipe *Recipe) GetItems() []Item {
-	// add all items to map
-	var itemsMap = make(map[primitive.ObjectID]Item)
-	for _, stepItem := range recipe.GetStepItemsList() {
-		itemsMap[stepItem.ID] = Item{}
-	}
+	itemsMap := recipe.GetStepItemsMappedToName()
 
 	// convert map to array
 	var items []Item
 	for _, item := range itemsMap {
-		items = append(items, item)
+		items = append(items, item.Item)
 	}
 	return items
 }
@@ -262,14 +304,6 @@ func (app *TasteBuddyApp) CalculateItemPriceForMarket(item *Item, market Market)
 		price = 0
 	}
 	return math.Max(price, 0), successful
-}
-
-func ToItemIds(items []StepItem) []primitive.ObjectID {
-	var itemIds []primitive.ObjectID
-	for _, item := range items {
-		itemIds = append(itemIds, item.ID)
-	}
-	return itemIds
 }
 
 // GetItemQuality gets the quality of an item

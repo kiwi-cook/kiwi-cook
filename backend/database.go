@@ -69,8 +69,7 @@ func (collection *TBCollection) AllWithDefault(filter interface{}, results inter
 	if err != nil {
 		collection.hasError = true
 		results = defaultValue
-		collection.LogError("AllWithDefault[Find]", err)
-		return err
+		return collection.LogError("AllWithDefault[Find]", err)
 	}
 	defer cursor.Close(DefaultContext())
 	if err = cursor.All(DefaultContext(), results); err != nil {
@@ -82,7 +81,10 @@ func (collection *TBCollection) AllWithDefault(filter interface{}, results inter
 	if results == nil {
 		results = defaultValue
 	}
-	return err
+	if err != nil {
+		return collection.LogError("AllWithDefault[Decode]", err)
+	}
+	return nil
 }
 
 func (collection *TBCollection) All(filter interface{}, results interface{}) error {

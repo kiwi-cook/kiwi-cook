@@ -13,13 +13,15 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
-type RecipeParser func(string) ([]Recipe, error)
-type IngredientParser func(string) (StepItem, error)
+type RecipeParser func(string, chan Recipe)
+type IngredientParser func(string) (error, StepItem)
 
 func (app *TasteBuddyApp) ParseRecipe(file string, parser string) {
+	app.Log("ParseRecipe", "Parsing recipe "+file)
 	recipeParser := RecipeParser(nil)
 
 	switch parser {
@@ -34,10 +36,12 @@ func (app *TasteBuddyApp) ParseRecipe(file string, parser string) {
 		app.LogError("ParseRecipe", err)
 		return
 	}
+	app.Log("ParseRecipe", "Finished parsing recipe "+file)
 }
 
-func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string) ([]Recipe, error) {
-	// read our opened jsonFile as a byte array.
+func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel chan Recipe) {
+	app.LogTrace("CookstrRecipeParser", "Parsing recipe "+recipeFile)
+	// Read the opened jsonFile as a byte array.
 	bytes, _ := os.ReadFile(recipeFile)
 
 	type CookstrRecipe struct {
@@ -54,71 +58,102 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string) ([]Recipe, erro
 	}
 	var recipes []CookstrRecipe
 
-	// we unmarshal our byteArray which contains our
-	// jsonFile's content into 'users' which we defined above
+	// Parse json to struct
 	err := json.Unmarshal(bytes, &recipes)
 	if err != nil {
-		return []Recipe{}, app.LogError("CookstrRecipeParser", err)
+		return
 	}
-	// recipes = recipes[0:1]
+	recipes = recipes[:100]
 
-	// parse recipes
-	var parsedRecipes []Recipe
+	// Pre-cache all items
+	app.GetAllItems(false)
+
+	// Create a wait group
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(len(recipes))
+
+	// Close the recipe channel when all recipes are parsed
+	go func() {
+		waitGroup.Wait()
+		close(recipeChannel)
+	}()
+
+	// Parse recipes
 	for _, recipe := range recipes {
-		parsedRecipe := Recipe{}
-		parsedRecipe.Name = recipe.Name
-		parsedRecipe.Author = recipe.Author
-		parsedRecipe.Description = recipe.Description
-		parsedRecipe.Props.Url = recipe.Url
-		parsedRecipe.Props.ImgUrl = recipe.ImgUrl
-		parsedRecipe.Props.CreatedAt, err = time.Parse("2006-01-02", recipe.Date)
-		if err != nil {
-			return []Recipe{}, app.LogError("CookstrRecipeParser", err)
-		}
-		stepsDescriptions := recipe.Steps
-		stepItems := ParseItems(recipe.Items, CookstrIngredientParser)
-		app.AddOrUpdateStepItems(stepItems)
-		for _, description := range stepsDescriptions {
-			parsedRecipe.Steps = append(parsedRecipe.Steps, app.StepFromDescription(description, stepItems))
-		}
-		parsedRecipes = append(parsedRecipes, parsedRecipe)
-	}
+		go func(recipe CookstrRecipe) {
+			// Defer the wait group
+			defer waitGroup.Done()
 
-	return parsedRecipes, nil
+			parsedRecipe := Recipe{}
+			parsedRecipe.Name = recipe.Name
+			app.Log("CookstrRecipeParser", "Parsing recipe "+recipe.Name)
+			parsedRecipe.Author = recipe.Author
+			parsedRecipe.Description = recipe.Description
+			parsedRecipe.Props.Url = recipe.Url
+			parsedRecipe.Props.ImgUrl = recipe.ImgUrl
+			if parsedRecipe.Props.CreatedAt, err = time.Parse("2006-01-02", recipe.Date); err != nil {
+				app.LogError("CookstrRecipeParser", err)
+				return
+			}
+			stepItems := app.ParseItems(recipe.Items, CookstrIngredientParser)
+			stepsDescriptions := recipe.Steps
+			for _, description := range stepsDescriptions {
+				parsedRecipe.Steps = append(parsedRecipe.Steps, app.StepFromDescription(description, stepItems))
+			}
+			app.Log("CookstrRecipeParser", "Finished parsing recipe "+recipe.Name)
+			recipeChannel <- parsedRecipe
+		}(recipe)
+	}
+	app.LogTrace("CookstrRecipeParser", "Finished parsing recipes")
 }
 
 func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []StepItem) Step {
+	app.LogTrace("StepFromDescription", "Parsing step from description "+description)
+
 	step := Step{}
 	descriptionTokens := strings.Fields(description)
-	var stepItemsInDescription []StepItem
+	// Make map of step items
+	var stepItemsInDescription = make(map[string]StepItem)
 	for _, token := range descriptionTokens {
-		if item, err := app.GetMostSimilarItem(token); err != nil {
+		similarResult := app.MatchOrNewItem(token, 0.9)
+		if similarResult.error != nil {
+			app.LogError("StepFromDescription[MatchOrNewItem]", similarResult.error)
 			continue
-		} else {
-			if stepItem, err := app.MatchItemToStepItem(item, stepItems); err != nil {
-				continue
-			} else {
-				stepItemsInDescription = append(stepItemsInDescription, stepItem)
-			}
+		}
+
+		matchResult := app.MatchItemToStepItem(similarResult.Item, stepItems, 0.5)
+		if matchResult.error != nil {
+			app.LogError("StepFromDescription[MatchItemToStepItem]", matchResult.error)
+			continue
+		}
+
+		if matchResult.success {
+			stepItemsInDescription[matchResult.Item.Name] = matchResult.StepItem
 		}
 	}
-	step.Items = stepItemsInDescription
+	step.Description = description
+	for _, stepItem := range stepItemsInDescription {
+		step.Items = append(step.Items, stepItem)
+	}
 	step.Duration = 0
 	step.ImgUrl = ""
 	step.AdditionalStepInformation = nil
 
+	app.LogTrace("StepFromDescription", "Finished parsing step from description "+description)
 	return step
 }
 
-func ParseItems(items []string, parser IngredientParser) []StepItem {
+func (app *TasteBuddyApp) ParseItems(items []string, parser IngredientParser) []StepItem {
+	app.LogTrace("ParseItems", "Parsing items")
+
 	var stepItems []StepItem
+	var err error
 
 	for _, ingredient := range items {
 		stepItem := StepItem{}
 
 		// parse ingredient
-		stepItem, err := parser(ingredient)
-		if err != nil {
+		if err, stepItem = parser(ingredient); err != nil {
 			continue
 		}
 		stepItem.Type = "ingredient"
@@ -126,16 +161,19 @@ func ParseItems(items []string, parser IngredientParser) []StepItem {
 		stepItems = append(stepItems, stepItem)
 	}
 
+	app.LogTrace("ParseItems", "Finished parsing items")
+	app.LogDebug("ParseItems", "Parsed ", stepItems)
+
 	return stepItems
 }
 
-func CookstrIngredientParser(ingredientStr string) (StepItem, error) {
+func CookstrIngredientParser(ingredientStr string) (error, StepItem) {
 	// Regex pattern to match amount and unit
 	re := regexp.MustCompile(`^(?P<amount>([\d/.½¼¾\-]|(\s*to\s*))+)\s*(?P<unit>(tablespoons?|teaspoons?|cups?|ounces?|kg|(kilo)?gr(ams)?|ml|(milli)?l(itres)?)?)\s+(?P<ingredient>.*)$`)
 
 	match := re.FindStringSubmatch(ingredientStr)
 	if match == nil {
-		return StepItem{}, errors.New("invalid ingredient")
+		return errors.New("invalid ingredient"), StepItem{}
 	}
 	names := re.SubexpNames()
 
@@ -158,7 +196,7 @@ func CookstrIngredientParser(ingredientStr string) (StepItem, error) {
 		},
 	}
 
-	return stepItem, nil
+	return nil, stepItem
 }
 
 // ParseAmount converts a string amount to a float64
@@ -264,19 +302,30 @@ func ParseUnit(unit string) string {
 
 // ParseAndSaveRecipe parses a recipe from an interface{} and adds it to the database
 func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipeParser) error {
-	parsedRecipes, err := recipeParser(file)
-	if err != nil {
-		return app.LogError("ParseAndSaveRecipe", err)
+
+	// Create channel for recipes
+	var recipes []Recipe
+	recipeChannel := make(chan Recipe)
+	recipeParser(file, recipeChannel)
+
+	// Receive recipes from channel
+	for recipe := range recipeChannel {
+		app.LogDebug("ParseAndSaveRecipe", "Received recipe: ", recipe)
+		recipes = append(recipes, recipe)
 	}
 
-	// add recipe to database
-	for _, parsedRecipe := range parsedRecipes {
-		app.LogDebug("ParseAndSaveRecipe", "Adding recipe: "+parsedRecipe.Name)
-		app.LogDebug("ParseAndSaveRecipe", "Recipe: %+v", parsedRecipe)
-		_, _, err := app.AddOrUpdateRecipe(parsedRecipe)
-		if err != nil {
-			return app.LogError("ParseAndSaveRecipe", err)
-		}
+	// Save items to database
+	var items []Item
+	for _, recipe := range recipes {
+		items = append(items, recipe.GetItems()...)
+	}
+	if err := app.AddOrUpdateItems(items); err != nil {
+		return app.LogError("ParseAndSaveRecipe", errors.New("error saving items to database: "+err.Error()))
+	}
+
+	// Save recipes to database
+	if err := app.AddOrUpdateRecipes(recipes); err != nil {
+		return app.LogError("ParseAndSaveRecipe", errors.New("error saving recipes to database: "+err.Error()))
 	}
 
 	return nil

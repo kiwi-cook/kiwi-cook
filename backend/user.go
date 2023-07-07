@@ -117,5 +117,5 @@ func (app *TasteBuddyApp) SetUserLevel(user *User, userLevel AuthLevel) error {
 	_, err := app.GetUsersCollections().UpdateOne(DefaultContext(),
 		bson.D{{Key: "_id", Value: user.ID}}, bson.D{{Key: "$set", Value: user}})
 
-	return err
+	return app.LogError("SetUserLevel", err)
 }

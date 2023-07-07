@@ -10,9 +10,30 @@ type LogLevel string
 const (
 	DefaultLogLevel LogLevel = "default" // Normal logging
 	WarnLogLevel    LogLevel = "warn"    // Warning logging
+	Database        LogLevel = "db"      // Database logging
 	DebugLogLevel   LogLevel = "debug"   // Debug logging
+	TraceLogLevel   LogLevel = "trace"   // Trace logging
 	VerboseLogLevel LogLevel = "verbose" // Verbose logging. Logs everything
 )
+
+func (logLevel LogLevel) int() int {
+	switch logLevel {
+	case DefaultLogLevel:
+		return 0
+	case WarnLogLevel:
+		return 1
+	case Database:
+		return 2
+	case DebugLogLevel:
+		return 3
+	case TraceLogLevel:
+		return 4
+	case VerboseLogLevel:
+		return 5
+	default:
+		return 0
+	}
+}
 
 const colorNone = "\033[0m"
 const colorRed = "\033[31m"
@@ -37,6 +58,22 @@ func (app *TasteBuddyApp) LogDebug(functionName string, message ...any) {
 
 func (logger *TasteBuddyLogger) LogDebug(functionName string, message ...any) {
 	logger.Printf(DebugLogLevel, "DEBUG", colorNone, functionName, message...)
+}
+
+func (app *TasteBuddyApp) LogTrace(functionName string, message ...any) {
+	app.logger.LogTrace(functionName, message...)
+}
+
+func (logger *TasteBuddyLogger) LogTrace(functionName string, message ...any) {
+	logger.Printf(TraceLogLevel, "TRACE", colorNone, functionName, message...)
+}
+
+func (app *TasteBuddyApp) LogDatabase(functionName string, message ...any) {
+	app.logger.LogDatabase(functionName, message...)
+}
+
+func (logger *TasteBuddyLogger) LogDatabase(functionName string, message ...any) {
+	logger.Printf(Database, "DATABASE", colorNone, functionName, message...)
 }
 
 func (app *TasteBuddyApp) LogWarning(functionName string, message ...any) {
@@ -85,18 +122,7 @@ func (logger *TasteBuddyLogger) Printf(logLevel LogLevel, logType string, color 
 		format += "%v\n"
 	}
 
-	switch logger.logLevel {
-	case DefaultLogLevel:
-		log.Printf(format, message...)
-	case WarnLogLevel:
-		if logLevel == WarnLogLevel || logLevel == DefaultLogLevel {
-			log.Printf(format, message...)
-		}
-	case DebugLogLevel:
-		if logLevel == DebugLogLevel || logLevel == WarnLogLevel || logLevel == DefaultLogLevel {
-			log.Printf(format, message...)
-		}
-	case VerboseLogLevel:
+	if logLevel.int() <= logger.logLevel.int() {
 		log.Printf(format, message...)
 	}
 }

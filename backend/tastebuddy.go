@@ -26,8 +26,8 @@ func TasteBuddyAppFactory() *TasteBuddyApp {
 // Default sets up the TasteBuddyApp with default values
 func (app *TasteBuddyApp) Default() *TasteBuddyApp {
 	return app.
-		SetupViper().
 		SetLogger("default").
+		SetupViper().
 		SetDatabase().
 		SetJWTKeys()
 }

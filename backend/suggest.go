@@ -124,7 +124,7 @@ func (app *TasteBuddyApp) SuggestRecipes(recipeSuggestionQuery RecipeSuggestionQ
 			if calculatedRecipePrice, market, err := app.CalculateLowestRecipePriceInCity(&recipe, recipeSuggestionQuery.City); err == nil {
 				app.LogDebug("SuggestRecipes", "Market is "+market.MarketName)
 				// Calculate the price of the missing items
-				itemsMap := recipe.GetStepItems()
+				itemsMap := recipe.GetStepItemsMappedToId()
 				for index, missingRecipeItem := range matchedRecipe.MissingRecipeItems {
 					item := itemsMap[missingRecipeItem.ItemID]
 					missingRecipeItem.Price, _ = app.CalculateItemPriceForMarket(&item.Item, *market)
@@ -147,7 +147,7 @@ func matchesByItems(recipe Recipe, itemQuery []ItemQuery) *MatchedRecipe {
 	var suggestedRecipeID primitive.ObjectID
 
 	matchesAllItems := true
-	recipeItemsMap := recipe.GetStepItems()
+	recipeItemsMap := recipe.GetStepItemsMappedToId()
 	if len(recipeItemsMap) == 0 {
 		return nil
 	}
