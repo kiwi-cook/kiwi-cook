@@ -4,21 +4,18 @@
             <!-- Router views -->
             <IonRouterOutlet/>
 
-            <IonProgressBar v-if="loadingState" type="indeterminate"/>
+            <IonProgressBar v-show="loadingState" type="indeterminate"/>
             <IonTabBar slot="bottom">
                 <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
-                    <IonIcon :icon="fastFood"/>
-                    <IonLabel>Today</IonLabel>
+                    <IonIcon :icon="home"/>
                 </IonTabButton>
 
                 <IonTabButton href="/recipe/suggestions" tab="recipe-finder">
-                    <IonIcon :icon="sparklesOutline"/>
-                    <IonLabel>Suggestions</IonLabel>
+                    <IonIcon :icon="search"/>
                 </IonTabButton>
 
                 <IonTabButton href="/recipe/saved" tab="saved-recipes">
-                    <IonIcon :icon="heart"/>
-                    <IonLabel>Saved</IonLabel>
+                    <IonIcon :icon="star"/>
                 </IonTabButton>
             </IonTabBar>
         </IonTabs>
@@ -29,7 +26,6 @@
 import {computed, defineComponent} from 'vue';
 import {
     IonIcon,
-    IonLabel,
     IonPage,
     IonProgressBar,
     IonRouterOutlet,
@@ -37,12 +33,12 @@ import {
     IonTabButton,
     IonTabs,
 } from '@ionic/vue';
-import {fastFood, heart, sparklesOutline} from 'ionicons/icons';
+import {fastFood, heart, home, search, sparklesOutline, star} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
 
 export default defineComponent({
     name: 'TabsPage',
-    components: {IonLabel, IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar},
+    components: {IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar},
     setup() {
 
         const store = useTasteBuddyStore()
@@ -51,7 +47,7 @@ export default defineComponent({
         return {
             loadingState,
             // icons
-            heart, fastFood, sparklesOutline
+            heart, fastFood, sparklesOutline, home, search, star
         }
     }
 });
