@@ -16,5 +16,5 @@
 
 1. Clone this repository
 2. `cd frontend`
-3. `npm install`
+3. `npm ci`
 4. `npm run serve`
