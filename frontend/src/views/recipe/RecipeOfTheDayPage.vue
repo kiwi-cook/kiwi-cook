@@ -28,7 +28,7 @@ import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {Recipe} from "@/tastebuddy/types";
 import {useTasteBuddyStore} from "@/storage";
-import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
+import TasteBuddyLogo from "@/components/TasteBuddyLogo.vue";
 
 
 export default defineComponent({

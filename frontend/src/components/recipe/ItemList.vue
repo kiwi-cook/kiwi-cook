@@ -6,7 +6,7 @@
                     <IonItem class="small-item" lines="none" @click="select(item.id)">
                         <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
                         <IonText class="small-item-name">
-                            <IonChip v-if="item.showAmountUnit" color="light">
+                            <IonChip v-if="item.showAmountUnit">
                                 {{ item.amount }} {{ item.unit }}
                             </IonChip>
                             {{ item.name }}
@@ -30,6 +30,11 @@ export default defineComponent({
             type: Array as PropType<(StepItem[] | Item[])>,
             required: true,
         },
+        showLimit: {
+            type: Number,
+            required: false,
+            default: 5
+        },
         type: {
             type: Array as PropType<string[]>,
             required: false,
@@ -41,7 +46,8 @@ export default defineComponent({
         IonItem, IonImg, IonText, IonChip
     },
     setup(props: any, {emit}) {
-        const {items, type} = toRefs(props);
+        const {items, type, showLimit} = toRefs(props);
+
         const mappedItems = computed(() => items.value
             .map((item: Item) => {
                 const amount = item instanceof StepItem ? item.servingAmount : 0;
@@ -56,6 +62,7 @@ export default defineComponent({
                 }
             })
             .filter((item: any) => (type.value as string[]).includes(item.type))
+            .slice(0, showLimit.value)
         );
 
         const select = (itemId: string) => {
@@ -63,8 +70,7 @@ export default defineComponent({
         }
 
         return {
-            mappedItems,
-            select
+            mappedItems, select
         }
     }
 })
@@ -72,7 +78,7 @@ export default defineComponent({
 
 <style scoped>
 .item-list-wrapper {
-    max-height: 30vh;
+    max-height: 40vh;
     overflow-y: scroll;
 }
 

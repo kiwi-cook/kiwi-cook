@@ -4,7 +4,7 @@
 npm run build
 
 # navigate into the build output directory
-cd dist
+cd dist || exit
 
 # deploy to github pages
 git init
@@ -22,5 +22,5 @@ git remote add origin git@github.com:taste-buddy/taste-buddy.github.io.git
 git push -u -f origin master
 
 # remove the build directory
-cd -
+cd - || exit
 rm -rf dist

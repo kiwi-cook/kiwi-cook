@@ -41,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'RecipeSuggestions',
                 path: 'recipe/suggestions',
-                component: () => import('@/views/recipe/RecipeSuggestionsPage.vue')
+                component: () => import('@/views/RecipeSuggestionsPage.vue')
             },
             {
                 name: 'RecipeOfTheDay',
@@ -56,7 +56,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'Login',
                 path: 'login',
-                component: () => import('@/views/user/SignInPage.vue')
+                component: () => import('@/views/SignInPage.vue')
             },
             /* 404 */
             {

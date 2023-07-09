@@ -5,7 +5,7 @@
                 <IonAvatar v-if="mutableItem.imgUrl">
                     <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl"/>
                 </IonAvatar>
-                <IonChip v-if="mutableItem._id" color="light">
+                <IonChip v-if="mutableItem._id">
                     {{ mutableItem._id }}
                 </IonChip>
                 <IonButton @click="saveItem()">Save item</IonButton>
@@ -44,7 +44,7 @@
                 <IonList>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
                         <router-link :to="recipe.route()">
-                            <IonChip color="light">
+                            <IonChip>
                                 {{ recipe?.name }}
                             </IonChip>
                         </router-link>

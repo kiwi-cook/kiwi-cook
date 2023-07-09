@@ -26,13 +26,13 @@
         <template #left>
             <IonCard>
                 <IonCardHeader>
-                    <IonCardTitle color="light">
+                    <IonCardTitle>
                         Ingredients
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
                     <IonItem class="servings-counter">
-                        <IonInput v-model="servings" color="light" label="Servings" label-placement="stacked" max="15"
+                        <IonInput v-model="servings" label="Servings" label-placement="stacked" max="15"
                                   min="1"
                                   type="number"/>
                     </IonItem>
@@ -43,7 +43,7 @@
         <template #right>
             <IonCard>
                 <IonCardHeader>
-                    <IonCardTitle color="light">
+                    <IonCardTitle>
                         Equipment
                     </IonCardTitle>
                 </IonCardHeader>

@@ -31,7 +31,7 @@ import {
 } from '@ionic/vue';
 import { ellipsisHorizontal, ellipsisVertical } from "ionicons/icons";
 import SignIn from "@/components/user/SignInComponent.vue";
-import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
+import TasteBuddyLogo from "@/components/TasteBuddyLogo.vue";
 
 export default defineComponent({
     name: 'LoginPage',

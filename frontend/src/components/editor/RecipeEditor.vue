@@ -9,7 +9,7 @@
                         </IonAvatar>
                     </IonCol>
                     <IonCol size="3">
-                        <IonCardTitle color="light">
+                        <IonCardTitle>
                             <IonInput :maxlength="40" :value="mutableRecipe.name" aria-label="Recipe name"
                                       type="text"
                                       @keyup.enter="mutableRecipe.name = $event.target.value"
@@ -17,12 +17,12 @@
                         </IonCardTitle>
                     </IonCol>
                     <IonCol size="auto">
-                        <IonChip v-if="mutableRecipe._id || mutableRecipe._tmpId" color="light">
+                        <IonChip v-if="mutableRecipe._id || mutableRecipe._tmpId">
                             {{ mutableRecipe._id ?? mutableRecipe._tmpId }}
                         </IonChip>
                     </IonCol>
                     <IonCol size="auto">
-                        <IonChip v-if="mutableRecipe.props.createdAt" color="light">
+                        <IonChip v-if="mutableRecipe.props.createdAt">
                             Created at {{ formatDate(mutableRecipe.props.createdAt) }}
                         </IonChip>
                     </IonCol>
@@ -62,8 +62,7 @@
 
             <IonItem class="tags-editor" lines="none">
                 <!-- Tags -->
-                <IonChip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex" class="tag"
-                         color="light">
+                <IonChip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex" class="tag">
                     <IonLabel>{{ tag }}</IonLabel>
                     <IonIcon :icon="closeCircleOutline"
                              @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)"/>
@@ -72,7 +71,7 @@
                 <DropDownSearch :items="allTags" :reset-after="true" placeholder="e.g. vegan"
                                 @select-item="mutableRecipe.addTag($event)" @add-item="mutableRecipe.addTag($event)">
                     <template #item="{ filteredItem }">
-                        <IonChip class="tag" color="light">
+                        <IonChip class="tag">
                             <IonLabel>{{ filteredItem }}</IonLabel>
                         </IonChip>
                     </template>
@@ -130,7 +129,7 @@
                                     <IonAvatar v-if="stepItem.imgUrl">
                                         <img :alt="`Image of ${stepItem.name}`" :src="stepItem.imgUrl"/>
                                     </IonAvatar>
-                                    <IonChip v-if="stepItem._id || stepItem._tmpId" color="light">
+                                    <IonChip v-if="stepItem._id || stepItem._tmpId">
                                         {{ stepItem._id ?? stepItem._tmpId }}
                                     </IonChip>
                                 </IonItem>
@@ -194,7 +193,7 @@
                                 </IonItem>
 
                                 <IonItem lines="none">
-                                    <IonSelect v-model="stepItem.type" color="light" interface="popover"
+                                    <IonSelect v-model="stepItem.type" interface="popover"
                                                label="Type"
                                                label-placement="floating" placeholder="Type">
                                         <IonSelectOption value="ingredient">Ingredient</IonSelectOption>

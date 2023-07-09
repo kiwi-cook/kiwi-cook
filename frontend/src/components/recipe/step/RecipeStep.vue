@@ -2,9 +2,9 @@
     <IonCard>
         <IonImg :src="step?.imgUrl ?? ''"/>
         <IonCardHeader>
-            <IonCardTitle color="light">
+            <IonCardTitle>
                 Step {{ stepIndex + 1 }}
-                <IonChip v-if="step?.duration" color="light">
+                <IonChip v-if="step?.duration">
                     <IonLabel>{{ step?.duration }} minutes</IonLabel>
                 </IonChip>
             </IonCardTitle>

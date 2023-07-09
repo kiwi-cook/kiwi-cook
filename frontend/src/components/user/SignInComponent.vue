@@ -21,7 +21,7 @@
 <script lang="ts">
 import {computed, ref, watch} from 'vue';
 import {IonButton, IonCard, IonCardContent, IonCardHeader, IonInput, IonItem, useIonRouter} from '@ionic/vue';
-import TasteBuddyLogo from '@/components/general/TasteBuddyLogo.vue'
+import TasteBuddyLogo from '@/components/TasteBuddyLogo.vue'
 import {useUserStore} from '@/storage';
 import {useRoute} from 'vue-router';
 

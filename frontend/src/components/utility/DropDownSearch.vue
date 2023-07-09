@@ -10,7 +10,7 @@
             <IonItem>
                 <IonButton @click="selectItem(filteredItem)">
                     <slot :filteredItem="filteredItem" name="item">
-                        <IonLabel color="light">{{ filteredItem }}</IonLabel>
+                        <IonLabel>{{ filteredItem }}</IonLabel>
                     </slot>
                 </IonButton>
             </IonItem>

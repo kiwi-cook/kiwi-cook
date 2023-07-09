@@ -24,16 +24,8 @@
 
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
-import {
-    IonIcon,
-    IonPage,
-    IonProgressBar,
-    IonRouterOutlet,
-    IonTabBar,
-    IonTabButton,
-    IonTabs,
-} from '@ionic/vue';
-import {fastFood, heart, home, search, sparklesOutline, star} from 'ionicons/icons';
+import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
+import {home, search, star} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
 
 export default defineComponent({
@@ -47,7 +39,7 @@ export default defineComponent({
         return {
             loadingState,
             // icons
-            heart, fastFood, sparklesOutline, home, search, star
+            home, search, star
         }
     }
 });

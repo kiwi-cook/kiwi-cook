@@ -41,7 +41,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {addOutline, filter} from 'ionicons/icons';
-import TasteBuddyLogo from "@/components/general/TasteBuddyLogo.vue";
+import TasteBuddyLogo from "@/components/TasteBuddyLogo.vue";
 import {useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
 import List from "@/components/utility/List.vue";
