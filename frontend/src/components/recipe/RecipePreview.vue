@@ -1,37 +1,34 @@
 <template>
-    <IonCard class="recipe-preview-card" @click="toRecipe()">
-        <RecipeHero :recipe="recipe" class="recipe-preview-hero"/>
-        <IonCardContent>
-            <TwoColumnLayout>
-                <template #left>
-                    <ItemList key="ingredient" :items="recipe?.getItems() ?? []" :type="['ingredient']"/>
-                </template>
-                <template #right>
-                    <ItemList key="tool" :items="recipe?.getItems() ?? []" :type="['tool']"/>
-                </template>
-            </TwoColumnLayout>
-            <div v-if="firstStep?.description" class="recipe-step-preview">
-                <p>
-                    <strong>Step 1</strong>
-                    {{ firstStep?.getShortDescription() }}
-                </p>
-                ...
-            </div>
-            <RecipeLink :recipe="recipe">
-                View Full Recipe
-            </RecipeLink>
-        </IonCardContent>
-    </IonCard>
+    <div class="recipe-preview-card">
+        <RecipeHero :recipe="recipe" class="recipe-preview-hero" :routable="true"/>
+        <IonItem v-if="recipe?.getItems().length > 0" lines="none">
+            <IonText>
+                <h1 class="recipe-subheader">What You'll Need</h1>
+            </IonText>
+        </IonItem>
+
+        <TwoColumnLayout>
+            <template #left>
+                <ItemList key="ingredient" :items="recipe?.getItems() ?? []" :type="['ingredient']"/>
+            </template>
+            <template #right>
+                <ItemList key="tool" :items="recipe?.getItems() ?? []" :type="['tool']"/>
+            </template>
+        </TwoColumnLayout>
+        <RecipeLink :recipe="recipe">
+            View Full Recipe
+        </RecipeLink>
+    </div>
 </template>
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
 import {Recipe, Step} from "@/tastebuddy/types";
-import {IonCard, IonCardContent, useIonRouter} from "@ionic/vue";
+import {IonItem, IonText, useIonRouter} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
-import RecipeLink from "@/components/recipe/RecipeLink.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
+import RecipeLink from "@/components/recipe/RecipeLink.vue";
 
 export default defineComponent({
     name: 'RecipePreview',
@@ -39,13 +36,17 @@ export default defineComponent({
         recipe: {
             type: Object as PropType<Recipe>,
             required: true
+        },
+        noDescription: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
+        RecipeLink, IonItem, IonText,
         TwoColumnLayout,
         ItemList,
-        RecipeHero, RecipeLink,
-        IonCard, IonCardContent
+        RecipeHero
     },
     setup(props: any) {
         const {recipe} = toRefs(props)
@@ -80,14 +81,11 @@ export default defineComponent({
 
 <style scoped>
 .recipe-preview-card {
-    --color: var(--ion-color-dark);
-    --border-radius: 8px;
-    --box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16);
-    --padding: 16px;
-    --margin: 16px;
-    --ion-button-color: #FFF;
-    --ion-button-background-color: #F28705;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px;
     cursor: pointer;
+    box-shadow: var(--box-shadow);
 }
 
 .recipe-step-preview {

@@ -1,14 +1,10 @@
 <template>
     <IonList lines="none">
         <IonItem v-if="recipe" lines="none">
-            <RecipeHero :recipe="recipe"/>
+            <RecipeHero :recipe="recipe" :routable="false"/>
         </IonItem>
         <IonItem v-if="recipe" lines="none">
             <div class="center">
-                <IonButton color="primary">
-                    {{ recipe?.props.likes ?? 0 }}
-                    <IonIcon :aria-valuetext="`${recipe?.props.likes ?? 0} people like this`" :icon="heart"/>
-                </IonButton>
                 <IonButton v-if="canShareRecipe" color="primary" @click="shareRecipe()">
                     <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
                 </IonButton>
@@ -17,8 +13,8 @@
     </IonList>
 
     <IonItem v-if="itemsFromRecipe.length > 0" lines="none">
-        <IonText color="primary">
-            <h1 class="recipe-subheader">Ingredients and Equipment</h1>
+        <IonText>
+            <h1 class="recipe-subheader">What You'll Need</h1>
         </IonText>
     </IonItem>
 
@@ -36,7 +32,7 @@
                                   min="1"
                                   type="number"/>
                     </IonItem>
-                    <ItemList :items="itemsFromRecipe" :type="['ingredient']"/>
+                    <ItemList :items="itemsFromRecipe" :type="['ingredient']" :disable-click="true" />
                 </IonCardContent>
             </IonCard>
         </template>
@@ -48,15 +44,15 @@
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                    <ItemList :items="itemsFromRecipe" :type="['tool']"/>
+                    <ItemList :items="itemsFromRecipe" :type="['tool']" :disable-click="true"/>
                 </IonCardContent>
             </IonCard>
         </template>
     </TwoColumnLayout>
 
     <IonItem v-if="steps?.length > 0" lines="none">
-        <IonText color="primary">
-            <h1 class="recipe-subheader">Steps</h1>
+        <IonText>
+            <h1 class="recipe-subheader">How to Make It</h1>
         </IonText>
     </IonItem>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
@@ -78,7 +74,7 @@ import {
     IonList,
     IonText
 } from '@ionic/vue';
-import {flagOutline, heart, shareOutline} from 'ionicons/icons';
+import {flagOutline, heart, heartOutline, shareOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
@@ -113,7 +109,7 @@ export default defineComponent({
     setup(props: any) {
         const {recipe} = toRefs(props);
 
-        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
+        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getItems() ?? []);
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
         const servings = ref(1)
@@ -129,7 +125,8 @@ export default defineComponent({
         const canShareRecipe = ref(false);
         Share.canShare().then((canShareResult: CanShareResult) => {
             canShareRecipe.value = canShareResult.value;
-        });
+        })
+
 
         return {
             // recipe
@@ -141,7 +138,7 @@ export default defineComponent({
             // share
             canShareRecipe, shareRecipe, shareOutline,
             // icons
-            heart, flagOutline,
+            heart, heartOutline, flagOutline,
         };
     },
 });

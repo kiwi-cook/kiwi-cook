@@ -1,27 +1,40 @@
 <template>
     <div class="recipe-hero">
-        <IonImg :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''" class="hero-image"/>
+        <IonImg :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''"
+                :class="['hero-image', { 'link': routable }]" @click="toRecipe()"/>
         <div class="hero-content">
+
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
-                <p class="recipe-description">{{ recipe?.getShortDescription() }}</p>
+                <p v-if="!noDescription" class="recipe-description">{{ recipe?.getShortDescription() }}</p>
                 <h2 class="recipe-author">By {{ recipe?.author }}</h2>
             </div>
-            <div class="hero-tags">
-                <div v-if="(recipe?.props?.tags ?? []).length > 0" class="flex">
-                    <IonChip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
-                        <IonLabel>{{ tag }}</IonLabel>
-                    </IonChip>
+            <div class="hero-bottom">
+                <div class="hero-buttons">
+                    <slot name="buttons">
+                        <IonButton color="primary" shape="round" @click="toRecipe(true)" v-if="routable">View Recipe
+                        </IonButton>
+                        <IonButton color="primary" shape="round" @click="recipe?.toggleLike()">
+                            <IonIcon :icon="recipe?.isLiked ?? false ? heart: heartOutline"/>
+                        </IonButton>
+                    </slot>
                 </div>
-                <div v-if="(additionalTags ?? []).length > 0" class="flex">
-                    <IonChip v-for="tag in additionalTags" :key="tag" class="hero-tag" color="light">
-                        <IonLabel>{{ tag }}</IonLabel>
-                    </IonChip>
-                </div>
-                <div class="flex">
-                    <IonChip class="hero-tag" color="light">
-                        <IonLabel>{{ recipe?.getDuration() }} minutes</IonLabel>
-                    </IonChip>
+                <div class="hero-tags">
+                    <div v-if="(recipe?.props?.tags ?? []).length > 0" class="flex">
+                        <IonChip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
+                            <IonLabel>{{ tag }}</IonLabel>
+                        </IonChip>
+                    </div>
+                    <div v-if="(additionalTags ?? []).length > 0" class="flex">
+                        <IonChip v-for="tag in additionalTags" :key="tag" class="hero-tag" color="light">
+                            <IonLabel>{{ tag }}</IonLabel>
+                        </IonChip>
+                    </div>
+                    <div class="flex">
+                        <IonChip class="hero-tag" color="light">
+                            <IonLabel>{{ recipe?.getDuration() }} minutes</IonLabel>
+                        </IonChip>
+                    </div>
                 </div>
             </div>
         </div>
@@ -29,10 +42,11 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from "vue";
+import {defineComponent, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy/types";
-import {IonChip, IonImg, IonLabel} from "@ionic/vue";
+import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
+import {heart, heartOutline} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -44,16 +58,35 @@ export default defineComponent({
         additionalTags: {
             type: Array as PropType<string[]>,
             default: () => []
+        },
+        noDescription: {
+            type: Boolean,
+            default: false
+        },
+        routable: {
+            type: Boolean,
+            default: false
         }
     },
     components: {
-        IonImg, IonChip, IonLabel
+        IonIcon,
+        IonImg, IonChip, IonLabel, IonButton
     },
-    setup() {
+    setup(props: any) {
+        const {recipe, routable} = toRefs(props);
 
+        const router = useIonRouter();
+        const toRecipe = (override = false) => {
+            if (routable.value || override) {
+                router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
+            }
+        }
 
         return {
-            formatDate
+            toRecipe,
+            formatDate,
+            // icons
+            heart, heartOutline
         }
     }
 })
@@ -66,6 +99,10 @@ export default defineComponent({
     width: 100%;
     overflow: hidden;
     border-radius: 10px;
+}
+
+.hero-image {
+    aspect-ratio: 20/19;
 }
 
 .hero-image::part(image) {
@@ -111,6 +148,24 @@ export default defineComponent({
 .hero-text p.recipe-description {
     font-size: 1.5em;
     margin: 0;
+}
+
+.hero-bottom {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px 30px;
+}
+
+.hero-buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding: 0 15px;
+    gap: 10px;
 }
 
 .hero-tags {
@@ -171,7 +226,7 @@ export default defineComponent({
         padding: 10px;
     }
 
-    .hero-text h1 {
+    .hero-text h1.recipe-name {
         font-size: 1.5em;
     }
 

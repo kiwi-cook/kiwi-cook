@@ -72,6 +72,7 @@ export const useUserStore = defineStore('user', {
 interface RecipeState {
     loading: { [key: string]: boolean }
     recipes: { [id: string]: Recipe }
+    savedRecipes: Set<string>
     recipeSuggestions: RecipeSuggestion[]
     items: { [id: string]: Item }
     recipesByItemId: { [itemId: string]: string[] }
@@ -83,6 +84,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
     state: (): RecipeState => ({
         loading: {},
         recipes: {},
+        savedRecipes: new Set(),
         recipeSuggestions: [],
         items: {},
         recipesByItemId: {},
@@ -133,9 +135,17 @@ export const useTasteBuddyStore = defineStore('recipes', {
         /**
          * Get the recipe suggestions
          * @param state
-         * @returns a list of recipes
+         * @returns a list of recipe suggestions
          */
         getRecipeSuggestions: (state): RecipeSuggestion[] => state.recipeSuggestions ?? [],
+        /**
+         * Get saved recipes
+         * @param state
+         * @returns a list of saved recipes
+         */
+        getSavedRecipes(state): Recipe[] {
+            return [...state.savedRecipes.keys()].map((recipeId) => this.recipes[recipeId])
+        },
         /**
          * Get the items
          * @param state
@@ -158,6 +168,13 @@ export const useTasteBuddyStore = defineStore('recipes', {
         },
         updateRecipe(recipe: Recipe) {
             this.recipes[recipe.getId()] = recipe
+        },
+        updateLike(recipe: Recipe) {
+            if (recipe.isLiked) {
+                this.savedRecipes.add(recipe.getId())
+            } else {
+                this.savedRecipes.delete(recipe.getId())
+            }
         },
         setItems(items: Item[]) {
             this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
@@ -226,7 +243,7 @@ export const useTasteBuddyStore = defineStore('recipes', {
                     return []
                 })
         },
-        deleteRecipe(recipe: Recipe) {
+        deleteRecipe(recipe: Recipe): Promise<void> {
             this.addLoading('deleteRecipe')
             logDebug('deleteRecipe', recipe)
             delete this.recipes[recipe.getId()]
@@ -237,6 +254,10 @@ export const useTasteBuddyStore = defineStore('recipes', {
                 }).then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('deleteRecipe')
                     return presentToast(apiResponse.response)
+                })
+            } else {
+                // eslint-disable-next-line @typescript-eslint/no-empty-function
+                return new Promise(() => {
                 })
             }
         },

@@ -2,7 +2,7 @@
     <IonApp>
         <IonRouterOutlet/>
     </IonApp>
-    <IonText color="primary"> 
+    <IonText>
         Made with ♥️ by Josef & Vasilij
     </IonText>
 </template>

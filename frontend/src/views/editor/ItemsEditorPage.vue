@@ -51,7 +51,7 @@ export default defineComponent({
             const recipesByItemIds = store.getRecipesByItemIds
             items.forEach((item: Item) => {
                 if (!(item.getId() in recipesByItemIds)) {
-                    item.delete(store);
+                    item.delete();
                 }
             })
         }

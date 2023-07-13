@@ -1,7 +1,9 @@
 <template>
-    <IonSearchbar v-model="filterInput" :debounce="500" :placeholder="placeholder"/>
-    <ItemList :items="filteredItems" :placeholder="placeholder" :show-limit="5" v-if="listOpen"
-              v-bind="$attrs" :type="['ingredient', 'tool']"/>
+    <div>
+        <IonSearchbar v-model="filterInput" :debounce="500" :placeholder="placeholder"/>
+        <ItemList v-if="listOpen" :items="filteredItems" :placeholder="placeholder" :show-limit="5"
+                  :type="['ingredient', 'tool']" v-bind="$attrs"/>
+    </div>
 </template>
 
 

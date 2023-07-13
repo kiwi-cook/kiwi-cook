@@ -1,9 +1,9 @@
 <template>
     <div class="item-list-wrapper">
-        <ul class="item-list">
+        <ul :class="['item-list', {'horizontal': horizontal}]">
             <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
                 <li>
-                    <IonItem class="small-item" lines="none" @click="select(item.id)">
+                    <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select(item.id)">
                         <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
                         <IonText class="small-item-name">
                             <IonChip v-if="item.showAmountUnit">
@@ -39,6 +39,16 @@ export default defineComponent({
             type: Array as PropType<string[]>,
             required: false,
             default: () => ['ingredient', 'tool']
+        },
+        horizontal: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        disableClick: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     emits: ['select'],
@@ -46,7 +56,7 @@ export default defineComponent({
         IonItem, IonImg, IonText, IonChip
     },
     setup(props: any, {emit}) {
-        const {items, type, showLimit} = toRefs(props);
+        const {items, type, showLimit, disableClick} = toRefs(props);
 
         const mappedItems = computed(() => items.value
             .map((item: Item) => {
@@ -66,6 +76,9 @@ export default defineComponent({
         );
 
         const select = (itemId: string) => {
+            if (disableClick.value) {
+                return;
+            }
             emit('select', itemId)
         }
 
@@ -82,10 +95,18 @@ export default defineComponent({
     overflow-y: scroll;
 }
 
-ul {
+ul.item-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
+}
+
+ul.item-list.horizontal {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
 }
 
 .small-item {
@@ -96,7 +117,6 @@ ul {
     padding: 0;
     margin: 0;
     background: inherit !important;
-    cursor: pointer;
 }
 
 .small-item-img::part(image) {

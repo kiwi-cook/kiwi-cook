@@ -1,12 +1,12 @@
 <template>
     <IonCard>
         <IonCardHeader>
-            <IonItem v-if="mutableItem.imgUrl || mutableItem._id" lines="none">
+            <IonItem lines="none">
                 <IonAvatar v-if="mutableItem.imgUrl">
                     <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl"/>
                 </IonAvatar>
-                <IonChip v-if="mutableItem._id">
-                    {{ mutableItem._id }}
+                <IonChip>
+                    {{ mutableItem.getId() }}
                 </IonChip>
                 <IonButton @click="saveItem()">Save item</IonButton>
             </IonItem>
@@ -119,7 +119,7 @@ export default defineComponent({
         })
 
         const saveItem = () => mutableItem.value.save(store)
-        const deleteItem = () => mutableItem.value.delete(store)
+        const deleteItem = () => mutableItem.value.delete()
 
         return {
             mutableItem, saveItem, removeItem: deleteItem,

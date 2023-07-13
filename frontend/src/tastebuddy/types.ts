@@ -13,16 +13,17 @@ import {useTasteBuddyStore} from "@/storage";
  */
 export class Item {
     _id?: string;
-    _isSaved?: boolean;
     _tmpId?: string;
     name: string;
     type: string;
     imgUrl: string;
 
     constructor(item?: Item) {
-        this._isSaved = false
         // create a temporary id to identify the item in the store before it is saved
-        this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+        this._id = item?._id
+        if (this._id === undefined && item?._tmpId === undefined) {
+            this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+        }
         this.name = item?.name ?? 'New Item'
         this.type = item?.type ?? 'ingredient'
         this.imgUrl = item?.imgUrl ?? ''
@@ -40,7 +41,6 @@ export class Item {
         item._id = json._id
         // remove the temporary id
         delete item._tmpId
-        item._isSaved = true
         item.name = json.name
         item.type = json.type
         item.imgUrl = json.imgUrl
@@ -102,10 +102,18 @@ export class Item {
 
     /**
      * Delete the item from the database
-     * @param store
      */
-    public delete(store: any): void {
+    public delete(): void {
+        const store = useTasteBuddyStore()
         store.deleteItem(this)
+    }
+
+    /**
+     * Narrow the item to an item
+     * @param item
+     */
+    public narrow(item: Item): Item {
+        return new Item(item)
     }
 }
 
@@ -139,11 +147,17 @@ export class StepItem extends Item {
         stepItem.amount = json.amount
         stepItem.servingAmount = json.amount
         stepItem.unit = json.unit
-        stepItem._id = json._id
-        stepItem._isSaved = json._isSaved
-        stepItem.name = json.name
-        stepItem.type = json.type
-        stepItem.imgUrl = json.imgUrl
+        const store = useTasteBuddyStore()
+        const item = store.getItemsAsMap[json._id ?? '']
+        if (typeof item !== 'undefined') {
+            stepItem._id = item._id
+            stepItem.name = item.name
+            stepItem.type = item.type
+            stepItem.imgUrl = item.imgUrl
+        } else {
+            stepItem.name = json.name
+            stepItem.type = json.type
+        }
         return stepItem
     }
 
@@ -153,7 +167,6 @@ export class StepItem extends Item {
      */
     updateItem(item: Item): void {
         this._id = item._id
-        this._isSaved = item._isSaved
         this.name = item.name
         this.type = item.type
         this.imgUrl = item.imgUrl
@@ -244,18 +257,7 @@ export class Step {
      * Get all unique items in the step
      * @returns a list of all items in the step
      */
-    public getItems(): Item[] {
-        // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
-        // use flatMap to get all items in the recipe
-        const items: Item[] = this.items.flatMap((item: StepItem) => item)
-        return [...new Set(items)]
-    }
-
-    /**
-     * Get all step items in the step
-     * @returns a list of all step items in the step
-     */
-    public getStepItems(): StepItem[] {
+    public getItems(): StepItem[] {
         return [...new Set(this.items)]
     }
 
@@ -279,7 +281,6 @@ export class Step {
  */
 export class Recipe {
     _id?: string;
-    _isSaved?: boolean;
     _tmpId?: string;
     name: string;
     author: string;
@@ -291,12 +292,11 @@ export class Recipe {
         duration?: number;
         createdAt: Date;
         tags?: string[];
-        likes: number;
     };
     servings: number;
+    isLiked: boolean;
 
     constructor() {
-        this._isSaved = false
         // create a temporary id to identify the recipe in the store before it is saved
         this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         this.name = 'New Recipe'
@@ -308,10 +308,10 @@ export class Recipe {
             duration: 0,
             createdAt: new Date(),
             tags: [],
-            likes: 0
         }
         this.steps = [new Step()]
         this.servings = 1
+        this.isLiked = false;
     }
 
     /**
@@ -329,7 +329,6 @@ export class Recipe {
         if (recipe._id === undefined) {
             throw new Error("recipe id is undefined")
         }
-        recipe._isSaved = true
         recipe.name = json.name
         recipe.author = json.author
         recipe.description = json.description
@@ -339,7 +338,6 @@ export class Recipe {
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
-        recipe.props.likes = json.props.likes
         return recipe
     }
 
@@ -420,9 +418,10 @@ export class Recipe {
      * Delete the recipe from the database
      * @param store
      */
-    public delete(store: any): Promise<Recipe> {
+    public delete() {
+        const store = useTasteBuddyStore()
         logDebug('delete', this.getId())
-        return store.deleteRecipe(this).then(() => this)
+        return store.deleteRecipe(this)
     }
 
     /**
@@ -492,35 +491,23 @@ export class Recipe {
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
-    public getItems(sorted = false): Item[] {
+    public getItems(sorted = false): StepItem[] {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
-        const items = this.getStepItems().map(stepItem => stepItem)
-        const uniqueItems: { [key: string]: Item } = {}
-        items.forEach(item => {
+        const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
+            .flatMap((step: Step) => step.getItems())
+            .map(stepItem => ({[stepItem.getId()]: stepItem}))
+        ))
+        const uniqueItems: { [key: string]: StepItem } = {}
+        items.forEach((item: StepItem) => {
             uniqueItems[item.getId()] = item
         })
         const result = Object.values(uniqueItems)
         if (sorted) {
             result.sort((a, b) => a.name.localeCompare(b.name))
         }
+        console.log(result)
         return result
-    }
-
-    /**
-     * Get all unique stepItems in the recipe
-     * @param sorted sort the items by name
-     */
-    public getStepItems(sorted = false): StepItem[] {
-        const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
-            .flatMap((step: Step) => step.getStepItems())
-            .map(stepItem => ({[stepItem.getId()]: stepItem}))
-        ))
-
-        if (sorted) {
-            items.sort((a, b) => a.name.localeCompare(b.name))
-        }
-        return items
     }
 
     /**
@@ -548,12 +535,16 @@ export class Recipe {
                 return
             }
 
-            return Share.share({
-                title: 'Share with your recipe with buddies',
-                text: `Check out this recipe for ${this.name} on Taste Buddy!`,
-                url: '#/' + this.route(),
-                dialogTitle: 'Share with buddies',
-            })
+            try {
+                return Share.share({
+                    title: 'Share with your recipe with buddies',
+                    text: `Check out this recipe for ${this.name} on Taste Buddy!`,
+                    url: '#/' + this.route(),
+                    dialogTitle: 'Share with buddies',
+                })
+            } catch (e) {
+                console.log('sharing aborted')
+            }
         })
     }
 
@@ -573,6 +564,15 @@ export class Recipe {
         this.steps.forEach(step => {
             step.updateServings(servings)
         })
+    }
+
+    /**
+     * Like or unlike the recipe
+     */
+    public toggleLike() {
+        const store = useTasteBuddyStore()
+        this.isLiked = !this.isLiked
+        store.updateLike(this)
     }
 }
 

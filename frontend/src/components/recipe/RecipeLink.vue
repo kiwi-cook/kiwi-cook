@@ -1,6 +1,6 @@
 <template>
-    <IonButton color="tertiary" @click="toRecipe()">
-        <slot/>
+    <IonButton color="primary" @click="toRecipe()">
+        <slot></slot>
     </IonButton>
 </template>
 

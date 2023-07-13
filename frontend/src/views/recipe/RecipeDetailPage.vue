@@ -1,18 +1,7 @@
 <template>
     <IonPage id="recipe-detail-page">
-        <IonHeader>
-            <IonToolbar color="primary">
-                <IonTitle>{{ recipe?.name }}</IonTitle>
-            </IonToolbar>
-        </IonHeader>
-
         <IonContent :fullscreen="true">
             <div class="content">
-                <IonHeader collapse="condense">
-                    <IonToolbar>
-                        <IonTitle size="large">{{ recipe?.name }}</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
                 <template v-if="recipe">
                     <RecipeComponent :recipe="recipe"/>
                 </template>
@@ -36,18 +25,7 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent} from 'vue';
-import {
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonFabList,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-    useIonRouter
-} from '@ionic/vue';
+import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useTasteBuddyStore} from "@/storage";
 import {useRoute} from 'vue-router';
@@ -59,7 +37,7 @@ export default defineComponent({
     title: 'RecipeOfTheDayPage',
     components: {
         RecipeComponent,
-        IonPage, IonContent, IonHeader, IonToolbar, IonTitle, IonFabButton, IonIcon, IonFab, IonFabList,
+        IonPage, IonContent, IonFabButton, IonIcon, IonFab, IonFabList,
     },
     setup() {
         const route = useRoute()

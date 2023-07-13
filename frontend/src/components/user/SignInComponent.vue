@@ -9,9 +9,8 @@
                           label-placement="floating" type="text"/>
             </IonItem>
             <IonItem>
-                <IonInput v-model="password" autocomplete="current-password" label="Password"
-                          label-placement="floating"
-                          type="password"/>
+                <IonInput v-model="password" :clear-input="true" autocomplete="current-password" label="Password"
+                          label-placement="floating" type="password"/>
             </IonItem>
             <IonButton :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</IonButton>
         </IonCardContent>

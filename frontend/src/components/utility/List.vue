@@ -1,25 +1,24 @@
 <template>
-    <IonList v-if="loadedFilteredItems.length > 0">
+    <div v-if="loadedFilteredItems.length > 0">
         <div v-for="(item, itemIndex) in loadedFilteredItems" :key="itemIndex" class="recipe-preview-container">
             <slot :item="item" name="item">
-                <RecipePreview :recipe="item as Recipe"/>
+                {{ item }}
             </slot>
         </div>
-    </IonList>
+    </div>
     <IonItem v-else>
         {{ noItemsMessage }}
     </IonItem>
-    <IonInfiniteScroll @ionInfinite="ionInfinite">
+    <IonInfiniteScroll v-if="!loadAll && loadedFilteredItems.length > 0" @ionInfinite="ionInfinite">
         <IonInfiniteScrollContent></IonInfiniteScrollContent>
     </IonInfiniteScroll>
 </template>
 
 <script lang="ts">
-import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem, IonList} from '@ionic/vue';
+import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {arrowDown} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
-import RecipePreview from "@/components/recipe/RecipePreview.vue";
 import {Recipe} from "@/tastebuddy/types";
 
 
@@ -36,6 +35,11 @@ export default defineComponent({
             required: false,
             default: null
         },
+        loadAll: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
         noItemsMessage: {
             type: String,
             required: false,
@@ -43,12 +47,11 @@ export default defineComponent({
         },
     },
     components: {
-        RecipePreview,
-        IonList, IonInfiniteScroll, IonInfiniteScrollContent, IonItem
+        IonInfiniteScroll, IonInfiniteScrollContent, IonItem
 
     },
     setup(props: any) {
-        const {filter, itemList} = toRefs(props)
+        const {filter, itemList, loadAll} = toRefs(props)
 
         const store = useTasteBuddyStore();
         const items: ComputedRef<unknown[]> = computed(() => (itemList.value
@@ -90,8 +93,12 @@ export default defineComponent({
         };
 
         watch(items, () => {
-            resetLoadedItems()
-            loadNextItems()
+            if (!loadAll.value) {
+                resetLoadedItems()
+                loadNextItems()
+            } else {
+                loadedItems.value = items.value;
+            }
         }, {immediate: true})
 
         watch(loadedItems, () => {

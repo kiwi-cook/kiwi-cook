@@ -58,7 +58,7 @@
             <IonInput v-model="mutableRecipe.props.imgUrl" label="Image URL" label-placement="stacked" type="url"/>
 
             <!-- Item icons -->
-            <ItemList :items="mutableRecipe.getStepItems()"/>
+            <ItemList :items="mutableRecipe.getItems()"/>
 
             <IonItem class="tags-editor" lines="none">
                 <!-- Tags -->
@@ -116,7 +116,7 @@
                           label-placement="stacked" type="url"/>
 
                 <!-- Item icons -->
-                <ItemList :items="step.getStepItems()"/>
+                <ItemList :items="step.getItems()"/>
 
 
                 <!-- Items -->
@@ -297,7 +297,7 @@ export default defineComponent({
          * Delete recipe from the Backend API
          * Redirect to SavedRecipes
          */
-        const deleteRecipe = () => mutableRecipe.value?.delete(store).then(() => {
+        const deleteRecipe = () => mutableRecipe.value?.delete().then(() => {
             router.push({name: 'SavedRecipes'})
         })
 

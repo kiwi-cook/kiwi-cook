@@ -30,6 +30,8 @@ import '@ionic/vue/css/display.css';
 
 /* Theme variables */
 import './theme/custom.css';
+import './theme/layout.css';
+import './theme/headers.css';
 // import './theme/general.css';
 /* iOS */
 // import './theme/ios.css';
