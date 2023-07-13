@@ -12,9 +12,14 @@
             <div class="hero-bottom">
                 <div class="hero-buttons">
                     <slot name="buttons">
-                        <IonButton color="primary" shape="round" @click="toRecipe(true)" v-if="routable">View Recipe
+                        <IonButton color="primary" class="hero-button hero-button-view-recipe-big" shape="round"
+                                   @click="toRecipe(true)" v-if="routable">View Recipe
                         </IonButton>
-                        <IonButton color="primary" shape="round" @click="recipe?.toggleLike()">
+                        <IonButton color="primary" class="hero-button hero-button-view-recipe-small" shape="round"
+                                   @click="toRecipe(true)" v-if="routable">
+                            <IonIcon :icon="restaurant"/>
+                        </IonButton>
+                        <IonButton color="primary" class="hero-button" shape="round" @click="recipe?.toggleLike()">
                             <IonIcon :icon="recipe?.isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
                     </slot>
@@ -46,7 +51,7 @@ import {defineComponent, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy/types";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
-import {heart, heartOutline} from "ionicons/icons";
+import {restaurant, heart, heartOutline} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -86,7 +91,7 @@ export default defineComponent({
             toRecipe,
             formatDate,
             // icons
-            heart, heartOutline
+            heart, heartOutline, restaurant
         }
     }
 })
@@ -180,8 +185,11 @@ export default defineComponent({
     margin: 0 10px 0 0;
 }
 
-@media only screen and (max-width: 768px) {
+.hero-button-view-recipe-small {
+    display: none;
+}
 
+@media only screen and (max-width: 768px) {
     .recipe-hero {
         height: 300px;
     }
@@ -208,10 +216,17 @@ export default defineComponent({
     .hero-text p.recipe-description {
         font-size: 1em;
     }
+
+    .hero-bottom {
+        padding: 0 10px 10px;
+    }
+
+    .hero-buttons {
+        padding: 0 5px;
+    }
 }
 
 @media only screen and (max-width: 480px) {
-
     .recipe-hero {
         height: 200px;
     }
@@ -222,7 +237,6 @@ export default defineComponent({
     }
 
     .hero-text {
-        height: auto;
         padding: 10px;
     }
 
@@ -246,8 +260,21 @@ export default defineComponent({
         margin-top: 0;
     }
 
-    .recipe-created-date {
+    .hero-bottom {
+        padding: 0 5px 5px;
+        flex-direction: column;
+    }
+
+    .hero-buttons {
+        padding: 0 5px;
+    }
+
+    .hero-button-view-recipe-big {
         display: none;
+    }
+
+    .hero-button-view-recipe-small {
+        display: block;
     }
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
     <div class="recipe-preview-card">
         <RecipeHero :recipe="recipe" class="recipe-preview-hero" :routable="true"/>
-        <IonItem v-if="recipe?.getItems().length > 0" lines="none">
+        <IonItem v-if="items.length > 0" lines="none">
             <IonText>
                 <h1 class="recipe-subheader">What You'll Need</h1>
             </IonText>
@@ -9,15 +9,12 @@
 
         <TwoColumnLayout>
             <template #left>
-                <ItemList key="ingredient" :items="recipe?.getItems() ?? []" :type="['ingredient']"/>
+                <ItemList key="ingredient" :items="items" :type="['ingredient']"/>
             </template>
             <template #right>
-                <ItemList key="tool" :items="recipe?.getItems() ?? []" :type="['tool']"/>
+                <ItemList key="tool" :items="items" :type="['tool']"/>
             </template>
         </TwoColumnLayout>
-        <RecipeLink :recipe="recipe">
-            View Full Recipe
-        </RecipeLink>
     </div>
 </template>
 
@@ -28,7 +25,6 @@ import {IonItem, IonText, useIonRouter} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
-import RecipeLink from "@/components/recipe/RecipeLink.vue";
 
 export default defineComponent({
     name: 'RecipePreview',
@@ -43,7 +39,7 @@ export default defineComponent({
         }
     },
     components: {
-        RecipeLink, IonItem, IonText,
+        IonItem, IonText,
         TwoColumnLayout,
         ItemList,
         RecipeHero
@@ -51,6 +47,7 @@ export default defineComponent({
     setup(props: any) {
         const {recipe} = toRefs(props)
         const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
+        const items = computed(() => recipe.value?.getItems() ?? [])
 
         const router = useIonRouter();
         const toRecipe = () => {
@@ -58,7 +55,7 @@ export default defineComponent({
         }
 
         return {
-            firstStep,
+            firstStep, items,
             toRecipe
         }
     }

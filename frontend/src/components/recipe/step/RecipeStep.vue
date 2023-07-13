@@ -21,9 +21,9 @@
                 </IonCardContent>
             </IonCard>
         </template>
-        <template #right>
+        <template #right v-if="items.length > 0">
             <IonCard>
-                <ItemList :items="step.getItems()" :disable-click="true"/>
+                <ItemList :items="items" :disable-click="true"/>
             </IonCard>
         </template>
     </TwoColumnLayout>
@@ -41,7 +41,7 @@ import {
     IonLabel,
     IonText
 } from '@ionic/vue';
-import {defineComponent, PropType} from "vue";
+import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Step} from "@/tastebuddy/types";
 import ItemList from "@/components/recipe/ItemList.vue";
 import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
@@ -73,8 +73,13 @@ export default defineComponent({
         IonLabel,
         TwoColumnLayout
     },
-    setup() {
-        return {}
+    setup(props: {step: Step}) {
+        const {step} = toRefs(props)
+
+        const items = computed(() => step.value?.getItems() ?? [])
+        return {
+            items
+        }
     }
 })
 </script>

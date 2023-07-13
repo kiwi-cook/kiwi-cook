@@ -1,10 +1,12 @@
 <template>
     <IonGrid>
         <IonRow>
-            <IonCol :size="left" v-bind="$props">
+            <IonCol :size-xl="left" :size-lg="left" :size-md="left" :size-sm="left" size="12" v-bind="$props">
                 <slot name="left"></slot>
             </IonCol>
-            <IonCol :size="right" v-bind="$props">
+
+            <IonCol :size-xl="right" :size-lg="right" :size-md="right" :size-sm="right" size="12" v-bind="$props"
+                    v-if="$slots.right">
                 <slot name="right"></slot>
             </IonCol>
         </IonRow>
@@ -12,7 +14,7 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, toRefs} from 'vue';
+import {computed, defineComponent, toRefs, useSlots} from 'vue';
 import {IonCol, IonGrid, IonRow} from "@ionic/vue";
 
 export default defineComponent({
@@ -30,6 +32,9 @@ export default defineComponent({
     setup(props: { layout: string }) {
         const {layout} = toRefs(props)
 
+        const slots = useSlots()
+        const hasRightSlot = computed(() => !!slots['right'])
+
         const layouts: { [key: string]: { left: string, right: string } } = {
             default: {
                 left: "",
@@ -42,10 +47,14 @@ export default defineComponent({
             rightBigger: {
                 left: "4",
                 right: "8"
+            },
+            noRight: {
+                left: "12",
+                right: ""
             }
         }
 
-        const selectedLayout = computed(() => layouts[layout.value])
+        const selectedLayout = computed(() => hasRightSlot.value ? layouts[layout.value] : layouts["noRight"])
 
         return {
             left: selectedLayout.value.left,
