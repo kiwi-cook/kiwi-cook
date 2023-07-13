@@ -1,4 +1,3 @@
-// Ionic
 // Vue
 import {defineStore} from 'pinia'
 
@@ -6,6 +5,15 @@ import {defineStore} from 'pinia'
 import {Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery} from '@/tastebuddy/types';
 import {API_ROUTE, DURATIONS} from '@/tastebuddy/constants';
 import {APIResponse, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
+
+// Ionic
+import {Drivers, Storage} from '@ionic/storage';
+
+const ionicStorage = new Storage({
+    name: '__mydb',
+    driverOrder: [Drivers.LocalStorage]
+});
+await ionicStorage.create();
 
 // Define typings for the store state
 
@@ -147,6 +155,16 @@ export const useTasteBuddyStore = defineStore('recipes', {
             return [...state.savedRecipes.keys()].map((recipeId) => this.recipes[recipeId])
         },
         /**
+         * Get saved recipes as a map
+         * @param state
+         */
+        getSavedRecipesAsMap(state): { [id: string]: Recipe } {
+            return [...state.savedRecipes.keys()].reduce((recipes: { [id: string]: Recipe }, recipeId) => {
+                recipes[recipeId] = this.recipes[recipeId]
+                return recipes
+            }, {})
+        },
+        /**
          * Get the items
          * @param state
          */
@@ -163,6 +181,46 @@ export const useTasteBuddyStore = defineStore('recipes', {
         },
     },
     actions: {
+        async prepare() {
+            const savedAt = await ionicStorage.get('savedAt').then((savedAt: string) => {
+                return new Date(savedAt)
+            })
+            console.log('savedAt', savedAt)
+
+            // check if the data is older than 1 day
+            if (savedAt && (new Date().getTime() - savedAt.getTime()) > 1000 * 60 * 60 * 24) {
+                this.fetchRecipes()
+                this.fetchItems()
+            } else {
+                // first get the items from storage
+                ionicStorage.get('items').then((items: Item[]) => {
+                    logDebug('prepare', 'got items from storage')
+                    const itemsAsObject = items.map((item: Item) => Item.fromJSON(item))
+                    this.setItems(itemsAsObject)
+                }) // ... then get the recipes from storage
+                    // this must be done after the items are loaded because when the recipes are loaded
+                    // the recipes look up the items by their id
+                    .then(() => {
+                        ionicStorage.get('recipes').then((recipes: Recipe[]) => {
+                            logDebug('prepare', 'got recipes from storage')
+                            const recipesAsObject = recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe))
+                            this.setRecipes(recipesAsObject)
+                        })
+                    })
+                    .then(() => {
+                        ionicStorage.get('savedRecipes').then((savedRecipes: string[]) => {
+                            logDebug('prepare', 'got saved recipes from storage')
+                            this.setSavedRecipes(savedRecipes)
+                        })
+                    })
+            }
+        },
+        updateIonicStorage() {
+            const savedDate = new Date().toISOString()
+            ionicStorage.set('savedAt', savedDate).then(() => {
+                logDebug('updateIonicStorage', `savedAt updated to ${savedDate}`)
+            })
+        },
         setRecipes(recipes: Recipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
         },
@@ -175,6 +233,12 @@ export const useTasteBuddyStore = defineStore('recipes', {
             } else {
                 this.savedRecipes.delete(recipe.getId())
             }
+            ionicStorage.set('savedRecipes', [...this.savedRecipes]).then(() => {
+                logDebug('updateIonicStorage', 'savedRecipes updated')
+            })
+        },
+        setSavedRecipes(savedRecipes: string[]) {
+            this.savedRecipes = new Set(savedRecipes)
         },
         setItems(items: Item[]) {
             this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
@@ -203,7 +267,12 @@ export const useTasteBuddyStore = defineStore('recipes', {
                     // this is because the JSON is not a valid Recipe object,
                     // and we need to use the Recipe class methods
                     if (!apiResponse.error) {
-                        this.setRecipes(apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                        const recipes = apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe))
+                        this.setRecipes(recipes)
+                        // update the ionic storage
+                        ionicStorage.set('recipes', recipes).then(() => {
+                            logDebug('updateIonicStorage', 'recipes updated in ionic storage')
+                        })
                     }
                     this.finishLoading('fetchRecipes')
                     return apiResponse.response
@@ -292,7 +361,12 @@ export const useTasteBuddyStore = defineStore('recipes', {
                     // this is because the JSON is not a valid Item object,
                     // and we need to use the Item class methods
                     if (!apiResponse.error) {
-                        this.setItems(apiResponse.response.map((item: Item) => Item.fromJSON(item)))
+                        const items: Item[] = apiResponse.response.map((item: Item) => Item.fromJSON(item))
+                        this.setItems(items)
+                        // update the ionic storage
+                        ionicStorage.set('items', items).then(() => {
+                            logDebug('updateIonicStorage', 'items updated in ionic storage')
+                        })
                     }
                     this.finishLoading('fetchItems')
                     return apiResponse.response

@@ -20,7 +20,7 @@
                             <IonIcon :icon="restaurant"/>
                         </IonButton>
                         <IonButton color="primary" class="hero-button" shape="round" @click="recipe?.toggleLike()">
-                            <IonIcon :icon="recipe?.isLiked ?? false ? heart: heartOutline"/>
+                            <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
                     </slot>
                 </div>
@@ -47,11 +47,12 @@
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType, toRefs} from "vue";
+import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy/types";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
 import {restaurant, heart, heartOutline} from "ionicons/icons";
+import {useTasteBuddyStore} from "@/storage";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -86,8 +87,11 @@ export default defineComponent({
                 router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
             }
         }
+        const store = useTasteBuddyStore();
+        const isLiked = computed(() => store.getSavedRecipesAsMap[recipe.value?.getId() ?? ''] ?? false)
 
         return {
+            isLiked,
             toRecipe,
             formatDate,
             // icons

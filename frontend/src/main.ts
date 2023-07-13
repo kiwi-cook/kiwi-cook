@@ -32,11 +32,6 @@ import '@ionic/vue/css/display.css';
 import './theme/custom.css';
 import './theme/layout.css';
 import './theme/headers.css';
-// import './theme/general.css';
-/* iOS */
-// import './theme/ios.css';
-/* Android */
-// import './theme/md.css';
 import 'ionicons/icons';
 import {createPinia} from "pinia";
 

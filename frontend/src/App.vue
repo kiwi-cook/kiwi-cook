@@ -21,8 +21,8 @@ export default defineComponent({
     setup() {
         // Initialize the store
         const store = useTasteBuddyStore();
-        store.fetchRecipes()
-        store.fetchItems()
+        store.prepare()
+        store.updateIonicStorage()
 
         // Use matchMedia to check the user preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');

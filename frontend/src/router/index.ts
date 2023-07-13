@@ -16,6 +16,11 @@ const routes: Array<RouteRecordRaw> = [
                 redirect: () => ({name: 'RecipeOfTheDay'}),
                 children: [
                     {
+                        name: 'Recipes',
+                        path: 's',
+                        component: () => import('@/views/recipe/RecipesListPage.vue')
+                    },
+                    {
                         name: 'Recipe',
                         path: 's/:id',
                         component: () => import('@/views/recipe/RecipeDetailPage.vue')

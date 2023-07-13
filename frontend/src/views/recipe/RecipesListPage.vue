@@ -6,9 +6,9 @@
                     All recipes
                 </h1>
 
-                <IonSearchbar v-model="filterInput" :debounce="500" color="primary"/>
+                <IonSearchbar v-model="filterInput" :debounce="500" />
 
-                <List :item-list="recipes">
+                <List :item-list="recipes" :filter="filterInput">
                     <template #item="{item}">
                         <RecipePreview :recipe="item"/>
                     </template>
@@ -39,7 +39,6 @@ export default defineComponent({
     },
     setup() {
         const filterInput = ref('')
-
 
         const router = useIonRouter()
         const store = useTasteBuddyStore()
