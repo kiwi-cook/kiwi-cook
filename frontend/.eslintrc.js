@@ -3,10 +3,14 @@ module.exports = {
 	env: {
 		node: true
 	},
+	"plugins": ["sonarjs"],
 	'extends': [
-		'plugin:vue/vue3-essential',
 		'eslint:recommended',
-		'@vue/typescript/recommended'
+		/* Vue */
+		'plugin:vue/vue3-essential',
+		'@vue/typescript/recommended',
+		/* Detect bugs and suspicious patterns */
+		"plugin:sonarjs/recommended"
 	],
 	parserOptions: {
 		ecmaVersion: 2020
@@ -21,5 +25,21 @@ module.exports = {
 		'vue/html-indent': ['error', 4],
 		'vue/singleline-html-element-content-newline': 0,
 		'vue/component-name-in-template-casing': ['error', 'PascalCase'],
+		"vue/attributes-order": ["error", {
+			"order": [
+				"DEFINITION",
+				"LIST_RENDERING",
+				"CONDITIONALS",
+				"RENDER_MODIFIERS",
+				"GLOBAL",
+				["UNIQUE", "SLOT"],
+				"TWO_WAY_BINDING",
+				"OTHER_DIRECTIVES",
+				"OTHER_ATTR",
+				"EVENTS",
+				"CONTENT"
+			],
+			"alphabetical": false
+		}]
 	}
 }
