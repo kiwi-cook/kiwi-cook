@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-preview-card">
-        <RecipeHero :recipe="recipe" class="recipe-preview-hero" :routable="true"/>
+        <RecipeHero :recipe="recipe" :routable="true" class="recipe-preview-hero"/>
         <IonItem v-if="items.length > 0" lines="none">
             <IonText>
                 <h1 class="recipe-subheader">What You'll Need</h1>
@@ -81,7 +81,6 @@ export default defineComponent({
     border-radius: 8px;
     padding: 16px;
     margin: 16px;
-    cursor: pointer;
     box-shadow: var(--box-shadow);
 }
 

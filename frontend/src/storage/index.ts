@@ -11,7 +11,7 @@ import {Drivers, Storage} from '@ionic/storage';
 
 const ionicStorage = new Storage({
     name: '__mydb',
-    driverOrder: [Drivers.LocalStorage]
+    driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage]
 });
 await ionicStorage.create();
 
@@ -179,41 +179,39 @@ export const useTasteBuddyStore = defineStore('recipes', {
                 return [...tags, ...(recipe.props.tags ?? [])]
             }, [])
         },
+        async cacheIsOld(): Promise<boolean> {
+            return await ionicStorage.get('savedAt').then((savedAt: string) => (new Date().getTime() - new Date(savedAt).getTime()) > 1000 * 60 * 60 * 24)
+        }
     },
     actions: {
         async prepare() {
-            const savedAt = await ionicStorage.get('savedAt').then((savedAt: string) => {
-                return new Date(savedAt)
+            this.cacheIsOld.then((isOld: boolean) => {
+                if (isOld) {
+                    this.fetchItems().then(() => this.fetchRecipes())
+                } else {
+                    // first get the items from storage
+                    ionicStorage.get('items').then((items: Item[]) => {
+                        logDebug('prepare', 'got items from storage')
+                        const itemsAsObject = items.map((item: Item) => Item.fromJSON(item))
+                        this.setItems(itemsAsObject)
+                    }) // ... then get the recipes from storage
+                        // this must be done after the items are loaded because when the recipes are loaded
+                        // the recipes look up the items by their id
+                        .then(() => {
+                            ionicStorage.get('recipes').then((recipes: Recipe[]) => {
+                                logDebug('prepare', 'got recipes from storage')
+                                const recipesAsObject = recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe))
+                                this.setRecipes(recipesAsObject)
+                            })
+                        })
+                        .then(() => {
+                            ionicStorage.get('savedRecipes').then((savedRecipes: string[]) => {
+                                logDebug('prepare', 'got saved recipes from storage')
+                                this.setSavedRecipes(savedRecipes)
+                            })
+                        })
+                }
             })
-            console.log('savedAt', savedAt)
-
-            // check if the data is older than 1 day
-            if (savedAt && (new Date().getTime() - savedAt.getTime()) > 1000 * 60 * 60 * 24) {
-                this.fetchRecipes()
-                this.fetchItems()
-            } else {
-                // first get the items from storage
-                ionicStorage.get('items').then((items: Item[]) => {
-                    logDebug('prepare', 'got items from storage')
-                    const itemsAsObject = items.map((item: Item) => Item.fromJSON(item))
-                    this.setItems(itemsAsObject)
-                }) // ... then get the recipes from storage
-                    // this must be done after the items are loaded because when the recipes are loaded
-                    // the recipes look up the items by their id
-                    .then(() => {
-                        ionicStorage.get('recipes').then((recipes: Recipe[]) => {
-                            logDebug('prepare', 'got recipes from storage')
-                            const recipesAsObject = recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe))
-                            this.setRecipes(recipesAsObject)
-                        })
-                    })
-                    .then(() => {
-                        ionicStorage.get('savedRecipes').then((savedRecipes: string[]) => {
-                            logDebug('prepare', 'got saved recipes from storage')
-                            this.setSavedRecipes(savedRecipes)
-                        })
-                    })
-            }
         },
         updateIonicStorage() {
             const savedDate = new Date().toISOString()

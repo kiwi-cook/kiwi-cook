@@ -6,9 +6,9 @@
                     All recipes
                 </h1>
 
-                <IonSearchbar v-model="filterInput" :debounce="500" />
+                <IonSearchbar v-model="filterInput" :debounce="500"/>
 
-                <List :item-list="recipes" :filter="filterInput">
+                <List :filter="filterInput" :item-list="recipes">
                     <template #item="{item}">
                         <RecipePreview :recipe="item"/>
                     </template>
@@ -60,10 +60,3 @@ export default defineComponent({
     }
 });
 </script>
-
-<style scoped>
-.filter-relevanz-button {
-    margin: 2%;
-    color: white;
-}
-</style>

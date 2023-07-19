@@ -11,7 +11,6 @@ export const logMiddleware = (to: any, from: any) => {
  * @param to
  * @param from
  * @param next
- * @param store
  */
 export const checkAuthMiddleware = (to: any, from: any, next: any) => {
     const store = useUserStore();

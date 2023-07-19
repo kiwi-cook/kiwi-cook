@@ -18,6 +18,9 @@ export enum API_ROUTE {
     POST_SUGGEST_RECIPE
 }
 
+const JSONTYPE = 'application/json'
+
+
 type API_ROUTE_OPTIONS = {
     url: string;
     method: string;
@@ -32,25 +35,25 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
         contentType: 'application/x-www-form-urlencoded',
         credentials: 'include'
     },
-    [API_ROUTE.GET_AUTH]: {url: '/user/auth', method: 'GET', contentType: 'application/json', credentials: 'include'},
-    [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: 'application/json'},
-    [API_ROUTE.ADD_RECIPE]: {url: '/recipe', method: 'POST', contentType: 'application/json', credentials: 'include'},
+    [API_ROUTE.GET_AUTH]: {url: '/user/auth', method: 'GET', contentType: JSONTYPE, credentials: 'include'},
+    [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: JSONTYPE},
+    [API_ROUTE.ADD_RECIPE]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.DELETE_RECIPE]: {
         url: '/recipe/RECIPE_ID',
         method: 'DELETE',
-        contentType: 'application/json',
+        contentType: JSONTYPE,
         credentials: 'include'
     },
-    [API_ROUTE.SEARCH_RECIPES]: {url: '/search', method: 'POST', contentType: 'application/json'},
-    [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: 'application/json'},
-    [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: 'application/json', credentials: 'include'},
+    [API_ROUTE.SEARCH_RECIPES]: {url: '/search', method: 'POST', contentType: JSONTYPE},
+    [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: JSONTYPE},
+    [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.DELETE_ITEM]: {
         url: '/item/ITEM_ID',
         method: 'DELETE',
-        contentType: 'application/json',
+        contentType: JSONTYPE,
         credentials: 'include'
     },
-    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/suggest/recipe', method: 'POST', contentType: 'application/json'},
+    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/suggest/recipe', method: 'POST', contentType: JSONTYPE},
 }
 
 export const DURATIONS = {

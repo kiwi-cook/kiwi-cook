@@ -1,7 +1,7 @@
 // Data types for the API
 
 import {descriptionToSteps} from "@/utility/recipeParser";
-import {logDebug} from ".";
+import {logDebug, logError} from ".";
 import {CanShareResult, Share} from "@capacitor/share";
 import {useTasteBuddyStore} from "@/storage";
 
@@ -416,7 +416,6 @@ export class Recipe {
 
     /**
      * Delete the recipe from the database
-     * @param store
      */
     public delete() {
         const store = useTasteBuddyStore()
@@ -506,7 +505,6 @@ export class Recipe {
         if (sorted) {
             result.sort((a, b) => a.name.localeCompare(b.name))
         }
-        console.log(result)
         return result
     }
 
@@ -543,7 +541,7 @@ export class Recipe {
                     dialogTitle: 'Share with buddies',
                 })
             } catch (e) {
-                console.log('sharing aborted')
+                logError('sharing failed', e)
             }
         })
     }

@@ -140,6 +140,7 @@ const normalizeIngredient = (ingredient: string): string => {
  * Convert a description to a list of step items
  * @param description
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const descriptionToItems = (description: string): StepItem[] => {
     // prepare and tokenize the description
     const tokens = description.trim()

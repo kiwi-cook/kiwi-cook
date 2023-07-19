@@ -21,9 +21,9 @@
                 </IonCardContent>
             </IonCard>
         </template>
-        <template #right v-if="items.length > 0">
+        <template v-if="items.length > 0" #right>
             <IonCard>
-                <ItemList :items="items" :disable-click="true"/>
+                <ItemList :disable-click="true" :items="items"/>
             </IonCard>
         </template>
     </TwoColumnLayout>
@@ -73,7 +73,7 @@ export default defineComponent({
         IonLabel,
         TwoColumnLayout
     },
-    setup(props: {step: Step}) {
+    setup(props: { step: Step }) {
         const {step} = toRefs(props)
 
         const items = computed(() => step.value?.getItems() ?? [])

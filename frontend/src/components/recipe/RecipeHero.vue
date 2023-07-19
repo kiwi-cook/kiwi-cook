@@ -1,7 +1,7 @@
 <template>
     <div class="recipe-hero">
-        <IonImg :alt="`Image of ${recipe?.name}`" :src="recipe?.props?.imgUrl ?? ''"
-                :class="['hero-image', { 'link': routable }]" @click="toRecipe()"/>
+        <IonImg :alt="`Image of ${recipe?.name}`" :class="['hero-image', { 'link': routable }]"
+                :src="recipe?.props?.imgUrl ?? ''" @click="toRecipe()"/>
         <div class="hero-content">
 
             <div class="hero-text">
@@ -12,14 +12,15 @@
             <div class="hero-bottom">
                 <div class="hero-buttons">
                     <slot name="buttons">
-                        <IonButton color="primary" class="hero-button hero-button-view-recipe-big" shape="round"
-                                   @click="toRecipe(true)" v-if="routable">View Recipe
+                        <IonButton v-if="routable" class="hero-button hero-button-view-recipe-big" color="primary"
+                                   shape="round" aria-description="Route to recipe" @click="toRecipe(true)">View Recipe
                         </IonButton>
-                        <IonButton color="primary" class="hero-button hero-button-view-recipe-small" shape="round"
-                                   @click="toRecipe(true)" v-if="routable">
+                        <IonButton v-if="routable" class="hero-button hero-button-view-recipe-small" color="primary"
+                                   aria-description="Route to recipe"
+                                   shape="round" @click="toRecipe(true)">
                             <IonIcon :icon="restaurant"/>
                         </IonButton>
-                        <IonButton color="primary" class="hero-button" shape="round" @click="recipe?.toggleLike()">
+                        <IonButton class="hero-button" color="primary" shape="round" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
                     </slot>
@@ -51,7 +52,7 @@ import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy/types";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
-import {restaurant, heart, heartOutline} from "ionicons/icons";
+import {heart, heartOutline, restaurant} from "ionicons/icons";
 import {useTasteBuddyStore} from "@/storage";
 
 export default defineComponent({

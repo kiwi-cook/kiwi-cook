@@ -25,6 +25,7 @@ export default defineComponent({
             let additionalComponent = "";
             if ("additional" in step.value) {
                 const additional = step.value.additional;
+                // eslint-disable-next-line sonarjs/no-small-switch
                 switch (additional?.informationType ?? "") {
                     case "baking":
                         additionalComponent = "baking";

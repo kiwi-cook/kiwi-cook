@@ -116,7 +116,7 @@ import ItemSearchbar from "@/components/utility/ItemSearchbar.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 
 export default defineComponent({
-    name: 'RecipesOverviewPage',
+    name: 'RecipeSuggestionsPage',
     computed: {
         Recipe() {
             return Recipe
@@ -152,8 +152,8 @@ export default defineComponent({
                 filteredItems.value = []
             } else {
                 filteredItems.value = (items.value ?? [])
-                    .filter(item => item.name.toLowerCase().includes(filterInput.value.toLowerCase()))
-                    .filter(item => !selectedItemIds.has(item.getId()))
+                    .filter((item: Item) => item.name.toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
+                    .filter((item: Item) => !selectedItemIds.has(item.getId()))
             }
         }, {immediate: true})
 
@@ -189,7 +189,7 @@ export default defineComponent({
 
         /* Items suggestions prototype */
         const suggestedItems: Ref<Item[]> = computed(() => {
-                return [...new Set(favoriteRecipes.value.flatMap((recipe: Recipe) => recipe.getItems()
+                return [...new Set(favoriteRecipes.value.flatMap((recipe: Recipe) => (recipe.getItems() ?? [])
                     .map((item: StepItem) => item.narrow(item))))]
                     .slice(0, 3)
             }

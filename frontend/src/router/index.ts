@@ -56,7 +56,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'SavedRecipes',
                 path: 'recipe/saved',
-                component: () => import('@/views/recipe/RecipesSaved.vue')
+                component: () => import('@/views/recipe/RecipesSavedPage.vue')
             },
             {
                 name: 'Login',

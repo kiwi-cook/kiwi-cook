@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-preview-card">
-        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" class="recipe-preview-hero" :routable="true"/>
+        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true" class="recipe-preview-hero"/>
         <IonItem v-if="possessedItems.length > 0" lines="none">
             <IonText>
                 <h1 class="recipe-subheader">What You'll Need</h1>

@@ -1,12 +1,12 @@
 <template>
     <IonGrid>
         <IonRow>
-            <IonCol :size-xl="left" :size-lg="left" :size-md="left" :size-sm="left" size="12" v-bind="$props">
+            <IonCol :size-lg="left" :size-md="left" :size-sm="left" :size-xl="left" size="12" v-bind="$props">
                 <slot name="left"></slot>
             </IonCol>
 
-            <IonCol :size-xl="right" :size-lg="right" :size-md="right" :size-sm="right" size="12" v-bind="$props"
-                    v-if="$slots.right">
+            <IonCol v-if="$slots.right" :size-lg="right" :size-md="right" :size-sm="right" :size-xl="right" size="12"
+                    v-bind="$props">
                 <slot name="right"></slot>
             </IonCol>
         </IonRow>

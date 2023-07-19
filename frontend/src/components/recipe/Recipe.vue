@@ -32,7 +32,7 @@
                                   min="1"
                                   type="number"/>
                     </IonItem>
-                    <ItemList :items="itemsFromRecipe" :type="['ingredient']" :disable-click="true" />
+                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
                 </IonCardContent>
             </IonCard>
         </template>
@@ -44,7 +44,7 @@
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                    <ItemList :items="itemsFromRecipe" :type="['tool']" :disable-click="true"/>
+                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
                 </IonCardContent>
             </IonCard>
         </template>

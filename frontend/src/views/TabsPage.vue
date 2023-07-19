@@ -8,14 +8,17 @@
             <IonTabBar slot="bottom">
                 <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
                     <IonIcon :icon="home"/>
+                    Home
                 </IonTabButton>
 
                 <IonTabButton href="/recipe/suggestions" tab="recipe-finder">
                     <IonIcon :icon="search"/>
+                    Search
                 </IonTabButton>
 
                 <IonTabButton href="/recipe/saved" tab="saved-recipes">
                     <IonIcon :icon="star"/>
+                    Favorites
                 </IonTabButton>
             </IonTabBar>
         </IonTabs>

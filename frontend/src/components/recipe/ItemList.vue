@@ -58,10 +58,24 @@ export default defineComponent({
     setup(props: any, {emit}) {
         const {items, type, showLimit, disableClick} = toRefs(props);
 
-        const mappedItems = computed(() => items.value
-            .map((item: Item) => {
+        type Item2 = {
+            id: string,
+            name: string,
+            imgUrl: string,
+            amount: number,
+            unit: string,
+            showAmountUnit: boolean,
+            type: string
+        }
+
+        const mappedItems = computed(() => items.value.reduce((acc: Item2[], item: Item, length: number) => {
+                if (typeof item === 'undefined' || length > showLimit.value || !type.value.includes(item.type)) {
+                    return acc
+                }
+
                 const amount = item instanceof StepItem ? item.servingAmount : 0;
-                return {
+
+                acc.push({
                     id: item.getId(),
                     name: item.name,
                     imgUrl: item.imgUrl,
@@ -69,11 +83,11 @@ export default defineComponent({
                     unit: item instanceof StepItem ? item.unit : '',
                     showAmountUnit: item.type === 'ingredient' && amount > 0,
                     type: item.type
-                }
-            })
-            .filter((item: any) => (type.value as string[]).includes(item.type))
-            .slice(0, showLimit.value)
-        );
+                })
+
+                return acc
+            }, [])
+        )
 
         const select = (itemId: string) => {
             if (disableClick.value) {

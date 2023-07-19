@@ -17,9 +17,14 @@ export interface APIResponse<T extends APIResponseBody> {
 /**
  * Present a toast to the user
  * @param message the message to display
+ * @param isError
  * @param duration the duration of the toast in milliseconds
  */
-export const presentToast = async (message: string, isError = false, duration = DURATIONS.SHORT) => {
+export const presentToast = async (message?: string, isError = false, duration = DURATIONS.SHORT) => {
+    if (!!message || message === '') {
+        return
+    }
+
     const toast = toastController.create({
         message,
         duration,
@@ -87,31 +92,32 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
     errorMessage?: string
 }): Promise<APIResponse<R>> {
     let url = API_URL + API_ROUTES[route].url;
+
+    const {formatObject, body, headers, errorMessage} = options ?? {};
+
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
-    if (options?.formatObject) {
-        // use Object.keys to get all keys of the formatObject
-        for (const key of Object.keys(options?.formatObject)) {
-            url = url.replace(key, options?.formatObject[key].toString());
+    // use Object.keys to get all keys of the formatObject
+    for (const key of Object.keys(formatObject ?? {})) {
+        if (formatObject) {
+            url = url.replace(key, formatObject[key].toString());
         }
     }
 
     // headers
-    const headers = new Headers();
-    if (options?.body) {
-        headers.append('Content-Type', API_ROUTES[route].contentType ?? 'application/json');
+    const requestHeaders = new Headers();
+    if (body) {
+        requestHeaders.append('Content-Type', API_ROUTES[route].contentType ?? 'application/json');
     }
-    if (options?.headers) {
-        for (const header of options.headers) {
-            headers.append(header.key, header.value);
-        }
+    for (const header of headers ?? []) {
+        requestHeaders.append(header.key, header.value);
     }
 
     const fetchOptions: RequestInit = {
         method: API_ROUTES[route].method ?? 'GET',
-        headers: headers,
+        headers: requestHeaders,
         credentials: API_ROUTES[route].credentials ?? undefined,
-        body: options?.body ? JSON.stringify(options.body) : null,
+        body: body ? JSON.stringify(body) : null,
         signal: controller.signal
     }
 
@@ -138,9 +144,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
             logError('sendToAPI ' + route, error)
 
             // present a toast to the user
-            if (typeof options?.errorMessage !== 'undefined') {
-                presentToast(options?.errorMessage, true, DURATIONS.LONG)
-            }
+            presentToast(errorMessage, true, DURATIONS.LONG)
             return {
                 error: true,
                 response: (options?.errorMessage ?? 'An error occurred') as R
