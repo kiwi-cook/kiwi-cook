@@ -1,0 +1,21 @@
+.center {
+    position: relative;
+    text-align: center;
+    object-fit: fill;
+    width: 100%;
+}
+
+/* Flex */
+
+.flex {
+    display: flex;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+}
+
+.block {
+    display: block;
+}
