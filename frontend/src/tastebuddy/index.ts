@@ -85,6 +85,7 @@ const controller = new AbortController()
  *   }
  * })
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: {
     formatObject?: { [key: string]: string | number },
     body?: unknown,
