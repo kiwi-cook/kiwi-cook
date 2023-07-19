@@ -19,7 +19,7 @@
     "@capacitor/status-bar": "5.0.4",
     "@ionic/storage": "^4.0.0",
     "@ionic/vue": "^7.1.1",
-    "@ionic/vue-router": "^7.0.14",
+    "@ionic/vue-router": "^7.1.0",
     "core-js": "^3.31.0",
     "ionicons": "^7.1.2",
     "pinia": "^2.1.4",
@@ -28,7 +28,7 @@
     "vue-router": "4.2.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "5.0.5",
+    "@capacitor/cli": "5.1.1",
     "@typescript-eslint/eslint-plugin": "5.60.0",
     "@typescript-eslint/parser": "5.60.1",
     "@vue/cli-plugin-babel": "~5.0.8",
@@ -39,7 +39,7 @@
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-typescript": "^11.0.3",
     "cypress": "^12.16.0",
-    "eslint": "^8.42.0",
+    "eslint": "^8.44.0",
     "eslint-plugin-sonarjs": "^0.19.0",
     "eslint-plugin-vue": "9.14.1",
     "typescript": "^5.1.3"
