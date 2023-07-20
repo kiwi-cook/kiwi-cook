@@ -1,6 +1,6 @@
 <template>
     <IonItem lines="none">
-        <IonInput :aria-label="inputValue" :color="isTemporaryInput ? 'medium' : 'light'"
+        <IonInput :label="label" :label-placement="labelPlacement" :aria-label="inputValue"
                   :placeholder="placeholder ?? ''"
                   :value="inputValue" type="text" @input="handleInput($event)" @keyup.enter="addItem()"/>
     </IonItem>
@@ -29,6 +29,16 @@ import {IonButton, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
 export default defineComponent({
     name: 'DropDownSearch',
     props: {
+        label: {
+            type: String,
+            required: false,
+            default: undefined,
+        },
+        labelPlacement: {
+            type: String as PropType<"start" | "end" | "floating" | "stacked" | "fixed">,
+            required: false,
+            default: 'stacked'
+        },
         modelValue: {
             type: Object,
             required: false
@@ -92,7 +102,7 @@ export default defineComponent({
             }
         }, {immediate: true})
 
-        const filteredItems: Ref<any[]> = ref(items.value.slice(0, maxItems.value))
+        const filteredItems: Ref<unknown[]> = ref(items.value.slice(0, maxItems.value))
 
         // show the items list only if the input value is not empty
         const showItemsList: Ref<boolean> = ref(false)

@@ -7,7 +7,7 @@
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
                 <p v-if="!noDescription" class="recipe-description">{{ recipe?.getShortDescription() }}</p>
-                <h2 class="recipe-author">By {{ recipe?.author }}</h2>
+                <h2 class="recipe-author">By {{ recipe?.getAuthors() }}</h2>
             </div>
             <div class="hero-bottom">
                 <div class="hero-buttons">

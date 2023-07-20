@@ -3,7 +3,7 @@ import {defineStore} from 'pinia'
 
 // Types
 import {Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery} from '@/tastebuddy/types';
-import {API_ROUTE, DURATIONS} from '@/tastebuddy/constants';
+import {API_ROUTE} from '@/tastebuddy/constants';
 import {APIResponse, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
 
 // Ionic
@@ -294,18 +294,15 @@ export const useTasteBuddyStore = defineStore('recipes', {
             this.updateRecipe(recipe)
             return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                 body: recipe,
-                errorMessage: 'Could not save recipe in database. Please retry later!'
+                errorMessage: 'Could not save recipe in database. Please retry later!',
+                successMessage: 'Updated recipe'
             })
-                .then((apiResponse: APIResponse<string>) => {
-                    presentToast(apiResponse.response, apiResponse.error, apiResponse.error ? DURATIONS.LONG : DURATIONS.SHORT)
-                    return apiResponse
-                })
                 .then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('saveRecipe')
                     return apiResponse
                 }).then((apiResponse: APIResponse<string>) => {
                     if (!apiResponse.error) {
-                        return this.fetchRecipes()
+                        return this.fetchItems().then(() => this.fetchRecipes())
                     }
                     return []
                 })
@@ -322,11 +319,10 @@ export const useTasteBuddyStore = defineStore('recipes', {
                     this.finishLoading('deleteRecipe')
                     return presentToast(apiResponse.response)
                 })
-            } else {
-                // eslint-disable-next-line @typescript-eslint/no-empty-function
-                return new Promise(() => {
-                })
             }
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
+            return new Promise(() => {
+            })
         },
         /**
          * Fetch the suggestions for the recipe search

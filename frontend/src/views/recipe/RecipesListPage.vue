@@ -46,7 +46,7 @@ export default defineComponent({
         const isDevMode = computed(() => store.isDevMode)
         const addRecipe = () => {
             if (isDevMode.value) {
-                const newRecipeId = Recipe.newRecipe().update(store)._tmpId
+                const newRecipeId = Recipe.newRecipe().update()._tmpId
                 router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
             }
         }

@@ -21,7 +21,8 @@ export class Item {
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
         this._id = item?._id
-        if (this._id === undefined && item?._tmpId === undefined) {
+        this._tmpId = item?._tmpId
+        if (this._id === undefined) {
             this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         }
         this.name = item?.name ?? 'New Item'
@@ -63,6 +64,7 @@ export class Item {
     public static newItemFromName(name?: string): Item {
         const item = new Item()
         item.name = name ?? 'New Item'
+        logDebug("new item from name", item)
         return item
     }
 
@@ -74,6 +76,7 @@ export class Item {
     public getId(): string {
         // if the id is undefined, throw an error
         if (this._id === undefined && this._tmpId === undefined) {
+            logError("item id is undefined", this)
             throw new Error("item id is undefined")
         }
         return this._id ?? this._tmpId as string
@@ -81,21 +84,22 @@ export class Item {
 
     /**
      * Update the item in the store
-     * @param store
      * @returns the item to allow chaining
      */
-    public update(store: any): this {
+    public update(): this {
+        logDebug("item.update", this.getId())
+        const store = useTasteBuddyStore()
         store.updateItem(this)
         return this
     }
 
     /**
      * Save the item to the database
-     * @param store
      * @returns the item to allow chaining
      */
-    public save(store: any): this {
-        // remove the temporary id
+    public save(): this {
+        logDebug("item.save", this.getId())
+        const store = useTasteBuddyStore()
         store.saveItem(this)
         return this
     }
@@ -104,6 +108,7 @@ export class Item {
      * Delete the item from the database
      */
     public delete(): void {
+        logDebug('item.delete', this.getId())
         const store = useTasteBuddyStore()
         store.deleteItem(this)
     }
@@ -284,6 +289,7 @@ export class Recipe {
     _tmpId?: string;
     name: string;
     author: string;
+    authors: string[];
     description: string;
     steps: Step[];
     props: {
@@ -301,6 +307,7 @@ export class Recipe {
         this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         this.name = 'New Recipe'
         this.author = ''
+        this.authors = []
         this.description = ''
         this.props = {
             url: '',
@@ -330,7 +337,7 @@ export class Recipe {
             throw new Error("recipe id is undefined")
         }
         recipe.name = json.name
-        recipe.author = json.author
+        recipe.authors = json.authors ?? [json.author]
         recipe.description = json.description
         recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
         // props
@@ -338,6 +345,7 @@ export class Recipe {
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
+        logDebug('recipe.fromJSON', recipe)
         return recipe
     }
 
@@ -355,7 +363,7 @@ export class Recipe {
      * @param id
      */
     public static saveById(store: any, id: string): void {
-        logDebug('saveById', id)
+        logDebug('recipe.saveById', id)
         store.saveRecipeById(id)
     }
 
@@ -370,6 +378,30 @@ export class Recipe {
             throw new Error("recipe id is undefined")
         }
         return this._id ?? this._tmpId as string
+    }
+
+    /**
+     * Get the list of authors as a string
+     * @returns the list of authors as string
+     */
+    public getAuthors(): string {
+        if (this.authors === undefined) {
+            return ''
+        }
+        const length = this.authors.length
+
+        // if there's only one author, return the name
+        if (length === 1) {
+            return this.authors[0]
+        }
+
+        // if there are two authors, return them and concat them using 'and'
+        if (length === 2) {
+            return this.authors[0] + ' and ' + this.authors[1]
+        }
+
+        // if there are more, return a comma separated list
+        return this.authors.slice(0, length - 1).join(', ') + ' and ' + this.authors[length - 1]
     }
 
     /**
@@ -395,22 +427,22 @@ export class Recipe {
 
     /**
      * Updates the recipe in the store
-     * @param store
      * @returns the recipe to allow chaining
      */
-    public update(store: any): this {
-        logDebug('update', this.getId())
+    public update(): this {
+        logDebug('recipe.update', this.getId())
+        const store = useTasteBuddyStore()
         store.updateRecipe(this)
         return this
     }
 
     /**
      * Save the recipe to the database
-     * @param store
      * @returns the id of the recipe
      */
-    public save(store: any) {
-        logDebug('save', this.getId())
+    public save() {
+        logDebug('recipe.save', this.getId())
+        const store = useTasteBuddyStore()
         return store.saveRecipe(this)
     }
 
@@ -471,6 +503,7 @@ export class Recipe {
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
         item = item ?? new Item();
+        logDebug(`add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
         const stepItem = new StepItem();
 
         if (stepIndex === undefined) {

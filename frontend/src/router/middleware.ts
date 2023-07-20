@@ -2,7 +2,7 @@ import {logDebug} from "@/tastebuddy";
 import {useUserStore} from "@/storage";
 
 export const logMiddleware = (to: any, from: any) => {
-    logDebug('router', `routing from ${from.path} -> ${to.path}`)
+    logDebug('middleware.router', `routing from ${from.path} -> ${to.path}`)
 }
 
 /**
@@ -16,7 +16,7 @@ export const checkAuthMiddleware = (to: any, from: any, next: any) => {
     const store = useUserStore();
     if (to.meta.auth) {
         store.sessionAuth().then((isAuthenticated: boolean) => {
-            logDebug('router', `auth required for ${to.path} -> ${isAuthenticated}`)
+            logDebug('checkAuthMiddleware', `auth required for ${to.path} -> ${isAuthenticated}`)
             if (isAuthenticated) {
                 next()
             } else {

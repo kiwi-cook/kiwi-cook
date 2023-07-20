@@ -21,7 +21,7 @@ export interface APIResponse<T extends APIResponseBody> {
  * @param duration the duration of the toast in milliseconds
  */
 export const presentToast = async (message?: string, isError = false, duration = DURATIONS.SHORT) => {
-    if (!!message || message === '') {
+    if ((message ?? '') === '') {
         return
     }
 
@@ -90,11 +90,12 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
     formatObject?: { [key: string]: string | number },
     body?: unknown,
     headers?: { key: string, value: string }[],
+    successMessage?: string,
     errorMessage?: string
 }): Promise<APIResponse<R>> {
     let url = API_URL + API_ROUTES[route].url;
 
-    const {formatObject, body, headers, errorMessage} = options ?? {};
+    const {formatObject, body, headers, errorMessage, successMessage} = options ?? {};
 
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
@@ -136,7 +137,14 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         return response
     })
         .then((response: Response) => {
-            const jsonResponse = response.json()
+            const jsonResponse: Promise<APIResponse<R>> = response.json()
+                .then((apiResponse: APIResponse<R>) => {
+                    // show toast if the response is a string
+                    if (!apiResponse.error && successMessage) {
+                        return presentToast(successMessage, false, DURATIONS.MEDIUM).then(() => apiResponse)
+                    }
+                    return apiResponse
+                })
             logDebug('sendToAPI ' + route, jsonResponse)
             return jsonResponse
         })
@@ -148,7 +156,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
             presentToast(errorMessage, true, DURATIONS.LONG)
             return {
                 error: true,
-                response: (options?.errorMessage ?? 'An error occurred') as R
+                response: (errorMessage ?? 'An error occurred') as R
             }
         })
 }
