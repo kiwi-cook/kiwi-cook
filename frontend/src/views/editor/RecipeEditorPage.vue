@@ -68,7 +68,7 @@ export default defineComponent({
 
             event.preventDefault();
             // save only recipes that are not new
-            mutableRecipe.value?.update(store)?.save(store)
+            mutableRecipe.value?.update()?.save()
         }
 
         onMounted(() => {

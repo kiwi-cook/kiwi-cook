@@ -8,7 +8,9 @@
                 <IonChip>
                     {{ mutableItem.getId() }}
                 </IonChip>
-                <IonButton @click="saveItem()">Save item</IonButton>
+                <IonButton color="success" @click="saveItem()">
+                    <IonIcon :icon="save"/>
+                </IonButton>
             </IonItem>
             <IonCardTitle color="primary">
                 <IonItem lines="none">
@@ -19,9 +21,12 @@
                                   @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
                     </div>
                     <div slot="end">
-                        <IonButton color="danger" fill="solid" @click="removeItem()">
-                            Delete item
-                        </IonButton>
+                        <div slot="end">
+                            <IonButton color="danger" fill="solid"
+                                       @click="deleteItem()">
+                                <IonIcon :icon="trash"/>
+                            </IonButton>
+                        </div>
                     </div>
                 </IonItem>
 
@@ -64,7 +69,7 @@ import {
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonChip,
+    IonChip, IonIcon,
     IonInput,
     IonItem,
     IonList,
@@ -73,6 +78,7 @@ import {
 } from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
 import {useTasteBuddyStore} from '@/storage';
+import {save, trash} from "ionicons/icons";
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -83,6 +89,7 @@ export default defineComponent({
         }
     },
     components: {
+        IonIcon,
         IonSelect,
         IonSelectOption,
         IonCard,
@@ -118,11 +125,14 @@ export default defineComponent({
                 .map((recipeId: string) => store.getRecipesAsMap[recipeId])
         })
 
-        const saveItem = () => mutableItem.value.save(store)
+        const saveItem = () => mutableItem.value.save()
         const deleteItem = () => mutableItem.value.delete()
 
         return {
-            mutableItem, saveItem, removeItem: deleteItem,
+            // icons
+            trash, save,
+            // items
+            mutableItem, saveItem, deleteItem,
             usedInRecipes
         }
     }

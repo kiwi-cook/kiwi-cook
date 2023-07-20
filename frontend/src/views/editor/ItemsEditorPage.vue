@@ -1,23 +1,24 @@
 <template>
     <IonPage id="items-editor-page">
-        <IonHeader>
-            <IonToolbar>
-                <IonTitle>Items Editor</IonTitle>
-            </IonToolbar>
-        </IonHeader>
         <IonContent :fullscreen="true">
             <div class="content">
+                <h1 class="header-title">
+                    Items Editor
+                </h1>
+
+                <IonSearchbar v-model="filterInput" :debounce="500"/>
+
                 <TwoColumnLayout>
                     <template #left>
                         <IonButton @click="removeUnusedItems()">Remove unused items</IonButton>
                         <IonButton @click="addItem()">Add Item</IonButton>
                     </template>
                     <template #right>
-                        <IonList>
-                            <IonItem v-for="item in items" :key="item.getId()">
+                        <List :item-list="items" :filter="filterInput">
+                            <template #item="{item}">
                                 <ItemEditor :item="item"/>
-                            </IonItem>
-                        </IonList>
+                            </template>
+                        </List>
                     </template>
                 </TwoColumnLayout>
             </div>
@@ -26,26 +27,31 @@
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent} from 'vue';
-import {IonButton, IonContent, IonHeader, IonItem, IonList, IonPage, IonTitle, IonToolbar} from "@ionic/vue";
+import {computed, ComputedRef, defineComponent, ref} from 'vue';
+import {IonButton, IonContent, IonPage, IonSearchbar} from "@ionic/vue";
 import {arrowBack} from 'ionicons/icons';
 import {useTasteBuddyStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy/types";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
+import List from "@/components/utility/List.vue";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
+        IonSearchbar,
+        List,
         TwoColumnLayout,
-        IonPage, IonContent, IonHeader, IonToolbar, IonTitle, IonList, IonItem, IonButton,
+        IonPage, IonContent, IonButton,
         ItemEditor
     },
     setup() {
         const store = useTasteBuddyStore();
         const items: ComputedRef<Item[]> = computed(() => store.getItems)
 
-        const addItem = () => Item.newItem().update(store);
+        const filterInput = ref('')
+
+        const addItem = () => Item.newItem().update();
         const removeUnusedItems = () => {
             const items = store.getItems;
             const recipesByItemIds = store.getRecipesByItemIds
@@ -57,6 +63,7 @@ export default defineComponent({
         }
 
         return {
+            filterInput,
             items, arrowBack,
             removeUnusedItems, addItem
         }

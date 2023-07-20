@@ -96,7 +96,7 @@
                 <IonItem lines="none">
                     <IonCardTitle color="primary">Step {{ stepIndex + 1 }}</IonCardTitle>
                     <IonButton color="danger" fill="solid" @click="removeStep(stepIndex)">
-                        Remove step
+                        <IonIcon :icon="trash"/>
                     </IonButton>
                 </IonItem>
             </IonCardHeader>
@@ -132,29 +132,35 @@
                                     <IonChip v-if="stepItem._id || stepItem._tmpId">
                                         {{ stepItem._id ?? stepItem._tmpId }}
                                     </IonChip>
+                                    <IonChip>
+                                        {{ stepItem.type }}
+                                    </IonChip>
                                 </IonItem>
                                 <IonCardTitle color="primary">
                                     <IonItem lines="none">
                                         <div slot="start">
-                                            <IonLabel position="stacked">Name</IonLabel>
                                             <DropDownSearch :custom-mapper="(item: Item) => item.name" :item="stepItem"
+                                                            label="Name"
                                                             :items="allItems" placeholder="e.g. Baking powder"
                                                             @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                             @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
                                                     <IonLabel>
                                                         {{ (filteredItem as Item).name }} {{
-                                                            (filteredItem as Item)._id ? ' - ' +
-                                                                (filteredItem as Item)._id : ''
+                                                            (filteredItem as Item).getId()
                                                         }}
                                                     </IonLabel>
                                                 </template>
                                             </DropDownSearch>
                                         </div>
                                         <div slot="end">
+                                            <IonButton color="success" fill="solid"
+                                                       @click="editItem(stepIndex, itemIndex)">
+                                                <IonIcon :icon="create"/>
+                                            </IonButton>
                                             <IonButton color="danger" fill="solid"
                                                        @click="removeItem(stepIndex, itemIndex)">
-                                                Remove item
+                                                <IonIcon :icon="trash"/>
                                             </IonButton>
                                         </div>
                                     </IonItem>
@@ -162,13 +168,6 @@
                             </IonCardHeader>
 
                             <IonCardContent>
-                                <IonItem lines="none">
-                                    <IonInput v-model.trim="stepItem.imgUrl"
-                                              :placeholder="`e.g. https://source.unsplash.com/`" label="Image URL"
-                                              label-placement="stacked"
-                                              type="url"/>
-                                </IonItem>
-
                                 <IonItem lines="none">
                                     <IonGrid>
                                         <IonRow>
@@ -191,15 +190,6 @@
                                         </IonRow>
                                     </IonGrid>
                                 </IonItem>
-
-                                <IonItem lines="none">
-                                    <IonSelect v-model="stepItem.type" interface="popover"
-                                               label="Type"
-                                               label-placement="floating" placeholder="Type">
-                                        <IonSelectOption value="ingredient">Ingredient</IonSelectOption>
-                                        <IonSelectOption value="tool">Tool</IonSelectOption>
-                                    </IonSelect>
-                                </IonItem>
                             </IonCardContent>
                         </IonCard>
                     </template>
@@ -210,8 +200,14 @@
         <IonButton fill="clear" @click="addStep(stepIndex)">Add step</IonButton>
     </template>
     <IonItem>
-        <IonButton @click="saveRecipe()">Save recipe</IonButton>
-        <IonButton color="danger" fill="solid" @click="deleteRecipe()">Delete recipe</IonButton>
+        <IonButton color="success" fill="solid"
+                   @click="saveRecipe()">
+            <IonIcon :icon="save"/>
+        </IonButton>
+        <IonButton color="danger" fill="solid"
+                   @click="deleteRecipe()">
+            <IonIcon :icon="trash"/>
+        </IonButton>
     </IonItem>
 </template>
 
@@ -239,7 +235,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
-import {closeCircleOutline} from 'ionicons/icons';
+import {closeCircleOutline, create, save, trash} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
 import {descriptionToItems} from '@/utility/recipeParser';
 import {formatDate} from '@/utility/util';
@@ -291,7 +287,7 @@ export default defineComponent({
         /**
          * Save recipe to the Backend API
          */
-        const saveRecipe = () => mutableRecipe.value?.save(store)
+        const saveRecipe = () => mutableRecipe.value?.save()
 
         /**
          * Delete recipe from the Backend API
@@ -327,7 +323,7 @@ export default defineComponent({
          * @param itemName name of the item to add
          */
         const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe
-            .value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update(store)
+            .value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update()
 
         /**
          * Select an item in a step and update it
@@ -358,6 +354,16 @@ export default defineComponent({
             .value?.steps[stepIndex].items.splice(itemIndex, 1);
 
         /**
+         * Edit the item
+         * @param stepIndex index of the step to edit the item from
+         * @param itemIndex index of the item to edit
+         */
+        const editItem = (stepIndex: number, itemIndex: number) => router.push({
+            name: 'ItemEditor',
+            params: {id: mutableRecipe.value?.steps[stepIndex].items[itemIndex]}
+        })
+
+        /**
          * Get all tags from the store
          */
         const allTags: ComputedRef<string[]> = computed(() => store.getTags);
@@ -368,11 +374,11 @@ export default defineComponent({
             // steps
             addStep, removeStep, addStepsFromDescription,
             // items
-            allItems, addItem, selectItem, removeItem, addItemsFromDescription,
+            allItems, addItem, editItem, selectItem, removeItem, addItemsFromDescription,
             // tags
             allTags,
             // icons
-            closeCircleOutline,
+            closeCircleOutline, trash, create, save,
             // utility
             formatDate,
             // types
@@ -415,7 +421,7 @@ ion-avatar.recipe-preview-img {
 
 .step-editor {
     margin: 10px;
-    max-width: fit-content;
+    width: 100%;
 }
 
 .items-editor {
