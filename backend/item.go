@@ -21,6 +21,7 @@ type Item struct {
 	Name   string             `json:"name" bson:"name" binding:"required"`
 	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
 	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	I18n   map[string]string  `json:"i18n,omitempty" bson:"i18n,omitempty"`
 }
 
 type ItemResult struct {
@@ -86,14 +87,14 @@ func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
 
 	var newItem Item
 	if err := context.BindJSON(&newItem); err != nil {
-		server.LogError("HandleAddItem", err)
+		server.LogError("HandleAddItem.BindJSON", err)
 		BadRequestError(context, "Invalid item")
 		return
 	}
 
 	var itemId primitive.ObjectID
-	if err := server.AddOrUpdateItem(newItem); err != nil {
-		server.LogError("HandleAddItem", err)
+	if _, err := server.AddOrUpdateItem(newItem); err != nil {
+		server.LogError("HandleAddItem.AddOrUpdateItem", err)
 		ServerError(context, true)
 		return
 	}
@@ -110,14 +111,14 @@ func (server *TasteBuddyServer) HandleDeleteItemById(context *gin.Context) {
 	// convert id to primitive.ObjectID
 	objectID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		server.LogError("HandleDeleteItemById", err)
+		server.LogError("HandleDeleteItemById.ObjectIDFromHex", err)
 		ServerError(context, true)
 		return
 	}
 
 	// delete recipe
 	if _, err := server.DeleteItemById(objectID); err != nil {
-		server.LogError("HandleDeleteItemById", err)
+		server.LogError("HandleDeleteItemById.DeleteItemById", err)
 		ServerError(context, true)
 		return
 	}
@@ -149,7 +150,7 @@ func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 		app.LogDatabase("GetAllItems", "Get all items from database")
 		var itemsFromDatabase []Item
 		if err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{}); err != nil {
-			return itemsFromDatabase, app.LogError("GetAllItems", err)
+			return itemsFromDatabase, app.LogError("GetAllItems.AllWithDefault", err)
 		}
 		cachedItems = itemsFromDatabase
 	} else {
@@ -181,7 +182,7 @@ func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
 	var itemFromDatabase Item
 	app.LogDebug("GetItemById", "Get item "+id.Hex()+" from database")
 	err := app.GetItemsCollection().FindOneWithDefault(bson.M{"_id": id}, &itemFromDatabase, Item{})
-	return itemFromDatabase, err
+	return itemFromDatabase, app.LogError("GetItemById.FindOneWithDefault", err)
 }
 
 // GetItemByName gets item from database by name
@@ -264,13 +265,13 @@ func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.Objec
 	return id, nil
 }
 
-func (app *TasteBuddyApp) AddOrUpdateItem(item Item) error {
+func (app *TasteBuddyApp) AddOrUpdateItem(item Item) ([]Item, error) {
 	return app.AddOrUpdateItems([]Item{item})
 }
 
 // AddOrUpdateItems adds or updates multiple items in the database of items
 // If an item has not an id, it will be added
-func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
+func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	app.Log("AddOrUpdateItems", "Add or update "+fmt.Sprintf("%d", len(items))+" items")
 	var itemsWithIds []interface{}
 	var itemsWithoutIds []interface{}
@@ -280,21 +281,15 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 	for _, item := range items {
 		itemsMap[item.Name] = item
 	}
+	app.LogTrace("AddOrUpdateItems", "Found "+fmt.Sprintf("%d", len(itemsMap))+" unique items")
 
 	// Split items into items with and without ids
 	for _, item := range itemsMap {
-		if matchResult := app.MatchOrNewItem(item.Name, 0.90); matchResult.success {
-			app.LogTrace("AddOrUpdateItems", "Item "+item.Name+" has match "+matchResult.Name+", ignore!")
-			continue
-		}
-
 		// Check if item name is empty
 		if item.Name == "" {
-			app.LogError("AddOrUpdateItems", errors.New("item name is empty"))
+			app.LogWarning("AddOrUpdateItems", "Item "+item.Name+" has no name")
 			continue
 		}
-
-		app.LogTrace("AddOrUpdateItems", "Item "+item.Name+" has no match, add to database")
 
 		if item.ID.IsZero() {
 			itemsWithoutIds = append(itemsWithoutIds, item)
@@ -306,7 +301,7 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 	// Add items without ids to database
 	if len(itemsWithoutIds) > 0 {
 		if _, err := app.GetItemsCollection().InsertMany(DefaultContext(), itemsWithoutIds); err != nil {
-			return app.LogError("AddOrUpdateItems", err)
+			return nil, app.LogError("AddOrUpdateItems.InsertMany", err)
 		}
 		app.Log("AddOrUpdateItems", "Added "+strconv.Itoa(len(itemsWithoutIds))+" items without ids to database")
 	}
@@ -314,8 +309,9 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 	// Update items with ids in database
 	if len(itemsWithIds) > 0 {
 		for _, item := range itemsWithIds {
-			if _, err := app.GetItemsCollection().UpdateByID(DefaultContext(), item.(Item).ID, item); err != nil {
-				return app.LogError("AddOrUpdateItems", err)
+			app.LogTrace("AddOrUpdateItems", "Update item "+item.(Item).Name+" in database")
+			if _, err := app.GetItemsCollection().UpdateOne(DefaultContext(), bson.M{"_id": item.(Item).ID}, bson.M{"$set": item}); err != nil {
+				return nil, app.LogError("AddOrUpdateItems.UpdateByID", err)
 			}
 		}
 		app.Log("AddOrUpdateItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
@@ -323,19 +319,12 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) error {
 
 	app.Log("AddOrUpdateItems", "Finished adding or updating "+fmt.Sprintf("%d", len(itemsWithIds)+len(itemsWithoutIds))+" items")
 
-	return nil
-}
-
-// GetItems gets all items used in a recipe
-func (recipe *Recipe) GetItems() []Item {
-	itemsMap := recipe.GetStepItemsMappedToName()
-
-	// convert map to array
-	var items []Item
-	for _, item := range itemsMap {
-		items = append(items, item.Item)
+	items, err := app.GetAllItems(false)
+	if err != nil {
+		return nil, app.LogError("AddOrUpdateItems.GetAllItems", err)
 	}
-	return items
+
+	return items, nil
 }
 
 // CalculateItemPriceForMarket calculates the price of a recipe for a market

@@ -189,7 +189,7 @@ func (server *TasteBuddyServer) Serve() {
 
 	////////////////////////////////////////////////////////////////////////
 	// Suggestions
-	suggestionRoutes := v1.Group("/suggest")
+	suggestionRoutes := v1.Group("/s")
 	// Suggest recipes
 	suggestionRoutes.POST("/recipe", func(context *gin.Context) {
 		server.HandleRecipeSuggestions(context)

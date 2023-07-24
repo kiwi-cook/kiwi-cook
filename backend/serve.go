@@ -20,8 +20,8 @@ var serveCmd = &cobra.Command{
 
 		// Create the TasteBuddyApp
 		app := TasteBuddyAppFactory()
-		app.SetLogger(logLevel)
 		app.Default()
+		app.SetLogger(logLevel)
 
 		// Run go routines
 		// cities := []string{"Tuebingen", "Stuttgart", "Reutlingen"}

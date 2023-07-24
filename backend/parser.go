@@ -18,8 +18,9 @@ import (
 
 type RecipeParser func(string, chan Recipe) error
 type ItemParser func(string, chan Item) error
-type IngredientParser func(string) (error, StepItem)
+type IngredientParser func(string) (StepItem, error)
 
+// Parse parses a file and saves the content to the database
 func (app *TasteBuddyApp) Parse(file string, parser string) {
 	app.Log("Parse", "Parsing "+file)
 	recipeParser := RecipeParser(nil)
@@ -68,8 +69,8 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 	for _, recipe := range recipes {
 		items = append(items, recipe.GetItems()...)
 	}
-	if err = app.AddOrUpdateItems(items); err != nil {
-		return app.LogError("ParseAndSaveRecipe", errors.New("error saving items to database: "+err.Error()))
+	if _, err = app.AddOrUpdateItems(items); err != nil {
+		return app.LogError("ParseAndSaveRecipe.AddOrUpdateItems", errors.New("error saving items to database: "+err.Error()))
 	}
 
 	// Save recipes to database
@@ -77,7 +78,7 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 	itemsMap, err = app.GetAllItemsMappedByName(false)
 	recipes = app.AddItemIdsToRecipes(recipes, itemsMap)
 	if err = app.AddOrUpdateRecipes(recipes); err != nil {
-		return app.LogError("ParseAndSaveRecipe", errors.New("error saving recipes to database: "+err.Error()))
+		return app.LogError("ParseAndSaveRecipe.AddOrUpdateRecipes", errors.New("error saving recipes to database: "+err.Error()))
 	}
 
 	return err
@@ -132,6 +133,7 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 			parsedRecipe.Name = recipe.Name
 			app.Log("CookstrRecipeParser", "Parsing recipe "+recipe.Name)
 			parsedRecipe.Author = recipe.Author
+			parsedRecipe.Authors = []string{recipe.Author}
 			parsedRecipe.Description = recipe.Description
 			parsedRecipe.Props.Url = recipe.Url
 			parsedRecipe.Props.ImgUrl = recipe.ImgUrl
@@ -152,13 +154,13 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 	return nil
 }
 
-func CookstrIngredientParser(ingredientStr string) (error, StepItem) {
+func CookstrIngredientParser(ingredientStr string) (StepItem, error) {
 	// Regex pattern to match amount and unit
 	re := regexp.MustCompile(`^(?P<amount>([\d.½¼¾\-]|(\s*to\s*))+)\s*(?P<unit>(tablespoons?|teaspoons?|cups?|ounces?|kg|(kilo)?gr(ams)?|ml|(milli)?l(itres)?)?)\s+(?P<ingredient>.*)$`)
 
 	match := re.FindStringSubmatch(ingredientStr)
 	if match == nil {
-		return errors.New("invalid ingredient"), StepItem{}
+		return StepItem{}, errors.New("invalid ingredient")
 	}
 	names := re.SubexpNames()
 
@@ -181,7 +183,7 @@ func CookstrIngredientParser(ingredientStr string) (error, StepItem) {
 		},
 	}
 
-	return nil, stepItem
+	return stepItem, nil
 }
 
 func parseItems(items []string, parser IngredientParser) []StepItem {
@@ -192,7 +194,7 @@ func parseItems(items []string, parser IngredientParser) []StepItem {
 		stepItem := StepItem{}
 
 		// parse ingredient
-		if err, stepItem = parser(ingredient); err != nil {
+		if stepItem, err = parser(ingredient); err != nil {
 			continue
 		}
 		stepItem.Type = "ingredient"
@@ -319,7 +321,7 @@ func (app *TasteBuddyApp) ParseAndSaveItems(file string, itemParser ItemParser) 
 	}
 
 	// Add or update items in database
-	if err = app.AddOrUpdateItems(items); err != nil {
+	if _, err = app.AddOrUpdateItems(items); err != nil {
 		return app.LogError("ParseAndSaveRecipe", errors.New("error saving items to database: "+err.Error()))
 	}
 

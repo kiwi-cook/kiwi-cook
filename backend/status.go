@@ -26,8 +26,8 @@ func Success(context *gin.Context, response interface{}) {
 }
 
 // Updated returns a 200 success with a message
-func Updated(context *gin.Context, t string, id primitive.ObjectID) {
-	context.JSON(http.StatusOK, responseJSONwithID("Updated "+t+" with ID "+id.Hex(), false, id.Hex()))
+func Updated(context *gin.Context, t string) {
+	context.JSON(http.StatusOK, responseJSONwithID("Updated "+t, false, ""))
 }
 
 // Created returns a 201 success with a message
