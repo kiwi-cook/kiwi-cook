@@ -13,7 +13,14 @@ export const logMiddleware = (to: any, from: any) => {
  * @param next
  */
 export const checkAuthMiddleware = (to: any, from: any, next: any) => {
+    const goHome = () => next({ name: 'Home' })
     const store = useTasteBuddyStore();
+
+    // if user is not in dev mode, redirect to home if they try to go to login page
+    if (to.name === 'Login' && !store.isDevMode) {
+        goHome()
+    }
+
     if (to.meta.auth) {
         if (store.isDevMode) {
             store.sessionAuth().then((isAuthenticated: boolean) => {
@@ -25,6 +32,8 @@ export const checkAuthMiddleware = (to: any, from: any, next: any) => {
                     next({ name: 'Login', query: { redirect: redirect } });
                 }
             })
+        } else {
+            return goHome()
         }
     } else {
         next();
