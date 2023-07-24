@@ -12,6 +12,7 @@ export const logMiddleware = (to: any, from: any) => {
  * @param from
  * @param next
  */
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export const checkAuthMiddleware = (to: any, from: any, next: any) => {
     const goHome = () => next({ name: 'Home' })
     const store = useTasteBuddyStore();
