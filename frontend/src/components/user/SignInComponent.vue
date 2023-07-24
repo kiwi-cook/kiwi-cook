@@ -21,7 +21,7 @@
 import {computed, ref, watch} from 'vue';
 import {IonButton, IonCard, IonCardContent, IonCardHeader, IonInput, IonItem, useIonRouter} from '@ionic/vue';
 import TasteBuddyLogo from '@/components/TasteBuddyLogo.vue'
-import {useUserStore} from '@/storage';
+import {useTasteBuddyStore} from '@/storage';
 import {useRoute} from 'vue-router';
 
 export default {
@@ -36,15 +36,17 @@ export default {
         TasteBuddyLogo,
     },
     setup() {
+        const store = useTasteBuddyStore();
+        const isDevMode = computed(() => store.isDevMode)
+
         const username = ref('');
         const password = ref('');
-        const isDisabled = computed(() => username.value.length === 0 || password.value.length === 0)
+        const isDisabled = computed(() => !isDevMode.value || username.value.length === 0 || password.value.length === 0)
 
         const route = useRoute()
         const router = useIonRouter()
         const redirect = computed(() => (route.query.redirect ?? '') as string)
 
-        const store = useUserStore();
         const isAuthenticated = computed(() => store.isAuthenticated)
         /* Redirect if already logged in */
         watch(isAuthenticated, () => {

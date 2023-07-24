@@ -14,9 +14,6 @@
                     <IonFabButton color="primary" @click="goBack()">
                         <IonIcon :icon="arrowBack"/>
                     </IonFabButton>
-                    <IonFabButton v-if="isDevMode" color="primary" @click="editRecipe()">
-                        <IonIcon :icon="createOutline"/>
-                    </IonFabButton>
                 </IonFabList>
             </IonFab>
         </IonContent>
@@ -27,7 +24,7 @@
 import {computed, ComputedRef, defineComponent} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
-import {useTasteBuddyStore} from "@/storage";
+import {useRecipeStore} from "@/storage";
 import {useRoute} from 'vue-router';
 import {Recipe} from '@/tastebuddy/types';
 import {addOutline, arrowBack, createOutline} from "ionicons/icons";
@@ -43,14 +40,8 @@ export default defineComponent({
         const route = useRoute()
         const recipeId: ComputedRef<string> = computed(() => (route.params.id ?? '') as string)
 
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeId.value])
-        const isDevMode = computed(() => store.isDevMode)
-        const editRecipe = () => {
-            if (isDevMode.value) {
-                router.push({name: 'RecipeEditor', params: {id: recipeId.value}})
-            }
-        }
 
 
         const router = useIonRouter()
@@ -58,7 +49,7 @@ export default defineComponent({
 
         return {
             // recipe
-            recipe, isDevMode, editRecipe, createOutline,
+            recipe, createOutline,
             // fab
             goBack, arrowBack, addOutline
         }

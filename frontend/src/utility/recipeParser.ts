@@ -16,10 +16,10 @@ export const descriptionToSteps = (description: string): Step[] => {
     const steps: Step[] = [];
 
     // create step from tokens
-    for (let i = 0; i < descriptions.length; i++) {
-        const stepItems = descriptionToItems(descriptions[i]) ?? [];
+    for (const element of descriptions) {
+        const stepItems = descriptionToItems(element) ?? [];
         const newStep = new Step()
-        newStep.description = descriptions[i];
+        newStep.description = element;
         newStep.items = stepItems;
         steps.push(newStep);
     }

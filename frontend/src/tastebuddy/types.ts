@@ -3,7 +3,7 @@
 import {descriptionToSteps} from "@/utility/recipeParser";
 import {logDebug, logError} from ".";
 import {CanShareResult, Share} from "@capacitor/share";
-import {useTasteBuddyStore} from "@/storage";
+import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 
 // types for recipe
 
@@ -17,6 +17,7 @@ export class Item {
     name: string;
     type: string;
     imgUrl: string;
+    i18n: { [lang: string]: string };
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
@@ -28,6 +29,7 @@ export class Item {
         this.name = item?.name ?? 'New Item'
         this.type = item?.type ?? 'ingredient'
         this.imgUrl = item?.imgUrl ?? ''
+        this.i18n = item?.i18n ?? {}
     }
 
     /**
@@ -44,7 +46,8 @@ export class Item {
         delete item._tmpId
         item.name = json.name
         item.type = json.type
-        item.imgUrl = json.imgUrl
+        item.imgUrl = json.imgUrl ?? ''
+        item.i18n = json.i18n ?? {}
         return item
     }
 
@@ -68,6 +71,24 @@ export class Item {
         return item
     }
 
+    public getI18n(): { [lang: string]: string } {
+        return this.i18n ?? {}
+    }
+
+    public getName(lang?: string): string {
+        const store = useTasteBuddyStore()
+        return this.getI18n()[lang ?? store.language.lang] ?? this.name
+    }
+
+    public setName(name: string, lang?: string): void {
+        const store = useTasteBuddyStore()
+        console.log(this.i18n, lang, store.language.lang)
+        this.i18n[lang ?? store.language.lang] = name
+        if (lang === undefined) {
+            this.name = name
+        }
+    }
+
     /**
      * Get the id of the item
      * @returns the id of the item
@@ -88,7 +109,7 @@ export class Item {
      */
     public update(): this {
         logDebug("item.update", this.getId())
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         store.updateItem(this)
         return this
     }
@@ -99,7 +120,7 @@ export class Item {
      */
     public save(): this {
         logDebug("item.save", this.getId())
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         store.saveItem(this)
         return this
     }
@@ -109,7 +130,7 @@ export class Item {
      */
     public delete(): void {
         logDebug('item.delete', this.getId())
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         store.deleteItem(this)
     }
 
@@ -152,7 +173,7 @@ export class StepItem extends Item {
         stepItem.amount = json.amount
         stepItem.servingAmount = json.amount
         stepItem.unit = json.unit
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const item = store.getItemsAsMap[json._id ?? '']
         if (typeof item !== 'undefined') {
             stepItem._id = item._id
@@ -340,7 +361,8 @@ export class Recipe {
         recipe.authors = json.authors ?? [json.author]
         recipe.description = json.description
         recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
-        // props
+
+        recipe.props.url = json.props.url
         recipe.props.imgUrl = json.props.imgUrl
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
@@ -431,7 +453,7 @@ export class Recipe {
      */
     public update(): this {
         logDebug('recipe.update', this.getId())
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         store.updateRecipe(this)
         return this
     }
@@ -442,7 +464,7 @@ export class Recipe {
      */
     public save() {
         logDebug('recipe.save', this.getId())
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         return store.saveRecipe(this)
     }
 
@@ -450,7 +472,7 @@ export class Recipe {
      * Delete the recipe from the database
      */
     public delete() {
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         logDebug('delete', this.getId())
         return store.deleteRecipe(this)
     }
@@ -601,7 +623,7 @@ export class Recipe {
      * Like or unlike the recipe
      */
     public toggleLike() {
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         this.isLiked = !this.isLiked
         store.updateLike(this)
     }
@@ -647,7 +669,7 @@ export class RecipeSuggestion {
      */
     public static fromJSON(json: RecipeSuggestion): RecipeSuggestion {
         const suggestion = new RecipeSuggestion()
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         suggestion.recipe_id = json.recipe_id
         suggestion.recipe = store.getRecipesAsMap[json.recipe_id]
         suggestion.recipe_price = json.recipe_price

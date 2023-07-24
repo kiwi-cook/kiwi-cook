@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent, onMounted, ref, watch} from 'vue';
+import {computed, ComputedRef, defineComponent, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {
     IonContent,
@@ -38,7 +38,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {Recipe} from '@/tastebuddy/types';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 import {arrowBack} from "ionicons/icons";
 
@@ -53,7 +53,7 @@ export default defineComponent({
     setup() {
         const route = useRoute();
         const recipeId = ref(route.params.id as string);
-        const store = useTasteBuddyStore();
+        const store = useRecipeStore();
         const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeId.value]);
         const mutableRecipe = ref<Recipe>(recipe.value);
 
@@ -73,6 +73,10 @@ export default defineComponent({
 
         onMounted(() => {
             document.addEventListener("keydown", handleSave, false);
+        })
+
+        onUnmounted(() => {
+            document.removeEventListener("keydown", handleSave, false);
         })
 
         const handleRefresh = async (event: any) => {

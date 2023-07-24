@@ -23,6 +23,14 @@
                         <IonButton class="hero-button" color="primary" shape="round" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
+                        <IonButton v-if="recipe?.props.url" class="hero-button" color="primary" shape="round"
+                                   :href="recipe?.props.url" target="_blank">
+                            <IonIcon :icon="link"/>
+                        </IonButton>
+                        <IonButton v-if="isDevMode" class="hero-button" shape="round" color="secondary"
+                                   @click="editRecipe()">
+                            <IonIcon :icon="create"/>
+                        </IonButton>
                     </slot>
                 </div>
                 <div class="hero-tags">
@@ -52,8 +60,8 @@ import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy/types";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import {formatDate} from "@/utility/util";
-import {heart, heartOutline, restaurant} from "ionicons/icons";
-import {useTasteBuddyStore} from "@/storage";
+import {create, heart, heartOutline, link, restaurant} from "ionicons/icons";
+import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -88,15 +96,23 @@ export default defineComponent({
                 router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
             }
         }
-        const store = useTasteBuddyStore();
-        const isLiked = computed(() => store.getSavedRecipesAsMap[recipe.value?.getId() ?? ''] ?? false)
+        const recipeStore = useRecipeStore()
+        const isLiked = computed(() => recipeStore.getSavedRecipesAsMap[recipe.value?.getId() ?? ''] ?? false)
+
+        const tasteBuddyStore = useTasteBuddyStore()
+        const isDevMode = computed(() => tasteBuddyStore.isDevMode)
+        const editRecipe = () => {
+            if (isDevMode.value) {
+                router.push({name: 'RecipeEditor', params: {id: recipe.value.getId()}})
+            }
+        }
 
         return {
             isLiked,
             toRecipe,
-            formatDate,
+            formatDate, editRecipe, isDevMode,
             // icons
-            heart, heartOutline, restaurant
+            heart, heartOutline, restaurant, link, create
         }
     }
 })

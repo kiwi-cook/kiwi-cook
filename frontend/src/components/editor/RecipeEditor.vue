@@ -127,7 +127,7 @@
                             <IonCardHeader>
                                 <IonItem lines="none">
                                     <IonAvatar v-if="stepItem.imgUrl">
-                                        <img :alt="`Image of ${stepItem.name}`" :src="stepItem.imgUrl"/>
+                                        <img :alt="`Image of ${stepItem.getName()}`" :src="stepItem.imgUrl"/>
                                     </IonAvatar>
                                     <IonChip v-if="stepItem._id || stepItem._tmpId">
                                         {{ stepItem._id ?? stepItem._tmpId }}
@@ -139,7 +139,7 @@
                                 <IonCardTitle color="primary">
                                     <IonItem lines="none">
                                         <div slot="start">
-                                            <DropDownSearch :custom-mapper="(item: Item) => item.name" :item="stepItem"
+                                            <DropDownSearch :custom-mapper="(item: Item) => item.getName()" :item="stepItem"
                                                             label="Name"
                                                             :items="allItems" placeholder="e.g. Baking powder"
                                                             @select-item="selectItem(stepIndex, itemIndex, $event)"
@@ -213,7 +213,7 @@
 
 <script lang="ts">
 import {Item, Recipe, Step, StepItem} from '@/tastebuddy/types';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
     IonButton,
@@ -275,7 +275,7 @@ export default defineComponent({
 
         const router = useIonRouter();
 
-        const store = useTasteBuddyStore();
+        const store = useRecipeStore();
         const allItems = computed(() => store.getItems);
 
         const mutableRecipe: Ref<Recipe> = ref<Recipe>(recipe.value)

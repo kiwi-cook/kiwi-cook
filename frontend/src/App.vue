@@ -10,7 +10,7 @@
 <script lang="ts">
 import {IonApp, IonRouterOutlet, IonText} from '@ionic/vue';
 import {defineComponent} from 'vue';
-import {useTasteBuddyStore} from './storage';
+import {useRecipeStore} from './storage';
 
 export default defineComponent({
     name: 'App',
@@ -20,7 +20,7 @@ export default defineComponent({
     },
     setup() {
         // Initialize the store
-        const store = useTasteBuddyStore();
+        const store = useRecipeStore();
         store.prepare()
         store.updateIonicStorage()
 

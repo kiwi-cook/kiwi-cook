@@ -27,7 +27,7 @@
 import {computed, defineComponent, ref} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonPage, IonSearchbar, useIonRouter} from '@ionic/vue';
 import {addOutline, filter} from 'ionicons/icons';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
 import List from "@/components/utility/List.vue";
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
@@ -41,9 +41,11 @@ export default defineComponent({
         const filterInput = ref('')
 
         const router = useIonRouter()
-        const store = useTasteBuddyStore()
-        const recipes = computed(() => store.getRecipesAsList)
-        const isDevMode = computed(() => store.isDevMode)
+        const recipeStore = useRecipeStore()
+        const recipes = computed(() => recipeStore.getRecipesAsList)
+
+        const tasteBuddyStore = useTasteBuddyStore()
+        const isDevMode = computed(() => tasteBuddyStore.isDevMode)
         const addRecipe = () => {
             if (isDevMode.value) {
                 const newRecipeId = Recipe.newRecipe().update()._tmpId

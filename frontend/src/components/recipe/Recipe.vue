@@ -23,7 +23,7 @@
             <IonCard>
                 <IonCardHeader>
                     <IonCardTitle>
-                        Ingredients
+                        {{ amountIngredients }} Ingredients
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
@@ -37,10 +37,10 @@
             </IonCard>
         </template>
         <template #right>
-            <IonCard>
+            <IonCard v-if="amountTools !== 0">
                 <IonCardHeader>
                     <IonCardTitle>
-                        Equipment
+                        {{ amountTools }} Tools
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
@@ -56,7 +56,7 @@
         </IonText>
     </IonItem>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-        <RecipeStep :step="step" :stepIndex="stepIndex"/>
+        <RecipeStep :step="step" :stepIndex="stepIndex" :max-step-index="steps.length"/>
     </template>
 </template>
 
@@ -110,6 +110,8 @@ export default defineComponent({
         const {recipe} = toRefs(props);
 
         const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getItems() ?? []);
+        const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
+        const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
         const servings = ref(1)
@@ -134,7 +136,7 @@ export default defineComponent({
             // steps
             steps,
             // items
-            itemsFromRecipe,
+            itemsFromRecipe, amountIngredients, amountTools,
             // share
             canShareRecipe, shareRecipe, shareOutline,
             // icons

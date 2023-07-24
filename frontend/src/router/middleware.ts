@@ -1,5 +1,5 @@
 import {logDebug} from "@/tastebuddy";
-import {useUserStore} from "@/storage";
+import {useTasteBuddyStore} from "@/storage";
 
 export const logMiddleware = (to: any, from: any) => {
     logDebug('middleware.router', `routing from ${from.path} -> ${to.path}`)
@@ -13,8 +13,8 @@ export const logMiddleware = (to: any, from: any) => {
  * @param next
  */
 export const checkAuthMiddleware = (to: any, from: any, next: any) => {
-    const store = useUserStore();
-    if (to.meta.auth) {
+    const store = useTasteBuddyStore();
+    if (to.meta.auth && store.isDevMode) {
         store.sessionAuth().then((isAuthenticated: boolean) => {
             logDebug('checkAuthMiddleware', `auth required for ${to.path} -> ${isAuthenticated}`)
             if (isAuthenticated) {

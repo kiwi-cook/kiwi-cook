@@ -17,7 +17,7 @@ import {computed, ComputedRef, defineComponent} from 'vue';
 import {IonContent, IonPage} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {Recipe} from "@/tastebuddy/types";
-import {useTasteBuddyStore} from "@/storage";
+import {useRecipeStore} from "@/storage";
 
 
 export default defineComponent({
@@ -36,7 +36,7 @@ export default defineComponent({
         const day: number = Math.floor(diff / oneDay);
 
         // Get the recipe of the day depending on the day of the year
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() =>
             (store.getRecipesAsList[day % store.getRecipesAsList.length]))
 

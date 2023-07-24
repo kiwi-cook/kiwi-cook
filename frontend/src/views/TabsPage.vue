@@ -29,14 +29,14 @@
 import {computed, defineComponent} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
 import {home, search, star} from 'ionicons/icons';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 
 export default defineComponent({
     name: 'TabsPage',
     components: {IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar},
     setup() {
 
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const loadingState = computed(() => store.isLoading ?? false)
 
         return {

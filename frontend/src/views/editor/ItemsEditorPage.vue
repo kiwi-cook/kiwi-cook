@@ -14,7 +14,7 @@
                         <IonButton @click="addItem()">Add Item</IonButton>
                     </template>
                     <template #right>
-                        <List :item-list="items" :filter="filterInput">
+                        <List :item-list="items" :filter="filterInput" no-items-message="No items found">
                             <template #item="{item}">
                                 <ItemEditor :item="item"/>
                             </template>
@@ -30,7 +30,7 @@
 import {computed, ComputedRef, defineComponent, ref} from 'vue';
 import {IonButton, IonContent, IonPage, IonSearchbar} from "@ionic/vue";
 import {arrowBack} from 'ionicons/icons';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy/types";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
@@ -46,7 +46,7 @@ export default defineComponent({
         ItemEditor
     },
     setup() {
-        const store = useTasteBuddyStore();
+        const store = useRecipeStore();
         const items: ComputedRef<Item[]> = computed(() => store.getItems)
 
         const filterInput = ref('')
@@ -61,6 +61,7 @@ export default defineComponent({
                 }
             })
         }
+
 
         return {
             filterInput,

@@ -107,7 +107,7 @@ import {
     IonPage,
     IonRange,
 } from '@ionic/vue';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import {Item, Recipe, RecipeSuggestion, StepItem} from '@/tastebuddy/types';
 import List from "@/components/utility/List.vue";
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
@@ -140,7 +140,7 @@ export default defineComponent({
         IonRange
     },
     setup() {
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const itemsById = computed(() => store.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
@@ -152,7 +152,7 @@ export default defineComponent({
                 filteredItems.value = []
             } else {
                 filteredItems.value = (items.value ?? [])
-                    .filter((item: Item) => item.name.toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
+                    .filter((item: Item) => item.getName().toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
                     .filter((item: Item) => !selectedItemIds.has(item.getId()))
             }
         }, {immediate: true})

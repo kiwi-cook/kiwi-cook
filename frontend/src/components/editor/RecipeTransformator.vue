@@ -32,7 +32,7 @@
 </template>
 
 <script lang="ts">
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {logDebug, sendToAPI} from "@/tastebuddy";
@@ -167,7 +167,7 @@ export default defineComponent({
             transformToSchema.value = newSchema
         })
 
-        const store = useTasteBuddyStore()
+        const store = useRecipeStore()
         const recipes: ComputedRef<any[]> = computed(() => store.getRecipesAsList)
         const transformedRecipes: Ref = ref(recipes.value)
         watch(recipes, (newRecipes) => {

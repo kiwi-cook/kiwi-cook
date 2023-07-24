@@ -18,7 +18,7 @@
 import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {arrowDown} from 'ionicons/icons';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore} from '@/storage';
 import {Recipe} from "@/tastebuddy/types";
 
 
@@ -53,7 +53,7 @@ export default defineComponent({
     setup(props: any) {
         const {filter, itemList, loadAll} = toRefs(props)
 
-        const store = useTasteBuddyStore();
+        const store = useRecipeStore();
         const items: ComputedRef<unknown[]> = computed(() => (itemList.value
             ? (itemList.value ?? [])
             : store.getRecipesAsList));

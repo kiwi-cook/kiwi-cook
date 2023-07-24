@@ -11,7 +11,6 @@ export enum API_ROUTE {
     GET_RECIPES,
     ADD_RECIPE,
     DELETE_RECIPE,
-    SEARCH_RECIPES,
     GET_ITEMS,
     ADD_ITEM,
     DELETE_ITEM,
@@ -44,7 +43,6 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
         contentType: JSONTYPE,
         credentials: 'include'
     },
-    [API_ROUTE.SEARCH_RECIPES]: {url: '/search', method: 'POST', contentType: JSONTYPE},
     [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: JSONTYPE},
     [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.DELETE_ITEM]: {
@@ -53,7 +51,7 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
         contentType: JSONTYPE,
         credentials: 'include'
     },
-    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/suggest/recipe', method: 'POST', contentType: JSONTYPE},
+    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/s/recipe', method: 'POST', contentType: JSONTYPE},
 }
 
 export const DURATIONS = {

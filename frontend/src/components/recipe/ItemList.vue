@@ -77,7 +77,7 @@ export default defineComponent({
 
                 acc.push({
                     id: item.getId(),
-                    name: item.name,
+                    name: item.getName(),
                     imgUrl: item.imgUrl,
                     amount,
                     unit: item instanceof StepItem ? item.unit : '',

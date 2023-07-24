@@ -20,19 +20,39 @@ await ionicStorage.create();
 interface UserState {
     user: {
         authenticated: boolean
+    },
+    language: {
+        lang: string,
+        supportedLanguages: string[]
     }
 }
 
-export const useUserStore = defineStore('user', {
+export const useTasteBuddyStore = defineStore('tastebuddy', {
     state: (): UserState => ({
         user: {
             authenticated: false
+        },
+        language: {
+            lang: 'en',
+            supportedLanguages: ['en', 'de']
         }
     }),
     getters: {
+        /**
+         * Get the current app state
+         * @returns
+         */
+        isDevMode: (): boolean => process.env.NODE_ENV === 'development',
         isAuthenticated: (state): boolean => state.user.authenticated ?? false,
     },
     actions: {
+        /**
+         * Change the language
+         * @param language
+         */
+        changeLanguage(language: string) {
+            this.language.lang = this.language.supportedLanguages.includes(language) ? language : 'en'
+        },
         /**
          * Authenticate the user using the session cookie
          */
@@ -88,7 +108,7 @@ interface RecipeState {
 
 // Create the store
 // called by main.ts
-export const useTasteBuddyStore = defineStore('recipes', {
+export const useRecipeStore = defineStore('recipes', {
     state: (): RecipeState => ({
         loading: {},
         recipes: {},
@@ -99,11 +119,6 @@ export const useTasteBuddyStore = defineStore('recipes', {
     }),
     getters: {
         isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
-        /**
-         * Get the current app state
-         * @returns
-         */
-        isDevMode: (): boolean => process.env.NODE_ENV === 'development',
         /**
          * Get the recipes as list
          * @param state

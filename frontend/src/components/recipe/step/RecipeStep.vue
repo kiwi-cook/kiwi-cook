@@ -5,7 +5,8 @@
                 <IonImg :src="step?.imgUrl ?? ''"/>
                 <IonCardHeader>
                     <IonCardTitle>
-                        {{ stepIndex + 1 }}. Step
+                        <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
+                            class="recipe-step-index-max"> / {{ maxStepIndex }}</span>
                         <IonChip v-if="step?.duration">
                             <IonLabel>{{ step?.duration }} minutes</IonLabel>
                         </IonChip>
@@ -57,6 +58,10 @@ export default defineComponent({
         step: {
             type: Object as PropType<Step>,
             required: true
+        },
+        maxStepIndex: {
+            type: Number,
+            default: 0
         }
     },
     components: {
@@ -83,3 +88,14 @@ export default defineComponent({
     }
 })
 </script>
+
+<style scoped>
+.recipe-step-index {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.recipe-step-index-max {
+    font-size: 1.1rem;
+}
+</style>

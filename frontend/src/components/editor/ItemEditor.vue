@@ -3,7 +3,7 @@
         <IonCardHeader>
             <IonItem lines="none">
                 <IonAvatar v-if="mutableItem.imgUrl">
-                    <img :alt="`Image of ${mutableItem.name}`" :src="mutableItem.imgUrl"/>
+                    <img :alt="`Image of ${mutableItem.getName()}`" :src="mutableItem.imgUrl"/>
                 </IonAvatar>
                 <IonChip>
                     {{ mutableItem.getId() }}
@@ -29,6 +29,16 @@
                         </div>
                     </div>
                 </IonItem>
+
+                <template v-for="lang in supportedLanguages" :key="lang">
+                    <IonItem lines="none">
+                        <IonInput :maxlength="40" :value="item.getName(lang)" :label="`Name in ${lang}`"
+                                  label-placement="stacked"
+                                  placeholder="e.g. Baking powder" type="text"
+                                  @keyup.enter="item.setName($event.target.value, lang)"
+                                  @ion-blur="item.setName(($event.target.value ?? '').toString(), lang)"/>
+                    </IonItem>
+                </template>
 
                 <IonItem lines="none">
                     <IonInput v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="text"/>
@@ -69,7 +79,8 @@ import {
     IonCardContent,
     IonCardHeader,
     IonCardTitle,
-    IonChip, IonIcon,
+    IonChip,
+    IonIcon,
     IonInput,
     IonItem,
     IonList,
@@ -77,7 +88,7 @@ import {
     IonSelectOption
 } from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
-import {useTasteBuddyStore} from '@/storage';
+import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {save, trash} from "ionicons/icons";
 
 export default defineComponent({
@@ -106,10 +117,12 @@ export default defineComponent({
     emits: ['remove'],
     setup(props) {
         const {item} = toRefs(props)
-        const store = useTasteBuddyStore()
+        const tasteBuddyStore = useTasteBuddyStore()
+        const supportedLanguages = tasteBuddyStore.language.supportedLanguages
+
+        const recipeStore = useRecipeStore()
 
         const mutableItem: Ref<Item> = ref(item.value)
-
         // update mutableItem when item changes
         watch(item, () => {
             mutableItem.value = item.value
@@ -117,12 +130,12 @@ export default defineComponent({
 
 
         const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
-            const recipesByItemIds = store.getRecipesByItemIds
+            const recipesByItemIds = recipeStore.getRecipesByItemIds
             if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
                 return []
             }
             return recipesByItemIds[item.value?.getId() ?? '']
-                .map((recipeId: string) => store.getRecipesAsMap[recipeId])
+                .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId])
         })
 
         const saveItem = () => mutableItem.value.save()
@@ -133,7 +146,9 @@ export default defineComponent({
             trash, save,
             // items
             mutableItem, saveItem, deleteItem,
-            usedInRecipes
+            usedInRecipes,
+            // i18n
+            supportedLanguages
         }
     }
 })
