@@ -223,6 +223,9 @@ export const useRecipeStore = defineStore('recipes', {
                 date: number,
                 value: any
             }) => {
+                if (!cachedItem) {
+                    return {value: null, isOld: true}
+                }
                 return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
             })
         },
@@ -235,7 +238,7 @@ export const useRecipeStore = defineStore('recipes', {
             // fetch all items
             this.getCachedItem('items').then((cachedItem: { value: Item[], isOld: boolean }) => {
                 if (cachedItem.isOld) {
-                    this.fetchItems().then(() => this.fetchRecipes())
+                    this.fetchItems()
                 } else {
                     this.setItems(cachedItem.value.map((item: Item) => Item.fromJSON(item)))
                 }
@@ -250,9 +253,7 @@ export const useRecipeStore = defineStore('recipes', {
             })
             // fetch saved recipes
             this.getCachedItem('savedRecipes').then((cachedItem: { value: string[], isOld: boolean }) => {
-                if (cachedItem.isOld) {
-                    this.fetchRecipes()
-                } else {
+                if (!cachedItem.isOld) {
                     this.setSavedRecipes(cachedItem.value)
                 }
             })
