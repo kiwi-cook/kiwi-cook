@@ -1,6 +1,6 @@
 <template>
     <IonItem lines="none">
-        <IonInput :label="label" :label-placement="labelPlacement" :aria-label="inputValue"
+        <IonInput :aria-label="inputValue" :label="label" :label-placement="labelPlacement"
                   :placeholder="placeholder ?? ''"
                   :value="inputValue" type="text" @input="handleInput($event)" @keyup.enter="addItem()"/>
     </IonItem>

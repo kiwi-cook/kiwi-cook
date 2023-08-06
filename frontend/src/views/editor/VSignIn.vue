@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content">
                 <h1 class="header-title">
-                    Hello
+                    Hello 🍻
                 </h1>
 
                 <SignIn/>

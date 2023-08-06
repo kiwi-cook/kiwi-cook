@@ -35,8 +35,7 @@
 import {useRecipeStore} from '@/storage';
 import {IonButton, IonCol, IonGrid, IonRow, IonTextarea} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {logDebug, sendToAPI} from "@/tastebuddy";
-import {API_ROUTE} from "@/tastebuddy/constants";
+import {API_ROUTE, logDebug, sendToAPI} from "@/tastebuddy";
 
 export default defineComponent({
     name: 'RecipeTransformator',

@@ -1,15 +1,10 @@
 <template>
     <IonPage id="recipe-editor-page">
-        <IonHeader>
-            <IonToolbar>
-                <IonTitle>Recipe Editor</IonTitle>
-            </IonToolbar>
-        </IonHeader>
         <IonContent :fullscreen="true">
             <div class="content">
-                <IonRefresher slot="fixed" @ion-refresh="handleRefresh($event)">
-                    <IonRefresherContent/>
-                </IonRefresher>
+                <h1 class="header-title">
+                    Recipe Editor
+                </h1>
                 <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
@@ -24,19 +19,7 @@
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
-import {
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonRefresher,
-    IonRefresherContent,
-    IonTitle,
-    IonToolbar,
-    useIonRouter
-} from '@ionic/vue';
+import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import {Recipe} from '@/tastebuddy/types';
 import {useRecipeStore} from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
@@ -45,10 +28,9 @@ import {arrowBack} from "ionicons/icons";
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
-        IonRefresher, IonRefresherContent,
         IonIcon, IonFab, IonFabButton,
         RecipeEditor,
-        IonPage, IonContent, IonHeader, IonToolbar, IonTitle
+        IonPage, IonContent
     },
     setup() {
         const route = useRoute();
@@ -79,23 +61,12 @@ export default defineComponent({
             document.removeEventListener("keydown", handleSave, false);
         })
 
-        const handleRefresh = async (event: any) => {
-            store.fetchRecipes().then(() => {
-                // set timeout to avoid sus behaviour :)
-                setTimeout(() => {
-                    // 'complete' tells the refresher to close itself
-                    event.detail.complete()
-                }, 1700)
-            })
-        }
-
 
         const router = useIonRouter()
         const goBack = () => router.back()
 
         return {
             recipe,
-            handleRefresh,
             goBack, arrowBack
         }
     }

@@ -1,7 +1,6 @@
 // Data types for the API
 
-import {descriptionToSteps} from "@/utility/recipeParser";
-import {logDebug, logError} from ".";
+import {logDebug, logError} from "@/tastebuddy";
 import {CanShareResult, Share} from "@capacitor/share";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 
@@ -37,9 +36,9 @@ export class Item {
      * This is done because the json object does not have the methods of the class
      *
      * @param json
-     * @returns a new recipe
+     * @returns a new item
      */
-    static fromJSON(json: Item): Item {
+    public static fromJSON(json: Item): Item {
         const item = new Item()
         item._id = json._id
         // remove the temporary id
@@ -110,7 +109,7 @@ export class Item {
     public update(): this {
         logDebug("item.update", this.getId())
         const store = useRecipeStore()
-        store.updateItem(this)
+        store.setItem(this)
         return this
     }
 
@@ -166,9 +165,9 @@ export class StepItem extends Item {
      * This is done because the json object does not have the methods of the class
      *
      * @param json
-     * @returns a new recipe
+     * @returns a new step item
      */
-    static fromJSON(json: StepItem): StepItem {
+    public static fromJSON(json: StepItem): StepItem {
         const stepItem = new StepItem()
         stepItem.amount = json.amount
         stepItem.servingAmount = json.amount
@@ -232,9 +231,9 @@ export class Step {
      * This is done because the json object does not have the methods of the class
      *
      * @param json
-     * @returns a new recipe
+     * @returns a new step
      */
-    static fromJSON(json: Step): Step {
+    public static fromJSON(json: Step): Step {
         const item = new Step()
         item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
@@ -255,15 +254,6 @@ export class Step {
         step.items = stepItems
         step.description = description ?? ''
         return step
-    }
-
-    /**
-     * Generate a list of steps from a description
-     * @param description
-     * @returns a list of steps
-     */
-    public static fromDescription(description: string): Step[] {
-        return descriptionToSteps(description)
     }
 
     /**
@@ -313,6 +303,7 @@ export class Recipe {
     authors: string[];
     description: string;
     steps: Step[];
+    items: StepItem[];
     props: {
         url?: string;
         imgUrl?: string;
@@ -338,6 +329,7 @@ export class Recipe {
             tags: [],
         }
         this.steps = [new Step()]
+        this.items = []
         this.servings = 1
         this.isLiked = false;
     }
@@ -368,6 +360,7 @@ export class Recipe {
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
         logDebug('recipe.fromJSON', recipe)
+        recipe.computeItems()
         return recipe
     }
 
@@ -454,7 +447,7 @@ export class Recipe {
     public update(): this {
         logDebug('recipe.update', this.getId())
         const store = useRecipeStore()
-        store.updateRecipe(this)
+        store.setRecipe(this)
         return this
     }
 
@@ -493,16 +486,7 @@ export class Recipe {
             // add the step to the end
             this.steps.push(_step)
         }
-        return this
-    }
-
-    /**
-     * Add multiple steps to the recipe
-     * @param steps
-     * @returns the recipe to allow chaining
-     */
-    public addSteps(steps: Step[]): this {
-        this.steps.push(...steps)
+        this.computeItems()
         return this
     }
 
@@ -513,6 +497,7 @@ export class Recipe {
      */
     public removeStep(index: number): this {
         this.steps.splice(index, 1)
+        this.computeItems()
         return this
     }
 
@@ -538,14 +523,11 @@ export class Recipe {
             // update the item at the specified index
             this.steps[stepIndex].items[itemIndex] = new StepItem(item);
         }
+        this.computeItems()
         return {item, recipe: this};
     }
 
-    /**
-     * Get all unique items in the recipe
-     * @returns a list of all items in the recipe
-     */
-    public getItems(sorted = false): StepItem[] {
+    computeItems() {
         // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
         // use flatMap to get all items in the recipe
         const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
@@ -556,11 +538,15 @@ export class Recipe {
         items.forEach((item: StepItem) => {
             uniqueItems[item.getId()] = item
         })
-        const result = Object.values(uniqueItems)
-        if (sorted) {
-            result.sort((a, b) => a.name.localeCompare(b.name))
-        }
-        return result
+        this.items = Object.values(uniqueItems)
+    }
+
+    /**
+     * Get all unique items in the recipe
+     * @returns a list of all items in the recipe
+     */
+    public getItems(): StepItem[] {
+        return this.items
     }
 
     /**
@@ -625,7 +611,7 @@ export class Recipe {
     public toggleLike() {
         const store = useRecipeStore()
         this.isLiked = !this.isLiked
-        store.updateLike(this)
+        store.setLike(this)
     }
 }
 

@@ -8,6 +8,9 @@ import App from './App.vue'
 // Router
 import {createTasteBuddyRouter} from './router';
 
+// Store
+import {createPinia} from "pinia";
+
 // Styles
 /* Add service worker */
 import './registerServiceWorker';
@@ -33,8 +36,9 @@ import './theme/colors.css';
 import './theme/custom.css';
 import './theme/layout.css';
 import './theme/headers.css';
+
+/* Icons */
 import 'ionicons/icons';
-import {createPinia} from "pinia";
 
 /* Initialize store */
 const pinia = createPinia()
@@ -49,5 +53,5 @@ const app = createApp(App)
     .use(router)
 
 router.isReady().then(() => {
-    app.mount('#app');
+    app.mount('#tastebuddy');
 });

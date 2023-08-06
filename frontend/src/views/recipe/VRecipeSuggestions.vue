@@ -14,14 +14,16 @@
 
                 <!-- <List v-if="favoriteRecipes.length > 0" :item-list="favoriteRecipes">
                     <template #item="{ item }">
-                        <RecipePreview :no-description="true" :recipe="(item as Recipe)"/>
+                        <div class="mini-recipe-preview">
+                            <RecipePreview :no-description="true" :recipe="(item as Recipe)"/>
+                        </div>
                     </template>
                 </List> -->
 
                 <ItemList v-if="suggestedItems.length > 0" :horizontal="true" :items="suggestedItems"
                           @select="selectItem($event)"/>
 
-                <IonCard v-if="selectedItems.length > 0">
+                <IonCard>
                     <IonCardHeader>
                         <IonCardSubtitle>
                             Your ingredients
@@ -33,7 +35,7 @@
                     </IonCardContent>
                 </IonCard>
 
-                <IonCard>
+                <!-- <IonCard v-if="selectedItems.length > 0">
                     <IonCardHeader>
                         <IonCardSubtitle>
                             Find the best ingredient prices near you!
@@ -43,9 +45,9 @@
                         <IonInput v-model="city" label="City" label-placement="stacked"
                                   placeholder="Where do you live?"/>
                     </IonCardContent>
-                </IonCard>
+                </IonCard> -->
 
-                <IonCard>
+                <IonCard v-show="selectedItems.length > 0" class="animation-fade-in">
                     <IonCardHeader>
                         <IonCardSubtitle>
                             How long do you want to spend cooking?
@@ -103,7 +105,6 @@ import {
     IonCardSubtitle,
     IonCardTitle,
     IonContent,
-    IonInput,
     IonPage,
     IonRange,
 } from '@ionic/vue';
@@ -128,7 +129,6 @@ export default defineComponent({
         RecipeSuggestionPreview,
         RecipePreview,
         List,
-        IonInput,
         IonPage,
         IonContent,
         IonCard,
@@ -140,6 +140,12 @@ export default defineComponent({
         IonRange
     },
     setup() {
+        const enum suggestionStates {
+            ITEMS_SELECTED,
+            LOCATION,
+            COOKING_TIME,
+        }
+
         const store = useRecipeStore()
         const itemsById = computed(() => store.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
@@ -189,9 +195,11 @@ export default defineComponent({
 
         /* Items suggestions prototype */
         const suggestedItems: Ref<Item[]> = computed(() => {
-                return [...new Set(favoriteRecipes.value.flatMap((recipe: Recipe) => (recipe.getItems() ?? [])
-                    .map((item: StepItem) => item.narrow(item))))]
-                    .slice(0, 3)
+                favoriteRecipes.value.slice(0, 3).flatMap((recipe: Recipe) => recipe.getItems() ?? [])
+                const itemsFromRecipes = favoriteRecipes.value.flatMap((recipe: Recipe) => (recipe.getItems() ?? [])
+                    .map((item: StepItem) => item.narrow(item)))
+                const randomItems = items.value.filter(() => Math.random() < 0.8)
+                return [...new Set([...itemsFromRecipes, ...randomItems])]
             }
         )
 
@@ -224,4 +232,10 @@ ion-card-title {
 .search-button {
     width: 70%;
     max-width: 400px;
-}</style>
+}
+
+.mini-recipe-preview {
+    width: 100%;
+    max-width: 200px;
+}
+</style>

@@ -56,7 +56,7 @@
         </IonText>
     </IonItem>
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-        <RecipeStep :step="step" :stepIndex="stepIndex" :max-step-index="steps.length"/>
+        <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
     </template>
 </template>
 

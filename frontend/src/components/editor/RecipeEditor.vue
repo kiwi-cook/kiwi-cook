@@ -80,14 +80,6 @@
         </IonCardContent>
     </IonCard>
 
-    <IonCard class="shadow">
-        <IonCardContent>
-            <IonTextarea :auto-grow="true" label="Steps from description"
-                         placeholder="e.g. Add 500 gr flour and 5 egg to a bowl."
-                         @keyup.enter="addStepsFromDescription($event.target.value)"/>
-        </IonCardContent>
-    </IonCard>
-
     <!-- Steps -->
     <IonButton fill="clear" @click="addStep(-1)">Add step</IonButton>
     <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
@@ -139,9 +131,10 @@
                                 <IonCardTitle color="primary">
                                     <IonItem lines="none">
                                         <div slot="start">
-                                            <DropDownSearch :custom-mapper="(item: Item) => item.getName()" :item="stepItem"
-                                                            label="Name"
-                                                            :items="allItems" placeholder="e.g. Baking powder"
+                                            <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
+                                                            :item="stepItem"
+                                                            :items="allItems"
+                                                            label="Name" placeholder="e.g. Baking powder"
                                                             @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                             @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
@@ -212,7 +205,7 @@
 </template>
 
 <script lang="ts">
-import {Item, Recipe, Step, StepItem} from '@/tastebuddy/types';
+import {formatDate, Item, Recipe} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -237,8 +230,6 @@ import {
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
 import {closeCircleOutline, create, save, trash} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
-import {descriptionToItems} from '@/utility/recipeParser';
-import {formatDate} from '@/utility/util';
 import ItemList from "@/components/recipe/ItemList.vue";
 
 export default defineComponent({
@@ -303,12 +294,6 @@ export default defineComponent({
          */
         const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, stepIndex)
 
-        /**
-         * Add steps to the recipe from a description
-         * @param description description to parse
-         */
-        const addStepsFromDescription = (description: string) => mutableRecipe
-            .value?.addSteps(Step.fromDescription(description))
 
         /**
          * Remove a step from the recipe
@@ -334,16 +319,6 @@ export default defineComponent({
         const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe
             .value?.steps[stepIndex].items[itemIndex].updateItem(item)
 
-        /**
-         * Add items to a step from a description
-         * @param stepIndex index of the step to add the items to
-         */
-        const addItemsFromDescription = (stepIndex: number) => {
-            const description: string = mutableRecipe.value?.steps[stepIndex].description ?? '';
-            descriptionToItems(description).forEach((stepItem: StepItem) => {
-                mutableRecipe.value.addStep(Step.fromStepItems([stepItem], description))
-            })
-        }
 
         /**
          * Remove an item from a step
@@ -372,9 +347,9 @@ export default defineComponent({
             // recipe
             mutableRecipe, saveRecipe, deleteRecipe,
             // steps
-            addStep, removeStep, addStepsFromDescription,
+            addStep, removeStep,
             // items
-            allItems, addItem, editItem, selectItem, removeItem, addItemsFromDescription,
+            allItems, addItem, editItem, selectItem, removeItem,
             // tags
             allTags,
             // icons

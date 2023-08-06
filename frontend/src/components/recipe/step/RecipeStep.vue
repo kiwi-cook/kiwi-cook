@@ -43,7 +43,7 @@ import {
     IonText
 } from '@ionic/vue';
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Step} from "@/tastebuddy/types";
+import {Step} from "@/tastebuddy";
 import ItemList from "@/components/recipe/ItemList.vue";
 import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue"

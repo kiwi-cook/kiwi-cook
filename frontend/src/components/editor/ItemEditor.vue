@@ -32,7 +32,7 @@
 
                 <template v-for="lang in supportedLanguages" :key="lang">
                     <IonItem lines="none">
-                        <IonInput :maxlength="40" :value="item.getName(lang)" :label="`Name in ${lang}`"
+                        <IonInput :label="`Name in ${lang}`" :maxlength="40" :value="item.getName(lang)"
                                   label-placement="stacked"
                                   placeholder="e.g. Baking powder" type="text"
                                   @keyup.enter="item.setName($event.target.value, lang)"

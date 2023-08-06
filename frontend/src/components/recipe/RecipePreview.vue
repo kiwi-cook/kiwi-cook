@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
-import {Recipe, Step} from "@/tastebuddy/types";
+import {Recipe, Step} from "@/tastebuddy";
 import {IonItem, IonText, useIonRouter} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import ItemList from "@/components/recipe/ItemList.vue";

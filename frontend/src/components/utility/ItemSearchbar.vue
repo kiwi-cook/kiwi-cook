@@ -10,7 +10,7 @@
 <script lang="ts">
 import {defineComponent, PropType, ref, toRefs, watch} from "vue";
 import ItemList from "@/components/recipe/ItemList.vue";
-import {Item, StepItem} from "@/tastebuddy/types";
+import {Item, StepItem} from "@/tastebuddy";
 import {IonSearchbar} from "@ionic/vue";
 
 export default defineComponent({

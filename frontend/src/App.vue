@@ -22,7 +22,6 @@ export default defineComponent({
         // Initialize the store
         const store = useRecipeStore();
         store.prepare()
-        store.updateIonicStorage()
 
         // Use matchMedia to check the user preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');

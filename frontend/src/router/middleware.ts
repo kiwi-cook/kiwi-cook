@@ -1,5 +1,5 @@
-import { logDebug } from "@/tastebuddy";
-import { useTasteBuddyStore } from "@/storage";
+import {logDebug} from "@/tastebuddy";
+import {useTasteBuddyStore} from "@/storage";
 
 export const logMiddleware = (to: any, from: any) => {
     logDebug('middleware.router', `routing from ${from.path} -> ${to.path}`)
@@ -14,7 +14,7 @@ export const logMiddleware = (to: any, from: any) => {
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
 export const checkAuthMiddleware = (to: any, from: any, next: any) => {
-    const goHome = () => next({ name: 'Home' })
+    const goHome = () => next({name: 'Home'})
     const store = useTasteBuddyStore();
 
     // if user is not in dev mode, redirect to home if they try to go to login page
@@ -30,7 +30,7 @@ export const checkAuthMiddleware = (to: any, from: any, next: any) => {
                     next()
                 } else {
                     const redirect = to.query.redirect ? to.query.redirect : to.path;
-                    next({ name: 'Login', query: { redirect: redirect } });
+                    next({name: 'Login', query: {redirect: redirect}});
                 }
             })
         } else {

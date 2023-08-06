@@ -1,3 +1,6 @@
+import {toastController} from "@ionic/vue";
+import {DURATIONS} from "@/tastebuddy";
+
 /**
  * Create a deep copy of an object
  * This is done by serializing the object to JSON and then parsing it back to an object
@@ -23,11 +26,21 @@ export function formatDate(date?: Date): string {
 
 
 /**
- * Set the cookie details
- * @param cookie
- * @param value
- * @param expirationDate
+ * Present a toast to the user
+ * @param message the message to display
+ * @param isError
+ * @param duration the duration of the toast in milliseconds
  */
-export function setCookie(cookie: string, value: string, expirationDate: Date) {
-    document.cookie = cookie + "=" + value + ";path=/;expires=" + expirationDate.toUTCString();
+export const presentToast = async (message?: string, isError = false, duration = DURATIONS.SHORT) => {
+    if ((message ?? '') === '') {
+        return
+    }
+
+    const toast = toastController.create({
+        message,
+        duration,
+        position: 'top',
+        color: isError ? 'danger' : 'success'
+    });
+    await (await toast).present()
 }

@@ -12,22 +12,22 @@
             <div class="hero-bottom">
                 <div class="hero-buttons">
                     <slot name="buttons">
-                        <IonButton v-if="routable" class="hero-button hero-button-view-recipe-big" color="primary"
-                                   shape="round" aria-description="Route to recipe" @click="toRecipe(true)">View Recipe
+                        <IonButton v-if="routable" aria-description="Route to recipe" class="hero-button hero-button-view-recipe-big"
+                                   color="primary" shape="round" @click="toRecipe(true)">View Recipe
                         </IonButton>
-                        <IonButton v-if="routable" class="hero-button hero-button-view-recipe-small" color="primary"
-                                   aria-description="Route to recipe"
+                        <IonButton v-if="routable" aria-description="Route to recipe" class="hero-button hero-button-view-recipe-small"
+                                   color="primary"
                                    shape="round" @click="toRecipe(true)">
                             <IonIcon :icon="restaurant"/>
                         </IonButton>
                         <IonButton class="hero-button" color="primary" shape="round" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
-                        <IonButton v-if="recipe?.props.url" class="hero-button" color="primary" shape="round"
-                                   :href="recipe?.props.url" target="_blank">
+                        <IonButton v-if="recipe?.props.url" :href="recipe?.props.url" class="hero-button" color="primary"
+                                   shape="round" target="_blank">
                             <IonIcon :icon="link"/>
                         </IonButton>
-                        <IonButton v-if="isDevMode" class="hero-button" shape="round" color="secondary"
+                        <IonButton v-if="isDevMode" class="hero-button" color="secondary" shape="round"
                                    @click="editRecipe()">
                             <IonIcon :icon="create"/>
                         </IonButton>
@@ -57,11 +57,10 @@
 
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Recipe} from "@/tastebuddy/types";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
-import {formatDate} from "@/utility/util";
 import {create, heart, heartOutline, link, restaurant} from "ionicons/icons";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
+import {formatDate, Recipe} from "@/tastebuddy";
 
 export default defineComponent({
     name: 'RecipeHero',

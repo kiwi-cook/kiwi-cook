@@ -2,12 +2,20 @@
 import {defineStore} from 'pinia'
 
 // Types
-import {Item, Recipe, RecipeSuggestion, RecipeSuggestionQuery} from '@/tastebuddy/types';
-import {API_ROUTE} from '@/tastebuddy/constants';
-import {APIResponse, logDebug, logError, presentToast, sendToAPI} from '@/tastebuddy';
-
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
+import {
+    API_ROUTE,
+    APIResponse,
+    Item,
+    logDebug,
+    logError,
+    presentToast,
+    Recipe,
+    RecipeSuggestion,
+    RecipeSuggestionQuery,
+    sendToAPI
+} from "@/tastebuddy";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -56,7 +64,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         /**
          * Authenticate the user using the session cookie
          */
-        sessionAuth() {
+        async sessionAuth() {
             logDebug('sessionAuth', 'logging in')
             // if the user is already authenticated, return true
             if (this.isAuthenticated) {
@@ -76,7 +84,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          * @param payload username and password
          * @returns true if the authentication was successful, false otherwise
          */
-        basicAuth(payload: { username: string, password: string }): Promise<boolean> {
+        async basicAuth(payload: { username: string, password: string }): Promise<boolean> {
             logDebug('basicAuth', 'logging in')
             const {username, password} = payload
             return sendToAPI<string>(API_ROUTE.POST_AUTH, {
@@ -179,10 +187,6 @@ export const useRecipeStore = defineStore('recipes', {
                 return recipes
             }, {})
         },
-        /**
-         * Get the items
-         * @param state
-         */
         getItems: (state): Item[] => {
             const itemsAsArray: Item[] = Object.values(state.items ?? {})
             itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
@@ -199,81 +203,137 @@ export const useRecipeStore = defineStore('recipes', {
         }
     },
     actions: {
+        /**
+         * Cache item in the Ionic Storage and set a timestamp
+         * @param key
+         * @param value
+         */
+        async setCachedItem(key: string, value: any) {
+            return ionicStorage.set(key, {date: new Date().getTime(), value: value}).then(() => {
+                logDebug('setCachedItem', `saved ${key} to cache`)
+                return value
+            })
+        },
+        /**
+         * Get the cached item
+         * @param key
+         */
+        async getCachedItem(key: string): Promise<{ value: any, isOld: boolean }> {
+            return ionicStorage.get(key).then((cachedItem: {
+                date: number,
+                value: any
+            }) => {
+                return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
+            })
+        },
+        /**
+         * Prepare the Ionic Storage by fetching the items and recipes
+         * If the cache is old, the items and recipes are fetched from the API
+         */
         async prepare() {
-            this.cacheIsOld.then((isOld: boolean) => {
-                if (isOld) {
+            this.setLoadingState('prepare')
+            // fetch all items
+            this.getCachedItem('items').then((cachedItem: { value: Item[], isOld: boolean }) => {
+                if (cachedItem.isOld) {
                     this.fetchItems().then(() => this.fetchRecipes())
                 } else {
-                    // first get the items from storage
-                    ionicStorage.get('items').then((items: Item[]) => {
-                        logDebug('prepare', 'got items from storage')
-                        const itemsAsObject = items.map((item: Item) => Item.fromJSON(item))
-                        this.setItems(itemsAsObject)
-                    }) // ... then get the recipes from storage
-                        // this must be done after the items are loaded because when the recipes are loaded
-                        // the recipes look up the items by their id
-                        .then(() => {
-                            ionicStorage.get('recipes').then((recipes: Recipe[]) => {
-                                logDebug('prepare', 'got recipes from storage')
-                                const recipesAsObject = recipes.map((recipe: Recipe) => Recipe.fromJSON(recipe))
-                                this.setRecipes(recipesAsObject)
-                            })
-                        })
-                        .then(() => {
-                            ionicStorage.get('savedRecipes').then((savedRecipes: string[]) => {
-                                logDebug('prepare', 'got saved recipes from storage')
-                                this.setSavedRecipes(savedRecipes)
-                            })
-                        })
+                    this.setItems(cachedItem.value.map((item: Item) => Item.fromJSON(item)))
                 }
             })
-        },
-        updateIonicStorage() {
-            const savedDate = new Date().toISOString()
-            ionicStorage.set('savedAt', savedDate).then(() => {
-                logDebug('updateIonicStorage', `savedAt updated to ${savedDate}`)
+            // fetch all recipes
+            this.getCachedItem('recipes').then((cachedItem: { value: Recipe[], isOld: boolean }) => {
+                if (cachedItem.isOld) {
+                    this.fetchRecipes()
+                } else {
+                    this.setRecipes(cachedItem.value.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                }
             })
+            // fetch saved recipes
+            this.getCachedItem('savedRecipes').then((cachedItem: { value: string[], isOld: boolean }) => {
+                if (cachedItem.isOld) {
+                    this.fetchRecipes()
+                } else {
+                    this.setSavedRecipes(cachedItem.value)
+                }
+            })
+            this.finishLoading('prepare')
         },
+        /**
+         * Override all recipes
+         * @param recipes
+         */
         setRecipes(recipes: Recipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
+            return this.setCachedItem('recipes', recipes)
         },
-        updateRecipe(recipe: Recipe) {
+        /**
+         * Update a single recipe
+         * @param recipe
+         */
+        setRecipe(recipe: Recipe) {
             this.recipes[recipe.getId()] = recipe
         },
-        updateLike(recipe: Recipe) {
+        /**
+         * Remove or add a recipe to the saved recipes
+         * @param recipe
+         */
+        setLike(recipe: Recipe) {
             if (recipe.isLiked) {
                 this.savedRecipes.add(recipe.getId())
             } else {
                 this.savedRecipes.delete(recipe.getId())
             }
-            ionicStorage.set('savedRecipes', [...this.savedRecipes]).then(() => {
-                logDebug('updateIonicStorage', 'savedRecipes updated')
-            })
+            return this.setCachedItem('savedRecipes', [...this.savedRecipes])
         },
+        /**
+         * Override all saved recipes
+         * @param savedRecipes
+         */
         setSavedRecipes(savedRecipes: string[]) {
             this.savedRecipes = new Set(savedRecipes)
         },
+        /**
+         * Override all items
+         * @param items
+         */
         setItems(items: Item[]) {
             this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
+            return this.setCachedItem('items', items)
         },
-        updateItem(item: Item) {
+        /**
+         * Update a single item
+         * @param item
+         */
+        setItem(item: Item) {
             this.items[item.getId()] = item
         },
+        /**
+         * Remove a single item
+         * @param item
+         */
         removeItem(item: Item) {
             delete this.items[item.getId()]
         },
-        addLoading(key: string) {
+        /**
+         * Set the loading state
+         * @param key
+         */
+        setLoadingState(key: string) {
             this.loading[key] = true
         },
+        /**
+         * Finish the loading state
+         * @param key
+         */
         finishLoading(key: string) {
             this.loading[key] = false
         },
         /**
          * Fetch the recipes from the API and store them in the store
          */
-        fetchRecipes(): Promise<Recipe[]> {
-            this.addLoading('fetchRecipes')
+        async fetchRecipes(): Promise<Recipe[]> {
             logDebug('fetchRecipes', 'fetching recipes')
+            this.setLoadingState('fetchRecipes')
             return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
                 .then((apiResponse: APIResponse<Recipe[]>) => {
                     // map the recipes JSON to Recipe objects
@@ -282,18 +342,14 @@ export const useRecipeStore = defineStore('recipes', {
                     if (!apiResponse.error) {
                         const recipes = apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe))
                         this.setRecipes(recipes)
-                        // update the ionic storage
-                        ionicStorage.set('recipes', recipes).then(() => {
-                            logDebug('updateIonicStorage', 'recipes updated in ionic storage')
-                        })
                     }
                     this.finishLoading('fetchRecipes')
                     return apiResponse.response
                 });
         },
         saveRecipeById(recipeId: string) {
-            this.addLoading('saveRecipeById')
             logDebug('saveRecipeById', recipeId)
+            this.setLoadingState('saveRecipeById')
             const recipe: Recipe = this.getRecipesAsMap[recipeId]
             if (typeof recipe === 'undefined') {
                 logError('Recipe not found: ', recipeId)
@@ -303,10 +359,10 @@ export const useRecipeStore = defineStore('recipes', {
                 this.finishLoading('saveRecipeById')
             })
         },
-        saveRecipe(recipe: Recipe) {
-            this.addLoading('saveRecipe')
+        async saveRecipe(recipe: Recipe) {
             logDebug('saveRecipe', recipe)
-            this.updateRecipe(recipe)
+            this.setLoadingState('saveRecipe')
+            this.setRecipe(recipe)
             return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
                 body: recipe,
                 errorMessage: 'Could not save recipe in database. Please retry later!',
@@ -322,9 +378,9 @@ export const useRecipeStore = defineStore('recipes', {
                     return []
                 })
         },
-        deleteRecipe(recipe: Recipe): Promise<void> {
-            this.addLoading('deleteRecipe')
+        async deleteRecipe(recipe: Recipe): Promise<void> {
             logDebug('deleteRecipe', recipe)
+            this.setLoadingState('deleteRecipe')
             delete this.recipes[recipe.getId()]
             if (typeof recipe._id !== 'undefined') {
                 return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
@@ -343,9 +399,9 @@ export const useRecipeStore = defineStore('recipes', {
          * Fetch the suggestions for the recipe search
          * @param query
          */
-        fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<RecipeSuggestion[]> {
-            this.addLoading('fetchRecipeSuggestions')
+        async fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<RecipeSuggestion[]> {
             logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
+            this.setLoadingState('fetchRecipeSuggestions')
             return sendToAPI<RecipeSuggestion[]>(API_ROUTE.POST_SUGGEST_RECIPE, {
                 body: query,
                 errorMessage: 'Could not fetch recipe suggestions'
@@ -361,9 +417,9 @@ export const useRecipeStore = defineStore('recipes', {
                     return this.getRecipeSuggestions
                 });
         },
-        fetchItems(): Promise<Item[]> {
-            this.addLoading('fetchItems')
+        async fetchItems(): Promise<Item[]> {
             logDebug('fetchItems', 'fetching items')
+            this.setLoadingState('fetchItems')
             return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
                 .then((apiResponse: APIResponse<Item[]>) => {
                     // map the items JSON to Item objects
@@ -372,18 +428,15 @@ export const useRecipeStore = defineStore('recipes', {
                     if (!apiResponse.error) {
                         const items: Item[] = apiResponse.response.map((item: Item) => Item.fromJSON(item))
                         this.setItems(items)
-                        // update the ionic storage
-                        ionicStorage.set('items', items).then(() => {
-                            logDebug('updateIonicStorage', 'items updated in ionic storage')
-                        })
                     }
                     this.finishLoading('fetchItems')
                     return apiResponse.response
                 });
         },
-        saveItem(item: Item) {
+        async saveItem(item: Item) {
             logDebug('saveItem', item)
-            this.updateItem(item)
+            this.setLoadingState('saveItem')
+            this.setItem(item)
             return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
                 body: item,
                 errorMessage: 'Could not save item in database. Please retry later!'
@@ -392,11 +445,12 @@ export const useRecipeStore = defineStore('recipes', {
                     if (!apiResponse.error) {
                         return this.fetchItems()
                     }
+                    this.finishLoading('saveItem')
                 });
         },
         deleteItem(item: Item) {
             logDebug('deleteItem', item)
-            this.addLoading('deleteItem')
+            this.setLoadingState('deleteItem')
             this.removeItem(item)
             if (typeof item._id !== 'undefined') {
                 return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {

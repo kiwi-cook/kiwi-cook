@@ -16,7 +16,7 @@
 import {computed, ComputedRef, defineComponent} from 'vue';
 import {IonContent, IonPage} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
-import {Recipe} from "@/tastebuddy/types";
+import {Recipe} from "@/tastebuddy";
 import {useRecipeStore} from "@/storage";
 
 

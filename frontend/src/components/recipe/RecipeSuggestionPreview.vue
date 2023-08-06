@@ -1,6 +1,9 @@
 <template>
     <div class="recipe-preview-card">
-        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true" class="recipe-preview-hero"/>
+        <IonItem>
+            <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true"
+                        class="recipe-preview-hero"/>
+        </IonItem>
         <IonItem v-if="possessedItems.length > 0" lines="none">
             <IonText>
                 <h1 class="recipe-subheader">What You'll Need</h1>
@@ -19,8 +22,8 @@
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
-import {Item, Recipe, RecipeSuggestion} from "@/tastebuddy/types";
+import {computed, defineComponent, PropType, toRefs} from "vue";
+import {Item, Recipe, RecipeSuggestion} from "@/tastebuddy";
 import {IonItem, IonText, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
@@ -43,13 +46,13 @@ export default defineComponent({
     },
     setup(props: { recipeSuggestion: RecipeSuggestion }) {
         const {recipeSuggestion} = toRefs(props)
-        const recipe: ComputedRef<Recipe> = computed(() => recipeSuggestion.value?.recipe ?? new Recipe())
-        const missingItems: ComputedRef<Item[]> = computed(() => recipeSuggestion.value?.getMissingItems() ?? [])
-        const possessedItems: ComputedRef<Item[]> = computed(() => {
+        const recipe = computed<Recipe>(() => recipeSuggestion.value?.recipe ?? new Recipe())
+        const missingItems = computed<Item[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
+        const possessedItems = computed<Item[]>(() => {
             const missingItemIds = missingItems.value.map(item => item.getId())
             return recipe.value.getItems().filter(item => !missingItemIds.includes(item.getId()))
         })
-        const additionalTags = computed(() => [
+        const additionalTags = computed<string[]>(() => [
             (recipeSuggestion.value.recipe_price ?? 0) + ' €'
         ])
 

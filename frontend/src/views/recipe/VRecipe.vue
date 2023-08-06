@@ -7,14 +7,9 @@
                 </template>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                <IonFabButton color="tertiary" size="small">
-                    <IonIcon :icon="addOutline"/>
+                <IonFabButton color="primary" @click="goBack()">
+                    <IonIcon :icon="arrowBack"/>
                 </IonFabButton>
-                <IonFabList side="end">
-                    <IonFabButton color="primary" @click="goBack()">
-                        <IonIcon :icon="arrowBack"/>
-                    </IonFabButton>
-                </IonFabList>
             </IonFab>
         </IonContent>
     </IonPage>
@@ -22,11 +17,11 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent} from 'vue';
-import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
+import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useRecipeStore} from "@/storage";
 import {useRoute} from 'vue-router';
-import {Recipe} from '@/tastebuddy/types';
+import {Recipe} from '@/tastebuddy';
 import {addOutline, arrowBack, createOutline} from "ionicons/icons";
 
 
@@ -34,7 +29,7 @@ export default defineComponent({
     title: 'RecipeOfTheDayPage',
     components: {
         RecipeComponent,
-        IonPage, IonContent, IonFabButton, IonIcon, IonFab, IonFabList,
+        IonPage, IonContent, IonFabButton, IonIcon, IonFab,
     },
     setup() {
         const route = useRoute()

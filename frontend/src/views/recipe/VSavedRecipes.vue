@@ -7,7 +7,7 @@
                 </h1>
                 <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search through your recipes"/>
 
-                <List :item-list="savedRecipes" :filter="filterInput"
+                <List :filter="filterInput" :item-list="savedRecipes"
                       no-items-message="Save recipes to find them faster">
                     <template #item="{ item }">
                         <RecipePreview :recipe="item"/>

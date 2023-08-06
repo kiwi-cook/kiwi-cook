@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Item, StepItem} from "@/tastebuddy/types";
+import {Item, StepItem} from "@/tastebuddy";
 import {IonChip, IonImg, IonItem, IonText} from "@ionic/vue";
 
 export default defineComponent({
@@ -58,7 +58,7 @@ export default defineComponent({
     setup(props: any, {emit}) {
         const {items, type, showLimit, disableClick} = toRefs(props);
 
-        type Item2 = {
+        type CustomItem = {
             id: string,
             name: string,
             imgUrl: string,
@@ -68,7 +68,7 @@ export default defineComponent({
             type: string
         }
 
-        const mappedItems = computed(() => items.value.reduce((acc: Item2[], item: Item, length: number) => {
+        const mappedItems = computed(() => items.value.reduce((acc: CustomItem[], item: Item, length: number) => {
                 if (typeof item === 'undefined' || length > showLimit.value || !type.value.includes(item.type)) {
                     return acc
                 }
