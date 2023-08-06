@@ -62,7 +62,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'Login',
                 path: 'login',
-                component: () => import('@/views/editor/VSignIn.vue')
+                component: () => import('@/views/editor/VSignIn.vue'),
             },
             // 404
             {

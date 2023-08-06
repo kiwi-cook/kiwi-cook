@@ -257,16 +257,16 @@ export class Step {
     }
 
     /**
-     * Get the short description of the recipe. It is the first two sentences of the description.
-     * @returns the short description of the recipe
+     * Get the description of the step
+     * as HTML with highlighted items
+     * @param className the class name of the highlighted items
      */
-    public getShortDescription(maxLength = 2): string {
-        let shortDescription = this.description.split('.').slice(0, maxLength).join('.')
-        const lastChar = shortDescription.charAt(shortDescription.length - 1)
-        if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
-            shortDescription += '.'
-        }
-        return shortDescription
+    public getDescription(className: string): string {
+        let description = this.description
+        this.getItems().forEach(item => {
+            description = description.replace(new RegExp(item.name, 'ig'), `<span class="${className}">${item.name}</span>`)
+        })
+        return description
     }
 
     /**
@@ -359,7 +359,6 @@ export class Recipe {
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
-        logDebug('recipe.fromJSON', recipe)
         recipe.computeItems()
         return recipe
     }
@@ -438,6 +437,10 @@ export class Recipe {
             shortDescription += '.'
         }
         return shortDescription
+    }
+
+    public getTags(): string[] {
+        return this.props.tags ?? []
     }
 
     /**
@@ -578,12 +581,14 @@ export class Recipe {
                 return Share.share({
                     title: 'Share with your recipe with buddies',
                     text: `Check out this recipe for ${this.name} on Taste Buddy!`,
-                    url: '#/' + this.route(),
+                    url: '#' + this.route(),
                     dialogTitle: 'Share with buddies',
                 })
             } catch (e) {
                 logError('sharing failed', e)
             }
+        }).catch((error: Error) => {
+            logError('sharing failed', error)
         })
     }
 
@@ -591,7 +596,7 @@ export class Recipe {
      * Get the route to the recipe
      */
     public route(): string {
-        return '/recipe/s/' + this.getId()
+        return '/recipe/show/' + this.getId()
     }
 
     /**

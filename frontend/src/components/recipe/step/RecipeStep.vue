@@ -15,9 +15,7 @@
                 <IonCardContent>
                     <AdditionalStepInfo :step="step"/>
                     <IonItem lines="none">
-                        <IonText>
-                            {{ step.description }}
-                        </IonText>
+                        <div v-html="step?.getDescription('item-highlight')"></div>
                     </IonItem>
                 </IonCardContent>
             </IonCard>
@@ -31,17 +29,7 @@
 </template>
 
 <script lang="ts">
-import {
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonChip,
-    IonImg,
-    IonItem,
-    IonLabel,
-    IonText
-} from '@ionic/vue';
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonImg, IonItem, IonLabel,} from '@ionic/vue';
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Step} from "@/tastebuddy";
 import ItemList from "@/components/recipe/ItemList.vue";
@@ -72,7 +60,6 @@ export default defineComponent({
         IonCardTitle,
         IonCardContent,
         IonItem,
-        IonText,
         IonImg,
         IonChip,
         IonLabel,
@@ -88,6 +75,13 @@ export default defineComponent({
     }
 })
 </script>
+
+<style>
+.item-highlight {
+    font-weight: bold;
+    color: var(--ion-color-secondary);
+}
+</style>
 
 <style scoped>
 .recipe-step-index {

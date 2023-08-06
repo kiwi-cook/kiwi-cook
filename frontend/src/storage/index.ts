@@ -223,7 +223,7 @@ export const useRecipeStore = defineStore('recipes', {
                 date: number,
                 value: any
             }) => {
-                if (!cachedItem) {
+                if (!cachedItem || typeof cachedItem === 'undefined') {
                     return {value: null, isOld: true}
                 }
                 return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
@@ -236,19 +236,19 @@ export const useRecipeStore = defineStore('recipes', {
         async prepare() {
             this.setLoadingState('prepare')
             // fetch all items
-            this.getCachedItem('items').then((cachedItem: { value: Item[], isOld: boolean }) => {
+            this.getCachedItem('items').then((cachedItem: { value: unknown[], isOld: boolean }) => {
                 if (cachedItem.isOld) {
                     this.fetchItems()
                 } else {
-                    this.setItems(cachedItem.value.map((item: Item) => Item.fromJSON(item)))
+                    this.setItems((cachedItem.value as Item[]).map((item: Item) => Item.fromJSON(item)))
                 }
             })
             // fetch all recipes
-            this.getCachedItem('recipes').then((cachedItem: { value: Recipe[], isOld: boolean }) => {
+            this.getCachedItem('recipes').then((cachedItem: { value: unknown[], isOld: boolean }) => {
                 if (cachedItem.isOld) {
                     this.fetchRecipes()
                 } else {
-                    this.setRecipes(cachedItem.value.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                    this.setRecipes((cachedItem.value as Recipe[]).map((recipe: Recipe) => Recipe.fromJSON(recipe)))
                 }
             })
             // fetch saved recipes

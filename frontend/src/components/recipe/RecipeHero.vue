@@ -7,25 +7,26 @@
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
                 <p v-if="!noDescription" class="recipe-description">{{ recipe?.getShortDescription() }}</p>
-                <h2 class="recipe-author">By {{ recipe?.getAuthors() }}</h2>
+                <h2 v-if="recipe.getAuthors() !== ''" class="recipe-author">By <a :href="recipe?.props?.url"
+                                                                                  target="_blank">{{
+                                                                                      recipe?.getAuthors()
+                                                                                  }}</a></h2>
             </div>
             <div class="hero-bottom">
                 <div class="hero-buttons">
                     <slot name="buttons">
-                        <IonButton v-if="routable" aria-description="Route to recipe" class="hero-button hero-button-view-recipe-big"
+                        <IonButton v-if="routable" aria-description="Route to recipe"
+                                   class="hero-button hero-button-view-recipe-big"
                                    color="primary" shape="round" @click="toRecipe(true)">View Recipe
                         </IonButton>
-                        <IonButton v-if="routable" aria-description="Route to recipe" class="hero-button hero-button-view-recipe-small"
+                        <IonButton v-if="routable" aria-description="Route to recipe"
+                                   class="hero-button hero-button-view-recipe-small"
                                    color="primary"
                                    shape="round" @click="toRecipe(true)">
                             <IonIcon :icon="restaurant"/>
                         </IonButton>
                         <IonButton class="hero-button" color="primary" shape="round" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
-                        </IonButton>
-                        <IonButton v-if="recipe?.props.url" :href="recipe?.props.url" class="hero-button" color="primary"
-                                   shape="round" target="_blank">
-                            <IonIcon :icon="link"/>
                         </IonButton>
                         <IonButton v-if="isDevMode" class="hero-button" color="secondary" shape="round"
                                    @click="editRecipe()">
@@ -34,8 +35,8 @@
                     </slot>
                 </div>
                 <div class="hero-tags">
-                    <div v-if="(recipe?.props?.tags ?? []).length > 0" class="flex">
-                        <IonChip v-for="tag in recipe?.props.tags" :key="tag" class="hero-tag" color="light">
+                    <div v-if="recipe?.getTags().length > 0" class="flex">
+                        <IonChip v-for="tag in recipe?.getTags()" :key="tag" class="hero-tag" color="light">
                             <IonLabel>{{ tag }}</IonLabel>
                         </IonChip>
                     </div>
@@ -46,7 +47,8 @@
                     </div>
                     <div class="flex">
                         <IonChip class="hero-tag" color="light">
-                            <IonLabel>{{ recipe?.getDuration() }} minutes</IonLabel>
+                            <IonIcon :icon="time" />
+                            <IonLabel>{{ recipe?.getDuration() }} min.</IonLabel>
                         </IonChip>
                     </div>
                 </div>
@@ -58,7 +60,7 @@
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
-import {create, heart, heartOutline, link, restaurant} from "ionicons/icons";
+import {create, heart, heartOutline, link, restaurant, time} from "ionicons/icons";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 import {formatDate, Recipe} from "@/tastebuddy";
 
@@ -111,7 +113,7 @@ export default defineComponent({
             toRecipe,
             formatDate, editRecipe, isDevMode,
             // icons
-            heart, heartOutline, restaurant, link, create
+            heart, heartOutline, restaurant, link, create, time
         }
     }
 })
@@ -168,6 +170,10 @@ export default defineComponent({
 .hero-text h2.recipe-author {
     font-size: 2em;
     font-weight: bold;
+}
+
+.recipe-author a {
+    color: inherit;
 }
 
 .hero-text p.recipe-description {
@@ -282,7 +288,6 @@ export default defineComponent({
 
     .hero-bottom {
         padding: 0 5px 5px;
-        flex-direction: column;
     }
 
     .hero-buttons {

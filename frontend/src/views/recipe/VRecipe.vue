@@ -1,6 +1,6 @@
 <template>
-    <IonPage id="recipe-detail-page">
-        <IonContent :fullscreen="true">
+    <IonPage id="recipe-page">
+        <IonContent id="recipe-page-content" :fullscreen="true">
             <div class="content">
                 <template v-if="recipe">
                     <RecipeComponent :recipe="recipe"/>
@@ -37,7 +37,6 @@ export default defineComponent({
 
         const store = useRecipeStore()
         const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeId.value])
-
 
         const router = useIonRouter()
         const goBack = () => router.back()

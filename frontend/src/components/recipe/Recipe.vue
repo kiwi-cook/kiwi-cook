@@ -58,6 +58,13 @@
     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
         <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
     </template>
+
+    <IonItem lines="none">
+        <IonNote>
+            Recipe from {{ recipe?.getAuthors() }} on <a :href="recipe?.props?.url"
+                                                         target="_blank">{{ recipe?.props?.url }}</a>
+        </IonNote>
+    </IonItem>
 </template>
 
 <script lang="ts">
@@ -72,6 +79,7 @@ import {
     IonInput,
     IonItem,
     IonList,
+    IonNote,
     IonText
 } from '@ionic/vue';
 import {flagOutline, heart, heartOutline, shareOutline} from 'ionicons/icons';
@@ -104,7 +112,8 @@ export default defineComponent({
         IonCardContent,
         IonCardHeader,
         IonCardTitle,
-        IonInput
+        IonInput,
+        IonNote
     },
     setup(props: any) {
         const {recipe} = toRefs(props);
