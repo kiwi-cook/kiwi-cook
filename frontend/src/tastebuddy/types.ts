@@ -419,6 +419,28 @@ export class Recipe {
     }
 
     /**
+     * Add an author to the list of authors
+     * @param author
+     */
+    public addAuthor(author: string): void {
+        if (this.authors === undefined) {
+            this.authors = []
+        }
+        this.authors.push(author)
+    }
+
+    /**
+     * Remove an author from the list of authors
+     * @param author
+     */
+    public removeAuthor(author: string): void {
+        if (this.authors === undefined) {
+            return
+        }
+        this.authors = this.authors.filter(a => a !== author)
+    }
+
+    /**
      * Get the duration of the recipe. It is the sum of the duration of all steps.
      * @returns the duration of the recipe
      */

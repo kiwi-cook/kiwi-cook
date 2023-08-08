@@ -4,9 +4,9 @@
             <IonGrid>
                 <IonRow>
                     <IonCol>
-                        <IonInput :maxlength="40" :value="mutableRecipe.name" label="Recipe name"
-                                  label-placement="stacked"
-                                  type="text" color="primary"
+                        <IonInput :maxlength="40" :value="mutableRecipe.name" color="primary"
+                                  label="Recipe name"
+                                  label-placement="stacked" type="text"
                                   @keyup.enter="mutableRecipe.name = $event.target.value"
                                   @ion-blur="mutableRecipe.name = ($event.target.value ?? '').toString()"/>
                     </IonCol>
@@ -44,9 +44,18 @@
                             </IonRow>
                             <IonRow>
                                 <IonCol size="auto">
-                                    <IonInput v-model.trim="mutableRecipe.author" label="Author"
-                                              label-placement="stacked"
-                                              placeholder="e.g. Vasilij & Josef" type="text"/>
+                                    <IonLabel position="stacked">Authors</IonLabel>
+                                    <IonChip v-for="(author, authorIndex) in (mutableRecipe.authors ?? [])"
+                                             :key="authorIndex"
+                                             class="recipe-author">
+                                        <IonLabel>{{ author }}</IonLabel>
+                                        <IonIcon :icon="closeCircleOutline"
+                                                 @click="(mutableRecipe.authors ?? []).splice(authorIndex, 1)"/>
+                                    </IonChip>
+                                    <IonInput label="Add author" label-placement="stacked"
+                                              placeholder="e.g. John Doe"
+                                              type="text"
+                                              @keydown.enter="mutableRecipe.addAuthor($event.target.value)"/>
                                 </IonCol>
                                 <IonCol size="auto">
 
@@ -206,7 +215,7 @@
         </IonCard>
         <IonButton fill="clear" @click="addStep(stepIndex)">Add step</IonButton>
     </template>
-    <IonItem>
+    <IonItem lines="none">
         <IonButton color="success" fill="solid"
                    @click="saveRecipe()">
             <IonIcon :icon="save"/>
