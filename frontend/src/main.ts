@@ -31,11 +31,11 @@ import '@ionic/vue/css/text-transformation.css';
 import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
-/* Theme variables */
+/* Custom variables */
 import './theme/colors.css';
-import './theme/custom.css';
+import './theme/global.css';
 import './theme/layout.css';
-import './theme/headers.css';
+import './theme/font.css';
 
 /* Icons */
 import 'ionicons/icons';

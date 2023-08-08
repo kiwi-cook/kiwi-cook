@@ -1,93 +1,73 @@
 <template>
-    <IonList lines="none">
-        <IonItem v-if="recipe" lines="none">
+    <div class="recipe-wrapper">
+        <div class="recipe-hero-wrapper">
             <RecipeHero :recipe="recipe" :routable="false"/>
-        </IonItem>
-        <IonItem v-if="recipe" lines="none">
-            <div class="center">
-                <IonButton v-if="canShareRecipe" color="primary" @click="shareRecipe()">
-                    <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
-                </IonButton>
-            </div>
-        </IonItem>
-    </IonList>
+        </div>
 
-    <IonItem v-if="itemsFromRecipe.length > 0" lines="none">
-        <IonText>
-            <h1 class="recipe-subheader">What You'll Need</h1>
+        <IonText v-if="itemsFromRecipe.length > 0" lines="none">
+            <h2>What you'll need</h2>
         </IonText>
-    </IonItem>
 
-    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
-        <template #left>
-            <IonCard>
-                <IonCardHeader>
-                    <IonCardTitle>
-                        {{ amountIngredients }} Ingredients
-                    </IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                    <IonItem class="servings-counter">
-                        <IonInput v-model="servings" label="Servings" label-placement="stacked" max="15"
-                                  min="1"
-                                  type="number"/>
-                    </IonItem>
-                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
-                </IonCardContent>
-            </IonCard>
-        </template>
-        <template #right>
-            <IonCard v-if="amountTools !== 0">
-                <IonCardHeader>
-                    <IonCardTitle>
-                        {{ amountTools }} Tools
-                    </IonCardTitle>
-                </IonCardHeader>
-                <IonCardContent>
-                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
-                </IonCardContent>
-            </IonCard>
-        </template>
-    </TwoColumnLayout>
+        <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+            <template #left>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                {{ amountIngredients }} Ingredients
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <IonItem class="servings-counter" lines="none">
+                            <IonInput v-model="servings" label="Servings" label-placement="end" max="15"
+                                      min="1"
+                                      type="number"/>
+                        </IonItem>
+                        <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
+                    </IonCardContent>
+                </IonCard>
+            </template>
+            <template #right>
+                <IonCard v-if="amountTools !== 0">
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                {{ amountTools }} Tools
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
+                    </IonCardContent>
+                </IonCard>
+            </template>
+        </TwoColumnLayout>
 
-    <IonItem v-if="steps?.length > 0" lines="none">
-        <IonText>
-            <h1 class="recipe-subheader">How to Make It</h1>
+        <IonText v-if="steps?.length > 0" lines="none">
+            <h2>How to make it!</h2>
         </IonText>
-    </IonItem>
-    <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-        <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
-    </template>
+        <template v-for="(step, stepIndex) in steps" :key="stepIndex">
+            <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
+        </template>
 
-    <IonItem lines="none">
-        <IonNote>
-            Recipe from {{ recipe?.getAuthors() }} on <a :href="recipe?.props?.url"
-                                                         target="_blank">{{ recipe?.props?.url }}</a>
-        </IonNote>
-    </IonItem>
+        <IonItem lines="none">
+            <IonNote>
+                Recipe from {{ recipe?.getAuthors() }} on <a :href="recipe?.props?.url"
+                                                             target="_blank">{{ recipe?.props?.url }}</a>
+            </IonNote>
+        </IonItem>
+    </div>
 </template>
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
-import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonIcon,
-    IonInput,
-    IonItem,
-    IonList,
-    IonNote,
-    IonText
-} from '@ionic/vue';
-import {flagOutline, heart, heartOutline, shareOutline} from 'ionicons/icons';
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem, IonNote, IonText} from '@ionic/vue';
+import {flagOutline, heart, heartOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
-import {CanShareResult, Share} from '@capacitor/share';
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
 export default defineComponent({
@@ -103,10 +83,7 @@ export default defineComponent({
         ItemList,
         RecipeHero,
         RecipeStep,
-        IonIcon,
-        IonButton,
         IonItem,
-        IonList,
         IonText,
         IonCard,
         IonCardContent,
@@ -130,15 +107,6 @@ export default defineComponent({
             }
         });
 
-        // share
-        const shareRecipe = () => recipe.value?.share();
-        // check if the browser supports sharing
-        const canShareRecipe = ref(false);
-        Share.canShare().then((canShareResult: CanShareResult) => {
-            canShareRecipe.value = canShareResult.value;
-        })
-
-
         return {
             // recipe
             servings,
@@ -146,8 +114,6 @@ export default defineComponent({
             steps,
             // items
             itemsFromRecipe, amountIngredients, amountTools,
-            // share
-            canShareRecipe, shareRecipe, shareOutline,
             // icons
             heart, heartOutline, flagOutline,
         };
@@ -156,12 +122,17 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.recipe-subheader {
-    margin-top: 2%;
-    font-weight: bold;
+.recipe-wrapper {
+    width: 100%;
+    margin: var(--margin);
 }
 
+/* .recipe-hero-wrapper {
+    margin-left: 15px;
+    margin-right: 15px;
+} */
+
 .servings-counter {
-    max-width: 100px;
+    max-width: 150px;
 }
 </style>

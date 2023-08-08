@@ -17,18 +17,22 @@
                     <slot name="buttons">
                         <IonButton v-if="routable" aria-description="Route to recipe"
                                    class="hero-button hero-button-view-recipe-big"
-                                   color="primary" shape="round" @click="toRecipe(true)">View Recipe
+                                   color="primary"
+                                   @click="toRecipe(true)">View Recipe
                         </IonButton>
                         <IonButton v-if="routable" aria-description="Route to recipe"
                                    class="hero-button hero-button-view-recipe-small"
-                                   color="primary"
-                                   shape="round" @click="toRecipe(true)">
+                                   color="primary" @click="toRecipe(true)">
                             <IonIcon :icon="restaurant"/>
                         </IonButton>
-                        <IonButton class="hero-button" color="primary" shape="round" @click="recipe?.toggleLike()">
+                        <IonButton class="hero-button" color="primary" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
-                        <IonButton v-if="isDevMode" class="hero-button" color="secondary" shape="round"
+                        <IonButton v-if="canShareRecipe" class="hero-button" color="primary"
+                                   @click="shareRecipe()">
+                            <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
+                        </IonButton>
+                        <IonButton v-if="isDevMode" class="hero-button" color="secondary"
                                    @click="editRecipe()">
                             <IonIcon :icon="create"/>
                         </IonButton>
@@ -47,7 +51,7 @@
                     </div>
                     <div class="flex">
                         <IonChip class="hero-tag" color="light">
-                            <IonIcon :icon="time" />
+                            <IonIcon :icon="time"/>
                             <IonLabel>{{ recipe?.getDuration() }} min.</IonLabel>
                         </IonChip>
                     </div>
@@ -58,11 +62,12 @@
 </template>
 
 <script lang="ts">
-import {computed, defineComponent, PropType, toRefs} from "vue";
+import {computed, defineComponent, PropType, ref, toRefs} from "vue";
 import {IonButton, IonChip, IonIcon, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
-import {create, heart, heartOutline, link, restaurant, time} from "ionicons/icons";
+import {create, heart, heartOutline, link, restaurant, shareOutline, time} from "ionicons/icons";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 import {formatDate, Recipe} from "@/tastebuddy";
+import {CanShareResult, Share} from "@capacitor/share";
 
 export default defineComponent({
     name: 'RecipeHero',
@@ -100,6 +105,15 @@ export default defineComponent({
         const recipeStore = useRecipeStore()
         const isLiked = computed(() => recipeStore.getSavedRecipesAsMap[recipe.value?.getId() ?? ''] ?? false)
 
+        // share
+        const shareRecipe = () => recipe.value?.share();
+        // check if the browser supports sharing
+        const canShareRecipe = ref(false);
+        Share.canShare().then((canShareResult: CanShareResult) => {
+            canShareRecipe.value = canShareResult.value;
+        })
+
+
         const tasteBuddyStore = useTasteBuddyStore()
         const isDevMode = computed(() => tasteBuddyStore.isDevMode)
         const editRecipe = () => {
@@ -113,7 +127,9 @@ export default defineComponent({
             toRecipe,
             formatDate, editRecipe, isDevMode,
             // icons
-            heart, heartOutline, restaurant, link, create, time
+            heart, heartOutline, restaurant, link, create, time,
+            // share
+            canShareRecipe, shareRecipe, shareOutline,
         }
     }
 })
@@ -250,6 +266,10 @@ export default defineComponent({
     .hero-buttons {
         padding: 0 5px;
     }
+
+    .hero-button {
+        font-size: 0.6em;
+    }
 }
 
 @media only screen and (max-width: 480px) {
@@ -292,6 +312,14 @@ export default defineComponent({
 
     .hero-buttons {
         padding: 0 5px;
+    }
+
+    /* shadow part of hero-button */
+    .hero-button::part(native) {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        padding: 5px;
     }
 
     .hero-button-view-recipe-big {

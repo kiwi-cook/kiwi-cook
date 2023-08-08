@@ -1,18 +1,20 @@
 <template>
     <IonPage id="recipe-list-page">
         <IonContent :fullscreen="true">
-            <div class="content">
-                <h1 class="header-title">
-                    Your favorite recipes
-                </h1>
-                <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search through your recipes"/>
+            <div class="page">
+                <div class="content">
+                    <h1 >
+                        Your favorite recipes
+                    </h1>
+                    <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Filter saved recipes"/>
 
-                <List :filter="filterInput" :item-list="savedRecipes"
-                      no-items-message="Save recipes to find them faster">
-                    <template #item="{ item }">
-                        <RecipePreview :recipe="item"/>
-                    </template>
-                </List>
+                    <List :filter="filterInput" :item-list="savedRecipes"
+                          no-items-message="Save recipes to find them faster">
+                        <template #item="{ item }">
+                            <RecipePreview :recipe="item"/>
+                        </template>
+                    </List>
+                </div>
             </div>
         </IonContent>
     </IonPage>

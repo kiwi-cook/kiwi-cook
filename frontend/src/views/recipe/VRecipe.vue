@@ -1,16 +1,18 @@
 <template>
     <IonPage id="recipe-page">
-        <IonContent id="recipe-page-content" :fullscreen="true">
-            <div class="content">
-                <template v-if="recipe">
-                    <RecipeComponent :recipe="recipe"/>
-                </template>
+        <IonContent v-once :fullscreen="true">
+            <div class="page">
+                <div class="content">
+                    <template v-if="recipe">
+                        <RecipeComponent :recipe="recipe"/>
+                    </template>
+                </div>
+                <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                    <IonFabButton color="primary" @click="goBack()">
+                        <IonIcon :icon="arrowBack"/>
+                    </IonFabButton>
+                </IonFab>
             </div>
-            <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                <IonFabButton color="primary" @click="goBack()">
-                    <IonIcon :icon="arrowBack"/>
-                </IonFabButton>
-            </IonFab>
         </IonContent>
     </IonPage>
 </template>

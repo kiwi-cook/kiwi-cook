@@ -1,20 +1,22 @@
 <template>
     <div class="recipe-preview-card">
-        <IonItem>
-            <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true"
-                        class="recipe-preview-hero"/>
-        </IonItem>
-        <IonItem v-if="possessedItems.length > 0" lines="none">
-            <IonText>
-                <h1 class="recipe-subheader">What You'll Need</h1>
-            </IonText>
-        </IonItem>
+        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true"/>
 
         <TwoColumnLayout>
-            <template #left>
+            <template v-if="possessedItems.length > 0" #left>
+                <IonItem lines="none">
+                    <IonText>
+                        <h2>What you might have</h2>
+                    </IonText>
+                </IonItem>
                 <ItemList key="ingredient" :items="possessedItems ?? []"/>
             </template>
-            <template #right>
+            <template v-if="missingItems.length > 0" #right>
+                <IonItem lines="none">
+                    <IonText>
+                        <h2>What you'll need</h2>
+                    </IonText>
+                </IonItem>
                 <ItemList key="tool" :items="missingItems ?? []"/>
             </template>
         </TwoColumnLayout>
@@ -32,11 +34,10 @@ import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 export default defineComponent({
     name: 'RecipeSuggestionPreview',
     components: {
+        IonText, IonItem,
         TwoColumnLayout,
         RecipeHero,
         ItemList,
-        IonItem,
-        IonText
     },
     props: {
         recipeSuggestion: {

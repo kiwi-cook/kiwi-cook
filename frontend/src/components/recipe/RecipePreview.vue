@@ -1,12 +1,10 @@
 <template>
     <div class="recipe-preview-card">
-        <IonItem>
-            <RecipeHero :recipe="recipe" :routable="true" class="recipe-preview-hero"/>
-        </IonItem>
+        <RecipeHero :recipe="recipe" :routable="true"/>
 
         <IonItem v-if="items.length > 0" lines="none">
             <IonText>
-                <h1 class="recipe-subheader">What You'll Need</h1>
+                <h2>What You'll Need</h2>
             </IonText>
         </IonItem>
 

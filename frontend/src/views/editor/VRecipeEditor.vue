@@ -1,11 +1,13 @@
 <template>
     <IonPage id="recipe-editor-page">
         <IonContent :fullscreen="true">
-            <div class="content">
-                <h1 class="header-title">
-                    Recipe Editor
-                </h1>
-                <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
+            <div class="page">
+                <div class="content">
+                    <h1 >
+                        Recipe Editor
+                    </h1>
+                    <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
+                </div>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton color="tertiary" @click="goBack()">

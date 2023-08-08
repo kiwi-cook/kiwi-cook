@@ -6,16 +6,16 @@
             </slot>
         </div>
     </div>
-    <IonItem v-else>
+    <IonText v-else lines="none">
         {{ noItemsMessage }}
-    </IonItem>
+    </IonText>
     <IonInfiniteScroll v-if="!loadAll && loadedFilteredItems.length > 0" @ionInfinite="ionInfinite">
         <IonInfiniteScrollContent></IonInfiniteScrollContent>
     </IonInfiniteScroll>
 </template>
 
 <script lang="ts">
-import {IonInfiniteScroll, IonInfiniteScrollContent, IonItem} from '@ionic/vue';
+import {IonInfiniteScroll, IonInfiniteScrollContent, IonText} from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
 import {arrowDown} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
@@ -47,8 +47,7 @@ export default defineComponent({
         },
     },
     components: {
-        IonInfiniteScroll, IonInfiniteScrollContent, IonItem
-
+        IonInfiniteScroll, IonInfiniteScrollContent, IonText
     },
     setup(props: any) {
         const {filter, itemList, loadAll} = toRefs(props)

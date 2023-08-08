@@ -1,24 +1,26 @@
 <template>
     <IonPage id="recipe-list-page">
         <IonContent :fullscreen="true">
-            <div class="content">
-                <h1 class="header-title">
-                    All recipes
-                </h1>
+            <div class="page">
+                <div class="content">
+                    <h1 >
+                        All recipes
+                    </h1>
 
-                <IonSearchbar v-model="filterInput" :debounce="500"/>
+                    <IonSearchbar v-model="filterInput" :debounce="500"/>
 
-                <List :filter="filterInput" :item-list="recipes">
-                    <template #item="{item}">
-                        <RecipePreview :recipe="item"/>
-                    </template>
-                </List>
+                    <List :filter="filterInput" :item-list="recipes">
+                        <template #item="{item}">
+                            <RecipePreview :recipe="item"/>
+                        </template>
+                    </List>
+                </div>
+                <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                    <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
+                        New
+                    </IonFabButton>
+                </IonFab>
             </div>
-            <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
-                    New
-                </IonFabButton>
-            </IonFab>
         </IonContent>
     </IonPage>
 </template>
