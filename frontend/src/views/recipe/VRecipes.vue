@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1 >
+                    <h1>
                         All recipes
                     </h1>
 

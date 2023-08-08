@@ -4,7 +4,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1 >
+                    <h1>
                         Discover new recipes
                     </h1>
                     <ItemSearchbar v-model="filterInput" :filtered-items="filteredItems"
@@ -26,7 +26,7 @@
                     <IonCard>
                         <IonCardHeader>
                             <IonCardTitle>
-                                <h2 >
+                                <h2>
                                     Your ingredients
                                 </h2>
                             </IonCardTitle>
@@ -56,7 +56,7 @@
                     <IonCard v-show="selectedItems.length > 0" class="animation-fade-in">
                         <IonCardHeader>
                             <IonCardTitle>
-                                <h2 >
+                                <h2>
                                     How long do you want to spend cooking?
                                 </h2>
                             </IonCardTitle>
@@ -84,7 +84,7 @@
                     <IonCard v-if="recipeSuggestions.length > 0">
                         <IonCardHeader>
                             <IonCardTitle>
-                                <h2 >
+                                <h2>
                                     Suggested Recipes
                                 </h2>
                             </IonCardTitle>

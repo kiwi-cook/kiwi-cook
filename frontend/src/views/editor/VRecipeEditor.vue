@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1 >
+                    <h1>
                         Recipe Editor
                     </h1>
                     <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
