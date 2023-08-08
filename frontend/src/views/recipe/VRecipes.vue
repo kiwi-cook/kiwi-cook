@@ -15,12 +15,12 @@
                         </template>
                     </List>
                 </div>
-                <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                    <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
-                        New
-                    </IonFabButton>
-                </IonFab>
             </div>
+            <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
+                    New
+                </IonFabButton>
+            </IonFab>
         </IonContent>
     </IonPage>
 </template>

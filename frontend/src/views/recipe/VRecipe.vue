@@ -7,12 +7,12 @@
                         <RecipeComponent :recipe="recipe"/>
                     </template>
                 </div>
-                <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                    <IonFabButton color="primary" @click="goBack()">
-                        <IonIcon :icon="arrowBack"/>
-                    </IonFabButton>
-                </IonFab>
             </div>
+            <IonFab slot="fixed" horizontal="start" vertical="bottom">
+                <IonFabButton color="primary" @click="goBack()">
+                    <IonIcon :icon="arrowBack"/>
+                </IonFabButton>
+            </IonFab>
         </IonContent>
     </IonPage>
 </template>

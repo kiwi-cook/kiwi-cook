@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1 >
+                    <h1>
                         Your favorite recipes
                     </h1>
                     <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Filter saved recipes"/>
