@@ -18,11 +18,11 @@
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent} from 'vue';
+import {computed, ComputedRef, defineComponent, Ref, ref} from 'vue';
 import {IonContent, IonPage} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {Recipe} from "@/tastebuddy";
-import {useRecipeStore} from "@/storage";
+import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 
 
 export default defineComponent({
@@ -41,35 +41,18 @@ export default defineComponent({
         const day: number = Math.floor(diff / oneDay);
 
         // Get the recipe of the day depending on the day of the year
-        const store = useRecipeStore()
+        const recipeStore = useRecipeStore()
         const recipeOfTheDay: ComputedRef<Recipe> = computed(() =>
-            (store.getRecipesAsList[day % store.getRecipesAsList.length]))
+            (recipeStore.getRecipesAsList[day % recipeStore.getRecipesAsList.length]))
 
         // Welcome messages
-        const welcomeMessages = [
-            ['Greetings,', 'Master of Flavors'],
-            ['Hey there,', 'Culinary Artist'],
-            ['Hello,', 'Foodie'],
-            ['Hi,', 'Chef'],
-            ['Let\'s get', 'cooking'],
-            ['Hiya,', 'Kitchen Genius'],
-            ['Hello,', 'Food Lover'],
-            ['Hey,', 'Culinary Connoisseur'],
-            ['Greetings,', 'Gastronomic Guru'],
-            ['Hi there,', 'Epicurean Expert'],
-            ['Hello,', 'Culinary Devotee'],
-            ['Hey,', 'Flavor Aficionado'],
-            ['Hi,', 'Culinary Enthusiast'],
-            ['Hello there,', 'Dining Dynamo'],
-            ['Hey there,', 'Taste Trailblazer'],
-            ['Hi,', 'Kitchen Aficionado'],
-            ['Hello,', 'Culinary Connoisseur'],
-            ['Hey,', 'Foodie'],
-            ['Hiya,', 'Culinary Artist'],
-            ['Hello,', 'Master of Flavors'],
-        ]
-        const welcomeMessage: ComputedRef<string[]> = computed(() =>
-            welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)])
+        const tasteBuddyStore = useTasteBuddyStore()
+        const welcomeMessage: Ref<string[]> = ref([])
+        tasteBuddyStore.getGreetings().then((greetings: string[]) => {
+            welcomeMessage.value = greetings
+        }).catch(() => {
+            welcomeMessage.value = ['Hello there!']
+        })
 
         return {
             recipeOfTheDay,

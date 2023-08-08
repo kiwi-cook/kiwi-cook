@@ -23,6 +23,34 @@ const ionicStorage = new Storage({
 });
 await ionicStorage.create();
 
+/**
+ * Cache item in the Ionic Storage and set a timestamp
+ * @param key
+ * @param value
+ */
+async function setCachedItem<T>(key: string, value: T) {
+    return ionicStorage.set(key, {date: new Date().getTime(), value: value}).then(() => {
+        logDebug('setCachedItem', `saved ${key} to cache`)
+        return value
+    })
+}
+
+/**
+ * Get the cached item
+ * @param key
+ */
+async function getCachedItem<T>(key: string): Promise<{ value: T, isOld: boolean }> {
+    return ionicStorage.get(key).then((cachedItem: {
+        date: number,
+        value: any
+    }) => {
+        if (!cachedItem || typeof cachedItem === 'undefined') {
+            return {value: null, isOld: true}
+        }
+        return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
+    })
+}
+
 // Define typings for the store state
 
 interface UserState {
@@ -32,7 +60,8 @@ interface UserState {
     language: {
         lang: string,
         supportedLanguages: string[]
-    }
+    },
+    greetings: string[][]
 }
 
 export const useTasteBuddyStore = defineStore('tastebuddy', {
@@ -43,7 +72,8 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         language: {
             lang: 'en',
             supportedLanguages: ['en', 'de']
-        }
+        },
+        greetings: []
     }),
     getters: {
         /**
@@ -51,6 +81,10 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          * @returns
          */
         isDevMode: (): boolean => process.env.NODE_ENV === 'development',
+        /**
+         * Get the current language
+         * @param state
+         */
         isAuthenticated: (state): boolean => state.user.authenticated ?? false,
     },
     actions: {
@@ -102,6 +136,30 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
                 return !apiResponse.error
             })
         },
+        /**
+         * Get the greetings
+         */
+        async getGreetings(): Promise<string[]> {
+            logDebug('fetchGreetings', 'fetching greetings')
+            let greetings: string[][] = []
+            if (this.greetings.length > 0) {
+                greetings = this.greetings
+            } else {
+                greetings = await getCachedItem<string[][]>('greetings').then(async (cachedGreetings) => {
+                    if (cachedGreetings.isOld) {
+                        return await fetch('https://raw.githubusercontent.com/taste-buddy/greetings/master/greetings.json').then(async (response) => {
+                            return response.json().then((greetings: string[][]) => {
+                                this.greetings = greetings
+                                setCachedItem('greetings', greetings)
+                                return greetings
+                            })
+                        })
+                    }
+                    return cachedGreetings.value
+                })
+            }
+            return greetings[Math.floor(Math.random() * greetings.length)]
+        }
     }
 })
 
@@ -204,39 +262,13 @@ export const useRecipeStore = defineStore('recipes', {
     },
     actions: {
         /**
-         * Cache item in the Ionic Storage and set a timestamp
-         * @param key
-         * @param value
-         */
-        async setCachedItem(key: string, value: any) {
-            return ionicStorage.set(key, {date: new Date().getTime(), value: value}).then(() => {
-                logDebug('setCachedItem', `saved ${key} to cache`)
-                return value
-            })
-        },
-        /**
-         * Get the cached item
-         * @param key
-         */
-        async getCachedItem(key: string): Promise<{ value: any, isOld: boolean }> {
-            return ionicStorage.get(key).then((cachedItem: {
-                date: number,
-                value: any
-            }) => {
-                if (!cachedItem || typeof cachedItem === 'undefined') {
-                    return {value: null, isOld: true}
-                }
-                return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
-            })
-        },
-        /**
          * Prepare the Ionic Storage by fetching the items and recipes
          * If the cache is old, the items and recipes are fetched from the API
          */
         async prepare() {
             this.setLoadingState('prepare')
             // fetch all items
-            this.getCachedItem('items').then((cachedItem: { value: unknown[], isOld: boolean }) => {
+            getCachedItem<Item[]>('items').then((cachedItem: { value: Item[], isOld: boolean }) => {
                 if (cachedItem.isOld) {
                     this.fetchItems()
                 } else {
@@ -244,7 +276,7 @@ export const useRecipeStore = defineStore('recipes', {
                 }
             })
             // fetch all recipes
-            this.getCachedItem('recipes').then((cachedItem: { value: unknown[], isOld: boolean }) => {
+            getCachedItem<Recipe[]>('recipes').then((cachedItem: { value: Recipe[], isOld: boolean }) => {
                 if (cachedItem.isOld) {
                     this.fetchRecipes()
                 } else {
@@ -252,7 +284,7 @@ export const useRecipeStore = defineStore('recipes', {
                 }
             })
             // fetch saved recipes
-            this.getCachedItem('savedRecipes').then((cachedItem: { value: string[], isOld: boolean }) => {
+            getCachedItem<string[]>('savedRecipes').then((cachedItem: { value: string[], isOld: boolean }) => {
                 if (!cachedItem.isOld) {
                     this.setSavedRecipes(cachedItem.value)
                 }
@@ -265,7 +297,7 @@ export const useRecipeStore = defineStore('recipes', {
          */
         setRecipes(recipes: Recipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
-            return this.setCachedItem('recipes', recipes)
+            return setCachedItem('recipes', recipes)
         },
         /**
          * Update a single recipe
@@ -284,7 +316,7 @@ export const useRecipeStore = defineStore('recipes', {
             } else {
                 this.savedRecipes.delete(recipe.getId())
             }
-            return this.setCachedItem('savedRecipes', [...this.savedRecipes])
+            return setCachedItem('savedRecipes', [...this.savedRecipes])
         },
         /**
          * Override all saved recipes
@@ -299,7 +331,7 @@ export const useRecipeStore = defineStore('recipes', {
          */
         setItems(items: Item[]) {
             this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
-            return this.setCachedItem('items', items)
+            return setCachedItem('items', items)
         },
         /**
          * Update a single item
