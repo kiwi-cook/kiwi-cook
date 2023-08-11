@@ -33,7 +33,7 @@ type Market struct {
 	Location                    MarketLocation     `json:"location,omitempty" bson:"location,omitempty"`
 }
 
-// HandleGetMarketsByCity gets called by router
+// HandleGetMarketsByCity gets called by server
 // Calls getMarkets and handles the context
 func (server *TasteBuddyServer) HandleGetMarketsByCity(context *gin.Context) {
 	city := context.Param("city")
@@ -45,7 +45,7 @@ func (server *TasteBuddyServer) HandleGetMarketsByCity(context *gin.Context) {
 	}
 }
 
-// HandleGetAllMarkets gets called by router
+// HandleGetAllMarkets gets called by server
 // Calls getMarkets and handles the context
 func (server *TasteBuddyServer) HandleGetAllMarkets(context *gin.Context) {
 	if markets, err := server.GetAllMarkets(); err != nil {

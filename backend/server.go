@@ -152,17 +152,13 @@ func (server *TasteBuddyServer) Serve() {
 	recipeRoutes.GET("", func(context *gin.Context) {
 		server.HandleGetAllRecipes(context)
 	})
-	// Get recipe by id
-	recipeRoutes.GET("/:id", func(context *gin.Context) {
-		server.HandleGetRecipeById(context)
-	})
 	// Delete recipe by id
 	recipeRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
 		server.HandleDeleteRecipeById(context)
 	})
-	// Add recipe to database
+	// Add one or more recipes to database
 	recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-		server.HandleAddRecipe(context)
+		server.HandleAddRecipes(context)
 	})
 	////////////////////////////////////////////////////////////////////////
 
@@ -172,10 +168,6 @@ func (server *TasteBuddyServer) Serve() {
 	// Get list of all items
 	itemRoutes.GET("", func(context *gin.Context) {
 		server.HandleGetAllItems(context)
-	})
-	// Get item by id
-	itemRoutes.GET("/:id", func(context *gin.Context) {
-		server.HandleGetItemById(context)
 	})
 	// Delete item by id
 	itemRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {

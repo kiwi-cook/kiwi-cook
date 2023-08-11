@@ -26,7 +26,7 @@ func (user *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
-// HandleRegisterUser gets called by router
+// HandleRegisterUser gets called by server
 // Calls AddOrUpdateUser and handles the context
 func (server *TasteBuddyServer) HandleRegisterUser(context *gin.Context) {
 	var user User

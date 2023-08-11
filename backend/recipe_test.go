@@ -14,7 +14,7 @@ func TestAddRecipe(t *testing.T) {
 		Name: "Chocolate Chip Cookies",
 	}
 
-	recipeId, _, err := app.AddOrUpdateRecipe(recipe)
+	recipeId, _, err := app.AddRecipe(recipe)
 	if err != nil {
 		t.Errorf("Error adding recipe: %v", err)
 	}
@@ -41,7 +41,7 @@ func TestAddAndDeleteRecipes(t *testing.T) {
 	}
 
 	for _, recipe := range recipes {
-		recipeIdAdded, _, err := app.AddOrUpdateRecipe(recipe)
+		recipeIdAdded, _, err := app.AddRecipe(recipe)
 		if err != nil {
 			t.Errorf("Error adding recipe: %v", err)
 		}

@@ -27,7 +27,7 @@ type Discount struct {
 	Tags             []string           `json:"-" bson:"_tags"`
 }
 
-// HandleGetDiscountsByCity gets called by router
+// HandleGetDiscountsByCity gets called by server
 // Calls getDiscountsFromDBOrAPI and handles the context
 func (server *TasteBuddyServer) HandleGetDiscountsByCity(context *gin.Context) {
 	city := context.Param("city")
@@ -40,7 +40,7 @@ func (server *TasteBuddyServer) HandleGetDiscountsByCity(context *gin.Context) {
 	}
 }
 
-// HandleGetAllDiscounts gets called by router
+// HandleGetAllDiscounts gets called by server
 // Calls getDiscountsFromDB
 func (server *TasteBuddyServer) HandleGetAllDiscounts(context *gin.Context) {
 	server.Log("HandleGetAllDiscounts", "Get all discounts")

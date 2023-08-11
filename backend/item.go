@@ -45,7 +45,7 @@ func NewItemErrorResult(err error) *ItemResult {
 	}
 }
 
-// HandleGetAllItems gets called by router
+// HandleGetAllItems gets called by server
 // Calls getRecipesFromDB and handles the context
 func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
 	items, err := server.GetAllItems(false)
@@ -57,30 +57,7 @@ func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
 	Success(context, items)
 }
 
-// HandleGetItemById gets called by router
-// Calls getItemByIdFromDB and handles the context
-func (server *TasteBuddyServer) HandleGetItemById(context *gin.Context) {
-	id := context.Param("id")
-
-	// convert id to primitive.ObjectID
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		server.LogError("HandleGetItemById", err)
-		ServerError(context, true)
-		return
-	}
-
-	item, err := server.GetItemById(objectID)
-	if err != nil {
-		server.LogError("HandleGetItemById", err)
-		ServerError(context, true)
-		return
-	}
-
-	Success(context, item)
-}
-
-// HandleAddItem gets called by router
+// HandleAddItem gets called by server
 // Calls addItemToDB and handles the context
 func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
 	server.LogContextHandle(context, "HandleAddItem", "Trying to add/update item")
@@ -102,7 +79,7 @@ func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
 	Success(context, "Saved item "+itemId.Hex())
 }
 
-// HandleDeleteItemById gets called by router
+// HandleDeleteItemById gets called by server
 // Calls DeleteItemById and handles the context
 func (server *TasteBuddyServer) HandleDeleteItemById(context *gin.Context) {
 	id := context.Param("id")
