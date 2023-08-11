@@ -1,4 +1,5 @@
 // Package recipe
+// Deprecated
 /*
 Copyright © 2023 JOSEF MUELLER
 */
@@ -7,11 +8,15 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -19,6 +24,11 @@ import (
 type RecipeParser func(string, chan Recipe) error
 type ItemParser func(string, chan Item) error
 type IngredientParser func(string) (StepItem, error)
+type StepItemResult struct {
+	StepItem
+	error   error
+	success bool `json:"success"`
+}
 
 // Parse parses a file and saves the content to the database
 func (app *TasteBuddyApp) Parse(file string, parser string) {
@@ -74,11 +84,13 @@ func (app *TasteBuddyApp) ParseAndSaveRecipe(file string, recipeParser RecipePar
 	}
 
 	// Save recipes to database
-	var itemsMap map[string]Item
-	itemsMap, err = app.GetAllItemsMappedByName(false)
-	recipes = app.AddItemIdsToRecipes(recipes, itemsMap)
-	if err = app.AddOrUpdateRecipes(recipes); err != nil {
-		return app.LogError("ParseAndSaveRecipe.AddOrUpdateRecipes", errors.New("error saving recipes to database: "+err.Error()))
+	itemsMap, err := app.GetAllItems(false)
+	if err != nil {
+		return app.LogError("ParseAndSaveRecipe.GetAllItems", errors.New("error getting items from database: "+err.Error()))
+	}
+	recipes = AddItemIdsToRecipes(recipes, itemsMap)
+	if err = app.AddRecipes(recipes); err != nil {
+		return app.LogError("ParseAndSaveRecipe.AddRecipes", errors.New("error saving recipes to database: "+err.Error()))
 	}
 
 	return err
@@ -152,6 +164,63 @@ func (app *TasteBuddyApp) CookstrRecipeParser(recipeFile string, recipeChannel c
 	}
 	app.LogTrace("CookstrRecipeParser", "Finished parsing recipes")
 	return nil
+}
+
+// StepFromDescription parses step from description
+func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []StepItem) Step {
+	app.LogTrace("StepFromDescription", "Parsing step from description "+description)
+
+	step := Step{}
+	descriptionTokens := strings.Fields(description)
+	// Make map of step items
+	var stepItemsInDescription = make(map[string]StepItem)
+	for _, token := range descriptionTokens {
+		similarResult := app.MatchOrNewItem(token, 0.9)
+		if similarResult.error != nil {
+			app.LogError("StepFromDescription.MatchOrNewItem", similarResult.error)
+			continue
+		}
+
+		matchResult := app.MatchItemToStepItem(similarResult.Item, stepItems, 0.5)
+		if matchResult.error != nil {
+			app.LogError("StepFromDescription.MatchItemToStepItem", matchResult.error)
+			continue
+		}
+
+		if matchResult.success {
+			stepItemsInDescription[matchResult.Item.Name] = matchResult.StepItem
+		}
+	}
+	step.Description = description
+	for _, stepItem := range stepItemsInDescription {
+		step.Items = append(step.Items, stepItem)
+	}
+	step.Duration = 0
+	step.ImgUrl = ""
+	step.AdditionalStepInformation = nil
+
+	app.LogTrace("StepFromDescription", "Finished parsing step from description "+description)
+	return step
+}
+
+// MatchItemToStepItem selects the most similar item from the given step items
+func (app *TasteBuddyApp) MatchItemToStepItem(item Item, stepItems []StepItem, threshold float64) StepItemResult {
+	var mostSimilarItem StepItem
+	var mostSimilarity float64 = 0
+	for _, stepItem := range stepItems {
+		if similarity := strutil.Similarity(item.Name, stepItem.Name, metrics.NewHamming()); similarity >= threshold && similarity > mostSimilarity {
+			app.LogDebug("MatchItemToStepItem.Similarity", "Found most similar step item "+stepItem.Name+" to "+item.Name+" with similarity "+fmt.Sprintf("%f", similarity))
+			mostSimilarItem = stepItem
+			mostSimilarity = similarity
+		}
+	}
+
+	if mostSimilarity == 0 {
+		app.LogDebug("MatchItemToStepItem", "No similar step item found for "+item.Name)
+		return StepItemResult{StepItem: StepItem{}, success: false}
+	}
+
+	return StepItemResult{StepItem: mostSimilarItem, success: true}
 }
 
 func CookstrIngredientParser(ingredientStr string) (StepItem, error) {
