@@ -23,6 +23,9 @@ const ionicStorage = new Storage({
 });
 await ionicStorage.create();
 
+// 24 hours
+const MAX_CACHE_AGE = 1000 * 60 * 60 * 24
+
 /**
  * Cache item in the Ionic Storage and set a timestamp
  * @param key
@@ -47,7 +50,7 @@ async function getCachedItem<T>(key: string): Promise<{ value: T, isOld: boolean
         if (!cachedItem || typeof cachedItem === 'undefined') {
             return {value: null, isOld: true}
         }
-        return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > 1000 * 60 * 60 * 24}
+        return {value: cachedItem.value, isOld: (new Date().getTime() - cachedItem?.date) > MAX_CACHE_AGE}
     })
 }
 
@@ -255,9 +258,6 @@ export const useRecipeStore = defineStore('recipes', {
             return this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
             }, [])
-        },
-        async cacheIsOld(): Promise<boolean> {
-            return await ionicStorage.get('savedAt').then((savedAt: string) => (new Date().getTime() - new Date(savedAt).getTime()) > 1000 * 60 * 60 * 24)
         }
     },
     actions: {

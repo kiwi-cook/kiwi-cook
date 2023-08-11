@@ -9,8 +9,7 @@
                     </h1>
                     <ItemSearchbar v-model="filterInput" :filtered-items="filteredItems"
                                    placeholder="What ingredients are you craving today?"
-                                   @select="selectItem($event)">
-                    </ItemSearchbar>
+                                   @select="selectItem($event)"/>
 
                     <!-- <List v-if="favoriteRecipes.length > 0" :item-list="favoriteRecipes">
                         <template #item="{ item }">
@@ -157,12 +156,6 @@ export default defineComponent({
         IonRange
     },
     setup() {
-        const enum suggestionStates {
-            ITEMS_SELECTED,
-            LOCATION,
-            COOKING_TIME,
-        }
-
         const store = useRecipeStore()
         const itemsById = computed(() => store.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
@@ -227,10 +220,10 @@ export default defineComponent({
         const recipes = computed(() => store.getRecipesAsList)
         const suggestedItems: Ref<Item[]> = computed(() => {
                 const randItems = recipes.value.flatMap((recipe: Recipe) => recipe.getItems())
-                    .filter((item: Item) => Math.random() < 0.5)
+                    .filter(() => Math.random() < 0.5)
                     .slice(0, 3)
                 const favItems = favoriteRecipes.value.flatMap((recipe: Recipe) => recipe.getItems())
-                    .filter((item: Item) => Math.random() < 0.5)
+                    .filter(() => Math.random() < 0.5)
                     .slice(0, 3)
                 console.log(randItems, favItems)
                 return [...new Set([...randItems, ...favItems])].slice(0, 6)

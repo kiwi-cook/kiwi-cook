@@ -128,7 +128,6 @@ export default defineComponent({
             mutableItem.value = item.value
         })
 
-
         const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
             const recipesByItemIds = recipeStore.getRecipesByItemIds
             if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {

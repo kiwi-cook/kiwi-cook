@@ -156,16 +156,13 @@
                                         <div slot="start">
                                             <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
                                                             :item="stepItem"
-                                                            :items="allItems"
+                                                            :items="items"
                                                             label="Name" placeholder="e.g. Baking powder"
                                                             @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                             @add-item="addItem(stepIndex, itemIndex, $event)">
                                                 <template #item="{ filteredItem }">
-                                                    <IonLabel>
-                                                        {{ (filteredItem as Item).name }} {{
-                                                            (filteredItem as Item).getId()
-                                                        }}
-                                                    </IonLabel>
+                                                    <ItemComponent :item="filteredItem"/>
+                                                    {{ (filteredItem as Item).getId() }}
                                                 </template>
                                             </DropDownSearch>
                                         </div>
@@ -209,6 +206,11 @@
                             </IonCardContent>
                         </IonCard>
                     </template>
+
+                    <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
+                              :key="missingItemIndex">
+                        <ItemComponent :item="missingItem" @select="addMissingItem(stepIndex, $event)"/>
+                    </template>
                 </div>
             </IonCardContent>
             <IonButton fill="clear" @click="addItem(stepIndex)">Add item</IonButton>
@@ -228,7 +230,7 @@
 </template>
 
 <script lang="ts">
-import {formatDate, Item, Recipe} from '@/tastebuddy';
+import {formatDate, getItemsFromDescription, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -250,10 +252,11 @@ import {
     IonTextarea,
     useIonRouter
 } from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
 import {calendar, closeCircleOutline, create, save, time, trash} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
 import ItemList from "@/components/recipe/ItemList.vue";
+import ItemComponent from "@/components/recipe/Item.vue";
 
 export default defineComponent({
     name: 'RecipeEditor',
@@ -282,17 +285,18 @@ export default defineComponent({
         IonSelect,
         IonSelectOption,
         IonChip,
-        DropDownSearch
+        DropDownSearch,
+        ItemComponent
     },
     setup(props) {
         const {recipe} = toRefs(props)
 
         const router = useIonRouter();
+        const recipeStore = useRecipeStore();
 
-        const store = useRecipeStore();
-        const allItems = computed(() => store.getItems);
+        const items = computed<Item[]>(() => recipeStore.getItems);
 
-        const mutableRecipe: Ref<Recipe> = ref<Recipe>(recipe.value)
+        const mutableRecipe = ref<Recipe>(recipe.value)
         // update recipe and steps when prop changes
         watch(recipe, (newRecipe: Recipe) => {
             mutableRecipe.value = newRecipe
@@ -362,9 +366,35 @@ export default defineComponent({
         })
 
         /**
+         * Get a map of missing items for each step
+         */
+        const missingItems = computed<{ [stepIndex: number]: Item[] }>(() => {
+            const missingItems: { [stepIndex: number]: Item[] } = {}
+            const steps = recipe.value.steps
+            steps.forEach((step: Step, stepIndex: number) => {
+                const stepItems = step.getItems()
+                // return only items that aren't in the step
+                missingItems[stepIndex] = getItemsFromDescription(step.description)
+                    .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.name == stepItem.name))
+            })
+            return missingItems
+        })
+
+        /**
+         * Add missing item to recipe
+         * @param stepIndex
+         * @param itemId
+         */
+        const addMissingItem = (stepIndex: number, itemId: string) => {
+            const item = recipeStore.getItemsAsMap[itemId]
+            console.log(item)
+            mutableRecipe.value?.addItem(stepIndex, undefined, item)
+        }
+
+        /**
          * Get all tags from the store
          */
-        const allTags: ComputedRef<string[]> = computed(() => store.getTags);
+        const allTags: ComputedRef<string[]> = computed(() => recipeStore.getTags);
 
         return {
             // recipe
@@ -372,7 +402,8 @@ export default defineComponent({
             // steps
             addStep, removeStep,
             // items
-            allItems, addItem, editItem, selectItem, removeItem,
+            items, addItem, editItem, selectItem, removeItem,
+            missingItems, addMissingItem,
             // tags
             allTags,
             // icons

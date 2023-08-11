@@ -17,7 +17,7 @@
                 </IonTabButton>
 
                 <IonTabButton :disabled="loadingState" href="/recipe/saved" tab="saved-recipes">
-                    <IonIcon :icon="star"/>
+                    <IonIcon :icon="heart"/>
                     Favorites
                 </IonTabButton>
             </IonTabBar>
@@ -28,7 +28,7 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
-import {home, search, star} from 'ionicons/icons';
+import {heart, home, search} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 
 export default defineComponent({
@@ -43,7 +43,7 @@ export default defineComponent({
         return {
             loadingState,
             // icons
-            home, search, star
+            home, search, heart
         }
     }
 });

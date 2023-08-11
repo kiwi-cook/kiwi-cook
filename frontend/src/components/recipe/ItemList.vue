@@ -3,18 +3,7 @@
         <ul :class="['item-list', {'horizontal': horizontal}]">
             <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
                 <li>
-                    <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select(item.id)">
-                        <IonImg v-if="!item.showAmountUnit && item.imgUrl" :src="item.imgUrl ?? ''"
-                                class="small-item-img-rm"/>
-                        <IonText class="small-item-name">
-                            <IonChip v-if="item.showAmountUnit">
-                                {{ item.amount }} {{ item.unit }}
-                                <IonImg v-if="item.imgUrl" :src="item.imgUrl ?? ''"
-                                        class="small-item-img-lm"/>
-                            </IonChip>
-                            {{ item.name }}
-                        </IonText>
-                    </IonItem>
+                    <ItemComponent :item="item" :disableClick="disableClick" @select="select($event)"/>
                 </li>
             </template>
         </ul>
@@ -24,10 +13,11 @@
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Item, StepItem} from "@/tastebuddy";
-import {IonChip, IonImg, IonItem, IonText} from "@ionic/vue";
+import ItemComponent from "@/components/recipe/Item.vue";
 
 export default defineComponent({
     name: 'ItemList',
+    components: {ItemComponent},
     props: {
         items: {
             type: Array as PropType<(StepItem[] | Item[])>,
@@ -55,9 +45,6 @@ export default defineComponent({
         }
     },
     emits: ['select'],
-    components: {
-        IonItem, IonImg, IonText, IonChip
-    },
     setup(props: any, {emit}) {
         const {items, type, showLimit, disableClick} = toRefs(props);
 
@@ -124,34 +111,5 @@ ul.item-list.horizontal {
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
-}
-
-.small-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0;
-    margin: 0;
-    background: inherit !important;
-}
-
-.small-item-img-rm::part(image) {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.small-item-img-lm::part(image) {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    margin-left: 10px;
-}
-
-ion-text.small-item-name {
-    font-size: 1rem;
-    margin: 0;
 }
 </style>

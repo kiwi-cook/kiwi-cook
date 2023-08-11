@@ -73,7 +73,7 @@ export default defineComponent({
         }
         watch(filter, () => {
             handleFilter();
-        })
+        }, {immediate: true})
 
         const loadNextItems = (amountLoaded = 15) => {
             loadedItems.value.push(...items.value.slice(loadedItemsIndex.value,

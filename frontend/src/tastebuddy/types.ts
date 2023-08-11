@@ -330,7 +330,6 @@ export class Recipe {
     _id?: string;
     _tmpId?: string;
     name: string;
-    author: string;
     authors: string[];
     description: string;
     steps: Step[];
@@ -349,7 +348,6 @@ export class Recipe {
         // create a temporary id to identify the recipe in the store before it is saved
         this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         this.name = 'New Recipe'
-        this.author = ''
         this.authors = []
         this.description = ''
         this.props = {
@@ -381,7 +379,7 @@ export class Recipe {
             throw new Error("recipe id is undefined")
         }
         recipe.name = json.name
-        recipe.authors = json.authors ?? [json.author]
+        recipe.authors = json.authors ?? []
         recipe.description = json.description
         recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
 
@@ -567,7 +565,7 @@ export class Recipe {
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
         item = item ?? new Item();
         logDebug(`add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
-        const stepItem = new StepItem();
+        const stepItem = new StepItem(item);
 
         if (stepIndex === undefined) {
             // add a new step if no step is specified
@@ -577,7 +575,7 @@ export class Recipe {
             this.steps[stepIndex].items.push(stepItem);
         } else {
             // update the item at the specified index
-            this.steps[stepIndex].items[itemIndex] = new StepItem(item);
+            this.steps[stepIndex].items[itemIndex] = stepItem;
         }
         this.computeItems()
         return {item, recipe: this};
@@ -704,9 +702,7 @@ export class RecipeSuggestion {
     recipe_price?: number;
     market_for_price?: Market;
     missing_items?: {
-        item_id: string;
-        item?: Item;
-        amount: number;
+        item: StepItem;
         price?: number;
     }[]
 
@@ -724,19 +720,25 @@ export class RecipeSuggestion {
      * @param json
      * @returns a new suggestion
      */
-    public static fromJSON(json: RecipeSuggestion): RecipeSuggestion {
+    public static fromJSON(json: any): RecipeSuggestion {
         const suggestion = new RecipeSuggestion()
         const store = useRecipeStore()
         suggestion.recipe_id = json.recipe_id
         suggestion.recipe = store.getRecipesAsMap[json.recipe_id]
         suggestion.recipe_price = json.recipe_price
         suggestion.market_for_price = json.market_for_price
-        suggestion.missing_items = json.missing_items
-        suggestion.missing_items = suggestion.missing_items?.map((missing_item) => {
+        const missing_items = json.missing_items
+        suggestion.missing_items = missing_items?.map((missing_item: {
+            item_id: string,
+            item?: Item,
+            amount: number,
+            price?: number
+        }) => {
+            const item = store.getItemsAsMap[missing_item.item_id]
+            const stepItem = new StepItem(item)
+            stepItem.amount = missing_item.amount
             return {
-                item_id: missing_item.item_id,
-                item: store.getItemsAsMap[missing_item.item_id],
-                amount: missing_item.amount,
+                item: stepItem,
                 price: missing_item.price
             }
         })
@@ -772,8 +774,8 @@ export class RecipeSuggestion {
         return this.recipe ?? new Recipe()
     }
 
-    public getMissingItems(): Item[] {
-        return this.missing_items?.map(missing_item => missing_item.item ?? new Item()) ?? []
+    public getMissingItems(): StepItem[] {
+        return this.missing_items?.map(missing_item => missing_item.item ?? new StepItem()) ?? []
     }
 }
 

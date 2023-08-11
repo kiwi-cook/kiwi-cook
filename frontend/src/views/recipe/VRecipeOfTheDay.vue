@@ -68,6 +68,6 @@ export default defineComponent({
 }
 
 .welcome-msg-highlight {
-    color: #8CC84B;
+    color: var(--ion-color-primary);
 }
 </style>

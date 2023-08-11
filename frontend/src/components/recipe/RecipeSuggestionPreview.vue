@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Item, Recipe, RecipeSuggestion} from "@/tastebuddy";
+import {Item, Recipe, RecipeSuggestion, StepItem} from "@/tastebuddy";
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
@@ -60,7 +60,7 @@ export default defineComponent({
     setup(props: { recipeSuggestion: RecipeSuggestion }) {
         const {recipeSuggestion} = toRefs(props)
         const recipe = computed<Recipe>(() => recipeSuggestion.value?.recipe ?? new Recipe())
-        const missingItems = computed<Item[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
+        const missingItems = computed<StepItem[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
         const possessedItems = computed<Item[]>(() => {
             const missingItemIds = missingItems.value.map(item => item.getId())
             return recipe.value.getStepItems().filter(item => !missingItemIds.includes(item.getId()))
