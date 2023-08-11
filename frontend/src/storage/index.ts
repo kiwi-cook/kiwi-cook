@@ -204,7 +204,7 @@ export const useRecipeStore = defineStore('recipes', {
             const recipesByItemId: { [key: string]: string[] } = {}
 
             recipes.forEach((recipe: Recipe) => {
-                const items = recipe.getItems()
+                const items = recipe.getStepItems()
                 items.forEach((item: Item) => {
                     if (!(item.getId() in recipesByItemId)) {
                         recipesByItemId[item.getId()] = []
@@ -280,7 +280,7 @@ export const useRecipeStore = defineStore('recipes', {
                 if (cachedItem.isOld) {
                     this.fetchRecipes()
                 } else {
-                    this.setRecipes((cachedItem.value as Recipe[]).map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                    this.replaceRecipes((cachedItem.value as Recipe[]).map((recipe: Recipe) => Recipe.fromJSON(recipe)))
                 }
             })
             // fetch saved recipes
@@ -295,16 +295,20 @@ export const useRecipeStore = defineStore('recipes', {
          * Override all recipes
          * @param recipes
          */
-        setRecipes(recipes: Recipe[]) {
+        replaceRecipes(recipes: Recipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
             return setCachedItem('recipes', recipes)
         },
         /**
-         * Update a single recipe
-         * @param recipe
+         * Update multiple recipes
+         * @param recipes
          */
-        setRecipe(recipe: Recipe) {
-            this.recipes[recipe.getId()] = recipe
+        setRecipes(recipes: Recipe[] | Recipe) {
+            if (!Array.isArray(recipes)) {
+                this.recipes[recipes.getId()] = recipes
+            } else {
+                this.recipes = Object.assign(this.recipes, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
+            }
         },
         /**
          * Remove or add a recipe to the saved recipes
@@ -374,7 +378,7 @@ export const useRecipeStore = defineStore('recipes', {
                     // and we need to use the Recipe class methods
                     if (!apiResponse.error) {
                         const recipes = apiResponse.response.map((recipe: Recipe) => Recipe.fromJSON(recipe))
-                        this.setRecipes(recipes)
+                        this.replaceRecipes(recipes)
                     }
                     this.finishLoading('fetchRecipes')
                     return apiResponse.response
@@ -388,16 +392,21 @@ export const useRecipeStore = defineStore('recipes', {
                 logError('Recipe not found: ', recipeId)
                 return
             }
-            return this.saveRecipe(recipe).then(() => {
+            return this.saveRecipes(recipe).then(() => {
                 this.finishLoading('saveRecipeById')
             })
         },
-        async saveRecipe(recipe: Recipe) {
-            logDebug('saveRecipe', recipe)
+        async saveRecipes(recipes: Recipe[] | Recipe) {
+            // if the recipes is not an array, make it an array
+            if (!Array.isArray(recipes)) {
+                recipes = [recipes]
+            }
+
+            logDebug('saveRecipe', recipes)
             this.setLoadingState('saveRecipe')
-            this.setRecipe(recipe)
+            this.setRecipes(recipes)
             return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
-                body: recipe,
+                body: recipes,
                 errorMessage: 'Could not save recipe in database. Please retry later!',
                 successMessage: 'Updated recipe'
             })
@@ -473,12 +482,15 @@ export const useRecipeStore = defineStore('recipes', {
             return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
                 body: item,
                 errorMessage: 'Could not save item in database. Please retry later!'
+            }).then((apiResponse: APIResponse<string>) => {
+                this.finishLoading('saveItem')
+                return apiResponse
             })
                 .then((apiResponse: APIResponse<string>) => {
+
                     if (!apiResponse.error) {
                         return this.fetchItems()
                     }
-                    this.finishLoading('saveItem')
                 });
         },
         deleteItem(item: Item) {

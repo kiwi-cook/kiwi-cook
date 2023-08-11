@@ -33,7 +33,7 @@ export default defineComponent({
         showLimit: {
             type: Number,
             required: false,
-            default: 5
+            default: 30
         },
         type: {
             type: Array as PropType<string[]>,
@@ -68,8 +68,8 @@ export default defineComponent({
             type: string
         }
 
-        const mappedItems = computed(() => items.value.reduce((acc: CustomItem[], item: Item, length: number) => {
-                if (typeof item === 'undefined' || length > showLimit.value || !type.value.includes(item.type)) {
+        const mappedItems = computed(() => items.value.reduce((acc: CustomItem[], item: Item) => {
+                if (typeof item === 'undefined' || !type.value.includes(item.type)) {
                     return acc
                 }
 
@@ -86,7 +86,7 @@ export default defineComponent({
                 })
 
                 return acc
-            }, [])
+            }, []).slice(0, showLimit.value)
         )
 
         const select = (itemId: string) => {

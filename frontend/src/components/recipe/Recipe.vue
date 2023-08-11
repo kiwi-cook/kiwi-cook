@@ -66,7 +66,7 @@ import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem,
 import {flagOutline, heart, heartOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
-import RecipeStep from "@/components/recipe/step/RecipeStep.vue";
+import RecipeStep from "@/components/recipe/RecipeStep.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
@@ -95,7 +95,7 @@ export default defineComponent({
     setup(props: any) {
         const {recipe} = toRefs(props);
 
-        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getItems() ?? []);
+        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
         const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
         const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])

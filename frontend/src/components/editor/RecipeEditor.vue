@@ -68,7 +68,7 @@
                                 </IonCol>
                             </IonRow>
                             <IonRow>
-                                <ItemList :items="mutableRecipe.getItems()"/>
+                                <ItemList :items="mutableRecipe.getStepItems()"/>
                             </IonRow>
                         </IonGrid>
                     </IonCol>
@@ -368,7 +368,7 @@ export default defineComponent({
 
         return {
             // recipe
-            mutableRecipe, saveRecipe, deleteRecipe,
+            mutableRecipe, saveRecipes: saveRecipe, deleteRecipe,
             // steps
             addStep, removeStep,
             // items

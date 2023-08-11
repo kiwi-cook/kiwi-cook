@@ -198,15 +198,6 @@ export class StepItem extends Item {
     }
 }
 
-export type BakingStepInformation = {
-    informationType: "baking";
-    temperature: string;
-    duration: string;
-    bakingType: string;
-}
-
-export type AdditionalStepInformation = BakingStepInformation | { [key: string]: string }
-
 /**
  * Step of a recipe
  * It is a step with a list of StepItems
@@ -217,7 +208,7 @@ export class Step {
     imgUrl?: string;
     description: string;
     duration?: number;
-    additional?: AdditionalStepInformation
+    temperature?: number;
 
     constructor() {
         this.items = [new StepItem()]
@@ -238,8 +229,8 @@ export class Step {
         item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
         item.description = json.description
-        item.duration = json.duration
-        item.additional = json.additional
+        item.duration = Step.parseDuration(json.duration, item.description)
+        item.temperature = Step.parseTemperature(json.temperature, item.description)
         return item
     }
 
@@ -275,6 +266,45 @@ export class Step {
      */
     public getItems(): StepItem[] {
         return [...new Set(this.items)]
+    }
+
+    /**
+     * Get duration
+     */
+    public static parseDuration(duration?: number, description?: string): number {
+        let dur
+        if (duration && duration > 0) {
+            dur = duration
+        } else {
+            const duration = RegExp(/(\d+) (min|minutes|hour|hours)/).exec(description ?? '')
+            if (duration === null) {
+                dur = 0
+            } else {
+                let factor = 1
+                if (duration[2] === 'hour' || duration[2] === 'hours') {
+                    factor = 60
+                }
+                dur = parseInt(duration[1]) * factor
+            }
+        }
+        return dur
+    }
+
+    public static parseTemperature(temperature?: number, description?: string): number {
+        let temp
+        if (temperature && temperature > 0) {
+            temp = temperature
+        } else {
+            const temperature = RegExp(/(\d+)°([CF]?)/).exec(description ?? '')
+            console.log(temperature)
+            const unit = temperature?.[2] ?? 'C'
+            let unitFactor = 1
+            if (unit === 'F') {
+                unitFactor = 1.8
+            }
+            temp = parseInt(temperature?.[1] ?? '0') * unitFactor
+        }
+        return temp
     }
 
     /**
@@ -472,7 +502,7 @@ export class Recipe {
     public update(): this {
         logDebug('recipe.update', this.getId())
         const store = useRecipeStore()
-        store.setRecipe(this)
+        store.setRecipes(this)
         return this
     }
 
@@ -483,7 +513,7 @@ export class Recipe {
     public save() {
         logDebug('recipe.save', this.getId())
         const store = useRecipeStore()
-        return store.saveRecipe(this)
+        return store.saveRecipes([this])
     }
 
     /**
@@ -570,8 +600,12 @@ export class Recipe {
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
-    public getItems(): StepItem[] {
-        return this.items
+    public getStepItems(): StepItem[] {
+        return this.items ?? []
+    }
+
+    public getItems(): Item[] {
+        return this.getStepItems().map(stepItem => stepItem.narrow(stepItem))
     }
 
     /**

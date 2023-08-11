@@ -51,7 +51,7 @@ export default defineComponent({
         const missingItems = computed<Item[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
         const possessedItems = computed<Item[]>(() => {
             const missingItemIds = missingItems.value.map(item => item.getId())
-            return recipe.value.getItems().filter(item => !missingItemIds.includes(item.getId()))
+            return recipe.value.getStepItems().filter(item => !missingItemIds.includes(item.getId()))
         })
         const additionalTags = computed<string[]>(() => [
             (recipeSuggestion.value.recipe_price ?? 0) + ' €'

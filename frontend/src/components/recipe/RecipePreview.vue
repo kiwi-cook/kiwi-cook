@@ -48,7 +48,7 @@ export default defineComponent({
     setup(props: any) {
         const {recipe} = toRefs(props)
         const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
-        const items = computed(() => recipe.value?.getItems() ?? [])
+        const items = computed(() => recipe.value?.getStepItems() ?? [])
 
         const router = useIonRouter();
         const toRecipe = () => {

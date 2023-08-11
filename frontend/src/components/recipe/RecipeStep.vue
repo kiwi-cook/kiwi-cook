@@ -7,13 +7,17 @@
                     <IonCardTitle>
                         <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
                             class="recipe-step-index-max"> / {{ maxStepIndex }}</span>
-                        <IonChip v-if="step?.duration">
-                            <IonLabel>{{ step?.duration }} minutes</IonLabel>
-                        </IonChip>
                     </IonCardTitle>
                 </IonCardHeader>
                 <IonCardContent>
-                    <AdditionalStepInfo :step="step"/>
+                    <IonChip v-if="step?.duration > 0">
+                        <IonIcon :icon="time"/>
+                        <IonLabel>{{ step?.duration }} min.</IonLabel>
+                    </IonChip>
+                    <IonChip v-if="step?.temperature > 0">
+                        <IonIcon :icon="flame"/>
+                        <IonLabel>{{ step?.temperature }} °C</IonLabel>
+                    </IonChip>
                     <IonItem lines="none">
                         <div v-html="step?.getDescription('item-highlight')"></div>
                     </IonItem>
@@ -29,12 +33,22 @@
 </template>
 
 <script lang="ts">
-import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonImg, IonItem, IonLabel,} from '@ionic/vue';
+import {
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonIcon,
+    IonImg,
+    IonItem,
+    IonLabel,
+} from '@ionic/vue';
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Step} from "@/tastebuddy";
 import ItemList from "@/components/recipe/ItemList.vue";
-import AdditionalStepInfo from "@/components/recipe/step/StepInfo.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue"
+import {flame, time} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeStep',
@@ -53,8 +67,8 @@ export default defineComponent({
         }
     },
     components: {
+        IonIcon,
         ItemList,
-        AdditionalStepInfo,
         IonCard,
         IonCardHeader,
         IonCardTitle,
@@ -70,6 +84,9 @@ export default defineComponent({
 
         const items = computed(() => step.value?.getItems() ?? [])
         return {
+            // icons
+            time, flame,
+            // items
             items
         }
     }

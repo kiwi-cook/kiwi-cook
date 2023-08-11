@@ -126,7 +126,7 @@ import {
     IonRange,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/storage';
-import {Item, Recipe, RecipeSuggestion, StepItem} from '@/tastebuddy/types';
+import {Item, Recipe, RecipeSuggestion} from '@/tastebuddy/types';
 import List from "@/components/utility/List.vue";
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 import RecipeSuggestionPreview from "@/components/recipe/RecipeSuggestionPreview.vue";
@@ -223,13 +223,17 @@ export default defineComponent({
         /* Favorite recipes */
         const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => store.getSavedRecipes.slice(0, 3))
 
-        /* Items suggestions prototype */
+        /* Items suggestions */
+        const recipes = computed(() => store.getRecipesAsList)
         const suggestedItems: Ref<Item[]> = computed(() => {
-                favoriteRecipes.value.slice(0, 3).flatMap((recipe: Recipe) => recipe.getItems() ?? [])
-                const itemsFromRecipes = favoriteRecipes.value.flatMap((recipe: Recipe) => (recipe.getItems() ?? [])
-                    .map((item: StepItem) => item.narrow(item)))
-                const randomItems = items.value.filter(() => Math.random() < 0.8)
-                return [...new Set([...itemsFromRecipes, ...randomItems])]
+                const randItems = recipes.value.flatMap((recipe: Recipe) => recipe.getItems())
+                    .filter((item: Item) => Math.random() < 0.5)
+                    .slice(0, 3)
+                const favItems = favoriteRecipes.value.flatMap((recipe: Recipe) => recipe.getItems())
+                    .filter((item: Item) => Math.random() < 0.5)
+                    .slice(0, 3)
+                console.log(randItems, favItems)
+                return [...new Set([...randItems, ...favItems])].slice(0, 6)
             }
         )
 
