@@ -197,7 +197,6 @@ func (app *TasteBuddyApp) StepFromDescription(description string, stepItems []St
 	}
 	step.Duration = 0
 	step.ImgUrl = ""
-	step.AdditionalStepInformation = nil
 
 	app.LogTrace("StepFromDescription", "Finished parsing step from description "+description)
 	return step

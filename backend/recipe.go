@@ -31,28 +31,18 @@ type Recipe struct {
 }
 
 type Step struct {
-	Description               string                     `json:"description" bson:"description" binding:"required"`
-	Items                     []StepItem                 `json:"items,omitempty" bson:"items,omitempty"`
-	ImgUrl                    string                     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Duration                  int                        `json:"duration,omitempty" bson:"duration,omitempty"`
-	AdditionalStepInformation *AdditionalStepInformation `json:"additional,omitempty" bson:"additional,omitempty"`
-}
-
-type AdditionalStepInformation struct {
-	Type                  string `json:"informationType,omitempty" bson:"informationType,omitempty"`
-	BakingStepInformation `json:",inline,omitempty" bson:",inline,omitempty"`
-}
-
-type BakingStepInformation struct {
-	Temperature int    `json:"temperature,omitempty" bson:"temperature,omitempty"`
-	BakingType  string `json:"bakingType,omitempty" bson:"bakingType,omitempty"`
+	Description string     `json:"description" bson:"description" binding:"required"`
+	Items       []StepItem `json:"items,omitempty" bson:"items,omitempty"`
+	ImgUrl      string     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	Duration    int        `json:"duration,omitempty" bson:"duration,omitempty"`
+	Temperature int        `json:"temperature,omitempty" bson:"temperature,omitempty"`
 }
 
 type StepItem struct {
+	// nested nameless struct
 	Item   `json:",inline,omitempty" bson:",inline,omitempty"`
 	Amount float64 `json:"amount" bson:"amount" binding:"required"`
 	Unit   string  `json:"unit,omitempty" bson:"unit,omitempty" binding:"required"`
-	// nested nameless struct
 }
 
 // HandleGetAllRecipes gets called by server
