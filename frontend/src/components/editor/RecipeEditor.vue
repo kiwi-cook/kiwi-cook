@@ -368,7 +368,7 @@ export default defineComponent({
 
         return {
             // recipe
-            mutableRecipe, saveRecipes: saveRecipe, deleteRecipe,
+            mutableRecipe, saveRecipe, deleteRecipe,
             // steps
             addStep, removeStep,
             // items

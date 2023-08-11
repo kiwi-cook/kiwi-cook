@@ -58,7 +58,7 @@
             <template v-if="usedInRecipes.length > 0">
                 <IonList>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
-                        <router-link :to="recipe.route()">
+                        <router-link :to="recipe.getRoute()">
                             <IonChip>
                                 {{ recipe?.name }}
                             </IonChip>

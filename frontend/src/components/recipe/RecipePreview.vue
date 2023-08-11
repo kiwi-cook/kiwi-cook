@@ -2,27 +2,47 @@
     <div class="recipe-preview-card">
         <RecipeHero :recipe="recipe" :routable="true"/>
 
-        <IonItem v-if="items.length > 0" lines="none">
-            <IonText>
-                <h2>What You'll Need</h2>
-            </IonText>
-        </IonItem>
+        <IonText v-if="items.length > 0" lines="none">
+            <h2>What you'll need</h2>
+        </IonText>
 
-        <TwoColumnLayout>
+        <TwoColumnLayout v-if="items.length > 0" size="12" size-lg="6">
             <template #left>
-                <ItemList key="ingredient" :items="items" :type="['ingredient']"/>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                Ingredients
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ItemList key="ingredient" :items="items" :type="['ingredient']"/>
+                    </IonCardContent>
+                </IonCard>
             </template>
             <template #right>
-                <ItemList key="tool" :items="items" :type="['tool']"/>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                Tools
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ItemList key="tool" :items="items" :type="['tool']"/>
+                    </IonCardContent>
+                </IonCard>
             </template>
         </TwoColumnLayout>
     </div>
 </template>
 
 <script lang="ts">
-import {computed, ComputedRef, defineComponent, PropType, toRefs} from "vue";
-import {Recipe, Step} from "@/tastebuddy";
-import {IonItem, IonText, useIonRouter} from "@ionic/vue";
+import {computed, defineComponent, PropType, toRefs} from "vue";
+import {Recipe} from "@/tastebuddy";
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
@@ -40,24 +60,18 @@ export default defineComponent({
         }
     },
     components: {
-        IonItem, IonText,
+        IonCardTitle, IonCard, IonCardHeader, IonCardContent,
+        IonText,
         TwoColumnLayout,
         ItemList,
         RecipeHero
     },
     setup(props: any) {
         const {recipe} = toRefs(props)
-        const firstStep: ComputedRef<Step | undefined> = computed(() => recipe.value?.steps[0])
         const items = computed(() => recipe.value?.getStepItems() ?? [])
 
-        const router = useIonRouter();
-        const toRecipe = () => {
-            router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
-        }
-
         return {
-            firstStep, items,
-            toRecipe
+            items
         }
     }
 });

@@ -17,9 +17,17 @@
                 </div>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
-                <IonFabButton v-if="isDevMode" color="tertiary" @click="addRecipe()">
-                    New
+                <IonFabButton>
+                    <IonIcon :icon="chevronForwardCircle"/>
                 </IonFabButton>
+                <IonFabList side="end">
+                    <IonFabButton v-if="isDevMode" @click="addRecipe()">
+                        <IonIcon :icon="addOutline"/>
+                    </IonFabButton>
+                    <IonFabButton v-if="isDevMode" @click="saveRecipes()">
+                        <IonIcon :icon="saveOutline"/>
+                    </IonFabButton>
+                </IonFabList>
             </IonFab>
         </IonContent>
     </IonPage>
@@ -27,8 +35,8 @@
 
 <script lang="ts">
 import {computed, defineComponent, ref} from 'vue';
-import {IonContent, IonFab, IonFabButton, IonPage, IonSearchbar, useIonRouter} from '@ionic/vue';
-import {addOutline, filter} from 'ionicons/icons';
+import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, IonSearchbar, useIonRouter} from '@ionic/vue';
+import {addOutline, chevronForwardCircle, filter, saveOutline} from 'ionicons/icons';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
 import List from "@/components/utility/List.vue";
@@ -37,7 +45,7 @@ import RecipePreview from "@/components/recipe/RecipePreview.vue";
 export default defineComponent({
     name: 'RecipesOverviewPage',
     components: {
-        RecipePreview, List, IonPage, IonSearchbar, IonContent, IonFab, IonFabButton,
+        RecipePreview, List, IonPage, IonSearchbar, IonContent, IonFab, IonFabButton, IonFabList, IonIcon
     },
     setup() {
         const filterInput = ref('')
@@ -54,10 +62,18 @@ export default defineComponent({
                 router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
             }
         }
+        const saveRecipes = () => {
+            if (isDevMode.value) {
+                recipeStore.saveRecipes()
+            }
+        }
 
         return {
+            // icons
+            chevronForwardCircle, addOutline, saveOutline,
             // recipe
-            recipes, addOutline, addRecipe, isDevMode,
+            recipes,
+            isDevMode, addRecipe, saveRecipes,
             // filter
             filterInput, filter
         }

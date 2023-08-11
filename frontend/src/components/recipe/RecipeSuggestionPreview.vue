@@ -2,22 +2,34 @@
     <div class="recipe-preview-card">
         <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true"/>
 
-        <TwoColumnLayout>
+        <TwoColumnLayout size="12" size-lg="6">
             <template v-if="possessedItems.length > 0" #left>
-                <IonItem lines="none">
-                    <IonText>
-                        <h2>What you might have</h2>
-                    </IonText>
-                </IonItem>
-                <ItemList key="ingredient" :items="possessedItems ?? []"/>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                What you might have
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ItemList key="ingredient" :items="possessedItems ?? []"/>
+                    </IonCardContent>
+                </IonCard>
             </template>
             <template v-if="missingItems.length > 0" #right>
-                <IonItem lines="none">
-                    <IonText>
-                        <h2>What you'll need</h2>
-                    </IonText>
-                </IonItem>
-                <ItemList key="tool" :items="missingItems ?? []"/>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            <h3>
+                                What you eventually need
+                            </h3>
+                        </IonCardTitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ItemList key="tool" :items="missingItems ?? []"/>
+                    </IonCardContent>
+                </IonCard>
             </template>
         </TwoColumnLayout>
     </div>
@@ -26,7 +38,7 @@
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion} from "@/tastebuddy";
-import {IonItem, IonText, useIonRouter} from "@ionic/vue";
+import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
@@ -34,7 +46,7 @@ import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 export default defineComponent({
     name: 'RecipeSuggestionPreview',
     components: {
-        IonText, IonItem,
+        IonCardTitle, IonCard, IonCardHeader, IonCardContent,
         TwoColumnLayout,
         RecipeHero,
         ItemList,

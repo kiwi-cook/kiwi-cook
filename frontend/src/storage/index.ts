@@ -396,7 +396,12 @@ export const useRecipeStore = defineStore('recipes', {
                 this.finishLoading('saveRecipeById')
             })
         },
-        async saveRecipes(recipes: Recipe[] | Recipe) {
+        async saveRecipes(recipes?: Recipe[] | Recipe) {
+            // if the recipes is not defined, save all recipes
+            if (typeof recipes === 'undefined') {
+                recipes = Object.values(this.getRecipesAsMap)
+            }
+
             // if the recipes is not an array, make it an array
             if (!Array.isArray(recipes)) {
                 recipes = [recipes]

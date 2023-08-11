@@ -3,6 +3,7 @@
 import {logDebug, logError} from "@/tastebuddy";
 import {CanShareResult, Share} from "@capacitor/share";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
+import {useIonRouter} from "@ionic/vue";
 
 // types for recipe
 
@@ -248,27 +249,6 @@ export class Step {
     }
 
     /**
-     * Get the description of the step
-     * as HTML with highlighted items
-     * @param className the class name of the highlighted items
-     */
-    public getDescription(className: string): string {
-        let description = this.description
-        this.getItems().forEach(item => {
-            description = description.replace(new RegExp(item.name, 'ig'), `<span class="${className}">${item.name}</span>`)
-        })
-        return description
-    }
-
-    /**
-     * Get all unique items in the step
-     * @returns a list of all items in the step
-     */
-    public getItems(): StepItem[] {
-        return [...new Set(this.items)]
-    }
-
-    /**
      * Get duration
      */
     public static parseDuration(duration?: number, description?: string): number {
@@ -305,6 +285,27 @@ export class Step {
             temp = parseInt(temperature?.[1] ?? '0') * unitFactor
         }
         return temp
+    }
+
+    /**
+     * Get the description of the step
+     * as HTML with highlighted items
+     * @param className the class name of the highlighted items
+     */
+    public getDescription(className: string): string {
+        let description = this.description
+        this.getItems().forEach(item => {
+            description = description.replace(new RegExp(item.name, 'ig'), `<span class="${className}">${item.name}</span>`)
+        })
+        return description
+    }
+
+    /**
+     * Get all unique items in the step
+     * @returns a list of all items in the step
+     */
+    public getItems(): StepItem[] {
+        return [...new Set(this.items)]
     }
 
     /**
@@ -637,7 +638,7 @@ export class Recipe {
                 return Share.share({
                     title: 'Share with your recipe with buddies',
                     text: `Check out this recipe for ${this.name} on Taste Buddy!`,
-                    url: '#' + this.route(),
+                    url: '#' + this.getRoute(),
                     dialogTitle: 'Share with buddies',
                 })
             } catch (e) {
@@ -651,8 +652,17 @@ export class Recipe {
     /**
      * Get the route to the recipe
      */
-    public route(): string {
+    public getRoute(): string {
         return '/recipe/show/' + this.getId()
+    }
+
+    /**
+     * Navigate to the recipe
+     */
+
+    public route(): void {
+        const router = useIonRouter()
+        router.push(this.getRoute())
     }
 
     /**

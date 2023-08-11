@@ -4,10 +4,13 @@
             <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
                 <li>
                     <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select(item.id)">
-                        <IonImg :src="item.imgUrl ?? ''" class="small-item-img"/>
+                        <IonImg v-if="!item.showAmountUnit && item.imgUrl" :src="item.imgUrl ?? ''"
+                                class="small-item-img-rm"/>
                         <IonText class="small-item-name">
                             <IonChip v-if="item.showAmountUnit">
                                 {{ item.amount }} {{ item.unit }}
+                                <IonImg v-if="item.imgUrl" :src="item.imgUrl ?? ''"
+                                        class="small-item-img-lm"/>
                             </IonChip>
                             {{ item.name }}
                         </IonText>
@@ -133,11 +136,18 @@ ul.item-list.horizontal {
     background: inherit !important;
 }
 
-.small-item-img::part(image) {
+.small-item-img-rm::part(image) {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     margin-right: 10px;
+}
+
+.small-item-img-lm::part(image) {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-left: 10px;
 }
 
 ion-text.small-item-name {
