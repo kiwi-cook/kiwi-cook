@@ -48,35 +48,9 @@ export default defineComponent({
     setup(props: any, {emit}) {
         const {items, type, showLimit, disableClick} = toRefs(props);
 
-        type CustomItem = {
-            id: string,
-            name: string,
-            imgUrl: string,
-            amount: number,
-            unit: string,
-            showAmountUnit: boolean,
-            type: string
-        }
-
-        const mappedItems = computed(() => items.value.reduce((acc: CustomItem[], item: Item) => {
-                if (typeof item === 'undefined' || !type.value.includes(item.type)) {
-                    return acc
-                }
-
-                const amount = item instanceof StepItem ? item.servingAmount : 0;
-
-                acc.push({
-                    id: item.getId(),
-                    name: item.getName(),
-                    imgUrl: item.imgUrl,
-                    amount,
-                    unit: item instanceof StepItem ? item.unit : '',
-                    showAmountUnit: item.type === 'ingredient' && amount > 0,
-                    type: item.type
-                })
-
-                return acc
-            }, []).slice(0, showLimit.value)
+        const mappedItems = computed<Item[]>(() => items.value
+            .slice(0, showLimit.value)
+            .filter((item: Item) => type.value.includes(item.type))
         )
 
         const select = (itemId: string) => {

@@ -131,80 +131,69 @@
                           label-placement="stacked" type="url"/>
 
                 <!-- Item icons -->
-                <ItemList :items="step.getItems()"/>
+                <ItemList :items="step.getItems()" :horizontal="true"/>
 
 
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
                               :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
-                        <IonCard class="item-editor shadow">
-                            <IonCardHeader>
+                        <div class="item-editor shadow">
+                            <IonItem lines="none">
                                 <IonItem lines="none">
                                     <IonAvatar v-if="stepItem.imgUrl">
                                         <img :alt="`Image of ${stepItem.getName()}`" :src="stepItem.imgUrl"/>
                                     </IonAvatar>
-                                    <IonChip v-if="stepItem._id || stepItem._tmpId">
-                                        {{ stepItem._id ?? stepItem._tmpId }}
-                                    </IonChip>
                                     <IonChip>
-                                        {{ stepItem.type }}
+                                        {{ stepItem.getId() }}
                                     </IonChip>
+                                    <IonButton color="success" fill="solid"
+                                               @click="editItem(stepIndex, itemIndex)">
+                                        <IonIcon :icon="create"/>
+                                    </IonButton>
+                                    <IonButton color="danger" fill="solid"
+                                               @click="removeItem(stepIndex, itemIndex)">
+                                        <IonIcon :icon="trash"/>
+                                    </IonButton>
                                 </IonItem>
-                                <IonCardTitle color="primary">
-                                    <IonItem lines="none">
-                                        <div slot="start">
-                                            <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
-                                                            :item="stepItem"
-                                                            :items="items"
-                                                            label="Name" placeholder="e.g. Baking powder"
-                                                            @select-item="selectItem(stepIndex, itemIndex, $event)"
-                                                            @add-item="addItem(stepIndex, itemIndex, $event)">
-                                                <template #item="{ filteredItem }">
-                                                    <ItemComponent :item="filteredItem"/>
-                                                    {{ (filteredItem as Item).getId() }}
-                                                </template>
-                                            </DropDownSearch>
-                                        </div>
-                                        <div slot="end">
-                                            <IonButton color="success" fill="solid"
-                                                       @click="editItem(stepIndex, itemIndex)">
-                                                <IonIcon :icon="create"/>
-                                            </IonButton>
-                                            <IonButton color="danger" fill="solid"
-                                                       @click="removeItem(stepIndex, itemIndex)">
-                                                <IonIcon :icon="trash"/>
-                                            </IonButton>
-                                        </div>
-                                    </IonItem>
-                                </IonCardTitle>
-                            </IonCardHeader>
-
-                            <IonCardContent>
-                                <IonItem lines="none">
-                                    <IonGrid>
-                                        <IonRow>
-                                            <IonCol size="auto">
-                                                <IonInput v-model.number="stepItem.amount" inputmode="numeric"
-                                                          label="Amount" label-placement="floating" max="9999" min="0"
-                                                          type="number"/>
-                                            </IonCol>
-                                            <IonCol size="8">
-                                                <IonSelect v-model="stepItem.unit" label="Unit"
-                                                           label-placement="floating"
-                                                           placeholder="Unit">
-                                                    <IonSelectOption value="ml">ml</IonSelectOption>
-                                                    <IonSelectOption value="l">l</IonSelectOption>
-                                                    <IonSelectOption value="g">g</IonSelectOption>
-                                                    <IonSelectOption value="kg">kg</IonSelectOption>
-                                                    <IonSelectOption value="pcs">pcs</IonSelectOption>
-                                                </IonSelect>
-                                            </IonCol>
-                                        </IonRow>
-                                    </IonGrid>
-                                </IonItem>
-                            </IonCardContent>
-                        </IonCard>
+                            </IonItem>
+                            <IonItem lines="none">
+                                <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
+                                                :item="stepItem"
+                                                :items="items"
+                                                label="Name" placeholder="e.g. Baking powder"
+                                                class="item-name"
+                                                @select-item="selectItem(stepIndex, itemIndex, $event)"
+                                                @add-item="addItem(stepIndex, itemIndex, $event)">
+                                    <template #item="{ filteredItem }">
+                                        <ItemComponent :item="filteredItem"/>
+                                        {{ (filteredItem as Item).getId() }}
+                                    </template>
+                                </DropDownSearch>
+                            </IonItem>
+                            <IonItem lines="none">
+                                <IonGrid>
+                                    <IonRow>
+                                        <IonCol size="auto">
+                                            <IonInput v-model.number="stepItem.amount" inputmode="numeric"
+                                                      label="Amount" label-placement="floating" max="9999" min="0"
+                                                      type="number"/>
+                                        </IonCol>
+                                        <IonCol size="8">
+                                            <IonSelect v-model="stepItem.unit" label="Unit"
+                                                       label-placement="floating"
+                                                       placeholder="Unit">
+                                                <IonSelectOption value="ml">ml</IonSelectOption>
+                                                <IonSelectOption value="l">l</IonSelectOption>
+                                                <IonSelectOption value="g">g</IonSelectOption>
+                                                <IonSelectOption value="kg">kg</IonSelectOption>
+                                                <IonSelectOption value="pcs">pcs</IonSelectOption>
+                                            </IonSelect>
+                                        </IonCol>
+                                    </IonRow>
+                                </IonGrid>
+                            </IonItem>
+                        </div>
                     </template>
 
                     <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
@@ -466,6 +455,7 @@ ion-avatar.recipe-preview-img {
 .item-editor {
     margin: 10px;
     max-width: fit-content;
+    border-radius: var(--border-radius);
 }
 
 @media screen and (max-width: 600px) {

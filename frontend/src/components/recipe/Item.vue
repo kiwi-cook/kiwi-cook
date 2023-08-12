@@ -1,14 +1,14 @@
 <template>
-    <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select(customItem.id)">
-        <IonImg v-if="!customItem.showAmountUnit && customItem.imgUrl" :src="customItem.imgUrl ?? ''"
+    <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select()">
+        <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                 class="small-item-img-rm"/>
         <IonText class="small-item-name">
-            <IonChip v-if="customItem.showAmountUnit">
-                {{ customItem.amount }} {{ customItem.unit }}
-                <IonImg v-if="customItem.imgUrl" :src="customItem.imgUrl ?? ''"
+            <IonChip v-if="mappedItem.showAmountUnit">
+                {{ mappedItem.amount }} {{ mappedItem.unit }}
+                <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                         class="small-item-img-lm"/>
             </IonChip>
-            {{ customItem.name }}
+            {{ mappedItem.name }}
         </IonText>
     </IonItem>
 </template>
@@ -16,7 +16,7 @@
 <script lang="ts">
 import {IonChip, IonImg, IonItem, IonText} from "@ionic/vue";
 import {computed, defineComponent, PropType, toRefs} from "vue";
-import {Item, logDebug, StepItem} from "@/tastebuddy";
+import {Item, StepItem} from "@/tastebuddy";
 
 export default defineComponent({
     name: 'Item',
@@ -37,6 +37,7 @@ export default defineComponent({
     },
     setup(props: any, {emit}) {
         const {item} = toRefs(props);
+        console.log(item.value.value)
 
         type CustomItem = {
             id: string,
@@ -47,22 +48,26 @@ export default defineComponent({
             showAmountUnit: boolean
         }
 
-        const customItem = computed<CustomItem>(() => ({
-            id: item.value._id,
-            name: item.value.name,
-            amount: item.value.amount,
-            unit: item.value.unit,
-            imgUrl: item.value.imgUrl,
-            showAmountUnit: item.value.showAmountUnit
-        }))
+        const mappedItem = computed<CustomItem>(() => {
+            const amount = item.value instanceof StepItem ? item.value.servingAmount : 0;
 
-        const select = (id: string) => {
-            logDebug('Item.select', `selected item with id ${id}`)
-            emit('select', id)
+            return {
+                id: item.value.getId(),
+                name: item.value.getName(),
+                imgUrl: item.value.imgUrl,
+                amount,
+                unit: item.value instanceof StepItem ? item.value.unit : '',
+                showAmountUnit: item.value.type === 'ingredient' && amount > 0,
+                type: item.value.type
+            }
+        })
+
+        const select = () => {
+            emit('select', mappedItem.value.id)
         }
 
         return {
-            customItem,
+            mappedItem,
             select
         }
     }
