@@ -13,7 +13,7 @@
 
                 <IonTabButton :disabled="loadingState" href="/recipe/suggestions" tab="recipe-finder">
                     <IonIcon :icon="search"/>
-                    Search
+                    Explore
                 </IonTabButton>
 
                 <IonTabButton :disabled="loadingState" href="/recipe/saved" tab="saved-recipes">

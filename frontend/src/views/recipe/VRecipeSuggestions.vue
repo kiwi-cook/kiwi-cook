@@ -84,7 +84,7 @@
                         <IonCardHeader>
                             <IonCardTitle>
                                 <h2>
-                                    Suggested Recipes
+                                    Explore {{ recipeSuggestions.length }} recipes
                                 </h2>
                             </IonCardTitle>
                         </IonCardHeader>
@@ -93,6 +93,15 @@
                                 <RecipeSuggestionPreview :recipe-suggestion="item as RecipeSuggestion"/>
                             </template>
                         </List>
+                    </IonCard>
+                    <IonCard v-else>
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                <h2>
+                                    No recipes found
+                                </h2>
+                            </IonCardTitle>
+                        </IonCardHeader>
                     </IonCard>
 
                     <IonCard v-if="recipeSuggestions.length > 0">
@@ -124,8 +133,8 @@ import {
     IonPage,
     IonRange,
 } from '@ionic/vue';
-import {useRecipeStore} from '@/storage';
-import {Item, Recipe, RecipeSuggestion} from '@/tastebuddy/types';
+import {useRecipeStore, useTasteBuddyStore} from '@/storage';
+import {Item, Recipe, RecipeSuggestion, SearchQueryBuilder, suggestRecipes} from '@/tastebuddy';
 import List from "@/components/utility/List.vue";
 import RecipePreview from "@/components/recipe/RecipePreview.vue";
 import RecipeSuggestionPreview from "@/components/recipe/RecipeSuggestionPreview.vue";
@@ -156,8 +165,10 @@ export default defineComponent({
         IonRange
     },
     setup() {
-        const store = useRecipeStore()
-        const itemsById = computed(() => store.getItemsAsMap)
+        const tasteBuddyStore = useTasteBuddyStore()
+        const recipeStore = useRecipeStore()
+
+        const itemsById = computed(() => recipeStore.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
         /* Filtered items */
@@ -186,12 +197,23 @@ export default defineComponent({
             selectedItems.value = Array.from(selectedItemIds).map(id => itemsById.value[id])
         }
 
-        /* Recipes suggestions */
+        /* City */
         const city = ref('')
+        const supportedCities = computed(() => tasteBuddyStore.cities)
+
+        /* Recipes suggestions */
         const maxCookingTime = ref(15)
         const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
-        const suggestRecipes = () => RecipeSuggestion.suggestRecipes(store, Array.from(selectedItemIds), city.value)
-            .then((fetchedRecipeSuggestions: RecipeSuggestion[]) => recipeSuggestions.value = fetchedRecipeSuggestions)
+
+        const suggest = () => {
+            const searchQueryBuilder = new SearchQueryBuilder()
+            searchQueryBuilder.setCity(city.value)
+            searchQueryBuilder.setDuration(maxCookingTime.value)
+            searchQueryBuilder.setItemIds(Array.from(selectedItemIds))
+            const query = searchQueryBuilder.build()
+            recipeSuggestions.value = suggestRecipes(query)
+        }
+
         const noRecipesMessage = computed(() => {
             if (selectedItems.value.length === 0) {
                 return 'Select items'
@@ -200,10 +222,11 @@ export default defineComponent({
             }
         })
 
+        /* Submit button */
         const submit = () => {
             if (recipeSuggestions.value.length === 0) {
                 // suggest recipes
-                suggestRecipes()
+                suggest()
             } else {
                 // reset
                 recipeSuggestions.value = []
@@ -214,10 +237,10 @@ export default defineComponent({
         const submitDisabled = computed<boolean>(() => recipeSuggestions.value.length === 0 && selectedItems.value.length === 0)
 
         /* Favorite recipes */
-        const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => store.getSavedRecipes.slice(0, 3))
+        const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes.slice(0, 3))
 
         /* Items suggestions */
-        const recipes = computed(() => store.getRecipesAsList)
+        const recipes = computed(() => recipeStore.getRecipesAsList)
         const suggestedItems: Ref<Item[]> = computed(() => {
                 const randItems = recipes.value.flatMap((recipe: Recipe) => recipe.getItems())
                     .filter(() => Math.random() < 0.5)
@@ -231,7 +254,7 @@ export default defineComponent({
         )
 
         /* Recipes */
-        const moreRecipes = computed(() => store.getRecipesAsList
+        const moreRecipes = computed(() => recipeStore.getRecipesAsList
             .filter((recipe: Recipe) => recipeSuggestions.value
                 .every((suggestion: RecipeSuggestion) => suggestion.getRecipe().getId() !== recipe.getId())))
 

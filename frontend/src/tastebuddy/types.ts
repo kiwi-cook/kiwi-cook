@@ -17,7 +17,7 @@ export class Item {
     name: string;
     type: string;
     imgUrl: string;
-    i18n: { [lang: string]: string };
+    names: { [lang: string]: string };
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
@@ -29,7 +29,7 @@ export class Item {
         this.name = item?.name ?? 'New Item'
         this.type = item?.type ?? 'ingredient'
         this.imgUrl = item?.imgUrl ?? ''
-        this.i18n = item?.i18n ?? {}
+        this.names = item?.names ?? {}
     }
 
     /**
@@ -47,7 +47,7 @@ export class Item {
         item.name = json.name
         item.type = json.type
         item.imgUrl = json.imgUrl ?? ''
-        item.i18n = json.i18n ?? {}
+        item.names = json.names ?? {}
         return item
     }
 
@@ -72,7 +72,7 @@ export class Item {
     }
 
     public getI18n(): { [lang: string]: string } {
-        return this.i18n ?? {}
+        return this.names ?? {}
     }
 
     public getName(lang?: string): string {
@@ -82,8 +82,8 @@ export class Item {
 
     public setName(name: string, lang?: string): void {
         const store = useTasteBuddyStore()
-        console.log(this.i18n, lang, store.language.lang)
-        this.i18n[lang ?? store.language.lang] = name
+        console.log(this.names, lang, store.language.lang)
+        this.names[lang ?? store.language.lang] = name
         if (lang === undefined) {
             this.name = name
         }
@@ -334,6 +334,7 @@ export class Recipe {
     description: string;
     steps: Step[];
     items: StepItem[];
+    itemsById: { [key: string]: StepItem };
     props: {
         url?: string;
         imgUrl?: string;
@@ -359,6 +360,7 @@ export class Recipe {
         }
         this.steps = [new Step()]
         this.items = []
+        this.itemsById = {}
         this.servings = 1
         this.isLiked = false;
     }
@@ -401,16 +403,6 @@ export class Recipe {
     }
 
     /**
-     * Save the recipe to the database by its id
-     * @param store
-     * @param id
-     */
-    public static saveById(store: any, id: string): void {
-        logDebug('recipe.saveById', id)
-        store.saveRecipeById(id)
-    }
-
-    /**
      * Get the id of the recipe
      * @returns the id of the recipe
      * @throws an error if the id is undefined
@@ -424,27 +416,20 @@ export class Recipe {
     }
 
     /**
-     * Get the list of authors as a string
+     * Get the authors as a string
      * @returns the list of authors as string
      */
     public getAuthors(): string {
-        if (this.authors === undefined) {
-            return ''
+        switch ((this.authors ?? []).length) {
+            case 0:
+                return ''
+            case 1:
+                return this.authors[0]
+            case 2:
+                return this.authors[0] + ' and ' + this.authors[1]
+            default:
+                return this.authors.slice(0, length - 1).join(', ') + ' and ' + this.authors[length - 1]
         }
-        const length = this.authors.length
-
-        // if there's only one author, return the name
-        if (length === 1) {
-            return this.authors[0]
-        }
-
-        // if there are two authors, return them and concat them using 'and'
-        if (length === 2) {
-            return this.authors[0] + ' and ' + this.authors[1]
-        }
-
-        // if there are more, return a comma separated list
-        return this.authors.slice(0, length - 1).join(', ') + ' and ' + this.authors[length - 1]
     }
 
     /**
@@ -582,17 +567,12 @@ export class Recipe {
     }
 
     computeItems() {
-        // use a Set to remove duplicates: https://stackoverflow.com/a/14438954
-        // use flatMap to get all items in the recipe
-        const items: StepItem[] = Object.values(Object.assign({}, ...this.steps
-            .flatMap((step: Step) => step.getItems())
-            .map(stepItem => ({[stepItem.getId()]: stepItem}))
-        ))
-        const uniqueItems: { [key: string]: StepItem } = {}
-        items.forEach((item: StepItem) => {
-            uniqueItems[item.getId()] = item
-        })
-        this.items = Object.values(uniqueItems)
+        // Iterate over all steps and all items to compute the list of items
+        this.itemsById = {}
+        this.steps.forEach(step => step.getItems().forEach((item: StepItem) => {
+            this.itemsById[item.getId()] = item
+        }))
+        this.items = Object.values(this.itemsById)
     }
 
     /**
@@ -605,6 +585,10 @@ export class Recipe {
 
     public getItems(): Item[] {
         return this.getStepItems().map(stepItem => stepItem.narrow(stepItem))
+    }
+
+    public hasItem(id?: string): boolean {
+        return typeof id !== 'undefined' && typeof this.itemsById[id] !== 'undefined'
     }
 
     /**
@@ -681,101 +665,6 @@ export class Recipe {
         const store = useRecipeStore()
         this.isLiked = !this.isLiked
         store.setLike(this)
-    }
-}
-
-// types for suggestion
-export type RecipeSuggestionQuery = {
-    item_query: {
-        id: string;
-        name: string;
-        exclude: boolean;
-    }[];
-    city?: string;
-}
-
-
-export class RecipeSuggestion {
-
-    recipe_id: string;
-    recipe?: Recipe;
-    recipe_price?: number;
-    market_for_price?: Market;
-    missing_items?: {
-        item: StepItem;
-        price?: number;
-    }[]
-
-    constructor() {
-        this.recipe_id = ''
-        this.recipe_price = 0
-        this.market_for_price = undefined
-        this.missing_items = []
-    }
-
-    /**
-     * Initialize a recipe suggestion from a json object
-     * This is done because the json object does not have the methods of the class
-     *
-     * @param json
-     * @returns a new suggestion
-     */
-    public static fromJSON(json: any): RecipeSuggestion {
-        const suggestion = new RecipeSuggestion()
-        const store = useRecipeStore()
-        suggestion.recipe_id = json.recipe_id
-        suggestion.recipe = store.getRecipesAsMap[json.recipe_id]
-        suggestion.recipe_price = json.recipe_price
-        suggestion.market_for_price = json.market_for_price
-        const missing_items = json.missing_items
-        suggestion.missing_items = missing_items?.map((missing_item: {
-            item_id: string,
-            item?: Item,
-            amount: number,
-            price?: number
-        }) => {
-            const item = store.getItemsAsMap[missing_item.item_id]
-            const stepItem = new StepItem(item)
-            stepItem.amount = missing_item.amount
-            return {
-                item: stepItem,
-                price: missing_item.price
-            }
-        })
-        return suggestion
-    }
-
-    /**
-     * Suggest recipes based on the given query
-     * @param store
-     * @param itemIds
-     * @param city
-     * @returns a promise that resolves to a list of recipe suggestions
-     */
-    public static suggestRecipes(store: any, itemIds: string[], city?: string): Promise<RecipeSuggestion[]> {
-        const query: RecipeSuggestionQuery = {
-            item_query: itemIds.map(id => {
-                return {
-                    id,
-                    name: '',
-                    exclude: false
-                }
-            }),
-            city: city ?? undefined
-        }
-
-        return store.fetchRecipeSuggestions(query)
-    }
-
-    /**
-     * Get the recipe of the suggestion
-     */
-    public getRecipe(): Recipe {
-        return this.recipe ?? new Recipe()
-    }
-
-    public getMissingItems(): StepItem[] {
-        return this.missing_items?.map(missing_item => missing_item.item ?? new StepItem()) ?? []
     }
 }
 

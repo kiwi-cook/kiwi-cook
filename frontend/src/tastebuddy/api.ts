@@ -1,5 +1,4 @@
-import {Item, Recipe, RecipeSuggestion} from './types';
-import {logDebug, logError, presentToast} from "@/tastebuddy";
+import {Item, logDebug, logError, presentToast, Recipe, RecipeSuggestion} from "@/tastebuddy";
 
 type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 
@@ -18,8 +17,7 @@ export enum API_ROUTE {
     DELETE_RECIPE,
     GET_ITEMS,
     ADD_ITEM,
-    DELETE_ITEM,
-    POST_SUGGEST_RECIPE
+    DELETE_ITEM
 }
 
 const JSONTYPE = 'application/json'
@@ -55,8 +53,7 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
         method: 'DELETE',
         contentType: JSONTYPE,
         credentials: 'include'
-    },
-    [API_ROUTE.POST_SUGGEST_RECIPE]: {url: '/s/recipe', method: 'POST', contentType: JSONTYPE},
+    }
 }
 
 export const DURATIONS = {

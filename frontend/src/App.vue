@@ -10,7 +10,7 @@
 <script lang="ts">
 import {IonApp, IonRouterOutlet, IonText} from '@ionic/vue';
 import {defineComponent} from 'vue';
-import {useRecipeStore} from './storage';
+import {useRecipeStore, useTasteBuddyStore} from './storage';
 
 export default defineComponent({
     name: 'App',
@@ -19,9 +19,11 @@ export default defineComponent({
         IonRouterOutlet,
     },
     setup() {
-        // Initialize the store
-        const store = useRecipeStore();
-        store.prepare()
+        const tasteBuddyStore = useTasteBuddyStore();
+        const recipeStore = useRecipeStore();
+
+        // Initialize the recipe store
+        recipeStore.prepare()
 
         // Use matchMedia to check the user preference
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
@@ -37,6 +39,10 @@ export default defineComponent({
         function toggleDarkTheme(shouldAdd: boolean) {
             document.body.classList.toggle('dark', shouldAdd);
         }
+
+        // GeoLocation
+        tasteBuddyStore.getPosition()
+
 
         return {}
     }

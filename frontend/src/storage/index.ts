@@ -4,18 +4,8 @@ import {defineStore} from 'pinia'
 // Types
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
-import {
-    API_ROUTE,
-    APIResponse,
-    Item,
-    logDebug,
-    logError,
-    presentToast,
-    Recipe,
-    RecipeSuggestion,
-    RecipeSuggestionQuery,
-    sendToAPI
-} from "@/tastebuddy";
+import {Geolocation, Position} from '@capacitor/geolocation';
+import {API_ROUTE, APIResponse, Item, logDebug, logError, presentToast, Recipe, sendToAPI} from "@/tastebuddy";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -59,24 +49,28 @@ async function getCachedItem<T>(key: string): Promise<{ value: T, isOld: boolean
 interface UserState {
     user: {
         authenticated: boolean
+        position?: Position
     },
     language: {
         lang: string,
         supportedLanguages: string[]
     },
-    greetings: string[][]
+    greetings: string[][],
+    cities: string[]
 }
 
 export const useTasteBuddyStore = defineStore('tastebuddy', {
     state: (): UserState => ({
         user: {
-            authenticated: false
+            authenticated: false,
+            position: undefined
         },
         language: {
             lang: 'en',
             supportedLanguages: ['en', 'de']
         },
-        greetings: []
+        greetings: [],
+        cities: ['Tübingen', 'Stuttgart', 'Berlin', 'München', 'Hamburg', 'Köln', 'Frankfurt', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden', 'Hannover', 'Nürnberg', 'Duisburg', 'Bochum', 'Wuppertal', 'Bielefeld', 'Bonn', 'Münster', 'Karlsruhe', 'Mannheim', 'Augsburg', 'Wiesbaden', 'Gelsenkirchen', 'Mönchengladbach', 'Braunschweig', 'Chemnitz', 'Kiel', 'Aachen', 'Halle', 'Magdeburg', 'Freiburg', 'Krefeld', 'Lübeck', 'Oberhausen', 'Erfurt', 'Mainz', 'Rostock', 'Kassel', 'Hagen', 'Hamm', 'Saarbrücken', 'Mülheim an der Ruhr', 'Potsdam', 'Ludwigshafen am Rhein', 'Oldenburg', 'Leverkusen', 'Osnabrück', 'Solingen', 'Heidelberg', 'Herne', 'Neuss', 'Darmstadt', 'Paderborn', 'Regensburg', 'Ingolstadt', 'Würzburg', 'Wolfsburg', 'Fürth', 'Ulm', 'Heilbronn', 'Pforzheim', 'Göttingen', 'Bottrop', 'Recklinghausen', 'Reutlingen', 'Koblenz', 'Bremerhaven', 'Bergisch Gladbach', 'Remscheid', 'Jena', 'Trier', 'Erlangen', 'Moers', 'Siegen', 'Hildesheim', 'Salzgitter', 'Cottbus', 'Gera', 'Kaiserslautern', 'Witten', 'Gütersloh', 'Schwerin', 'Iserlohn', 'Ludwigsburg', 'Hanau', 'Esslingen am Neckar', 'Zwickau', 'Düren', 'Ratingen', 'Flensburg', 'Villingen-Schwenningen', 'Lünen', 'Marl', 'Lüneburg', 'Dessau-Roßlau', 'Konstanz']
     }),
     getters: {
         /**
@@ -140,6 +134,32 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             })
         },
         /**
+         * Get the user's position
+         */
+        async getPosition() {
+            const getPositionViaCapacitor = () => {
+                Geolocation.getCurrentPosition().then((position: Position) => {
+                    this.user.position = position
+                }).catch((error) => {
+                    logError('getGeolocation.getPositionViaCapacitor', error)
+                })
+            }
+
+            const getPositionViaBrowser = () => {
+                navigator.geolocation.getCurrentPosition((position: Position) => {
+                    this.user.position = position
+                }, (error) => {
+                    logError('getGeolocation.getPositionViaBrowser', error)
+                })
+            }
+
+            if (typeof navigator.geolocation !== 'undefined') {
+                getPositionViaBrowser()
+            } else {
+                getPositionViaCapacitor()
+            }
+        },
+        /**
          * Get the greetings
          */
         async getGreetings(): Promise<string[]> {
@@ -170,7 +190,6 @@ interface RecipeState {
     loading: { [key: string]: boolean }
     recipes: { [id: string]: Recipe }
     savedRecipes: Set<string>
-    recipeSuggestions: RecipeSuggestion[]
     items: { [id: string]: Item }
     recipesByItemId: { [itemId: string]: string[] }
 }
@@ -182,7 +201,6 @@ export const useRecipeStore = defineStore('recipes', {
         loading: {},
         recipes: {},
         savedRecipes: new Set(),
-        recipeSuggestions: [],
         items: {},
         recipesByItemId: {},
     }),
@@ -224,12 +242,6 @@ export const useRecipeStore = defineStore('recipes', {
          * @param state
          */
         getRecipesAsListByItemId: (state) => (itemId?: string): string[] => state.recipesByItemId[itemId ?? ''] ?? [],
-        /**
-         * Get the recipe suggestions
-         * @param state
-         * @returns a list of recipe suggestions
-         */
-        getRecipeSuggestions: (state): RecipeSuggestion[] => state.recipeSuggestions ?? [],
         /**
          * Get saved recipes
          * @param state
@@ -384,18 +396,6 @@ export const useRecipeStore = defineStore('recipes', {
                     return apiResponse.response
                 });
         },
-        saveRecipeById(recipeId: string) {
-            logDebug('saveRecipeById', recipeId)
-            this.setLoadingState('saveRecipeById')
-            const recipe: Recipe = this.getRecipesAsMap[recipeId]
-            if (typeof recipe === 'undefined') {
-                logError('Recipe not found: ', recipeId)
-                return
-            }
-            return this.saveRecipes(recipe).then(() => {
-                this.finishLoading('saveRecipeById')
-            })
-        },
         async saveRecipes(recipes?: Recipe[] | Recipe) {
             // if the recipes is not defined, save all recipes
             if (typeof recipes === 'undefined') {
@@ -441,28 +441,6 @@ export const useRecipeStore = defineStore('recipes', {
             // eslint-disable-next-line @typescript-eslint/no-empty-function
             return new Promise(() => {
             })
-        },
-        /**
-         * Fetch the suggestions for the recipe search
-         * @param query
-         */
-        async fetchRecipeSuggestions(query: RecipeSuggestionQuery): Promise<RecipeSuggestion[]> {
-            logDebug('fetchRecipeSuggestions', 'fetching recipe suggestions')
-            this.setLoadingState('fetchRecipeSuggestions')
-            return sendToAPI<RecipeSuggestion[]>(API_ROUTE.POST_SUGGEST_RECIPE, {
-                body: query,
-                errorMessage: 'Could not fetch recipe suggestions'
-            })
-                .then((apiResponse: APIResponse<RecipeSuggestion[]>) => {
-                    // map the recipes JSON to Recipe objects
-                    // this is because the JSON is not a valid Recipe object,
-                    // and we need to use the Recipe class methods
-                    if (!apiResponse.error) {
-                        this.recipeSuggestions = apiResponse.response.map((recipeSuggestion: RecipeSuggestion) => RecipeSuggestion.fromJSON(recipeSuggestion))
-                    }
-                    this.finishLoading('fetchRecipeSuggestions')
-                    return this.getRecipeSuggestions
-                });
         },
         async fetchItems(): Promise<Item[]> {
             logDebug('fetchItems', 'fetching items')
