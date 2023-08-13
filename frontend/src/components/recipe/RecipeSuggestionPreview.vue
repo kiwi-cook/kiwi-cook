@@ -8,7 +8,7 @@
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
-                                What ingredients and tools you might have
+                                Ingredients and tools you might have
                             </h3>
                         </IonCardTitle>
                     </IonCardHeader>
@@ -22,7 +22,7 @@
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
-                                What you eventually need
+                                What you'll eventually need
                             </h3>
                         </IonCardTitle>
                     </IonCardHeader>

@@ -80,7 +80,8 @@
                         </IonButton>
                     </div>
 
-                    <IonCard v-if="recipeSuggestions.length > 0">
+                    <div ref="recipeSuggestionsEl"/>
+                    <IonCard v-if="recipeSuggestions.length > 0 && submitted">
                         <IonCardHeader>
                             <IonCardTitle>
                                 <h2>
@@ -88,13 +89,13 @@
                                 </h2>
                             </IonCardTitle>
                         </IonCardHeader>
-                        <List :item-list="recipeSuggestions" :no-items-message="noRecipesMessage">
+                        <List :item-list="recipeSuggestions" no-items-message="No recipes found">
                             <template #item="{ item }">
                                 <RecipeSuggestionPreview :recipe-suggestion="item as RecipeSuggestion"/>
                             </template>
                         </List>
                     </IonCard>
-                    <IonCard v-else>
+                    <IonCard v-else-if="submitted">
                         <IonCardHeader>
                             <IonCardTitle>
                                 <h2>
@@ -165,7 +166,6 @@ export default defineComponent({
         IonRange
     },
     setup() {
-        const tasteBuddyStore = useTasteBuddyStore()
         const recipeStore = useRecipeStore()
 
         const itemsById = computed(() => recipeStore.getItemsAsMap)
@@ -199,12 +199,13 @@ export default defineComponent({
 
         /* City */
         const city = ref('')
-        const supportedCities = computed(() => tasteBuddyStore.cities)
 
         /* Recipes suggestions */
         const maxCookingTime = ref(15)
         const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
 
+        /* Suggest recipes */
+        const recipeSuggestionsEl = ref()
         const suggest = () => {
             const searchQueryBuilder = new SearchQueryBuilder()
             searchQueryBuilder.setCity(city.value)
@@ -212,23 +213,23 @@ export default defineComponent({
             searchQueryBuilder.setItemIds(Array.from(selectedItemIds))
             const query = searchQueryBuilder.build()
             recipeSuggestions.value = suggestRecipes(query)
+
+            // scroll to recipe suggestions
+            if (recipeSuggestions.value.length > 0) {
+                recipeSuggestionsEl.value.scrollIntoView({behavior: "smooth", block: "start", inline: "nearest"})
+            }
         }
 
-        const noRecipesMessage = computed(() => {
-            if (selectedItems.value.length === 0) {
-                return 'Select items'
-            } else {
-                return 'No recipes found'
-            }
-        })
-
         /* Submit button */
+        const submitted = ref(false)
         const submit = () => {
             if (recipeSuggestions.value.length === 0) {
                 // suggest recipes
+                submitted.value = true
                 suggest()
             } else {
                 // reset
+                submitted.value = false
                 recipeSuggestions.value = []
             }
         }
@@ -264,9 +265,9 @@ export default defineComponent({
             selectItem, filteredItems, selectedItems,
             city, maxCookingTime,
             /* Submit */
-            submit, submitButton, submitColor, submitDisabled,
+            submit, submitButton, submitColor, submitDisabled, submitted,
             /* Suggestions */
-            RecipeSuggestion, recipeSuggestions, noRecipesMessage,
+            RecipeSuggestion, recipeSuggestions, recipeSuggestionsEl,
             favoriteRecipes, suggestedItems,
             /* Recipes */
             moreRecipes

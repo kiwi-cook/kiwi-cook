@@ -1,5 +1,5 @@
 import {useRecipeStore} from "@/storage";
-import {Item, logDebug, Market, Recipe, StepItem} from "@/tastebuddy";
+import {logDebug, Market, Recipe, StepItem} from "@/tastebuddy";
 
 class RecipeSuggestion {
 
@@ -119,9 +119,9 @@ function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
 
     const suggestedRecipes = recipes.filter((recipe: Recipe) => {
         return filterRecipeByItems(recipe, query.items) &&
-        filterRecipeByDuration(recipe, query.duration) &&
-        filterRecipeByTag(recipe, query.tags) &&
-        filterByPrice(recipe, query.price)
+            filterRecipeByDuration(recipe, query.duration) &&
+            filterRecipeByTag(recipe, query.tags) &&
+            filterByPrice(recipe, query.price)
     })
 
     return suggestedRecipes.map((recipe: Recipe) => {
@@ -168,7 +168,7 @@ function filterRecipeByDuration(recipe: Recipe, maxDuration: number): boolean {
  */
 function filterRecipeByTag(recipe: Recipe, tags: string[]): boolean {
     const recipeTags = recipe.getTags()
-    const success =  tags.every((tag: string) => recipeTags.includes(tag))
+    const success = tags.every((tag: string) => recipeTags.includes(tag))
     logDebug('filterRecipeByTag', recipe, tags, success)
     return success
 }
