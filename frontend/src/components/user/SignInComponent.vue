@@ -84,9 +84,5 @@ export default {
     padding: 16px;
     text-align: center;
 }
-
-.signup-link {
-    margin-top: 16px;
-}
 </style>
   

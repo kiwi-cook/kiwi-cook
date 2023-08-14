@@ -14,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Home',
         path: '/',
         component: TabsPage,
-        redirect: () => ({name: 'RecipeOfTheDay'}),
+        redirect: () => ({name: 'RecipeSuggestions'}),
         children: [
             // Recipes
             {

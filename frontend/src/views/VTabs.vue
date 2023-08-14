@@ -7,8 +7,8 @@
             <IonProgressBar v-show="loadingState" type="indeterminate"/>
             <IonTabBar slot="bottom">
                 <IonTabButton :disabled="loadingState" href="/recipe/of-the-day" tab="recipe-of-the-day">
-                    <IonIcon :icon="home"/>
-                    Home
+                    <IonIcon :icon="sparkles"/>
+                    New Recipe
                 </IonTabButton>
 
                 <IonTabButton :disabled="loadingState" href="/recipe/suggestions" tab="recipe-finder">
@@ -28,7 +28,7 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
-import {heart, home, search} from 'ionicons/icons';
+import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 
 export default defineComponent({
@@ -43,7 +43,7 @@ export default defineComponent({
         return {
             loadingState,
             // icons
-            home, search, heart
+            sparkles, search, heart
         }
     }
 });
