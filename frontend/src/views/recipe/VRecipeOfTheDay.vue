@@ -3,10 +3,7 @@
         <IonContent v-once :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1>
-                        {{ welcomeMessage[0] }} <span v-if="welcomeMessage.length > 1"
-                                                      class="welcome-msg-highlight">{{ welcomeMessage[1] }}!</span>
-                    </h1>
+                    <FancyHeader :header="welcomeMessage" />
 
                     <template v-if="recipeOfTheDay">
                         <RecipeComponent :recipe="recipeOfTheDay"/>
@@ -23,11 +20,13 @@ import {IonContent, IonPage} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {Recipe} from "@/tastebuddy";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
+import FancyHeader from "@/components/utility/FancyHeader.vue";
 
 
 export default defineComponent({
     title: 'RecipeOfTheDayPage',
     components: {
+        FancyHeader,
         RecipeComponent,
         IonPage, IonContent,
     },
@@ -65,9 +64,5 @@ export default defineComponent({
 <style scoped>
 .gradient {
     background: linear-gradient(to bottom, #2F3540 0%, rgba(0, 0, 0, 0) 100%);
-}
-
-.welcome-msg-highlight {
-    color: var(--ion-color-primary);
 }
 </style>

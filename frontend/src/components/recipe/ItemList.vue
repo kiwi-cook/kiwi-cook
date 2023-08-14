@@ -1,11 +1,9 @@
 <template>
     <div class="item-list-wrapper">
         <ul :class="['item-list', {'horizontal': horizontal}]">
-            <template v-for="(item, itemIndex) in mappedItems" :key="itemIndex">
-                <li>
-                    <ItemComponent :item="item" :disableClick="disableClick" @select="select($event)"/>
-                </li>
-            </template>
+            <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" :class="['item', {'border': itemBorder}]">
+                <ItemComponent :item="item" :disableClick="disableClick" @select="select($event)"/>
+            </li>
         </ul>
     </div>
 </template>
@@ -39,6 +37,11 @@ export default defineComponent({
             default: true
         },
         horizontal: {
+            type: Boolean,
+            required: false,
+            default: false
+        },
+        itemBorder: {
             type: Boolean,
             required: false,
             default: false
@@ -100,5 +103,17 @@ ul.item-list.horizontal {
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
+}
+
+li.item {
+    margin-bottom: 0.3rem;
+    margin-right: 0.3rem;
+}
+
+li.item.border {
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+    border: var(--border);
+    border-radius: var(--border-radius);
 }
 </style>

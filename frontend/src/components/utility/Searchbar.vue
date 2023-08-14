@@ -1,8 +1,17 @@
 <template>
-    <div>
+    <div class="item-searchbar">
         <IonSearchbar v-model="filterInput" :debounce="500" :placeholder="placeholder"/>
-        <ItemList v-if="listOpen" :items="filteredItems" :placeholder="placeholder" :show-limit="5"
-                  :type="['ingredient', 'tool']" v-bind="$attrs"/>
+        <div>
+            <slot name="item">
+                <ItemList v-if="listOpen" class="item-searchbar-results" :items="filteredItems"
+                          :placeholder="placeholder"
+                          :show-limit="5"
+                          :type="['ingredient', 'tool']" v-bind="$attrs"/>
+            </slot>
+            <slot name="tag">
+
+            </slot>
+        </div>
     </div>
 </template>
 
@@ -14,7 +23,7 @@ import {Item, StepItem} from "@/tastebuddy";
 import {IonSearchbar} from "@ionic/vue";
 
 export default defineComponent({
-    name: 'ItemSearchbar',
+    name: 'Searchbar',
     props: {
         placeholder: {
             type: String,
@@ -68,3 +77,18 @@ export default defineComponent({
     }
 })
 </script>
+
+<style scoped>
+.item-searchbar {
+    position: relative;
+    width: 100%;
+}
+
+.item-searchbar-results {
+    border-radius: var(--border-radius);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
+    width: 95%;
+    margin: 0 auto;
+}
+</style>

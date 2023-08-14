@@ -3,6 +3,7 @@
     --margin: 0;
     --margin-lr: 20px;
     --border-radius: 15px;
+    --border: 1px solid #dcdcdc !important;
 }
 
 .shadow {
@@ -18,7 +19,8 @@ ion-card {
     margin-right: 0;
     margin-left: 0;
     box-shadow: none !important;
-    border: 1px solid #dcdcdc !important;
+    border: var(--border);
+    border-radius: var(--border-radius);
 }
 
 ion-grid {

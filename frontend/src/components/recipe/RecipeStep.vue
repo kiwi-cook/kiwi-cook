@@ -90,7 +90,7 @@ export default defineComponent({
 }
 </style>
 
-<style scoped>
+<style>
 .recipe-step-index {
     font-size: 1.5rem;
     font-weight: bold;

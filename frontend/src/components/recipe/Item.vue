@@ -1,5 +1,5 @@
 <template>
-    <IonItem :class="['small-item', {'link': !disableClick}]" lines="none" @click="select()">
+    <IonItem v-if="mappedItem" :class="['small-item', {'link': !disableClick}]" lines="none" @click="select()">
         <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                 class="small-item-img-rm"/>
         <IonText class="small-item-name">
@@ -37,7 +37,6 @@ export default defineComponent({
     },
     setup(props: any, {emit}) {
         const {item} = toRefs(props);
-        console.log(item.value.value)
 
         type CustomItem = {
             id: string,
@@ -48,7 +47,10 @@ export default defineComponent({
             showAmountUnit: boolean
         }
 
-        const mappedItem = computed<CustomItem>(() => {
+        const mappedItem = computed<CustomItem | undefined>(() => {
+            if (!item.value) {
+                return undefined;
+            }
             const amount = item.value instanceof StepItem ? item.value.servingAmount : 0;
 
             return {
@@ -63,7 +65,9 @@ export default defineComponent({
         })
 
         const select = () => {
-            emit('select', mappedItem.value.id)
+            if (mappedItem.value) {
+                emit('select', mappedItem.value.id)
+            }
         }
 
         return {

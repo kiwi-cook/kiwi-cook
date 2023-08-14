@@ -9,9 +9,9 @@
 
                     <IonSearchbar v-model="filterInput" :debounce="500"/>
 
-                    <List :filter="filterInput" :item-list="recipes">
-                        <template #item="{item}">
-                            <RecipePreview :recipe="item"/>
+                    <List :filter="filterInput" :list="recipes">
+                        <template #element="{ element }">
+                            <RecipePreview :recipe="element as Recipe"/>
                         </template>
                     </List>
                 </div>
@@ -39,8 +39,8 @@ import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, IonSearc
 import {addOutline, chevronForwardCircle, filter, saveOutline} from 'ionicons/icons';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
-import List from "@/components/utility/List.vue";
-import RecipePreview from "@/components/recipe/RecipePreview.vue";
+import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
+import List from "@/components/recipe/List.vue";
 
 export default defineComponent({
     name: 'RecipesOverviewPage',

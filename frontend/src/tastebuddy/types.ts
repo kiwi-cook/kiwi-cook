@@ -342,6 +342,13 @@ export class Recipe {
         createdAt: Date;
         tags?: string[];
     };
+    source: {
+        url?: string;
+        authors: {
+            name: string;
+            url?: string;
+        }[];
+    };
     servings: number;
     isLiked: boolean;
 
@@ -363,6 +370,10 @@ export class Recipe {
         this.itemsById = {}
         this.servings = 1
         this.isLiked = false;
+        this.source = {
+            url: '',
+            authors: [],
+        }
     }
 
     /**
@@ -374,22 +385,34 @@ export class Recipe {
      */
     public static fromJSON(json: Recipe): Recipe {
         const recipe = new Recipe()
+
+        // Id
         recipe._id = json._id
         delete recipe._tmpId
         // if the id is undefined, throw an error
         if (recipe._id === undefined) {
             throw new Error("recipe id is undefined")
         }
+
         recipe.name = json.name
         recipe.authors = json.authors ?? []
         recipe.description = json.description
         recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
 
+        // Props
         recipe.props.url = json.props.url
         recipe.props.imgUrl = json.props.imgUrl
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
+
+        // Source
+        recipe.source.url = json.props.url
+        recipe.source.authors = json.authors.map((author: string) => ({
+            name: author,
+            url: ''
+        }))
+
         recipe.computeItems()
         return recipe
     }
@@ -420,15 +443,16 @@ export class Recipe {
      * @returns the list of authors as string
      */
     public getAuthors(): string {
-        switch ((this.authors ?? []).length) {
+        switch ((this.source.authors ?? []).length) {
             case 0:
                 return ''
             case 1:
-                return this.authors[0]
+                return this.source.authors[0].name
             case 2:
-                return this.authors[0] + ' and ' + this.authors[1]
+                return this.source.authors[0].name + ' and ' + this.source.authors[1].name
             default:
-                return this.authors.slice(0, length - 1).join(', ') + ' and ' + this.authors[length - 1]
+                return this.source.authors.map((author) => author.name)
+                    .slice(0, length - 1).join(', ') + ' and ' + this.source.authors[length - 1].name
         }
     }
 
@@ -437,21 +461,10 @@ export class Recipe {
      * @param author
      */
     public addAuthor(author: string): void {
-        if (this.authors === undefined) {
-            this.authors = []
+        if (this.source.authors === undefined) {
+            this.source.authors = []
         }
-        this.authors.push(author)
-    }
-
-    /**
-     * Remove an author from the list of authors
-     * @param author
-     */
-    public removeAuthor(author: string): void {
-        if (this.authors === undefined) {
-            return
-        }
-        this.authors = this.authors.filter(a => a !== author)
+        this.source.authors.push({name: author})
     }
 
     /**
@@ -641,7 +654,6 @@ export class Recipe {
     /**
      * Navigate to the recipe
      */
-
     public route(): void {
         const router = useIonRouter()
         router.push(this.getRoute())

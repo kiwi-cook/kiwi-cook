@@ -15,6 +15,8 @@
                     <IonCol size="5">
                         <img :alt="`Image of ${mutableRecipe.name}`" :src="mutableRecipe.props.imgUrl"
                              class="recipe-image"/>
+                        <IonInput v-model="mutableRecipe.props.imgUrl" label="Image URL"
+                                  label-placement="stacked" type="url"/>
                     </IonCol>
                     <IonCol size="7">
                         <IonGrid>
@@ -35,7 +37,7 @@
                             </IonRow>
                             <IonRow>
                                 <IonCol>
-                                    <IonTextarea v-model.trim="mutableRecipe.description"
+                                    <IonTextarea v-model="mutableRecipe.description"
                                                  :cols="6" :counter="true"
                                                  :rows="3"
                                                  :spellcheck="true" label="Description" label-placement="stacked"
@@ -45,12 +47,12 @@
                             <IonRow>
                                 <IonCol size="auto">
                                     <IonLabel position="stacked">Authors</IonLabel>
-                                    <IonChip v-for="(author, authorIndex) in (mutableRecipe.authors ?? [])"
+                                    <IonChip v-for="(author, authorIndex) in (mutableRecipe.source.authors ?? [])"
                                              :key="authorIndex"
                                              class="recipe-author">
-                                        <IonLabel>{{ author }}</IonLabel>
+                                        <IonLabel>{{ author.name }}</IonLabel>
                                         <IonIcon :icon="closeCircleOutline"
-                                                 @click="(mutableRecipe.authors ?? []).splice(authorIndex, 1)"/>
+                                                 @click="(mutableRecipe.source.authors ?? []).splice(authorIndex, 1)"/>
                                     </IonChip>
                                     <IonInput label="Add author" label-placement="stacked"
                                               placeholder="e.g. John Doe"
@@ -63,12 +65,12 @@
                             </IonRow>
                             <IonRow>
                                 <IonCol>
-                                    <IonInput v-model="mutableRecipe.props.imgUrl" label="Image URL"
+                                    <IonInput v-model="mutableRecipe.source.url" label="Source URL"
                                               label-placement="stacked" type="url"/>
                                 </IonCol>
                             </IonRow>
                             <IonRow>
-                                <ItemList :items="mutableRecipe.getStepItems()"/>
+                                <ItemList :items="mutableRecipe.getStepItems()" :horizontal="true"/>
                             </IonRow>
                         </IonGrid>
                     </IonCol>
@@ -100,15 +102,14 @@
     </IonCard>
 
     <!-- Steps -->
-    <IonButton fill="clear" @click="addStep(-1)">Add step</IonButton>
+    <IonButton @click="addStep(-1)">Add step</IonButton>
     <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
         <IonCard class="step-editor shadow">
             <IonCardHeader>
                 <IonItem lines="none">
                     <IonCardTitle>
-                        <h2>
-                            Step {{ stepIndex + 1 }}
-                        </h2>
+                        <span class="recipe-step-index">Step {{ stepIndex + 1 }}</span><span
+                            class="recipe-step-index-max"> / {{ mutableRecipe.steps.length }}</span>
                     </IonCardTitle>
                     <IonButton color="danger" fill="solid" @click="removeStep(stepIndex)">
                         <IonIcon :icon="trash"/>
@@ -202,9 +203,9 @@
                     </template>
                 </div>
             </IonCardContent>
-            <IonButton fill="clear" @click="addItem(stepIndex)">Add item</IonButton>
+            <IonButton @click="addItem(stepIndex)">Add item</IonButton>
         </IonCard>
-        <IonButton fill="clear" @click="addStep(stepIndex)">Add step</IonButton>
+        <IonButton @click="addStep(stepIndex)">Add step</IonButton>
     </template>
     <IonItem lines="none">
         <IonButton color="success" fill="solid"
@@ -410,7 +411,6 @@ export default defineComponent({
 .recipe-image {
     border-radius: 15px;
     width: 100%;
-    height: 100%;
 }
 
 ion-textarea {
@@ -440,8 +440,9 @@ ion-avatar.recipe-preview-img {
 }
 
 .step-editor {
-    margin: 10px;
     width: 100%;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .items-editor {

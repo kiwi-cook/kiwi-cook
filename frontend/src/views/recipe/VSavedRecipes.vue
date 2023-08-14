@@ -3,15 +3,13 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1>
-                        Your favorite recipes
-                    </h1>
+                    <FancyHeader :header="['Your', 'favorite recipes']"/>
                     <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Filter saved recipes"/>
 
-                    <List :filter="filterInput" :item-list="savedRecipes"
+                    <List :filter="filterInput" :list="savedRecipes"
                           no-items-message="Save recipes to find them faster">
-                        <template #item="{ item }">
-                            <RecipePreview :recipe="item"/>
+                        <template #element="{ element }">
+                            <RecipePreview :recipe="element as Recipe"/>
                         </template>
                     </List>
                 </div>
@@ -26,12 +24,14 @@ import {IonContent, IonPage, IonSearchbar, useIonRouter} from '@ionic/vue';
 import {addOutline, filter} from 'ionicons/icons';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
-import List from "@/components/utility/List.vue";
-import RecipePreview from "@/components/recipe/RecipePreview.vue";
+import List from "@/components/recipe/List.vue";
+import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
+import FancyHeader from "@/components/utility/FancyHeader.vue";
 
 export default defineComponent({
     name: 'RecipeSavedPage',
     components: {
+        FancyHeader,
         RecipePreview, List, IonPage, IonSearchbar, IonContent
     },
     setup() {

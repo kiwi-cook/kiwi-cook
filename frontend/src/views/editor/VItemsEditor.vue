@@ -14,9 +14,9 @@
                         <IonButton @click="addItem()">Add Item</IonButton>
                     </template>
                     <template #right>
-                        <List :filter="filterInput" :item-list="items" no-items-message="No items found">
-                            <template #item="{item}">
-                                <ItemEditor :item="item"/>
+                        <List :filter="filterInput" :list="items" no-items-message="No items found">
+                            <template #element="{element}">
+                                <ItemEditor :item="element as Item"/>
                             </template>
                         </List>
                     </template>
@@ -34,7 +34,7 @@ import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
-import List from "@/components/utility/List.vue";
+import List from "@/components/recipe/List.vue";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
@@ -64,9 +64,12 @@ export default defineComponent({
 
 
         return {
-            filterInput,
-            items, arrowBack,
-            removeUnusedItems, addItem
+            filterInput, items,
+            removeUnusedItems, addItem,
+            // icons
+            arrowBack,
+            // types
+            Item
         }
     }
 })

@@ -14,13 +14,13 @@
                     <IonIcon :icon="chevronForwardCircle"/>
                 </IonFabButton>
                 <IonFabList side="end">
-                    <IonFabButton @click="goBack()">
+                    <IonFabButton color="primary" @click="goBack()">
                         <IonIcon :icon="arrowBack"/>
                     </IonFabButton>
-                    <IonFabButton @click="addRecipe()">
+                    <IonFabButton color="primary" @click="addRecipe()">
                         <IonIcon :icon="addOutline"/>
                     </IonFabButton>
-                    <IonFabButton @click="recipe.save()">
+                    <IonFabButton color="primary" @click="recipe.save()">
                         <IonIcon :icon="saveOutline"/>
                     </IonFabButton>
                 </IonFabList>
