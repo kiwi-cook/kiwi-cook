@@ -1,0 +1,24 @@
+/* Style Ionic components */
+ion-card {
+    margin-bottom: 20px;
+    margin-right: 0;
+    margin-left: 0;
+    box-shadow: none !important;
+    border: var(--border);
+    border-radius: var(--border-radius);
+}
+
+ion-grid {
+    padding: 0;
+}
+
+ion-searchbar {
+    --border-radius: 50px !important;
+    --box-shadow: var(--box-shadow);
+}
+
+ion-item {
+    --border-radius: 15px;
+    --background: inherit;
+    --padding-end: 1rem;
+}

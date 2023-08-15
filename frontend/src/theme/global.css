@@ -1,5 +1,12 @@
 :root {
-    --box-shadow: rgba(0, 0, 0, 0.15) 0 2px 8px;
+    --shadow-color: 0deg 0% 61%;
+    --shadow-color-dark: var(--ion-color-primary-shade);
+    --box-shadow: 0 2px 8px hsl(var(--shadow-color) / 0.23);
+    --box-shadow-hover: 0 4px 16px hsl(var(--shadow-color) / 0.23);
+    --box-shadow-strong:
+            0 2px 8px hsl(var(--shadow-color) / 0.23),
+            0 4px 16px hsl(var(--shadow-color) / 0.23),
+            0 8px 32px hsl(var(--shadow-color) / 0.1);
     --margin: 0;
     --margin-lr: 20px;
     --border-radius: 15px;
@@ -10,26 +17,12 @@
     box-shadow: var(--box-shadow);
 }
 
-.animation-fade-in {
-    animation: fade-in 0.5s ease-in-out;
+.shadow:hover {
+    box-shadow: var(--box-shadow-hover);
 }
 
-ion-card {
-    margin-bottom: 20px;
-    margin-right: 0;
-    margin-left: 0;
-    box-shadow: none !important;
-    border: var(--border);
-    border-radius: var(--border-radius);
-}
-
-ion-grid {
-    padding: 0;
-}
-
-ion-searchbar {
-    --border-radius: 50px !important;
-    --box-shadow: var(--box-shadow);
+.no-border {
+    border: none !important;
 }
 
 .link {

@@ -8,7 +8,7 @@
 
         <TwoColumnLayout v-if="items.length > 0" size="12" size-lg="6">
             <template #left>
-                <IonCard>
+                <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
@@ -22,7 +22,7 @@
                 </IonCard>
             </template>
             <template #right>
-                <IonCard>
+                <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
@@ -77,56 +77,10 @@ export default defineComponent({
 });
 </script>
 
-<!-- Use this to override the default styles -->
-<style>
-/* Override hero styles */
-.recipe-preview-hero {
-    height: 400px;
-    border-radius: 0;
-}
-
-/* Is used in the RecipeHero component */
-.recipe-preview-hero .hero-image::part(image) {
-    border-radius: 0;
-}
-</style>
-
 <style scoped>
 .recipe-preview-card {
-    border-radius: 8px;
-    padding: 16px;
-    margin: 16px;
+    border: var(--border);
+    border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-}
-
-.recipe-step-preview {
-    margin-top: 16px;
-    color: var(--ion-color-light);
-}
-
-.recipe-preview-card ion-card-content {
-    padding: var(--padding);
-}
-
-.recipe-preview-card ion-card-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--ion-button-background-color);
-}
-
-.recipe-preview-card p {
-    margin-top: 16px;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-.recipe-preview-card ion-button {
-    margin-top: 16px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    font-weight: 600;
-    --background: var(--ion-button-background-color);
-    --color: var(--ion-button-color);
 }
 </style>

@@ -420,7 +420,7 @@ ion-textarea {
 
 ion-card {
     /* nice shadow with light background and round corners */
-    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: var(--box-shadow);
 }
 
 ion-item {

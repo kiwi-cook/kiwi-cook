@@ -5,9 +5,30 @@
             <div class="page">
                 <div class="content">
                     <FancyHeader :header="['Discover', 'new recipes']"/>
-                    <Searchbar v-model="filterInput" :filtered-items="filteredItems" class="item-searchbar"
-                               placeholder="What ingredients are you craving today?"
-                               @select="selectItem($event)"/>
+
+                    <!-- Searchbar for ingredients and tools -->
+                    <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
+                               placeholder="What ingredients are you craving today?">
+                        <template #element="{element}">
+                            <ItemComponent :item="element as Item" @select="toggleItem($event)"/>
+                        </template>
+                    </Searchbar>
+
+                    <!-- Suggested and selected items -->
+                    <List :list="[...selectedItems, ...itemSuggestions]" :horizontal="true" :load-all="true"
+                          :border="true">
+                        <template #element="{ element }">
+                            <ItemComponent :item="element as Item"
+                                           :color="selectedItemColors[(element as Item).getId()] ?? ''"
+                                           @select="toggleItem($event)">
+                                <template v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'" #end>
+                                    <IonButton color="light" @click="unselectItem((element as Item).getId())">
+                                        <IonIcon :icon="closeCircleOutline"/>
+                                    </IonButton>
+                                </template>
+                            </ItemComponent>
+                        </template>
+                    </List>
 
                     <!-- Favorite recipes -->
                     <List v-if="favoriteRecipes.length > 0" :list="favoriteRecipes" :horizontal="true" :load-all="true"
@@ -19,29 +40,7 @@
                         </template>
                     </List>
 
-                    <!-- Suggested items -->
-                    <ItemList v-if="suggestedItems.length > 0" :horizontal="true" :items="suggestedItems"
-                              :item-border="true" @select="selectItem($event)"/>
-
-                    <IonCard>
-                        <IonCardHeader>
-                            <IonCardSubtitle>
-                                Select the ingredients and tools you want to use
-                            </IonCardSubtitle>
-                            <IonCardTitle>
-                                <h2>
-                                    Your ingredients and tools
-                                </h2>
-                            </IonCardTitle>
-
-                        </IonCardHeader>
-
-                        <IonCardContent>
-                            <ItemList :items="selectedItems" @select="selectItem($event)"/>
-                        </IonCardContent>
-                    </IonCard>
-
-                    <IonCard v-show="selectedItems.length > 0" class="animation-fade-in">
+                    <IonCard v-show="selectedItems.length > 0">
                         <IonCardHeader>
                             <IonCardSubtitle>
                                 Select the maximum cooking time
@@ -75,40 +74,32 @@
                         </IonButton>
                     </div>
 
-                    <IonCard v-if="recipeSuggestions.length > 0 && submitted">
-                        <IonCardHeader>
-                            <IonCardTitle>
-                                <h2>
-                                    Explore {{ recipeSuggestions.length }} recipes
-                                </h2>
-                            </IonCardTitle>
-                        </IonCardHeader>
+                    <template v-if="recipeSuggestions.length > 0 && submitted">
+                        <h2>
+                            Explore {{ recipeSuggestions.length }} recipes
+                        </h2>
                         <List :list="recipeSuggestions">
                             <template #element="{ element }">
                                 <RecipeSuggestionPreview :recipe-suggestion="element as RecipeSuggestion"/>
                             </template>
                         </List>
-                    </IonCard>
-                    <IonCard v-else-if="submitted">
-                        <IonCardHeader>
-                            <IonCardTitle>
-                                <h2>
-                                    No recipes found
-                                </h2>
-                            </IonCardTitle>
-                        </IonCardHeader>
-                    </IonCard>
+                    </template>
+                    <template v-else-if="submitted">
+                        <h2>
+                            No recipes found
+                        </h2>
+                    </template>
 
-                    <IonCard v-if="recipeSuggestions.length > 0">
-                        <IonCardHeader>
-                            <IonCardTitle>More Recipes</IonCardTitle>
-                        </IonCardHeader>
+                    <template v-if="recipeSuggestions.length > 0">
+                        <h2>
+                            More recipes
+                        </h2>
                         <List :list="moreRecipes">
                             <template #element="{ element }">
                                 <RecipePreview :recipe="element as Recipe"/>
                             </template>
                         </List>
-                    </IonCard>
+                    </template>
                 </div>
             </div>
         </IonContent>
@@ -126,6 +117,7 @@ import {
     IonCardTitle,
     IonChip,
     IonContent,
+    IonIcon,
     IonPage,
     IonRange,
 } from '@ionic/vue';
@@ -135,21 +127,16 @@ import List from "@/components/recipe/List.vue";
 import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
 import RecipeSuggestionPreview from "@/components/recipe/previews/RecipeSuggestionPreview.vue";
 import Searchbar from "@/components/utility/Searchbar.vue";
-import ItemList from "@/components/recipe/ItemList.vue";
 import FancyHeader from "@/components/utility/FancyHeader.vue";
 import MiniRecipePreview from "@/components/recipe/previews/MiniRecipePreview.vue";
+import ItemComponent from "@/components/recipe/Item.vue";
+import {closeCircleOutline} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeSuggestionsPage',
-    computed: {
-        Recipe() {
-            return Recipe
-        }
-    },
     components: {
         MiniRecipePreview,
         FancyHeader,
-        ItemList,
         Searchbar,
         RecipeSuggestionPreview,
         RecipePreview,
@@ -163,7 +150,9 @@ export default defineComponent({
         IonCardContent,
         IonButton,
         IonRange,
-        IonChip
+        IonChip,
+        ItemComponent,
+        IonIcon
     },
     setup() {
         const recipeStore = useRecipeStore()
@@ -171,8 +160,13 @@ export default defineComponent({
         const itemsById = computed(() => recipeStore.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 
+        /* Favorite recipes */
+        const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes.slice(0, 8)
+            .sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration()))
+
+
         /* Filtered items */
-        const filteredItems = ref([] as Item[])
+        const filteredItems = ref<Item[]>([])
         const filterInput = ref('')
         watch([filterInput, items], () => {
             if (filterInput.value === '') {
@@ -181,22 +175,45 @@ export default defineComponent({
                 filteredItems.value = (items.value ?? [])
                     .filter((item: Item) => item.getName()
                         .toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
-                    .filter((item: Item) => !selectedItemIds.has(item.getId()))
+                    .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
             }
         }, {immediate: true})
 
         /* Selected items */
-        const selectedItemIds = new Set<string>()
-        const selectedItems = ref([] as Item[])
-        const selectItem = (itemID: string) => {
-            if (selectedItemIds.has(itemID)) {
-                selectedItemIds.delete(itemID)
-            } else {
-                filterInput.value = ''
-                selectedItemIds.add(itemID)
-            }
-            selectedItems.value = Array.from(selectedItemIds).map(id => itemsById.value[id])
+        const itemQueries = ref<{ [id: string]: boolean }>({})
+        const selectedItems = computed<Item[]>(() => Object.keys(itemQueries.value)
+            .map((id: string) => itemsById.value[id]))
+        const selectedItemColors = computed<{ [id: string]: string }>(() => Object.fromEntries(Object.entries(itemQueries.value)
+            .map(([id, exclude]: [string, boolean]) => [id, exclude ? 'danger' : 'primary'])))
+        const toggleItem = (id: string) => {
+            itemQueries.value[id] = !(itemQueries.value[id] || typeof itemQueries.value[id] === 'undefined')
         }
+        const unselectItem = (id: string) => {
+            delete itemQueries.value[id]
+        }
+
+
+        /* Items suggestions */
+        const recipes = computed(() => recipeStore.getRecipesAsList)
+        const maxItemSuggestionsLength = 3
+        const itemSuggestions = computed(() => {
+            const itemsUsedInRecipes = (recipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
+            const favItems = (favoriteRecipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
+
+            const items: Item[] = [...itemsUsedInRecipes, ...favItems]
+            const itemIds: string[] = []
+            const itemSuggestions: Item[] = []
+            for (const itemSuggestion of items) {
+                if (!itemIds.includes(itemSuggestion.getId())
+                    && typeof itemQueries.value[itemSuggestion.getId()] === 'undefined'
+                    && itemIds.length < maxItemSuggestionsLength) {
+                    itemIds.push(itemSuggestion.getId())
+                    itemSuggestions.push(itemSuggestion)
+                }
+            }
+
+            return itemSuggestions
+        })
 
         /* City */
         const city = ref('')
@@ -213,7 +230,7 @@ export default defineComponent({
             const searchQueryBuilder = new SearchQueryBuilder()
             searchQueryBuilder.setCity(city.value)
             searchQueryBuilder.setDuration(maxCookingTime.value)
-            searchQueryBuilder.setItemIds(Array.from(selectedItemIds))
+            searchQueryBuilder.setItemIds(itemQueries.value)
             const query = searchQueryBuilder.build()
             recipeSuggestions.value = suggestRecipes(query)
         }
@@ -232,26 +249,9 @@ export default defineComponent({
             }
         }
         const submitButton = computed<string>(() => recipeSuggestions.value.length === 0 ? 'Suggest Recipes' : 'Reset');
-        const submitColor = computed<string>(() => recipeSuggestions.value.length === 0 ? 'primary' : 'danger');
+        const submitColor = computed<string>(() => recipeSuggestions.value.length === 0 ? 'success' : 'danger');
         const submitDisabled = computed<boolean>(() => recipeSuggestions.value.length === 0
             && selectedItems.value.length === 0)
-
-        /* Favorite recipes */
-        const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes.slice(0, 8))
-
-        /* Items suggestions */
-        const recipes = computed(() => recipeStore.getRecipesAsList)
-        const suggestedItems: Ref<Item[]> = computed(() => {
-                const randItems = recipes.value.flatMap((recipe: Recipe) => recipe.getItems())
-                    .filter(() => Math.random() < 0.5)
-                    .slice(0, 3)
-                const favItems = favoriteRecipes.value.flatMap((recipe: Recipe) => recipe.getItems())
-                    .filter(() => Math.random() < 0.5)
-                    .slice(0, 3)
-                console.log(randItems, favItems)
-                return [...new Set([...randItems, ...favItems])].slice(0, 6)
-            }
-        )
 
         /* Recipes */
         const moreRecipes = computed(() => recipeStore.getRecipesAsList
@@ -261,17 +261,21 @@ export default defineComponent({
         return {
             /* Filtering */
             filterInput,
-            selectItem, filteredItems, selectedItems,
+            toggleItem, unselectItem, filteredItems, selectedItems, selectedItemColors, itemQueries,
             city,
             /* Cooking Time */
             maxCookingTime, cookingTimes,
             /* Submit */
             submit, submitButton, submitColor, submitDisabled, submitted,
             /* Suggestions */
-            RecipeSuggestion, recipeSuggestions,
-            favoriteRecipes, suggestedItems,
+            RecipeSuggestion, recipeSuggestions, itemSuggestions,
+            favoriteRecipes,
             /* Recipes */
-            moreRecipes
+            moreRecipes,
+            /* Types */
+            Item, Recipe,
+            /* Icons */
+            closeCircleOutline
         }
     }
 })

@@ -2,7 +2,8 @@
     <div :class="['element-list-wrapper', {'horizontal': horizontal}]">
         <ul v-if="loadedFilteredElements.length > 0"
             :class="['element-list', {'horizontal': horizontal}, {'wrap': !noWrap}]">
-            <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex" class="element">
+            <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex"
+                :class="['element', {'border': border}, {'horizontal': horizontal}, {'wrap': !noWrap}]">
                 <slot :element="element" name="element">
                     {{ element }}
                 </slot>
@@ -22,7 +23,7 @@ import {useRecipeStore} from '@/storage';
 
 
 export default defineComponent({
-    name: 'RecipeList',
+    name: 'List',
     props: {
         filter: {
             type: String,
@@ -33,6 +34,11 @@ export default defineComponent({
             type: Array,
             required: false,
             default: null
+        },
+        border: {
+            type: Boolean,
+            required: false,
+            default: false
         },
         noWrap: {
             type: Boolean,
@@ -127,12 +133,12 @@ export default defineComponent({
 .element-list-wrapper.horizontal {
     overflow-x: scroll;
     width: 100%;
+    margin-left: -1rem;
 }
 
 ul.element-list {
     list-style-type: none;
     padding: 0;
-    margin: 0;
 }
 
 ul.element-list.horizontal {
@@ -141,14 +147,28 @@ ul.element-list.horizontal {
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: start;
+    /* works together with margin-left: -1rem of .element-list-wrapper.horizontal */
+    margin: 0 0 0 1rem;
 }
 
 ul.element-list.horizontal.wrap {
     flex-wrap: wrap;
 }
 
-li.element {
+li.element, li.element.horizontal.wrap {
     margin-bottom: 1rem;
+    margin-right: 0;
+}
+
+li.element.horizontal {
     margin-right: 1rem;
 }
+
+
+/* li.element.border {
+    margin-bottom: 1rem;
+    margin-right: 1rem;
+    border: var(--border);
+    border-radius: var(--border-radius);
+} */
 </style>

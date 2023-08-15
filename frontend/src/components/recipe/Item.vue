@@ -1,8 +1,9 @@
 <template>
-    <IonItem v-if="mappedItem" :class="['small-item', {'link': !disableClick}]" lines="none" @click="select()">
+    <IonItem v-if="mappedItem" :class="['small-item', {'link': !disableClick}]" lines="none" v-bind="$attrs"
+             :color="color">
         <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                 class="small-item-img-rm"/>
-        <IonText class="small-item-name">
+        <IonText class="small-item-name" @click="select()">
             <IonChip v-if="mappedItem.showAmountUnit">
                 {{ mappedItem.amount }} {{ mappedItem.unit }}
                 <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
@@ -10,6 +11,9 @@
             </IonChip>
             {{ mappedItem.name }}
         </IonText>
+        <div class="small-item-end">
+            <slot name="end"></slot>
+        </div>
     </IonItem>
 </template>
 
@@ -29,6 +33,11 @@ export default defineComponent({
             type: Boolean,
             required: false,
             default: false
+        },
+        color: {
+            type: String,
+            required: false,
+            default: ''
         }
     },
     emits: ['select'],
@@ -107,4 +116,9 @@ ion-text.small-item-name {
     font-size: 1rem;
     margin: 0;
 }
+
+.small-item-end {
+    margin-left: 5px;
+}
+
 </style>

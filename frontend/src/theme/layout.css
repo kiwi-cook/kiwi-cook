@@ -1,3 +1,7 @@
+:root {
+    --max-width: 1080px;
+}
+
 .page {
     margin-top: 20px;
     margin-left: 15px;
@@ -9,7 +13,7 @@
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    max-width: 1080px;
+    max-width: var(--max-width) !important;
     margin: unset !important;
     margin-left: auto !important;
     margin-right: auto !important;
@@ -23,7 +27,6 @@
 }
 
 /* Flex */
-
 .flex {
     display: flex;
 }

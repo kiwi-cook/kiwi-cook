@@ -34,6 +34,7 @@ import '@ionic/vue/css/display.css';
 /* Custom variables */
 import './theme/colors.css';
 import './theme/global.css';
+import './theme/ionic.css'
 import './theme/layout.css';
 import './theme/font.css';
 

@@ -40,6 +40,12 @@ export default defineComponent({
     width: 200px;
     cursor: pointer;
     box-shadow: var(--box-shadow) !important;
+    transition: all 0.3s ease-in-out;
+}
+
+.mini-recipe-card:hover {
+    box-shadow: var(--box-shadow-hover) !important;
+    transform: scale(1.01, 1.01);
 }
 
 .mini-recipe-card-title {

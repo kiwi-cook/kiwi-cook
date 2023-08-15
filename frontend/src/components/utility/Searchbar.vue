@@ -1,26 +1,29 @@
 <template>
-    <div class="item-searchbar">
-        <IonSearchbar v-model="filterInput" :debounce="500" :placeholder="placeholder"/>
-        <div>
-            <slot name="item">
-                <ItemList v-if="listOpen" class="item-searchbar-results" :items="filteredItems"
-                          :placeholder="placeholder"
-                          :show-limit="5"
-                          :type="['ingredient', 'tool']" v-bind="$attrs"/>
-            </slot>
-            <slot name="tag">
-
-            </slot>
+    <div class="searchbar-wrapper" @mouseenter="mouseLeave = false" @mouseleave="mouseLeave = true"
+         @focusout="closeList()" @focusin="searchActive = true">
+        <IonSearchbar v-model="searchInput" class="searchbar-search" :debounce="500"
+                      :placeholder="placeholder" @keydown.esc="closeList()" @ionClear="closeList()" />
+        <div v-show="listIsOpen" class="searchbar-list-wrapper">
+            <div class="searchbar-list">
+                <List :list="elements" :filter="searchInput" :loadAll="true" :noWrap="true" :horizontal="false">
+                    <template #element="{element}">
+                        <div @click="selectElement">
+                            <slot :element="element" name="element">
+                                {{ element }}
+                            </slot>
+                        </div>
+                    </template>
+                </List>
+            </div>
         </div>
     </div>
 </template>
 
 
 <script lang="ts">
-import {defineComponent, PropType, ref, toRefs, watch} from "vue";
-import ItemList from "@/components/recipe/ItemList.vue";
-import {Item, StepItem} from "@/tastebuddy";
+import {computed, defineComponent, ref, toRefs, watch} from "vue";
 import {IonSearchbar} from "@ionic/vue";
+import List from "@/components/recipe/List.vue";
 
 export default defineComponent({
     name: 'Searchbar',
@@ -29,66 +32,78 @@ export default defineComponent({
             type: String,
             required: true
         },
-        filteredItems: {
-            type: Array as PropType<(StepItem[] | Item[])>,
+        elements: {
+            type: Array,
             required: true,
         },
     },
     components: {
-        ItemList,
-        IonSearchbar
+        IonSearchbar,
+        List
     },
     emits: ['update:modelValue'],
     setup(props, {emit}) {
-        const {filteredItems} = toRefs(props);
+        const {elements} = toRefs(props);
 
-        const listOpen = ref(false)
-        const filterInput = ref('')
-        const updateFilterInput = (value: string) => {
-            emit('update:modelValue', value)
+        /* Searchbar state */
+        const searchActive = ref(false)
+        const searchInput = ref('')
+        const mouseLeave = ref(false)
 
-            // Close list if input is empty
-            if (value === '') {
-                listOpen.value = false
-            }
+        /**
+         * Close list if mouse leaves searchbar and searchbar is not focussed
+         * or on "esc" keydown
+         */
+        const closeList = () => {
+            searchActive.value = !(mouseLeave.value)
+        }
+        /**
+         * Close list if element was selected
+         */
+        const selectElement = () => {
+            searchActive.value = false
+            searchInput.value = ''
         }
 
-        watch(filterInput, (value) => {
-            updateFilterInput(value)
+        /* State whether list should be open */
+        const listIsOpen = computed<boolean>(() => {
+            return elements.value.length !== 0 && (searchInput.value !== '' || searchActive.value)
         })
 
-        watch(filteredItems, (value) => {
-            // Close list if filtered items are empty
-            if (value.length === 0) {
-                listOpen.value = false
-                return
-            }
-            showList()
+        watch(searchInput, (newFilterInput) => {
+            // Emit new filter input
+            emit('update:modelValue', newFilterInput)
         })
-
-        function showList() {
-            listOpen.value = true
-        }
 
         return {
-            listOpen, openPopover: showList,
-            filterInput, updateFilterInput
+            listIsOpen, mouseLeave, selectElement, closeList,
+            searchInput, searchActive,
         }
     }
 })
 </script>
 
 <style scoped>
-.item-searchbar {
-    position: relative;
+.searchbar-wrapper {
     width: 100%;
 }
 
-.item-searchbar-results {
-    border-radius: var(--border-radius);
-    border: var(--border);
-    box-shadow: var(--box-shadow);
-    width: 95%;
+.searchbar-list-wrapper {
+    position: absolute;
+    left: 0;
+    z-index: 10;
+    width: 100%;
+}
+
+.searchbar-list {
+    width: 90%;
+    max-width: var(--max-width);
     margin: 0 auto;
+    max-height: 30vh;
+    overflow-y: scroll;
+    background: var(--background);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow-strong);
 }
 </style>

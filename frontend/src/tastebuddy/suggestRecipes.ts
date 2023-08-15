@@ -63,14 +63,15 @@ class SearchQueryBuilder {
         return this
     }
 
-    public setItemIds(itemIds: string[]): this {
-        this.items.push(...itemIds.map(id => {
-            return {
-                id,
-                name: '',
-                exclude: false
-            }
+    public setItemIds(itemIds: {
+        [id: string]: boolean
+    }): this {
+        const items = Object.entries(itemIds).map(([id, exclude]: [string, boolean]) => ({
+            id,
+            name: '',
+            exclude: exclude
         }))
+        this.items.push(...items)
         return this
     }
 
@@ -181,6 +182,7 @@ function filterByPrice(recipe: Recipe, price: number): boolean {
 }
 
 export {
+    ItemQuery,
     suggestRecipes,
     RecipeSuggestion,
     SearchQueryBuilder

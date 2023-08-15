@@ -4,7 +4,7 @@
 
         <TwoColumnLayout size="12" size-lg="6">
             <template v-if="possessedItems.length > 0" #left>
-                <IonCard>
+                <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
@@ -18,7 +18,7 @@
                 </IonCard>
             </template>
             <template v-if="missingItems.length > 0" #right>
-                <IonCard>
+                <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
                             <h3>
@@ -98,33 +98,9 @@ export default defineComponent({
 
 <style scoped>
 .recipe-preview-card {
-    border-radius: 8px;
-    padding: 16px;
-    margin: 16px;
+    border: var(--border);
+    border-radius: var(--border-radius);
     cursor: pointer;
-    box-shadow: var(--box-shadow);
-}
-
-.recipe-step-preview {
-    margin-top: 16px;
-    color: var(--ion-color-light);
-}
-
-.recipe-preview-card ion-card-content {
-    padding: var(--padding);
-}
-
-.recipe-preview-card ion-card-title {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--ion-button-background-color);
-}
-
-.recipe-preview-card p {
-    margin-top: 16px;
-    font-size: 16px;
-    line-height: 1.5;
 }
 
 .recipe-preview-card ion-button {
