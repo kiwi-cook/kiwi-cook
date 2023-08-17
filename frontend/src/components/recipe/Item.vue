@@ -1,18 +1,19 @@
 <template>
-    <IonItem v-if="mappedItem" :button="!disableClick"
-             :class="['small-item', {'border': border}]" lines="none" @click="select">
-        <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
-                class="small-item-img-rm"/>
-        <IonText class="small-item-name" :color="color">
-            <IonChip v-if="mappedItem.showAmountUnit">
-                {{ mappedItem.amount }} {{ mappedItem.unit }}
-                <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
-                        class="small-item-img-lm"/>
-            </IonChip>
-            {{ mappedItem.name }}
-        </IonText>
-        <div slot="end" class="item-buttons">
-            <slot name="buttons"></slot>
+    <IonItem v-if="mappedItem" :button="!disableClick" class="item" :lines="lines" @click="select">
+        <div class="item-start">
+            <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
+                    class="item-img-rm"/>
+            <IonText class="item-name" :color="color">
+                <IonChip v-if="mappedItem.showAmountUnit">
+                    {{ mappedItem.amount }} {{ mappedItem.unit }}
+                    <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
+                            class="item-img-lm"/>
+                </IonChip>
+                {{ mappedItem.name }}
+            </IonText>
+        </div>
+        <div class="item-end">
+            <slot name="end"></slot>
         </div>
     </IonItem>
 </template>
@@ -39,10 +40,10 @@ export default defineComponent({
             required: false,
             default: ''
         },
-        border: {
-            type: Boolean,
+        lines: {
+            type: String as PropType<"full" | "inset" | "none" | undefined>,
             required: false,
-            default: false
+            default: 'none'
         }
     },
     emits: ['select'],
@@ -93,12 +94,18 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.small-item {
+.item {
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: start;
     justify-content: space-between;
     background: inherit !important;
+}
+
+.item::part(native) {
+    margin: 5px 0;
+    padding: 0;
+    min-width: 230px;
 }
 
 ion-item.border::part(native) {
@@ -106,32 +113,34 @@ ion-item.border::part(native) {
     border-radius: 15px;
 }
 
-.small-item-img-rm::part(image) {
+.item-img-rm::part(image) {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     margin-right: 10px;
 }
 
-.small-item-img-lm::part(image) {
+.item-img-lm::part(image) {
     width: 30px;
     height: 30px;
     border-radius: 50%;
     margin-left: 10px;
 }
 
-.small-item-name {
+.item-name {
     font-size: 1rem;
     margin: 0;
 }
 
-.item-buttons {
-    margin-left: auto;
+.item-start, .item-end {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
-    z-index: 100;
 }
 
+.item-start {
+    margin-right: auto;
+}
+
+.item-end {
+    margin-left: auto;
+}
 </style>

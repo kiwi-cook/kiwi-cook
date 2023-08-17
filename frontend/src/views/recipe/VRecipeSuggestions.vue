@@ -18,7 +18,9 @@
                         <IonCardHeader>
                             <IonCardTitle>
                                 <h2>
-                                    Select the <FancyText text="ingredients and tools" /> you want to use
+                                    Select the
+                                    <FancyText text="ingredients and tools"/>
+                                    you want to use
                                 </h2>
                             </IonCardTitle>
                             <IonCardSubtitle>
@@ -33,28 +35,30 @@
                                 <template #element="{ element }">
                                     <ItemComponent :item="element as Item"
                                                    :color="selectedItemColors[(element as Item).getId()]"
-                                                   :disable-click="true">
-                                        <template #buttons>
-                                            <IonButton
-                                                :color="itemQueries[(element as Item).getId()] === false ? 'success' : 'light'"
-                                                aria-description="Include item"
-                                                @click="includeItem((element as Item).getId())">
-                                                <IonIcon :icon="includeIcon"/>
-                                            </IonButton>
-                                            <IonButton
-                                                :color="itemQueries[(element as Item).getId()] ? 'danger' : 'light'"
-                                                aria-description="Exclude item"
-                                                @click="excludeItem((element as Item).getId())">
-                                                <IonIcon :icon="excludeIcon"/>
-                                            </IonButton>
-                                            <IonButton
-                                                v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
-                                                color="light"
-                                                aria-description="Remove item"
-                                                @click="removeItem((element as Item).getId())">
-                                                <IonIcon :icon="removeIcon"
-                                                         @click="removeItem((element as Item).getId())"/>
-                                            </IonButton>
+                                                   :disable-click="true" lines="inset">
+                                        <template #end>
+                                            <div class="item-buttons">
+                                                <IonButton
+                                                    :color="itemQueries[(element as Item).getId()] === false ? 'success' : 'light'"
+                                                    aria-description="Include item"
+                                                    class="item-button" @click="includeItem((element as Item).getId())">
+                                                    <IonIcon :icon="includeIcon"/>
+                                                </IonButton>
+                                                <IonButton
+                                                    :color="itemQueries[(element as Item).getId()] ? 'danger' : 'light'"
+                                                    aria-description="Exclude item"
+                                                    class="item-button" @click="excludeItem((element as Item).getId())">
+                                                    <IonIcon :icon="excludeIcon"/>
+                                                </IonButton>
+                                                <IonButton
+                                                    v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
+                                                    color="light"
+                                                    aria-description="Remove item"
+                                                    class="item-button" @click="removeItem((element as Item).getId())">
+                                                    <IonIcon :icon="removeIcon"
+                                                             @click="removeItem((element as Item).getId())"/>
+                                                </IonButton>
+                                            </div>
                                         </template>
                                     </ItemComponent>
                                 </template>
@@ -338,6 +342,36 @@ ion-card-title {
 
 .item-searchbar {
     margin-bottom: 1rem;
+}
+
+.item-buttons {
+    margin-left: 10px;
+    display: flex;
+}
+
+.item-button {
+    margin: 0;
+}
+
+.item-button::part(native) {
+    border-radius: 0;
+    padding: 10px;
+}
+
+.item-buttons .item-button:not(:last-child)::part(native) {
+    border-right: none; /* Prevent double borders */
+}
+
+.item-buttons .item-button:first-child::part(native) {
+    border-right: none; /* Prevent double borders */
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.item-buttons .item-button:last-child::part(native) {
+    border-right: none; /* Prevent double borders */
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
 }
 
 .cooking-time {

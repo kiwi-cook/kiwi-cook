@@ -13,9 +13,9 @@
                 <IonCard>
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 {{ amountIngredients }} Ingredients
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -32,9 +32,9 @@
                 <IonCard v-if="amountTools !== 0">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 {{ amountTools }} Tools
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -126,11 +126,6 @@ export default defineComponent({
     width: 100%;
     margin: var(--margin);
 }
-
-/* .recipe-hero-wrapper {
-    margin-left: 15px;
-    margin-right: 15px;
-} */
 
 .servings-counter {
     max-width: 150px;

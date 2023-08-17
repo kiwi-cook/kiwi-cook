@@ -93,6 +93,8 @@ export default defineComponent({
     margin: 0 auto;
     max-height: 30vh;
     overflow-y: scroll;
+    padding-left: 15px;
+    padding-right: 15px;
     background: var(--background);
     border: var(--border);
     border-radius: var(--border-radius);

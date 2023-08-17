@@ -82,33 +82,10 @@ export default defineComponent({
 });
 </script>
 
-<!-- Use this to override the default styles -->
-<style>
-/* Override hero styles */
-.recipe-preview-hero {
-    height: 400px;
-    border-radius: 0;
-}
-
-/* Is used in the RecipeHero component */
-.recipe-preview-hero .hero-image::part(image) {
-    border-radius: 0;
-}
-</style>
-
 <style scoped>
 .recipe-preview-card {
     border: var(--border);
     border-radius: var(--border-radius);
     cursor: pointer;
-}
-
-.recipe-preview-card ion-button {
-    margin-top: 16px;
-    border-radius: 999px;
-    text-transform: uppercase;
-    font-weight: 600;
-    --background: var(--ion-button-background-color);
-    --color: var(--ion-button-color);
 }
 </style>

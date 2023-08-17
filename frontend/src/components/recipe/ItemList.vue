@@ -2,7 +2,7 @@
     <div class="item-list-wrapper">
         <ul :class="['item-list', {'horizontal': horizontal}]">
             <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" :class="['item', {'border': itemBorder}]">
-                <ItemComponent :item="item" :disableClick="disableClick" :border="false" @select="select($event)"/>
+                <ItemComponent :item="item" :disableClick="disableClick" @select="select($event)"/>
             </li>
         </ul>
     </div>
