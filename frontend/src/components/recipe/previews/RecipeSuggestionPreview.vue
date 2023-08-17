@@ -7,9 +7,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 Ingredients and tools you might have
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -21,9 +21,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 What you'll eventually need
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>

@@ -1,9 +1,9 @@
 <template>
-    <IonItem v-if="mappedItem" :class="['small-item', {'link': !disableClick}]" lines="none" v-bind="$attrs"
-             :color="color">
+    <IonItem v-if="mappedItem" :button="!disableClick"
+             :class="['small-item', {'border': border}]" lines="none" @click="select">
         <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                 class="small-item-img-rm"/>
-        <IonText class="small-item-name" @click="select()">
+        <IonText class="small-item-name" :color="color">
             <IonChip v-if="mappedItem.showAmountUnit">
                 {{ mappedItem.amount }} {{ mappedItem.unit }}
                 <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
@@ -11,8 +11,8 @@
             </IonChip>
             {{ mappedItem.name }}
         </IonText>
-        <div class="small-item-end">
-            <slot name="end"></slot>
+        <div slot="end" class="item-buttons">
+            <slot name="buttons"></slot>
         </div>
     </IonItem>
 </template>
@@ -38,6 +38,11 @@ export default defineComponent({
             type: String,
             required: false,
             default: ''
+        },
+        border: {
+            type: Boolean,
+            required: false,
+            default: false
         }
     },
     emits: ['select'],
@@ -74,7 +79,7 @@ export default defineComponent({
         })
 
         const select = () => {
-            if (mappedItem.value) {
+            if (mappedItem.value && !props.disableClick) {
                 emit('select', mappedItem.value.id)
             }
         }
@@ -87,15 +92,18 @@ export default defineComponent({
 })
 </script>
 
-<style>
+<style scoped>
 .small-item {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0;
-    margin: 0;
     background: inherit !important;
+}
+
+ion-item.border::part(native) {
+    border: var(--border);
+    border-radius: 15px;
 }
 
 .small-item-img-rm::part(image) {
@@ -112,13 +120,18 @@ export default defineComponent({
     margin-left: 10px;
 }
 
-ion-text.small-item-name {
+.small-item-name {
     font-size: 1rem;
     margin: 0;
 }
 
-.small-item-end {
-    margin-left: 5px;
+.item-buttons {
+    margin-left: auto;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 100;
 }
 
 </style>

@@ -3,7 +3,7 @@
         <ul v-if="loadedFilteredElements.length > 0"
             :class="['element-list', {'horizontal': horizontal}, {'wrap': !noWrap}]">
             <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex"
-                :class="['element', {'border': border}, {'horizontal': horizontal}, {'wrap': !noWrap}]">
+                :class="['element', {'horizontal': horizontal}, {'wrap': !noWrap}]">
                 <slot :element="element" name="element">
                     {{ element }}
                 </slot>
@@ -34,11 +34,6 @@ export default defineComponent({
             type: Array,
             required: false,
             default: null
-        },
-        border: {
-            type: Boolean,
-            required: false,
-            default: false
         },
         noWrap: {
             type: Boolean,
@@ -156,19 +151,10 @@ ul.element-list.horizontal.wrap {
 }
 
 li.element, li.element.horizontal.wrap {
-    margin-bottom: 1rem;
     margin-right: 0;
 }
 
 li.element.horizontal {
     margin-right: 1rem;
 }
-
-
-/* li.element.border {
-    margin-bottom: 1rem;
-    margin-right: 1rem;
-    border: var(--border);
-    border-radius: var(--border-radius);
-} */
 </style>

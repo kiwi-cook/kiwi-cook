@@ -45,7 +45,7 @@ export default defineComponent({
 
 .mini-recipe-card:hover {
     box-shadow: var(--box-shadow-hover) !important;
-    transform: scale(1.01, 1.01);
+    transform: scale(1.02, 1.02);
 }
 
 .mini-recipe-card-title {

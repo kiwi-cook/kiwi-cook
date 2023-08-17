@@ -10,28 +10,62 @@
                     <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
                                placeholder="What ingredients are you craving today?">
                         <template #element="{element}">
-                            <ItemComponent :item="element as Item" @select="toggleItem($event)"/>
+                            <ItemComponent :item="element as Item" @click="includeItem((element as Item).getId())"/>
                         </template>
                     </Searchbar>
 
-                    <!-- Suggested and selected items -->
-                    <List :list="[...selectedItems, ...itemSuggestions]" :horizontal="true" :load-all="true"
-                          :border="true">
-                        <template #element="{ element }">
-                            <ItemComponent :item="element as Item"
-                                           :color="selectedItemColors[(element as Item).getId()] ?? ''"
-                                           @select="toggleItem($event)">
-                                <template v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'" #end>
-                                    <IonButton color="light" @click="unselectItem((element as Item).getId())">
-                                        <IonIcon :icon="closeCircleOutline"/>
-                                    </IonButton>
+                    <IonCard>
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                <h2>
+                                    Select the <FancyText text="ingredients and tools" /> you want to use
+                                </h2>
+                            </IonCardTitle>
+                            <IonCardSubtitle>
+                                <h3>
+                                    Include or exclude by clicking on + and -
+                                </h3>
+                            </IonCardSubtitle>
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <!-- Suggested and selected items -->
+                            <List :list="[...selectedItems, ...itemSuggestions]" :load-all="true">
+                                <template #element="{ element }">
+                                    <ItemComponent :item="element as Item"
+                                                   :color="selectedItemColors[(element as Item).getId()]"
+                                                   :disable-click="true">
+                                        <template #buttons>
+                                            <IonButton
+                                                :color="itemQueries[(element as Item).getId()] === false ? 'success' : 'light'"
+                                                aria-description="Include item"
+                                                @click="includeItem((element as Item).getId())">
+                                                <IonIcon :icon="includeIcon"/>
+                                            </IonButton>
+                                            <IonButton
+                                                :color="itemQueries[(element as Item).getId()] ? 'danger' : 'light'"
+                                                aria-description="Exclude item"
+                                                @click="excludeItem((element as Item).getId())">
+                                                <IonIcon :icon="excludeIcon"/>
+                                            </IonButton>
+                                            <IonButton
+                                                v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
+                                                color="light"
+                                                aria-description="Remove item"
+                                                @click="removeItem((element as Item).getId())">
+                                                <IonIcon :icon="removeIcon"
+                                                         @click="removeItem((element as Item).getId())"/>
+                                            </IonButton>
+                                        </template>
+                                    </ItemComponent>
                                 </template>
-                            </ItemComponent>
-                        </template>
-                    </List>
+                            </List>
+                        </IonCardContent>
+                    </IonCard>
+
 
                     <!-- Favorite recipes -->
-                    <List v-if="favoriteRecipes.length > 0" :list="favoriteRecipes" :horizontal="true" :load-all="true"
+                    <List v-if="suggestedRecipes.length > 0" :list="suggestedRecipes" :horizontal="true"
+                          :load-all="true"
                           :no-wrap="true">
                         <template #element="{ element }">
                             <div class="mini-recipe-preview">
@@ -43,7 +77,9 @@
                     <IonCard v-show="selectedItems.length > 0">
                         <IonCardHeader>
                             <IonCardSubtitle>
-                                Select the maximum cooking time
+                                <h3>
+                                    Select the maximum cooking time
+                                </h3>
                             </IonCardSubtitle>
                             <IonCardTitle>
                                 <h2>
@@ -127,14 +163,18 @@ import List from "@/components/recipe/List.vue";
 import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
 import RecipeSuggestionPreview from "@/components/recipe/previews/RecipeSuggestionPreview.vue";
 import Searchbar from "@/components/utility/Searchbar.vue";
-import FancyHeader from "@/components/utility/FancyHeader.vue";
+import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/components/recipe/previews/MiniRecipePreview.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
-import {closeCircleOutline} from "ionicons/icons";
+import {add, remove, trash} from "ionicons/icons";
+import {addIcons} from "ionicons";
+import FancyText from "@/components/utility/fancy/FancyText.vue";
 
 export default defineComponent({
     name: 'RecipeSuggestionsPage',
+    methods: {addIcons},
     components: {
+        FancyText,
         MiniRecipePreview,
         FancyHeader,
         Searchbar,
@@ -159,11 +199,16 @@ export default defineComponent({
 
         const itemsById = computed(() => recipeStore.getItemsAsMap)
         const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
+        const recipes = computed(() => recipeStore.getRecipesAsList)
+        const savedRecipes = computed(() => recipeStore.getSavedRecipes)
 
-        /* Favorite recipes */
-        const favoriteRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes.slice(0, 8)
-            .sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration()))
-
+        /* Suggested recipes */
+        const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
+            const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
+                .filter(() => Math.random() < 0.5).slice(0, 6)
+            suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
+            return suggestedRecipes
+        })
 
         /* Filtered items */
         const filteredItems = ref<Item[]>([])
@@ -183,22 +228,25 @@ export default defineComponent({
         const itemQueries = ref<{ [id: string]: boolean }>({})
         const selectedItems = computed<Item[]>(() => Object.keys(itemQueries.value)
             .map((id: string) => itemsById.value[id]))
-        const selectedItemColors = computed<{ [id: string]: string }>(() => Object.fromEntries(Object.entries(itemQueries.value)
+        const selectedItemColors = computed<{
+            [id: string]: string
+        }>(() => Object.fromEntries(Object.entries(itemQueries.value)
             .map(([id, exclude]: [string, boolean]) => [id, exclude ? 'danger' : 'primary'])))
-        const toggleItem = (id: string) => {
-            itemQueries.value[id] = !(itemQueries.value[id] || typeof itemQueries.value[id] === 'undefined')
+        const includeItem = (id: string) => {
+            itemQueries.value[id] = false
         }
-        const unselectItem = (id: string) => {
+        const excludeItem = (id: string) => {
+            itemQueries.value[id] = true
+        }
+        const removeItem = (id: string) => {
             delete itemQueries.value[id]
         }
 
-
         /* Items suggestions */
-        const recipes = computed(() => recipeStore.getRecipesAsList)
         const maxItemSuggestionsLength = 3
         const itemSuggestions = computed(() => {
             const itemsUsedInRecipes = (recipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
-            const favItems = (favoriteRecipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
+            const favItems = (suggestedRecipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
 
             const items: Item[] = [...itemsUsedInRecipes, ...favItems]
             const itemIds: string[] = []
@@ -261,7 +309,8 @@ export default defineComponent({
         return {
             /* Filtering */
             filterInput,
-            toggleItem, unselectItem, filteredItems, selectedItems, selectedItemColors, itemQueries,
+            includeItem, excludeItem, removeItem,
+            filteredItems, selectedItems, selectedItemColors, itemQueries,
             city,
             /* Cooking Time */
             maxCookingTime, cookingTimes,
@@ -269,13 +318,13 @@ export default defineComponent({
             submit, submitButton, submitColor, submitDisabled, submitted,
             /* Suggestions */
             RecipeSuggestion, recipeSuggestions, itemSuggestions,
-            favoriteRecipes,
+            suggestedRecipes,
             /* Recipes */
             moreRecipes,
             /* Types */
             Item, Recipe,
             /* Icons */
-            closeCircleOutline
+            includeIcon: add, excludeIcon: remove, removeIcon: trash
         }
     }
 })

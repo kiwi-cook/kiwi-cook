@@ -20,7 +20,7 @@ import {IonContent, IonPage} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {Recipe} from "@/tastebuddy";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
-import FancyHeader from "@/components/utility/FancyHeader.vue";
+import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
 
 export default defineComponent({

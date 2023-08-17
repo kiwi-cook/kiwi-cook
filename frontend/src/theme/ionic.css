@@ -3,8 +3,8 @@ ion-card {
     margin-bottom: 20px;
     margin-right: 0;
     margin-left: 0;
-    box-shadow: none !important;
-    border: var(--border);
+    box-shadow: var(--box-shadow-inner);
+    /* border: var(--border); */
     border-radius: var(--border-radius);
 }
 
@@ -18,7 +18,6 @@ ion-searchbar {
 }
 
 ion-item {
-    --border-radius: 15px;
     --background: inherit;
     --padding-end: 1rem;
 }

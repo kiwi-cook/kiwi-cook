@@ -26,7 +26,7 @@ import {useRecipeStore, useTasteBuddyStore} from '@/storage';
 import {Recipe} from '@/tastebuddy/types';
 import List from "@/components/recipe/List.vue";
 import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
-import FancyHeader from "@/components/utility/FancyHeader.vue";
+import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
 export default defineComponent({
     name: 'RecipeSavedPage',

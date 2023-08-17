@@ -11,9 +11,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 Ingredients
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -25,9 +25,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h3>
+                            <h2>
                                 Tools
-                            </h3>
+                            </h2>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>

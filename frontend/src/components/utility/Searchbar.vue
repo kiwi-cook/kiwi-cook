@@ -1,13 +1,12 @@
 <template>
-    <div class="searchbar-wrapper" @mouseenter="mouseLeave = false" @mouseleave="mouseLeave = true"
-         @focusout="closeList()" @focusin="searchActive = true">
+    <div class="searchbar-wrapper">
         <IonSearchbar v-model="searchInput" class="searchbar-search" :debounce="500"
-                      :placeholder="placeholder" @keydown.esc="closeList()" @ionClear="closeList()" />
+                      :placeholder="placeholder" @keydown.esc="closeSearch()" @ionClear="searchInput = ''"/>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
-                <List :list="elements" :filter="searchInput" :loadAll="true" :noWrap="true" :horizontal="false">
+                <List :list="elements" :loadAll="true" :noWrap="true" :horizontal="false">
                     <template #element="{element}">
-                        <div @click="selectElement">
+                        <div @click="closeSearch()">
                             <slot :element="element" name="element">
                                 {{ element }}
                             </slot>
@@ -48,22 +47,15 @@ export default defineComponent({
         /* Searchbar state */
         const searchActive = ref(false)
         const searchInput = ref('')
-        const mouseLeave = ref(false)
 
         /**
          * Close list if mouse leaves searchbar and searchbar is not focussed
          * or on "esc" keydown
          */
-        const closeList = () => {
-            searchActive.value = !(mouseLeave.value)
-        }
-        /**
-         * Close list if element was selected
-         */
-        const selectElement = () => {
-            searchActive.value = false
+        const closeSearch = () => {
             searchInput.value = ''
         }
+
 
         /* State whether list should be open */
         const listIsOpen = computed<boolean>(() => {
@@ -76,7 +68,7 @@ export default defineComponent({
         })
 
         return {
-            listIsOpen, mouseLeave, selectElement, closeList,
+            listIsOpen, closeSearch,
             searchInput, searchActive,
         }
     }
