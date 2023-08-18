@@ -132,7 +132,8 @@ ion-item.border::part(native) {
 }
 
 .item-name {
-    font-size: 1rem;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
     margin: 0;
 }
 

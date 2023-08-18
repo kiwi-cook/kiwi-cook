@@ -40,15 +40,15 @@ type ItemQuery = {
 type SearchQuery = {
     items: ItemQuery[],
     tags: string[]
-    price: number,
-    duration: number,
+    price?: number,
+    duration?: number,
 }
 
 class SearchQueryBuilder {
     private readonly items: ItemQuery[]
     private readonly tags: string[]
-    private price: number
-    private duration: number
+    private price: number | undefined
+    private duration: number | undefined
     private city?: string
 
     constructor() {
@@ -85,12 +85,12 @@ class SearchQueryBuilder {
         return this
     }
 
-    public setPrice(price: number): this {
+    public setPrice(price?: number): this {
         this.price = price
         return this
     }
 
-    public setDuration(duration: number): this {
+    public setDuration(duration?: number): this {
         this.duration = duration
         return this
     }
@@ -158,7 +158,10 @@ function filterRecipeByItems(recipe: Recipe, itemQuery: ItemQuery[]): boolean {
  * @param recipe
  * @param maxDuration
  */
-function filterRecipeByDuration(recipe: Recipe, maxDuration: number): boolean {
+function filterRecipeByDuration(recipe: Recipe, maxDuration?: number): boolean {
+    if (maxDuration === undefined) {
+        return true
+    }
     const success = recipe.getDuration() <= maxDuration
     logDebug('filterRecipeByDuration', recipe.getDuration(), maxDuration, success)
     return success
@@ -179,7 +182,10 @@ function filterRecipeByTag(recipe: Recipe, tags: string[]): boolean {
 /**
  * Checks if a recipe is within the price range
  */
-function filterByPrice(recipe: Recipe, maxPrice: number): boolean {
+function filterByPrice(recipe: Recipe, maxPrice?: number): boolean {
+    if (maxPrice === undefined) {
+        return true
+    }
     const recipePrice = recipe.getPrice()
     const success = recipePrice <= maxPrice
     console.log('filterByPrice', recipePrice, maxPrice, success)

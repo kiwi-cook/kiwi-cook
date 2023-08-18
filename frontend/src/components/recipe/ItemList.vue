@@ -1,8 +1,8 @@
 <template>
     <div class="item-list-wrapper">
         <ul :class="['item-list', {'horizontal': horizontal}]">
-            <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" :class="['item', {'border': itemBorder}]">
-                <ItemComponent :disableClick="disableClick" :item="item" :lines="horizontal ? 'none' : 'full'"
+            <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" class="item">
+                <ItemComponent :disableClick="disableClick" :item="item" :lines="horizontal || noLines ? 'none' : 'full'"
                                @select="select($event)"/>
             </li>
         </ul>
@@ -42,7 +42,7 @@ export default defineComponent({
             required: false,
             default: false
         },
-        itemBorder: {
+        noLines: {
             type: Boolean,
             required: false,
             default: false
@@ -107,14 +107,6 @@ ul.item-list.horizontal {
 }
 
 li.item {
-    margin-bottom: 0.3rem;
-    margin-right: 0.3rem;
-}
-
-li.item.border {
-    margin-bottom: 1rem;
-    margin-right: 1rem;
-    border: var(--border);
-    border-radius: var(--border-radius);
+    margin-right: var(--margin-small);
 }
 </style>

@@ -175,14 +175,14 @@ export default defineComponent({
 }
 
 .hero-text h1.recipe-name {
-    font-size: 3em;
-    font-weight: bold;
+    font-size: var(--font-size-huge);
+    font-weight: var(--font-weight-bold);
     margin: 0 0 10px;
 }
 
 .hero-text h2.recipe-author {
-    font-size: 2em;
-    font-weight: bold;
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-normal);
 }
 
 .recipe-author a {
@@ -190,7 +190,8 @@ export default defineComponent({
 }
 
 .hero-text p.recipe-description {
-    font-size: 1.5em;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
     margin: 0;
 }
 
@@ -207,8 +208,6 @@ export default defineComponent({
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    margin-bottom: 15px;
-    padding: 0 15px;
     gap: 10px;
 }
 
@@ -222,10 +221,6 @@ export default defineComponent({
 
 .hero-tag {
     margin: 0 10px 0 0;
-}
-
-.hero-button-view-recipe-small {
-    display: none;
 }
 
 @media only screen and (max-width: 768px) {
@@ -243,19 +238,6 @@ export default defineComponent({
         padding: 10px;
     }
 
-    .hero-text h1.recipe-name {
-        font-size: 2em;
-    }
-
-    .hero-text h2.recipe-author {
-        font-size: 1.5em;
-        font-weight: bold;
-    }
-
-    .hero-text p.recipe-description {
-        font-size: 1em;
-    }
-
     .hero-bottom {
         padding: 0 10px 10px;
     }
@@ -265,7 +247,7 @@ export default defineComponent({
     }
 
     .hero-button {
-        font-size: 0.6em;
+        font-size: var(--font-size-small);
     }
 }
 
@@ -283,10 +265,6 @@ export default defineComponent({
         padding: 10px;
     }
 
-    .hero-text h1.recipe-name {
-        font-size: 1.5em;
-    }
-
     .hero-text p.recipe-description {
         display: none;
     }
@@ -294,8 +272,6 @@ export default defineComponent({
     .hero-text h2.recipe-author {
         margin-top: 0;
         margin-bottom: 0;
-        font-size: 1em;
-        font-weight: bold;
     }
 
 
@@ -317,14 +293,6 @@ export default defineComponent({
         width: 30px;
         height: 30px;
         padding: 5px;
-    }
-
-    .hero-button-view-recipe-big {
-        display: none;
-    }
-
-    .hero-button-view-recipe-small {
-        display: block;
     }
 }
 </style>

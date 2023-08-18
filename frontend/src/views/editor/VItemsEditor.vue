@@ -7,20 +7,14 @@
                 </h1>
 
                 <IonSearchbar v-model="filterInput" :debounce="500"/>
+                <IonButton @click="removeUnusedItems()">Remove unused items</IonButton>
+                <IonButton @click="addItem()">Add Item</IonButton>
 
-                <TwoColumnLayout>
-                    <template #left>
-                        <IonButton @click="removeUnusedItems()">Remove unused items</IonButton>
-                        <IonButton @click="addItem()">Add Item</IonButton>
+                <List :filter="filterInput" :list="items" no-items-message="No items found">
+                    <template #element="{element}">
+                        <ItemEditor :item="element as Item"/>
                     </template>
-                    <template #right>
-                        <List :filter="filterInput" :list="items" no-items-message="No items found">
-                            <template #element="{element}">
-                                <ItemEditor :item="element as Item"/>
-                            </template>
-                        </List>
-                    </template>
-                </TwoColumnLayout>
+                </List>
             </div>
         </IonContent>
     </IonPage>
@@ -33,7 +27,6 @@ import {arrowBack} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy";
-import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 import List from "@/components/recipe/List.vue";
 
 export default defineComponent({
@@ -41,7 +34,6 @@ export default defineComponent({
     components: {
         IonSearchbar,
         List,
-        TwoColumnLayout,
         IonPage, IonContent, IonButton,
         ItemEditor
     },

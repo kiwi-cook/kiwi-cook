@@ -82,7 +82,6 @@ export class Item {
 
     public setName(name: string, lang?: string): void {
         const store = useTasteBuddyStore()
-        console.log(this.names, lang, store.language.lang)
         this.names[lang ?? store.language.lang] = name
         if (lang === undefined) {
             this.name = name

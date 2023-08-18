@@ -30,8 +30,8 @@ export default defineComponent({
 
 <style scoped>
 .small-header {
-    font-size: 1.2rem;
-    font-weight: normal;
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-normal);
     margin-bottom: 0;
     margin-left: 0;
     color: var(--ion-color-dark);
@@ -39,8 +39,8 @@ export default defineComponent({
 
 .big-header {
     margin-top: 0;
-    font-size: 2rem;
-    font-weight: bold;
+    font-size: var(--font-size-large);
+    font-weight: var(--font-weight-bold);
     margin-bottom: 10px;
     margin-left: 0;
 }

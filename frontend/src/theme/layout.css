@@ -1,9 +1,13 @@
 :root {
     --max-width: 1080px;
+    --margin-page: 25px 15px;
+    --margin-small: 5px;
+    --margin-medium: 10px;
+    --margin-large: 25px;
 }
 
 .page {
-    margin: 25px 15px;
+    margin: var(--margin-page);
 }
 
 .content {
@@ -24,3 +28,4 @@
 .flex {
     display: flex;
 }
+

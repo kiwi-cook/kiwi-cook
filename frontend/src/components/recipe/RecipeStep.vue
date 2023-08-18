@@ -85,18 +85,20 @@ export default defineComponent({
 
 <style>
 .item-highlight {
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
     color: var(--ion-color-secondary);
 }
 </style>
 
 <style>
 .recipe-step-index {
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-bold);
 }
 
 .recipe-step-index-max {
-    font-size: 1.1rem;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
+    margin-right: var(--margin-medium);
 }
 </style>

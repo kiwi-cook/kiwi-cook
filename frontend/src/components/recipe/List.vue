@@ -150,11 +150,16 @@ ul.element-list.horizontal.wrap {
     flex-wrap: wrap;
 }
 
+li.element {
+    margin-bottom: 1rem;
+}
+
 li.element, li.element.horizontal.wrap {
     margin-right: 0;
 }
 
 li.element.horizontal {
     margin-right: 1rem;
+    margin-bottom: 0;
 }
 </style>

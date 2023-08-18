@@ -15,9 +15,9 @@
                         </template>
                     </Searchbar>
 
-                    <h3>
+                    <h2>
                         Select the ingredients and tools you have
-                    </h3>
+                    </h2>
                     <IonCard>
                         <IonCardContent>
                             <!-- Suggested and selected items -->
@@ -58,9 +58,9 @@
 
                     <!-- Cooking time -->
                     <template v-if="selectedItems.length > 0">
-                        <h3>
+                        <h2>
                             How long do you want to cook?
-                        </h3>
+                        </h2>
                         <IonCard>
                             <IonCardContent>
                                 <template v-for="time in cookingTimes" :key="time">
@@ -69,7 +69,12 @@
                                         {{ time }} min.
                                     </IonChip>
                                 </template>
-                                <IonRange v-model="maxCookingTime" :label="`${maxCookingTime} min.`"
+                                <IonChip :outline="true" class="recipe-price"
+                                         @click="maxCookingTime = undefined">
+                                    Any duration
+                                </IonChip>
+                                <IonRange v-model="maxCookingTime"
+                                          :label="`${ maxCookingTime ? `${maxCookingTime} min.` : 'Any duration' }`"
                                           :max="60" :min="5" :pin="true"
                                           :pin-formatter="(value: number) => `${value} min.`"
                                           :snaps="true"
@@ -81,9 +86,9 @@
 
                     <!-- Cooking time -->
                     <template v-if="selectedItems.length > 0">
-                        <h3>
+                        <h2>
                             How much money do you want to spend?
-                        </h3>
+                        </h2>
                         <IonCard>
                             <IonCardContent>
                                 <template v-for="price in prices" :key="price">
@@ -92,7 +97,11 @@
                                         {{ price }} €
                                     </IonChip>
                                 </template>
-                                <IonRange v-model="maxPrice" :label="`${maxPrice} €`"
+                                <IonChip :outline="true" class="recipe-price"
+                                         @click="maxPrice = undefined">
+                                    Any price
+                                </IonChip>
+                                <IonRange v-model="maxPrice" :label="`${maxPrice ?? 'Any'} €`"
                                           :max="20" :min="1" :pin="true"
                                           :pin-formatter="(value: number) => `${value} €`"
                                           :snaps="true"
@@ -135,18 +144,6 @@
                             No recipes found
                         </h2>
                     </template>
-
-                    <!-- More recipes -->
-                    <template v-if="recipeSuggestions.length > 0">
-                        <h2>
-                            More recipes
-                        </h2>
-                        <List :list="moreRecipes">
-                            <template #element="{ element }">
-                                <RecipePreview :recipe="element as Recipe"/>
-                            </template>
-                        </List>
-                    </template>
                 </div>
             </div>
 
@@ -168,7 +165,6 @@ import {IonButton, IonCard, IonCardContent, IonChip, IonContent, IonIcon, IonPag
 import {useRecipeStore} from '@/storage';
 import {Item, Recipe, RecipeSuggestion, SearchQueryBuilder, suggestRecipes} from '@/tastebuddy';
 import List from "@/components/recipe/List.vue";
-import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
 import RecipeSuggestionPreview from "@/components/recipe/previews/RecipeSuggestionPreview.vue";
 import Searchbar from "@/components/utility/Searchbar.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
@@ -183,7 +179,6 @@ export default defineComponent({
         FancyHeader,
         Searchbar,
         RecipeSuggestionPreview,
-        RecipePreview,
         List,
         IonPage,
         IonContent,
@@ -267,11 +262,11 @@ export default defineComponent({
         /* City + Price */
         const city = ref('')
         const prices = [2, 3, 5, 10]
-        const maxPrice = ref(prices[prices.length / 2])
+        const maxPrice = ref<number | undefined>(undefined)
 
         /* Max cooking time */
         const cookingTimes = [5, 10, 20, 45]
-        const maxCookingTime = ref(cookingTimes[cookingTimes.length / 2])
+        const maxCookingTime = ref<number | undefined>(undefined)
 
         /* Recipes suggestions */
         const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
@@ -337,10 +332,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-ion-card-title {
-    font-size: 1.5rem;
-}
-
 .item-searchbar {
     margin-bottom: 1rem;
 }

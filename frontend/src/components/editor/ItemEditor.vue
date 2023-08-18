@@ -11,25 +11,12 @@
                 <IonButton color="success" @click="saveItem()">
                     <IonIcon :icon="save"/>
                 </IonButton>
+                <IonButton color="danger" fill="solid"
+                           @click="deleteItem()">
+                    <IonIcon :icon="trash"/>
+                </IonButton>
             </IonItem>
             <IonCardTitle color="primary">
-                <IonItem lines="none">
-                    <div slot="start">
-                        <IonInput :maxlength="40" :value="mutableItem.name" label="Name" label-placement="stacked"
-                                  placeholder="e.g. Baking powder" type="text"
-                                  @keyup.enter="mutableItem.name = $event.target.value"
-                                  @ion-blur="mutableItem.name = ($event.target.value ?? '').toString()"/>
-                    </div>
-                    <div slot="end">
-                        <div slot="end">
-                            <IonButton color="danger" fill="solid"
-                                       @click="deleteItem()">
-                                <IonIcon :icon="trash"/>
-                            </IonButton>
-                        </div>
-                    </div>
-                </IonItem>
-
                 <template v-for="lang in supportedLanguages" :key="lang">
                     <IonItem lines="none">
                         <IonInput :label="`Name in ${lang}`" :maxlength="40" :value="item.getName(lang)"

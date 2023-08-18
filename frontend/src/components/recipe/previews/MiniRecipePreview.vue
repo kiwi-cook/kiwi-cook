@@ -38,8 +38,8 @@ export default defineComponent({
 <style scoped>
 .mini-recipe-card {
     width: 200px;
-    cursor: pointer;
     box-shadow: var(--box-shadow) !important;
+    cursor: pointer;
     transition: all 0.3s ease-in-out;
 }
 
@@ -49,8 +49,8 @@ export default defineComponent({
 }
 
 .mini-recipe-card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: var(--font-size-smaller);
+    font-weight: var(--font-weight-bold);
     margin-bottom: 5px;
 }
 </style>
