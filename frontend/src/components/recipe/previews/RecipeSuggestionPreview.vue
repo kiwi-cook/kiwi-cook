@@ -1,19 +1,53 @@
 <template>
-    <div class="recipe-preview">
-        <div class="recipe-img-wrapper">
-            <IonImg :src="recipe.props.imgUrl" class="recipe-img"/>
-        </div>
-        <div class="recipe-details">
-            <div>
+    <div class="recipe-preview" @click="toRecipe">
+        <div class="recipe-img-title-wrapper">
+            <div class="recipe-img-wrapper">
+                <IonImg :src="recipe.props.imgUrl" class="recipe-img"/>
+            </div>
+            <div class="recipe-title-author-mobile">
                 <h1 class="recipe-title">
                     {{ recipe.name }}
                 </h1>
                 <h2 class="recipe-author">
                     {{ recipe.getAuthors() }}
                 </h2>
+                <div>
+                    <IonChip color="medium">
+                        <IonLabel>{{ recipe.getDuration() }} min.</IonLabel>
+                    </IonChip>
+                    <IonChip color="medium">
+                        <IonLabel>{{ recipe.getPrice() }} €</IonLabel>
+                    </IonChip>
+                    <template v-for="(tag, tagIndex) in recipe.getTags()" :key="tagIndex">
+                        <IonChip color="light">
+                            <IonLabel>{{ tag }}</IonLabel>
+                        </IonChip>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <div class="recipe-details">
+            <div class="recipe-title-author-large">
+                <h1 class="recipe-title">
+                    {{ recipe.name }}
+                </h1>
+                <h2 class="recipe-author">
+                    {{ recipe.getAuthors() }}
+                </h2>
+                <div>
+                    <IonChip color="medium">
+                        <IonLabel>{{ recipe.getDuration() }} min.</IonLabel>
+                    </IonChip>
+                    <template v-for="(tag, tagIndex) in recipe.getTags()" :key="tagIndex">
+                        <IonChip color="light">
+                            <IonLabel>{{ tag }}</IonLabel>
+                        </IonChip>
+                    </template>
+                </div>
             </div>
             <div class="recipe-item-list">
-                <ItemList v-if="possessedItems.length > 0" :items="possessedItems" :disable-click="true" :no-lines="true"/>
+                <ItemList v-if="possessedItems.length > 0" :items="possessedItems" :disable-click="true"
+                          :no-lines="true"/>
             </div>
         </div>
     </div>
@@ -22,13 +56,13 @@
 <script lang="ts">
 import {computed, defineComponent, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/tastebuddy";
-import {IonImg, useIonRouter} from "@ionic/vue";
+import {IonChip, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 
 export default defineComponent({
     name: 'RecipeSuggestionPreview',
     components: {
-        ItemList, IonImg
+        ItemList, IonImg, IonChip, IonLabel
     },
     props: {
         recipeSuggestion: {
@@ -66,15 +100,33 @@ export default defineComponent({
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
-
-    margin-bottom: var(--margin-medium);
+    cursor: pointer;
 
     /* Layout */
-    height: 400px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    align-items: center; /* Center items vertically */
-    justify-content: center; /* Center items horizontally */
+    margin-bottom: var(--margin-medium);
+    max-height: 450px;
+    display: flex;
+    flex-direction: row;
+}
+
+@media (width <= 500px) {
+    .recipe-preview {
+        flex-direction: column;
+        height: auto;
+    }
+}
+
+.recipe-img-title-wrapper {
+    display: flex;
+}
+
+.recipe-title-author-mobile {
+    margin-top: var(--margin-large);
+    display: none;
+}
+
+.recipe-title-author-large {
+    margin-bottom: var(--margin-large);
 }
 
 .recipe-title {
@@ -84,8 +136,23 @@ export default defineComponent({
 
 .recipe-author {
     margin-top: 0;
+    font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
     color: var(--ion-color-medium);
+}
+
+@media (width <= 500px) {
+    .recipe-title {
+        max-width: 200px;
+    }
+
+    .recipe-title-author-mobile {
+        display: initial;
+    }
+
+    .recipe-title-author-large {
+        display: none;
+    }
 }
 
 .recipe-img-wrapper {
@@ -123,6 +190,20 @@ export default defineComponent({
 
 .recipe-details {
     padding: 16px;
+}
+
+.recipe-item-list-and-description {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.recipe-description {
+    font-size: var(--font-size-small);
+    color: var(--ion-color-medium);
+    width: 40%;
+    overflow-y: auto;
+    max-height: 250px;
 }
 
 .recipe-item-list {

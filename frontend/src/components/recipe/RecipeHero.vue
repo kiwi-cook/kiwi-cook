@@ -138,7 +138,7 @@ export default defineComponent({
     height: 500px;
     width: 100%;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
 }
 
 .hero-image {
@@ -149,7 +149,7 @@ export default defineComponent({
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
 }
 
 .hero-content {
@@ -289,7 +289,7 @@ export default defineComponent({
 
     /* shadow part of hero-button */
     .hero-button::part(native) {
-        border-radius: 50%;
+        border-radius: var(--border-radius-round);
         width: 30px;
         height: 30px;
         padding: 5px;

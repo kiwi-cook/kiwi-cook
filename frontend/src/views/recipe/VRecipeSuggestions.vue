@@ -4,7 +4,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <FancyHeader :big-text="['Discover new recipes']" small-text="Hello"/>
+                    <FancyHeader :big-text="['Discover', 'new recipes']" small-text="Hello"/>
 
                     <!-- Searchbar for ingredients and tools -->
                     <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
@@ -150,9 +150,8 @@
             <!-- Submit button -->
             <div v-if="!submitDisabled" class="search-button-wrapper">
                 <IonButton :color="submitColor" :disabled="submitDisabled" class="search-button"
-                           type="submit"
-                           @click="submit()">
-                    {{ submitButton }}
+                           type="submit" @click="submit()">
+                    {{ submitButton }} <IonIcon v-if="!submitted" :icon="submitIcon" class="search-button-icon"/>
                 </IonButton>
             </div>
         </IonContent>
@@ -170,7 +169,7 @@ import Searchbar from "@/components/utility/Searchbar.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/components/recipe/previews/MiniRecipePreview.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
-import {add, remove, trash} from "ionicons/icons";
+import {add, remove, search, trash} from "ionicons/icons";
 
 export default defineComponent({
     name: 'RecipeSuggestionsPage',
@@ -324,7 +323,7 @@ export default defineComponent({
             /* Types */
             Item, Recipe,
             /* Icons */
-            includeIcon: add, excludeIcon: remove, removeIcon: trash
+            includeIcon: add, excludeIcon: remove, removeIcon: trash, submitIcon: search,
         }
     }
 })
@@ -378,12 +377,16 @@ export default defineComponent({
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
+    z-index: 100;
 }
 
 .search-button::part(native) {
-    color: var(--ion-color-light);
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    font-weight: bold;
+}
+
+.search-button-icon {
+    margin-left: 10px;
 }
 
 .mini-recipe-preview {

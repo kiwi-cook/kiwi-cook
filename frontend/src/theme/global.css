@@ -9,6 +9,8 @@
     --margin: 0;
     --margin-lr: 20px;
     --border-radius: 15px;
+    --border-radius-small: 10px;
+    --border-radius-round: 50%;
     --border: 1px solid var(--ion-color-medium) !important;
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
 }

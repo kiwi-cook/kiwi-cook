@@ -145,7 +145,7 @@ export class Item {
      * Get price of the item
      */
     public getPrice(): number {
-        return 1
+        return Math.random()
     }
 }
 
@@ -686,14 +686,14 @@ export class Recipe {
     }
 
     /**
-     * Get recipe price
+     * Prototype function to get the price of the recipe
      */
     public getPrice(): number {
         let price = 0
         this.steps.forEach(step => step.getItems().forEach((item: StepItem) => {
             price += item.getPrice() * item.servingAmount
         }))
-        return price
+        return Math.floor(price)
     }
 }
 

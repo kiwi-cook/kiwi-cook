@@ -12,5 +12,6 @@ defineProps({
 <style scoped>
 .header-msg-highlight {
     color: var(--ion-color-primary);
+    font-weight: var(--font-weight-bolder);
 }
 </style>

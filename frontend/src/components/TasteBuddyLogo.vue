@@ -53,7 +53,7 @@ export default {
 
 /* shadow root styles */
 .taste-buddy-logo::part(image) {
-    border-radius: 50%;
+    border-radius: var(--border-radius-round);
     box-shadow: var(--box-shadow);
 }
 </style>

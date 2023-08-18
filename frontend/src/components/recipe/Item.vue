@@ -114,20 +114,20 @@ export default defineComponent({
 
 ion-item.border::part(native) {
     border: var(--border);
-    border-radius: 15px;
+    border-radius: var(--border-radius);
 }
 
 .item-img-rm::part(image) {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: var(--border-radius-round);
     margin-right: 10px;
 }
 
 .item-img-lm::part(image) {
     width: 30px;
     height: 30px;
-    border-radius: 50%;
+    border-radius: var(--border-radius-round);
     margin-left: 10px;
 }
 

@@ -409,7 +409,7 @@ export default defineComponent({
 
 <style scoped>
 .recipe-image {
-    border-radius: 15px;
+    border-radius: var(--border-radius);
     width: 100%;
 }
 
