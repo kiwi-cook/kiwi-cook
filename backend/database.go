@@ -133,14 +133,9 @@ func (app *TasteBuddyApp) ConnectToDatabase(databaseAuth DatabaseAuth) (*TasteBu
 		}
 	}
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(URI).SetAuth(credential))
-	if err != nil {
-		return nil, app.LogError("ConnectToDatabase", err)
-	}
 	ctx := DefaultContext()
-
-	// connect to MongoDB via mongo client
-	if err = client.Connect(ctx); err != nil {
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(URI).SetAuth(credential))
+	if err != nil {
 		return nil, app.LogError("ConnectToDatabase", err)
 	}
 

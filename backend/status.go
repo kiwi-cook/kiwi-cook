@@ -9,7 +9,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func responseJSON(response interface{}, isError bool) gin.H {
@@ -30,11 +29,6 @@ func Updated(context *gin.Context, t string) {
 	context.JSON(http.StatusOK, responseJSONwithID("Updated "+t, false, ""))
 }
 
-// Created returns a 201 success with a message
-func Created(context *gin.Context, t string, id primitive.ObjectID) {
-	context.JSON(http.StatusCreated, responseJSONwithID("Created "+t+" with ID "+id.Hex(), false, id.Hex()))
-}
-
 // BadRequestError returns a 400 error with a message
 func BadRequestError(context *gin.Context, response string) {
 	context.JSON(http.StatusBadRequest, responseJSON(response, true))
@@ -53,16 +47,6 @@ func MissingRights(context *gin.Context) {
 // ForbiddenError returns a 403 error with a message
 func ForbiddenError(context *gin.Context) {
 	context.AbortWithStatusJSON(http.StatusForbidden, responseJSON("Forbidden.", true))
-}
-
-// NotFoundError returns a 404 error with a message
-func NotFoundError(context *gin.Context, itemName string) {
-	context.JSON(http.StatusNotFound, responseJSON(itemName+" not found.", true))
-}
-
-// TooManyRequests returns a 429 error with a message
-func TooManyRequests(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusTooManyRequests, responseJSON("Too many requests.", true))
 }
 
 // ServerError returns a 500 error with a message

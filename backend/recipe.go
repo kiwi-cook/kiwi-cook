@@ -280,15 +280,6 @@ func (recipe *Recipe) GetItems() []Item {
 	return items
 }
 
-// GetStepItemsMappedToId returns a map of all items used in the recipe
-func (recipe *Recipe) GetStepItemsMappedToId() map[primitive.ObjectID]StepItem {
-	var stepItems = make(map[primitive.ObjectID]StepItem)
-	for _, stepItem := range recipe.GetStepItemsList() {
-		stepItems[stepItem.ID] = stepItem
-	}
-	return stepItems
-}
-
 // GetStepItemsList returns a list of all StepItem used in the recipe
 func (recipe *Recipe) GetStepItemsList() []StepItem {
 	var stepItems []StepItem

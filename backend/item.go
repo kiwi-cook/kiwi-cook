@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"math"
 	"strconv"
 )
 
@@ -21,7 +20,7 @@ type Item struct {
 	Name   string             `json:"name" bson:"name" binding:"required"`
 	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
 	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	I18n   map[string]string  `json:"i18n,omitempty" bson:"i18n,omitempty"`
+	Names  map[string]string  `json:"names,omitempty" bson:"names,omitempty"`
 }
 
 type ItemResult struct {
@@ -302,38 +301,4 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	}
 
 	return items, nil
-}
-
-// CalculateItemPriceForMarket calculates the price of a recipe for a market
-func (app *TasteBuddyApp) CalculateItemPriceForMarket(item *Item, market Market) (float64, bool) {
-	discounts, err := app.GetDiscountsByMarket(&market)
-	if err != nil {
-		app.LogError("CalculateRecipePrice", err)
-		return 0, false
-	}
-
-	discount, successful := item.FindMatchingDiscount(discounts)
-	price, err := strconv.ParseFloat(discount.Price, 32)
-	if err != nil || !successful {
-		price = 0
-	}
-	return math.Max(price, 0), successful
-}
-
-// GetItemQuality gets the quality of an item
-// 0 = empty (low quality)
-// 1 = ID (medium quality)
-// 2 = name (medium quality)
-// 3 = name + type (medium quality)
-// 4 = name + type + imgUrl (high quality)
-func (item *Item) GetItemQuality() int {
-	var itemQuality = 0
-	var conditions = [4]bool{!item.ID.IsZero(), item.ImgUrl != "", item.Name != "", item.Type != ""}
-	for _, condition := range conditions {
-		if condition {
-			itemQuality = itemQuality + 1
-		}
-	}
-
-	return itemQuality
 }
