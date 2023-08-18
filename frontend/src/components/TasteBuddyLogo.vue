@@ -1,22 +1,18 @@
 <template>
-    <IonImg :class="['taste-buddy-logo', { 'margin': withLeftMargin}]" :style="{ width: pixelSize, height: pixelSize }"
+    <IonImg :style="{ width: pixelSize, height: pixelSize }" class="taste-buddy-logo"
             src="./img/icon.png"/>
 </template>
 
 <script lang="ts">
 import {IonImg} from '@ionic/vue'
-import {computed, toRefs} from "vue";
+import {computed, PropType, toRefs} from "vue";
 
 export default {
     name: 'TasteBuddyLogo',
     props: {
         size: {
-            type: String,
-            default: '200px',
-            required: false
-        },
-        withLeftMargin: {
-            type: Boolean,
+            type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>,
+            default: 'medium',
             required: false
         }
     },
@@ -54,17 +50,10 @@ export default {
     margin: 10px auto;
 }
 
-.taste-buddy-logo.left-margin {
-    margin-left: 5px;
-}
-
-.taste-buddy-logo.margin {
-    margin: 5px;
-}
-
 
 /* shadow root styles */
 .taste-buddy-logo::part(image) {
-    border-radius: 50px;
+    border-radius: 50%;
+    box-shadow: var(--box-shadow);
 }
 </style>

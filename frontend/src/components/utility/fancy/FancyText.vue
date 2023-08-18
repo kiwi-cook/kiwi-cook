@@ -3,7 +3,7 @@
         class="header-msg-highlight">{{ text }}</span>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 defineProps({
     text: String
 })

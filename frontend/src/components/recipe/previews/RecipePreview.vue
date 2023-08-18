@@ -1,6 +1,6 @@
 <template>
     <div class="recipe-preview-card">
-        <RecipeHero :recipe="recipe" :routable="true"/>
+        <RecipeHero :recipe="recipe" :routable="true" :likable="false" :noDescription="true"/>
 
         <IonText v-if="items.length > 0" lines="none">
             <h2>What you'll need</h2>
@@ -11,9 +11,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h2>
+                            <h3>
                                 Ingredients
-                            </h2>
+                            </h3>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -25,9 +25,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h2>
+                            <h3>
                                 Tools
-                            </h2>
+                            </h3>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -79,7 +79,7 @@ export default defineComponent({
 
 <style scoped>
 .recipe-preview-card {
-    border: var(--border);
+    /* border: var(--border); */
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
 }

@@ -1,10 +1,14 @@
 /* Style Ionic components */
 ion-card {
+    /* margin */
     margin-bottom: 20px;
     margin-right: 0;
     margin-left: 0;
+
+    /* shadow */
     box-shadow: var(--box-shadow-inner);
-    /* border: var(--border); */
+
+    /* border */
     border-radius: var(--border-radius);
 }
 

@@ -14,7 +14,7 @@ export const log = (functionName: string, message?: any) => {
  * @param message the message to log
  * @param messages
  */
-export const logDebug = (functionName: string, message: any, ...messages: any[]  ) => {
+export const logDebug = (functionName: string, message: any, ...messages: any[]) => {
     if (process.env.NODE_ENV === 'development') {
         console.debug(`[${functionName}]:`, message, ...messages)
     }

@@ -116,7 +116,7 @@ class SearchQueryBuilder {
  */
 function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
     const store = useRecipeStore()
-    const recipes = store.getRecipesAsList
+    const recipes: Recipe[] = store.getRecipesAsList
 
     const suggestedRecipes = recipes.filter((recipe: Recipe) => {
         return filterRecipeByItems(recipe, query.items) &&
@@ -128,7 +128,7 @@ function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
     return suggestedRecipes.map((recipe: Recipe) => {
         const suggestion = new RecipeSuggestion()
         suggestion.recipe = recipe
-        suggestion.recipe_price = 0
+        suggestion.recipe_price = recipe.getPrice()
         suggestion.market_for_price = undefined
         suggestion.missing_items = []
         return suggestion
@@ -159,7 +159,9 @@ function filterRecipeByItems(recipe: Recipe, itemQuery: ItemQuery[]): boolean {
  * @param maxDuration
  */
 function filterRecipeByDuration(recipe: Recipe, maxDuration: number): boolean {
-    return recipe.getDuration() <= maxDuration
+    const success = recipe.getDuration() <= maxDuration
+    logDebug('filterRecipeByDuration', recipe.getDuration(), maxDuration, success)
+    return success
 }
 
 /**
@@ -170,15 +172,18 @@ function filterRecipeByDuration(recipe: Recipe, maxDuration: number): boolean {
 function filterRecipeByTag(recipe: Recipe, tags: string[]): boolean {
     const recipeTags = recipe.getTags()
     const success = tags.every((tag: string) => recipeTags.includes(tag))
-    logDebug('filterRecipeByTag', recipe, tags, success)
+    logDebug('filterRecipeByTag', recipeTags, tags, success)
     return success
 }
 
 /**
  * Checks if a recipe is within the price range
  */
-function filterByPrice(recipe: Recipe, price: number): boolean {
-    return true
+function filterByPrice(recipe: Recipe, maxPrice: number): boolean {
+    const recipePrice = recipe.getPrice()
+    const success = recipePrice <= maxPrice
+    console.log('filterByPrice', recipePrice, maxPrice, success)
+    return success
 }
 
 export {

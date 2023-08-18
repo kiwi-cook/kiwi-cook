@@ -1,10 +1,10 @@
 <template>
     <div class="searchbar-wrapper">
-        <IonSearchbar v-model="searchInput" class="searchbar-search" :debounce="500"
-                      :placeholder="placeholder" @keydown.esc="closeSearch()" @ionClear="searchInput = ''"/>
+        <IonSearchbar v-model="searchInput" :debounce="500" :placeholder="placeholder"
+                      class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
-                <List :list="elements" :loadAll="true" :noWrap="true" :horizontal="false">
+                <List :horizontal="false" :list="elements" :loadAll="true" :noWrap="true">
                     <template #element="{element}">
                         <div @click="closeSearch()">
                             <slot :element="element" name="element">

@@ -3,15 +3,22 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <FancyHeader :header="['Your', 'favorite recipes']"/>
-                    <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Filter saved recipes"/>
+                    <FancyHeader :bigText="['Your', 'favorite recipes']"/>
+                    <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search saved recipes"/>
 
-                    <List :filter="filterInput" :list="savedRecipes"
-                          no-items-message="Save recipes to find them faster">
-                        <template #element="{ element }">
-                            <RecipePreview :recipe="element as Recipe"/>
-                        </template>
-                    </List>
+                    <template v-if="savedRecipes.length > 0">
+                        <List :filter="filterInput" :list="savedRecipes">
+                            <template #element="{ element }">
+                                <RecipePreview :recipe="element as Recipe"/>
+                            </template>
+                        </List>
+                    </template>
+                    <template v-else>
+                        <TasteBuddyLogo size="small"/>
+                        <h2 class="ion-text-center">
+                            You have no saved recipes yet.
+                        </h2>
+                    </template>
                 </div>
             </div>
         </IonContent>
@@ -27,10 +34,12 @@ import {Recipe} from '@/tastebuddy/types';
 import List from "@/components/recipe/List.vue";
 import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
+import TasteBuddyLogo from "@/components/TasteBuddyLogo.vue";
 
 export default defineComponent({
     name: 'RecipeSavedPage',
     components: {
+        TasteBuddyLogo,
         FancyHeader,
         RecipePreview, List, IonPage, IonSearchbar, IonContent
     },

@@ -1,9 +1,9 @@
 <template>
-    <IonItem v-if="mappedItem" :button="!disableClick" class="item" :lines="lines" @click="select">
+    <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" :lines="lines" @click="select">
         <div class="item-start">
             <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                     class="item-img-rm"/>
-            <IonText class="item-name" :color="color">
+            <IonText :color="color" class="item-name">
                 <IonChip v-if="mappedItem.showAmountUnit">
                     {{ mappedItem.amount }} {{ mappedItem.unit }}
                     <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
@@ -106,6 +106,10 @@ export default defineComponent({
     margin: 5px 0;
     padding: 0;
     min-width: 230px;
+}
+
+.item.button {
+    cursor: pointer;
 }
 
 ion-item.border::part(native) {

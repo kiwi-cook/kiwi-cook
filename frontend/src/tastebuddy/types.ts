@@ -141,6 +141,13 @@ export class Item {
     public narrow(item: Item): Item {
         return new Item(item)
     }
+
+    /**
+     * Get price of the item
+     */
+    public getPrice(): number {
+        return 1
+    }
 }
 
 /**
@@ -314,8 +321,8 @@ export class Step {
      * @returns the step to allow chaining
      */
     public updateServings(servings = 1): this {
-        this.items.forEach(item => {
-            item.servingAmount = item.amount * servings
+        this.items.forEach((stepItem: StepItem) => {
+            stepItem.servingAmount = stepItem.amount * servings
         })
         return this
     }
@@ -677,6 +684,17 @@ export class Recipe {
         const store = useRecipeStore()
         this.isLiked = !this.isLiked
         store.setLike(this)
+    }
+
+    /**
+     * Get recipe price
+     */
+    public getPrice(): number {
+        let price = 0
+        this.steps.forEach(step => step.getItems().forEach((item: StepItem) => {
+            price += item.getPrice() * item.servingAmount
+        }))
+        return price
     }
 }
 

@@ -1,15 +1,16 @@
 <template>
     <div class="recipe-preview-card">
-        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true"/>
+        <RecipeHero :additional-tags="additionalTags" :recipe="recipe" :routable="true" :likable="false"
+                    :shareable="false"/>
 
         <TwoColumnLayout size="12" size-lg="6">
             <template v-if="possessedItems.length > 0" #left>
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h2>
+                            <h3>
                                 Ingredients and tools you might have
-                            </h2>
+                            </h3>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -21,9 +22,9 @@
                 <IonCard class="no-border">
                     <IonCardHeader>
                         <IonCardTitle>
-                            <h2>
+                            <h3>
                                 What you'll eventually need
-                            </h2>
+                            </h3>
                         </IonCardTitle>
                     </IonCardHeader>
                     <IonCardContent>
@@ -84,7 +85,7 @@ export default defineComponent({
 
 <style scoped>
 .recipe-preview-card {
-    border: var(--border);
+    /* border: var(--border); */
     border-radius: var(--border-radius);
     cursor: pointer;
 }

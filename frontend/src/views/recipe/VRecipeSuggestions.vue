@@ -4,38 +4,28 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <FancyHeader :header="['Discover', 'new recipes']"/>
+                    <FancyHeader :big-text="['Discover new recipes']" small-text="Hello"/>
 
                     <!-- Searchbar for ingredients and tools -->
                     <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
                                placeholder="What ingredients are you craving today?">
                         <template #element="{element}">
-                            <ItemComponent :item="element as Item" @click="includeItem((element as Item).getId())"/>
+                            <ItemComponent :item="element as Item" lines="full"
+                                           @click="includeItem((element as Item).getId())"/>
                         </template>
                     </Searchbar>
 
+                    <h3>
+                        Select the ingredients and tools you have
+                    </h3>
                     <IonCard>
-                        <IonCardHeader>
-                            <IonCardTitle>
-                                <h2>
-                                    Select the
-                                    <FancyText text="ingredients and tools"/>
-                                    you want to use
-                                </h2>
-                            </IonCardTitle>
-                            <IonCardSubtitle>
-                                <h3>
-                                    Include or exclude by clicking on + and -
-                                </h3>
-                            </IonCardSubtitle>
-                        </IonCardHeader>
                         <IonCardContent>
                             <!-- Suggested and selected items -->
                             <List :list="[...selectedItems, ...itemSuggestions]" :load-all="true">
                                 <template #element="{ element }">
-                                    <ItemComponent :item="element as Item"
-                                                   :color="selectedItemColors[(element as Item).getId()]"
-                                                   :disable-click="true" lines="inset">
+                                    <ItemComponent :color="selectedItemColors[(element as Item).getId()]"
+                                                   :disable-click="true"
+                                                   :item="element as Item" lines="inset">
                                         <template #end>
                                             <div class="item-buttons">
                                                 <IonButton
@@ -52,9 +42,9 @@
                                                 </IonButton>
                                                 <IonButton
                                                     v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
-                                                    color="light"
                                                     aria-description="Remove item"
-                                                    class="item-button" @click="removeItem((element as Item).getId())">
+                                                    class="item-button"
+                                                    color="light" @click="removeItem((element as Item).getId())">
                                                     <IonIcon :icon="removeIcon"
                                                              @click="removeItem((element as Item).getId())"/>
                                                 </IonButton>
@@ -66,54 +56,70 @@
                         </IonCardContent>
                     </IonCard>
 
+                    <!-- Cooking time -->
+                    <template v-if="selectedItems.length > 0">
+                        <h3>
+                            How long do you want to cook?
+                        </h3>
+                        <IonCard>
+                            <IonCardContent>
+                                <template v-for="time in cookingTimes" :key="time">
+                                    <IonChip :outline="true" class="cooking-time"
+                                             @click="maxCookingTime = time">
+                                        {{ time }} min.
+                                    </IonChip>
+                                </template>
+                                <IonRange v-model="maxCookingTime" :label="`${maxCookingTime} min.`"
+                                          :max="60" :min="5" :pin="true"
+                                          :pin-formatter="(value: number) => `${value} min.`"
+                                          :snaps="true"
+                                          :step="5" :ticks="false"
+                                          label-placement="end"/>
+                            </IonCardContent>
+                        </IonCard>
+                    </template>
 
-                    <!-- Favorite recipes -->
-                    <List v-if="suggestedRecipes.length > 0" :list="suggestedRecipes" :horizontal="true"
-                          :load-all="true"
-                          :no-wrap="true">
-                        <template #element="{ element }">
-                            <div class="mini-recipe-preview">
-                                <MiniRecipePreview :recipe="element as Recipe"/>
-                            </div>
-                        </template>
-                    </List>
+                    <!-- Cooking time -->
+                    <template v-if="selectedItems.length > 0">
+                        <h3>
+                            How much money do you want to spend?
+                        </h3>
+                        <IonCard>
+                            <IonCardContent>
+                                <template v-for="price in prices" :key="price">
+                                    <IonChip :outline="true" class="recipe-price"
+                                             @click="maxPrice = price">
+                                        {{ price }} €
+                                    </IonChip>
+                                </template>
+                                <IonRange v-model="maxPrice" :label="`${maxPrice} €`"
+                                          :max="20" :min="1" :pin="true"
+                                          :pin-formatter="(value: number) => `${value} €`"
+                                          :snaps="true"
+                                          :step="1" :ticks="false"
+                                          label-placement="end"/>
+                            </IonCardContent>
+                        </IonCard>
+                    </template>
 
-                    <IonCard v-show="selectedItems.length > 0">
-                        <IonCardHeader>
-                            <IonCardSubtitle>
-                                <h3>
-                                    Select the maximum cooking time
-                                </h3>
-                            </IonCardSubtitle>
-                            <IonCardTitle>
-                                <h2>
-                                    How long do you want to spend cooking?
-                                </h2>
-                            </IonCardTitle>
-                        </IonCardHeader>
-                        <IonCardContent>
-                            <template v-for="time in cookingTimes" :key="time">
-                                <IonChip :outline="true" class="cooking-time"
-                                         @click="maxCookingTime = time">
-                                    {{ time }} min.
-                                </IonChip>
+
+                    <!-- Suggested recipes -->
+                    <template v-if="suggestedRecipes.length > 0 && recipeSuggestions.length === 0">
+                        <h2>
+                            Recommendations
+                        </h2>
+                        <List :horizontal="true" :list="suggestedRecipes"
+                              :load-all="true"
+                              :no-wrap="true">
+                            <template #element="{ element }">
+                                <div class="mini-recipe-preview">
+                                    <MiniRecipePreview :recipe="element as Recipe"/>
+                                </div>
                             </template>
-                            <IonRange v-model="maxCookingTime" :label="`${maxCookingTime} minutes max. cooking time`"
-                                      :max="60" :min="5" :pin="true" :pin-formatter="(value: number) => `${value} min.`"
-                                      :snaps="true"
-                                      :step="5" :ticks="false"
-                                      label-placement="end"/>
-                        </IonCardContent>
-                    </IonCard>
+                        </List>
+                    </template>
 
-                    <div class="center">
-                        <IonButton :color="submitColor" :disabled="submitDisabled" class="search-button"
-                                   type="submit"
-                                   @click="submit()">
-                            {{ submitButton }}
-                        </IonButton>
-                    </div>
-
+                    <!-- Recipe suggestions -->
                     <template v-if="recipeSuggestions.length > 0 && submitted">
                         <h2>
                             Explore {{ recipeSuggestions.length }} recipes
@@ -130,6 +136,7 @@
                         </h2>
                     </template>
 
+                    <!-- More recipes -->
                     <template v-if="recipeSuggestions.length > 0">
                         <h2>
                             More recipes
@@ -142,25 +149,22 @@
                     </template>
                 </div>
             </div>
+
+            <!-- Submit button -->
+            <div v-if="!submitDisabled" class="search-button-wrapper">
+                <IonButton :color="submitColor" :disabled="submitDisabled" class="search-button"
+                           type="submit"
+                           @click="submit()">
+                    {{ submitButton }}
+                </IonButton>
+            </div>
         </IonContent>
     </IonPage>
 </template>
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, Ref, ref, watch} from 'vue';
-import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonChip,
-    IonContent,
-    IonIcon,
-    IonPage,
-    IonRange,
-} from '@ionic/vue';
+import {IonButton, IonCard, IonCardContent, IonChip, IonContent, IonIcon, IonPage, IonRange,} from '@ionic/vue';
 import {useRecipeStore} from '@/storage';
 import {Item, Recipe, RecipeSuggestion, SearchQueryBuilder, suggestRecipes} from '@/tastebuddy';
 import List from "@/components/recipe/List.vue";
@@ -171,14 +175,10 @@ import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/components/recipe/previews/MiniRecipePreview.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
 import {add, remove, trash} from "ionicons/icons";
-import {addIcons} from "ionicons";
-import FancyText from "@/components/utility/fancy/FancyText.vue";
 
 export default defineComponent({
     name: 'RecipeSuggestionsPage',
-    methods: {addIcons},
     components: {
-        FancyText,
         MiniRecipePreview,
         FancyHeader,
         Searchbar,
@@ -188,9 +188,6 @@ export default defineComponent({
         IonPage,
         IonContent,
         IonCard,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardSubtitle,
         IonCardContent,
         IonButton,
         IonRange,
@@ -267,12 +264,14 @@ export default defineComponent({
             return itemSuggestions
         })
 
-        /* City */
+        /* City + Price */
         const city = ref('')
+        const prices = [2, 3, 5, 10]
+        const maxPrice = ref(prices[prices.length / 2])
 
         /* Max cooking time */
-        const maxCookingTime = ref(15)
-        const cookingTimes = [5, 15, 30, 60]
+        const cookingTimes = [5, 10, 20, 45]
+        const maxCookingTime = ref(cookingTimes[cookingTimes.length / 2])
 
         /* Recipes suggestions */
         const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
@@ -283,6 +282,7 @@ export default defineComponent({
             searchQueryBuilder.setCity(city.value)
             searchQueryBuilder.setDuration(maxCookingTime.value)
             searchQueryBuilder.setItemIds(itemQueries.value)
+            searchQueryBuilder.setPrice(maxPrice.value)
             const query = searchQueryBuilder.build()
             recipeSuggestions.value = suggestRecipes(query)
         }
@@ -300,7 +300,7 @@ export default defineComponent({
                 recipeSuggestions.value = []
             }
         }
-        const submitButton = computed<string>(() => recipeSuggestions.value.length === 0 ? 'Suggest Recipes' : 'Reset');
+        const submitButton = computed<string>(() => recipeSuggestions.value.length === 0 ? 'Suggest Recipes' : 'Reset Suggestions');
         const submitColor = computed<string>(() => recipeSuggestions.value.length === 0 ? 'success' : 'danger');
         const submitDisabled = computed<boolean>(() => recipeSuggestions.value.length === 0
             && selectedItems.value.length === 0)
@@ -315,7 +315,8 @@ export default defineComponent({
             filterInput,
             includeItem, excludeItem, removeItem,
             filteredItems, selectedItems, selectedItemColors, itemQueries,
-            city,
+            /* City + Price */
+            city, prices, maxPrice,
             /* Cooking Time */
             maxCookingTime, cookingTimes,
             /* Submit */
@@ -346,6 +347,7 @@ ion-card-title {
 
 .item-buttons {
     margin-left: 10px;
+    margin-right: 10px;
     display: flex;
 }
 
@@ -378,9 +380,19 @@ ion-card-title {
     cursor: pointer;
 }
 
-.search-button {
+.search-button-wrapper {
+    position: fixed;
     width: 70%;
-    max-width: 400px;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.search-button::part(native) {
+    color: var(--ion-color-light);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
 }
 
 .mini-recipe-preview {

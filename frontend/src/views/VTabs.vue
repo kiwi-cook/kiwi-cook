@@ -6,14 +6,14 @@
 
             <IonProgressBar v-show="loadingState" type="indeterminate"/>
             <IonTabBar slot="bottom">
-                <IonTabButton :disabled="loadingState" href="/recipe/of-the-day" tab="recipe-of-the-day">
-                    <IonIcon :icon="sparkles"/>
-                    New Recipe
-                </IonTabButton>
-
-                <IonTabButton :disabled="loadingState" href="/recipe/suggestions" tab="recipe-finder">
+                <IonTabButton :disabled="loadingState" href="/recipe/suggestions" tab="recipe-suggestions">
                     <IonIcon :icon="search"/>
                     Explore
+                </IonTabButton>
+
+                <IonTabButton :disabled="loadingState" href="/recipe/of-the-day" tab="recipe-of-the-day">
+                    <IonIcon :icon="sparkles"/>
+                    Recipe of the Day
                 </IonTabButton>
 
                 <IonTabButton :disabled="loadingState" href="/recipe/saved" tab="saved-recipes">

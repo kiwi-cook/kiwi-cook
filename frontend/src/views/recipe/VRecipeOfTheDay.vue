@@ -3,7 +3,7 @@
         <IonContent v-once :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <FancyHeader :header="welcomeMessage" />
+                    <FancyHeader :bigText="welcomeMessage"/>
 
                     <template v-if="recipeOfTheDay">
                         <RecipeComponent :recipe="recipeOfTheDay"/>

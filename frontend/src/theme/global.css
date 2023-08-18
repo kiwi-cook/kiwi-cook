@@ -1,16 +1,16 @@
 :root {
     --shadow-color: var(--ion-color-medium-shade);
-    --box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-    --box-shadow-inner: 0 2px 2px 0 rgba(0, 0, 0, 0.14) inset, 0 3px 1px -2px rgba(0, 0, 0, 0.2) inset, 0 1px 5px 0 rgba(0, 0, 0, 0.12) inset;
-    --box-shadow-hover: 0 4px 16px hsl(var(--shadow-color) / 0.23);
-    --box-shadow-strong: 0 2px 8px hsl(var(--shadow-color) / 0.23),
-    0 4px 16px hsl(var(--shadow-color) / 0.23),
-    0 8px 32px hsl(var(--shadow-color) / 0.1);
+    --box-shadow: 0 2px 2px 0 rgb(0 0 0 / 14%), 0 3px 1px -2px rgb(0 0 0 / 20%), 0 1px 5px 0 rgb(0 0 0 / 12%);
+    --box-shadow-inner: 0 2px 2px 0 rgb(0 0 0 / 14%) inset, 0 3px 1px -2px rgb(0 0 0 / 20%) inset, 0 1px 5px 0 rgb(0 0 0 / 12%) inset;
+    --box-shadow-hover: 0 4px 16px hsl(var(--shadow-color) / 23%);
+    --box-shadow-strong: 0 2px 8px hsl(var(--shadow-color) / 23%),
+    0 4px 16px hsl(var(--shadow-color) / 23%),
+    0 8px 32px hsl(var(--shadow-color) / 10%);
     --margin: 0;
     --margin-lr: 20px;
     --border-radius: 15px;
     --border: 1px solid var(--ion-color-medium) !important;
-    --border-hover: 1px solid rgba(59, 89, 152, 0.16) !important;
+    --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
 }
 
 .shadow {

@@ -70,7 +70,7 @@
                                 </IonCol>
                             </IonRow>
                             <IonRow>
-                                <ItemList :items="mutableRecipe.getStepItems()" :horizontal="true"/>
+                                <ItemList :horizontal="true" :items="mutableRecipe.getStepItems()"/>
                             </IonRow>
                         </IonGrid>
                     </IonCol>
@@ -132,7 +132,7 @@
                           label-placement="stacked" type="url"/>
 
                 <!-- Item icons -->
-                <ItemList :items="step.getItems()" :horizontal="true"/>
+                <ItemList :horizontal="true" :items="step.getItems()"/>
 
 
                 <!-- Items -->
@@ -162,8 +162,8 @@
                                 <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
                                                 :item="stepItem"
                                                 :items="items"
-                                                label="Name" placeholder="e.g. Baking powder"
-                                                class="item-name"
+                                                class="item-name" label="Name"
+                                                placeholder="e.g. Baking powder"
                                                 @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                 @add-item="addItem(stepIndex, itemIndex, $event)">
                                     <template #item="{ filteredItem }">

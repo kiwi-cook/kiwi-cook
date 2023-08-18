@@ -7,25 +7,14 @@
             <div class="hero-text">
                 <h1 class="recipe-name">{{ recipe?.name }}</h1>
                 <p v-if="!noDescription" class="recipe-description">{{ recipe?.getShortDescription() }}</p>
-                <h2 v-if="recipe.getAuthors() !== ''" class="recipe-author">By <a :href="recipe?.props?.url"
-                                                                                  target="_blank">{{
-                                                                                      recipe?.getAuthors()
-                                                                                  }}</a></h2>
+                <h2 v-if="recipe.getAuthors() !== ''" class="recipe-author">
+                    By <a :href="recipe?.props?.url" target="_blank">{{ recipe?.getAuthors() }}</a>
+                </h2>
             </div>
             <div class="hero-bottom">
                 <div class="hero-buttons">
                     <slot name="buttons">
-                        <IonButton v-if="routable" aria-description="Route to recipe"
-                                   class="hero-button hero-button-view-recipe-big"
-                                   color="primary"
-                                   @click="toRecipe(true)">View Recipe
-                        </IonButton>
-                        <IonButton v-if="routable" aria-description="Route to recipe"
-                                   class="hero-button hero-button-view-recipe-small"
-                                   color="primary" @click="toRecipe(true)">
-                            <IonIcon :icon="restaurant"/>
-                        </IonButton>
-                        <IonButton class="hero-button" color="primary" @click="recipe?.toggleLike()">
+                        <IonButton v-if="likable" class="hero-button" color="primary" @click="recipe?.toggleLike()">
                             <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
                         </IonButton>
                         <IonButton v-if="canShareRecipe" class="hero-button" color="primary"
@@ -87,6 +76,14 @@ export default defineComponent({
         routable: {
             type: Boolean,
             default: false
+        },
+        likable: {
+            type: Boolean,
+            default: true
+        },
+        shareable: {
+            type: Boolean,
+            default: true
         }
     },
     components: {

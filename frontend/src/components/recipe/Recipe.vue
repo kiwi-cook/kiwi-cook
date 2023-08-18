@@ -1,8 +1,13 @@
 <template>
     <div class="recipe-wrapper">
         <div class="recipe-hero-wrapper">
-            <RecipeHero :recipe="recipe" :routable="false"/>
+            <RecipeHero :no-description="true" :recipe="recipe" :routable="false"/>
         </div>
+
+        <h2>Description</h2>
+        <IonText class="recipe-description">
+            {{ recipe?.description }}
+        </IonText>
 
         <IonText v-if="itemsFromRecipe.length > 0" lines="none">
             <h2>What you'll need</h2>
@@ -11,13 +16,6 @@
         <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
             <template #left>
                 <IonCard>
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            <h2>
-                                {{ amountIngredients }} Ingredients
-                            </h2>
-                        </IonCardTitle>
-                    </IonCardHeader>
                     <IonCardContent>
                         <IonItem class="servings-counter" lines="none">
                             <IonInput v-model="servings" label="Servings" label-placement="end" max="15"
@@ -30,13 +28,6 @@
             </template>
             <template #right>
                 <IonCard v-if="amountTools !== 0">
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            <h2>
-                                {{ amountTools }} Tools
-                            </h2>
-                        </IonCardTitle>
-                    </IonCardHeader>
                     <IonCardContent>
                         <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
                     </IonCardContent>
@@ -62,7 +53,7 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
-import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonInput, IonItem, IonNote, IonText} from '@ionic/vue';
+import {IonCard, IonCardContent, IonInput, IonItem, IonNote, IonText} from '@ionic/vue';
 import {flagOutline, heart, heartOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
@@ -87,8 +78,6 @@ export default defineComponent({
         IonText,
         IonCard,
         IonCardContent,
-        IonCardHeader,
-        IonCardTitle,
         IonInput,
         IonNote
     },
@@ -125,6 +114,12 @@ export default defineComponent({
 .recipe-wrapper {
     width: 100%;
     margin: var(--margin);
+}
+
+.recipe-description {
+    white-space: pre-wrap;
+    color: var(--ion-color-medium);
+    font-size: var(--font-size-small);
 }
 
 .servings-counter {
