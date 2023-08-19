@@ -23,10 +23,10 @@
 @media (width <= 414px) {
     :root {
         --font-size-huge: 1.7rem;
-        --font-size-large: 1.5rem;
-        --font-size-medium: 1.4rem;
-        --font-size-smaller: 1.2rem;
-        --font-size-small: 1.0rem;
+        --font-size-large: 1.6rem;
+        --font-size-medium: 1.5rem;
+        --font-size-smaller: 1.3rem;
+        --font-size-small: 1.1rem;
     }
 }
 
@@ -46,6 +46,28 @@ h2 {
 
 h3 {
     font-size: var(--font-size-smaller);
+}
+
+h3.subheader {
+    margin-top: 0;
+    font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
     color: var(--ion-color-medium);
+}
+
+h4 {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
+}
+
+h4.subheader {
+    margin-top: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
+    color: var(--ion-color-medium);
+}
+
+h5 {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
 }

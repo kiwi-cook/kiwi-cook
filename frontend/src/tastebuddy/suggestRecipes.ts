@@ -66,10 +66,10 @@ class SearchQueryBuilder {
     public setItemIds(itemIds: {
         [id: string]: boolean
     }): this {
-        const items = Object.entries(itemIds).map(([id, exclude]: [string, boolean]) => ({
+        const items = Object.entries(itemIds).map(([id, include]: [string, boolean]) => ({
             id,
             name: '',
-            exclude: exclude
+            exclude: !include
         }))
         this.items.push(...items)
         return this

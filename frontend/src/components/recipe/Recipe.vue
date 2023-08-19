@@ -44,8 +44,10 @@
 
         <IonItem lines="none">
             <IonNote>
-                Recipe from {{ recipe?.getAuthors() }} on <a :href="recipe?.props?.url"
-                                                             target="_blank">{{ recipe?.props?.url }}</a>
+                Recipe from {{ recipe?.getAuthors() ?? 'unknown' }}
+                <template v-if="recipe?.source?.url">on <a :href="recipe?.source?.url"
+                                                           target="_blank">{{ recipe?.source?.url }}</a>
+                </template>
             </IonNote>
         </IonItem>
     </div>

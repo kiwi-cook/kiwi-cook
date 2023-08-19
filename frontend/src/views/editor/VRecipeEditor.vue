@@ -3,9 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1>
-                        Recipe Editor
-                    </h1>
+                    <FancyHeader :big-text="['Recipe', 'Editor']" />
                     <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
                 </div>
             </div>
@@ -37,10 +35,12 @@ import {Recipe} from '@/tastebuddy/types';
 import {useRecipeStore} from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";
+import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
+        FancyHeader,
         IonFabList,
         IonIcon, IonFab, IonFabButton,
         RecipeEditor,

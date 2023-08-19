@@ -134,6 +134,7 @@ export default defineComponent({
 ul.element-list {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 ul.element-list.horizontal {
@@ -151,7 +152,7 @@ ul.element-list.horizontal.wrap {
 }
 
 li.element {
-    margin-bottom: 1rem;
+    margin-bottom: 0.3rem;
 }
 
 li.element, li.element.horizontal.wrap {

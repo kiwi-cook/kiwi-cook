@@ -2,7 +2,9 @@
     <IonCard class="mini-recipe-card" @click="routeToRecipe()">
         <IonImg :src="recipe?.props.imgUrl"></IonImg>
         <IonCardHeader>
-            <IonCardSubtitle>{{ recipe?.getDuration() }} min.</IonCardSubtitle>
+            <IonCardSubtitle>
+                {{ recipe?.getDuration() }} min.
+            </IonCardSubtitle>
             <IonCardTitle class="mini-recipe-card-title">{{ recipe?.name }}</IonCardTitle>
         </IonCardHeader>
     </IonCard>
@@ -49,7 +51,7 @@ export default defineComponent({
 }
 
 .mini-recipe-card-title {
-    font-size: var(--font-size-smaller);
+    font-size: var(--font-size-small);
     font-weight: var(--font-weight-bold);
     margin-bottom: 5px;
 }

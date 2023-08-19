@@ -1,15 +1,18 @@
 <template>
-    <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" :lines="lines" @click="select">
+    <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" lines="none" @click="select">
         <div class="item-start">
             <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                     class="item-img-rm"/>
-            <IonText :color="color" class="item-name">
+            <IonText class="item-name">
                 <IonChip v-if="mappedItem.showAmountUnit">
                     {{ mappedItem.amount }} {{ mappedItem.unit }}
                     <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                             class="item-img-lm"/>
                 </IonChip>
-                {{ mappedItem.name }}
+                <span :class="[{'item-excluded': include === false}]">
+                    {{ mappedItem.name }}
+                    <span v-if="include" class="item-included">✓</span>
+                </span>
             </IonText>
         </div>
         <div class="item-end">
@@ -35,15 +38,10 @@ export default defineComponent({
             required: false,
             default: false
         },
-        color: {
-            type: String,
+        include: {
+            type: Boolean,
             required: false,
-            default: ''
-        },
-        lines: {
-            type: String as PropType<"full" | "inset" | "none" | undefined>,
-            required: false,
-            default: 'none'
+            default: undefined
         }
     },
     emits: ['select'],
@@ -94,7 +92,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.item {
+ion-item.item {
     display: flex;
     flex-direction: row;
     align-items: start;
@@ -102,19 +100,13 @@ export default defineComponent({
     background: inherit !important;
 }
 
-.item::part(native) {
-    margin: 5px 0;
+ion-item.item::part(native) {
     padding: 0;
     min-width: 230px;
 }
 
 .item.button {
     cursor: pointer;
-}
-
-ion-item.border::part(native) {
-    border: var(--border);
-    border-radius: var(--border-radius);
 }
 
 .item-img-rm::part(image) {
@@ -135,6 +127,12 @@ ion-item.border::part(native) {
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
     margin: 0;
+}
+
+.item-excluded {
+    text-decoration: line-through;
+    text-decoration-thickness: 0.15rem;
+    text-decoration-color: var(--ion-color-danger);
 }
 
 .item-start, .item-end {

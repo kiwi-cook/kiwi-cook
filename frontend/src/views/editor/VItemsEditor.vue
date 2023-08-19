@@ -2,9 +2,7 @@
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
             <div class="content">
-                <h1 class="header-title">
-                    Items Editor
-                </h1>
+                <FancyHeader :big-text="['Items', 'Editor']" />
 
                 <IonSearchbar v-model="filterInput" :debounce="500"/>
                 <IonButton @click="removeUnusedItems()">Remove unused items</IonButton>
@@ -28,10 +26,12 @@ import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy";
 import List from "@/components/recipe/List.vue";
+import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
 export default defineComponent({
     name: 'RecipeEditorPage',
     components: {
+        FancyHeader,
         IonSearchbar,
         List,
         IonPage, IonContent, IonButton,

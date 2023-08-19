@@ -58,8 +58,8 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
 
 export const DURATIONS = {
     SHORT: 3000,
-    MEDIUM: 5000,
-    LONG: 20000,
+    MEDIUM: 4000,
+    LONG: 5000,
 }
 
 /**

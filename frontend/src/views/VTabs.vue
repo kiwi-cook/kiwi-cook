@@ -11,6 +11,11 @@
                     Explore
                 </IonTabButton>
 
+                <!-- <IonTabButton :disabled="loadingState" href="/recipe/add" tab="add-recipe">
+                    <IonIcon :icon="create"/>
+                    Add Recipe
+                </IonTabButton> -->
+
                 <IonTabButton :disabled="loadingState" href="/recipe/of-the-day" tab="recipe-of-the-day">
                     <IonIcon :icon="sparkles"/>
                     Recipe of the Day
@@ -28,7 +33,7 @@
 <script lang="ts">
 import {computed, defineComponent} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
-import {heart, search, sparkles} from 'ionicons/icons';
+import {create, heart, restaurant, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 
 export default defineComponent({
@@ -43,7 +48,7 @@ export default defineComponent({
         return {
             loadingState,
             // icons
-            sparkles, search, heart
+            sparkles, search, heart, restaurant, create
         }
     }
 });

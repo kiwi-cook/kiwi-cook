@@ -5,12 +5,12 @@
                 <IonImg :src="recipe.props.imgUrl" class="recipe-img"/>
             </div>
             <div class="recipe-title-author-mobile">
-                <h1 class="recipe-title">
+                <h2 class="recipe-title">
                     {{ recipe.name }}
-                </h1>
-                <h2 class="recipe-author">
-                    {{ recipe.getAuthors() }}
                 </h2>
+                <h3 class="recipe-author subheader">
+                    {{ recipe.getAuthors() }}
+                </h3>
                 <div>
                     <IonChip color="medium">
                         <IonLabel>{{ recipe.getDuration() }} min.</IonLabel>
@@ -28,12 +28,12 @@
         </div>
         <div class="recipe-details">
             <div class="recipe-title-author-large">
-                <h1 class="recipe-title">
+                <h2 class="recipe-title">
                     {{ recipe.name }}
-                </h1>
-                <h2 class="recipe-author">
-                    {{ recipe.getAuthors() }}
                 </h2>
+                <h3 class="recipe-author subheader">
+                    {{ recipe.getAuthors() }}
+                </h3>
                 <div>
                     <IonChip color="medium">
                         <IonLabel>{{ recipe.getDuration() }} min.</IonLabel>
