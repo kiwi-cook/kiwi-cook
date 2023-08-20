@@ -178,7 +178,7 @@ func (item *Item) FindMatchingDiscount(discounts []Discount) (*Discount, bool) {
 	matchedDiscountSimilarity := 0.0
 	threshold := 0.3
 	for _, discount := range discounts {
-		similarity := strutil.Similarity(item.Name, discount.Title, metrics.NewHamming())
+		similarity := strutil.Similarity(item.Name.GetDefault(), discount.Title, metrics.NewHamming())
 		if similarity > threshold && similarity > matchedDiscountSimilarity {
 			matchedDiscount = &discount
 			matchedDiscountSimilarity = similarity

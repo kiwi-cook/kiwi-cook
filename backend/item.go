@@ -7,8 +7,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/adrg/strutil"
-	"github.com/adrg/strutil/metrics"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,31 +15,9 @@ import (
 
 type Item struct {
 	ID     primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name   string             `json:"name" bson:"name" binding:"required"`
+	Name   LocalizedString    `json:"name,omitempty" bson:"localizedName,omitempty"`
 	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
 	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Names  map[string]string  `json:"names,omitempty" bson:"names,omitempty"`
-}
-
-type ItemResult struct {
-	Item
-	error   error
-	success bool
-}
-
-func NewItemResult(item Item, success bool) *ItemResult {
-	return &ItemResult{
-		Item:    item,
-		error:   nil,
-		success: success,
-	}
-}
-
-func NewItemErrorResult(err error) *ItemResult {
-	return &ItemResult{
-		error:   err,
-		success: false,
-	}
 }
 
 // HandleGetAllItems gets called by server
@@ -74,7 +50,7 @@ func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
 		ServerError(context, true)
 		return
 	}
-	server.LogContextHandle(context, "HandleAddItem", "Added/Updated item "+newItem.Name+" ("+newItem.ID.Hex()+")")
+	server.LogContextHandle(context, "HandleAddItem", "Added/Updated item "+newItem.Name.GetDefault()+" ("+newItem.ID.Hex()+")")
 	Success(context, "Saved item "+itemId.Hex())
 }
 
@@ -141,92 +117,6 @@ func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 	return cachedItems, nil
 }
 
-func (app *TasteBuddyApp) GetAllItemsMappedByName(cached bool) (map[string]Item, error) {
-	items, err := app.GetAllItems(cached)
-	if err != nil {
-		return nil, app.LogError("GetAllItemsMappedByName", err)
-	}
-	mappedItems := make(map[string]Item)
-	for _, item := range items {
-		mappedItems[item.Name] = item
-	}
-	return mappedItems, nil
-}
-
-// GetItemById gets item from database by id
-func (app *TasteBuddyApp) GetItemById(id primitive.ObjectID) (Item, error) {
-	var itemFromDatabase Item
-	app.LogDebug("GetItemById", "Get item "+id.Hex()+" from database")
-	err := app.GetItemsCollection().FindOneWithDefault(bson.M{"_id": id}, &itemFromDatabase, Item{})
-	return itemFromDatabase, app.LogError("GetItemById.FindOneWithDefault", err)
-}
-
-// GetItemByName gets item from database by name
-func (app *TasteBuddyApp) GetItemByName(name string) (error, Item) {
-	var item Item
-	items, err := app.GetAllItems(true)
-	if err != nil {
-		return app.LogError("GetItemByName", err), item
-	}
-	for _, i := range items {
-		if i.Name == name {
-			return nil, i
-		}
-	}
-	return errors.New("no item found with name " + name), item
-}
-
-// MatchOrNewItem compares which item is most similar to the given item name
-// and returns the item with the highest similarity
-// If no item is found, a new item is created
-// If threshold is -1, the default threshold of 0.7 is used
-func (app *TasteBuddyApp) MatchOrNewItem(itemName string, threshold float64) *ItemResult {
-	if itemName == "" {
-		return NewItemErrorResult(errors.New("item name is empty"))
-	}
-
-	// get all items
-	items, err := app.GetAllItems(true)
-	if err != nil {
-		return NewItemErrorResult(err)
-	}
-
-	// if no items are found, return error
-	if len(items) == 0 {
-		return NewItemErrorResult(errors.New("no items found"))
-	}
-
-	// if threshold is -1, use default threshold
-	if threshold == -1 {
-		threshold = 0.7
-	}
-
-	var mostSimilarItem = Item{Name: itemName}
-	var mostSimilarity float64 = 0
-	for _, item := range items {
-		// if item name is equal to itemName, return item
-		if itemName == item.Name {
-			return NewItemResult(item, true)
-		}
-
-		// calculate similarity
-		if similarity := strutil.Similarity(item.Name, itemName, metrics.NewHamming()); similarity >= threshold && similarity > mostSimilarity {
-			mostSimilarItem = item
-			mostSimilarity = similarity
-		}
-	}
-
-	var success = false
-	if mostSimilarity < threshold {
-		app.LogDebug("MatchOrNewItem", "No similar item found for "+itemName+" with threshold "+fmt.Sprintf("%f", threshold))
-	} else {
-		success = true
-		app.LogDebug("MatchOrNewItem", "Found most similar item "+mostSimilarItem.Name+" to "+itemName+" with similarity "+fmt.Sprintf("%f", mostSimilarity))
-	}
-
-	return NewItemResult(mostSimilarItem, success)
-}
-
 // DeleteItemById deletes item from database by id
 func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
 	ctx := DefaultContext()
@@ -255,15 +145,15 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	// Only unique items
 	itemsMap := make(map[string]Item)
 	for _, item := range items {
-		itemsMap[item.Name] = item
+		itemsMap[item.Name.GetDefault()] = item
 	}
 	app.LogTrace("AddOrUpdateItems", "Found "+fmt.Sprintf("%d", len(itemsMap))+" unique items")
 
 	// Split items into items with and without ids
 	for _, item := range itemsMap {
 		// Check if item name is empty
-		if item.Name == "" {
-			app.LogWarning("AddOrUpdateItems", "Item "+item.Name+" has no name")
+		if item.Name.GetDefault() == "" {
+			app.LogWarning("AddOrUpdateItems", "Item "+item.Name.GetDefault()+" has no name")
 			continue
 		}
 
@@ -285,7 +175,6 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	// Update items with ids in database
 	if len(itemsWithIds) > 0 {
 		for _, item := range itemsWithIds {
-			app.LogTrace("AddOrUpdateItems", "Update item "+item.(Item).Name+" in database")
 			if _, err := app.GetItemsCollection().UpdateOne(DefaultContext(), bson.M{"_id": item.(Item).ID}, bson.M{"$set": item}); err != nil {
 				return nil, app.LogError("AddOrUpdateItems.UpdateByID", err)
 			}

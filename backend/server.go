@@ -36,22 +36,24 @@ func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
 }
 
 func (server *TasteBuddyServer) SetGin() *TasteBuddyServer {
-	gin := gin.Default()
+	tasteBuddyGin := gin.Default()
+
+	// CORS Configuration
 	corsConfig := cors.Config{
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
+		AllowAllOrigins:  false,
 	}
 	if server.mode == DEV {
-		corsConfig.AllowAllOrigins = false
 		corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	} else {
-		corsConfig.AllowAllOrigins = false
-		corsConfig.AllowOrigins = []string{"https://taste-buddy.github.io"}
+		corsConfig.AllowOrigins = []string{"http://localhost:8080", "https://taste-buddy.github.io"}
 	}
-	gin.Use(cors.New(corsConfig))
-	server.gin = gin
+	tasteBuddyGin.Use(cors.New(corsConfig))
+
+	server.gin = tasteBuddyGin
 	return server
 }
 
@@ -119,18 +121,16 @@ func (server *TasteBuddyServer) Serve() {
 	r.Use(server.GenerateJWTMiddleware())
 
 	// API Routes
-	apiRoutes := r.Group("/api")
+	apiRoutes := r.Group("/")
 
-	// Version 1
-	v1 := apiRoutes.Group("/v1")
 	// Check
-	v1.GET("", func(context *gin.Context) {
+	apiRoutes.GET("", func(context *gin.Context) {
 		context.Status(200)
 	})
 
 	////////////////////////////////////////////////////////////////////////
 	// Users
-	userRoutes := v1.Group("/user")
+	userRoutes := apiRoutes.Group("/user")
 	// Check session
 	userRoutes.GET("/auth", func(context *gin.Context) {
 		server.HandleCheckSessionToken(context)
@@ -147,7 +147,7 @@ func (server *TasteBuddyServer) Serve() {
 
 	////////////////////////////////////////////////////////////////////////
 	// Recipes
-	recipeRoutes := v1.Group("/recipe")
+	recipeRoutes := apiRoutes.Group("/recipe")
 	// Get list of all recipes
 	recipeRoutes.GET("", func(context *gin.Context) {
 		server.HandleGetAllRecipes(context)
@@ -164,7 +164,7 @@ func (server *TasteBuddyServer) Serve() {
 
 	////////////////////////////////////////////////////////////////////////
 	// Items
-	itemRoutes := v1.Group("/item")
+	itemRoutes := apiRoutes.Group("/item")
 	// Get list of all items
 	itemRoutes.GET("", func(context *gin.Context) {
 		server.HandleGetAllItems(context)

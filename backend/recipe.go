@@ -14,28 +14,32 @@ import (
 
 type Recipe struct {
 	ID          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name        string             `json:"name" bson:"name" binding:"required"`
-	Author      string             `json:"author" bson:"author"`
-	Authors     []string           `json:"authors" bson:"authors"`
-	Description string             `json:"description" bson:"description"`
+	Name        LocalizedString    `json:"name,omitempty" bson:"name,omitempty"`
+	Description LocalizedString    `json:"description" bson:"description"`
 	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
 	Props       struct {
-		Url       string    `json:"url,omitempty" bson:"url,omitempty"`
 		ImgUrl    string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 		Duration  int       `json:"duration,omitempty" bson:"duration,omitempty"`
 		CreatedAt time.Time `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
 		Tags      []string  `json:"tags,omitempty" bson:"tags,omitempty"`
-		Copyright string    `json:"copyRight,omitempty" bson:"copyRight,omitempty"`
 	} `json:"props,omitempty" bson:"props,omitempty"`
+	Source struct {
+		Url     string `json:"url,omitempty" bson:"url,omitempty"`
+		Authors []struct {
+			Name string `json:"name" bson:"name" binding:"required"`
+			Url  string `json:"url,omitempty" bson:"url,omitempty"`
+		} `json:"authors,omitempty" bson:"authors,omitempty"`
+		Copyright string `json:"copyRight,omitempty" bson:"copyRight,omitempty"`
+	} `json:"source,omitempty" bson:"source,omitempty"`
 	Deleted bool `json:"-" bson:"deleted,omitempty"`
 }
 
 type Step struct {
-	Description string     `json:"description" bson:"description" binding:"required"`
-	Items       []StepItem `json:"items,omitempty" bson:"items,omitempty"`
-	ImgUrl      string     `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
-	Duration    int        `json:"duration,omitempty" bson:"duration,omitempty"`
-	Temperature int        `json:"temperature,omitempty" bson:"temperature,omitempty"`
+	Description LocalizedString `json:"description" bson:"description" binding:"required"`
+	Items       []StepItem      `json:"items,omitempty" bson:"items,omitempty"`
+	ImgUrl      string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	Duration    int             `json:"duration,omitempty" bson:"duration,omitempty"`
+	Temperature int             `json:"temperature,omitempty" bson:"temperature,omitempty"`
 }
 
 type StepItem struct {
@@ -221,7 +225,7 @@ func AddItemIdsToRecipes(recipes []Recipe, items []Item) []Recipe {
 	// Create map of items
 	var itemsMap = make(map[string]Item)
 	for _, item := range items {
-		itemsMap[item.Name] = item
+		itemsMap[item.Name.GetDefault()] = item
 	}
 
 	for _, recipe := range recipes {
@@ -229,7 +233,7 @@ func AddItemIdsToRecipes(recipes []Recipe, items []Item) []Recipe {
 		for stepIndex, step := range recipe.Steps {
 			for itemIndex, stepItem := range step.Items {
 				// if item in stepItem has an id, it is already in the database
-				stepItem.ID = itemsMap[stepItem.Name].ID
+				stepItem.ID = itemsMap[stepItem.Name.GetDefault()].ID
 				recipe.Steps[stepIndex].Items[itemIndex] = stepItem
 			}
 		}
@@ -269,7 +273,7 @@ func (recipe *Recipe) GetItems() []Item {
 	// Create map of items
 	var stepItemsMap = make(map[string]StepItem)
 	for _, stepItem := range recipe.GetStepItemsList() {
-		stepItemsMap[stepItem.Name] = stepItem
+		stepItemsMap[stepItem.Name.GetDefault()] = stepItem
 	}
 
 	// Convert map to array

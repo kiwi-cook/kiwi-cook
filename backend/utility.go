@@ -13,6 +13,32 @@ import (
 	"time"
 )
 
+// LocalizedString is a struct for localized strings
+type LocalizedString struct {
+	De string `json:"de" bson:"de"`
+	En string `json:"en" bson:"en"`
+	It string `json:"it" bson:"it"`
+}
+
+// Get gets the localized string for a language
+func (ls *LocalizedString) Get(lang string) string {
+	switch lang {
+	case "de":
+		return ls.De
+	case "en":
+		return ls.En
+	case "it":
+		return ls.It
+	default:
+		return ""
+	}
+}
+
+// GetDefault gets the string for the default language
+func (ls *LocalizedString) GetDefault() string {
+	return ls.Get("en")
+}
+
 // DefaultContext creates a default context with a timeout of 30 seconds
 func DefaultContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
