@@ -47,7 +47,7 @@
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
                         <router-link :to="recipe.getRoute()">
                             <IonChip>
-                                {{ recipe?.name }}
+                                {{ recipe?.getName() }}
                             </IonChip>
                         </router-link>
                     </template>
@@ -76,7 +76,7 @@ import {
 } from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
-import {save, trash} from "ionicons/icons";
+import {addOutline, chevronForwardCircle, save, saveOutline, trash} from "ionicons/icons";
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -134,7 +134,7 @@ export default defineComponent({
             mutableItem, saveItem, deleteItem,
             usedInRecipes,
             // i18n
-            supportedLanguages
+            supportedLanguages,
         }
     }
 })

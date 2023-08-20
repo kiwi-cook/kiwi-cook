@@ -5,7 +5,7 @@
             <IonCardSubtitle>
                 {{ recipe?.getDuration() }} min.
             </IonCardSubtitle>
-            <IonCardTitle class="mini-recipe-card-title">{{ recipe?.name }}</IonCardTitle>
+            <IonCardTitle class="mini-recipe-card-title">{{ recipe?.getName() }}</IonCardTitle>
         </IonCardHeader>
     </IonCard>
 </template>

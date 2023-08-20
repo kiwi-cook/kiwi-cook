@@ -6,7 +6,7 @@
             </div>
             <div class="recipe-title-author-mobile">
                 <h2 class="recipe-title">
-                    {{ recipe.name }}
+                    {{ recipe.getName() }}
                 </h2>
                 <h3 class="recipe-author subheader">
                     {{ recipe.getAuthors() }}
@@ -29,7 +29,7 @@
         <div class="recipe-details">
             <div class="recipe-title-author-large">
                 <h2 class="recipe-title">
-                    {{ recipe.name }}
+                    {{ recipe.getName() }}
                 </h2>
                 <h3 class="recipe-author subheader">
                     {{ recipe.getAuthors() }}

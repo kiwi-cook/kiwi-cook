@@ -90,11 +90,10 @@ export default defineComponent({
 .searchbar-list {
     width: 90%;
     max-width: var(--max-width);
-    margin: 0 auto;
+    margin: var(--margin-auto);
     max-height: 30vh;
     overflow-y: scroll;
-    padding-left: 15px;
-    padding-right: 15px;
+    padding: var(--padding-large);
     background: var(--background);
     border: var(--border);
     border-radius: var(--border-radius);

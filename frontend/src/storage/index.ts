@@ -9,7 +9,7 @@ import {API_ROUTE, APIResponse, Item, logDebug, logError, presentToast, Recipe, 
 
 const ionicStorage = new Storage({
     name: '__mydb',
-    driverOrder: [Drivers.IndexedDB, Drivers.LocalStorage]
+    driverOrder: [Drivers.LocalStorage]
 });
 await ionicStorage.create();
 
@@ -22,8 +22,13 @@ const MAX_CACHE_AGE = 1000 * 60 * 60 * 24
  * @param value
  */
 async function setCachedItem<T>(key: string, value: T) {
+    logDebug('setCachedItem', `saving ${key} with size ${JSON.stringify(value).length}`)
     return ionicStorage.set(key, {date: new Date().getTime(), value: value}).then(() => {
         logDebug('setCachedItem', `saved ${key} to cache`)
+        return value
+    }).catch((error) => {
+        logError('setCachedItem', `error saving ${key} to cache:`, error)
+        logDebug('setCachedItem', value)
         return value
     })
 }
@@ -212,7 +217,7 @@ export const useRecipeStore = defineStore('recipes', {
          */
         getRecipesAsList: (state): Recipe[] => {
             const recipesAsList: Recipe[] = Object.values(state.recipes ?? {})
-            recipesAsList.sort((a: Recipe, b: Recipe) => a.name.localeCompare(b.name))
+            recipesAsList.sort((a: Recipe, b: Recipe) => a.getName().localeCompare(b.getName()))
             return recipesAsList
         },
         /**
@@ -260,9 +265,12 @@ export const useRecipeStore = defineStore('recipes', {
                 return recipes
             }, {})
         },
-        getItems: (state): Item[] => {
-            const itemsAsArray: Item[] = Object.values(state.items ?? {})
-            itemsAsArray.sort((a: Item, b: Item) => a.name.localeCompare(b.name))
+        getItemsAsList: (state): Item[] => {
+            return Object.values(state.items ?? {}) ?? []
+        },
+        getItemsSortedByName(): Item[] {
+            const itemsAsArray = this.getItemsAsList ?? []
+            itemsAsArray.sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
             return itemsAsArray
         },
         getItemsAsMap: (state): { [id: string]: Item } => state.items ?? {},

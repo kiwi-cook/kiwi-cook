@@ -1,9 +1,13 @@
 :root {
+    /* Font sizes */
     --font-size-huge: 3.0rem;
     --font-size-large: 2.1rem;
     --font-size-medium: 1.5rem;
     --font-size-smaller: 1.4rem;
     --font-size-small: 1.1rem;
+    --font-size-tiny: 0.7rem;
+
+    /* Font weights */
     --font-weight-bolder: 700;
     --font-weight-bold: 600;
     --font-weight-normal: 400;

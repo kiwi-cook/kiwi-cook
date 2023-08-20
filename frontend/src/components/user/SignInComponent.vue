@@ -10,7 +10,8 @@
             </IonItem>
             <IonItem>
                 <IonInput v-model="password" :clear-input="true" autocomplete="current-password" label="Password"
-                          label-placement="floating" type="password"/>
+                          label-placement="floating" :type="visible ? 'text' : 'password'"/>
+                <IonCheckbox slot="end" v-model="visible" color="primary" />
             </IonItem>
             <IonButton :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</IonButton>
         </IonCardContent>
@@ -19,7 +20,16 @@
 
 <script lang="ts">
 import {computed, ref, watch} from 'vue';
-import {IonButton, IonCard, IonCardContent, IonCardHeader, IonInput, IonItem, useIonRouter} from '@ionic/vue';
+import {
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCheckbox,
+    IonInput,
+    IonItem,
+    useIonRouter
+} from '@ionic/vue';
 import TasteBuddyLogo from '@/components/TasteBuddyLogo.vue'
 import {useTasteBuddyStore} from '@/storage';
 import {useRoute} from 'vue-router';
@@ -34,6 +44,7 @@ export default {
         IonInput,
         IonItem,
         TasteBuddyLogo,
+        IonCheckbox
     },
     setup() {
         const store = useTasteBuddyStore();
@@ -41,6 +52,7 @@ export default {
 
         const username = ref('');
         const password = ref('');
+        const visible = ref(false);
         const isDisabled = computed(() => !isDevMode.value || username.value.length === 0 || password.value.length === 0)
 
         const route = useRoute()
@@ -69,7 +81,7 @@ export default {
 
 
         return {
-            username, password,
+            username, password, visible,
             isDisabled,
             authenticate,
         };

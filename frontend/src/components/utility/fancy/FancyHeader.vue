@@ -4,12 +4,12 @@
     </h2>
     <h1 class="big-header">
         {{ bigText[0] }}
-        <FancyText v-if="bigText.length > 1" :text="bigText[1]"/>
+        <FancyText v-if="bigText.length > 1" :text="typedText"/>
     </h1>
 </template>
 
 <script lang="ts">
-import {defineComponent, PropType} from "vue";
+import {defineComponent, onMounted, PropType, Ref, ref, toRefs} from "vue";
 import FancyText from "@/components/utility/fancy/FancyText.vue";
 
 export default defineComponent({
@@ -25,6 +25,32 @@ export default defineComponent({
             required: true
         }
     },
+    setup(props: { bigText: string[] }) {
+        const { bigText} = toRefs(props);
+
+        let interval = -1
+        const typedText = ref('')
+        const typedTextIndex = ref(0)
+        const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<number>): boolean => {
+            if (text.length <= typedTextIndex.value) {
+                return false
+            }
+            typedText.value += text[typedTextIndex.value++]
+            return true
+        }
+
+        onMounted(() => {
+            interval = setInterval(() => {
+                if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
+                    clearInterval(interval)
+                }
+            }, 150)
+        })
+
+        return {
+            typedText
+        }
+    }
 })
 </script>
 

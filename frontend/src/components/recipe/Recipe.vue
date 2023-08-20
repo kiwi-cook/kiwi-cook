@@ -4,50 +4,64 @@
             <RecipeHero :no-description="true" :recipe="recipe" :routable="false"/>
         </div>
 
-        <h2>Description</h2>
-        <IonText class="recipe-description">
-            {{ recipe?.description }}
-        </IonText>
+        <IonAccordionGroup :multiple="true" :value="['description', 'items', 'steps']" expand="inset">
+            <IonAccordion value="description">
+                <IonItem slot="header">
+                    <h2>Description</h2>
+                </IonItem>
+                <div slot="content" class="ion-padding">
+                    <IonText class="recipe-description">
+                        <p>
+                            {{ recipe?.getDescription() }}
+                        </p>
+                    </IonText>
+                </div>
+            </IonAccordion>
 
-        <IonText v-if="itemsFromRecipe.length > 0" lines="none">
-            <h2>What you'll need</h2>
-        </IonText>
+            <IonAccordion value="items">
+                <IonItem slot="header">
+                    <h2>What you'll need</h2>
+                </IonItem>
+                <div slot="content" class="ion-padding">
+                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+                        <template #left>
+                            <IonCard>
+                                <IonCardContent>
+                                    <IonItem class="servings-counter" lines="none">
+                                        <IonInput v-model="servings" label="Servings" label-placement="end" max="15"
+                                                  min="1"
+                                                  type="number"/>
+                                    </IonItem>
+                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
+                                </IonCardContent>
+                            </IonCard>
+                        </template>
+                        <template #right>
+                            <IonCard v-if="amountTools !== 0">
+                                <IonCardContent>
+                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
+                                </IonCardContent>
+                            </IonCard>
+                        </template>
+                    </TwoColumnLayout>
+                </div>
+            </IonAccordion>
 
-        <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
-            <template #left>
-                <IonCard>
-                    <IonCardContent>
-                        <IonItem class="servings-counter" lines="none">
-                            <IonInput v-model="servings" label="Servings" label-placement="end" max="15"
-                                      min="1"
-                                      type="number"/>
-                        </IonItem>
-                        <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
-                    </IonCardContent>
-                </IonCard>
-            </template>
-            <template #right>
-                <IonCard v-if="amountTools !== 0">
-                    <IonCardContent>
-                        <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
-                    </IonCardContent>
-                </IonCard>
-            </template>
-        </TwoColumnLayout>
-
-        <IonText v-if="steps?.length > 0" lines="none">
-            <h2>How to make it!</h2>
-        </IonText>
-        <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-            <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
-        </template>
+            <IonAccordion value="steps">
+                <IonItem slot="header">
+                    <h2>How to make it</h2>
+                </IonItem>
+                <div slot="content" class="ion-padding">
+                    <template v-for="(step, stepIndex) in steps" :key="stepIndex">
+                        <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
+                    </template>
+                </div>
+            </IonAccordion>
+        </IonAccordionGroup>
 
         <IonItem lines="none">
             <IonNote>
-                Recipe from {{ recipe?.getAuthors() ?? 'unknown' }}
-                <template v-if="recipe?.source?.url">on <a :href="recipe?.source?.url"
-                                                           target="_blank">{{ recipe?.source?.url }}</a>
-                </template>
+                <p v-html="source" />
             </IonNote>
         </IonItem>
     </div>
@@ -55,7 +69,16 @@
 
 <script lang="ts">
 import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
-import {IonCard, IonCardContent, IonInput, IonItem, IonNote, IonText} from '@ionic/vue';
+import {
+    IonAccordion,
+    IonAccordionGroup,
+    IonCard,
+    IonCardContent,
+    IonInput,
+    IonItem,
+    IonNote,
+    IonText
+} from '@ionic/vue';
 import {flagOutline, heart, heartOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
@@ -81,7 +104,8 @@ export default defineComponent({
         IonCard,
         IonCardContent,
         IonInput,
-        IonNote
+        IonNote,
+        IonAccordionGroup, IonAccordion
     },
     setup(props: any) {
         const {recipe} = toRefs(props);
@@ -90,6 +114,22 @@ export default defineComponent({
         const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
         const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
         const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
+
+        const source = computed(() => {
+            const authors = recipe.value?.getAuthors()
+            const source = recipe.value?.source?.url
+            const sourceTag = source ? `<a href="${source}" target="_blank">${source}</a>` : ''
+
+            if (authors !== '' && source !== '') {
+                return `Recipe by ${authors} on ${sourceTag}`
+            } else if (source === '') {
+                return `Recipe by ${authors}`
+            } else if (authors === '') {
+                return `Recipe on ${sourceTag}`
+            } else {
+                return ''
+            }
+        })
 
         const servings = ref(1)
         watch(servings, (newServings, oldServings) => {
@@ -100,7 +140,7 @@ export default defineComponent({
 
         return {
             // recipe
-            servings,
+            servings, source,
             // steps
             steps,
             // items

@@ -5,6 +5,10 @@ import {CanShareResult, Share} from "@capacitor/share";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 import {useIonRouter} from "@ionic/vue";
 
+type LocalizedString = {
+    [lang: string]: string
+}
+
 // types for recipe
 
 /**
@@ -14,10 +18,9 @@ import {useIonRouter} from "@ionic/vue";
 export class Item {
     _id?: string;
     _tmpId?: string;
-    name: string;
+    name: LocalizedString;
     type: string;
     imgUrl: string;
-    names: { [lang: string]: string };
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
@@ -26,10 +29,9 @@ export class Item {
         if (this._id === undefined) {
             this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
         }
-        this.name = item?.name ?? 'New Item'
+        this.name = item?.name ?? {'en': 'New Item'}
         this.type = item?.type ?? 'ingredient'
         this.imgUrl = item?.imgUrl ?? ''
-        this.names = item?.names ?? {}
     }
 
     /**
@@ -47,7 +49,7 @@ export class Item {
         item.name = json.name
         item.type = json.type
         item.imgUrl = json.imgUrl ?? ''
-        item.names = json.names ?? {}
+
         return item
     }
 
@@ -66,26 +68,18 @@ export class Item {
      */
     public static newItemFromName(name?: string): Item {
         const item = new Item()
-        item.name = name ?? 'New Item'
-        logDebug("new item from name", item)
+        item.setName(name ?? 'New Item')
         return item
-    }
-
-    public getI18n(): { [lang: string]: string } {
-        return this.names ?? {}
     }
 
     public getName(lang?: string): string {
         const store = useTasteBuddyStore()
-        return this.getI18n()[lang ?? store.language.lang] ?? this.name
+        return this.name[lang ?? store.language.lang]
     }
 
     public setName(name: string, lang?: string): void {
         const store = useTasteBuddyStore()
-        this.names[lang ?? store.language.lang] = name
-        if (lang === undefined) {
-            this.name = name
-        }
+        this.name[lang ?? store.language.lang] = name
     }
 
     /**
@@ -151,18 +145,18 @@ export class Item {
 
 /**
  * StepItem of a recipe
- * It is an item with an amount and a unit
+ * It is an item with an quantityand a unit
  * It is used in a step
  * This is done to make the item reusable
  */
 export class StepItem extends Item {
-    amount: number;
+    quantity: number;
     servingAmount: number;
     unit: string;
 
     constructor(item?: Item) {
         super(item)
-        this.amount = 1
+        this.quantity= 1
         this.servingAmount = 1
         this.unit = 'pcs'
     }
@@ -176,8 +170,8 @@ export class StepItem extends Item {
      */
     public static fromJSON(json: StepItem): StepItem {
         const stepItem = new StepItem()
-        stepItem.amount = json.amount
-        stepItem.servingAmount = json.amount
+        stepItem.quantity= json.quantity
+        stepItem.servingAmount = json.quantity
         stepItem.unit = json.unit
         const store = useRecipeStore()
         const item = store.getItemsAsMap[json._id ?? '']
@@ -213,14 +207,16 @@ export class StepItem extends Item {
 export class Step {
     items: StepItem[];
     imgUrl?: string;
-    description: string;
+    description: LocalizedString;
     duration?: number;
     temperature?: number;
 
     constructor() {
         this.items = [new StepItem()]
         this.imgUrl = ''
-        this.description = 'New step description'
+        this.description = {
+            en: 'New Step',
+        }
         this.duration = 0
     }
 
@@ -236,8 +232,8 @@ export class Step {
         item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
         item.description = json.description
-        item.duration = Step.parseDuration(json.duration, item.description)
-        item.temperature = Step.parseTemperature(json.temperature, item.description)
+        item.duration = Step.parseDuration(json.duration, item.getDescription())
+        item.temperature = Step.parseTemperature(json.temperature, item.getDescription())
         return item
     }
 
@@ -250,7 +246,7 @@ export class Step {
     public static fromStepItems(stepItems: StepItem[], description?: string): Step {
         const step = new Step()
         step.items = stepItems
-        step.description = description ?? ''
+        step.setDescription(description ?? '')
         return step
     }
 
@@ -294,14 +290,33 @@ export class Step {
     }
 
     /**
+     * Get the localized description of the recipe
+     */
+    public getDescription(lang?: string): string {
+        const store = useTasteBuddyStore()
+        return this.description[lang ?? store.language.lang ?? 'en']
+    }
+
+    /**
+     * Set the localized description of the recipe
+     */
+    public setDescription(description: string, lang?: string): void {
+        const store = useTasteBuddyStore()
+        this.description[lang ?? store.language.lang ?? 'en'] = description
+    }
+
+    /**
      * Get the description of the step
      * as HTML with highlighted items
      * @param className the class name of the highlighted items
      */
-    public getDescription(className: string): string {
-        let description = this.description
+    public printDescription(className: string): string {
+        let description = this.getDescription()
         this.getItems().forEach(item => {
-            description = description.replace(new RegExp(item.name, 'ig'), `<span class="${className}">${item.name}</span>`)
+            const itemName = item.getName()
+            const regex = new RegExp(itemName, 'ig')
+            console.log(description, regex, itemName)
+            description = description.replaceAll(regex, `<span class="${className}">${itemName}</span>`)
         })
         return description
     }
@@ -321,7 +336,7 @@ export class Step {
      */
     public updateServings(servings = 1): this {
         this.items.forEach((stepItem: StepItem) => {
-            stepItem.servingAmount = stepItem.amount * servings
+            stepItem.servingAmount = stepItem.quantity* servings
         })
         return this
     }
@@ -335,9 +350,8 @@ export class Step {
 export class Recipe {
     _id?: string;
     _tmpId?: string;
-    name: string;
-    authors: string[];
-    description: string;
+    name: LocalizedString;
+    description: LocalizedString;
     steps: Step[];
     items: StepItem[];
     itemsById: { [key: string]: StepItem };
@@ -354,6 +368,12 @@ export class Recipe {
             name: string;
             url?: string;
         }[];
+        copyRight?: string;
+        cookBook?: {
+            name: string;
+            url?: string;
+            publisher?: string;
+        }
     };
     servings: number;
     isLiked: boolean;
@@ -361,11 +381,13 @@ export class Recipe {
     constructor() {
         // create a temporary id to identify the recipe in the store before it is saved
         this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
-        this.name = 'New Recipe'
-        this.authors = []
-        this.description = ''
+        this.name = {
+            en: 'New Recipe',
+        }
+        this.description = {
+            en: 'New Recipe description',
+        }
         this.props = {
-            url: '',
             imgUrl: '',
             duration: 0,
             createdAt: new Date(),
@@ -401,23 +423,17 @@ export class Recipe {
         }
 
         recipe.name = json.name
-        recipe.authors = json.authors ?? []
         recipe.description = json.description
         recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
 
         // Props
-        recipe.props.url = json.props.url
         recipe.props.imgUrl = json.props.imgUrl
         recipe.props.tags = json.props.tags
         recipe.props.duration = json.props.duration
         recipe.props.createdAt = new Date(json.props.createdAt)
 
         // Source
-        recipe.source.url = json.props.url
-        recipe.source.authors = json.authors.map((author: string) => ({
-            name: author,
-            url: ''
-        }))
+        recipe.source = json.source
 
         recipe.computeItems()
         return recipe
@@ -442,6 +458,38 @@ export class Recipe {
             throw new Error("recipe id is undefined")
         }
         return this._id ?? this._tmpId as string
+    }
+
+    /**
+     * Get the localized name of the recipe
+     */
+    public getName(): string {
+        const store = useTasteBuddyStore()
+        return this.name[store.language.lang] ?? this.name.en
+    }
+
+    /**
+     * Set the localized name of the recipe
+     */
+    public setName(name: string, lang?: string): void {
+        const store = useTasteBuddyStore()
+        this.name[lang ?? store.language.lang] = name
+    }
+
+    /**
+     * Get the localized description of the recipe
+     */
+    public getDescription(): string {
+        const store = useTasteBuddyStore()
+        return this.description[store.language.lang] ?? this.description.en
+    }
+
+    /**
+     * Set the localized description of the recipe
+     */
+    public setDescription(description: string, lang?: string): void {
+        const store = useTasteBuddyStore()
+        this.description[lang ?? store.language.lang] = description
     }
 
     /**
@@ -485,8 +533,8 @@ export class Recipe {
      * Get the short description of the recipe. It is the first two sentences of the description.
      * @returns the short description of the recipe
      */
-    public getShortDescription(): string {
-        let shortDescription = this.description.split('.').slice(0, 2).join('.')
+    public getShortDescription(lang?: string): string {
+        let shortDescription = this.description[lang ?? 'en'].split('.').slice(0, 2).join('.')
         const lastChar = shortDescription.charAt(shortDescription.length - 1)
         if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
             shortDescription += '.'
@@ -638,7 +686,7 @@ export class Recipe {
             try {
                 return Share.share({
                     title: 'Share with your recipe with buddies',
-                    text: `Check out this recipe for ${this.name} on Taste Buddy!`,
+                    text: `Check out this recipe for ${this.getName()} on Taste Buddy!`,
                     url: '#' + this.getRoute(),
                     dialogTitle: 'Share with buddies',
                 })

@@ -1,11 +1,11 @@
 <template>
     <div class="recipe-hero">
-        <IonImg :alt="`Image of ${recipe?.name}`" :class="['hero-image', { 'link': routable }]"
+        <IonImg :alt="`Image of ${recipe?.getName()}`" :class="['hero-image', { 'link': routable }]"
                 :src="recipe?.props?.imgUrl ?? ''" @click="toRecipe()"/>
         <div class="hero-content">
 
             <div class="hero-text">
-                <h1 class="recipe-name">{{ recipe?.name }}</h1>
+                <h1 class="recipe-name">{{ recipe?.getName() }}</h1>
                 <p v-if="!noDescription" class="recipe-description">{{ recipe?.getShortDescription() }}</p>
                 <h2 v-if="recipe.getAuthors() !== ''" class="recipe-author">
                     By <a :href="recipe?.props?.url" target="_blank">{{ recipe?.getAuthors() }}</a>

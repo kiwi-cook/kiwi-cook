@@ -11,11 +11,11 @@
                                placeholder="What ingredients or recipes are you craving today?">
                         <template #element="{element}">
                             <template v-if="element instanceof Item">
-                                <ItemComponent :item="element as Item" lines="full"
+                                <ItemComponent :item="element as Item"
                                                @click="includeItem((element as Item).getId())"/>
                             </template>
                             <template v-if="element instanceof Recipe">
-                                {{ (element as Recipe).name }}
+                                {{ (element as Recipe).getName() }}
                             </template>
                         </template>
                     </Searchbar>
@@ -27,8 +27,8 @@
                         <h4 class="subheader">
                             Filter by ingredients, cooking time, price and more.
                         </h4>
-                        <IonAccordionGroup :multiple="true">
-                            <IonAccordion value="first" class="suggestion-filter">
+                        <IonAccordionGroup :multiple="true" :value="['items']">
+                            <IonAccordion value="items" class="suggestion-filter">
                                 <IonItem slot="header">
                                     <IonLabel>
                                         What ingredients do you have?
@@ -42,7 +42,7 @@
                                                 <template #element="{ element }">
                                                     <ItemComponent
                                                         :disable-click="true"
-                                                        :item="element as Item" lines="inset"
+                                                        :item="element as Item"
                                                         :include="itemQueries[(element as Item).getId()]">
                                                         <template #end>
                                                             <div class="item-buttons">
@@ -80,7 +80,7 @@
                             </IonAccordion>
 
                             <!-- Cooking time -->
-                            <IonAccordion class="suggestion-filter">
+                            <IonAccordion class="suggestion-filter" value="duration">
                                 <IonItem slot="header">
                                     <IonLabel>
                                         How much time do you have?
@@ -112,7 +112,7 @@
                             </IonAccordion>
 
                             <!-- Price -->
-                            <IonAccordion class="suggestion-filter">
+                            <IonAccordion class="suggestion-filter" value="price">
                                 <IonItem slot="header">
                                     <IonLabel>
                                         What is your budget?
@@ -287,6 +287,7 @@ export default defineComponent({
             [id: string]: string
         }>(() => Object.fromEntries(Object.entries(itemQueries.value)
             .map(([id, include]: [string, boolean]) => [id, include ? 'success' : 'danger'])))
+        const itemSelectionSection = ref(false)
         const includeItem = (id: string) => {
             itemQueries.value[id] = true
         }
@@ -369,6 +370,7 @@ export default defineComponent({
             filterInput,
             includeItem, excludeItem, removeItem,
             filteredItems, selectedItems, selectedItemColors, itemQueries,
+            itemSelectionSection,
             /* City + Price */
             city, prices, maxPrice,
             /* Cooking Time */
@@ -395,29 +397,14 @@ export default defineComponent({
     margin-bottom: 1rem;
 }
 
-.suggestion-filters {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
-    flex-direction: row;
-    align-items: start;
-    justify-content: space-between;
-}
-
-@media (max-width: 768px) {
-    .suggestion-filters {
-        flex-direction: column;
-    }
-}
-
-.suggestion-filters .suggestion-filter {
-    margin-left: auto;
-    margin-right: auto;
+section {
+    margin-top: var(--margin-s);
+    margin-bottom: var(--margin-s);
 }
 
 .item-buttons {
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: var(--margin-medium);
+    margin-right: var(--margin-medium);
     display: flex;
 }
 
@@ -428,6 +415,13 @@ export default defineComponent({
 .item-button::part(native) {
     border-radius: 0;
     padding: 10px;
+}
+
+@media (width <= 414px) {
+    .item-button::part(native) {
+        padding: 5px;
+        font-size: var(--font-size-tiny);
+    }
 }
 
 .item-buttons .item-button:not(:last-child)::part(native) {

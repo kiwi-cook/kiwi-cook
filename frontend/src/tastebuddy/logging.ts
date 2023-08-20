@@ -24,11 +24,12 @@ export const logDebug = (functionName: string, message: any, ...messages: any[])
  * Log an error to the console
  * @param functionName the name of the function that threw the error
  * @param error the error to log
+ * @param errors
  */
-export const logError = (functionName: string, error: any) => {
+export const logError = (functionName: string, error: any, ...errors: any[]) => {
     if (error instanceof Error) {
         console.error(`[${functionName}]: ${error.message}`)
     } else {
-        console.error(`[${functionName}]:`, error)
+        console.error(`[${functionName}]:`, error, ...errors)
     }
 }

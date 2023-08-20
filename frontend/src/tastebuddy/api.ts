@@ -5,7 +5,7 @@ type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 // URLs for the API
 
 // Possible URLs for the API
-const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app/api/v1', 'http://localhost:8081/api/v1']
+const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://localhost:8081']
 
 export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS[1] : possibleAPI_URLS[0]
 

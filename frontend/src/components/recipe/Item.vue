@@ -5,7 +5,7 @@
                     class="item-img-rm"/>
             <IonText class="item-name">
                 <IonChip v-if="mappedItem.showAmountUnit">
-                    {{ mappedItem.amount }} {{ mappedItem.unit }}
+                    {{ mappedItem.quantity}} {{ mappedItem.unit }}
                     <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                             class="item-img-lm"/>
                 </IonChip>
@@ -54,7 +54,7 @@ export default defineComponent({
         type CustomItem = {
             id: string,
             name: string,
-            amount: number,
+            quantity: number,
             unit: string,
             imgUrl: string,
             showAmountUnit: boolean
@@ -64,15 +64,15 @@ export default defineComponent({
             if (!item.value) {
                 return undefined;
             }
-            const amount = item.value instanceof StepItem ? item.value.servingAmount : 0;
+            const quantity= item.value instanceof StepItem ? item.value.servingAmount : 0;
 
             return {
                 id: item.value.getId(),
                 name: item.value.getName(),
                 imgUrl: item.value.imgUrl,
-                amount,
+                quantity,
                 unit: item.value instanceof StepItem ? item.value.unit : '',
-                showAmountUnit: item.value.type === 'ingredient' && amount > 0,
+                showAmountUnit: item.value.type === 'ingredient' && quantity> 0,
                 type: item.value.type
             }
         })
@@ -95,7 +95,7 @@ export default defineComponent({
 ion-item.item {
     display: flex;
     flex-direction: row;
-    align-items: start;
+    align-items: flex-start;
     justify-content: space-between;
     background: inherit !important;
 }

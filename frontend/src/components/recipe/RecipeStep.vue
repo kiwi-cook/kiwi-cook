@@ -18,7 +18,7 @@
         <IonCardContent>
             <ItemList :disable-click="true" :horizontal="true" :items="items"/>
             <IonItem lines="none">
-                <div v-html="step?.getDescription('item-highlight')"></div>
+                <div v-html="step?.printDescription('item-highlight')"></div>
             </IonItem>
         </IonCardContent>
     </IonCard>

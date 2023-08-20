@@ -52,6 +52,14 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/editor/VRecipeEditor.vue'),
             },
             {
+                name: 'RecipesEditor',
+                path: 'recipe/edit',
+                meta: {
+                    auth: true,
+                },
+                component: () => import('@/views/editor/VRecipesEditor.vue'),
+            },
+            {
                 name: 'ItemEditor',
                 path: 'item/edit/',
                 meta: {

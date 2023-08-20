@@ -142,7 +142,7 @@ ul.element-list.horizontal {
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    align-items: start;
+    align-items: flex-start;
     /* works together with margin-left: -1rem of .element-list-wrapper.horizontal */
     margin: 0 0 0 1rem;
 }

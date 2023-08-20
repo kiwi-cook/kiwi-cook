@@ -4,16 +4,16 @@
             <IonGrid>
                 <IonRow>
                     <IonCol>
-                        <IonInput :maxlength="40" :value="mutableRecipe.name" color="primary"
+                        <IonInput :maxlength="40" :value="mutableRecipe.getName()" color="primary"
                                   label="Recipe name"
                                   label-placement="stacked" type="text"
-                                  @keyup.enter="mutableRecipe.name = $event.target.value"
-                                  @ion-blur="mutableRecipe.name = ($event.target.value ?? '').toString()"/>
+                                  @keyup.enter="mutableRecipe.setName($event.target.value ?? '')"
+                                  @ion-blur="mutableRecipe.setName($event.target.value ?? '')"/>
                     </IonCol>
                 </IonRow>
                 <IonRow>
                     <IonCol size="5">
-                        <img :alt="`Image of ${mutableRecipe.name}`" :src="mutableRecipe.props.imgUrl"
+                        <img :alt="`Image of ${mutableRecipe.getName()}`" :src="mutableRecipe.props.imgUrl"
                              class="recipe-image"/>
                         <IonInput v-model="mutableRecipe.props.imgUrl" label="Image URL"
                                   label-placement="stacked" type="url"/>
@@ -37,11 +37,15 @@
                             </IonRow>
                             <IonRow>
                                 <IonCol>
-                                    <IonTextarea v-model="mutableRecipe.description"
-                                                 :cols="6" :counter="true"
-                                                 :rows="3"
-                                                 :spellcheck="true" label="Description" label-placement="stacked"
-                                                 placeholder="e.g. The best recipe in Germany" wrap="soft"/>
+                                    <IonTextarea :value="mutableRecipe.getDescription()"
+                                                 :cols="6"
+                                                 :counter="true"
+                                                 :rows="3" :spellcheck="true"
+                                                 label="Description"
+                                                 wrap="soft"
+                                                 label-placement="stacked" placeholder="e.g. The best recipe in Germany"
+                                                 @keyup.enter="mutableRecipe.setDescription($event.target.value ?? '')"
+                                                 @ion-blur="mutableRecipe.setDescription($event.target.value ?? '')"/>
                                 </IonCol>
                             </IonRow>
                             <IonRow>
@@ -78,7 +82,7 @@
                 <IonRow>
                     <IonCol size="12">
                         <IonItem class="tags-editor" lines="none">
-                            <IonChip v-for="(tag, tagIndex) in (mutableRecipe.props.tags ?? [])" :key="tagIndex"
+                            <IonChip v-for="(tag, tagIndex) in mutableRecipe.getTags()" :key="tagIndex"
                                      class="tag">
                                 <IonLabel>{{ tag }}</IonLabel>
                                 <IonIcon :icon="closeCircleOutline"
@@ -118,10 +122,15 @@
             </IonCardHeader>
 
             <IonCardContent>
-                <IonTextarea v-model.trim="step.description" :cols="6"
-                             :counter="true" :rows="3" :spellcheck="true" label="Description"
+                <IonTextarea :value="step.getDescription()"
+                             :cols="6"
+                             :counter="true"
+                             :rows="3" :spellcheck="true"
+                             label="Description"
+                             wrap="soft"
                              label-placement="stacked" placeholder="e.g. Mix the ingredients together"
-                             wrap="soft"/>
+                             @keyup.enter="step.setDescription($event.target.value ?? '')"
+                             @ion-blur="step.setDescription($event.target.value ?? '')"/>
 
                 <IonInput v-model.number="step.duration" label="Preparation time (minutes)" label-placement="stacked"
                           max="9999"
@@ -138,7 +147,7 @@
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
-                              :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.name ?? ''">
+                              :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.getName() ?? ''">
                         <div class="item-editor shadow">
                             <IonItem lines="none">
                                 <IonItem lines="none">
@@ -161,8 +170,7 @@
                             <IonItem lines="none">
                                 <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
                                                 :item="stepItem"
-                                                :items="items"
-                                                class="item-name" label="Name"
+                                                :items="items" label="Name"
                                                 placeholder="e.g. Baking powder"
                                                 @select-item="selectItem(stepIndex, itemIndex, $event)"
                                                 @add-item="addItem(stepIndex, itemIndex, $event)">
@@ -176,7 +184,7 @@
                                 <IonGrid>
                                     <IonRow>
                                         <IonCol size="auto">
-                                            <IonInput v-model.number="stepItem.amount" inputmode="numeric"
+                                            <IonInput v-model.number="stepItem.quantity" inputmode="numeric"
                                                       label="Amount" label-placement="floating" max="9999" min="0"
                                                       type="number"/>
                                         </IonCol>
@@ -220,7 +228,7 @@
 </template>
 
 <script lang="ts">
-import {formatDate, getItemsFromDescription, Item, Recipe, Step, StepItem} from '@/tastebuddy';
+import {extractStepItemsFromDescription, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -284,7 +292,7 @@ export default defineComponent({
         const router = useIonRouter();
         const recipeStore = useRecipeStore();
 
-        const items = computed<Item[]>(() => recipeStore.getItems);
+        const items = computed<Item[]>(() => recipeStore.getItemsAsList);
 
         const mutableRecipe = ref<Recipe>(recipe.value)
         // update recipe and steps when prop changes
@@ -364,8 +372,8 @@ export default defineComponent({
             steps.forEach((step: Step, stepIndex: number) => {
                 const stepItems = step.getItems()
                 // return only items that aren't in the step
-                missingItems[stepIndex] = getItemsFromDescription(step.description)
-                    .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.name == stepItem.name))
+                missingItems[stepIndex] = extractStepItemsFromDescription(step.getDescription())
+                    .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.getName() == stepItem.getName()))
             })
             return missingItems
         })
