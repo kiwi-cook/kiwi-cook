@@ -15,9 +15,9 @@ import (
 
 // LocalizedString is a struct for localized strings
 type LocalizedString struct {
-	De string `json:"de" bson:"de"`
-	En string `json:"en" bson:"en"`
-	It string `json:"it" bson:"it"`
+	De string `json:"de,omitempty" bson:"de,omitempty"`
+	En string `json:"en,omitempty" bson:"en,omitempty"`
+	It string `json:"it,omitempty" bson:"it,omitempty"`
 }
 
 // Get gets the localized string for a language

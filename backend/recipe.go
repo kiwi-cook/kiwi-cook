@@ -39,7 +39,7 @@ type Step struct {
 	Items       []StepItem      `json:"items,omitempty" bson:"items,omitempty"`
 	ImgUrl      string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Duration    int             `json:"duration,omitempty" bson:"duration,omitempty"`
-	Temperature int             `json:"temperature,omitempty" bson:"temperature,omitempty"`
+	Temperature float32         `json:"temperature,omitempty" bson:"temperature,omitempty"`
 }
 
 type StepItem struct {
@@ -64,18 +64,18 @@ func (server *TasteBuddyServer) HandleGetAllRecipes(context *gin.Context) {
 // HandleAddRecipes gets called by server
 // Adds or updates recipes in database
 func (server *TasteBuddyServer) HandleAddRecipes(context *gin.Context) {
-	server.LogContextHandle(context, "HandleAddRecipe", "Trying to add/update recipe")
+	server.LogContextHandle(context, "HandleAddRecipes", "Add/update recipes")
 
 	// Bind JSON to list of recipes
 	var recipes []Recipe
 	if err := context.BindJSON(&recipes); err != nil {
-		server.LogError("HandleAddRecipe.BindJSON", err)
+		server.LogError("HandleAddRecipes.BindJSON", err)
 		BadRequestError(context, err.Error())
 		return
 	}
 
 	if err := server.AddRecipes(recipes); err != nil {
-		server.LogError("HandleAddRecipe.AddRecipe", err)
+		server.LogError("HandleAddRecipes.AddRecipe", err)
 		ServerError(context, false)
 		return
 	}
@@ -138,17 +138,6 @@ func (app *TasteBuddyApp) GetAllRecipes() ([]Recipe, error) {
 	}
 
 	return recipesFromDatabase, nil
-}
-
-// GetRecipeById gets recipe by id from database
-func (app *TasteBuddyApp) GetRecipeById(id primitive.ObjectID) (Recipe, error) {
-	var recipeFromDatabase Recipe
-	app.LogDebug("GetRecipeById", "Getting recipe with id "+id.Hex())
-	err := app.GetRecipesCollection().FindOneWithDefault(bson.M{"_id": id}, &recipeFromDatabase, Recipe{})
-	if err != nil {
-		return Recipe{}, app.LogError("GetRecipeById.FindOneWithDefault", err)
-	}
-	return recipeFromDatabase, err
 }
 
 // AddRecipes adds or updates recipes in database
@@ -243,10 +232,10 @@ func AddItemIdsToRecipes(recipes []Recipe, items []Item) []Recipe {
 
 // DeleteRecipeById deletes recipe by id from database
 func (app *TasteBuddyApp) DeleteRecipeById(id primitive.ObjectID) (primitive.ObjectID, error) {
-	ctx := DefaultContext()
 
 	// Delete recipe by setting "deleted" to true
 	app.Log("DeleteRecipeById", "Delete recipe "+id.Hex()+" from database")
+	ctx := DefaultContext()
 	if _, err := app.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}}); err != nil {
 		return id, app.LogError("DeleteRecipeById.UpdateByID", err)
 	}
@@ -256,10 +245,10 @@ func (app *TasteBuddyApp) DeleteRecipeById(id primitive.ObjectID) (primitive.Obj
 
 // RecoverRecipeById recovers recipe by id from database
 func (app *TasteBuddyApp) RecoverRecipeById(id primitive.ObjectID) (primitive.ObjectID, error) {
-	ctx := DefaultContext()
 
 	// Recover recipe by setting "deleted" to false
 	app.Log("RecoverRecipeById", "Recover recipe "+id.Hex()+" from database")
+	ctx := DefaultContext()
 	if _, err := app.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: false}}}}); err != nil {
 		return id, app.LogError("RecoverRecipeById.UpdateByID", err)
 	}
@@ -272,7 +261,7 @@ func (app *TasteBuddyApp) RecoverRecipeById(id primitive.ObjectID) (primitive.Ob
 func (recipe *Recipe) GetItems() []Item {
 	// Create map of items
 	var stepItemsMap = make(map[string]StepItem)
-	for _, stepItem := range recipe.GetStepItemsList() {
+	for _, stepItem := range recipe.GetStepItems() {
 		stepItemsMap[stepItem.Name.GetDefault()] = stepItem
 	}
 
@@ -284,8 +273,8 @@ func (recipe *Recipe) GetItems() []Item {
 	return items
 }
 
-// GetStepItemsList returns a list of all StepItem used in the recipe
-func (recipe *Recipe) GetStepItemsList() []StepItem {
+// GetStepItems returns a list of all StepItem used in the recipe
+func (recipe *Recipe) GetStepItems() []StepItem {
 	var stepItems []StepItem
 	for _, step := range recipe.Steps {
 		stepItems = append(stepItems, step.Items...)

@@ -175,7 +175,7 @@ func (server *TasteBuddyServer) Serve() {
 	})
 	// Add recipe to database
 	itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-		server.HandleAddItem(context)
+		server.HandleAddItems(context)
 	})
 	////////////////////////////////////////////////////////////////////////
 

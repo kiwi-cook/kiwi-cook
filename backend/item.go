@@ -32,26 +32,24 @@ func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
 	Success(context, items)
 }
 
-// HandleAddItem gets called by server
-// Calls addItemToDB and handles the context
-func (server *TasteBuddyServer) HandleAddItem(context *gin.Context) {
-	server.LogContextHandle(context, "HandleAddItem", "Trying to add/update item")
+// HandleAddItems gets called by server
+// Calls AddOrUpdateItems and handles the context
+func (server *TasteBuddyServer) HandleAddItems(context *gin.Context) {
+	server.LogContextHandle(context, "HandleAddItems", "Add/update items")
 
-	var newItem Item
-	if err := context.BindJSON(&newItem); err != nil {
-		server.LogError("HandleAddItem.BindJSON", err)
-		BadRequestError(context, "Invalid item")
+	var items []Item
+	if err := context.BindJSON(&items); err != nil {
+		server.LogError("HandleAddItems.BindJSON", err)
+		BadRequestError(context, "Invalid items")
 		return
 	}
 
-	var itemId primitive.ObjectID
-	if _, err := server.AddOrUpdateItem(newItem); err != nil {
-		server.LogError("HandleAddItem.AddOrUpdateItem", err)
+	if _, err := server.AddOrUpdateItems(items); err != nil {
+		server.LogError("HandleAddItems.AddOrUpdateItem", err)
 		ServerError(context, true)
 		return
 	}
-	server.LogContextHandle(context, "HandleAddItem", "Added/Updated item "+newItem.Name.GetDefault()+" ("+newItem.ID.Hex()+")")
-	Success(context, "Saved item "+itemId.Hex())
+	Updated(context, "item")
 }
 
 // HandleDeleteItemById gets called by server
