@@ -72,7 +72,7 @@ export default defineComponent({
     setup(props: { step: Step }) {
         const {step} = toRefs(props)
 
-        const items = computed(() => step.value?.getItems() ?? [])
+        const items = computed(() => step.value?.getStepItems() ?? [])
         return {
             // icons
             time, flame,

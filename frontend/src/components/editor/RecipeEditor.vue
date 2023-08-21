@@ -108,7 +108,7 @@
     <!-- Steps -->
     <IonButton @click="addStep(-1)">Add step</IonButton>
     <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
-        <IonCard class="step-editor shadow">
+        <IonCard class="step-editor">
             <IonCardHeader>
                 <IonItem lines="none">
                     <IonCardTitle>
@@ -133,22 +133,26 @@
                              @ion-blur="step.setDescription($event.target.value ?? '')"/>
 
                 <IonInput v-model.number="step.duration" label="Preparation time (minutes)" label-placement="stacked"
-                          max="9999"
+                          max="2400"
                           min="1" type="number"/>
+
+                <IonInput v-model.number="step.temperature" label="Temperature (°C)" label-placement="stacked"
+                          max="1000"
+                          min="-50" type="number"/>
 
                 <IonInput v-model.trim="step.imgUrl" :placeholder="`e.g. https://source.unsplash.com/`"
                           label="Image URL"
                           label-placement="stacked" type="url"/>
 
                 <!-- Item icons -->
-                <ItemList :horizontal="true" :items="step.getItems()"/>
+                <ItemList :horizontal="true" :items="step.getStepItems()"/>
 
 
                 <!-- Items -->
                 <div class="items-editor">
                     <template v-for="(stepItem, itemIndex) in step.items"
                               :key="stepIndex + ' - ' + itemIndex + ' - ' + stepItem.getName() ?? ''">
-                        <div class="item-editor shadow">
+                        <div class="item-editor">
                             <IonItem lines="none">
                                 <IonItem lines="none">
                                     <IonAvatar v-if="stepItem.imgUrl">
@@ -197,6 +201,9 @@
                                                 <IonSelectOption value="g">g</IonSelectOption>
                                                 <IonSelectOption value="kg">kg</IonSelectOption>
                                                 <IonSelectOption value="pcs">pcs</IonSelectOption>
+                                                <IonSelectOption value="tsp">tsp</IonSelectOption>
+                                                <IonSelectOption value="tbsp">tbsp</IonSelectOption>
+                                                <IonSelectOption value="">N/A</IonSelectOption>
                                             </IonSelect>
                                         </IonCol>
                                     </IonRow>
@@ -228,7 +235,7 @@
 </template>
 
 <script lang="ts">
-import {extractStepItemsFromDescription, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
+import {extractStepItemsFromText, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -370,9 +377,9 @@ export default defineComponent({
             const missingItems: { [stepIndex: number]: Item[] } = {}
             const steps = recipe.value.steps
             steps.forEach((step: Step, stepIndex: number) => {
-                const stepItems = step.getItems()
+                const stepItems = step.getStepItems()
                 // return only items that aren't in the step
-                missingItems[stepIndex] = extractStepItemsFromDescription(step.getDescription())
+                missingItems[stepIndex] = extractStepItemsFromText(step.getDescription())
                     .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.getName() == stepItem.getName()))
             })
             return missingItems
@@ -427,12 +434,8 @@ ion-textarea {
 }
 
 ion-card {
-    /* nice shadow with light background and round corners */
     box-shadow: var(--box-shadow);
-}
-
-ion-item {
-    display: block;
+    border-radius: var(--border-radius);
 }
 
 ion-avatar.recipe-preview-img {
@@ -462,9 +465,13 @@ ion-avatar.recipe-preview-img {
 }
 
 .item-editor {
-    margin: 10px;
-    max-width: fit-content;
+    margin: var(--margin);
+    padding: var(--padding);
     border-radius: var(--border-radius);
+    border: var(--border);
+}
+
+ion-item.item-editor::part(native) {
 }
 
 @media screen and (max-width: 600px) {

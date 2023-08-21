@@ -353,9 +353,12 @@ export const useRecipeStore = defineStore('recipes', {
          * Override all items
          * @param items
          */
-        setItems(items: Item[]) {
-            this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
-            return setCachedItem('items', items)
+        setItems(items: Item[] | Item) {
+            if (!Array.isArray(items)) {
+                this.items[items.getId()] = items
+            } else {
+                this.items = Object.assign(this.items, ...items.map((item: Item) => ({[item.getId()]: item})))
+            }
         },
         /**
          * Update a single item
@@ -466,12 +469,22 @@ export const useRecipeStore = defineStore('recipes', {
                     return apiResponse.response
                 });
         },
-        async saveItem(item: Item) {
-            logDebug('saveItem', item)
+        async saveItems(items?: Item[] | Item) {
+            // if the recipes is not defined, save all recipes
+            if (typeof items === 'undefined') {
+                items = Object.values(this.getItemsAsMap)
+            }
+
+            // if the recipes is not an array, make it an array
+            if (!Array.isArray(items)) {
+                items = [items]
+            }
+
+            logDebug('saveItem', items)
             this.setLoadingState('saveItem')
-            this.setItem(item)
+            this.setItems(items)
             return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
-                body: item,
+                body: items,
                 errorMessage: 'Could not save item in database. Please retry later!'
             }).then((apiResponse: APIResponse<string>) => {
                 this.finishLoading('saveItem')

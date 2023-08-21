@@ -1,4 +1,5 @@
 <template>
+
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
             <div class="content">
@@ -17,13 +18,19 @@
                 <h2>
                     {{ parsedRecipes.length }} Recipes
                 </h2>
-                <List :list="parsedRecipes">
-                    <template #element="{element}">
-                        <router-link :to="(element as Recipe).getRoute()">
-                            {{ (element as Recipe).getName() }}
-                        </router-link>
-                    </template>
-                </List>
+                <ul class="recipe-button-list">
+                    <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
+                        <IonButton size="small" fill="outline" @click="showEditor(recipe.getId())">
+                            {{ recipe.getName() }}
+                        </IonButton>
+                    </li>
+                </ul>
+
+                <!-- Recipe editor -->
+                <h2>
+                    Recipe Editor
+                </h2>
+                <RecipeEditor v-if="selectedRecipe !== null" :recipe="selectedRecipe"/>
 
             </div>
 
@@ -45,18 +52,29 @@
     </IonPage>
 </template>
 
+
 <script lang="ts">
 import {defineComponent, ref} from "vue";
 import {logError, parseRecipes, Recipe, RecipeParser} from "@/tastebuddy";
-import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from "@ionic/vue";
+import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from "@ionic/vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
-import List from "@/components/recipe/List.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/storage";
+import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 
 export default defineComponent({
     name: 'RecipeParser',
-    components: {IonFabList, IonFabButton, IonIcon, IonFab, List, FancyHeader, IonContent, IonPage},
+    components: {
+        RecipeEditor,
+        IonFabList,
+        IonFabButton,
+        IonIcon,
+        IonFab,
+        FancyHeader,
+        IonContent,
+        IonPage,
+        IonButton
+    },
     setup() {
         const router = useIonRouter()
         const recipeStore = useRecipeStore()
@@ -72,7 +90,11 @@ export default defineComponent({
                 reader.readAsText(file.value, "UTF-8")
                 reader.onload = (evt) => {
                     if (evt.target) {
-                        parsedRecipes.value = parseRecipes(evt.target.result as string, RecipeParser.Cookstr)
+                        parseRecipes(evt.target.result as string, {
+                            parser: RecipeParser.Cookstr,
+                            list: parsedRecipes,
+                            max: 500
+                        })
                     }
                 }
                 reader.onerror = (evt) => {
@@ -89,18 +111,32 @@ export default defineComponent({
             recipeStore.saveRecipes(parsedRecipes.value)
         }
 
+        const selectedRecipe = ref<Recipe | null>(null)
+        const showEditor = (id: string) => {
+            selectedRecipe.value = parsedRecipes.value.find(recipe => recipe.getId() === id) ?? null
+        }
+
         return {
             // JSON
             file, out,
             onFileChange,
             parsedRecipes,
-            // types
-            Recipe,
+            // editor
+            showEditor, selectedRecipe,
             // methods
             addRecipe, saveRecipes,
+            // types
+            Recipe,
             // icons
             chevronForwardCircle, addOutline, saveOutline,
         }
     }
 })
 </script>
+
+<style scoped>
+.recipe-button-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+</style>

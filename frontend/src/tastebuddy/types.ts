@@ -114,7 +114,7 @@ export class Item {
     public save(): this {
         logDebug("item.save", this.getId())
         const store = useRecipeStore()
-        store.saveItem(this)
+        store.saveItems([this])
         return this
     }
 
@@ -156,7 +156,7 @@ export class StepItem extends Item {
 
     constructor(item?: Item) {
         super(item)
-        this.quantity= 1
+        this.quantity = 1
         this.servingAmount = 1
         this.unit = 'pcs'
     }
@@ -170,7 +170,7 @@ export class StepItem extends Item {
      */
     public static fromJSON(json: StepItem): StepItem {
         const stepItem = new StepItem()
-        stepItem.quantity= json.quantity
+        stepItem.quantity = json.quantity
         stepItem.servingAmount = json.quantity
         stepItem.unit = json.unit
         const store = useRecipeStore()
@@ -232,7 +232,7 @@ export class Step {
         item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
         item.description = json.description
-        item.duration = Step.parseDuration(json.duration, item.getDescription())
+        item.duration = json.duration
         item.temperature = Step.parseTemperature(json.temperature, item.getDescription())
         return item
     }
@@ -250,35 +250,12 @@ export class Step {
         return step
     }
 
-    /**
-     * Get duration
-     */
-    public static parseDuration(duration?: number, description?: string): number {
-        let dur
-        if (duration && duration > 0) {
-            dur = duration
-        } else {
-            const duration = RegExp(/(\d+) (min|minutes|hour|hours)/).exec(description ?? '')
-            if (duration === null) {
-                dur = 0
-            } else {
-                let factor = 1
-                if (duration[2] === 'hour' || duration[2] === 'hours') {
-                    factor = 60
-                }
-                dur = parseInt(duration[1]) * factor
-            }
-        }
-        return dur
-    }
-
     public static parseTemperature(temperature?: number, description?: string): number {
         let temp
         if (temperature && temperature > 0) {
             temp = temperature
         } else {
             const temperature = RegExp(/(\d+)°([CF]?)/).exec(description ?? '')
-            console.log(temperature)
             const unit = temperature?.[2] ?? 'C'
             let unitFactor = 1
             if (unit === 'F') {
@@ -312,11 +289,10 @@ export class Step {
      */
     public printDescription(className: string): string {
         let description = this.getDescription()
-        this.getItems().forEach(item => {
+        this.getStepItems().forEach((item: StepItem) => {
             const itemName = item.getName()
-            const regex = new RegExp(itemName, 'ig')
-            console.log(description, regex, itemName)
-            description = description.replaceAll(regex, `<span class="${className}">${itemName}</span>`)
+            const regex = new RegExp(`\\s+${itemName}`, 'ig')
+            description = description.replace(regex, ` <span class="${className}">${itemName}</span>`)
         })
         return description
     }
@@ -325,7 +301,7 @@ export class Step {
      * Get all unique items in the step
      * @returns a list of all items in the step
      */
-    public getItems(): StepItem[] {
+    public getStepItems(): StepItem[] {
         return [...new Set(this.items)]
     }
 
@@ -336,7 +312,7 @@ export class Step {
      */
     public updateServings(servings = 1): this {
         this.items.forEach((stepItem: StepItem) => {
-            stepItem.servingAmount = stepItem.quantity* servings
+            stepItem.servingAmount = stepItem.quantity * servings
         })
         return this
     }
@@ -636,7 +612,7 @@ export class Recipe {
     computeItems() {
         // Iterate over all steps and all items to compute the list of items
         this.itemsById = {}
-        this.steps.forEach(step => step.getItems().forEach((item: StepItem) => {
+        this.steps.forEach(step => step.getStepItems().forEach((item: StepItem) => {
             this.itemsById[item.getId()] = item
         }))
         this.items = Object.values(this.itemsById)
@@ -738,7 +714,7 @@ export class Recipe {
      */
     public getPrice(): number {
         let price = 0
-        this.steps.forEach(step => step.getItems().forEach((item: StepItem) => {
+        this.steps.forEach(step => step.getStepItems().forEach((item: StepItem) => {
             price += item.getPrice() * item.servingAmount
         }))
         return Math.floor(price)

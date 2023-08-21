@@ -1,15 +1,20 @@
 import {useRecipeStore} from "@/storage";
 import {Item, Recipe, Step, StepItem} from "@/tastebuddy";
 import {closest, distance} from "fastest-levenshtein";
+import {Ref} from "vue";
 
 
-export function extractStepItemsFromDescription(description: string): StepItem[] {
+/**
+ * Parses a string into a list of step items.
+ * @param text
+ */
+export function extractStepItemsFromText(text: string): StepItem[] {
     const recipeStore = useRecipeStore()
     const items = recipeStore.getItemsAsList
     const itemsFromDescription: Set<StepItem> = new Set()
     items.forEach((item: Item) => {
         const itemName = item.getName().toLowerCase()
-        if (itemName !== '' && description.toLowerCase().includes(itemName)) {
+        if (itemName !== '' && text.toLowerCase().includes(itemName)) {
             itemsFromDescription.add(new StepItem(item))
         }
     })
@@ -17,10 +22,47 @@ export function extractStepItemsFromDescription(description: string): StepItem[]
 }
 
 /**
+ * Extracts the duration from a text in minutes.
+ * @param text
+ */
+export function extractDurationFromText(text: string): number {
+    let dur = 0
+    const durationRegex = RegExp(/\b(\d+)\s*((min(?:ute)?s?)|(h(?:ou)?rs?))\b/, 'gi')
+
+    // Find all durations in the text and sum them up
+    const durations = text.matchAll(durationRegex)
+    for (const duration of durations) {
+        let factor = 1
+        // only check the first character of the duration unit
+        if (duration[2].charAt(0) === 'h') {
+            factor = 60
+        }
+        dur += parseInt(duration[1]) * factor
+    }
+
+
+    return dur
+}
+
+/**
+ * Extracts the temperature from a text.
+ * @param text
+ */
+export function extractTemperatureFromText(text: string): number {
+    const temperature = RegExp(/(\d+)°([CF]?)/).exec(text ?? '')
+    const unit = temperature?.[2] ?? 'C'
+    let unitFactor = 1
+    if (unit === 'F') {
+        unitFactor = 1.8
+    }
+    return parseInt(temperature?.[1] ?? '0') * unitFactor
+}
+
+/**
  * Parses a string quantity into a number.
  * @param quantity
  */
-export function parseQuantity(quantity: string): number {
+function parseQuantity(quantity: string): number {
     const fractionalMap: { [fraction: string]: number } = {
         '½': 0.5,
         '⅓': 1 / 3,
@@ -51,13 +93,88 @@ export function parseQuantity(quantity: string): number {
     return 0;
 }
 
+/**
+ * Parses a string unit into a normalized unit.
+ * @param unit
+ * @param defaultUnit
+ */
+function normalizeUnit(unit?: string, defaultUnit = 'pcs'): string {
+    const unitMap: { [unit: string]: string } = {
+        "teaspoons": "tsp",
+        "tsps": "tsp",
+        "tablespoons": "tbsp",
+        "tbsps": "tbsp",
+        "fluid ounces": "fl oz",
+        "fl ozs": "fl oz",
+        "cups": "cup",
+        "pieces": "pcs",
+    };
+
+    return unitMap[(unit ?? '').toLowerCase()] || unit || defaultUnit;
+}
+
+/**
+ * Parses a string unit into a normalized unit.
+ * @param value
+ * @param normalizedUnit
+ */
+function convertUnits(value: number, normalizedUnit: string): { value: number, unit: string } {
+    const unitConversion: { [fromUnit: string]: { factor: number, unit: string } } = {
+        "tsp": {
+            "factor": 1 / 3,
+            "unit": "tbsp",
+        },
+        "tbsp": {
+            "factor": 3,
+            "unit": "tsp",
+        },
+        "fl oz": {
+            "factor": 6,
+            "unit": "tsp",
+        },
+        "oz": {
+            "factor": 28.3495,
+            "unit": "g",
+        },
+        "l": {
+            "factor": 1000,
+            "unit": "ml",
+        },
+        "cup": {
+            "factor": 236.588,
+            "unit": "ml",
+        },
+        "kg": {
+            "factor": 1000,
+            "unit": "g",
+        }
+    };
+
+    const conversionResult: { value: number, unit: string } = {
+        value: value,
+        unit: normalizedUnit,
+    }
+
+    // Convert unit if possible
+    const toUnit = unitConversion[normalizedUnit]
+    if (toUnit) {
+        conversionResult.value = toUnit.factor * value
+        conversionResult.unit = toUnit.unit
+    }
+
+    return conversionResult
+}
+
 function findMostSimilarItems(stepItemsFromRecipe: StepItem[]): StepItem[] {
     const recipeStore = useRecipeStore()
     const items = recipeStore.getItemsAsList
+    const itemsNames = items.map((item: Item) => item.getName())
     const maxDistance = 2
     stepItemsFromRecipe.forEach((stepItem: StepItem, index: number) => {
-        const closestItemName = closest(stepItem.getName(), items.map((item: Item) => item.getName()))
+        const closestItemName = closest(stepItem.getName(), itemsNames)
         if (distance(stepItem.getName(), closestItemName) <= maxDistance) {
+            const closestItem = items.find((item: Item) => item.getName() === closestItemName)
+            stepItemsFromRecipe[index]._id = closestItem?._id ?? ''
             stepItemsFromRecipe[index].setName(closestItemName)
         }
     })
@@ -85,7 +202,6 @@ type CookstrRecipe = {
     description: string;
     dietary_considerations: string;
     difficulty: null | string;
-    error: boolean;
     ingredients: string[];
     ingredients_detailed: {
         ingredients: string[];
@@ -114,19 +230,22 @@ type CookstrRecipe = {
 /**
  * Parses a JSON string into a list of recipes.
  * @param jsonString
- * @param parser
+ * @param options
  */
-export function parseRecipes(jsonString: string, parser: RecipeParser, max=500): Recipe[] {
-    const recipes = JSON.parse(jsonString)
+export function parseRecipes(jsonString: string, options: { parser: RecipeParser, max: number, list: Ref<Recipe[]> }) {
+    const recipes = JSON.parse(jsonString) as unknown[]
     let selectedParser: (recipe: unknown) => Recipe
 
     // eslint-disable-next-line sonarjs/no-small-switch
-    switch (parser) {
+    switch (options.parser) {
         case RecipeParser.Cookstr:
             selectedParser = parseCookstr as (recipe: unknown) => Recipe
     }
 
-    return recipes.slice(0, max).map((recipe: any) => selectedParser(recipe))
+    recipes.slice(0, options.max).forEach((recipe: any) => {
+        const parsedRecipe = selectedParser(recipe)
+        options.list.value.push(parsedRecipe)
+    })
 }
 
 /**
@@ -208,16 +327,16 @@ function parseCookstr(cookstrRecipe: CookstrRecipe): Recipe {
 
     // Props
     recipe.props.tags = [
-        ...(cookstrRecipe.course ?? '').split(',').map(tag => tag.trim()),
-        ...(cookstrRecipe.meal ?? '').split(',').map(tag => tag.trim().toLowerCase()),
-        ...(cookstrRecipe.taste_and_texture ?? '').split(',').map(tag => tag.trim().toLowerCase()),
-        cookstrRecipe.cooking_method
-    ]
+        ...(cookstrRecipe.course ?? '').split(','),
+        ...(cookstrRecipe.meal ?? '').split(','),
+        ...(cookstrRecipe.taste_and_texture ?? '').split(','),
+        ...(cookstrRecipe.cooking_method ?? '').split(','),
+    ].filter(tag => tag !== '').map(tag => tag.trim().toLowerCase())
     recipe.props.imgUrl = cookstrRecipe.photo_url
     recipe.props.createdAt = new Date(cookstrRecipe.date_modified)
 
     // Ingredients
-    const stepItemsFromIngredients = stepItemsFromIngredient(cookstrRecipe.ingredients)
+    const stepItemsFromIngredients = cookstrIngredientsToStepItems(cookstrRecipe.ingredients_detailed)
     const stepItemsFromInstructions = stepItemsFromInstruction(cookstrRecipe.instructions)
     let stepItemsFromIngredientsAndInstructions = [...stepItemsFromIngredients, ...stepItemsFromInstructions]
     stepItemsFromIngredientsAndInstructions = findMostSimilarItems(stepItemsFromIngredientsAndInstructions)
@@ -230,23 +349,39 @@ function parseCookstr(cookstrRecipe: CookstrRecipe): Recipe {
 /**
  * Parse a cookstr ingredient into a step item
  */
-function stepItemsFromIngredient(ingredients: string[]): StepItem[] {
+function cookstrIngredientsToStepItems(cookstrIngredients: { ingredients: string[], line: string }[]): StepItem[] {
     const stepItems: StepItem[] = []
-    for (const ingredient of ingredients) {
+    for (const ingredient of cookstrIngredients) {
         const stepItem = new StepItem()
-        const regex = /^(\d+(?:\.\d*)?)\s*(?:(tablespoons?|teaspoons?|ounces?|cups?)\s*)?(.+)/
-        const matches = ingredient.match(regex)
-        if (matches) {
-            const name = matches[3]
-            if (name !== '') {
-                const quantity = matches[1]
-                const unit = matches[2]
-                stepItem.quantity = parseQuantity(quantity)
-                stepItem.unit = unit
-                stepItem.setName(name)
-                stepItems.push(stepItem)
+
+        // Set the name based on the first ingredient
+        let itemName = ingredient.ingredients[0] ?? ''
+
+        const ingredientRegex = /^(\d(?:[/.]\d+)?|[½⅓¼⅕⅙⅛⅔¾⅖⅜⅗⅝⅞]|\s+)\s*(?:(t(?:a)?b(?:le)?sp(?:oon)?s?|t(?:ea)?s(?:poon)?s?|ounces?|cups?|tbsp|m(?:illi)?l(?:itre)?s?)\s*)?(.+)$/i
+        const matchesLine = ingredient.line.match(ingredientRegex)
+        console.log(matchesLine)
+        if (matchesLine) {
+            // Use the name from the line if the name from the ingredients is empty
+            if (itemName === '') {
+                itemName = matchesLine[3]
             }
+
+            if (itemName !== '') {
+                stepItem.setName(itemName)
+            } else {
+                continue
+            }
+
+            // Parse the quantity and unit
+            const quantity = parseQuantity(matchesLine[1])
+            const normalizedUnit = normalizeUnit(matchesLine[2])
+            const {value, unit} = convertUnits(quantity, normalizedUnit)
+            stepItem.quantity = value
+            stepItem.unit = unit
+
+            stepItems.push(stepItem)
         }
+
     }
 
     return stepItems
@@ -257,7 +392,7 @@ function stepItemsFromIngredient(ingredients: string[]): StepItem[] {
  * @param instruction
  */
 function stepItemsFromInstruction(instruction: string[]): StepItem[] {
-    return instruction.flatMap(extractStepItemsFromDescription)
+    return instruction.flatMap(extractStepItemsFromText)
 }
 
 /**
@@ -289,6 +424,9 @@ function parseCookstrInstruction(instruction: string, stepItems: StepItem[]): St
             items.add(stepItem)
         }
     })
+
+    step.duration = extractDurationFromText(instruction)
+    step.temperature = extractTemperatureFromText(instruction)
 
     step.items = [...items]
 

@@ -8,10 +8,10 @@
                 <IonChip>
                     {{ mutableItem.getId() }}
                 </IonChip>
-                <IonButton color="success" @click="saveItem()">
+                <IonButton color="success" fill="outline" @click="saveItem()">
                     <IonIcon :icon="save"/>
                 </IonButton>
-                <IonButton color="danger" fill="solid"
+                <IonButton color="danger" fill="outline"
                            @click="deleteItem()">
                     <IonIcon :icon="trash"/>
                 </IonButton>
@@ -42,7 +42,10 @@
 
         <IonCardContent>
             Used in {{ usedInRecipes.length }} recipes
-            <template v-if="usedInRecipes.length > 0">
+            <IonButton v-if="usedInRecipes.length > 0" size="small" fill="outline" @click="showUsedInRecipes = !showUsedInRecipes">
+                {{ showUsedInRecipes ? 'Hide' : 'Show' }} recipes
+            </IonButton>
+            <template v-if="usedInRecipes.length > 0 && showUsedInRecipes">
                 <IonList>
                     <template v-for="(recipe, index) in usedInRecipes" :key="index">
                         <router-link :to="recipe.getRoute()">
@@ -76,7 +79,7 @@ import {
 } from '@ionic/vue';
 import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
-import {addOutline, chevronForwardCircle, save, saveOutline, trash} from "ionicons/icons";
+import {save, trash} from "ionicons/icons";
 
 export default defineComponent({
     name: 'ItemEditor',
@@ -115,6 +118,7 @@ export default defineComponent({
             mutableItem.value = item.value
         })
 
+        const showUsedInRecipes: Ref<boolean> = ref(false)
         const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
             const recipesByItemIds = recipeStore.getRecipesByItemIds
             if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
@@ -132,7 +136,7 @@ export default defineComponent({
             trash, save,
             // items
             mutableItem, saveItem, deleteItem,
-            usedInRecipes,
+            usedInRecipes, showUsedInRecipes,
             // i18n
             supportedLanguages,
         }

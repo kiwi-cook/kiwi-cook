@@ -2,11 +2,12 @@
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
             <div class="content">
-                <FancyHeader :big-text="['Items', 'Editor']" />
+                <FancyHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
-                <IonSearchbar v-model="filterInput" :debounce="500"/>
-                <IonButton @click="removeUnusedItems()">Remove unused items</IonButton>
-                <IonButton @click="addItem()">Add Item</IonButton>
+                <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items" />
+                <IonButton fill="outline" color="danger" @click="removeUnusedItems()">Remove unused Items</IonButton>
+                <IonButton fill="outline" @click="formatItems()">Format Items</IonButton>
+                <IonButton fill="outline" @click="addItem()">Add Item</IonButton>
 
                 <List :filter="filterInput" :list="items">
                     <template #element="{element}">
@@ -39,7 +40,7 @@ import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPag
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
-import {Item, Recipe} from "@/tastebuddy";
+import {Item} from "@/tastebuddy";
 import List from "@/components/recipe/List.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
@@ -69,16 +70,21 @@ export default defineComponent({
                 }
             })
         }
-        const saveItems = () => {
+        const saveItems = () => recipeStore.saveItems()
+
+        const formatItems = () => {
             items.value.forEach((item: Item) => {
-                item.save();
+                // Fix name
+                let name = item.getName()
+                name = name[0].toUpperCase() + name.slice(1)
+                item.setName(name)
             })
         }
 
 
         return {
             filterInput, items,
-            removeUnusedItems, addItem, saveItems,
+            removeUnusedItems, addItem, saveItems, formatItems,
             // icons
             arrowBack, chevronForwardCircle, addOutline, saveOutline,
             // types

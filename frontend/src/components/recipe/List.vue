@@ -1,6 +1,6 @@
 <template>
     <div :class="['element-list-wrapper', {'horizontal': horizontal}]">
-        <ul v-if="loadedFilteredElements.length > 0"
+        <ul v-if="loadedFilteredElements.length > 0" :tabindex="0"
             :class="['element-list', {'horizontal': horizontal}, {'wrap': !noWrap}]">
             <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex"
                 :class="['element', {'horizontal': horizontal}, {'wrap': !noWrap}]">

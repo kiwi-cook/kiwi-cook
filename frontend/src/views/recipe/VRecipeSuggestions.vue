@@ -4,7 +4,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <FancyHeader :big-text="['Discover', 'new recipes']" small-text="Hello"/>
+                    <FancyHeader :big-text="['Discover', 'new recipes']"/>
 
                     <!-- Searchbar for ingredients and tools -->
                     <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
@@ -260,7 +260,7 @@ export default defineComponent({
         /* Suggested recipes */
         const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
             const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
-                .filter(() => Math.random() < 0.5).slice(0, 6)
+                .filter(() => Math.random() < 1 / (recipes.value.length * 0.15)).slice(0, 6)
             suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
             return suggestedRecipes
         })
