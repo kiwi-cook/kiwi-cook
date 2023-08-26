@@ -7,17 +7,17 @@
                     <FancyHeader :big-text="['Discover', 'new recipes']"/>
 
                     <!-- Searchbar for ingredients and tools -->
-                    <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
+                    <Searchbar v-model="filterInput" :elements="filteredItems" disable-list class="item-searchbar"
                                placeholder="What ingredients or recipes are you craving today?">
-                        <template #element="{element}">
-                            <template v-if="element instanceof Item">
-                                <ItemComponent :item="element as Item"
-                                               @click="includeItem((element as Item).getId())"/>
-                            </template>
-                            <template v-if="element instanceof Recipe">
-                                {{ (element as Recipe).getName() }}
-                            </template>
-                        </template>
+                               <!-- <template #element="{element}">
+                     <template v-if="element instanceof Item">
+                         <ItemComponent :item="element as Item"
+                                        @click="includeItem((element as Item).getId())"/>
+                     </template>
+                     <template v-if="element instanceof Recipe">
+                         {{ (element as Recipe).getName() }}
+                     </template>
+                 </template> -->
                     </Searchbar>
 
                     <section>
@@ -38,7 +38,8 @@
                                     <IonCard>
                                         <IonCardContent>
                                             <!-- Suggested and selected items -->
-                                            <List :list="[...selectedItems, ...itemSuggestions]" :load-all="true">
+                                            <List :list="[...selectedItems, ...itemSuggestions,...filteredItems]"
+                                                  :load-all="true">
                                                 <template #element="{ element }">
                                                     <ItemComponent
                                                         :disable-click="true"
@@ -269,14 +270,16 @@ export default defineComponent({
         const filteredItems = ref<Item[]>([])
         const filterInput = ref('')
         watch([filterInput, items], () => {
+            let _filteredItems: Item[] = []
             if (filterInput.value === '') {
-                filteredItems.value = []
+                _filteredItems = []
             } else {
-                filteredItems.value = (items.value ?? [])
+                _filteredItems = (items.value ?? [])
                     .filter((item: Item) => item.getName()
                         .toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
                     .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
             }
+            filteredItems.value = _filteredItems.slice(0, 5)
         }, {immediate: true})
 
         /* Selected items */
@@ -300,24 +303,10 @@ export default defineComponent({
 
         /* Items suggestions */
         const maxItemSuggestionsLength = 3
-        const itemSuggestions = computed(() => {
-            const itemsUsedInRecipes = (recipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
-            const favItems = (suggestedRecipes.value ?? []).flatMap((recipe: Recipe) => recipe.getItems())
-
-            const items: Item[] = [...itemsUsedInRecipes, ...favItems]
-            const itemIds: string[] = []
-            const itemSuggestions: Item[] = []
-            for (const itemSuggestion of items) {
-                if (!itemIds.includes(itemSuggestion.getId())
-                    && typeof itemQueries.value[itemSuggestion.getId()] === 'undefined'
-                    && itemIds.length < maxItemSuggestionsLength) {
-                    itemIds.push(itemSuggestion.getId())
-                    itemSuggestions.push(itemSuggestion)
-                }
-            }
-
-            return itemSuggestions
-        })
+        const itemSuggestions = computed(() => recipeStore.getItemSuggestions
+            .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
+            .slice(0, maxItemSuggestionsLength)
+        )
 
         /* City + Price */
         const city = ref('')

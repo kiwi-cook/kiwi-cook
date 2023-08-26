@@ -7,44 +7,16 @@
     </IonText>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {IonApp, IonRouterOutlet, IonText} from '@ionic/vue';
-import {defineComponent} from 'vue';
-import {useRecipeStore, useTasteBuddyStore} from './storage';
+import {useRecipeStore} from './storage';
+import {prefersDark, toggleDarkTheme} from "@/tastebuddy";
 
-export default defineComponent({
-    name: 'App',
-    components: {
-        IonApp, IonText,
-        IonRouterOutlet,
-    },
-    setup() {
-        const tasteBuddyStore = useTasteBuddyStore();
-        const recipeStore = useRecipeStore();
+const recipeStore = useRecipeStore();
 
-        // Initialize the recipe store
-        recipeStore.prepare()
+// Initialize the recipe store
+recipeStore.prepare()
 
-        // Use matchMedia to check the user preference
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-        // Listen for changes to the prefers-color-scheme media query
-        prefersDark.addEventListener('change', (e) => {
-            toggleDarkTheme(e.matches);
-        });
-
-        toggleDarkTheme(prefersDark.matches);
-
-        // Add or remove the "dark" class based on if the media query matches
-        function toggleDarkTheme(shouldAdd: boolean) {
-            document.body.classList.toggle('dark', shouldAdd);
-        }
-
-        // GeoLocation
-        tasteBuddyStore.getPosition()
-
-
-        return {}
-    }
-});
+// Theme
+toggleDarkTheme(prefersDark.matches);
 </script>

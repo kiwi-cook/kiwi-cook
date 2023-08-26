@@ -35,6 +35,11 @@ export default defineComponent({
             type: Array,
             required: true,
         },
+        disableList: {
+            type: Boolean,
+            required: false,
+            default: false
+        }
     },
     components: {
         IonSearchbar,
@@ -42,7 +47,7 @@ export default defineComponent({
     },
     emits: ['update:modelValue'],
     setup(props, {emit}) {
-        const {elements} = toRefs(props);
+        const {elements, disableList} = toRefs(props);
 
         /* Searchbar state */
         const searchActive = ref(false)
@@ -59,7 +64,7 @@ export default defineComponent({
 
         /* State whether list should be open */
         const listIsOpen = computed<boolean>(() => {
-            return elements.value.length !== 0 && (searchInput.value !== '' || searchActive.value)
+            return elements.value.length !== 0 && (searchInput.value !== '' || searchActive.value) && !disableList.value
         })
 
         watch(searchInput, (newFilterInput) => {

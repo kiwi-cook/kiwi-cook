@@ -1,12 +1,11 @@
 import {useRecipeStore} from "@/storage";
-import {logDebug, Market, Recipe, StepItem} from "@/tastebuddy";
+import {logDebug, Recipe, StepItem} from "@/tastebuddy";
 
 class RecipeSuggestion {
 
     recipe_id: string;
     recipe?: Recipe;
     recipe_price?: number;
-    market_for_price?: Market;
     missing_items?: {
         item: StepItem;
         price?: number;
@@ -15,7 +14,6 @@ class RecipeSuggestion {
     constructor() {
         this.recipe_id = ''
         this.recipe_price = 0
-        this.market_for_price = undefined
         this.missing_items = []
     }
 
@@ -129,7 +127,6 @@ function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
         const suggestion = new RecipeSuggestion()
         suggestion.recipe = recipe
         suggestion.recipe_price = recipe.getPrice()
-        suggestion.market_for_price = undefined
         suggestion.missing_items = []
         return suggestion
     })

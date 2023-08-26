@@ -53,7 +53,7 @@ export function extractTemperatureFromText(text: string): number {
     const unit = temperature?.[2] ?? 'C'
     let unitFactor = 1
     if (unit === 'F') {
-        unitFactor = 1.8
+        unitFactor = 0.55
     }
     return parseInt(temperature?.[1] ?? '0') * unitFactor
 }

@@ -1,5 +1,3 @@
-// Data types for the API
-
 import {logDebug, logError} from "@/tastebuddy";
 import {CanShareResult, Share} from "@capacitor/share";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
@@ -9,7 +7,7 @@ type LocalizedString = {
     [lang: string]: string
 }
 
-// types for recipe
+const tmpId = () => `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
 
 /**
  * Item of a recipe
@@ -27,7 +25,7 @@ export class Item {
         this._id = item?._id
         this._tmpId = item?._tmpId
         if (this._id === undefined) {
-            this._tmpId = item?._tmpId ?? `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+            this._tmpId = item?._tmpId ?? tmpId()
         }
         this.name = item?.name ?? {'en': 'New Item'}
         this.type = item?.type ?? 'ingredient'
@@ -72,11 +70,20 @@ export class Item {
         return item
     }
 
+    /**
+     * Get the localized name of the item
+     * @param lang
+     */
     public getName(lang?: string): string {
         const store = useTasteBuddyStore()
         return this.name[lang ?? store.language.lang]
     }
 
+    /**
+     * Set the localized name of the item
+     * @param name
+     * @param lang
+     */
     public setName(name: string, lang?: string): void {
         const store = useTasteBuddyStore()
         this.name[lang ?? store.language.lang] = name
@@ -111,17 +118,16 @@ export class Item {
      * Save the item to the database
      * @returns the item to allow chaining
      */
-    public save(): this {
+    public save() {
         logDebug("item.save", this.getId())
         const store = useRecipeStore()
         store.saveItems([this])
-        return this
     }
 
     /**
      * Delete the item from the database
      */
-    public delete(): void {
+    public delete() {
         logDebug('item.delete', this.getId())
         const store = useRecipeStore()
         store.deleteItem(this)
@@ -145,7 +151,7 @@ export class Item {
 
 /**
  * StepItem of a recipe
- * It is an item with an quantityand a unit
+ * It is an item with a quantity and a unit
  * It is used in a step
  * This is done to make the item reusable
  */
@@ -170,9 +176,13 @@ export class StepItem extends Item {
      */
     public static fromJSON(json: StepItem): StepItem {
         const stepItem = new StepItem()
-        stepItem.quantity = json.quantity
-        stepItem.servingAmount = json.quantity
+        stepItem.quantity = json.quantity ?? 1
+        stepItem.servingAmount = json.quantity ?? 1
         stepItem.unit = json.unit
+        stepItem._id = json._id
+        stepItem.name = json.name
+        stepItem.type = json.type
+        stepItem.imgUrl = json.imgUrl
         const store = useRecipeStore()
         const item = store.getItemsAsMap[json._id ?? '']
         if (typeof item !== 'undefined') {
@@ -180,9 +190,6 @@ export class StepItem extends Item {
             stepItem.name = item.name
             stepItem.type = item.type
             stepItem.imgUrl = item.imgUrl
-        } else {
-            stepItem.name = json.name
-            stepItem.type = json.type
         }
         return stepItem
     }
@@ -356,7 +363,7 @@ export class Recipe {
 
     constructor() {
         // create a temporary id to identify the recipe in the store before it is saved
-        this._tmpId = `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+        this._tmpId = tmpId()
         this.name = {
             en: 'New Recipe',
         }
@@ -721,35 +728,3 @@ export class Recipe {
     }
 }
 
-
-// types for discounts
-
-/**
- * A discount represents a discount on a product
- * It is a generic representation that is created by the backend based on the data from the different markets
- * The id is the id of the discount in the database
- */
-export type Discount = {
-    _id: string;
-    title: string;
-    price: string;
-    imageUrl: string;
-    validUntil: number;
-    internalMarketId: string;
-    marketName: string;
-    marketLocation: string;
-}
-
-/**
- * A market represents a market where a product is sold
- * It is a generic representation that is created by the backend based on the data from the different markets
- * The id is the id of the market in the database
- */
-export type Market = {
-    _id: string;
-    distributor: string;
-    distributorSpecificId: string;
-    name: string;
-    city: string;
-    location: string;
-}

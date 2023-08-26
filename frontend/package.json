@@ -25,6 +25,7 @@
     "core-js": "^3.31.1",
     "fastest-levenshtein": "^1.0.16",
     "ionicons": "^7.1.2",
+    "lz-string": "^1.5.0",
     "pinia": "^2.1.4",
     "register-service-worker": "^1.7.2",
     "vue": "^3.3.4",
