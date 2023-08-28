@@ -1,11 +1,11 @@
 :root {
-    --max-width: 1080px;
+    --max-width: 1280px;
 
     /* Margin */
     --margin-auto: 0 auto;
     --margin-page: 25px 15px;
     --margin-small: 5px;
-    --margin-medium: 10px;
+    --margin-medium: 16px;
     --margin: var(--margin-medium);
     --margin-large: 25px;
 

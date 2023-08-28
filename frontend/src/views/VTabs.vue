@@ -6,7 +6,7 @@
 
             <IonProgressBar v-show="loadingState" type="indeterminate"/>
             <IonTabBar slot="bottom">
-                <IonTabButton :disabled="loadingState" href="/recipe/suggestions" tab="recipe-suggestions">
+                <IonTabButton href="/recipe/suggestions" tab="recipe-suggestions">
                     <IonIcon :icon="search"/>
                     Explore
                 </IonTabButton>
@@ -16,12 +16,12 @@
                     Add Recipe
                 </IonTabButton> -->
 
-                <IonTabButton :disabled="loadingState" href="/recipe/of-the-day" tab="recipe-of-the-day">
+                <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
                     <IonIcon :icon="sparkles"/>
                     Recipe of the Day
                 </IonTabButton>
 
-                <IonTabButton :disabled="loadingState" href="/recipe/saved" tab="saved-recipes">
+                <IonTabButton href="/recipe/saved" tab="saved-recipes">
                     <IonIcon :icon="heart"/>
                     Favorites
                 </IonTabButton>
@@ -30,26 +30,12 @@
     </IonPage>
 </template>
 
-<script lang="ts">
-import {computed, defineComponent} from 'vue';
+<script setup lang="ts">
+import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
-import {create, heart, restaurant, search, sparkles} from 'ionicons/icons';
+import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 
-export default defineComponent({
-    name: 'TabsPage',
-    components: {IonTabs, IonTabBar, IonTabButton, IonIcon, IonPage, IonRouterOutlet, IonProgressBar},
-    setup() {
-
-        // Check if the recipe store is loading
-        const recipeStore = useRecipeStore()
-        const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)
-
-        return {
-            loadingState,
-            // icons
-            sparkles, search, heart, restaurant, create
-        }
-    }
-});
+const recipeStore = useRecipeStore()
+const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)
 </script>

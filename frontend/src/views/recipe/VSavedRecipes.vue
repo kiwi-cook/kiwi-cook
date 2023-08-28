@@ -1,5 +1,5 @@
 <template>
-    <IonPage id="recipe-list-page">
+    <IonPage>
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
@@ -25,46 +25,19 @@
     </IonPage>
 </template>
 
-<script lang="ts">
-import {computed, ComputedRef, defineComponent, ref} from 'vue';
-import {IonContent, IonPage, IonSearchbar, useIonRouter} from '@ionic/vue';
-import {addOutline, filter} from 'ionicons/icons';
-import {useRecipeStore, useTasteBuddyStore} from '@/storage';
-import {Recipe} from '@/tastebuddy/types';
+<script setup lang="ts">
+import {computed, ComputedRef, ref} from 'vue';
+import {IonContent, IonPage, IonSearchbar} from '@ionic/vue';
+import {useRecipeStore} from '@/storage';
+import {Recipe} from '@/tastebuddy';
 import List from "@/components/recipe/List.vue";
 import RecipePreview from "@/components/recipe/previews/RecipePreview.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import TasteBuddyLogo from "@/components/TasteBuddyLogo.vue";
 
-export default defineComponent({
-    name: 'RecipeSavedPage',
-    components: {
-        TasteBuddyLogo,
-        FancyHeader,
-        RecipePreview, List, IonPage, IonSearchbar, IonContent
-    },
-    setup() {
-        const filterInput = ref('')
 
-        const recipeStore = useRecipeStore()
-        const savedRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes)
+const filterInput = ref('')
 
-        const router = useIonRouter()
-        const tasteBuddyStore = useTasteBuddyStore()
-        const isDevMode = computed(() => tasteBuddyStore.isDevMode)
-        const addRecipe = () => {
-            if (isDevMode.value) {
-                const newRecipeId = Recipe.newRecipe().update()._tmpId
-                router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
-            }
-        }
-
-        return {
-            // recipe
-            savedRecipes, addOutline, addRecipe, isDevMode,
-            // filter
-            filterInput, filter
-        }
-    }
-});
+const recipeStore = useRecipeStore()
+const savedRecipes: ComputedRef<Recipe[]> = computed(() => recipeStore.getSavedRecipes)
 </script>

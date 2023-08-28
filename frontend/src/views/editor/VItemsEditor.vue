@@ -4,7 +4,7 @@
             <div class="content">
                 <FancyHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
-                <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items" />
+                <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
                 <IonButton fill="outline" color="danger" @click="removeUnusedItems()">Remove unused Items</IonButton>
                 <IonButton fill="outline" @click="formatItems()">Format Items</IonButton>
                 <IonButton fill="outline" @click="addItem()">Add Item</IonButton>
@@ -34,62 +34,39 @@
     </IonPage>
 </template>
 
-<script lang="ts">
-import {computed, ComputedRef, defineComponent, ref} from 'vue';
+<script setup lang="ts">
+import {computed, ComputedRef, ref} from 'vue';
 import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, IonSearchbar} from "@ionic/vue";
-import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from 'ionicons/icons';
+import {addOutline, chevronForwardCircle, saveOutline} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy";
 import List from "@/components/recipe/List.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
-export default defineComponent({
-    name: 'RecipeEditorPage',
-    components: {
-        IonFabList, IonFabButton, IonIcon, IonFab,
-        FancyHeader,
-        IonSearchbar,
-        List,
-        IonPage, IonContent, IonButton,
-        ItemEditor
-    },
-    setup() {
-        const recipeStore = useRecipeStore();
-        const items: ComputedRef<Item[]> = computed(() => recipeStore.getItemsAsList)
+const recipeStore = useRecipeStore();
+const items: ComputedRef<Item[]> = computed(() => recipeStore.getItemsAsList)
 
-        const filterInput = ref('')
+const filterInput = ref('')
 
-        const addItem = () => Item.newItem().update();
-        const removeUnusedItems = () => {
-            const items = recipeStore.getItemsAsList;
-            const recipesByItemIds = recipeStore.getRecipesByItemIds
-            items.forEach((item: Item) => {
-                if (!(item.getId() in recipesByItemIds)) {
-                    item.delete();
-                }
-            })
+const addItem = () => Item.newItem().update();
+const removeUnusedItems = () => {
+    const items = recipeStore.getItemsAsList;
+    const recipesByItemIds = recipeStore.getRecipesByItemIds
+    items.forEach((item: Item) => {
+        if (!(item.getId() in recipesByItemIds)) {
+            item.delete();
         }
-        const saveItems = () => recipeStore.saveItems()
+    })
+}
+const saveItems = () => recipeStore.saveItems()
 
-        const formatItems = () => {
-            items.value.forEach((item: Item) => {
-                // Fix name
-                let name = item.getName()
-                name = name[0].toUpperCase() + name.slice(1)
-                item.setName(name)
-            })
-        }
-
-
-        return {
-            filterInput, items,
-            removeUnusedItems, addItem, saveItems, formatItems,
-            // icons
-            arrowBack, chevronForwardCircle, addOutline, saveOutline,
-            // types
-            Item
-        }
-    }
-})
+const formatItems = () => {
+    items.value.forEach((item: Item) => {
+        // Fix name
+        let name = item.getName()
+        name = name[0].toUpperCase() + name.slice(1)
+        item.setName(name)
+    })
+}
 </script>

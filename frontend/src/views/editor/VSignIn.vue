@@ -12,21 +12,7 @@
     </IonPage>
 </template>
 
-<script lang="ts">
-import {defineComponent} from 'vue';
-import {IonContent, IonPage,} from '@ionic/vue';
-import {ellipsisHorizontal, ellipsisVertical} from "ionicons/icons";
+<script setup lang="ts">
+import {IonContent, IonPage} from '@ionic/vue';
 import SignIn from "@/components/user/SignInComponent.vue";
-
-export default defineComponent({
-    name: 'LoginPage',
-    components: {
-        SignIn, IonContent, IonPage
-    },
-    setup() {
-        return {
-            ellipsisHorizontal, ellipsisVertical
-        }
-    }
-});
 </script>

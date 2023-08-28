@@ -3,45 +3,33 @@
             src="./img/icon.png"/>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {IonImg} from '@ionic/vue'
 import {computed, PropType, toRefs} from "vue";
 
-export default {
-    name: 'TasteBuddyLogo',
-    props: {
-        size: {
-            type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>,
-            default: 'medium',
-            required: false
-        }
-    },
-    components: {
-        IonImg
-    },
-    setup(props: { size?: string }) {
-        const {size} = toRefs(props)
-
-        const pixelSize = computed(() => {
-            switch (size?.value ?? 'medium') {
-                case 'tiny':
-                    return '50px'
-                case 'small':
-                    return '100px'
-                case 'medium':
-                    return '200px'
-                case 'large':
-                    return '300px'
-                default:
-                    return size?.value ?? '200px'
-            }
-        })
-
-        return {
-            pixelSize,
-        }
+const props = defineProps({
+    size: {
+        type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>,
+        default: 'medium',
+        required: false
     }
-}
+})
+const {size} = toRefs(props)
+
+const pixelSize = computed(() => {
+    switch (size?.value ?? 'medium') {
+        case 'tiny':
+            return '50px'
+        case 'small':
+            return '100px'
+        case 'medium':
+            return '200px'
+        case 'large':
+            return '300px'
+        default:
+            return size?.value ?? '200px'
+    }
+})
 </script>
 
 <style>

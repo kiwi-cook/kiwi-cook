@@ -13,19 +13,18 @@
             </div>
             <div class="hero-bottom">
                 <div class="hero-buttons">
-                    <slot name="buttons">
-                        <IonButton v-if="likable" class="hero-button" color="primary" @click="recipe?.toggleLike()">
-                            <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
-                        </IonButton>
-                        <IonButton v-if="canShareRecipe" class="hero-button" color="primary"
-                                   @click="shareRecipe()">
-                            <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
-                        </IonButton>
-                        <IonButton v-if="isDevMode" class="hero-button" color="secondary"
-                                   @click="editRecipe()">
-                            <IonIcon :icon="create"/>
-                        </IonButton>
-                    </slot>
+                    <IonButton v-if="likable" class="hero-button" color="primary" size="small"
+                               @click="recipe?.toggleLike()">
+                        <IonIcon :icon="isLiked ?? false ? heart: heartOutline"/>
+                    </IonButton>
+                    <IonButton v-if="canShareRecipe" class="hero-button" color="primary"
+                               size="small" @click="shareRecipe()">
+                        <IonIcon slot="icon-only" :icon="shareOutline" aria-valuetext="Share Recipe"/>
+                    </IonButton>
+                    <IonButton v-if="isDevMode" class="hero-button" color="secondary"
+                               size="small" @click="editRecipe()">
+                        <IonIcon :icon="create"/>
+                    </IonButton>
                 </div>
                 <div class="hero-tags">
                     <div v-if="recipe?.getTags().length > 0" class="flex">
@@ -245,10 +244,6 @@ export default defineComponent({
     .hero-buttons {
         padding: 0 5px;
     }
-
-    .hero-button {
-        font-size: var(--font-size-small);
-    }
 }
 
 @media only screen and (max-width: 480px) {
@@ -285,14 +280,6 @@ export default defineComponent({
 
     .hero-buttons {
         padding: 0 5px;
-    }
-
-    /* shadow part of hero-button */
-    .hero-button::part(native) {
-        border-radius: var(--border-radius-round);
-        width: 30px;
-        height: 30px;
-        padding: 5px;
     }
 }
 </style>

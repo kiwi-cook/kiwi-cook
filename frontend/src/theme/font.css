@@ -48,6 +48,13 @@ h2 {
     font-weight: var(--font-weight-bold);
 }
 
+h2.subheader {
+    margin-top: 0;
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
+    color: var(--ion-color-medium);
+}
+
 h3 {
     font-size: var(--font-size-smaller);
 }

@@ -1,5 +1,4 @@
 <template>
-
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
             <div class="content">
@@ -53,8 +52,8 @@
 </template>
 
 
-<script lang="ts">
-import {defineComponent, ref} from "vue";
+<script setup lang="ts">
+import {ref} from "vue";
 import {logError, parseRecipes, Recipe, RecipeParser} from "@/tastebuddy";
 import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from "@ionic/vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
@@ -62,76 +61,44 @@ import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/storage";
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 
-export default defineComponent({
-    name: 'RecipeParser',
-    components: {
-        RecipeEditor,
-        IonFabList,
-        IonFabButton,
-        IonIcon,
-        IonFab,
-        FancyHeader,
-        IonContent,
-        IonPage,
-        IonButton
-    },
-    setup() {
-        const router = useIonRouter()
-        const recipeStore = useRecipeStore()
+const router = useIonRouter()
+const recipeStore = useRecipeStore()
 
-        const parsedRecipes = ref<Recipe[]>([])
-        const file = ref<File | null>(null)
-        const out = ref<string>("")
+const parsedRecipes = ref<Recipe[]>([])
+const file = ref<File | null>(null)
 
-        const onFileChange = (event: any) => {
-            file.value = event.target.files[0]
-            if (file.value) {
-                const reader = new FileReader()
-                reader.readAsText(file.value, "UTF-8")
-                reader.onload = (evt) => {
-                    if (evt.target) {
-                        parseRecipes(evt.target.result as string, {
-                            parser: RecipeParser.Cookstr,
-                            list: parsedRecipes,
-                            max: 500
-                        })
-                    }
-                }
-                reader.onerror = (evt) => {
-                    logError('parseRecipes', evt)
-                }
+const onFileChange = (event: any) => {
+    file.value = event.target.files[0]
+    if (file.value) {
+        const reader = new FileReader()
+        reader.readAsText(file.value, "UTF-8")
+        reader.onload = (evt) => {
+            if (evt.target) {
+                parseRecipes(evt.target.result as string, {
+                    parser: RecipeParser.Cookstr,
+                    list: parsedRecipes,
+                    max: 500
+                })
             }
         }
-
-        const addRecipe = () => {
-            const newRecipeId = Recipe.newRecipe().update()._tmpId
-            router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
-        }
-        const saveRecipes = () => {
-            recipeStore.saveRecipes(parsedRecipes.value)
-        }
-
-        const selectedRecipe = ref<Recipe | null>(null)
-        const showEditor = (id: string) => {
-            selectedRecipe.value = parsedRecipes.value.find(recipe => recipe.getId() === id) ?? null
-        }
-
-        return {
-            // JSON
-            file, out,
-            onFileChange,
-            parsedRecipes,
-            // editor
-            showEditor, selectedRecipe,
-            // methods
-            addRecipe, saveRecipes,
-            // types
-            Recipe,
-            // icons
-            chevronForwardCircle, addOutline, saveOutline,
+        reader.onerror = (evt) => {
+            logError('parseRecipes', evt)
         }
     }
-})
+}
+
+const addRecipe = () => {
+    const newRecipeId = Recipe.newRecipe().update()._tmpId
+    router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+}
+const saveRecipes = () => {
+    recipeStore.saveRecipes(parsedRecipes.value)
+}
+
+const selectedRecipe = ref<Recipe | null>(null)
+const showEditor = (id: string) => {
+    selectedRecipe.value = parsedRecipes.value.find(recipe => recipe.getId() === id) ?? null
+}
 </script>
 
 <style scoped>

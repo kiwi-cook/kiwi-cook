@@ -234,7 +234,7 @@
     </IonItem>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {extractStepItemsFromText, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
@@ -257,169 +257,124 @@ import {
     IonTextarea,
     useIonRouter
 } from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, PropType, ref, toRefs, watch} from 'vue';
 import {calendar, closeCircleOutline, create, save, time, trash} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
 import ItemList from "@/components/recipe/ItemList.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
 
-export default defineComponent({
-    name: 'RecipeEditor',
-    props: {
-        recipe: {
-            type: Object as PropType<Recipe>,
-            required: true,
-        },
+const props = defineProps({
+    recipe: {
+        type: Object as PropType<Recipe>,
+        required: true,
     },
-    components: {
-        ItemList,
-        IonGrid,
-        IonRow,
-        IonCol,
-        IonIcon,
-        IonAvatar,
-        IonCard,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardContent,
-        IonButton,
-        IonInput,
-        IonTextarea,
-        IonItem,
-        IonLabel,
-        IonSelect,
-        IonSelectOption,
-        IonChip,
-        DropDownSearch,
-        ItemComponent
-    },
-    setup(props) {
-        const {recipe} = toRefs(props)
+});
+const {recipe} = toRefs(props)
 
-        const router = useIonRouter();
-        const recipeStore = useRecipeStore();
+const router = useIonRouter();
+const recipeStore = useRecipeStore();
 
-        const items = computed<Item[]>(() => recipeStore.getItemsAsList);
+const items = computed<Item[]>(() => recipeStore.getItemsAsList);
 
-        const mutableRecipe = ref<Recipe>(recipe.value)
-        // update recipe and steps when prop changes
-        watch(recipe, (newRecipe: Recipe) => {
-            mutableRecipe.value = newRecipe
-        }, {immediate: true})
+const mutableRecipe = ref<Recipe>(recipe.value)
+// update recipe and steps when prop changes
+watch(recipe, (newRecipe: Recipe) => {
+    mutableRecipe.value = newRecipe
+}, {immediate: true})
 
-        /**
-         * Save recipe to the Backend API
-         */
-        const saveRecipe = () => mutableRecipe.value?.save()
+/**
+ * Save recipe to the Backend API
+ */
+const saveRecipe = () => mutableRecipe.value?.save()
 
-        /**
-         * Delete recipe from the Backend API
-         * Redirect to SavedRecipes
-         */
-        const deleteRecipe = () => mutableRecipe.value?.delete().then(() => {
-            router.push({name: 'SavedRecipes'})
-        })
-
-        /**
-         * Add a step to the recipe
-         * @param stepIndex index of the step to add after
-         */
-        const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, stepIndex)
-
-
-        /**
-         * Remove a step from the recipe
-         * @param stepIndex index of the step to remove
-         */
-        const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIndex)
-
-        /**
-         * Add an item to a step
-         * @param stepIndex index of the step to add the item to
-         * @param itemIndex index of the item to add after
-         * @param itemName name of the item to add
-         */
-        const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe
-            .value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update()
-
-        /**
-         * Select an item in a step and update it
-         * @param stepIndex index of the step to select the item in
-         * @param itemIndex index of the item to select
-         * @param item item to update
-         */
-        const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe
-            .value?.steps[stepIndex].items[itemIndex].updateItem(item)
-
-
-        /**
-         * Remove an item from a step
-         * @param stepIndex index of the step to remove the item from
-         * @param itemIndex index of the item to remove
-         */
-        const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
-            .value?.steps[stepIndex].items.splice(itemIndex, 1);
-
-        /**
-         * Edit the item
-         * @param stepIndex index of the step to edit the item from
-         * @param itemIndex index of the item to edit
-         */
-        const editItem = (stepIndex: number, itemIndex: number) => router.push({
-            name: 'ItemEditor',
-            params: {id: mutableRecipe.value?.steps[stepIndex].items[itemIndex]}
-        })
-
-        /**
-         * Get a map of missing items for each step
-         */
-        const missingItems = computed<{ [stepIndex: number]: Item[] }>(() => {
-            const missingItems: { [stepIndex: number]: Item[] } = {}
-            const steps = recipe.value.steps
-            steps.forEach((step: Step, stepIndex: number) => {
-                const stepItems = step.getStepItems()
-                // return only items that aren't in the step
-                missingItems[stepIndex] = extractStepItemsFromText(step.getDescription())
-                    .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.getName() == stepItem.getName()))
-            })
-            return missingItems
-        })
-
-        /**
-         * Add missing item to recipe
-         * @param stepIndex
-         * @param itemId
-         */
-        const addMissingItem = (stepIndex: number, itemId: string) => {
-            const item = recipeStore.getItemsAsMap[itemId]
-            console.log(item)
-            mutableRecipe.value?.addItem(stepIndex, undefined, item)
-        }
-
-        /**
-         * Get all tags from the store
-         */
-        const allTags: ComputedRef<string[]> = computed(() => recipeStore.getTags);
-
-        return {
-            // recipe
-            mutableRecipe, saveRecipe, deleteRecipe,
-            // steps
-            addStep, removeStep,
-            // items
-            items, addItem, editItem, selectItem, removeItem,
-            missingItems, addMissingItem,
-            // tags
-            allTags,
-            // icons
-            closeCircleOutline, trash, create, save, time, calendar,
-            // utility
-            formatDate,
-            // types
-            Item
-        };
-    },
+/**
+ * Delete recipe from the Backend API
+ * Redirect to SavedRecipes
+ */
+const deleteRecipe = () => mutableRecipe.value?.delete().then(() => {
+    router.push({name: 'SavedRecipes'})
 })
+
+/**
+ * Add a step to the recipe
+ * @param stepIndex index of the step to add after
+ */
+const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, stepIndex)
+
+
+/**
+ * Remove a step from the recipe
+ * @param stepIndex index of the step to remove
+ */
+const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIndex)
+
+/**
+ * Add an item to a step
+ * @param stepIndex index of the step to add the item to
+ * @param itemIndex index of the item to add after
+ * @param itemName name of the item to add
+ */
+const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe
+    .value?.addItem(stepIndex, itemIndex, Item.newItemFromName(itemName)).item.update()
+
+/**
+ * Select an item in a step and update it
+ * @param stepIndex index of the step to select the item in
+ * @param itemIndex index of the item to select
+ * @param item item to update
+ */
+const selectItem = (stepIndex: number, itemIndex: number, item: Item) => mutableRecipe
+    .value?.steps[stepIndex].items[itemIndex].updateItem(item)
+
+
+/**
+ * Remove an item from a step
+ * @param stepIndex index of the step to remove the item from
+ * @param itemIndex index of the item to remove
+ */
+const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
+    .value?.steps[stepIndex].items.splice(itemIndex, 1);
+
+/**
+ * Edit the item
+ * @param stepIndex index of the step to edit the item from
+ * @param itemIndex index of the item to edit
+ */
+const editItem = (stepIndex: number, itemIndex: number) => router.push({
+    name: 'ItemEditor',
+    params: {id: mutableRecipe.value?.steps[stepIndex].items[itemIndex]}
+})
+
+/**
+ * Get a map of missing items for each step
+ */
+const missingItems = computed<{ [stepIndex: number]: Item[] }>(() => {
+    const missingItems: { [stepIndex: number]: Item[] } = {}
+    const steps = recipe.value.steps
+    steps.forEach((step: Step, stepIndex: number) => {
+        const stepItems = step.getStepItems()
+        // return only items that aren't in the step
+        missingItems[stepIndex] = extractStepItemsFromText(step.getDescription())
+            .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.getName() == stepItem.getName()))
+    })
+    return missingItems
+})
+
+/**
+ * Add missing item to recipe
+ * @param stepIndex
+ * @param itemId
+ */
+const addMissingItem = (stepIndex: number, itemId: string) => {
+    const item = recipeStore.getItemsAsMap[itemId]
+    console.log(item)
+    mutableRecipe.value?.addItem(stepIndex, undefined, item)
+}
+
+/**
+ * Get all tags from the store
+ */
+const allTags: ComputedRef<string[]> = computed(() => recipeStore.getTags);
 </script>
 
 <style scoped>
@@ -469,9 +424,6 @@ ion-avatar.recipe-preview-img {
     padding: var(--padding);
     border-radius: var(--border-radius);
     border: var(--border);
-}
-
-ion-item.item-editor::part(native) {
 }
 
 @media screen and (max-width: 600px) {

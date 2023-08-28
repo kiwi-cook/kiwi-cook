@@ -1,10 +1,17 @@
 <template>
     <div class="recipe-wrapper">
-        <div class="recipe-hero-wrapper">
-            <RecipeHero :no-description="true" :recipe="recipe" :routable="false"/>
+        <div class="recipe-header">
+            <div class="recipe-title">
+                <h1>{{ recipe?.getName() }}</h1>
+                <h2 class="subheader">By {{ recipe?.getAuthors() }}</h2>
+            </div>
+            <div class="recipe-image-wrapper">
+                <IonImg class="recipe-image" :src="recipe.props.imgUrl" alt="Header Image"/>
+            </div>
         </div>
 
-        <IonAccordionGroup :multiple="true" :value="['description', 'items', 'steps']" expand="inset">
+        <IonAccordionGroup :multiple="true" :value="['description', 'items', 'steps']" expand="inset"
+                           class="recipe-categories">
             <IonAccordion value="description">
                 <IonItem slot="header">
                     <h2>Description</h2>
@@ -61,101 +68,75 @@
 
         <IonItem lines="none">
             <IonNote>
-                <p v-html="source" />
+                <p v-html="source"/>
             </IonNote>
         </IonItem>
     </div>
 </template>
 
-<script lang="ts">
-import {computed, ComputedRef, defineComponent, PropType, ref, toRefs, watch} from 'vue';
+<script setup lang="ts">
+import {computed, ComputedRef, PropType, ref, toRefs, watch} from 'vue';
 import {
     IonAccordion,
     IonAccordionGroup,
     IonCard,
     IonCardContent,
+    IonImg,
     IonInput,
     IonItem,
     IonNote,
     IonText
 } from '@ionic/vue';
-import {flagOutline, heart, heartOutline} from 'ionicons/icons';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
-import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import RecipeStep from "@/components/recipe/RecipeStep.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
-export default defineComponent({
-    title: 'Recipe',
-    props: {
-        recipe: {
-            type: Object as PropType<Recipe>,
-            required: true,
-        },
+const props = defineProps({
+    recipe: {
+        type: Object as PropType<Recipe>,
+        required: true,
     },
-    components: {
-        TwoColumnLayout,
-        ItemList,
-        RecipeHero,
-        RecipeStep,
-        IonItem,
-        IonText,
-        IonCard,
-        IonCardContent,
-        IonInput,
-        IonNote,
-        IonAccordionGroup, IonAccordion
-    },
-    setup(props: any) {
-        const {recipe} = toRefs(props);
+});
+const {recipe} = toRefs(props);
 
-        const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
-        const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
-        const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
-        const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
+const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
+const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
+const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
+const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
-        const source = computed(() => {
-            const authors = recipe.value?.getAuthors()
-            const source = recipe.value?.source?.url
-            const sourceTag = source ? `<a href="${source}" target="_blank">${source}</a>` : ''
+const source = computed(() => {
+    const authors = recipe.value?.getAuthors()
+    const source = recipe.value?.source?.url
+    const sourceTag = source ? `<a href="${source}" target="_blank">${source}</a>` : ''
 
-            if (authors !== '' && source !== '') {
-                return `Recipe by ${authors} on ${sourceTag}`
-            } else if (source === '') {
-                return `Recipe by ${authors}`
-            } else if (authors === '') {
-                return `Recipe on ${sourceTag}`
-            } else {
-                return ''
-            }
-        })
+    if (authors !== '' && source !== '') {
+        return `Recipe by ${authors} on ${sourceTag}`
+    } else if (source === '') {
+        return `Recipe by ${authors}`
+    } else if (authors === '') {
+        return `Recipe on ${sourceTag}`
+    } else {
+        return ''
+    }
+})
 
-        const servings = ref(1)
-        watch(servings, (newServings, oldServings) => {
-            if (newServings !== oldServings) {
-                recipe.value?.updateServings(newServings);
-            }
-        });
-
-        return {
-            // recipe
-            servings, source,
-            // steps
-            steps,
-            // items
-            itemsFromRecipe, amountIngredients, amountTools,
-            // icons
-            heart, heartOutline, flagOutline,
-        };
-    },
+const servings = ref(1)
+watch(servings, (newServings, oldServings) => {
+    if (newServings !== oldServings) {
+        recipe.value?.updateServings(newServings);
+    }
 });
 </script>
 
 <style scoped>
 .recipe-wrapper {
     width: 100%;
-    margin: var(--margin);
+}
+
+.recipe-categories {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .recipe-description {
@@ -166,5 +147,46 @@ export default defineComponent({
 
 .servings-counter {
     max-width: 150px;
+}
+
+.recipe-header {
+    display: flex;
+    align-items: center;
+}
+
+.recipe-image-wrapper {
+    flex: 1;
+}
+
+.recipe-image::part(image) {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+}
+
+.recipe-title {
+    flex: 2;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .recipe-header {
+        flex-direction: column;
+        display: flex;
+        align-items: flex-start;
+    }
+
+}
+
+@media (min-width: 768px) {
+    .recipe-image-wrapper {
+        display: block;
+    }
+
+    .recipe-title {
+        margin-right: 20px;
+    }
 }
 </style>

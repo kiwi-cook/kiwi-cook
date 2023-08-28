@@ -135,6 +135,11 @@ ion-item.item::part(native) {
     text-decoration-color: var(--ion-color-danger);
 }
 
+.item-included {
+    color: var(--ion-color-success);
+    margin-left: 0.5rem;
+}
+
 .item-start, .item-end {
     display: flex;
 }
