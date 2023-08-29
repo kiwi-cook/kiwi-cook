@@ -1,24 +1,18 @@
 <template>
     <IonPage id="recipe-list-page">
-
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
                     <FancyHeader :big-text="['Discover', 'new recipes']"/>
 
-                    <!-- Searchbar for ingredients and tools -->
-                    <Searchbar v-model="filterInput" :elements="filteredItems" class="item-searchbar"
-                               placeholder="What ingredients or recipes are you craving today?">
-                        <template #element="{element}">
-                            <template v-if="element instanceof Item">
-                                <ItemComponent :item="element as Item"
-                                               @click="includeItem((element as Item).getId())"/>
-                            </template>
-                            <template v-if="element instanceof Recipe">
-                                {{ (element as Recipe).getName() }}
-                            </template>
-                        </template>
-                    </Searchbar>
+                    <!-- Searchbar for ingredients, tools and recipes -->
+                    <Searchbar v-model="filterInput"
+                               class="searchbar"
+                               :elements="[...filteredTags, ...filteredItems, ...filteredRecipes]"
+                               placeholder="What ingredients or recipes are you craving today?"
+                               @select-item="includeItem($event)"
+                               @select-recipe="routeRecipe($event)"
+                               @select-tag="includeTag($event)"/>
 
                     <section>
                         <h3>
@@ -27,8 +21,8 @@
                         <h4 class="subheader">
                             Filter by ingredients, cooking time, price and more.
                         </h4>
-                        <IonAccordionGroup :multiple="true" :value="['items']">
-                            <IonAccordion value="items" class="suggestion-filter">
+                        <IonAccordionGroup :multiple="true" :value="[...searchFilters]">
+                            <IonAccordion value="items" class="search-filter">
                                 <IonItem slot="header">
                                     <IonLabel>
                                         What ingredients do you have?
@@ -51,14 +45,14 @@
                                                                     :color="itemQueries[(element as Item).getId()] ? 'success' : 'light'"
                                                                     aria-description="Include item"
                                                                     class="item-button"
-                                                                    @click="includeItem((element as Item).getId())">
+                                                                    @click="includeItem(element)">
                                                                     <IonIcon :icon="add"/>
                                                                 </IonButton>
                                                                 <IonButton
                                                                     :color="itemQueries[(element as Item).getId()] === false ? 'danger' : 'light'"
                                                                     aria-description="Exclude item"
                                                                     class="item-button"
-                                                                    @click="excludeItem((element as Item).getId())">
+                                                                    @click="excludeItem(element)">
                                                                     <IonIcon :icon="remove"/>
                                                                 </IonButton>
                                                                 <IonButton
@@ -66,9 +60,8 @@
                                                                     aria-description="Remove item"
                                                                     class="item-button"
                                                                     color="light"
-                                                                    @click="removeItem((element as Item).getId())">
-                                                                    <IonIcon :icon="trash"
-                                                                             @click="removeItem((element as Item).getId())"/>
+                                                                    @click="removeItem(element)">
+                                                                    <IonIcon :icon="close"/>
                                                                 </IonButton>
                                                             </div>
                                                         </template>
@@ -143,6 +136,34 @@
                                     </IonCard>
                                 </div>
                             </IonAccordion>
+
+                            <!-- Tags -->
+                            <IonAccordion class="suggestion-filter" value="tag">
+                                <IonItem slot="header">
+                                    <IonLabel>
+                                        What are you craving?
+                                    </IonLabel>
+                                </IonItem>
+                                <div slot="content" class="ion-padding">
+                                    <IonCard>
+                                        <IonCardContent>
+                                            <IonChip v-for="(tag, tagIndex) in suggestedTags"
+                                                     :key="`suggested-tag-${tagIndex}`"
+                                                     class="tag" color="success">
+                                                <IonLabel>{{ tag }}</IonLabel>
+                                                <IonIcon :icon="add" @click="includeTag(tag)"/>
+                                            </IonChip>
+                                            <IonChip v-for="(tag, tagIndex) in selectedTags"
+                                                     :key="`selected-tag-${tagIndex}`"
+                                                     class="tag">
+                                                <IonLabel>{{ tag }}</IonLabel>
+                                                <IonIcon :icon="closeCircleOutline" color="danger"
+                                                         @click="(selectedTags ?? []).splice(tagIndex, 1)"/>
+                                            </IonChip>
+                                        </IonCardContent>
+                                    </IonCard>
+                                </div>
+                            </IonAccordion>
                         </IonAccordionGroup>
                     </section>
 
@@ -168,16 +189,17 @@
                         </section>
                     </template>
 
-                    <!-- Recipe suggestions -->
-                    <template v-if="recipeSuggestions.length > 0 && submitted">
+                    <!-- Searched recipes -->
+                    <a id="recipe-search" ref="recipeSearchAnchor"/>
+                    <template v-if="searchedRecipes.length > 0 && submitted">
                         <section>
                             <h3>
-                                Found {{ recipeSuggestions.length }} recipes
+                                Found {{ searchedRecipes.length }} recipes
                             </h3>
                             <h4 class="subheader">
                                 These recipes match your search
                             </h4>
-                            <List :list="recipeSuggestions">
+                            <List :list="searchedRecipes">
                                 <template #element="{ element }">
                                     <RecipeSuggestionPreview :recipe-suggestion="element as RecipeSuggestion"/>
                                 </template>
@@ -191,8 +213,8 @@
                     </template>
 
                     <!-- Submit button -->
-                    <div v-if="!submitDisabled" class="search-button-wrapper">
-                        <IonButton :color="submitColor" :disabled="submitDisabled" class="search-button"
+                    <div class="search-button-wrapper">
+                        <IonButton :color="submitColor" class="search-button"
                                    type="submit" @click="submit()">
                             {{ submitButton }}
                             <IonIcon v-if="!submitted" :icon="search" class="search-button-icon"/>
@@ -219,37 +241,55 @@ import {
     IonLabel,
     IonPage,
     IonRange,
+    useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/storage';
 import {Item, Recipe, RecipeSuggestion, SearchQueryBuilder, suggestRecipes} from '@/tastebuddy';
 import List from "@/components/recipe/List.vue";
 import RecipeSuggestionPreview from "@/components/recipe/previews/RecipeSuggestionPreview.vue";
-import Searchbar from "@/components/utility/Searchbar.vue";
+import Searchbar from "@/components/recipe/Searchbar.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/components/recipe/previews/MiniRecipePreview.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
-import {add, remove, search, trash} from "ionicons/icons";
+import {add, close, closeCircleOutline, remove, search} from "ionicons/icons";
 
 const recipeStore = useRecipeStore()
+const router = useIonRouter()
 
 const itemsById = computed(() => recipeStore.getItemsAsMap)
 const items: ComputedRef<Item[]> = computed(() => Object.values(itemsById.value ?? {}))
 const recipes = computed(() => recipeStore.getRecipesAsList)
+const tags = computed(() => recipeStore.getTags)
 const savedRecipes = computed(() => recipeStore.getSavedRecipes)
 
-/* Suggested recipes */
-const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
-    const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
-        .filter(() => Math.random() < 1 / (recipes.value.length * 0.15)).slice(0, 6)
-    suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
-    return suggestedRecipes
-})
+/* Filtered tags, recipes & items */
+const filterInput = ref<string>('')
+const searchFilters = ref<Set<string>>(new Set(['items']))
 
-/* Filtered items */
+// Tags
+const filteredTags = ref<string[]>([])
+watch([filterInput, tags], () => {
+    const _filteredTags: string[] = filterInput.value === '' ? [] : (tags.value ?? [])
+        .filter((tag: string) => tag.toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
+    filteredTags.value = _filteredTags.slice(0, 5)
+}, {immediate: true})
+
+// Recipes
+const filteredRecipes = ref<Recipe[]>([])
+watch([filterInput, recipes], () => {
+    const _filteredRecipes = filterInput.value === '' ? [] : (recipes.value ?? [])
+        .filter((recipe: Recipe) => recipe.getName()
+            .toLowerCase().includes((filterInput.value ?? '').toLowerCase()));
+    filteredRecipes.value = _filteredRecipes.slice(0, 3)
+}, {immediate: true})
+const routeRecipe = (recipe?: Recipe) => {
+    router.push({name: 'Recipe', params: {id: recipe?.getId() ?? ''}})
+}
+
+// Items
 const filteredItems = ref<Item[]>([])
-const filterInput = ref('')
 watch([filterInput, items], () => {
-    let _filteredItems: Item[] = []
+    let _filteredItems: Item[]
     if (filterInput.value === '') {
         _filteredItems = []
     } else {
@@ -261,69 +301,91 @@ watch([filterInput, items], () => {
     filteredItems.value = _filteredItems.slice(0, 5)
 }, {immediate: true})
 
-/* Selected items */
 const itemQueries = ref<{ [id: string]: boolean }>({})
 const selectedItems = computed<Item[]>(() => Object.keys(itemQueries.value)
     .map((id: string) => itemsById.value[id]))
-const includeItem = (id: string) => {
-    itemQueries.value[id] = true
+const includeItem = (item?: Item) => {
+    itemQueries.value[item?.getId() ?? ''] = true
+    searchFilters.value.add('items')
 }
-const excludeItem = (id: string) => {
-    itemQueries.value[id] = false
+const excludeItem = (item?: Item) => {
+    itemQueries.value[item?.getId() ?? ''] = false
 }
-const removeItem = (id: string) => {
-    delete itemQueries.value[id]
+const removeItem = (item?: Item) => {
+    delete itemQueries.value[item?.getId() ?? '']
 }
 
-/* Items suggestions */
+// Item suggestions
 const maxItemSuggestionsLength = 3
 const itemSuggestions = computed(() => recipeStore.getItemSuggestions
     .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
     .slice(0, maxItemSuggestionsLength)
 )
 
-/* City + Price */
+// Tags
+const selectedTags = ref<string[]>([])
+const suggestedTags = computed(() => recipeStore.getTags
+    .filter((tag: string) => !selectedTags.value.includes(tag))
+    .slice(0, 3)
+)
+const includeTag = (tag: string) => {
+    selectedTags.value.push(tag)
+    searchFilters.value.add('tag')
+}
+
+// City
 const city = ref('')
 const prices = [2, 3, 5, 10]
 const maxPrice = ref<number | undefined>(undefined)
 
-/* Max cooking time */
+// Cooking time
 const cookingTimes = [5, 10, 20, 45]
 const maxCookingTime = ref<number | undefined>(undefined)
 
-/* Recipes suggestions */
-const recipeSuggestions: Ref<RecipeSuggestion[]> = ref([])
+// Recipe suggestions
+const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
+    const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
+        .filter(() => Math.random() < 1 / (recipes.value.length * 0.15)).slice(0, 6)
+    suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
+    return suggestedRecipes
+})
+
+/* Recipe search */
+const searchedRecipes: Ref<RecipeSuggestion[]> = ref([])
 const suggest = () => {
     const searchQueryBuilder = new SearchQueryBuilder()
     searchQueryBuilder.setCity(city.value)
     searchQueryBuilder.setDuration(maxCookingTime.value)
     searchQueryBuilder.setItemIds(itemQueries.value)
     searchQueryBuilder.setPrice(maxPrice.value)
+    searchQueryBuilder.setTags(selectedTags.value)
     const query = searchQueryBuilder.build()
-    recipeSuggestions.value = suggestRecipes(query)
+    searchedRecipes.value = suggestRecipes(query)
 }
 
 /* Submit button */
+const recipeSearchAnchor = ref<HTMLAnchorElement | null>(null)
 const submitted = ref(false)
 const submit = () => {
-    if (recipeSuggestions.value.length === 0) {
+    if (searchedRecipes.value.length === 0) {
         // suggest recipes
         submitted.value = true
         suggest()
+        setTimeout(() => {
+            recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: "start"})
+        }, 100)
     } else {
         // reset
         submitted.value = false
-        recipeSuggestions.value = []
+        searchedRecipes.value = []
     }
 }
-const submitButton = computed<string>(() => recipeSuggestions.value.length === 0 ? 'Suggest Recipes' : 'Reset Suggestions');
-const submitColor = computed<string>(() => recipeSuggestions.value.length === 0 ? 'success' : 'danger');
-const submitDisabled = computed<boolean>(() => recipeSuggestions.value.length === 0
-    && selectedItems.value.length === 0)
+const submitButton = computed<string>(() => searchedRecipes.value.length === 0 ? 'Suggest Recipes' : 'Reset Suggestions');
+const submitColor = computed<string>(() => searchedRecipes.value.length === 0 ? 'success' : 'danger');
 </script>
 
 <style scoped>
-.item-searchbar {
+.searchbar {
     margin-bottom: 1rem;
 }
 
@@ -372,6 +434,10 @@ section {
 
 .cooking-time {
     cursor: pointer;
+}
+
+#recipe-search {
+    scroll-margin-top: 500px;
 }
 
 .search-button-wrapper {

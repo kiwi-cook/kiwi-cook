@@ -127,8 +127,8 @@ export default defineComponent({
 
 .element-list-wrapper.horizontal {
     overflow-x: scroll;
+    overflow-y: visible;
     width: 100%;
-    margin-left: -1rem;
 }
 
 ul.element-list {
@@ -143,8 +143,6 @@ ul.element-list.horizontal {
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: flex-start;
-    /* works together with margin-left: -1rem of .element-list-wrapper.horizontal */
-    margin: 0 0 0 1rem;
 }
 
 ul.element-list.horizontal.wrap {

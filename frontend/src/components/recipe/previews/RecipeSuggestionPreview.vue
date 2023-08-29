@@ -99,7 +99,6 @@ export default defineComponent({
 .recipe-preview {
     border: var(--border);
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
     cursor: pointer;
 
     /* Layout */
@@ -162,7 +161,7 @@ export default defineComponent({
     height: 250px; /* Same value as width */
     overflow: hidden;
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
+    box-shadow: var(--box-shadow-strong);
 }
 
 @media (width < 768px) {

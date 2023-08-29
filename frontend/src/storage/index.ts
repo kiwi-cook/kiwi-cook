@@ -25,7 +25,7 @@ const MAX_CACHE_AGE = 1000 * 60 * 60 * 24
  * @param value
  */
 async function setCachedItem<T>(key: string, value: T) {
-    console.log('setCachedItem', key, value)
+    logDebug('setCachedItem', key, value)
     if (value === null || typeof value === 'undefined') {
         return value
     }
@@ -299,9 +299,9 @@ export const useRecipeStore = defineStore('recipes', {
             return [...itemIds].map((itemId: string) => this.items[itemId])
         },
         getTags(): string[] {
-            return this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
+            return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
-            }, [])
+            }, []))]
         }
     },
     actions: {

@@ -44,7 +44,7 @@ type SearchQuery = {
 
 class SearchQueryBuilder {
     private readonly items: ItemQuery[]
-    private readonly tags: string[]
+    private tags: string[]
     private price: number | undefined
     private duration: number | undefined
     private city?: string
@@ -78,8 +78,8 @@ class SearchQueryBuilder {
         return this
     }
 
-    public addTag(tag: string): this {
-        this.tags.push(tag)
+    public setTags(tags: string[]): this {
+        this.tags = tags
         return this
     }
 

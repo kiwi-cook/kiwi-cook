@@ -4,6 +4,19 @@
             <div class="recipe-title">
                 <h1>{{ recipe?.getName() }}</h1>
                 <h2 class="subheader">By {{ recipe?.getAuthors() }}</h2>
+                <IonButtons>
+                    <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
+                        <IonIcon :icon="shareSocial"/>
+                    </IonButton>
+                    <IonButton aria-valuetext="Like Recipe" @click="recipe?.toggleLike()">
+                        <IonIcon :icon="recipe.isLiked ?? false ? heart: heartOutline"
+                                 :color="recipe.isLiked ?? false ? 'primary' : undefined "/>
+                    </IonButton>
+                    <!-- Editor -->
+                    <IonButton v-if="isDevMode" aria-valuetext="Edit Recipe" @click="editRecipe">
+                        <IonIcon :icon="pencil"/>
+                    </IonButton>
+                </IonButtons>
             </div>
             <div class="recipe-image-wrapper">
                 <IonImg class="recipe-image" :src="recipe.props.imgUrl" alt="Header Image"/>
@@ -60,7 +73,29 @@
                 </IonItem>
                 <div slot="content" class="ion-padding">
                     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
-                        <RecipeStep :max-step-index="steps.length" :step="step" :stepIndex="stepIndex"/>
+                        <IonCard>
+                            <IonImg :src="step?.imgUrl ?? ''"/>
+                            <IonCardHeader>
+                                <IonCardTitle>
+                                    <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
+                                        class="recipe-step-index-max"> / {{ steps.length }}</span>
+                                    <IonChip v-if="step?.duration > 0">
+                                        <IonIcon :icon="time"/>
+                                        <IonLabel>{{ step?.duration }} min.</IonLabel>
+                                    </IonChip>
+                                    <IonChip v-if="step?.temperature > 0">
+                                        <IonIcon :icon="flame"/>
+                                        <IonLabel>{{ step?.temperature }} °C</IonLabel>
+                                    </IonChip>
+                                </IonCardTitle>
+                            </IonCardHeader>
+                            <IonCardContent>
+                                <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                                <IonItem lines="none">
+                                    <div v-html="step?.printDescription('item-highlight')"></div>
+                                </IonItem>
+                            </IonCardContent>
+                        </IonCard>
                     </template>
                 </div>
             </IonAccordion>
@@ -79,18 +114,28 @@ import {computed, ComputedRef, PropType, ref, toRefs, watch} from 'vue';
 import {
     IonAccordion,
     IonAccordionGroup,
+    IonButton,
+    IonButtons,
     IonCard,
     IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonIcon,
     IonImg,
     IonInput,
     IonItem,
+    IonLabel,
     IonNote,
-    IonText
+    IonText,
+    useIonRouter,
 } from '@ionic/vue';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
-import RecipeStep from "@/components/recipe/RecipeStep.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
+import {flame, heart, heartOutline, pencil, shareSocial, time} from "ionicons/icons";
+import {useTasteBuddyStore} from "@/storage";
+import {CanShareResult, Share} from "@capacitor/share";
 
 const props = defineProps({
     recipe: {
@@ -105,6 +150,7 @@ const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item
 const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
 const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
 
+// Source
 const source = computed(() => {
     const authors = recipe.value?.getAuthors()
     const source = recipe.value?.source?.url
@@ -121,12 +167,31 @@ const source = computed(() => {
     }
 })
 
+// Servings
 const servings = ref(1)
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
         recipe.value?.updateServings(newServings);
     }
 });
+
+/* Share */
+const shareRecipe = () => recipe.value?.share();
+// check if the browser supports sharing
+const canShareRecipe = ref(false);
+Share.canShare().then((canShareResult: CanShareResult) => {
+    canShareRecipe.value = canShareResult.value;
+})
+
+/* Editor */
+const tasteBuddyStore = useTasteBuddyStore()
+const router = useIonRouter()
+const isDevMode = computed(() => tasteBuddyStore.isDevMode)
+const editRecipe = () => {
+    if (isDevMode.value) {
+        router.push({name: 'RecipeEditor', params: {id: recipe.value.getId()}})
+    }
+}
 </script>
 
 <style scoped>
@@ -178,6 +243,9 @@ watch(servings, (newServings, oldServings) => {
         align-items: flex-start;
     }
 
+    .recipe-title {
+        margin-bottom: var(--margin-medium);
+    }
 }
 
 @media (min-width: 768px) {
