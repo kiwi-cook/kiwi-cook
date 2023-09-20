@@ -7,17 +7,16 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // User represents a user in the database
 type User struct {
-	ID        primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Username  string             `json:"username" bson:"username" binding:"required"`
-	Password  string             `json:"password" bson:"password" binding:"required"`
-	UserLevel int                `json:"userLevel" bson:"userLevel"`
+	ID        string `json:"_id,omitempty" bson:"_id,omitempty"`
+	Username  string `json:"username" bson:"username" binding:"required"`
+	Password  string `json:"password" bson:"password" binding:"required"`
+	UserLevel int    `json:"userLevel" bson:"userLevel"`
 }
 
 // CheckPassword checks if the password is correct
@@ -52,7 +51,7 @@ func (app *TasteBuddyApp) GetUsersCollections() *TBCollection {
 }
 
 // GetUserById gets a user by its id
-func (app *TasteBuddyApp) GetUserById(userId primitive.ObjectID) (User, error) {
+func (app *TasteBuddyApp) GetUserById(userId string) (User, error) {
 	var user User
 	err := app.GetUsersCollections().FindOne(bson.D{{Key: "_id", Value: userId}}, &user)
 	if err != nil {
@@ -74,12 +73,12 @@ func (user *User) HashPassword() error {
 }
 
 // AddOrUpdateUser adds a new user to the database of users
-func (app *TasteBuddyApp) AddOrUpdateUser(newUser User) (primitive.ObjectID, error) {
+func (app *TasteBuddyApp) AddOrUpdateUser(newUser User) (string, error) {
 	ctx := DefaultContext()
 	var err error
-	var objectId primitive.ObjectID
+	var objectId string
 
-	if newUser.ID.IsZero() {
+	if newUser.ID == "" {
 		// add new user
 		app.LogWarning("AddOrUpdateUser + user "+newUser.Username, "Add new user to database")
 		var result *mongo.InsertOneResult
@@ -88,21 +87,21 @@ func (app *TasteBuddyApp) AddOrUpdateUser(newUser User) (primitive.ObjectID, err
 			return objectId, err
 		}
 		result, err = app.GetUsersCollections().InsertOne(ctx, newUser)
-		objectId = result.InsertedID.(primitive.ObjectID)
+		objectId = result.InsertedID.(string)
 	} else {
 		// update user
-		app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+newUser.ID.Hex()+")", "Update existing user in database")
+		app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+newUser.ID+")", "Update existing user in database")
 		_, err = app.GetUsersCollections().UpdateOne(ctx,
 			bson.D{{Key: "_id", Value: newUser.ID}},
 			bson.D{{Key: "$set", Value: newUser}})
 		objectId = newUser.ID
 	}
 	if err != nil {
-		app.LogError("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", err)
+		app.LogError("AddOrUpdateUser + user "+newUser.Username+"("+objectId+")", err)
 		return objectId, err
 	}
 
-	app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+objectId.Hex()+")", "Successful operation")
+	app.LogWarning("AddOrUpdateUser + user "+newUser.Username+"("+objectId+")", "Successful operation")
 	return objectId, nil
 }
 

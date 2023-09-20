@@ -5,6 +5,7 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"github.com/gin-contrib/gzip"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -52,6 +53,7 @@ func (server *TasteBuddyServer) SetGin() *TasteBuddyServer {
 		corsConfig.AllowOrigins = []string{"http://localhost:8080", "https://taste-buddy.github.io"}
 	}
 	tasteBuddyGin.Use(cors.New(corsConfig))
+	tasteBuddyGin.Use(gzip.Gzip(gzip.DefaultCompression))
 
 	server.gin = tasteBuddyGin
 	return server
@@ -150,15 +152,15 @@ func (server *TasteBuddyServer) Serve() {
 	recipeRoutes := apiRoutes.Group("/recipe")
 	// Get list of all recipes
 	recipeRoutes.GET("", func(context *gin.Context) {
-		server.HandleGetAllRecipes(context)
-	})
-	// Delete recipe by id
-	recipeRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-		server.HandleDeleteRecipeById(context)
+		server.HandleGetRecipes(context)
 	})
 	// Add one or more recipes to database
 	recipeRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
 		server.HandleAddRecipes(context)
+	})
+	// Delete recipes
+	recipeRoutes.DELETE("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleDeleteRecipes(context)
 	})
 	////////////////////////////////////////////////////////////////////////
 
@@ -167,15 +169,15 @@ func (server *TasteBuddyServer) Serve() {
 	itemRoutes := apiRoutes.Group("/item")
 	// Get list of all items
 	itemRoutes.GET("", func(context *gin.Context) {
-		server.HandleGetAllItems(context)
+		server.HandleGetItems(context)
 	})
-	// Delete item by id
-	itemRoutes.DELETE("/:id", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
-		server.HandleDeleteItemById(context)
-	})
-	// Add recipe to database
+	// Add one or more items to database
 	itemRoutes.POST("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
 		server.HandleAddItems(context)
+	})
+	// Delete items
+	itemRoutes.DELETE("", server.CheckJWTMiddleware(ModeratorLevel), func(context *gin.Context) {
+		server.HandleDeleteItems(context)
 	})
 	////////////////////////////////////////////////////////////////////////
 

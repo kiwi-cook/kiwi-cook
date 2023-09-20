@@ -9,23 +9,23 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
+	"time"
 )
 
 type Item struct {
-	ID     primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name   LocalizedString    `json:"name,omitempty" bson:"localizedName,omitempty"`
-	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
-	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	ID     string          `json:"id,omitempty" bson:"_id,omitempty"`
+	Name   LocalizedString `json:"name,omitempty" bson:"localizedName,omitempty"`
+	Type   string          `json:"type,omitempty" bson:"type,omitempty"`
+	ImgUrl string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
-// HandleGetAllItems gets called by server
+// HandleGetItems gets called by server
 // Calls getRecipesFromDB and handles the context
-func (server *TasteBuddyServer) HandleGetAllItems(context *gin.Context) {
-	items, err := server.GetAllItems(false)
+func (server *TasteBuddyServer) HandleGetItems(context *gin.Context) {
+	items, err := server.GetItems(false)
 	if err != nil {
-		server.LogError("HandleGetAllItems", err)
+		server.LogError("HandleGetItems", err)
 		ServerError(context, true)
 		return
 	}
@@ -52,28 +52,29 @@ func (server *TasteBuddyServer) HandleAddItems(context *gin.Context) {
 	Updated(context, "item")
 }
 
-// HandleDeleteItemById gets called by server
-// Calls DeleteItemById and handles the context
-func (server *TasteBuddyServer) HandleDeleteItemById(context *gin.Context) {
-	id := context.Param("id")
-	server.LogContextHandle(context, "HandleDeleteItemById", "Trying to delete item "+id)
+// HandleDeleteItems gets called by server
+// Calls DeleteItems and handles the context
+func (server *TasteBuddyServer) HandleDeleteItems(context *gin.Context) {
+	server.LogContextHandle(context, "HandleDeleteItems", "Delete items")
 
-	// convert id to primitive.ObjectID
-	objectID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		server.LogError("HandleDeleteItemById.ObjectIDFromHex", err)
+	// Bind JSON to list of recipe ids
+	var itemIds []string
+	if err := context.BindJSON(&itemIds); err != nil {
+		server.LogError("HandleDeleteItems.BindJSON", err)
+		BadRequestError(context, err.Error())
+		return
+	}
+
+	// delete items
+	if err := server.DeleteItems(itemIds); err != nil {
+		server.LogError("HandleDeleteItems.DeleteItems", err)
 		ServerError(context, true)
 		return
 	}
 
-	// delete recipe
-	if _, err := server.DeleteItemById(objectID); err != nil {
-		server.LogError("HandleDeleteItemById.DeleteItemById", err)
-		ServerError(context, true)
-		return
-	}
-	server.LogContextHandle(context, "HandleDeleteItemById", "Deleted item "+id)
-	Success(context, "Deleted item "+id)
+	msg := "Deleted " + strconv.Itoa(len(itemIds)) + " items"
+	server.LogContextHandle(context, "HandleDeleteItems", msg)
+	Success(context, msg)
 }
 
 // GetItemsCollection gets recipes from database
@@ -82,29 +83,31 @@ func (app *TasteBuddyApp) GetItemsCollection() *TBCollection {
 }
 
 var (
-	cachedItems []Item
+	cachedItems    []Item
+	cachedItemsAge int64
 )
 
 func (app *TasteBuddyApp) UpdateItemCache() error {
 	app.LogTrace("UpdateItemCache", "Update item cache")
-	if _, err := app.GetAllItems(false); err != nil {
+	if _, err := app.GetItems(false); err != nil {
 		return app.LogError("UpdateItemCache", err)
 	}
 	return nil
 }
 
-// GetAllItems gets all items from database
-func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
-	// get all items from database that are not deleted
-	if cachedItems == nil || !cached {
-		app.LogDatabase("GetAllItems", "Get all items from database")
-		var itemsFromDatabase []Item
+// GetItems gets all items from database
+func (app *TasteBuddyApp) GetItems(cached bool) ([]Item, error) {
+	if cachedItems == nil || !cached || time.Now().Unix()-cachedItemsAge > 3600 {
+		app.LogDatabase("GetItems", "Get all items from database")
+		var itemsFromDatabase = make([]Item, 0)
+		// get all items from database that are not deleted
 		if err := app.GetItemsCollection().AllWithDefault(bson.M{"deleted": bson.M{"$ne": true}}, &itemsFromDatabase, []Item{}); err != nil {
-			return itemsFromDatabase, app.LogError("GetAllItems.AllWithDefault", err)
+			return itemsFromDatabase, app.LogError("GetItems.AllWithDefault", err)
 		}
 		cachedItems = itemsFromDatabase
+		cachedItemsAge = time.Now().Unix()
 	} else {
-		app.LogTrace("GetAllItems", "Get all items from cache")
+		app.Log("GetItems", "Get all items from cache")
 	}
 
 	if len(cachedItems) == 0 {
@@ -115,22 +118,20 @@ func (app *TasteBuddyApp) GetAllItems(cached bool) ([]Item, error) {
 	return cachedItems, nil
 }
 
-// DeleteItemById deletes item from database by id
-func (app *TasteBuddyApp) DeleteItemById(id primitive.ObjectID) (primitive.ObjectID, error) {
+// DeleteItems deletes item from database by id
+func (app *TasteBuddyApp) DeleteItems(itemIds []string) error {
 	ctx := DefaultContext()
 	var err error
 
 	// delete recipe by setting deleted to true
-	app.LogWarning("DeleteItemById", "Delete item "+id.Hex()+" from database")
-	if _, err = app.GetItemsCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}}); err != nil {
-		return id, app.LogError("DeleteItemById + "+id.Hex(), err)
+	for _, id := range itemIds {
+		if _, err = app.GetItemsCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}}); err != nil {
+			app.Log("DeleteItems", "Delete item "+id+" from database")
+			return app.LogError("DeleteItems + "+id, err)
+		}
 	}
 
-	return id, nil
-}
-
-func (app *TasteBuddyApp) AddOrUpdateItem(item Item) ([]Item, error) {
-	return app.AddOrUpdateItems([]Item{item})
+	return nil
 }
 
 // AddOrUpdateItems adds or updates multiple items in the database of items
@@ -155,7 +156,7 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 			continue
 		}
 
-		if item.ID.IsZero() {
+		if item.ID == "" {
 			itemsWithoutIds = append(itemsWithoutIds, item)
 		} else {
 			itemsWithIds = append(itemsWithIds, item)
@@ -182,9 +183,9 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 
 	app.Log("AddOrUpdateItems", "Finished adding or updating "+fmt.Sprintf("%d", len(itemsWithIds)+len(itemsWithoutIds))+" items")
 
-	items, err := app.GetAllItems(false)
+	items, err := app.GetItems(false)
 	if err != nil {
-		return nil, app.LogError("AddOrUpdateItems.GetAllItems", err)
+		return nil, app.LogError("AddOrUpdateItems.GetItems", err)
 	}
 
 	return items, nil

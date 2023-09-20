@@ -16,18 +16,11 @@ var serveCmd = &cobra.Command{
 		port, _ := cmd.Flags().GetString("port")
 		logLevel, _ := cmd.Flags().GetString("loglevel")
 		mode, _ := cmd.Flags().GetString("mode")
-		// configFilePath, _ := cmd.Flags().GetString("config")
 
 		// Create the TasteBuddyApp
 		app := TasteBuddyAppFactory()
 		app.Default()
 		app.SetLogger(logLevel)
-
-		// Run go routines
-		// cities := []string{"Tuebingen", "Stuttgart", "Reutlingen"}
-		// app.GoRoutineSaveMarketsToDB(cities)
-		// app.GoRoutineSaveDiscountsToDB(cities)
-		// app.GoRoutineCleanUpRecipes()
 
 		// Create the server
 		TasteBuddyServerFactory(app).

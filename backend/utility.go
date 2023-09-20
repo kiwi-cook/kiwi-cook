@@ -6,10 +6,7 @@ package main
 
 import (
 	"context"
-	"github.com/adrg/strutil"
-	"github.com/adrg/strutil/metrics"
-	"io"
-	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -45,50 +42,7 @@ func DefaultContext() context.Context {
 	return ctx
 }
 
-// GetFromUrl fetches bytes from an url
-func (app *TasteBuddyApp) GetFromUrl(url string) ([]byte, error) {
-	// fetch from url
-	req, err := http.NewRequest(http.MethodGet, url, http.NoBody)
-	if err != nil {
-		return []byte{}, app.LogError("GetFromUrl", err)
-	}
-
-	// set headers
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Accept-Language", "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7")
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/110.0")
-
-	// send request
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return []byte{}, app.LogError("GetFromUrl", err)
-	}
-
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			app.LogError("GetFromUrl", err)
-		}
-	}(resp.Body)
-
-	// read bytes from body
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, app.LogError("GetFromUrl", err)
-	}
-
-	return body, nil
-}
-
-func MostSimilarString(str string, strings []string, threshold float64) string {
-	// Get city whose name is most similar to the given city
-	mostSimilarString := ""
-	var mostSimilarity float64 = 0
-	for _, s := range strings {
-		if similarity := strutil.Similarity(str, s, metrics.NewHamming()); similarity > mostSimilarity && similarity > threshold {
-			mostSimilarString = s
-			mostSimilarity = similarity
-		}
-	}
-	return mostSimilarString
+// GenerateID generates a new ID
+func GenerateID(pre string) string {
+	return pre + strconv.FormatInt(time.Now().UnixNano(), 10)
 }

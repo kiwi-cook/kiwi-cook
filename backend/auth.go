@@ -17,7 +17,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // AuthLevel defines authentication levels as int type / Enum
@@ -118,10 +117,10 @@ func (server *TasteBuddyServer) CheckBasicAuthenticationCredentials(username, pa
 
 // Session is used to store the session of a user
 type Session struct {
-	SessionToken string             `json:"session_token" bson:"session_token"`
-	UserID       primitive.ObjectID `json:"user_id" bson:"user_id"`
-	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
-	ExpiresAt    time.Time          `json:"expires_at" bson:"expires_at"`
+	SessionToken string    `json:"session_token" bson:"session_token"`
+	UserID       string    `json:"user_id" bson:"user_id"`
+	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
+	ExpiresAt    time.Time `json:"expires_at" bson:"expires_at"`
 }
 
 // CheckSessionTokenMiddleware checks if the session is valid
@@ -359,7 +358,7 @@ func (server *TasteBuddyServer) GenerateJWTFromSessionToken(sessionToken string)
 		"iss": "TasteBuddy",
 		"exp": time.Now().UTC().Add(ttl).Unix(),
 		"data": map[string]string{
-			"user_id":    user.ID.Hex(),
+			"user_id":    user.ID,
 			"auth_level": strconv.Itoa(user.UserLevel),
 		},
 	}
