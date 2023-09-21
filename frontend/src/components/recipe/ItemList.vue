@@ -56,19 +56,22 @@ export default defineComponent({
     setup(props: any, {emit}) {
         const {items, type, showLimit, disableClick} = toRefs(props);
 
-        const mappedItems = computed<Item[]>(() => items.value
-            .slice(0, showLimit.value)
-            .filter((item: Item) => type.value.includes(item.type))
-            .sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
-            .sort((a: Item, b: Item) => {
-                if (a.type === 'ingredient' && b.type === 'tool') {
-                    return -1;
-                } else if (a.type === 'tool' && b.type === 'ingredient') {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            })
+        const mappedItems = computed<Item[]>(() => {
+                const mappedItems = items.value
+                    .slice(0, showLimit.value)
+                    .filter((item: Item) => type.value.includes(item.type))
+                mappedItems.sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
+                mappedItems.sort((a: Item, b: Item) => {
+                        if (a.type === 'ingredient' && b.type === 'tool') {
+                            return -1;
+                        } else if (a.type === 'tool' && b.type === 'ingredient') {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    })
+                return mappedItems
+            }
         )
 
         const select = (itemId: string) => {

@@ -26,6 +26,8 @@ export class Item {
         this.tmpId = item?.tmpId
         if (this.id === undefined) {
             this.tmpId = item?.tmpId ?? tmpId()
+        } else {
+            delete this.tmpId
         }
         this.name = item?.name ?? {'en': 'New Item'}
         this.type = item?.type ?? 'ingredient'
@@ -176,15 +178,12 @@ export class StepItem extends Item {
      */
     public static fromJSON(json: any): StepItem {
         const stepItem = new StepItem()
-        stepItem.quantity = json.quantity ?? 1
+        stepItem.quantity = !json.quantity || json.quantity === 0 ? 1 : json.quantity
         stepItem.unit = json.unit ?? 'pcs'
 
         const store = useRecipeStore()
         const item = store.getItemsAsMap[json.id ?? ''] ?? Item.newItemFromName('Not found')
-        stepItem.id = item.id
-        stepItem.name = item.name
-        stepItem.type = item.type
-        stepItem.imgUrl = item.imgUrl
+        stepItem.updateItem(item)
 
         return stepItem
     }
@@ -341,12 +340,12 @@ export class Step {
  */
 export class Recipe {
     id?: string;
-    tmpId?: string;
+    private readonly tmpId?: string;
     name: LocalizedString;
     desc: LocalizedString;
     steps: Step[];
-    items: StepItem[];
-    itemsById: { [key: string]: StepItem };
+    private items: StepItem[];
+    private itemsById: { [key: string]: StepItem };
     props: {
         imgUrl?: string;
         duration?: number;
@@ -407,7 +406,6 @@ export class Recipe {
 
         // Id
         recipe.id = json.id
-        delete recipe.tmpId
         // if the id is undefined, throw an error
         if (recipe.id === undefined) {
             throw new Error("recipe id is undefined")

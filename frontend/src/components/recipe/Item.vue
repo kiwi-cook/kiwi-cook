@@ -1,7 +1,7 @@
 <template>
     <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" lines="none" @click="select">
         <IonThumbnail slot="start" class="item-thumbnail">
-            <img v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''" class="item-img-lm"
+            <img v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
                  :alt="`Image of ${mappedItem.name}`"/>
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}]">
@@ -10,14 +10,14 @@
         </IonLabel>
         <div slot="end">
             <slot name="end">
-                {{ mappedItem.quantity }} {{ mappedItem.unit }}
+                {{ mappedItem.servings }} {{ mappedItem.unit }}
             </slot>
         </div>
     </IonItem>
 </template>
 
 <script setup lang="ts">
-import {IonItem, IonThumbnail} from "@ionic/vue";
+import {IonItem, IonLabel, IonThumbnail} from "@ionic/vue";
 import {computed, PropType, toRefs} from "vue";
 import {Item, StepItem} from "@/tastebuddy";
 
@@ -42,33 +42,29 @@ const {item} = toRefs(props);
 const emit = defineEmits(['select'])
 
 type CustomItem = {
-    id: string,
     name: string,
-    quantity: number,
+    servings: number,
     unit: string,
     imgUrl: string,
-    showAmountUnit: boolean
 }
 
 const mappedItem = computed<CustomItem | undefined>(() => {
-    if (!item.value) {
+    if (!item?.value) {
         return undefined;
     }
-    const quantity = item.value instanceof StepItem ? item.value.servings : 0;
+    const servings = item?.value instanceof StepItem ? item?.value?.servings : 0;
 
     return {
-        id: item.value?.getId() ?? '',
-        name: item.value?.getName(),
-        imgUrl: item.value?.imgUrl,
-        quantity,
-        unit: item.value instanceof StepItem ? item.value.unit : '',
-        type: item.value?.type
+        name: item?.value?.getName(),
+        imgUrl: item?.value?.imgUrl,
+        servings,
+        unit: item?.value instanceof StepItem ? item?.value?.unit : '',
     }
 })
 
 const select = () => {
     if (mappedItem.value && !props.disableClick) {
-        emit('select', mappedItem.value.id)
+        emit('select', item?.value?.getId())
     }
 }
 </script>

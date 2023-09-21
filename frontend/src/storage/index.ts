@@ -230,6 +230,9 @@ export const useRecipeStore = defineStore('recipes', {
          */
         getRecipesAsList: (state): Recipe[] => {
             const recipesAsList: Recipe[] = Object.values(state.recipes ?? {})
+            if (recipesAsList.length === 0) {
+                return []
+            }
             recipesAsList.sort((a: Recipe, b: Recipe) => a.getName().localeCompare(b.getName()))
             return recipesAsList
         },
@@ -283,6 +286,9 @@ export const useRecipeStore = defineStore('recipes', {
         },
         getItemsSortedByName(): Item[] {
             const itemsAsArray = this.getItemsAsList ?? []
+            if (itemsAsArray.length === 0) {
+                return []
+            }
             itemsAsArray.sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
             return itemsAsArray
         },

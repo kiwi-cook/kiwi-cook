@@ -28,7 +28,7 @@
                 </template>
 
                 <IonItem lines="none">
-                    <IonInput v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="text"/>
+                    <IonInput v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="url"/>
                 </IonItem>
 
                 <IonItem lines="none">

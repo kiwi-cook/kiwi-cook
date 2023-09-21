@@ -21,8 +21,8 @@
                         <IonGrid>
                             <IonRow>
                                 <IonCol>
-                                    <IonChip v-if="mutableRecipe.id || mutableRecipe.tmpId">
-                                        {{ mutableRecipe.id ?? mutableRecipe.tmpId }}
+                                    <IonChip>
+                                        {{ mutableRecipe.getId() }}
                                     </IonChip>
                                     <IonChip v-if="mutableRecipe.props.date">
                                         <IonIcon :icon="calendar"/>
@@ -86,6 +86,7 @@
                                 <IonIcon :icon="closeCircleOutline"
                                          @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)"/>
                             </IonChip>
+
                             <!-- Add tag to the list -->
                             <DropDownSearch :items="allTags" :reset-after="true" placeholder="e.g. vegan"
                                             @select-item="mutableRecipe.addTag($event)"
@@ -123,7 +124,6 @@
 
             <IonCardContent>
                 <IonTextarea :value="step.getDescription()"
-                             :cols="6"
                              :counter="true"
                              :rows="3" :spellcheck="true"
                              label="Description"
@@ -178,17 +178,12 @@
                                       @focusout="updateQuantityUnit($event.target.value, stepIndex, itemIndex)"/>
                         </IonItem>
 
-                        <DropDownSearch :custom-mapper="(item: Item) => item.getName()"
-                                        :item="stepItem"
-                                        :items="items" label="Name"
-                                        placeholder="e.g. Baking powder"
-                                        @select-item="selectItem(stepIndex, itemIndex, $event)"
-                                        @add-item="addItem(stepIndex, itemIndex, $event)">
-                            <template #item="{ filteredItem }">
-                                <ItemComponent :item="filteredItem as Item"/>
-                                {{ (filteredItem as Item).getId() }}
-                            </template>
-                        </DropDownSearch>
+                        <IonItem lines="none">
+                            <IonInput :value="stepItem.getName()"
+                                      label="Name"
+                                      label-placement="floating" type="text"
+                                      @focusout="updateName($event.target.value, stepIndex, itemIndex)"/>
+                        </IonItem>
                     </div>
 
                     <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
@@ -206,7 +201,7 @@
         </IonButton>
     </template>
     <IonItem lines="none">
-        <IonButton color="success" fill="solid"
+        <IonButton fill="solid"
                    @click="saveRecipe()">
             <IonIcon :icon="save"/>
         </IonButton>
@@ -218,7 +213,7 @@
 </template>
 
 <script setup lang="ts">
-import {extractStepItemsFromText, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
+import {extractStepItemsFromText, findMostSimilarItem, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -235,8 +230,6 @@ import {
     IonItem,
     IonLabel,
     IonRow,
-    IonSelect,
-    IonSelectOption,
     IonTextarea,
     useIonRouter
 } from '@ionic/vue';
@@ -256,8 +249,6 @@ const {recipe} = toRefs(props)
 
 const router = useIonRouter();
 const recipeStore = useRecipeStore();
-
-const items = computed<Item[]>(() => recipeStore.getItemsAsList);
 
 const mutableRecipe = ref<Recipe>(recipe.value)
 // update recipe and steps when prop changes
@@ -328,10 +319,24 @@ const editItem = (stepIndex: number, itemIndex: number) => router.push({
     params: {id: mutableRecipe.value?.steps?.[stepIndex].items?.[itemIndex]}
 })
 
+/**
+ * Update the quantity and unit of an item
+ * @param quantityUnit
+ * @param stepIndex
+ * @param itemIndex
+ */
 const updateQuantityUnit = (quantityUnit: string, stepIndex: number, itemIndex: number) => {
     const [quantity, unit] = quantityUnit.split(' ')
     mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.setUnit(unit)
     mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.setQuantity(parseFloat(quantity))
+}
+
+const updateName = (name: string, stepIndex: number, itemIndex: number) => {
+    const item = findMostSimilarItem(name)
+    if (typeof item === 'undefined') {
+        return
+    }
+    mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.updateItem(item)
 }
 
 /**

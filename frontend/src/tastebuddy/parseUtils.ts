@@ -182,6 +182,18 @@ function findMostSimilarItems(stepItemsFromRecipe: StepItem[]): StepItem[] {
     return stepItemsFromRecipe
 }
 
+/**
+ * Finds the most similar item in the list of items
+ * @param itemName
+ */
+export function findMostSimilarItem(itemName: string): Item | undefined {
+    const recipeStore = useRecipeStore()
+    const items = recipeStore.getItemsAsList
+    const itemsNames = items.map((item: Item) => item.getName())
+    const closestItemName = closest(itemName, itemsNames)
+    return items.find((item: Item) => item.getName() === closestItemName)
+}
+
 
 export const enum RecipeParser {
     Cookstr = 'cookstr',
@@ -359,7 +371,6 @@ function cookstrIngredientsToStepItems(cookstrIngredients: { ingredients: string
 
         const ingredientRegex = /^(\d(?:[/.]\d+)?|[½⅓¼⅕⅙⅛⅔¾⅖⅜⅗⅝⅞]|\s+)\s*(?:(t(?:a)?b(?:le)?sp(?:oon)?s?|t(?:ea)?s(?:poon)?s?|ounces?|cups?|tbsp|m(?:illi)?l(?:itre)?s?)\s*)?(.+)$/i
         const matchesLine = ingredient.line.match(ingredientRegex)
-        console.log(matchesLine)
         if (matchesLine) {
             // Use the name from the line if the name from the ingredients is empty
             if (itemName === '') {

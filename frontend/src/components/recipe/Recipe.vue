@@ -45,12 +45,21 @@
                         <template #left>
                             <IonCard>
                                 <IonCardContent>
-                                    <IonItem class="servings-counter" lines="none">
-                                        <IonInput v-model="servings" label="Servings" label-placement="end" max="15"
-                                                  min="1"
-                                                  type="number"/>
+                                    <IonItem lines="none" color="light" class="recipe-servings">
+                                        <IonButtons slot="start">
+                                            <IonButton :disabled="servings == 100" @click="servings++">
+                                                <IonIcon :icon="add"/>
+                                            </IonButton>
+                                            <IonButton :disabled="servings == 1" @click="servings--">
+                                                <IonIcon :icon="remove"/>
+                                            </IonButton>
+                                        </IonButtons>
+                                        <IonLabel>
+                                            {{ servings }} Servings
+                                        </IonLabel>
                                     </IonItem>
-                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['ingredient']"/>
+                                    <ItemList :disable-click="true" :items="itemsFromRecipe"
+                                              :type="['ingredient']"/>
                                 </IonCardContent>
                             </IonCard>
                         </template>
@@ -123,7 +132,6 @@ import {
     IonChip,
     IonIcon,
     IonImg,
-    IonInput,
     IonItem,
     IonLabel,
     IonNote,
@@ -133,7 +141,7 @@ import {
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
-import {flame, heart, heartOutline, pencil, shareSocial, time} from "ionicons/icons";
+import {add, flame, heart, heartOutline, pencil, remove, shareSocial, time} from "ionicons/icons";
 import {useTasteBuddyStore} from "@/storage";
 import {CanShareResult, Share} from "@capacitor/share";
 import ReadMore from "@/components/utility/ReadMore.vue";
@@ -218,7 +226,7 @@ useHead({
 })
 </script>
 
-<style scoped>
+<style>
 .recipe-wrapper {
     width: 100%;
 }
@@ -232,10 +240,6 @@ useHead({
     white-space: pre-wrap;
     color: var(--ion-color-medium);
     font-size: var(--font-size-small);
-}
-
-.servings-counter {
-    max-width: 150px;
 }
 
 .recipe-header {
@@ -280,6 +284,10 @@ useHead({
     .recipe-title {
         margin-right: 20px;
     }
+}
+
+.recipe-servings {
+    --border-radius: 15px;
 }
 
 .item-highlight {
