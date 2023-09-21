@@ -185,7 +185,7 @@ function filterByPrice(recipe: Recipe, maxPrice?: number): boolean {
     }
     const recipePrice = recipe.getPrice()
     const success = recipePrice <= maxPrice
-    console.log('filterByPrice', recipePrice, maxPrice, success)
+    logDebug('filterByPrice', recipePrice, maxPrice, success)
     return success
 }
 

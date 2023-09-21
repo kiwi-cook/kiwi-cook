@@ -2,15 +2,15 @@
     <div class="recipe-wrapper">
         <div class="recipe-header">
             <div class="recipe-title">
-                <h1>{{ recipe?.getName() }}</h1>
-                <h2 class="subheader">By {{ recipe?.getAuthors() }}</h2>
+                <h1>{{ name }}</h1>
+                <h2 v-if="authors.length > 0" class="subheader">By {{ authors }}</h2>
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
                     </IonButton>
                     <IonButton aria-valuetext="Like Recipe" @click="recipe?.toggleLike()">
-                        <IonIcon :icon="recipe.isLiked ?? false ? heart: heartOutline"
-                                 :color="recipe.isLiked ?? false ? 'primary' : undefined "/>
+                        <IonIcon :icon="recipe?.liked ?? false ? heart: heartOutline"
+                                 :color="recipe?.liked ?? false ? 'favorite' : undefined "/>
                     </IonButton>
                     <!-- Editor -->
                     <IonButton v-if="isDevMode" aria-valuetext="Edit Recipe" @click="editRecipe">
@@ -19,7 +19,7 @@
                 </IonButtons>
             </div>
             <div class="recipe-image-wrapper">
-                <IonImg class="recipe-image" :src="recipe.props.imgUrl" alt="Header Image"/>
+                <IonImg class="recipe-image" :src="recipe?.props?.imgUrl" alt="Header Image"/>
             </div>
         </div>
 
@@ -31,16 +31,14 @@
                 </IonItem>
                 <div slot="content" class="ion-padding">
                     <IonText class="recipe-description">
-                        <p>
-                            {{ recipe?.getDescription() }}
-                        </p>
+                        <ReadMore :text="recipe?.getDescription()"/>
                     </IonText>
                 </div>
             </IonAccordion>
 
             <IonAccordion value="items">
                 <IonItem slot="header">
-                    <h2>What you'll need</h2>
+                    <h2>Ingredients</h2>
                 </IonItem>
                 <div slot="content" class="ion-padding">
                     <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
@@ -69,7 +67,7 @@
 
             <IonAccordion value="steps">
                 <IonItem slot="header">
-                    <h2>How to make it</h2>
+                    <h2>Directions</h2>
                 </IonItem>
                 <div slot="content" class="ion-padding">
                     <template v-for="(step, stepIndex) in steps" :key="stepIndex">
@@ -79,18 +77,20 @@
                                 <IonCardTitle>
                                     <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
                                         class="recipe-step-index-max"> / {{ steps.length }}</span>
-                                    <IonChip v-if="step?.duration > 0">
+                                    <IonChip v-if="step?.duration ?? 0 > 0">
                                         <IonIcon :icon="time"/>
                                         <IonLabel>{{ step?.duration }} min.</IonLabel>
                                     </IonChip>
-                                    <IonChip v-if="step?.temperature > 0">
+                                    <IonChip v-if="step?.temperature ?? 0 > 0">
                                         <IonIcon :icon="flame"/>
                                         <IonLabel>{{ step?.temperature }} °C</IonLabel>
                                     </IonChip>
                                 </IonCardTitle>
                             </IonCardHeader>
                             <IonCardContent>
-                                <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                                <IonItem lines="none">
+                                    <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                                </IonItem>
                                 <IonItem lines="none">
                                     <div v-html="step?.printDescription('item-highlight')"></div>
                                 </IonItem>
@@ -136,6 +136,9 @@ import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 import {flame, heart, heartOutline, pencil, shareSocial, time} from "ionicons/icons";
 import {useTasteBuddyStore} from "@/storage";
 import {CanShareResult, Share} from "@capacitor/share";
+import ReadMore from "@/components/utility/ReadMore.vue";
+import {useHead} from '@unhead/vue'
+
 
 const props = defineProps({
     recipe: {
@@ -144,23 +147,24 @@ const props = defineProps({
     },
 });
 const {recipe} = toRefs(props);
+const authors = computed(() => recipe?.value?.getAuthors() ?? '');
+const name = computed(() => recipe?.value?.getName() ?? '');
 
-const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe.value?.getStepItems() ?? []);
+const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe?.value?.getStepItems() ?? []);
 const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
 const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
-const steps: ComputedRef<Step[]> = computed(() => recipe.value?.steps ?? [])
+const steps: ComputedRef<Step[]> = computed(() => recipe?.value?.steps ?? [])
 
 // Source
 const source = computed(() => {
-    const authors = recipe.value?.getAuthors()
-    const source = recipe.value?.source?.url
+    const source = recipe?.value?.src?.url
     const sourceTag = source ? `<a href="${source}" target="_blank">${source}</a>` : ''
 
-    if (authors !== '' && source !== '') {
-        return `Recipe by ${authors} on ${sourceTag}`
+    if (authors.value !== '' && source !== '') {
+        return `Recipe by ${authors.value} on ${sourceTag}`
     } else if (source === '') {
-        return `Recipe by ${authors}`
-    } else if (authors === '') {
+        return `Recipe by ${authors.value}`
+    } else if (authors.value === '') {
         return `Recipe on ${sourceTag}`
     } else {
         return ''
@@ -171,12 +175,12 @@ const source = computed(() => {
 const servings = ref(1)
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
-        recipe.value?.updateServings(newServings);
+        recipe?.value?.updateServings(newServings);
     }
 });
 
 /* Share */
-const shareRecipe = () => recipe.value?.share();
+const shareRecipe = () => recipe?.value?.share();
 // check if the browser supports sharing
 const canShareRecipe = ref(false);
 Share.canShare().then((canShareResult: CanShareResult) => {
@@ -189,9 +193,29 @@ const router = useIonRouter()
 const isDevMode = computed(() => tasteBuddyStore.isDevMode)
 const editRecipe = () => {
     if (isDevMode.value) {
-        router.push({name: 'RecipeEditor', params: {id: recipe.value.getId()}})
+        router.push({name: 'RecipeEditor', params: {id: recipe?.value.getId()}})
     }
 }
+
+/* Head */
+useHead({
+    title: 'Taste Buddy - ' + name.value,
+    meta: [
+        {
+            name: 'og:title',
+            content: 'Taste Buddy'
+        },
+        {
+            name: 'og:description',
+            content: `Delicious ${recipe?.value?.getName()} Made Easy!`
+        },
+        {
+            name: 'og:image',
+            content: recipe?.value?.props?.imgUrl
+        }
+    ]
+
+})
 </script>
 
 <style scoped>
@@ -256,5 +280,10 @@ const editRecipe = () => {
     .recipe-title {
         margin-right: 20px;
     }
+}
+
+.item-highlight {
+    font-weight: bold;
+    color: var(--ion-color-primary);
 }
 </style>

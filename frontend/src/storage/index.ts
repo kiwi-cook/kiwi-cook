@@ -296,7 +296,7 @@ export const useRecipeStore = defineStore('recipes', {
             }, [])
 
             const itemIds = new Set([...randomItems, ...itemsFromSavedRecipes].map((item: Item) => item.getId()))
-            return [...itemIds].map((itemId: string) => this.items[itemId])
+            return [...itemIds].map((itemId: string) => this.items[itemId]).filter((item: Item) => typeof item !== 'undefined')
         },
         getTags(): string[] {
             return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
@@ -312,32 +312,43 @@ export const useRecipeStore = defineStore('recipes', {
         async prepare() {
             // fetch all items
             this.setLoadingState('getCachedItems')
-            getCachedItem<Item[]>('items').then((cachedItem: { value: Item[] | null, isOld: boolean }) => {
-                if (cachedItem.isOld || cachedItem.value === null) {
-                    this.fetchItems()
-                } else {
-                    this.replaceItems(cachedItem.value.map((item: Item) => Item.fromJSON(item)))
-                }
-                this.finishLoading('getCachedItems')
-            })
-            // fetch all recipes
-            this.setLoadingState('getCachedRecipes')
-            getCachedItem<Recipe[]>('recipes').then((cachedItem: { value: Recipe[] | null, isOld: boolean }) => {
-                if (cachedItem.isOld || cachedItem.value === null) {
-                    this.fetchRecipes()
-                } else {
-                    this.replaceRecipes(cachedItem.value.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
-                }
-                this.finishLoading('getCachedRecipes')
-            })
-            // fetch saved recipes
-            this.setLoadingState('getCachedSavedRecipes')
-            getCachedItem<string[]>('savedRecipes').then((cachedItem: { value: string[] | null, isOld: boolean }) => {
-                if (!cachedItem.isOld && cachedItem.value !== null) {
-                    this.setSavedRecipes(cachedItem.value)
-                }
-                this.finishLoading('getCachedSavedRecipes')
-            })
+            getCachedItem<Item[]>('items')
+                .then(async (cachedItem: { value: Item[] | null, isOld: boolean }) => {
+                    if (cachedItem.isOld || cachedItem.value === null) {
+                        await this.fetchItems()
+                    } else {
+                        await this.replaceItems(cachedItem.value.map((item: Item) => Item.fromJSON(item)))
+                    }
+                    this.finishLoading('getCachedItems')
+                })
+                .then(() => {
+                    // fetch all recipes
+                    this.setLoadingState('getCachedRecipes')
+                    getCachedItem<Recipe[]>('recipes').then(async (cachedItem: {
+                        value: Recipe[] | null,
+                        isOld: boolean
+                    }) => {
+                        if (cachedItem.isOld || cachedItem.value === null) {
+                            await this.fetchRecipes()
+                        } else {
+                            await this.replaceRecipes(cachedItem.value.map((recipe: Recipe) => Recipe.fromJSON(recipe)))
+                        }
+                        this.finishLoading('getCachedRecipes')
+                    })
+                })
+                .then(() => {
+                    // fetch saved recipes
+                    this.setLoadingState('getCachedSavedRecipes')
+                    getCachedItem<string[]>('savedRecipes').then((cachedItem: {
+                        value: string[] | null,
+                        isOld: boolean
+                    }) => {
+                        if (!cachedItem.isOld && cachedItem.value !== null) {
+                            this.setSavedRecipes(cachedItem.value)
+                        }
+                        this.finishLoading('getCachedSavedRecipes')
+                    })
+                })
         },
         /**
          * Override all recipes
@@ -369,7 +380,7 @@ export const useRecipeStore = defineStore('recipes', {
          * @param recipe
          */
         setLike(recipe: Recipe) {
-            if (recipe.isLiked) {
+            if (recipe.liked) {
                 this.savedRecipes.add(recipe.getId())
             } else {
                 this.savedRecipes.delete(recipe.getId())
@@ -489,10 +500,10 @@ export const useRecipeStore = defineStore('recipes', {
             logDebug('deleteRecipe', recipe)
             this.setLoadingState('deleteRecipe')
             delete this.recipes[recipe.getId()]
-            if (typeof recipe._id !== 'undefined') {
+            if (typeof recipe.id !== 'undefined') {
                 return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
-                    formatObject: {RECIPE_ID: recipe._id ?? ''},
-                    errorMessage: `Could not delete recipe ${recipe._id} from database. Please retry later!`
+                    formatObject: {RECIPE_ID: recipe.id ?? ''},
+                    errorMessage: `Could not delete recipe ${recipe.id} from database. Please retry later!`
                 }).then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('deleteRecipe')
                     return presentToast(apiResponse.response)
@@ -551,10 +562,10 @@ export const useRecipeStore = defineStore('recipes', {
             logDebug('deleteItem', item)
             this.setLoadingState('deleteItem')
             this.removeItem(item)
-            if (typeof item._id !== 'undefined') {
+            if (typeof item.id !== 'undefined') {
                 return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
-                    formatObject: {ITEM_ID: item._id ?? ''},
-                    errorMessage: `Could not delete item ${item._id} from database. Please retry later!`
+                    formatObject: {ITEM_ID: item.id ?? ''},
+                    errorMessage: `Could not delete item ${item.id} from database. Please retry later!`
                 }).then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('deleteItem')
                     return presentToast(apiResponse.response)

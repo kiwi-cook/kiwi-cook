@@ -10,31 +10,21 @@
     </IonCard>
 </template>
 
-<script lang="ts">
-import {defineComponent, PropType, toRefs} from "vue";
+<script setup lang="ts">
+import {PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy";
 import {IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonImg, useIonRouter} from "@ionic/vue";
 
-export default defineComponent({
-    name: 'MiniRecipePreview',
-    props: {
-        recipe: {
-            type: Object as PropType<Recipe>,
-            required: true
-        }
-    },
-    components: {
-        IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonImg
-    },
-    setup(props: { recipe: Recipe }) {
-        const {recipe} = toRefs(props)
-        const router = useIonRouter();
-        const routeToRecipe = () => router.push(recipe.value.getRoute())
-        return {
-            routeToRecipe
-        }
+const props = defineProps({
+    recipe: {
+        type: Object as PropType<Recipe>,
+        required: true
     }
 })
+
+const {recipe} = toRefs(props)
+const router = useIonRouter();
+const routeToRecipe = () => router.push(recipe.value.getRoute())
 </script>
 
 <style scoped>

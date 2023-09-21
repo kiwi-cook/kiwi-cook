@@ -49,7 +49,7 @@ watch(recipe, (newRecipe) => {
 
 const router = useIonRouter()
 const addRecipe = () => {
-    const newRecipeId = Recipe.newRecipe().update()._tmpId
+    const newRecipeId = Recipe.newRecipe().update().tmpId
     router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
 }
 const goBack = () => router.back()

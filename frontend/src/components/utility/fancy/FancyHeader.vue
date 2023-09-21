@@ -8,50 +8,38 @@
     </h1>
 </template>
 
-<script lang="ts">
-import {defineComponent, onMounted, PropType, Ref, ref, toRefs} from "vue";
+<script setup lang="ts">
+import {PropType, Ref, ref, toRefs} from "vue";
 import FancyText from "@/components/utility/fancy/FancyText.vue";
 
-export default defineComponent({
-    name: 'FancyHeader',
-    components: {FancyText},
-    props: {
-        smallText: {
-            type: String,
-            required: false
-        },
-        bigText: {
-            type: Object as PropType<string[]>,
-            required: true
-        }
+const props = defineProps({
+    smallText: {
+        type: String,
+        required: false
     },
-    setup(props: { bigText: string[] }) {
-        const { bigText} = toRefs(props);
-
-        let interval = -1
-        const typedText = ref('')
-        const typedTextIndex = ref(0)
-        const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<number>): boolean => {
-            if (text.length <= typedTextIndex.value) {
-                return false
-            }
-            typedText.value += text[typedTextIndex.value++]
-            return true
-        }
-
-        onMounted(() => {
-            interval = setInterval(() => {
-                if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
-                    clearInterval(interval)
-                }
-            }, 150)
-        })
-
-        return {
-            typedText
-        }
+    bigText: {
+        type: Object as PropType<string[]>,
+        required: true
     }
 })
+const {bigText} = toRefs(props);
+
+let interval = -1
+const typedText = ref('')
+const typedTextIndex = ref(0)
+const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<number>): boolean => {
+    if (text.length <= typedTextIndex.value) {
+        return false
+    }
+    typedText.value += text[typedTextIndex.value++]
+    return true
+}
+
+interval = setInterval(() => {
+    if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
+        clearInterval(interval)
+    }
+}, 150)
 </script>
 
 <style scoped>

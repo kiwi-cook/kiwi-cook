@@ -174,7 +174,7 @@ function findMostSimilarItems(stepItemsFromRecipe: StepItem[]): StepItem[] {
         const closestItemName = closest(stepItem.getName(), itemsNames)
         if (distance(stepItem.getName(), closestItemName) <= maxDistance) {
             const closestItem = items.find((item: Item) => item.getName() === closestItemName)
-            stepItemsFromRecipe[index]._id = closestItem?._id ?? ''
+            stepItemsFromRecipe[index].id = closestItem?.id ?? ''
             stepItemsFromRecipe[index].setName(closestItemName)
         }
     })
@@ -317,11 +317,11 @@ function parseCookstr(cookstrRecipe: CookstrRecipe): Recipe {
     recipe.setDescription(cookstrRecipe.description, 'en')
 
     // Source
-    recipe.source.url = cookstrRecipe.url
-    recipe.source.authors = [{name: cookstrRecipe.chef}]
-    recipe.source.copyRight = cookstrRecipe.copyright
-    recipe.source.cookBook = {
-        publisher: cookstrRecipe.cookbook_publisher,
+    recipe.src.url = cookstrRecipe.url
+    recipe.src.authors = [{name: cookstrRecipe.chef}]
+    recipe.src.cr = cookstrRecipe.copyright
+    recipe.src.cookBook = {
+        pub: cookstrRecipe.cookbook_publisher,
         name: cookstrRecipe.cookbook
     }
 
@@ -333,7 +333,7 @@ function parseCookstr(cookstrRecipe: CookstrRecipe): Recipe {
         ...(cookstrRecipe.cooking_method ?? '').split(','),
     ].filter(tag => tag !== '').map(tag => tag.trim().toLowerCase())
     recipe.props.imgUrl = cookstrRecipe.photo_url
-    recipe.props.createdAt = new Date(cookstrRecipe.date_modified)
+    recipe.props.date = new Date(cookstrRecipe.date_modified)
 
     // Ingredients
     const stepItemsFromIngredients = cookstrIngredientsToStepItems(cookstrRecipe.ingredients_detailed)

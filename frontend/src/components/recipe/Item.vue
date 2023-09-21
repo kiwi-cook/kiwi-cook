@@ -1,104 +1,79 @@
 <template>
     <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" lines="none" @click="select">
-        <div class="item-start">
-            <IonImg v-if="!mappedItem.showAmountUnit && mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
-                    class="item-img-rm"/>
-            <IonText class="item-name">
-                <IonChip v-if="mappedItem.showAmountUnit">
-                    {{ mappedItem.quantity}} {{ mappedItem.unit }}
-                    <IonImg v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
-                            class="item-img-lm"/>
-                </IonChip>
-                <span :class="[{'item-excluded': include === false}]">
-                    {{ mappedItem.name }}
-                    <span v-if="include" class="item-included">✓</span>
-                </span>
-            </IonText>
-        </div>
-        <div class="item-end">
-            <slot name="end"></slot>
+        <IonThumbnail slot="start" class="item-thumbnail">
+            <img v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''" class="item-img-lm"
+                 :alt="`Image of ${mappedItem.name}`"/>
+        </IonThumbnail>
+        <IonLabel :class="[{'item-excluded': include === false}]">
+            {{ mappedItem.name }}
+            <span v-if="include" class="item-included">✓</span>
+        </IonLabel>
+        <div slot="end">
+            <slot name="end">
+                {{ mappedItem.quantity }} {{ mappedItem.unit }}
+            </slot>
         </div>
     </IonItem>
 </template>
 
-<script lang="ts">
-import {IonChip, IonImg, IonItem, IonText} from "@ionic/vue";
-import {computed, defineComponent, PropType, toRefs} from "vue";
+<script setup lang="ts">
+import {IonItem, IonThumbnail} from "@ionic/vue";
+import {computed, PropType, toRefs} from "vue";
 import {Item, StepItem} from "@/tastebuddy";
 
-export default defineComponent({
-    name: 'Item',
-    props: {
-        item: {
-            type: Object as PropType<(StepItem | Item)>,
-            required: true,
-        },
-        disableClick: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-        include: {
-            type: Boolean,
-            required: false,
-            default: undefined
-        }
+const props = defineProps({
+    item: {
+        type: Object as PropType<(StepItem | Item)>,
+        required: true,
     },
-    emits: ['select'],
-    components: {
-        IonItem, IonImg, IonText, IonChip
+    disableClick: {
+        type: Boolean,
+        required: false,
+        default: false
     },
-    setup(props: any, {emit}) {
-        const {item} = toRefs(props);
+    include: {
+        type: Boolean,
+        required: false,
+        default: undefined
+    },
+})
+const {item} = toRefs(props);
 
-        type CustomItem = {
-            id: string,
-            name: string,
-            quantity: number,
-            unit: string,
-            imgUrl: string,
-            showAmountUnit: boolean
-        }
+const emit = defineEmits(['select'])
 
-        const mappedItem = computed<CustomItem | undefined>(() => {
-            if (!item.value) {
-                return undefined;
-            }
-            const quantity= item.value instanceof StepItem ? item.value.servingAmount : 0;
+type CustomItem = {
+    id: string,
+    name: string,
+    quantity: number,
+    unit: string,
+    imgUrl: string,
+    showAmountUnit: boolean
+}
 
-            return {
-                id: item.value.getId(),
-                name: item.value.getName(),
-                imgUrl: item.value.imgUrl,
-                quantity,
-                unit: item.value instanceof StepItem ? item.value.unit : '',
-                showAmountUnit: item.value.type === 'ingredient' && quantity> 0,
-                type: item.value.type
-            }
-        })
+const mappedItem = computed<CustomItem | undefined>(() => {
+    if (!item.value) {
+        return undefined;
+    }
+    const quantity = item.value instanceof StepItem ? item.value.servings : 0;
 
-        const select = () => {
-            if (mappedItem.value && !props.disableClick) {
-                emit('select', mappedItem.value.id)
-            }
-        }
-
-        return {
-            mappedItem,
-            select
-        }
+    return {
+        id: item.value?.getId() ?? '',
+        name: item.value?.getName(),
+        imgUrl: item.value?.imgUrl,
+        quantity,
+        unit: item.value instanceof StepItem ? item.value.unit : '',
+        type: item.value?.type
     }
 })
+
+const select = () => {
+    if (mappedItem.value && !props.disableClick) {
+        emit('select', mappedItem.value.id)
+    }
+}
 </script>
 
 <style scoped>
-ion-item.item {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    background: inherit !important;
-}
 
 ion-item.item::part(native) {
     padding: 0;
@@ -109,24 +84,16 @@ ion-item.item::part(native) {
     cursor: pointer;
 }
 
-.item-img-rm::part(image) {
-    width: 30px;
-    height: 30px;
-    border-radius: var(--border-radius-round);
-    margin-right: 10px;
+.item-thumbnail {
+    border-radius: var(--border-radius);
+    background-color: var(--ion-color-light);
 }
 
-.item-img-lm::part(image) {
-    width: 30px;
-    height: 30px;
-    border-radius: var(--border-radius-round);
-    margin-left: 10px;
-}
-
-.item-name {
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-normal);
-    margin: 0;
+ion-thumbnail {
+    --size: 30px;
+    --border-radius: 5px;
+    border: 1px solid var(--ion-color-light);
+    background-color: var(--ion-color-dark);
 }
 
 .item-excluded {
@@ -138,17 +105,5 @@ ion-item.item::part(native) {
 .item-included {
     color: var(--ion-color-success);
     margin-left: 0.5rem;
-}
-
-.item-start, .item-end {
-    display: flex;
-}
-
-.item-start {
-    margin-right: auto;
-}
-
-.item-end {
-    margin-left: auto;
 }
 </style>

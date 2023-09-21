@@ -16,16 +16,41 @@
 
                     <section>
                         <h3>
-                            Set your preferences
+                            Set your search preferences
                         </h3>
                         <h4 class="subheader">
                             Filter by ingredients, cooking time, price and more.
                         </h4>
+
+                        <div class="over-x-scroll">
+                            <!-- Selected tags -->
+                            <IonChip v-for="(tag, tagIndex) in selectedTags"
+                                     :key="`selected-tag-${tagIndex}`"
+                                     class="tag">
+                                <IonLabel>{{ tag }}</IonLabel>
+                                <IonIcon :icon="closeCircleOutline" color="danger"
+                                         @click="(selectedTags ?? []).splice(tagIndex, 1)"/>
+                            </IonChip>
+                            <!-- Special tags -->
+                            <IonChip v-for="(specialTag, tagIndex) in specialTags" :key="`special-tag-${tagIndex}`"
+                                     class="tag" color="secondary" @click="specialTag.click()">
+                                <IonLabel>{{ specialTag.title }}</IonLabel>
+                                <IonIcon :icon="add"/>
+                            </IonChip>
+                            <!-- Suggested tags -->
+                            <IonChip v-for="(tag, tagIndex) in suggestedTags"
+                                     :key="`suggested-tag-${tagIndex}`"
+                                     class="tag" color="success" @click="includeTag(tag)">
+                                <IonLabel>{{ tag }}</IonLabel>
+                                <IonIcon :icon="add"/>
+                            </IonChip>
+                        </div>
+
                         <IonAccordionGroup :multiple="true" :value="[...searchFilters]">
                             <IonAccordion value="items" class="search-filter">
                                 <IonItem slot="header">
                                     <IonLabel>
-                                        What ingredients do you have?
+                                        What's in your inventory?
                                     </IonLabel>
                                 </IonItem>
                                 <div slot="content" class="ion-padding">
@@ -77,7 +102,7 @@
                             <IonAccordion class="suggestion-filter" value="duration">
                                 <IonItem slot="header">
                                     <IonLabel>
-                                        How much time do you have?
+                                        What's your time limit?
                                     </IonLabel>
                                 </IonItem>
                                 <div slot="content" class="ion-padding">
@@ -132,34 +157,6 @@
                                                       :snaps="true"
                                                       :step="1" :ticks="false"
                                                       label-placement="end"/>
-                                        </IonCardContent>
-                                    </IonCard>
-                                </div>
-                            </IonAccordion>
-
-                            <!-- Tags -->
-                            <IonAccordion class="suggestion-filter" value="tag">
-                                <IonItem slot="header">
-                                    <IonLabel>
-                                        What are you craving?
-                                    </IonLabel>
-                                </IonItem>
-                                <div slot="content" class="ion-padding">
-                                    <IonCard>
-                                        <IonCardContent>
-                                            <IonChip v-for="(tag, tagIndex) in suggestedTags"
-                                                     :key="`suggested-tag-${tagIndex}`"
-                                                     class="tag" color="success">
-                                                <IonLabel>{{ tag }}</IonLabel>
-                                                <IonIcon :icon="add" @click="includeTag(tag)"/>
-                                            </IonChip>
-                                            <IonChip v-for="(tag, tagIndex) in selectedTags"
-                                                     :key="`selected-tag-${tagIndex}`"
-                                                     class="tag">
-                                                <IonLabel>{{ tag }}</IonLabel>
-                                                <IonIcon :icon="closeCircleOutline" color="danger"
-                                                         @click="(selectedTags ?? []).splice(tagIndex, 1)"/>
-                                            </IonChip>
                                         </IonCardContent>
                                     </IonCard>
                                 </div>
@@ -328,19 +325,27 @@ const suggestedTags = computed(() => recipeStore.getTags
     .filter((tag: string) => !selectedTags.value.includes(tag))
     .slice(0, 3)
 )
-const includeTag = (tag: string) => {
-    selectedTags.value.push(tag)
-    searchFilters.value.add('tag')
-}
+const specialTags = [
+    {
+        title: 'fast & cheap',
+        click: () => {
+            maxCookingTime.value = 8
+            maxPrice.value = 3
+        }
+    }
+]
+const includeTag = (tag: string) => selectedTags.value.push(tag)
 
 // City
 const city = ref('')
 const prices = [2, 3, 5, 10]
 const maxPrice = ref<number | undefined>(undefined)
+watch(maxPrice, () => searchFilters.value.add('price'))
 
 // Cooking time
 const cookingTimes = [5, 10, 20, 45]
 const maxCookingTime = ref<number | undefined>(undefined)
+watch(maxCookingTime, () => searchFilters.value.add('duration'))
 
 // Recipe suggestions
 const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {

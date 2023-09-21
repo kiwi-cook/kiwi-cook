@@ -14,18 +14,18 @@ const tmpId = () => `tmp${Date.now().toString(16)}${Math.random().toString(16).s
  * It can be an ingredient or a tool
  */
 export class Item {
-    _id?: string;
-    _tmpId?: string;
+    id?: string;
+    tmpId?: string;
     name: LocalizedString;
     type: string;
     imgUrl: string;
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
-        this._id = item?._id
-        this._tmpId = item?._tmpId
-        if (this._id === undefined) {
-            this._tmpId = item?._tmpId ?? tmpId()
+        this.id = item?.id
+        this.tmpId = item?.tmpId
+        if (this.id === undefined) {
+            this.tmpId = item?.tmpId ?? tmpId()
         }
         this.name = item?.name ?? {'en': 'New Item'}
         this.type = item?.type ?? 'ingredient'
@@ -39,11 +39,11 @@ export class Item {
      * @param json
      * @returns a new item
      */
-    public static fromJSON(json: Item): Item {
+    public static fromJSON(json: any): Item {
         const item = new Item()
-        item._id = json._id
+        item.id = json.id
         // remove the temporary id
-        delete item._tmpId
+        delete item.tmpId
         item.name = json.name
         item.type = json.type
         item.imgUrl = json.imgUrl ?? ''
@@ -96,11 +96,11 @@ export class Item {
      */
     public getId(): string {
         // if the id is undefined, throw an error
-        if (this._id === undefined && this._tmpId === undefined) {
+        if (this.id === undefined && this.tmpId === undefined) {
             logError("item id is undefined", this)
-            throw new Error("item id is undefined")
+            throw new Error("item.id is undefined: " + JSON.stringify(this))
         }
-        return this._id ?? this._tmpId as string
+        return this.id ?? this.tmpId as string
     }
 
     /**
@@ -157,13 +157,13 @@ export class Item {
  */
 export class StepItem extends Item {
     quantity: number;
-    servingAmount: number;
+    servings: number;
     unit: string;
 
     constructor(item?: Item) {
         super(item)
         this.quantity = 1
-        this.servingAmount = 1
+        this.servings = 1
         this.unit = 'pcs'
     }
 
@@ -174,23 +174,18 @@ export class StepItem extends Item {
      * @param json
      * @returns a new step item
      */
-    public static fromJSON(json: StepItem): StepItem {
+    public static fromJSON(json: any): StepItem {
         const stepItem = new StepItem()
         stepItem.quantity = json.quantity ?? 1
-        stepItem.servingAmount = json.quantity ?? 1
-        stepItem.unit = json.unit
-        stepItem._id = json._id
-        stepItem.name = json.name
-        stepItem.type = json.type
-        stepItem.imgUrl = json.imgUrl
+        stepItem.unit = json.unit ?? 'pcs'
+
         const store = useRecipeStore()
-        const item = store.getItemsAsMap[json._id ?? '']
-        if (typeof item !== 'undefined') {
-            stepItem._id = item._id
-            stepItem.name = item.name
-            stepItem.type = item.type
-            stepItem.imgUrl = item.imgUrl
-        }
+        const item = store.getItemsAsMap[json.id ?? ''] ?? Item.newItemFromName('Not found')
+        stepItem.id = item.id
+        stepItem.name = item.name
+        stepItem.type = item.type
+        stepItem.imgUrl = item.imgUrl
+
         return stepItem
     }
 
@@ -199,10 +194,24 @@ export class StepItem extends Item {
      * @param item
      */
     updateItem(item: Item): void {
-        this._id = item._id
+        this.id = item.id
         this.name = item.name
         this.type = item.type
         this.imgUrl = item.imgUrl
+    }
+
+    /**
+     * Set the quantity of the item
+     */
+    public setQuantity(quantity: number): void {
+        this.quantity = quantity
+    }
+
+    /**
+     * Set the unit of the item
+     */
+    public setUnit(unit: string): void {
+        this.unit = unit
     }
 }
 
@@ -214,14 +223,14 @@ export class StepItem extends Item {
 export class Step {
     items: StepItem[];
     imgUrl?: string;
-    description: LocalizedString;
+    desc: LocalizedString;
     duration?: number;
     temperature?: number;
 
     constructor() {
         this.items = [new StepItem()]
         this.imgUrl = ''
-        this.description = {
+        this.desc = {
             en: 'New Step',
         }
         this.duration = 0
@@ -234,11 +243,11 @@ export class Step {
      * @param json
      * @returns a new step
      */
-    public static fromJSON(json: Step): Step {
+    public static fromJSON(json: any): Step {
         const item = new Step()
-        item.items = json.items?.map(item => StepItem.fromJSON(item)) ?? []
+        item.items = json.items?.map((item: any) => StepItem.fromJSON(item)) ?? []
         item.imgUrl = json.imgUrl
-        item.description = json.description
+        item.desc = json.desc
         item.duration = json.duration
         item.temperature = Step.parseTemperature(json.temperature, item.getDescription())
         return item
@@ -278,7 +287,7 @@ export class Step {
      */
     public getDescription(lang?: string): string {
         const store = useTasteBuddyStore()
-        return this.description[lang ?? store.language.lang ?? 'en']
+        return this.desc[lang ?? store.language.lang ?? 'en']
     }
 
     /**
@@ -286,7 +295,7 @@ export class Step {
      */
     public setDescription(description: string, lang?: string): void {
         const store = useTasteBuddyStore()
-        this.description[lang ?? store.language.lang ?? 'en'] = description
+        this.desc[lang ?? store.language.lang ?? 'en'] = description
     }
 
     /**
@@ -319,7 +328,7 @@ export class Step {
      */
     public updateServings(servings = 1): this {
         this.items.forEach((stepItem: StepItem) => {
-            stepItem.servingAmount = stepItem.quantity * servings
+            stepItem.servings = stepItem.quantity * servings
         })
         return this
     }
@@ -331,57 +340,56 @@ export class Step {
  * It contains all the information about a recipe
  */
 export class Recipe {
-    _id?: string;
-    _tmpId?: string;
+    id?: string;
+    tmpId?: string;
     name: LocalizedString;
-    description: LocalizedString;
+    desc: LocalizedString;
     steps: Step[];
     items: StepItem[];
     itemsById: { [key: string]: StepItem };
     props: {
-        url?: string;
         imgUrl?: string;
         duration?: number;
-        createdAt: Date;
+        date: Date;
         tags?: string[];
     };
-    source: {
+    src: {
         url?: string;
         authors: {
             name: string;
             url?: string;
         }[];
-        copyRight?: string;
+        cr?: string;
         cookBook?: {
             name: string;
             url?: string;
-            publisher?: string;
+            pub?: string;
         }
     };
     servings: number;
-    isLiked: boolean;
+    liked: boolean;
 
     constructor() {
         // create a temporary id to identify the recipe in the store before it is saved
-        this._tmpId = tmpId()
+        this.tmpId = tmpId()
         this.name = {
-            en: 'New Recipe',
+            en: 'New recipe',
         }
-        this.description = {
-            en: 'New Recipe description',
+        this.desc = {
+            en: 'New recipe description',
         }
         this.props = {
             imgUrl: '',
             duration: 0,
-            createdAt: new Date(),
+            date: new Date(),
             tags: [],
         }
         this.steps = [new Step()]
         this.items = []
         this.itemsById = {}
         this.servings = 1
-        this.isLiked = false;
-        this.source = {
+        this.liked = false;
+        this.src = {
             url: '',
             authors: [],
         }
@@ -394,29 +402,29 @@ export class Recipe {
      * @param json
      * @returns a new recipe
      */
-    public static fromJSON(json: Recipe): Recipe {
+    public static fromJSON(json: any): Recipe {
         const recipe = new Recipe()
 
         // Id
-        recipe._id = json._id
-        delete recipe._tmpId
+        recipe.id = json.id
+        delete recipe.tmpId
         // if the id is undefined, throw an error
-        if (recipe._id === undefined) {
+        if (recipe.id === undefined) {
             throw new Error("recipe id is undefined")
         }
 
         recipe.name = json.name
-        recipe.description = json.description
-        recipe.steps = json.steps?.map(step => Step.fromJSON(step)) ?? [new Step()]
+        recipe.desc = json.desc
+        recipe.steps = json.steps?.map((step: any) => Step.fromJSON(step)) ?? [new Step()]
 
         // Props
-        recipe.props.imgUrl = json.props.imgUrl
-        recipe.props.tags = json.props.tags
-        recipe.props.duration = json.props.duration
-        recipe.props.createdAt = new Date(json.props.createdAt)
+        recipe.props.imgUrl = json?.props?.imgUrl
+        recipe.props.tags = json?.props?.tags
+        recipe.props.duration = json?.props?.duration
+        recipe.props.date = new Date(json?.props?.date)
 
         // Source
-        recipe.source = json.source
+        recipe.src = json.src
 
         recipe.computeItems()
         return recipe
@@ -437,10 +445,10 @@ export class Recipe {
      */
     public getId(): string {
         // if the id is undefined, throw an error
-        if (this._id === undefined && this._tmpId === undefined) {
+        if (this.id === undefined && this.tmpId === undefined) {
             throw new Error("recipe id is undefined")
         }
-        return this._id ?? this._tmpId as string
+        return this.id ?? this.tmpId as string
     }
 
     /**
@@ -464,7 +472,7 @@ export class Recipe {
      */
     public getDescription(): string {
         const store = useTasteBuddyStore()
-        return this.description[store.language.lang] ?? this.description.en
+        return this.desc[store.language.lang] ?? this.desc.en
     }
 
     /**
@@ -472,7 +480,7 @@ export class Recipe {
      */
     public setDescription(description: string, lang?: string): void {
         const store = useTasteBuddyStore()
-        this.description[lang ?? store.language.lang] = description
+        this.desc[lang ?? store.language.lang] = description
     }
 
     /**
@@ -480,16 +488,16 @@ export class Recipe {
      * @returns the list of authors as string
      */
     public getAuthors(): string {
-        switch ((this.source.authors ?? []).length) {
+        switch ((this.src.authors ?? []).length) {
             case 0:
                 return ''
             case 1:
-                return this.source.authors[0].name
+                return this.src.authors[0].name
             case 2:
-                return this.source.authors[0].name + ' and ' + this.source.authors[1].name
+                return this.src.authors[0].name + ' and ' + this.src.authors[1].name
             default:
-                return this.source.authors.map((author) => author.name)
-                    .slice(0, length - 1).join(', ') + ' and ' + this.source.authors[length - 1].name
+                return this.src.authors.map((author) => author.name)
+                    .slice(0, length - 1).join(', ') + ' and ' + this.src.authors[length - 1].name
         }
     }
 
@@ -498,10 +506,10 @@ export class Recipe {
      * @param author
      */
     public addAuthor(author: string): void {
-        if (this.source.authors === undefined) {
-            this.source.authors = []
+        if (this.src.authors === undefined) {
+            this.src.authors = []
         }
-        this.source.authors.push({name: author})
+        this.src.authors.push({name: author})
     }
 
     /**
@@ -510,19 +518,6 @@ export class Recipe {
      */
     public getDuration(): number {
         return this.steps.reduce((acc, step) => acc + (step.duration ?? 0), 0)
-    }
-
-    /**
-     * Get the short description of the recipe. It is the first two sentences of the description.
-     * @returns the short description of the recipe
-     */
-    public getShortDescription(lang?: string): string {
-        let shortDescription = this.description[lang ?? 'en'].split('.').slice(0, 2).join('.')
-        const lastChar = shortDescription.charAt(shortDescription.length - 1)
-        if (lastChar !== '.' && lastChar !== '?' && lastChar !== '!') {
-            shortDescription += '.'
-        }
-        return shortDescription
     }
 
     public getTags(): string[] {
@@ -668,7 +663,7 @@ export class Recipe {
 
             try {
                 return Share.share({
-                    title: 'Share with your recipe with buddies',
+                    title: 'Share with your recipe with your buddies',
                     text: `Check out this recipe for ${this.getName()} on Taste Buddy!`,
                     url: '#' + this.getRoute(),
                     dialogTitle: 'Share with buddies',
@@ -712,7 +707,7 @@ export class Recipe {
      */
     public toggleLike() {
         const store = useRecipeStore()
-        this.isLiked = !this.isLiked
+        this.liked = !this.liked
         store.setLike(this)
     }
 
@@ -722,7 +717,7 @@ export class Recipe {
     public getPrice(): number {
         let price = 0
         this.steps.forEach(step => step.getStepItems().forEach((item: StepItem) => {
-            price += item.getPrice() * item.servingAmount
+            price += item.getPrice() * item.servings
         }))
         return Math.floor(price)
     }

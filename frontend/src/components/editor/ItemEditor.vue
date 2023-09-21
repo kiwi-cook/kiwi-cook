@@ -42,8 +42,9 @@
 
         <IonCardContent>
             Used in {{ usedInRecipes.length }} recipes
-            <IonButton v-if="usedInRecipes.length > 0" size="small" fill="outline" @click="showUsedInRecipes = !showUsedInRecipes">
-                {{ showUsedInRecipes ? 'Hide' : 'Show' }} recipes
+            <IonButton v-if="usedInRecipes.length > 0" size="small"
+                       @click="showUsedInRecipes = !showUsedInRecipes">
+                <IonIcon :icon="showUsedInRecipes ? chevronUp : chevronDown"/>
             </IonButton>
             <template v-if="usedInRecipes.length > 0 && showUsedInRecipes">
                 <IonList>
@@ -60,7 +61,7 @@
     </IonCard>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {Item, Recipe} from '@/tastebuddy/types';
 import {
     IonAvatar,
@@ -77,69 +78,39 @@ import {
     IonSelect,
     IonSelectOption
 } from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, PropType, Ref, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, PropType, Ref, ref, toRefs, watch} from 'vue';
 import {useRecipeStore, useTasteBuddyStore} from '@/storage';
-import {save, trash} from "ionicons/icons";
+import {chevronDown, chevronUp, save, trash} from "ionicons/icons";
 
-export default defineComponent({
-    name: 'ItemEditor',
-    props: {
-        item: {
-            type: Object as PropType<Item>,
-            required: true
-        }
-    },
-    components: {
-        IonIcon,
-        IonSelect,
-        IonSelectOption,
-        IonCard,
-        IonCardHeader,
-        IonCardTitle,
-        IonCardContent,
-        IonItem,
-        IonList,
-        IonInput,
-        IonChip,
-        IonAvatar,
-        IonButton
-    },
-    emits: ['remove'],
-    setup(props) {
-        const {item} = toRefs(props)
-        const tasteBuddyStore = useTasteBuddyStore()
-        const supportedLanguages = tasteBuddyStore.language.supportedLanguages
-
-        const recipeStore = useRecipeStore()
-
-        const mutableItem: Ref<Item> = ref(item.value)
-        // update mutableItem when item changes
-        watch(item, () => {
-            mutableItem.value = item.value
-        })
-
-        const showUsedInRecipes: Ref<boolean> = ref(false)
-        const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
-            const recipesByItemIds = recipeStore.getRecipesByItemIds
-            if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
-                return []
-            }
-            return recipesByItemIds[item.value?.getId() ?? '']
-                .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId])
-        })
-
-        const saveItem = () => mutableItem.value.save()
-        const deleteItem = () => mutableItem.value.delete()
-
-        return {
-            // icons
-            trash, save,
-            // items
-            mutableItem, saveItem, deleteItem,
-            usedInRecipes, showUsedInRecipes,
-            // i18n
-            supportedLanguages,
-        }
+const props = defineProps({
+    item: {
+        type: Object as PropType<Item>,
+        required: true
     }
 })
+
+const {item} = toRefs(props)
+const tasteBuddyStore = useTasteBuddyStore()
+const supportedLanguages = tasteBuddyStore.language.supportedLanguages
+
+const recipeStore = useRecipeStore()
+
+const mutableItem: Ref<Item> = ref(item.value)
+// update mutableItem when item changes
+watch(item, () => {
+    mutableItem.value = item.value
+})
+
+const showUsedInRecipes: Ref<boolean> = ref(false)
+const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
+    const recipesByItemIds = recipeStore.getRecipesByItemIds
+    if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
+        return []
+    }
+    return recipesByItemIds[item.value?.getId() ?? '']
+        .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId])
+})
+
+const saveItem = () => mutableItem.value.save()
+const deleteItem = () => mutableItem.value.delete()
 </script>

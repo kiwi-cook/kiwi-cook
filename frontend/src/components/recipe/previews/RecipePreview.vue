@@ -39,42 +39,27 @@
     </div>
 </template>
 
-<script lang="ts">
-import {computed, defineComponent, PropType, toRefs} from "vue";
+<script setup lang="ts">
+import {computed, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy";
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonText} from "@ionic/vue";
 import RecipeHero from "@/components/recipe/RecipeHero.vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 
-export default defineComponent({
-    name: 'RecipePreview',
-    props: {
-        recipe: {
-            type: Object as PropType<Recipe>,
-            required: true
-        },
-        noDescription: {
-            type: Boolean,
-            default: false
-        }
-    },
-    components: {
-        IonCardTitle, IonCard, IonCardHeader, IonCardContent,
-        IonText,
-        TwoColumnLayout,
-        ItemList,
-        RecipeHero
-    },
-    setup(props: any) {
-        const {recipe} = toRefs(props)
-        const items = computed(() => recipe.value?.getStepItems() ?? [])
 
-        return {
-            items
-        }
+const props = defineProps({
+    recipe: {
+        type: Object as PropType<Recipe>,
+        required: true
+    },
+    noDescription: {
+        type: Boolean,
+        default: false
     }
-});
+})
+const {recipe} = toRefs(props)
+const items = computed(() => recipe.value?.getStepItems() ?? [])
 </script>
 
 <style scoped>

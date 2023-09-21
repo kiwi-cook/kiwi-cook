@@ -43,3 +43,11 @@
     object-fit: cover;
     color: transparent;
 }
+
+.over-x-scroll {
+    overflow-x: scroll;
+}
+
+.over-y-scroll {
+    overflow-y: scroll;
+}

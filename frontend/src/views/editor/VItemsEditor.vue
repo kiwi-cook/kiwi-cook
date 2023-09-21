@@ -5,15 +5,42 @@
                 <FancyHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
                 <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
-                <IonButton fill="outline" color="danger" @click="removeUnusedItems()">Remove unused Items</IonButton>
-                <IonButton fill="outline" @click="formatItems()">Format Items</IonButton>
-                <IonButton fill="outline" @click="addItem()">Add Item</IonButton>
+                <IonButtons>
+                    <IonButton @click="saveItems()">
+                        <IonIcon :icon="save"/>
+                        Save
+                    </IonButton>
+                    <IonButton @click="addItem()">
+                        <IonIcon :icon="addOutline"/>
+                        Add
+                    </IonButton>
+                    <IonButton @click="formatItems()">
+                        <IonIcon :icon="colorWand"/>
+                        Format
+                    </IonButton>
+                    <IonButton color="danger" @click="removeDuplicates()">
+                        <IonIcon :icon="documents"/>
+                        Remove duplicates
+                    </IonButton>
+                    <IonButton color="danger" @click="removeUnusedItems()">
+                        <IonIcon :icon="trash"/>
+                        Remove unused
+                    </IonButton>
+                </IonButtons>
 
-                <List :filter="filterInput" :list="items">
-                    <template #element="{element}">
-                        <ItemEditor :item="element as Item"/>
-                    </template>
-                </List>
+                <IonAccordionGroup :multiple="true">
+                    <IonAccordion v-for="(item, index) in items" :key="index" :value="item.getId()">
+                        <IonItem slot="header">
+                            <IonLabel>
+                                {{ item.getName() }}
+                            </IonLabel>
+                        </IonItem>
+                        <div slot="content" class="ion-padding">
+                            <ItemEditor :item="item"/>
+                        </div>
+                    </IonAccordion>
+                </IonAccordionGroup>
+
             </div>
 
             <!-- Buttons -->
@@ -35,38 +62,77 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ComputedRef, ref} from 'vue';
-import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, IonSearchbar} from "@ionic/vue";
-import {addOutline, chevronForwardCircle, saveOutline} from 'ionicons/icons';
+import {computed, ref} from 'vue';
+import {
+    IonAccordion,
+    IonAccordionGroup,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonPage,
+    IonSearchbar
+} from "@ionic/vue";
+import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
 import {useRecipeStore} from '@/storage';
 import ItemEditor from "@/components/editor/ItemEditor.vue";
 import {Item} from "@/tastebuddy";
-import List from "@/components/recipe/List.vue";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 
 const recipeStore = useRecipeStore();
-const items: ComputedRef<Item[]> = computed(() => recipeStore.getItemsAsList)
+const items = computed<Item[]>(() => {
+    const items = recipeStore.getItemsAsList
+        .filter(item => item.getName().toLowerCase().includes(filterInput.value.toLowerCase()))
+    items.sort((a, b) => a.getName().localeCompare(b.getName()))
+    return items
+})
+const recipesByItemIds = computed(() => recipeStore.getRecipesByItemIds)
 
 const filterInput = ref('')
 
-const addItem = () => Item.newItem().update();
-const removeUnusedItems = () => {
-    const items = recipeStore.getItemsAsList;
-    const recipesByItemIds = recipeStore.getRecipesByItemIds
-    items.forEach((item: Item) => {
-        if (!(item.getId() in recipesByItemIds)) {
-            item.delete();
-        }
-    })
-}
 const saveItems = () => recipeStore.saveItems()
+
+const addItem = () => Item.newItem().update();
 
 const formatItems = () => {
     items.value.forEach((item: Item) => {
         // Fix name
         let name = item.getName()
         name = name[0].toUpperCase() + name.slice(1)
+        name = name.replace(/-/g, ' ')
         item.setName(name)
+
+        // Add img url
+        if (!item.imgUrl || item.imgUrl === '') {
+            item.imgUrl = `https://spoonacular.com/cdn/ingredients_100x100/${name}.jpg`
+        }
     })
 }
+
+const removeDuplicates = () => {
+    const itemNames: string[] = []
+    items.value.forEach((item: Item) => {
+        const name = item.getName()
+        if (itemNames.includes(name)) {
+            item.delete()
+        } else {
+            itemNames.push(name)
+        }
+    })
+}
+
+const removeUnusedItems = () => {
+    items.value.forEach((item: Item) => {
+        if (!(item.getId() in recipesByItemIds.value)) {
+            item.delete();
+        }
+    })
+}
+
+
 </script>

@@ -4,10 +4,7 @@ import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
 
 // Pages
 import TabsPage from '../views/VTabs.vue'
-import VRecipeOfTheDay from "@/views/recipe/VRecipeOfTheDay.vue";
 import VRecipeSuggestions from "@/views/recipe/VRecipeSuggestions.vue";
-import VRecipe from "@/views/recipe/VRecipe.vue";
-import VSavedRecipes from "@/views/recipe/VSavedRecipes.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -20,7 +17,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'Recipe',
                 path: 'recipe/show/:id',
-                component: VRecipe
+                component: () => import('@/views/recipe/VRecipe.vue')
             },
             {
                 name: 'RecipeSuggestions',
@@ -30,12 +27,12 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'RecipeOfTheDay',
                 path: 'recipe/of-the-day',
-                component: VRecipeOfTheDay
+                component: () => import('@/views/recipe/VRecipeOfTheDay.vue')
             },
             {
                 name: 'SavedRecipes',
                 path: 'recipe/saved',
-                component: VSavedRecipes
+                component: () => import('@/views/recipe/VSavedRecipes.vue')
             },
             {
                 name: 'Recipes',

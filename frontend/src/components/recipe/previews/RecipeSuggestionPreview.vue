@@ -53,46 +53,31 @@
     </div>
 </template>
 
-<script lang="ts">
-import {computed, defineComponent, PropType, toRefs} from "vue";
+<script setup lang="ts">
+import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/tastebuddy";
 import {IonChip, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 
-export default defineComponent({
-    name: 'RecipeSuggestionPreview',
-    components: {
-        ItemList, IonImg, IonChip, IonLabel
-    },
-    props: {
-        recipeSuggestion: {
-            type: Object as PropType<RecipeSuggestion>,
-            required: true
-        }
-    },
-    setup(props: { recipeSuggestion: RecipeSuggestion }) {
-        const {recipeSuggestion} = toRefs(props)
-        const recipe = computed<Recipe>(() => recipeSuggestion.value?.recipe ?? new Recipe())
-        const missingItems = computed<StepItem[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
-        const possessedItems = computed<Item[]>(() => {
-            const missingItemIds = missingItems.value.map(item => item.getId())
-            return recipe.value.getStepItems().filter(item => !missingItemIds.includes(item.getId()))
-        })
-        const additionalTags = computed<string[]>(() => [
-            (recipeSuggestion.value.recipe_price ?? 0) + ' €'
-        ])
-
-        const router = useIonRouter();
-        const toRecipe = () => {
-            router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
-        }
-
-        return {
-            recipe, missingItems, possessedItems, additionalTags,
-            toRecipe
-        }
+const props = defineProps({
+    recipeSuggestion: {
+        type: Object as PropType<RecipeSuggestion>,
+        required: true
     }
-});
+})
+const {recipeSuggestion} = toRefs(props)
+const recipe = computed<Recipe>(() => recipeSuggestion.value?.recipe ?? new Recipe())
+
+const missingItems = computed<StepItem[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
+const possessedItems = computed<Item[]>(() => {
+    const missingItemIds = missingItems.value.map(item => item.getId())
+    return recipe.value.getStepItems().filter(item => !missingItemIds.includes(item.getId()))
+})
+
+const router = useIonRouter();
+const toRecipe = () => {
+    router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
+}
 </script>
 
 <style scoped>

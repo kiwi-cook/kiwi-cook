@@ -15,109 +15,92 @@
     </IonInfiniteScroll>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import {IonInfiniteScroll, IonInfiniteScrollContent} from '@ionic/vue';
-import {computed, ComputedRef, defineComponent, Ref, ref, toRefs, watch} from 'vue';
-import {arrowDown} from 'ionicons/icons';
+import {computed, ComputedRef, Ref, ref, toRefs, watch} from 'vue';
 import {useRecipeStore} from '@/storage';
 
 
-export default defineComponent({
-    name: 'List',
-    props: {
-        filter: {
-            type: String,
-            required: false,
-            default: ''
-        },
-        list: {
-            type: Array,
-            required: false,
-            default: null
-        },
-        noWrap: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-        horizontal: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-        loadAll: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
+const props = defineProps({
+    filter: {
+        type: String,
+        required: false,
+        default: ''
     },
-    components: {
-        IonInfiniteScroll, IonInfiniteScrollContent
+    list: {
+        type: Array,
+        required: false,
+        default: null
     },
-    setup(props: any) {
-        const {filter, list, loadAll} = toRefs(props)
-
-        const store = useRecipeStore();
-        const elements: ComputedRef<unknown[]> = computed(() => (list.value
-            ? (list.value ?? [])
-            : store.getRecipesAsList));
-        const loadedElements: Ref<unknown[]> = ref([]);
-        const loadedFilteredElements: Ref<unknown[]> = ref([]);
-        const loadedElementsIndex = ref(0);
-
-        /**
-         * Filter the ingredients
-         */
-        const handleFilter = () => {
-            const query = filter.value?.toLowerCase() ?? '';
-            loadedFilteredElements.value = elements.value.filter((listItem: unknown) => {
-                return JSON.stringify(listItem)
-                    .toLowerCase()
-                    .includes(query)
-            })
-        }
-        watch(filter, () => {
-            handleFilter();
-        }, {immediate: true})
-
-        const loadNextElements = (amountLoaded = 15) => {
-            loadedElements.value.push(...elements.value.slice(loadedElementsIndex.value,
-                loadedElementsIndex.value + amountLoaded))
-            loadedElementsIndex.value += amountLoaded;
-        };
-
-        const resetLoadedElements = () => {
-            loadedElements.value = [];
-            loadedElementsIndex.value = 0;
-        }
-
-        const ionInfinite = (ev: any) => {
-            loadNextElements();
-            setTimeout(() => ev.target.complete(), 1000);
-        };
-
-        watch(elements, () => {
-            if (!loadAll.value) {
-                resetLoadedElements()
-                loadNextElements()
-            } else {
-                loadedElements.value = elements.value;
-            }
-        }, {immediate: true})
-
-        watch(loadedElements, () => {
-            loadedFilteredElements.value = loadedElements.value;
-        }, {immediate: true})
-
-        return {
-            ionInfinite,
-            loadedFilteredElements,
-            // icons
-            arrowDown
-        };
-
+    noWrap: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    horizontal: {
+        type: Boolean,
+        required: false,
+        default: false
+    },
+    loadAll: {
+        type: Boolean,
+        required: false,
+        default: false
     }
-});
+})
+const {filter, list, loadAll} = toRefs(props)
+
+const store = useRecipeStore();
+const elements: ComputedRef<unknown[]> = computed(() => (list.value
+    ? (list.value ?? [])
+    : store.getRecipesAsList));
+const loadedElements: Ref<unknown[]> = ref([]);
+const loadedFilteredElements: Ref<unknown[]> = ref([]);
+const loadedElementsIndex = ref(0);
+
+/**
+ * Filter the ingredients
+ */
+const handleFilter = () => {
+    const query = filter.value?.toLowerCase() ?? '';
+    loadedFilteredElements.value = elements.value.filter((listItem: unknown) => {
+        return JSON.stringify(listItem)
+            .toLowerCase()
+            .includes(query)
+    })
+}
+watch(filter, () => {
+    handleFilter();
+}, {immediate: true})
+
+const loadNextElements = (amountLoaded = 15) => {
+    loadedElements.value.push(...elements.value.slice(loadedElementsIndex.value,
+        loadedElementsIndex.value + amountLoaded))
+    loadedElementsIndex.value += amountLoaded;
+};
+
+const resetLoadedElements = () => {
+    loadedElements.value = [];
+    loadedElementsIndex.value = 0;
+}
+
+const ionInfinite = (ev: any) => {
+    loadNextElements();
+    setTimeout(() => ev.target.complete(), 1000);
+};
+
+watch(elements, () => {
+    if (!loadAll.value) {
+        resetLoadedElements()
+        loadNextElements()
+    } else {
+        loadedElements.value = elements.value;
+    }
+}, {immediate: true})
+
+watch(loadedElements, () => {
+    loadedFilteredElements.value = loadedElements.value;
+}, {immediate: true})
 </script>
 
 <style scoped>

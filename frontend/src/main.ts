@@ -5,6 +5,9 @@ import {IonicVue} from '@ionic/vue';
 import {createApp} from 'vue'
 import App from './App.vue'
 
+// Head
+import {createHead} from "@unhead/vue";
+
 // Router
 import {createTasteBuddyRouter} from './router';
 
@@ -41,6 +44,9 @@ import './theme/font.css';
 /* Icons */
 import 'ionicons/icons';
 
+/* Head */
+const head = createHead()
+
 /* Initialize store */
 const pinia = createPinia()
 
@@ -50,6 +56,7 @@ const router = createTasteBuddyRouter();
 /* Initialize app */
 const app = createApp(App)
     .use(IonicVue)
+    .use(head)
     .use(pinia)
     .use(router)
 
