@@ -9,15 +9,16 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strconv"
 	"time"
 )
 
 type Item struct {
-	ID     string          `json:"id,omitempty" bson:"_id,omitempty"`
-	Name   LocalizedString `json:"name,omitempty" bson:"localizedName,omitempty"`
-	Type   string          `json:"type,omitempty" bson:"type,omitempty"`
-	ImgUrl string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
+	ID     primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Name   LocalizedString    `json:"name,omitempty" bson:"localizedName,omitempty"`
+	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
+	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
 
 // HandleGetItems gets called by server
@@ -33,7 +34,7 @@ func (server *TasteBuddyServer) HandleGetItems(context *gin.Context) {
 }
 
 // HandleAddItems gets called by server
-// Calls AddOrUpdateItems and handles the context
+// Calls AddItems and handles the context
 func (server *TasteBuddyServer) HandleAddItems(context *gin.Context) {
 	server.LogContextHandle(context, "HandleAddItems", "Add/update items")
 
@@ -44,7 +45,7 @@ func (server *TasteBuddyServer) HandleAddItems(context *gin.Context) {
 		return
 	}
 
-	if _, err := server.AddOrUpdateItems(items); err != nil {
+	if err := server.AddItems(items); err != nil {
 		server.LogError("HandleAddItems.AddOrUpdateItem", err)
 		ServerError(context, true)
 		return
@@ -87,10 +88,11 @@ var (
 	cachedItemsAge int64
 )
 
+// UpdateItemCache updates the item cache
 func (app *TasteBuddyApp) UpdateItemCache() error {
 	app.LogTrace("UpdateItemCache", "Update item cache")
 	if _, err := app.GetItems(false); err != nil {
-		return app.LogError("UpdateItemCache", err)
+		return app.LogError("UpdateItemCache.GetItems", err)
 	}
 	return nil
 }
@@ -134,10 +136,10 @@ func (app *TasteBuddyApp) DeleteItems(itemIds []string) error {
 	return nil
 }
 
-// AddOrUpdateItems adds or updates multiple items in the database of items
+// AddItems adds or updates multiple items in the database of items
 // If an item has not an id, it will be added
-func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
-	app.Log("AddOrUpdateItems", "Add or update "+fmt.Sprintf("%d", len(items))+" items")
+func (app *TasteBuddyApp) AddItems(items []Item) error {
+	app.Log("AddItems", "Add or update "+fmt.Sprintf("%d", len(items))+" items")
 	var itemsWithIds []interface{}
 	var itemsWithoutIds []interface{}
 
@@ -146,17 +148,17 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	for _, item := range items {
 		itemsMap[item.Name.GetDefault()] = item
 	}
-	app.LogTrace("AddOrUpdateItems", "Found "+fmt.Sprintf("%d", len(itemsMap))+" unique items")
+	app.LogTrace("AddItems", "Found "+fmt.Sprintf("%d", len(itemsMap))+" unique items")
 
 	// Split items into items with and without ids
 	for _, item := range itemsMap {
 		// Check if item name is empty
 		if item.Name.GetDefault() == "" {
-			app.LogWarning("AddOrUpdateItems", "Item "+item.Name.GetDefault()+" has no name")
+			app.LogWarning("AddItems", "Item "+item.Name.GetDefault()+" has no name")
 			continue
 		}
 
-		if item.ID == "" {
+		if item.ID.IsZero() {
 			itemsWithoutIds = append(itemsWithoutIds, item)
 		} else {
 			itemsWithIds = append(itemsWithIds, item)
@@ -166,27 +168,22 @@ func (app *TasteBuddyApp) AddOrUpdateItems(items []Item) ([]Item, error) {
 	// Add items without ids to database
 	if len(itemsWithoutIds) > 0 {
 		if _, err := app.GetItemsCollection().InsertMany(DefaultContext(), itemsWithoutIds); err != nil {
-			return nil, app.LogError("AddOrUpdateItems.InsertMany", err)
+			return app.LogError("AddItems.InsertMany", err)
 		}
-		app.Log("AddOrUpdateItems", "Added "+strconv.Itoa(len(itemsWithoutIds))+" items without ids to database")
+		app.Log("AddItems", "Added "+strconv.Itoa(len(itemsWithoutIds))+" items without ids to database")
 	}
 
 	// Update items with ids in database
 	if len(itemsWithIds) > 0 {
 		for _, item := range itemsWithIds {
 			if _, err := app.GetItemsCollection().UpdateOne(DefaultContext(), bson.M{"_id": item.(Item).ID}, bson.M{"$set": item}); err != nil {
-				return nil, app.LogError("AddOrUpdateItems.UpdateByID", err)
+				return app.LogError("AddItems.UpdateByID", err)
 			}
 		}
-		app.Log("AddOrUpdateItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
+		app.Log("AddItems", "Updated "+strconv.Itoa(len(itemsWithIds))+" items with ids in database")
 	}
 
-	app.Log("AddOrUpdateItems", "Finished adding or updating "+fmt.Sprintf("%d", len(itemsWithIds)+len(itemsWithoutIds))+" items")
+	app.Log("AddItems", "Finished adding or updating "+fmt.Sprintf("%d", len(itemsWithIds)+len(itemsWithoutIds))+" items")
 
-	items, err := app.GetItems(false)
-	if err != nil {
-		return nil, app.LogError("AddOrUpdateItems.GetItems", err)
-	}
-
-	return items, nil
+	return app.UpdateItemCache()
 }

@@ -6,6 +6,7 @@ package main
 
 import (
 	"github.com/gin-contrib/gzip"
+	"net/http"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -127,7 +128,7 @@ func (server *TasteBuddyServer) Serve() {
 
 	// Check
 	apiRoutes.GET("", func(context *gin.Context) {
-		context.Status(200)
+		context.String(http.StatusOK, "Hello from Taste Buddy 🍻")
 	})
 
 	////////////////////////////////////////////////////////////////////////

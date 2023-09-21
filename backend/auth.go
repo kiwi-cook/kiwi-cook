@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"net/http"
 	"strconv"
 	"strings"
@@ -117,10 +118,10 @@ func (server *TasteBuddyServer) CheckBasicAuthenticationCredentials(username, pa
 
 // Session is used to store the session of a user
 type Session struct {
-	SessionToken string    `json:"session_token" bson:"session_token"`
-	UserID       string    `json:"user_id" bson:"user_id"`
-	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
-	ExpiresAt    time.Time `json:"expires_at" bson:"expires_at"`
+	SessionToken string             `json:"session_token" bson:"session_token"`
+	UserID       primitive.ObjectID `json:"user_id" bson:"user_id"`
+	CreatedAt    time.Time          `json:"created_at" bson:"created_at"`
+	ExpiresAt    time.Time          `json:"expires_at" bson:"expires_at"`
 }
 
 // CheckSessionTokenMiddleware checks if the session is valid
@@ -267,12 +268,11 @@ func (server *TasteBuddyServer) GetSession(sessionToken string) *Session {
 func (server *TasteBuddyServer) GetUserBySessionToken(sessionToken string) (*User, error) {
 	session := server.GetSession(sessionToken)
 	if session == nil {
-		return nil, errors.New("session token is invalid")
+		return nil, server.LogError("GetUserBySessionToken.GetSession", errors.New("session token is invalid"))
 	}
 
 	if user, err := server.GetUserById(session.UserID); err != nil {
-		server.LogError("GetUserBySessionToken", err)
-		return nil, err
+		return nil, server.LogError("GetUserBySessionToken.GetUserById", err)
 	} else {
 		return &user, nil
 	}
@@ -358,7 +358,7 @@ func (server *TasteBuddyServer) GenerateJWTFromSessionToken(sessionToken string)
 		"iss": "TasteBuddy",
 		"exp": time.Now().UTC().Add(ttl).Unix(),
 		"data": map[string]string{
-			"user_id":    user.ID,
+			"user_id":    user.ID.Hex(),
 			"auth_level": strconv.Itoa(user.UserLevel),
 		},
 	}
