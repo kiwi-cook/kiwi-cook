@@ -7,15 +7,17 @@
     --box-shadow-strong: var(--ion-color-medium) 0px 20px 30px -10px;
     --box-shadow-hover: var(--box-shadow-strong);
 
+    /* transition */
+    --transition: all 0.3s ease-in-out;
+
     /* margin */
     --margin: 0;
-    --margin-lr: 20px;
 
     /* border */
     --border-radius: 15px;
     --border-radius-small: 10px;
     --border-radius-round: 100%;
-    --border: 1px solid var(--ion-color-light) !important;
+    --border: thin solid var(--ion-color-light) !important;
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
 }
 
@@ -42,6 +44,10 @@
     inset: 0;
     object-fit: cover;
     color: transparent;
+}
+
+ion-img::part(image) {
+    box-shadow: var(--box-shadow-strong);
 }
 
 .over-x-scroll {

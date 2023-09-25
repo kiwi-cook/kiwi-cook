@@ -1,11 +1,12 @@
 :root {
     /* Font sizes */
-    --font-size-huge: 3.0rem;
-    --font-size-large: 2.1rem;
-    --font-size-medium: 1.5rem;
-    --font-size-smaller: 1.4rem;
-    --font-size-small: 1.1rem;
-    --font-size-tiny: 0.7rem;
+    --font-size-huge: 3.3rem;
+    --font-size-large: 2.3rem;
+    --font-size-medium: 1.65rem;
+    --font-size-small-medium: 1.55rem;
+    --font-size-small: 1.2rem;
+    --font-size-smaller: 1rem;
+    --font-size-tiny: 0.75rem;
 
     /* Font weights */
     --font-weight-bolder: 700;
@@ -16,21 +17,34 @@
 
 @media (width <= 768px) {
     :root {
-        --font-size-huge: 2.5rem;
-        --font-size-large: 1.9rem;
-        --font-size-medium: 1.5rem;
-        --font-size-smaller: 1.3rem;
-        --font-size-small: 1.1rem;
+        --font-size-huge: 2.75rem;
+        --font-size-large: 2.1rem;
+        --font-size-medium: 1.65rem;
+        --font-size-small-medium: 1.4rem;
+        --font-size-small: 1.2rem;
+        --font-size-smaller: 1rem;
     }
 }
 
 @media (width <= 414px) {
     :root {
-        --font-size-huge: 1.7rem;
-        --font-size-large: 1.6rem;
-        --font-size-medium: 1.5rem;
-        --font-size-smaller: 1.3rem;
+        --font-size-huge: 1.85rem;
+        --font-size-large: 1.75rem;
+        --font-size-medium: 1.4rem;
+        --font-size-small-medium: 1.25rem;
         --font-size-small: 1.1rem;
+        --font-size-smaller: 0.9rem;
+    }
+}
+
+@media (width <= 375px) {
+    :root {
+        --font-size-huge: 1.74rem;
+        --font-size-large: 1.65rem;
+        --font-size-medium: 1.35rem;
+        --font-size-small-medium: 1.2rem;
+        --font-size-small: 1rem;
+        --font-size-smaller: 0.9rem;
     }
 }
 
@@ -56,7 +70,7 @@ h2.subheader {
 }
 
 h3 {
-    font-size: var(--font-size-smaller);
+    font-size: var(--font-size-small-medium);
 }
 
 h3.subheader {
@@ -81,4 +95,11 @@ h4.subheader {
 h5 {
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
+}
+
+h5.subheader {
+    margin-top: 0;
+    font-size: var(--font-size-smaller);
+    font-weight: var(--font-weight-normal);
+    color: var(--ion-color-medium);
 }
