@@ -41,33 +41,26 @@ const slots = useSlots()
 const hasRightSlot = computed(() => !!slots['right'])
 
 type Layout = {
-    left: number,
-    right: number
-}
-type ComputedLayout = {
-    size: string,
-    sizeSm: string,
-    sizeMd: string,
-    sizeLg: string,
-    sizeXl: string,
+    left: string,
+    right: string
 }
 
 const layouts: { [key: string]: Layout } = {
     default: {
-        left: 6,
-        right: 6
+        left: "",
+        right: ""
     },
     leftBigger: {
-        left: 8,
-        right: 4
+        left: "8",
+        right: "4"
     },
     rightBigger: {
-        left: 4,
-        right: 8
+        left: "4",
+        right: "8"
     },
     noRight: {
-        left: 12,
-        right: 0
+        left: "12",
+        right: "0"
     }
 }
 
