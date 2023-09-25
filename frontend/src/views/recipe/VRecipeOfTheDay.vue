@@ -39,15 +39,9 @@ const recipeOfTheDay: ComputedRef<Recipe> = computed(() =>
 // Welcome messages
 const tasteBuddyStore = useTasteBuddyStore()
 const welcomeMessage: Ref<string[]> = ref([])
-tasteBuddyStore.getGreetings().then((greetings: string[]) => {
+tasteBuddyStore.getGreeting().then((greetings: string[]) => {
     welcomeMessage.value = greetings
 }).catch(() => {
     welcomeMessage.value = ['Hello there!']
 })
 </script>
-
-<style scoped>
-.gradient {
-    background: linear-gradient(to bottom, #2F3540 0%, rgba(0, 0, 0, 0) 100%);
-}
-</style>

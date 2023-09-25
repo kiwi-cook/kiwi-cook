@@ -23,8 +23,9 @@ import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useRecipeStore} from "@/storage";
 import {useRoute} from 'vue-router';
-import {Recipe} from '@/tastebuddy';
+import {APP_NAME, Recipe} from '@/tastebuddy';
 import {arrowBack} from "ionicons/icons";
+import {useHead} from "@unhead/vue";
 
 
 const route = useRoute()
@@ -35,4 +36,24 @@ const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeI
 
 const router = useIonRouter()
 const goBack = () => router.back()
+
+/* Head */
+useHead({
+    title: `${APP_NAME}| ${recipe?.value?.getName()}`,
+    meta: [
+        {
+            name: 'og:title',
+            content: APP_NAME
+        },
+        {
+            name: 'og:description',
+            content: `Delicious ${recipe?.value?.getName()} Made Easy!`
+        },
+        {
+            name: 'og:image',
+            content: recipe?.value?.props?.imgUrl
+        }
+    ]
+
+})
 </script>

@@ -1,9 +1,11 @@
 <template>
     <div class="recipe-wrapper">
-        <div class="recipe-header">
-            <div class="recipe-title">
-                <h1>{{ name }}</h1>
-                <h2 v-if="authors.length > 0" class="subheader">By {{ authors }}</h2>
+        <div class="recipe-header ion-margin-bottom">
+            <div class="recipe-header-text-wrapper">
+                <div class="recipe-title">
+                    <h1>{{ name }}</h1>
+                    <h2 v-if="authors.length > 0" class="subheader">By {{ authors }}</h2>
+                </div>
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
@@ -17,98 +19,88 @@
                         <IonIcon :icon="pencil"/>
                     </IonButton>
                 </IonButtons>
+                <div class="recipe-tags ion-margin-bottom">
+                    <IonChip v-for="tag in recipe?.getTags()" :key="tag" outline>
+                        {{ tag }}
+                    </IonChip>
+                </div>
+                <IonText class="recipe-description ion-margin-top">
+                    <ReadMore :text="recipe?.getDescription()"/>
+                </IonText>
             </div>
             <div class="recipe-image-wrapper">
                 <IonImg class="recipe-image" :src="recipe?.props?.imgUrl" alt="Header Image"/>
             </div>
         </div>
 
-        <IonAccordionGroup :multiple="true" :value="['description', 'items', 'steps']" expand="inset"
-                           class="recipe-categories">
-            <IonAccordion value="description">
-                <IonItem slot="header">
-                    <h2>Description</h2>
-                </IonItem>
-                <div slot="content" class="ion-padding">
-                    <IonText class="recipe-description">
-                        <ReadMore :text="recipe?.getDescription()"/>
-                    </IonText>
-                </div>
-            </IonAccordion>
-
-            <IonAccordion value="items">
-                <IonItem slot="header">
-                    <h2>Ingredients</h2>
-                </IonItem>
-                <div slot="content" class="ion-padding">
-                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
-                        <template #left>
-                            <IonCard>
-                                <IonCardContent>
-                                    <IonItem lines="none" color="light" class="recipe-servings">
-                                        <IonButtons slot="start">
-                                            <IonButton :disabled="servings == 100" @click="servings++">
-                                                <IonIcon :icon="add"/>
-                                            </IonButton>
-                                            <IonButton :disabled="servings == 1" @click="servings--">
-                                                <IonIcon :icon="remove"/>
-                                            </IonButton>
-                                        </IonButtons>
-                                        <IonLabel>
-                                            {{ servings }} Servings
-                                        </IonLabel>
-                                    </IonItem>
-                                    <ItemList :disable-click="true" :items="itemsFromRecipe"
-                                              :type="['ingredient']"/>
-                                </IonCardContent>
-                            </IonCard>
-                        </template>
-                        <template #right>
-                            <IonCard v-if="amountTools !== 0">
-                                <IonCardContent>
-                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
-                                </IonCardContent>
-                            </IonCard>
-                        </template>
-                    </TwoColumnLayout>
-                </div>
-            </IonAccordion>
-
-            <IonAccordion value="steps">
-                <IonItem slot="header">
-                    <h2>Directions</h2>
-                </IonItem>
-                <div slot="content" class="ion-padding">
-                    <template v-for="(step, stepIndex) in steps" :key="stepIndex">
+        <TwoColumnLayout layout="rightBigger">
+            <template #left>
+                <h2>Ingredients</h2>
+                <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+                    <template #left>
                         <IonCard>
-                            <IonImg :src="step?.imgUrl ?? ''"/>
-                            <IonCardHeader>
-                                <IonCardTitle>
-                                    <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
-                                        class="recipe-step-index-max"> / {{ steps.length }}</span>
-                                    <IonChip v-if="step?.duration ?? 0 > 0">
-                                        <IonIcon :icon="time"/>
-                                        <IonLabel>{{ step?.duration }} min.</IonLabel>
-                                    </IonChip>
-                                    <IonChip v-if="step?.temperature ?? 0 > 0">
-                                        <IonIcon :icon="flame"/>
-                                        <IonLabel>{{ step?.temperature }} °C</IonLabel>
-                                    </IonChip>
-                                </IonCardTitle>
-                            </IonCardHeader>
                             <IonCardContent>
-                                <IonItem lines="none">
-                                    <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                                <IonItem lines="none" color="light" class="recipe-servings">
+                                    <IonButtons slot="start">
+                                        <IonButton :disabled="servings == 100" @click="servings++">
+                                            <IonIcon :icon="add"/>
+                                        </IonButton>
+                                        <IonButton :disabled="servings == 1" @click="servings--">
+                                            <IonIcon :icon="remove"/>
+                                        </IonButton>
+                                    </IonButtons>
+                                    <IonLabel>
+                                        {{ servings }} Servings
+                                    </IonLabel>
                                 </IonItem>
-                                <IonItem lines="none">
-                                    <div v-html="step?.printDescription('item-highlight')"></div>
-                                </IonItem>
+                                <ItemList :disable-click="true" :items="itemsFromRecipe"
+                                          :type="['ingredient']"/>
                             </IonCardContent>
                         </IonCard>
                     </template>
-                </div>
-            </IonAccordion>
-        </IonAccordionGroup>
+                    <template v-if="amountTools !== 0" #right>
+                        <IonCard>
+                            <IonCardContent>
+                                <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
+                            </IonCardContent>
+                        </IonCard>
+                    </template>
+                </TwoColumnLayout>
+            </template>
+
+            <template #right>
+                <h2>Directions</h2>
+                <template v-for="(step, stepIndex) in steps" :key="stepIndex">
+                    <IonCard>
+                        <IonImg :src="step?.imgUrl ?? ''"/>
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                <h3>
+                                    <span class="recipe-step-index">{{ stepIndex + 1 }}</span><span
+                                        class="recipe-step-index-max"> / {{ steps.length }}</span>
+                                </h3>
+                                <IonChip v-if="step?.duration ?? 0 > 0">
+                                    <IonIcon :icon="time"/>
+                                    <IonLabel>{{ step?.duration }} min.</IonLabel>
+                                </IonChip>
+                                <IonChip v-if="step?.temperature ?? 0 > 0">
+                                    <IonIcon :icon="flame"/>
+                                    <IonLabel>{{ step?.temperature }} °C</IonLabel>
+                                </IonChip>
+                            </IonCardTitle>
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <IonItem lines="none">
+                                <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                            </IonItem>
+                            <IonItem lines="none">
+                                <div v-html="step?.printDescription('item-highlight')"></div>
+                            </IonItem>
+                        </IonCardContent>
+                    </IonCard>
+                </template>
+            </template>
+        </TwoColumnLayout>
 
         <IonItem lines="none">
             <IonNote>
@@ -121,8 +113,6 @@
 <script setup lang="ts">
 import {computed, ComputedRef, PropType, ref, toRefs, watch} from 'vue';
 import {
-    IonAccordion,
-    IonAccordionGroup,
     IonButton,
     IonButtons,
     IonCard,
@@ -145,9 +135,8 @@ import {add, flame, heart, heartOutline, pencil, remove, shareSocial, time} from
 import {useTasteBuddyStore} from "@/storage";
 import {CanShareResult, Share} from "@capacitor/share";
 import ReadMore from "@/components/utility/ReadMore.vue";
-import {useHead} from '@unhead/vue'
 
-
+/* Recipe */
 const props = defineProps({
     recipe: {
         type: Object as PropType<Recipe>,
@@ -187,6 +176,9 @@ watch(servings, (newServings, oldServings) => {
     }
 });
 
+/* Segments */
+const selectedView = ref('ingredients')
+
 /* Share */
 const shareRecipe = () => recipe?.value?.share();
 // check if the browser supports sharing
@@ -204,42 +196,27 @@ const editRecipe = () => {
         router.push({name: 'RecipeEditor', params: {id: recipe?.value.getId()}})
     }
 }
-
-/* Head */
-useHead({
-    title: 'Taste Buddy - ' + name.value,
-    meta: [
-        {
-            name: 'og:title',
-            content: 'Taste Buddy'
-        },
-        {
-            name: 'og:description',
-            content: `Delicious ${recipe?.value?.getName()} Made Easy!`
-        },
-        {
-            name: 'og:image',
-            content: recipe?.value?.props?.imgUrl
-        }
-    ]
-
-})
 </script>
 
 <style>
+.item-highlight {
+    font-weight: bold;
+    color: var(--ion-color-primary);
+}
+</style>
+
+<style scoped>
 .recipe-wrapper {
     width: 100%;
 }
 
-.recipe-categories {
-    margin-left: 0;
-    margin-right: 0;
-}
-
 .recipe-description {
     white-space: pre-wrap;
+    font-size: var(--font-size-smaller);
     color: var(--ion-color-medium);
-    font-size: var(--font-size-small);
+    line-height: 150%;
+    overflow-y: auto;
+    max-height: 250px;
 }
 
 .recipe-header {
@@ -249,40 +226,43 @@ useHead({
 
 .recipe-image-wrapper {
     flex: 1;
+    width: 100%;
 }
 
 .recipe-image::part(image) {
-    max-width: 100%;
+    max-width: 400px;
     height: auto;
     border-radius: var(--border-radius);
+    margin: auto;
+}
+
+.recipe-header-text-wrapper {
+    flex: 2;
+    margin: 0 var(--margin) 0 0;
 }
 
 .recipe-title {
-    flex: 2;
     font-size: 1.5rem;
     font-weight: bold;
-    margin: 0;
 }
 
-@media (max-width: 768px) {
+.recipe-tags {
+    margin-top: var(--margin);
+}
+
+@media (max-width: 736px) {
     .recipe-header {
         flex-direction: column;
         display: flex;
         align-items: flex-start;
     }
 
-    .recipe-title {
+    .recipe-header-text-wrapper {
         margin-bottom: var(--margin-medium);
     }
-}
 
-@media (min-width: 768px) {
     .recipe-image-wrapper {
-        display: block;
-    }
-
-    .recipe-title {
-        margin-right: 20px;
+        justify-content: center;
     }
 }
 
@@ -290,8 +270,8 @@ useHead({
     --border-radius: 15px;
 }
 
-.item-highlight {
-    font-weight: bold;
-    color: var(--ion-color-primary);
+.recipe-step-index-max {
+    font-size: var(--font-size-small);
+    font-weight: var(--font-weight-normal);
 }
 </style>

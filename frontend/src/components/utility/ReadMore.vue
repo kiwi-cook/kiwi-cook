@@ -1,6 +1,6 @@
 <template>
     {{ computedText }}
-    <a class="read-more-button" @click="isExpanded = !isExpanded">
+    <a v-if="showButton" class="read-more-button" @click="isExpanded = !isExpanded">
         {{ isExpanded ? 'Read less' : 'Read more' }}
     </a>
 </template>
@@ -22,8 +22,10 @@ const props = defineProps({
 const {text, maxLength} = toRefs(props);
 const isExpanded = ref(false);
 
+const showButton = computed(() => text.value.length > maxLength.value)
+
 const computedText = computed(() => {
-    if (isExpanded.value) {
+    if (isExpanded.value || text.value.length <= maxLength.value) {
         return text.value;
     } else {
         return text.value.substring(0, maxLength.value) + '...';
@@ -32,7 +34,7 @@ const computedText = computed(() => {
 
 </script>
 
-<style scoped>
+<style>
 .read-more-button {
     margin-left: 8px;
     color: var(--ion-color-primary);

@@ -272,11 +272,11 @@ export class Step {
         } else {
             const temperature = RegExp(/(\d+)°([CF]?)/).exec(description ?? '')
             const unit = temperature?.[2] ?? 'C'
-            let unitFactor = 1
+            let formula: (a: number) => number = (a) => a
             if (unit === 'F') {
-                unitFactor = 1.8
+                formula = (a) => (a - 32) / 1.8
             }
-            temp = parseInt(temperature?.[1] ?? '0') * unitFactor
+            temp = formula(parseInt(temperature?.[1] ?? '0'))
         }
         return temp
     }

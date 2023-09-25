@@ -1,9 +1,7 @@
 <template>
     <div class="recipe-preview" @click="toRecipe">
         <div class="recipe-img-title-wrapper">
-            <div class="recipe-img-wrapper">
-                <IonImg :src="recipe.props.imgUrl" class="recipe-img"/>
-            </div>
+            <img :src="recipe.props.imgUrl" class="recipe-img"/>
             <div class="recipe-title-author-mobile">
                 <h2 class="recipe-title">
                     {{ recipe.getName() }}
@@ -19,7 +17,7 @@
                         <IonLabel>{{ recipe.getPrice() }} €</IonLabel>
                     </IonChip>
                     <template v-for="(tag, tagIndex) in recipe.getTags()" :key="tagIndex">
-                        <IonChip color="light">
+                        <IonChip color="medium">
                             <IonLabel>{{ tag }}</IonLabel>
                         </IonChip>
                     </template>
@@ -56,7 +54,7 @@
 <script setup lang="ts">
 import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/tastebuddy";
-import {IonChip, IonImg, IonLabel, useIonRouter} from "@ionic/vue";
+import {IonChip, IonLabel, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 
 const props = defineProps({
@@ -139,37 +137,13 @@ const toRecipe = () => {
     }
 }
 
-.recipe-img-wrapper {
-    position: relative;
-    margin: 25px;
-    width: 250px; /* Adjust this value to your desired size */
-    height: 250px; /* Same value as width */
-    overflow: hidden;
-    border-radius: var(--border-radius);
+.recipe-img {
+    width: 300px;
+    height: 300px;
+    object-fit: cover; /* Crop the image if necessary */
+    border-radius: 8px; /* Optional: Add rounded corners */
     box-shadow: var(--box-shadow-strong);
-}
-
-@media (width < 768px) {
-    .recipe-img-wrapper {
-        width: 150px;
-        height: 150px;
-    }
-}
-
-@media (width < 576px) {
-    .recipe-img-wrapper {
-        width: 100px;
-        height: 100px;
-    }
-}
-
-.recipe-img::part(image) {
-    position: absolute;
-    width: auto;
-    height: 100%;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    margin: var(--margin);
 }
 
 .recipe-details {

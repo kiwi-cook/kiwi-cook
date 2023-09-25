@@ -1,19 +1,21 @@
 <template>
-    <IonCard class="mini-recipe-card" @click="routeToRecipe()">
-        <IonImg :src="recipe?.props.imgUrl"></IonImg>
-        <IonCardHeader>
-            <IonCardSubtitle>
-                {{ recipe?.getDuration() }} min.
-            </IonCardSubtitle>
-            <IonCardTitle class="mini-recipe-card-title">{{ recipe?.getName() }}</IonCardTitle>
-        </IonCardHeader>
-    </IonCard>
+    <div class="preview-container" @click="routeToRecipe()">
+        <img class="preview-image" :src="recipe?.props?.imgUrl" :alt="`Preview Image of ${name}`">
+        <h3 class="preview-title">{{ name }}</h3>
+        <h4 class="preview-subtitle">
+            <IonChip v-if="duration ?? 0 > 0">
+                <IonIcon :icon="time"/>
+                <IonLabel>{{ duration }} min.</IonLabel>
+            </IonChip>
+        </h4>
+    </div>
 </template>
 
 <script setup lang="ts">
-import {PropType, toRefs} from "vue";
+import {computed, PropType, toRefs} from "vue";
 import {Recipe} from "@/tastebuddy";
-import {IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonImg, useIonRouter} from "@ionic/vue";
+import {IonChip, IonIcon, IonLabel, useIonRouter} from "@ionic/vue";
+import {time} from "ionicons/icons";
 
 const props = defineProps({
     recipe: {
@@ -24,25 +26,47 @@ const props = defineProps({
 
 const {recipe} = toRefs(props)
 const router = useIonRouter();
-const routeToRecipe = () => router.push(recipe.value.getRoute())
+const routeToRecipe = () => router.push(recipe?.value?.getRoute())
+const name = computed(() => recipe?.value?.getName())
+const duration = computed(() => recipe?.value?.getDuration())
 </script>
 
 <style scoped>
-.mini-recipe-card {
-    width: 200px;
-    box-shadow: var(--box-shadow) !important;
+.preview-container {
+    width: 150px; /* Set a maximum width for the preview */
+    margin: 0 var(--margin) 0 auto;
     cursor: pointer;
-    transition: all 0.3s ease-in-out;
 }
 
-.mini-recipe-card:hover {
+.preview-image {
+    width: 150px; /* Set a fixed width */
+    height: 150px; /* Set a fixed height */
+    object-fit: cover; /* Crop the image if necessary */
+    border-radius: 8px; /* Optional: Add rounded corners */
+    border: var(--border);
+    transition: var(--transition);
+}
+
+.preview-image:hover {
     box-shadow: var(--box-shadow-hover) !important;
     transform: scale(1.02, 1.02);
 }
 
-.mini-recipe-card-title {
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-bold);
-    margin-bottom: 5px;
+.preview-title {
+    /* font */
+    font-size: var(--font-size-smaller);
+    font-weight: var(--font-weight-light);
+    color: var(--ion-color-medium);
+
+    /* sizing */
+    margin-top: var(--margin-small);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.preview-subtitle {
+    font-size: var(--font-size-tiny);
+    font-weight: var(--font-weight-light);
+
 }
 </style>

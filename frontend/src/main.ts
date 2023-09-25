@@ -43,6 +43,7 @@ import './theme/font.css';
 
 /* Icons */
 import 'ionicons/icons';
+import {logDebug} from "@/tastebuddy";
 
 /* Head */
 const head = createHead()
@@ -59,6 +60,10 @@ const app = createApp(App)
     .use(head)
     .use(pinia)
     .use(router)
+
+/* Configure app */
+app.config.performance = true
+logDebug('main.config', app.config)
 
 router.isReady().then(() => {
     app.mount('#tastebuddy');

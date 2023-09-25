@@ -4,14 +4,16 @@
             <TasteBuddyLogo/>
         </IonCardHeader>
         <IonCardContent>
-            <IonItem>
+            <IonItem lines="none">
                 <IonInput v-model="username" :clear-input="true" autocomplete="username" label="Username"
                           label-placement="floating" type="text"/>
             </IonItem>
-            <IonItem>
+            <IonItem lines="none">
                 <IonInput v-model="password" :clear-input="true" autocomplete="current-password" label="Password"
                           label-placement="floating" :type="visible ? 'text' : 'password'"/>
-                <IonCheckbox slot="end" v-model="visible" color="primary"/>
+                <IonCheckbox slot="end" v-model="visible" color="primary"
+                             label-placement="end">Show password
+                </IonCheckbox>
             </IonItem>
             <IonButton :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</IonButton>
         </IonCardContent>
@@ -69,9 +71,9 @@ const authenticate = () => {
 
 <style scoped>
 .login-card {
-    margin: 32px;
+    margin: var(--margin);
     /* max-width: 500px; */
-    padding: 16px;
+    padding: var(--padding);
     text-align: center;
 }
 </style>

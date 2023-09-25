@@ -1,12 +1,14 @@
 <template>
-    <IonPage id="login-page">
+    <IonPage>
         <IonContent :fullscreen="true">
-            <div class="content">
-                <h1 class="header-title">
-                    Hello 🍻
-                </h1>
+            <div class="page">
+                <div class="content">
+                    <h1 class="header-title">
+                        Hello 🍻
+                    </h1>
 
-                <SignIn/>
+                    <SignIn/>
+                </div>
             </div>
         </IonContent>
     </IonPage>

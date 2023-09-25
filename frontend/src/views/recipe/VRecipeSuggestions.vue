@@ -8,7 +8,7 @@
                     <!-- Searchbar for ingredients, tools and recipes -->
                     <Searchbar v-model="filterInput"
                                class="searchbar"
-                               :elements="[...filteredTags, ...filteredItems, ...filteredRecipes]"
+                               :elements="[...filteredRecipes, ...filteredItems, ...filteredTags]"
                                placeholder="What ingredients or recipes are you craving today?"
                                @select-item="includeItem($event)"
                                @select-recipe="routeRecipe($event)"
@@ -53,10 +53,10 @@
                                         What's in your inventory?
                                     </IonLabel>
                                 </IonItem>
-                                <div slot="content" class="ion-padding">
+                                <div slot="content">
+                                    <!-- Suggested and selected items -->
                                     <IonCard>
                                         <IonCardContent>
-                                            <!-- Suggested and selected items -->
                                             <List :list="[...selectedItems, ...itemSuggestions]"
                                                   :load-all="true">
                                                 <template #element="{ element }">
@@ -68,15 +68,19 @@
                                                             <div class="item-buttons">
                                                                 <IonButton
                                                                     :color="itemQueries[(element as Item).getId()] ? 'success' : 'light'"
+                                                                    :disabled="itemQueries[(element as Item).getId()]"
                                                                     aria-description="Include item"
                                                                     class="item-button"
+                                                                    shape="round"
                                                                     @click="includeItem(element)">
                                                                     <IonIcon :icon="add"/>
                                                                 </IonButton>
                                                                 <IonButton
                                                                     :color="itemQueries[(element as Item).getId()] === false ? 'danger' : 'light'"
+                                                                    :disabled="itemQueries[(element as Item).getId()] === false"
                                                                     aria-description="Exclude item"
                                                                     class="item-button"
+                                                                    shape="round"
                                                                     @click="excludeItem(element)">
                                                                     <IonIcon :icon="remove"/>
                                                                 </IonButton>
@@ -85,6 +89,7 @@
                                                                     aria-description="Remove item"
                                                                     class="item-button"
                                                                     color="light"
+                                                                    shape="round"
                                                                     @click="removeItem(element)">
                                                                     <IonIcon :icon="close"/>
                                                                 </IonButton>
@@ -105,7 +110,7 @@
                                         What's your time limit?
                                     </IonLabel>
                                 </IonItem>
-                                <div slot="content" class="ion-padding">
+                                <div slot="content">
                                     <IonCard>
                                         <IonCardContent>
                                             <template v-for="time in cookingTimes" :key="time">
@@ -134,10 +139,10 @@
                             <IonAccordion class="suggestion-filter" value="price">
                                 <IonItem slot="header">
                                     <IonLabel>
-                                        What is your budget?
+                                        What's your budget?
                                     </IonLabel>
                                 </IonItem>
-                                <div slot="content" class="ion-padding">
+                                <div slot="content">
                                     <IonCard>
                                         <IonCardContent>
                                             <template v-for="price in prices" :key="price">
@@ -348,9 +353,10 @@ const maxCookingTime = ref<number | undefined>(undefined)
 watch(maxCookingTime, () => searchFilters.value.add('duration'))
 
 // Recipe suggestions
+const suggestedRecipesLength = 15
 const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
     const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
-        .filter(() => Math.random() < 1 / (recipes.value.length * 0.15)).slice(0, 6)
+        .filter(() => Math.random() < 1 / (recipes.value.length * 0.1)).slice(0, suggestedRecipesLength)
     suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
     return suggestedRecipes
 })
@@ -400,24 +406,28 @@ section {
 }
 
 .item-buttons {
-    margin-left: var(--margin-medium);
-    margin-right: var(--margin-medium);
     display: flex;
 }
 
 .item-button {
     margin: 0;
+    font-size: var(--font-size-smaller);
 }
 
 .item-button::part(native) {
     border-radius: 0;
-    padding: 10px;
+    padding: 3px 12px;
 }
 
 @media (width <= 414px) {
     .item-button::part(native) {
-        padding: 5px;
-        font-size: var(--font-size-tiny);
+        padding: 2px 8px;
+    }
+}
+
+@media (width <= 350px) {
+    .item-button::part(native) {
+        padding: 1px 4px;
     }
 }
 

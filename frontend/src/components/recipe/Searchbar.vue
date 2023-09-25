@@ -4,18 +4,7 @@
                       class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
-                <IonList>
-                    <IonItemGroup v-if="tags.length > 0">
-                        <IonItemDivider>
-                            <IonLabel>Tags</IonLabel>
-                        </IonItemDivider>
-                        <div class="tags">
-                            <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
-                                     class="link" @click="selectTag(tag)">
-                                {{ tag }}
-                            </IonChip>
-                        </div>
-                    </IonItemGroup>
+                <IonList lines="none" class="ion-no-padding">
                     <IonItemGroup v-if="recipes.length > 0">
                         <IonItemDivider>
                             <IonLabel>Recipes</IonLabel>
@@ -23,6 +12,17 @@
                         <IonItem v-for="(recipe, recipeIndex) in recipes" :key="recipeIndex"
                                  class="link" @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
+                        </IonItem>
+                    </IonItemGroup>
+                    <IonItemGroup v-if="tags.length > 0">
+                        <IonItemDivider>
+                            <IonLabel>Tags</IonLabel>
+                        </IonItemDivider>
+                        <IonItem lines="none">
+                            <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
+                                     class="link" @click="selectTag(tag)">
+                                {{ tag }}
+                            </IonChip>
                         </IonItem>
                     </IonItemGroup>
                     <IonItemGroup v-if="items.length > 0">

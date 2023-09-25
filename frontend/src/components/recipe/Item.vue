@@ -10,7 +10,9 @@
         </IonLabel>
         <div slot="end">
             <slot name="end">
-                {{ mappedItem.servings }} {{ mappedItem.unit }}
+                <template v-if="mappedItem.servings !== 0">
+                    {{ mappedItem.servings }} {{ mappedItem.unit }}
+                </template>
             </slot>
         </div>
     </IonItem>
@@ -52,7 +54,7 @@ const mappedItem = computed<CustomItem | undefined>(() => {
     if (!item?.value) {
         return undefined;
     }
-    const servings = item?.value instanceof StepItem ? item?.value?.servings : 0;
+    const servings = item?.value instanceof StepItem && item?.value?.type === 'ingredient' ? item?.value?.servings : 0;
 
     return {
         name: item?.value?.getName(),
@@ -70,7 +72,6 @@ const select = () => {
 </script>
 
 <style scoped>
-
 ion-item.item::part(native) {
     padding: 0;
     min-width: 230px;
