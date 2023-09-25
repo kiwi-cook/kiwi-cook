@@ -202,11 +202,10 @@ func (app *TasteBuddyApp) AddRecipes(recipes []Recipe) error {
 
 // DeleteRecipes deletes recipe by id from database
 func (app *TasteBuddyApp) DeleteRecipes(recipeIds []string) error {
-
 	// Delete recipe by setting "del" to true
 	ctx := DefaultContext()
 	for _, id := range recipeIds {
-		if _, err := app.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "del", Value: true}}}}); err != nil {
+		if _, err := app.GetRecipesCollection().UpdateByID(ctx, id, bson.D{{Key: "$set", Value: bson.D{{Key: "deleted", Value: true}}}}); err != nil {
 			app.Log("DeleteRecipes", "Delete recipe "+id+" from database")
 			return app.LogError("DeleteRecipes.UpdateByID", err)
 		}
