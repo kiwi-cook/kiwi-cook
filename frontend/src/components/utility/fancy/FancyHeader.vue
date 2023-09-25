@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import {PropType, Ref, ref, toRefs} from "vue";
+import {PropType, Ref, ref, toRefs, watch} from "vue";
 import FancyText from "@/components/utility/fancy/FancyText.vue";
 
 const props = defineProps({
@@ -35,11 +35,14 @@ const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<numb
     return true
 }
 
-interval = setInterval(() => {
-    if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
-        clearInterval(interval)
-    }
-}, 150)
+const startTyping = () => {
+    interval = setInterval(() => {
+        if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
+            clearInterval(interval)
+        }
+    }, 150)
+}
+watch(bigText, startTyping)
 </script>
 
 <style scoped>

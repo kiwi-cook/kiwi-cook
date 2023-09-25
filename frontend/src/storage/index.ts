@@ -180,26 +180,29 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         /**
          * Get the greetings
          */
-        async getGreetings(): Promise<string[]> {
-            logDebug('fetchGreetings', 'fetching greetings')
-            let greetings: string[][] = []
+        async getGreeting(): Promise<string[]> {
+            const selectRand = (greetings: string[][]): string[] => greetings[Math.floor(Math.random() * greetings.length)]
+
             if (this.greetings.length > 0) {
-                greetings = this.greetings
-            } else {
-                greetings = await getCachedItem<string[][]>('greetings').then(async (cachedGreetings) => {
-                    if (cachedGreetings.isOld) {
-                        return await fetch('https://raw.githubusercontent.com/taste-buddy/greetings/master/greetings.json').then(async (response) => {
-                            return response.json().then((greetings: string[][]) => {
-                                this.greetings = greetings
-                                setCachedItem('greetings', greetings)
-                                return greetings
-                            })
-                        })
-                    }
-                    return cachedGreetings.value ?? []
+                return new Promise((resolve) => {
+                    resolve(selectRand(this.greetings))
                 })
+            } else {
+                return getCachedItem<string[][]>('greetings')
+                    .then((cachedGreetings) => {
+                        if (cachedGreetings.isOld) {
+                            logDebug('fetchGreetings', 'fetching greetings')
+                            return fetch('https://raw.githubusercontent.com/taste-buddy/greetings/master/greetings.json')
+                                .then((response) => response.json())
+                                .then((greetings: string[][]) => {
+                                    this.greetings = greetings
+                                    setCachedItem('greetings', greetings)
+                                    return greetings
+                                })
+                        }
+                        return cachedGreetings.value ?? []
+                    }).then((greetings: string[][]) => selectRand(greetings))
             }
-            return greetings[Math.floor(Math.random() * greetings.length)]
         }
     }
 })
