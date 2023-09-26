@@ -1,20 +1,20 @@
 <template>
     <IonGrid>
         <IonRow>
-            <IonCol
-                :size-xl="selectedLayout.left"
-                :size-lg="selectedLayout.left"
-                :size-md="selectedLayout.left"
-                size-sm="12"
-                size="12"
-                v-bind="$props">
+            <IonCol class="left"
+                    :size-xl="selectedLayout.left"
+                    :size-lg="selectedLayout.left"
+                    size-md="6"
+                    size-sm="12"
+                    size="12"
+                    v-bind="$props">
                 <slot name="left"></slot>
             </IonCol>
 
-            <IonCol v-if="$slots.right"
+            <IonCol v-if="$slots.right" class="right"
                     :size-xl="selectedLayout.right"
                     :size-lg="selectedLayout.right"
-                    :size-md="selectedLayout.right"
+                    size-md="6"
                     size-sm="12"
                     size="12"
                     v-bind="$props">
@@ -66,3 +66,23 @@ const layouts: { [key: string]: Layout } = {
 
 const selectedLayout = computed(() => hasRightSlot.value ? layouts[layout.value] : layouts["noRight"])
 </script>
+
+<style>
+.left {
+    padding-right: 1rem;
+}
+
+.right {
+    padding-left: 1rem;
+}
+
+@media (max-width <= 767px) {
+    .left {
+        padding-right: 0;
+    }
+
+    .right {
+        padding-left: 0;
+    }
+}
+</style>

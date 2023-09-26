@@ -35,37 +35,39 @@
 
         <TwoColumnLayout layout="rightBigger">
             <template #left>
-                <h2>Ingredients</h2>
-                <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
-                    <template #left>
-                        <IonCard>
-                            <IonCardContent>
-                                <IonItem lines="none" color="light" class="recipe-servings">
-                                    <IonButtons slot="start">
-                                        <IonButton :disabled="servings == 100" @click="servings++">
-                                            <IonIcon :icon="add"/>
-                                        </IonButton>
-                                        <IonButton :disabled="servings == 1" @click="servings--">
-                                            <IonIcon :icon="remove"/>
-                                        </IonButton>
-                                    </IonButtons>
-                                    <IonLabel>
-                                        {{ servings }} Servings
-                                    </IonLabel>
-                                </IonItem>
-                                <ItemList :disable-click="true" :items="itemsFromRecipe"
-                                          :type="['ingredient']"/>
-                            </IonCardContent>
-                        </IonCard>
-                    </template>
-                    <template v-if="amountTools !== 0" #right>
-                        <IonCard>
-                            <IonCardContent>
-                                <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
-                            </IonCardContent>
-                        </IonCard>
-                    </template>
-                </TwoColumnLayout>
+                <div class="sticky">
+                    <h2>Ingredients</h2>
+                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+                        <template #left>
+                            <IonCard>
+                                <IonCardContent>
+                                    <IonItem lines="none" color="light" class="recipe-servings">
+                                        <IonButtons slot="start">
+                                            <IonButton :disabled="servings == 100" @click="servings++">
+                                                <IonIcon :icon="add"/>
+                                            </IonButton>
+                                            <IonButton :disabled="servings == 1" @click="servings--">
+                                                <IonIcon :icon="remove"/>
+                                            </IonButton>
+                                        </IonButtons>
+                                        <IonLabel>
+                                            {{ servings }} Servings
+                                        </IonLabel>
+                                    </IonItem>
+                                    <ItemList :disable-click="true" :items="itemsFromRecipe"
+                                              :type="['ingredient']"/>
+                                </IonCardContent>
+                            </IonCard>
+                        </template>
+                        <template v-if="amountTools !== 0" #right>
+                            <IonCard>
+                                <IonCardContent>
+                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
+                                </IonCardContent>
+                            </IonCard>
+                        </template>
+                    </TwoColumnLayout>
+                </div>
             </template>
 
             <template #right>

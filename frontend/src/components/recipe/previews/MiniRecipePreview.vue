@@ -1,7 +1,7 @@
 <template>
-    <div class="preview-container" @click="routeToRecipe()">
-        <img class="preview-image" :src="recipe?.props?.imgUrl" :alt="`Preview Image of ${name}`">
-        <h3 class="preview-title">{{ name }}</h3>
+    <div class="mini-recipe-preview-container" @click="routeToRecipe()">
+        <img class="mini-recipe-preview-image" :src="recipe?.props?.imgUrl" :alt="`Preview Image of ${name}`">
+        <h3 class="mini-recipe-preview-title">{{ name }}</h3>
         <h4 class="preview-subtitle">
             <IonChip v-if="duration ?? 0 > 0">
                 <IonIcon :icon="time"/>
@@ -31,28 +31,44 @@ const name = computed(() => recipe?.value?.getName())
 const duration = computed(() => recipe?.value?.getDuration())
 </script>
 
-<style scoped>
-.preview-container {
-    width: 150px; /* Set a maximum width for the preview */
+<style>
+:root {
+    --mini-recipe-image-size: 200px;
+}
+
+@media (width <= 1280px) {
+    :root {
+        --mini-recipe-image-size: 170px;
+    }
+}
+
+@media (width <= 768px) {
+    :root {
+        --mini-recipe-image-size: 150px;
+    }
+}
+
+.mini-recipe-preview-container {
+    width: var(--mini-recipe-image-size); /* Set a maximum width for the preview */
     margin: 0 var(--margin) 0 auto;
     cursor: pointer;
 }
 
-.preview-image {
-    width: 150px; /* Set a fixed width */
-    height: 150px; /* Set a fixed height */
+.mini-recipe-preview-image {
+    width: var(--mini-recipe-image-size); /* Set a fixed width */
+    height: var(--mini-recipe-image-size); /* Set a fixed height */
     object-fit: cover; /* Crop the image if necessary */
     border-radius: 8px; /* Optional: Add rounded corners */
     border: var(--border);
     transition: var(--transition);
 }
 
-.preview-image:hover {
+.mini-recipe-preview-image:hover {
     box-shadow: var(--box-shadow-hover) !important;
     transform: scale(1.02, 1.02);
 }
 
-.preview-title {
+.mini-recipe-preview-title {
     /* font */
     font-size: var(--font-size-smaller);
     font-weight: var(--font-weight-light);

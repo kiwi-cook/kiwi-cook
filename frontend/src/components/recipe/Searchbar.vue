@@ -1,6 +1,6 @@
 <template>
     <div class="searchbar-wrapper">
-        <IonSearchbar v-model="searchInput" :debounce="500" :placeholder="placeholder"
+        <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
                       class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
@@ -18,7 +18,7 @@
                         <IonItemDivider>
                             <IonLabel>Tags</IonLabel>
                         </IonItemDivider>
-                        <IonItem lines="none">
+                        <IonItem lines="none" class="over-x-scroll">
                             <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
                                      class="link" @click="selectTag(tag)">
                                 {{ tag }}
@@ -133,7 +133,7 @@ watch(searchInput, (newFilterInput) => {
 .searchbar-list-wrapper {
     position: absolute;
     left: 0;
-    z-index: 10;
+    z-index: 110;
     width: 100%;
 }
 

@@ -52,8 +52,15 @@ ion-img::part(image) {
 
 .over-x-scroll {
     overflow-x: scroll;
+    width: 100%;
 }
 
 .over-y-scroll {
     overflow-y: scroll;
+}
+
+.sticky {
+    position: sticky;
+    top: 15px;
+    z-index: 100;
 }
