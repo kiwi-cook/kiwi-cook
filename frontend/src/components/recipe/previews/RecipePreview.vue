@@ -84,6 +84,40 @@ const price = computed(() => recipe.value?.getPrice())
 const tags = computed(() => recipe.value?.getTags().slice(0, 3))
 </script>
 
+<style>
+
+:root {
+    --recipe-preview-image-size: 200px;
+}
+
+@media (width <= 1280px) {
+    :root {
+        --recipe-preview-image-size: 170px;
+    }
+}
+
+@media (width <= 768px) {
+    :root {
+        --recipe-preview-image-size: 150px;
+    }
+}
+
+.recipe-preview-image {
+    /* Layout */
+    width: var(--recipe-preview-image-size); /* Set a fixed width */
+    height: var(--recipe-preview-image-size); /* Set a fixed height */
+    object-fit: cover; /* Crop the image if necessary */
+    border-radius: 8px; /* Optional: Add rounded corners */
+    border: var(--border);
+
+    /* Animation */
+    transition: var(--transition);
+
+    /* Positioning */
+    margin: var(--margin);
+}
+</style>
+
 <style scoped>
 .recipe-preview {
     border: var(--border);
@@ -142,20 +176,6 @@ const tags = computed(() => recipe.value?.getTags().slice(0, 3))
     }
 }
 
-.recipe-preview-image {
-    /* Layout */
-    width: 150px; /* Set a fixed width */
-    height: 150px; /* Set a fixed height */
-    object-fit: cover; /* Crop the image if necessary */
-    border-radius: 8px; /* Optional: Add rounded corners */
-    border: var(--border);
-
-    /* Animation */
-    transition: var(--transition);
-
-    /* Positioning */
-    margin: var(--margin);
-}
 
 .recipe-preview-image:hover {
     box-shadow: var(--box-shadow-hover) !important;

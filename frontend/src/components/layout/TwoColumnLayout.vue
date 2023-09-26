@@ -2,9 +2,9 @@
     <IonGrid>
         <IonRow>
             <IonCol class="left"
-                    :size-xl="selectedLayout.left"
-                    :size-lg="selectedLayout.left"
-                    size-md="6"
+                    :size-xl="selectedLayout.left.xl"
+                    :size-lg="selectedLayout.left.lg"
+                    :size-md="selectedLayout.left.md"
                     size-sm="12"
                     size="12"
                     v-bind="$props">
@@ -12,9 +12,9 @@
             </IonCol>
 
             <IonCol v-if="$slots.right" class="right"
-                    :size-xl="selectedLayout.right"
-                    :size-lg="selectedLayout.right"
-                    size-md="6"
+                    :size-xl="selectedLayout.right.xl"
+                    :size-lg="selectedLayout.right.lg"
+                    :size-md="selectedLayout.right.md"
                     size-sm="12"
                     size="12"
                     v-bind="$props">
@@ -41,26 +41,66 @@ const slots = useSlots()
 const hasRightSlot = computed(() => !!slots['right'])
 
 type Layout = {
-    left: string,
-    right: string
+    left: {
+        xl: string,
+        lg: string,
+        md: string
+    },
+    right: {
+        xl: string,
+        lg: string,
+        md: string
+    }
 }
 
 const layouts: { [key: string]: Layout } = {
     default: {
-        left: "",
-        right: ""
+        left: {
+            xl: "6",
+            lg: "6",
+            md: "12"
+        },
+        right: {
+            xl: "6",
+            lg: "6",
+            md: "12"
+        }
     },
     leftBigger: {
-        left: "8",
-        right: "4"
+        left: {
+            xl: "8",
+            lg: "8",
+            md: "7"
+        },
+        right: {
+            xl: "4",
+            lg: "4",
+            md: "5"
+        }
     },
     rightBigger: {
-        left: "4",
-        right: "8"
+        left: {
+            xl: "4",
+            lg: "4",
+            md: "5"
+        },
+        right: {
+            xl: "8",
+            lg: "8",
+            md: "7"
+        }
     },
     noRight: {
-        left: "12",
-        right: "0"
+        left: {
+            xl: "12",
+            lg: "12",
+            md: "12"
+        },
+        right: {
+            xl: "0",
+            lg: "0",
+            md: "0"
+        }
     }
 }
 

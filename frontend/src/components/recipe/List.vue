@@ -1,5 +1,5 @@
 <template>
-    <div :class="['element-list-wrapper', {'horizontal': horizontal}]">
+    <div :class="['element-list-wrapper', {'horizontal': horizontal}]" :style="{'max-height': maxHeight}">
         <ul v-if="loadedFilteredElements.length > 0" :tabindex="0"
             :class="['element-list', {'horizontal': horizontal}, {'wrap': !noWrap}]">
             <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex"
@@ -41,6 +41,11 @@ const props = defineProps({
         type: Boolean,
         required: false,
         default: false
+    },
+    maxHeight: {
+        type: String,
+        required: false,
+        default: '100%'
     },
     loadAll: {
         type: Boolean,
@@ -106,6 +111,7 @@ watch(loadedElements, () => {
 <style scoped>
 .element-list-wrapper {
     overflow-y: scroll;
+    height: 100%;
 }
 
 .element-list-wrapper.horizontal {

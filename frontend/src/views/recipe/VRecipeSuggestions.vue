@@ -62,7 +62,7 @@
                                                 <IonCard>
                                                     <IonCardContent>
                                                         <List :list="[...selectedItems, ...itemSuggestions]"
-                                                              :load-all="true">
+                                                              :load-all="true" max-height="400px">
                                                             <template #element="{ element }">
                                                                 <ItemComponent
                                                                     :disable-click="true"
