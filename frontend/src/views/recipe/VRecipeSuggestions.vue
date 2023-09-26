@@ -236,7 +236,7 @@
                                 </h4>
                                 <List :list="searchedRecipes">
                                     <template #element="{ element }">
-                                        <RecipePreview :recipe-suggestion="element as RecipeSuggestion"/>
+                                        <RecipePreview :recipe="element as RecipeSuggestion"/>
                                     </template>
                                 </List>
                             </section>

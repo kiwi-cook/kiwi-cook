@@ -37,7 +37,7 @@
             <template #left>
                 <div class="sticky">
                     <h2>Ingredients</h2>
-                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" size="12" size-lg="6">
+                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" layout="leftBigger">
                         <template #left>
                             <IonCard>
                                 <IonCardContent>

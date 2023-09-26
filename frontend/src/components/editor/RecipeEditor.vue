@@ -134,11 +134,11 @@
 
                 <IonInput v-model.number="step.duration" label="Preparation time (minutes)" label-placement="stacked"
                           max="2400"
-                          min="1" type="number"/>
+                          min="1" type="number" inputmode="numeric"/>
 
                 <IonInput v-model.number="step.temperature" label="Temperature (°C)" label-placement="stacked"
                           max="1000"
-                          min="-50" type="number"/>
+                          min="-50" type="number" inputmode="numeric"/>
 
                 <IonInput v-model.trim="step.imgUrl" :placeholder="`e.g. https://source.unsplash.com/`"
                           label="Image URL"

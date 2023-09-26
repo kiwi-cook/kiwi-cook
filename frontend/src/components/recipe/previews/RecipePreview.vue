@@ -1,14 +1,14 @@
 <template>
     <div class="recipe-preview" @click="toRecipe">
         <div class="recipe-img-title-wrapper">
-            <img class="recipe-preview-image" :src="recipe?.props?.imgUrl"
-                 :alt="`Preview Image of ${recipe?.getName()}`">
+            <img class="recipe-preview-image" :src="_recipe?.props?.imgUrl"
+                 :alt="`Preview Image of ${name}`">
             <div class="recipe-title-author-mobile">
                 <h2 class="recipe-title">
                     {{ name }}
                 </h2>
                 <h3 class="recipe-author subheader">
-                    {{ recipe.getAuthors() }}
+                    {{ authors }}
                 </h3>
                 <div>
                     <IonChip color="medium">
@@ -31,7 +31,7 @@
                     {{ name }}
                 </h2>
                 <h3 class="recipe-author subheader">
-                    {{ recipe?.getAuthors() }}
+                    {{ authors }}
                 </h3>
                 <div>
                     <IonChip color="medium">
@@ -59,29 +59,46 @@ import {IonChip, IonLabel, useIonRouter} from "@ionic/vue";
 import ItemList from "@/components/recipe/ItemList.vue";
 
 const props = defineProps({
-    recipeSuggestion: {
-        type: Object as PropType<RecipeSuggestion>,
+    recipe: {
+        type: Object as PropType<RecipeSuggestion|Recipe>,
         required: true
     }
 })
-const {recipeSuggestion} = toRefs(props)
-const recipe = computed<Recipe>(() => recipeSuggestion?.value?.recipe ?? new Recipe())
+const {recipe} = toRefs(props)
+const _recipe = computed<Recipe>(() => {
+    if (recipe?.value instanceof Recipe) {
+        return recipe?.value
+    } else if (recipe?.value instanceof RecipeSuggestion) {
+        return recipe?.value?.getRecipe()
+    } else {
+        return new Recipe()
+    }
+})
 
-const missingItems = computed<StepItem[]>(() => recipeSuggestion.value?.getMissingItems() ?? [])
+const missingItems = computed<StepItem[]>(() => {
+    if (_recipe?.value instanceof Recipe) {
+        return _recipe?.value?.getStepItems() ?? []
+    } else if (recipe?.value instanceof RecipeSuggestion) {
+        return recipe?.value?.getMissingItems() ?? []
+    } else {
+        return []
+    }
+})
 const possessedItems = computed<Item[]>(() => {
-    const missingItemIds = missingItems.value.map(item => item.getId())
-    return recipe.value.getStepItems().filter(item => !missingItemIds.includes(item.getId()))
+    const missingItemIds = missingItems?.value?.map((item: Item) => item.getId())
+    return _recipe?.value?.getStepItems()?.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
 })
 
 const router = useIonRouter();
 const toRecipe = () => {
-    router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
+    router.push({name: 'Recipe', params: {id: _recipe.value?.getId()}})
 }
 
-const name = computed(() => recipe.value?.getName())
-const duration = computed(() => recipe.value?.getDuration())
-const price = computed(() => recipe.value?.getPrice())
-const tags = computed(() => recipe.value?.getTags().slice(0, 3))
+const name = computed(() => _recipe?.value?.getName())
+const authors = computed(() => _recipe?.value?.getAuthors())
+const duration = computed(() => _recipe?.value?.getDuration())
+const price = computed(() => _recipe?.value?.getPrice())
+const tags = computed(() => _recipe?.value?.getTags()?.slice(0, 3))
 </script>
 
 <style>
