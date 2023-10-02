@@ -42,7 +42,7 @@
     "@vue/cli-plugin-typescript": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-typescript": "^11.0.3",
-    "cypress": "^12.17.4",
+    "cypress": "^13.2.0",
     "eslint": "^8.50.0",
     "eslint-plugin-sonarjs": "^0.21.0",
     "eslint-plugin-vue": "9.17.0",
