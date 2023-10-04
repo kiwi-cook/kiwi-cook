@@ -16,14 +16,14 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ComputedRef} from 'vue';
+import {computed, ComputedRef, watch} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import RecipeComponent from '@/components/recipe/Recipe.vue';
 import {useRecipeStore} from "@/storage";
 import {useRoute} from 'vue-router';
 import {APP_NAME, Recipe} from '@/tastebuddy';
 import {arrowBack} from "ionicons/icons";
-import {useHead} from "@unhead/vue";
+import {useHead, useSeoMeta} from "@unhead/vue";
 
 
 const route = useRoute()
@@ -38,41 +38,13 @@ const goBack = () => router.back()
 
 /* Head */
 const title = computed(() => `${APP_NAME} | ${recipe?.value?.getName()}`)
-useHead({
-    title: title.value,
-    meta: [
-        {
-            name: 'description',
-            content: `Discover the best ${recipe?.value?.getName()} on ${APP_NAME}. Quick, easy, and perfect for busy weeknights.`
-        },
-        {
-            name: 'keywords',
-            content: recipe?.value?.getTags().join(', ')
-        },
-        {
-            property: 'og:title',
-            content: title.value
-        },
-        {
-            property: 'og:type',
-            content: 'article'
-        },
-        {
-            property: 'og:description',
-            content: `Discover the best ${recipe?.value?.getName()}. Quick, easy, and perfect for busy weeknights.`
-        },
-        {
-            property: 'og:url',
-            content: 'https://taste-buddy.github.io/#/' + recipe?.value?.getRoute()
-        },
-        {
-            property: 'og:image',
-            content: recipe?.value?.props?.imgUrl
-        },
-        {
-            property: 'image_src',
-            content: recipe?.value?.props?.imgUrl
-        },
-    ]
+useSeoMeta({
+    title: () => title.value,
+    charset: 'utf-8',
+    description: () => `Discover the best ${recipe?.value?.getName()} on ${APP_NAME}. Quick, easy, and perfect for busy weeknights.`,
+    ogImage: () => recipe?.value?.props?.imgUrl,
+    ogLocale: 'de',
+    ogLocaleAlternate: ['en'],
+    ogType: 'article'
 })
 </script>
