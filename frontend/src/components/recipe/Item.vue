@@ -1,8 +1,8 @@
 <template>
-    <IonItem v-if="mappedItem" :class="['item', {'button':!disableClick}]" lines="none" @click="select">
+    <IonItem v-if="mappedItem" v-once class="item" lines="none">
         <IonThumbnail slot="start" class="item-thumbnail">
-            <img v-if="mappedItem.imgUrl" :src="mappedItem.imgUrl ?? ''"
-                 :alt="`Image of ${mappedItem.name}`"/>
+            <img :key="mappedItem.name"
+                 :src="mappedItem.imgUrl ?? ''" :alt="`Image of ${mappedItem.name}`"/>
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}]">
             {{ mappedItem.name }}
@@ -21,17 +21,12 @@
 <script setup lang="ts">
 import {IonItem, IonLabel, IonThumbnail} from "@ionic/vue";
 import {computed, PropType, toRefs} from "vue";
-import {Item, StepItem} from "@/tastebuddy";
+import {Item, ItemTypes, StepItem} from "@/tastebuddy";
 
 const props = defineProps({
     item: {
         type: Object as PropType<(StepItem | Item)>,
         required: true,
-    },
-    disableClick: {
-        type: Boolean,
-        required: false,
-        default: false
     },
     include: {
         type: Boolean,
@@ -40,8 +35,6 @@ const props = defineProps({
     },
 })
 const {item} = toRefs(props);
-
-const emit = defineEmits(['select'])
 
 type CustomItem = {
     name: string,
@@ -54,7 +47,7 @@ const mappedItem = computed<CustomItem | undefined>(() => {
     if (!item?.value) {
         return undefined;
     }
-    const servings = item?.value instanceof StepItem && item?.value?.type === 'ingredient' ? item?.value?.servings : 0;
+    const servings = item?.value instanceof StepItem && item?.value?.type === ItemTypes.Ingredient ? item?.value?.servings : 0;
 
     return {
         name: item?.value?.getName(),
@@ -63,12 +56,6 @@ const mappedItem = computed<CustomItem | undefined>(() => {
         unit: item?.value instanceof StepItem ? item?.value?.unit : '',
     }
 })
-
-const select = () => {
-    if (mappedItem.value && !props.disableClick) {
-        emit('select', item?.value?.getId())
-    }
-}
 </script>
 
 <style scoped>

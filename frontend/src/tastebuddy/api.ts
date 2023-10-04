@@ -13,11 +13,11 @@ export enum API_ROUTE {
     POST_AUTH,
     GET_AUTH,
     GET_RECIPES,
-    ADD_RECIPE,
-    DELETE_RECIPE,
+    ADD_RECIPES,
+    DELETE_RECIPES,
     GET_ITEMS,
-    ADD_ITEM,
-    DELETE_ITEM
+    ADD_ITEMS,
+    DELETE_ITEMS
 }
 
 const JSONTYPE = 'application/json'
@@ -39,17 +39,17 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     },
     [API_ROUTE.GET_AUTH]: {url: '/user/auth', method: 'GET', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: JSONTYPE},
-    [API_ROUTE.ADD_RECIPE]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
-    [API_ROUTE.DELETE_RECIPE]: {
-        url: '/recipe/RECIPE_ID',
+    [API_ROUTE.ADD_RECIPES]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
+    [API_ROUTE.DELETE_RECIPES]: {
+        url: '/recipe',
         method: 'DELETE',
         contentType: JSONTYPE,
         credentials: 'include'
     },
     [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: JSONTYPE},
-    [API_ROUTE.ADD_ITEM]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
-    [API_ROUTE.DELETE_ITEM]: {
-        url: '/item/ITEM_ID',
+    [API_ROUTE.ADD_ITEMS]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
+    [API_ROUTE.DELETE_ITEMS]: {
+        url: '/item',
         method: 'DELETE',
         contentType: JSONTYPE,
         credentials: 'include'

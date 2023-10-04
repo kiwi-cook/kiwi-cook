@@ -1,0 +1,42 @@
+{
+  "Tabs": {
+    "Explore": "Entdecken",
+    "RecipeOfTheDay": "Rezept des Tages",
+    "Favorites": "Favoriten"
+  },
+  "General": {
+    "Recipe": "Rezept | Rezepte",
+    "Item": "Zutat | Zutaten",
+    "Tag": "Stichwort | Stichwörter"
+  },
+  "Recipe": {
+    "By": "Von",
+    "Serving": "Gericht | Gerichte",
+    "Direction": "Schritt | Schritte",
+    "Ingredient": "Zutat | Zutaten"
+  },
+  "Suggestions": {
+    "Title": "Entdecke;neue Rezepte",
+    "SearchbarPrompt": "Nach welchen Zutaten oder Rezepten sehnst du dich heute?",
+    "Preferences": {
+      "Title": "Lege deine Präferenzen fest",
+      "Subtitle": "Filtere nach Zutaten, Kochzeit, Preis und mehr.",
+      "Inventory": "Welche Zutaten hast du zuhause?",
+      "Time": "Wie viel Zeit hast du?",
+      "Budget": "Was ist dein Budget?",
+      "Serving": "Wie viele Mengen?"
+    },
+    "Recommendations": {
+      "Title": "Vorschläge",
+      "Subtitle": "Basierend auf deinen Vorlieben"
+    },
+    "Search": {
+      "Title": "{0} Rezepte gefunden",
+      "Subtitle": "Diese Rezepte passen zu deiner Suche"
+    }
+  },
+  "Favorites": {
+    "Title": "Deine;Lieblingsrezepte",
+    "NoRecipesSaved": "Du hast noch keine Rezepte favorisiert."
+  }
+}

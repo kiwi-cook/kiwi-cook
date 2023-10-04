@@ -7,7 +7,7 @@
                 <IonList lines="none" class="ion-no-padding">
                     <IonItemGroup v-if="recipes.length > 0">
                         <IonItemDivider>
-                            <IonLabel>Recipes</IonLabel>
+                            <IonLabel>{{$t('General.Recipe', 2)}}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(recipe, recipeIndex) in recipes" :key="recipeIndex"
                                  class="link" @click="selectRecipe(recipe)">
@@ -16,7 +16,7 @@
                     </IonItemGroup>
                     <IonItemGroup v-if="tags.length > 0">
                         <IonItemDivider>
-                            <IonLabel>Tags</IonLabel>
+                            <IonLabel>{{$t('General.Tag', 2)}}</IonLabel>
                         </IonItemDivider>
                         <IonItem lines="none" class="over-x-scroll">
                             <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
@@ -27,7 +27,7 @@
                     </IonItemGroup>
                     <IonItemGroup v-if="items.length > 0">
                         <IonItemDivider>
-                            <IonLabel>Items</IonLabel>
+                            <IonLabel>{{$t('General.Item', 2)}}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(item, itemIndex) in items" :key="itemIndex"
                                  class="link" @click="selectItem(item)">
@@ -107,10 +107,11 @@ const selectItem = (item: Item) => {
 
 
 /**
- * Create sublists that are differiated by their type.
+ * Create sublists that are differentiated by their type.
  * E.g. all items are in one list and all recipes in another.
  */
-const tags = computed<string[]>(() => elements.value.filter((element) => typeof element === 'string' || element instanceof String) as string[])
+const tags = computed<string[]>(() => elements.value
+    .filter((element) => typeof element === 'string' || element instanceof String) as string[])
 const recipes = computed<Recipe[]>(() => elements.value.filter((element) => element instanceof Recipe) as Recipe[])
 const items = computed<Item[]>(() => elements.value.filter((element) => element instanceof Item) as Item[])
 
@@ -148,10 +149,5 @@ watch(searchInput, (newFilterInput) => {
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-strong);
-}
-
-.tags {
-    display: flex;
-    flex-wrap: wrap;
 }
 </style>

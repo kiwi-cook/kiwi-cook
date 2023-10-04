@@ -2,28 +2,60 @@
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
             <div class="content">
-                <FancyHeader :big-text="['Recipe', 'Parser']"/>
+                <FancyHeader :big-text="['Recipe Parser']"/>
 
-                <!-- File uploader for JSON recipes files -->
-                <h2>
-                    Upload recipes
-                </h2>
-                <label class="file-input-label" for="file-input">
-                    Recipe JSON file<br/>
-                    <input id="file-input" ref="file" type="file" accept=".json" @change="onFileChange"/>
-                </label>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            Parse recipes {{ selectedParser ? `with ${selectedParser}` : ''}}
+                        </IonCardTitle>
+                        <IonCardSubtitle>
+                            Select the recipe parser
+                        </IonCardSubtitle>
+                    </IonCardHeader>
+
+                    <IonCardContent>
+                        <!-- File uploader for JSON recipes files -->
+                        <IonItem lines="none" class="ion-no-padding">
+                            <label for="recipe-parser">
+                                Recipe parser
+                            </label>
+                            <select id="recipe-parser" v-model="selectedParser">
+                                <option v-for="parser in availableParsers" :key="parser">
+                                    {{ parser }}
+                                </option>
+                            </select>
+                        </IonItem>
+
+                        <IonItem lines="none" class="ion-no-padding">
+                            <label for="file-input">
+                                Recipe JSON file<br/>
+                            </label>
+                            <input id="file-input" ref="file" type="file" accept=".json" @change="onFileChange"/>
+                        </IonItem>
+                    </IonCardContent>
+                </IonCard>
 
                 <!-- List of recipes -->
-                <h2>
-                    {{ parsedRecipes.length }} Recipes
-                </h2>
-                <ul class="recipe-button-list">
-                    <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
-                        <IonButton size="small" fill="outline" @click="showEditor(recipe.getId())">
-                            {{ recipe.getName() }}
-                        </IonButton>
-                    </li>
-                </ul>
+                <IonCard>
+                    <IonCardHeader>
+                        <IonCardTitle>
+                            {{ parsedRecipes.length }} Recipes
+                        </IonCardTitle>
+                        <IonCardSubtitle>
+                            Select the recipe parser
+                        </IonCardSubtitle>
+                    </IonCardHeader>
+                    <IonCardContent>
+                        <ul class="recipe-button-list">
+                            <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
+                                <IonButton size="small" fill="outline" @click="showEditor(recipe.getId())">
+                                    {{ recipe.getName() }}
+                                </IonButton>
+                            </li>
+                        </ul>
+                    </IonCardContent>
+                </IonCard>
 
                 <!-- Recipe editor -->
                 <h2>
@@ -54,18 +86,35 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {logError, parseRecipes, Recipe, RecipeParser} from "@/tastebuddy";
-import {IonButton, IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from "@ionic/vue";
+import {logError, Recipe} from "@/tastebuddy";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/storage";
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
+import {
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonIcon,
+    IonItem,
+    IonPage,
+    useIonRouter
+} from "@ionic/vue";
+import {availableParsers, parseRecipes, RecipeParser} from "@/tastebuddy/parser";
 
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
 
 const parsedRecipes = ref<Recipe[]>([])
 const file = ref<File | null>(null)
+const selectedParser = ref<RecipeParser>(RecipeParser.Cookstr)
 
 const onFileChange = (event: any) => {
     file.value = event.target.files[0]
@@ -75,7 +124,7 @@ const onFileChange = (event: any) => {
         reader.onload = (evt) => {
             if (evt.target) {
                 parseRecipes(evt.target.result as string, {
-                    parser: RecipeParser.Cookstr,
+                    parser: selectedParser.value,
                     list: parsedRecipes,
                     max: 500
                 })

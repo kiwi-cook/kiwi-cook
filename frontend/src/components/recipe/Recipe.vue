@@ -4,7 +4,7 @@
             <div class="recipe-header-text-wrapper">
                 <div class="recipe-title">
                     <h1>{{ name }}</h1>
-                    <h2 v-if="authors.length > 0" class="subheader">By {{ authors }}</h2>
+                    <h2 v-if="authors.length > 0" class="subheader">{{ $t('Recipe.By') }} {{ authors }}</h2>
                 </div>
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
@@ -36,33 +36,32 @@
         <TwoColumnLayout layout="rightBigger">
             <template #left>
                 <div class="sticky">
-                    <h2>Ingredients</h2>
+                    <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
                     <TwoColumnLayout v-if="itemsFromRecipe.length > 0" layout="leftBigger">
                         <template #left>
                             <IonCard>
                                 <IonCardContent>
                                     <IonItem lines="none" color="light" class="recipe-servings">
                                         <IonButtons slot="start">
-                                            <IonButton :disabled="servings == 100" @click="servings++">
-                                                <IonIcon :icon="add"/>
-                                            </IonButton>
                                             <IonButton :disabled="servings == 1" @click="servings--">
                                                 <IonIcon :icon="remove"/>
                                             </IonButton>
+                                            <IonButton :disabled="servings == 100" @click="servings++">
+                                                <IonIcon :icon="add"/>
+                                            </IonButton>
                                         </IonButtons>
                                         <IonLabel>
-                                            {{ servings }} Servings
+                                            {{ servings }} {{ $t('Recipe.Serving', servings) }}
                                         </IonLabel>
                                     </IonItem>
-                                    <ItemList :disable-click="true" :items="itemsFromRecipe"
-                                              :type="['ingredient']"/>
+                                    <ItemList :items="ingredients"/>
                                 </IonCardContent>
                             </IonCard>
                         </template>
-                        <template v-if="amountTools !== 0" #right>
+                        <template v-if="tools.length > 0" #right>
                             <IonCard>
                                 <IonCardContent>
-                                    <ItemList :disable-click="true" :items="itemsFromRecipe" :type="['tool']"/>
+                                    <ItemList :items="tools"/>
                                 </IonCardContent>
                             </IonCard>
                         </template>
@@ -71,7 +70,12 @@
             </template>
 
             <template #right>
-                <h2>Directions</h2>
+                <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
+                    <IonChip v-if="recipe?.getDuration() ?? 0 > 0">
+                        <IonIcon :icon="time"/>
+                        <IonLabel>{{ recipe?.getDuration() }} min.</IonLabel>
+                    </IonChip>
+                </h2>
                 <template v-for="(step, stepIndex) in steps" :key="stepIndex">
                     <IonCard>
                         <IonImg :src="step?.imgUrl ?? ''"/>
@@ -93,7 +97,7 @@
                         </IonCardHeader>
                         <IonCardContent>
                             <IonItem lines="none">
-                                <ItemList :disable-click="true" :horizontal="true" :items="step.getStepItems()"/>
+                                <ItemList :horizontal="true" :items="step.getStepItems()"/>
                             </IonItem>
                             <IonItem lines="none">
                                 <div v-html="step?.printDescription('item-highlight')"></div>
@@ -131,7 +135,7 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import {Recipe, Step, StepItem} from '@/tastebuddy/types';
-import ItemList from "@/components/recipe/ItemList.vue";
+import ItemList from "@/components/utility/list/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 import {add, flame, heart, heartOutline, pencil, remove, shareSocial, time} from "ionicons/icons";
 import {useTasteBuddyStore} from "@/storage";
@@ -149,9 +153,9 @@ const {recipe} = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
 const name = computed(() => recipe?.value?.getName() ?? '');
 
-const itemsFromRecipe: ComputedRef<StepItem[]> = computed(() => recipe?.value?.getStepItems() ?? []);
-const amountIngredients = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'ingredient' ? 1 : 0), 0))
-const amountTools = computed(() => itemsFromRecipe.value.reduce((acc, item) => acc + (item.type === 'tool' ? 1 : 0), 0))
+const itemsFromRecipe = computed<StepItem[]>(() => recipe?.value?.getStepItems() ?? []);
+const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'ingredient'))
+const tools = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'tool'))
 const steps: ComputedRef<Step[]> = computed(() => recipe?.value?.steps ?? [])
 
 // Source
@@ -177,9 +181,6 @@ watch(servings, (newServings, oldServings) => {
         recipe?.value?.updateServings(newServings);
     }
 });
-
-/* Segments */
-const selectedView = ref('ingredients')
 
 /* Share */
 const shareRecipe = () => recipe?.value?.share();

@@ -2,12 +2,19 @@ import {logDebug, logError} from "@/tastebuddy";
 import {CanShareResult, Share} from "@capacitor/share";
 import {useRecipeStore, useTasteBuddyStore} from "@/storage";
 import {useIonRouter} from "@ionic/vue";
+import {parseTemperature} from "@/tastebuddy/parser/utils.ts";
+import {distance} from "fastest-levenshtein";
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/locales/i18n.ts";
 
-type LocalizedString = {
-    [lang: string]: string
-}
+
+
 
 const tmpId = () => `tmp${Date.now().toString(16)}${Math.random().toString(16).slice(2)}`
+
+export enum ItemTypes {
+    Ingredient = 'ingredient',
+    Tool = 'tool'
+}
 
 /**
  * Item of a recipe
@@ -16,8 +23,8 @@ const tmpId = () => `tmp${Date.now().toString(16)}${Math.random().toString(16).s
 export class Item {
     id?: string;
     tmpId?: string;
-    name: LocalizedString;
-    type: string;
+    name: LocaleStr;
+    type: ItemTypes;
     imgUrl: string;
 
     constructor(item?: Item) {
@@ -29,8 +36,8 @@ export class Item {
         } else {
             delete this.tmpId
         }
-        this.name = item?.name ?? {'en': 'New Item'}
-        this.type = item?.type ?? 'ingredient'
+        this.name = item?.name ?? newLocaleStr('New Item', 'en')
+        this.type = item?.type ?? ItemTypes.Ingredient
         this.imgUrl = item?.imgUrl ?? ''
     }
 
@@ -77,8 +84,19 @@ export class Item {
      * @param lang
      */
     public getName(lang?: string): string {
-        const store = useTasteBuddyStore()
-        return this.name[lang ?? store.language.lang]
+        return getLocaleStr(this.name, lang)
+    }
+
+    /**
+     * Checks if the item has the name
+     * @param name
+     */
+    public hasName(name: string): boolean {
+        name = name.toLowerCase()
+        return Object.values(this.name).some((itemName: string) => {
+            itemName = itemName.toLowerCase()
+            return distance(itemName, name) < 2 || itemName.includes(name)
+        })
     }
 
     /**
@@ -87,8 +105,7 @@ export class Item {
      * @param lang
      */
     public setName(name: string, lang?: string): void {
-        const store = useTasteBuddyStore()
-        this.name[lang ?? store.language.lang] = name
+        setLocaleStr(this.name, name, lang)
     }
 
     /**
@@ -132,7 +149,7 @@ export class Item {
     public delete() {
         logDebug('item.delete', this.getId())
         const store = useRecipeStore()
-        store.deleteItem(this)
+        store.deleteItems(this)
     }
 
     /**
@@ -222,16 +239,14 @@ export class StepItem extends Item {
 export class Step {
     items: StepItem[];
     imgUrl?: string;
-    desc: LocalizedString;
+    desc: LocaleStr;
     duration?: number;
     temperature?: number;
 
     constructor() {
         this.items = [new StepItem()]
         this.imgUrl = ''
-        this.desc = {
-            en: 'New Step',
-        }
+        this.desc = newLocaleStr('New step', 'en')
         this.duration = 0
     }
 
@@ -248,7 +263,7 @@ export class Step {
         item.imgUrl = json.imgUrl
         item.desc = json.desc
         item.duration = json.duration
-        item.temperature = Step.parseTemperature(json.temperature, item.getDescription())
+        item.temperature = parseTemperature(json.temperature, item.getDescription())
         return item
     }
 
@@ -265,36 +280,18 @@ export class Step {
         return step
     }
 
-    public static parseTemperature(temperature?: number, description?: string): number {
-        let temp
-        if (temperature && temperature > 0) {
-            temp = temperature
-        } else {
-            const temperature = RegExp(/(\d+)°([CF]?)/).exec(description ?? '')
-            const unit = temperature?.[2] ?? 'C'
-            let formula: (a: number) => number = (a) => a
-            if (unit === 'F') {
-                formula = (a) => (a - 32) / 1.8
-            }
-            temp = formula(parseInt(temperature?.[1] ?? '0'))
-        }
-        return temp
-    }
-
     /**
      * Get the localized description of the recipe
      */
     public getDescription(lang?: string): string {
-        const store = useTasteBuddyStore()
-        return this.desc[lang ?? store.language.lang ?? 'en']
+        return getLocaleStr(this.desc, lang)
     }
 
     /**
      * Set the localized description of the recipe
      */
     public setDescription(description: string, lang?: string): void {
-        const store = useTasteBuddyStore()
-        this.desc[lang ?? store.language.lang ?? 'en'] = description
+        setLocaleStr(this.desc, description, lang)
     }
 
     /**
@@ -341,11 +338,9 @@ export class Step {
 export class Recipe {
     id?: string;
     private readonly tmpId?: string;
-    name: LocalizedString;
-    desc: LocalizedString;
+    name: LocaleStr;
+    desc: LocaleStr;
     steps: Step[];
-    private items: StepItem[];
-    private itemsById: { [key: string]: StepItem };
     props: {
         imgUrl?: string;
         duration?: number;
@@ -367,16 +362,17 @@ export class Recipe {
     };
     servings: number;
     liked: boolean;
+    computed: {
+        itemsById: { [id: string]: StepItem }
+        items: StepItem[],
+        authors: string
+    }
 
     constructor() {
         // create a temporary id to identify the recipe in the store before it is saved
         this.tmpId = tmpId()
-        this.name = {
-            en: 'New recipe',
-        }
-        this.desc = {
-            en: 'New recipe description',
-        }
+        this.name = newLocaleStr('New recipe', 'en')
+        this.desc = newLocaleStr('New recipe description', 'en')
         this.props = {
             imgUrl: '',
             duration: 0,
@@ -384,13 +380,16 @@ export class Recipe {
             tags: [],
         }
         this.steps = [new Step()]
-        this.items = []
-        this.itemsById = {}
         this.servings = 1
         this.liked = false;
         this.src = {
             url: '',
             authors: [],
+        }
+        this.computed = {
+            itemsById: {},
+            items: [],
+            authors: ''
         }
     }
 
@@ -414,6 +413,7 @@ export class Recipe {
         recipe.name = json.name
         recipe.desc = json.desc
         recipe.steps = json.steps?.map((step: any) => Step.fromJSON(step)) ?? [new Step()]
+        recipe.computeItems()
 
         // Props
         recipe.props.imgUrl = json?.props?.imgUrl
@@ -423,8 +423,8 @@ export class Recipe {
 
         // Source
         recipe.src = json.src
+        recipe.computeAuthors()
 
-        recipe.computeItems()
         return recipe
     }
 
@@ -453,50 +453,28 @@ export class Recipe {
      * Get the localized name of the recipe
      */
     public getName(): string {
-        const store = useTasteBuddyStore()
-        return this.name[store.language.lang] ?? this.name.en
+        return getLocaleStr(this.name)
     }
 
     /**
      * Set the localized name of the recipe
      */
-    public setName(name: string, lang?: string): void {
-        const store = useTasteBuddyStore()
-        this.name[lang ?? store.language.lang] = name
+    public setName(name: string, lang?: string) {
+        setLocaleStr(this.name, name, lang)
     }
 
     /**
      * Get the localized description of the recipe
      */
     public getDescription(): string {
-        const store = useTasteBuddyStore()
-        return this.desc[store.language.lang] ?? this.desc.en
+        return getLocaleStr(this.desc)
     }
 
     /**
      * Set the localized description of the recipe
      */
     public setDescription(description: string, lang?: string): void {
-        const store = useTasteBuddyStore()
-        this.desc[lang ?? store.language.lang] = description
-    }
-
-    /**
-     * Get the authors as a string
-     * @returns the list of authors as string
-     */
-    public getAuthors(): string {
-        switch ((this.src.authors ?? []).length) {
-            case 0:
-                return ''
-            case 1:
-                return this.src.authors[0].name
-            case 2:
-                return this.src.authors[0].name + ' and ' + this.src.authors[1].name
-            default:
-                return this.src.authors.map((author) => author.name)
-                    .slice(0, length - 1).join(', ') + ' and ' + this.src.authors[length - 1].name
-        }
+        setLocaleStr(this.desc, description, lang)
     }
 
     /**
@@ -508,6 +486,11 @@ export class Recipe {
             this.src.authors = []
         }
         this.src.authors.push({name: author})
+        this.computeAuthors()
+    }
+
+    public getAuthors(): string {
+        return this.computed.authors
     }
 
     /**
@@ -548,8 +531,8 @@ export class Recipe {
      */
     public delete() {
         const store = useRecipeStore()
-        logDebug('delete', this.getId())
-        return store.deleteRecipe(this)
+        logDebug('recipe.delete', this.getId())
+        return store.deleteRecipes(this)
     }
 
     /**
@@ -592,7 +575,7 @@ export class Recipe {
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
         item = item ?? new Item();
-        logDebug(`add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
+        logDebug('recipe.addItem', `add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
         const stepItem = new StepItem(item);
 
         if (stepIndex === undefined) {
@@ -609,21 +592,12 @@ export class Recipe {
         return {item, recipe: this};
     }
 
-    computeItems() {
-        // Iterate over all steps and all items to compute the list of items
-        this.itemsById = {}
-        this.steps.forEach(step => step.getStepItems().forEach((item: StepItem) => {
-            this.itemsById[item.getId()] = item
-        }))
-        this.items = Object.values(this.itemsById)
-    }
-
     /**
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
     public getStepItems(): StepItem[] {
-        return this.items ?? []
+        return this.computed.items ?? []
     }
 
     public getItems(): Item[] {
@@ -631,7 +605,7 @@ export class Recipe {
     }
 
     public hasItem(id?: string): boolean {
-        return typeof id !== 'undefined' && typeof this.itemsById[id] !== 'undefined'
+        return typeof id !== 'undefined' && typeof this.computed.itemsById[id] !== 'undefined'
     }
 
     /**
@@ -640,7 +614,7 @@ export class Recipe {
      * @returns the recipe to allow chaining
      */
     public addTag(tag: string): this {
-        if (this.props.tags === undefined) {
+        if (!this.props.tags) {
             // initialize the tags array if it is undefined
             this.props.tags = []
         }
@@ -695,9 +669,9 @@ export class Recipe {
      */
     public updateServings(servings: number) {
         this.servings = servings
-        this.steps.forEach(step => {
+        for (const step of this.steps) {
             step.updateServings(servings)
-        })
+        }
     }
 
     /**
@@ -714,10 +688,45 @@ export class Recipe {
      */
     public getPrice(): number {
         let price = 0
-        this.steps.forEach(step => step.getStepItems().forEach((item: StepItem) => {
+        for (const item of this.getStepItems()) {
             price += item.getPrice() * item.servings
-        }))
+        }
         return Math.floor(price)
+    }
+
+    /**
+     * Compute items
+     */
+    computeItems(): void {
+        // Iterate over all steps and all items to compute the list of items
+        this.computed.itemsById = {}
+        for (const step of this.steps) {
+            for (const item of step.getStepItems()) {
+                this.computed.itemsById[item.getId()] = item
+            }
+        }
+        this.computed.items = Object.values(this.computed.itemsById)
+    }
+
+    /**
+     * Compute authors
+     */
+    computeAuthors(): void {
+        switch ((this.src.authors ?? []).length) {
+            case 0:
+                this.computed.authors = ''
+                break
+            case 1:
+                this.computed.authors = this.src.authors[0].name
+                break
+            case 2:
+                this.computed.authors = this.src.authors[0].name + ' and ' + this.src.authors[1].name
+                break
+            default:
+                this.computed.authors = this.src.authors.map((author) => author.name)
+                    .slice(0, length - 1).join(', ') + ' and ' + this.src.authors[length - 1].name
+                break
+        }
     }
 }
 

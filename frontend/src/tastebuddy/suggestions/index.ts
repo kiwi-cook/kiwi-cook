@@ -1,9 +1,9 @@
 import {useRecipeStore} from "@/storage";
-import {logDebug, Recipe, StepItem} from "@/tastebuddy";
+import {Recipe, StepItem} from "@/tastebuddy";
 
 class RecipeSuggestion {
 
-    recipe_id: string;
+    id: string;
     recipe?: Recipe;
     recipe_price?: number;
     missing_items?: {
@@ -12,7 +12,7 @@ class RecipeSuggestion {
     }[]
 
     constructor() {
-        this.recipe_id = ''
+        this.id = ''
         this.recipe_price = 0
         this.missing_items = []
     }
@@ -112,7 +112,7 @@ class SearchQueryBuilder {
  * Search recipes based on the given query
  * @param query
  */
-function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
+function index(query: SearchQuery): RecipeSuggestion[] {
     const store = useRecipeStore()
     const recipes: Recipe[] = store.getRecipesAsList
 
@@ -126,6 +126,7 @@ function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
     return suggestedRecipes.map((recipe: Recipe) => {
         const suggestion = new RecipeSuggestion()
         suggestion.recipe = recipe
+        suggestion.id = recipe.getId()
         suggestion.recipe_price = recipe.getPrice()
         suggestion.missing_items = []
         return suggestion
@@ -139,15 +140,13 @@ function suggestRecipes(query: SearchQuery): RecipeSuggestion[] {
  * @return {boolean} true if the itemQuery is satisfied by the recipe
  */
 function filterRecipeByItems(recipe: Recipe, itemQuery: ItemQuery[]): boolean {
-    const success = itemQuery.every((itemQ: ItemQuery) => {
+    return itemQuery.every((itemQ: ItemQuery) => {
         // Check if item exists in recipe
         const itemExists = recipe.hasItem(itemQ.id)
         // Either item exists and we want to include it,
         // or item doesn't exist, and we want to exclude it
         return itemExists !== itemQ.exclude
     })
-    logDebug('filterRecipeByItems', recipe, itemQuery, success)
-    return success
 }
 
 /**
@@ -159,9 +158,7 @@ function filterRecipeByDuration(recipe: Recipe, maxDuration?: number): boolean {
     if (maxDuration === undefined) {
         return true
     }
-    const success = recipe.getDuration() <= maxDuration
-    logDebug('filterRecipeByDuration', recipe.getDuration(), maxDuration, success)
-    return success
+    return recipe.getDuration() <= maxDuration
 }
 
 /**
@@ -171,9 +168,7 @@ function filterRecipeByDuration(recipe: Recipe, maxDuration?: number): boolean {
  */
 function filterRecipeByTag(recipe: Recipe, tags: string[]): boolean {
     const recipeTags = recipe.getTags()
-    const success = tags.every((tag: string) => recipeTags.includes(tag))
-    logDebug('filterRecipeByTag', recipeTags, tags, success)
-    return success
+    return tags.every((tag: string) => recipeTags.includes(tag))
 }
 
 /**
@@ -184,14 +179,12 @@ function filterByPrice(recipe: Recipe, maxPrice?: number): boolean {
         return true
     }
     const recipePrice = recipe.getPrice()
-    const success = recipePrice <= maxPrice
-    logDebug('filterByPrice', recipePrice, maxPrice, success)
-    return success
+    return recipePrice <= maxPrice
 }
 
 export {
     ItemQuery,
-    suggestRecipes,
+    index,
     RecipeSuggestion,
     SearchQueryBuilder
 }

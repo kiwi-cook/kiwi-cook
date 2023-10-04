@@ -4,6 +4,7 @@ import {IonicVue} from '@ionic/vue';
 // Vue + App
 import {createApp} from 'vue'
 import App from './App.vue'
+import {logDebug} from "@/tastebuddy";
 
 // Head
 import {createHead} from "@unhead/vue";
@@ -43,16 +44,20 @@ import './theme/font.css';
 
 /* Icons */
 import 'ionicons/icons';
-import {logDebug} from "@/tastebuddy";
 
-/* Head */
+// Initializations
+
+/* Initialize Head */
 const head = createHead()
 
 /* Initialize store */
 const pinia = createPinia()
 
-/* Initialize and configure router */
+/* Initialize router */
 const router = createTasteBuddyRouter();
+
+/* Initialize internalisation */
+import {i18n} from "@/locales/i18n.ts";
 
 /* Initialize app */
 const app = createApp(App)
@@ -60,6 +65,7 @@ const app = createApp(App)
     .use(head)
     .use(pinia)
     .use(router)
+    .use(i18n)
 
 /* Configure app */
 app.config.performance = true

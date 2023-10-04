@@ -2,10 +2,8 @@
     <IonPage>
         <IonContent :fullscreen="true">
             <div class="page">
-                <div class="content">
-                    <template v-if="recipe">
-                        <RecipeComponent :recipe="recipe"/>
-                    </template>
+                <div v-if="recipe" class="content">
+                    <RecipeComponent :recipe="recipe"/>
                 </div>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
@@ -37,23 +35,44 @@ const recipe: ComputedRef<Recipe> = computed(() => store.getRecipesAsMap[recipeI
 const router = useIonRouter()
 const goBack = () => router.back()
 
+
 /* Head */
+const title = computed(() => `${APP_NAME} | ${recipe?.value?.getName()}`)
 useHead({
-    title: `${APP_NAME}| ${recipe?.value?.getName()}`,
+    title: title.value,
     meta: [
         {
-            name: 'og:title',
-            content: APP_NAME
+            name: 'description',
+            content: `Discover the best ${recipe?.value?.getName()} on ${APP_NAME}. Quick, easy, and perfect for busy weeknights.`
         },
         {
-            name: 'og:description',
-            content: `Delicious ${recipe?.value?.getName()} Made Easy!`
+            name: 'keywords',
+            content: recipe?.value?.getTags().join(', ')
         },
         {
-            name: 'og:image',
+            property: 'og:title',
+            content: title.value
+        },
+        {
+            property: 'og:type',
+            content: 'article'
+        },
+        {
+            property: 'og:description',
+            content: `Discover the best ${recipe?.value?.getName()}. Quick, easy, and perfect for busy weeknights.`
+        },
+        {
+            property: 'og:url',
+            content: 'https://taste-buddy.github.io/#/' + recipe?.value?.getRoute()
+        },
+        {
+            property: 'og:image',
             content: recipe?.value?.props?.imgUrl
-        }
+        },
+        {
+            property: 'image_src',
+            content: recipe?.value?.props?.imgUrl
+        },
     ]
-
 })
 </script>

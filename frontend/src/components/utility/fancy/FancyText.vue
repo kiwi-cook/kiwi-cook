@@ -1,6 +1,5 @@
 <template>
-    <span
-        class="header-msg-highlight">{{ text }}</span>
+    <span class="header-msg-highlight">{{ text }}</span>
 </template>
 
 <script setup lang="ts">

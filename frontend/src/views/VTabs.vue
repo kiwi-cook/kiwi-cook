@@ -8,22 +8,17 @@
             <IonTabBar slot="bottom">
                 <IonTabButton href="/recipe/suggestions" tab="recipe-suggestions">
                     <IonIcon :icon="search"/>
-                    Explore
+                    {{ $t('Tabs.Explore') }}
                 </IonTabButton>
-
-                <!-- <IonTabButton :disabled="loadingState" href="/recipe/add" tab="add-recipe">
-                    <IonIcon :icon="create"/>
-                    Add Recipe
-                </IonTabButton> -->
 
                 <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
                     <IonIcon :icon="sparkles"/>
-                    Recipe of the Day
+                    {{ $t('Tabs.RecipeOfTheDay') }}
                 </IonTabButton>
 
                 <IonTabButton href="/recipe/saved" tab="saved-recipes">
                     <IonIcon :icon="heart"/>
-                    Favorites
+                    {{ $t('Tabs.Favorites') }}
                 </IonTabButton>
             </IonTabBar>
         </IonTabs>

@@ -1,6 +1,6 @@
 import {createRouter} from '@ionic/vue-router';
-import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
-import {checkAuthMiddleware, logMiddleware} from "@/router/middleware";
+import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
+import {checkAuthMiddleware, logMiddleware, setI18nLangMiddleware} from "@/router/middleware";
 
 // Pages
 import TabsPage from '../views/VTabs.vue'
@@ -34,11 +34,6 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'recipe/saved',
                 component: () => import('@/views/recipe/VSavedRecipes.vue')
             },
-            {
-                name: 'Recipes',
-                path: 'recipe/list',
-                component: () => import('@/views/recipe/VRecipes.vue')
-            },
             // Editor
             {
                 name: 'RecipeEditor',
@@ -69,6 +64,11 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'login',
                 component: () => import('@/views/editor/VSignIn.vue'),
             },
+            {
+                name: 'Settings',
+                path: 'settings',
+                component: () => import('@/views/VSettings.vue')
+            },
             // 404
             {
                 name: 'NotFound',
@@ -89,8 +89,9 @@ export function createTasteBuddyRouter(): Router {
         routes
     })
 
-    router.beforeEach((to, from, next) => {
+    router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
         logMiddleware(to, from);
+        setI18nLangMiddleware(to);
         checkAuthMiddleware(to, from, next);
     })
 

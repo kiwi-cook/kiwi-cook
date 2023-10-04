@@ -31,7 +31,7 @@ const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<numb
     if (text.length <= typedTextIndex.value) {
         return false
     }
-    typedText.value += text[typedTextIndex.value++]
+    typedText.value += text.charAt(typedTextIndex.value++)
     return true
 }
 

@@ -1,43 +1,33 @@
 <template>
-    <div :class="['element-list-wrapper', {'horizontal': horizontal}]" :style="{'max-height': maxHeight}">
-        <ul v-if="loadedFilteredElements.length > 0" :tabindex="0"
-            :class="['element-list', {'horizontal': horizontal}, {'wrap': !noWrap}]">
-            <li v-for="(element, elementIndex) in loadedFilteredElements" :key="elementIndex"
-                :class="['element', {'horizontal': horizontal}, {'wrap': !noWrap}]">
+    <div class="element-list-wrapper" :style="{'max-height': maxHeight}">
+        <ul v-if="loadedElements.length > 0" :tabindex="0"
+            :class="['element-list', {'wrap': !noWrap}]">
+            <li v-for="(element, elementIndex) in loadedElements" :key="elementIndex"
+                :class="['element', {'wrap': !noWrap}]">
                 <slot :element="element" name="element">
                     {{ element }}
                 </slot>
             </li>
         </ul>
     </div>
-    <IonInfiniteScroll v-if="!loadAll && loadedFilteredElements.length > 0" @ionInfinite="ionInfinite">
+    <IonInfiniteScroll v-if="!loadAll && loadedElements.length > 0" @ionInfinite="ionInfinite">
         <IonInfiniteScrollContent></IonInfiniteScrollContent>
     </IonInfiniteScroll>
 </template>
 
 <script setup lang="ts">
 import {IonInfiniteScroll, IonInfiniteScrollContent} from '@ionic/vue';
-import {computed, ComputedRef, Ref, ref, toRefs, watch} from 'vue';
+import {computed, ComputedRef, Ref, ref, shallowRef, toRefs, watch} from 'vue';
 import {useRecipeStore} from '@/storage';
 
 
 const props = defineProps({
-    filter: {
-        type: String,
-        required: false,
-        default: ''
-    },
     list: {
         type: Array,
         required: false,
         default: null
     },
     noWrap: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    horizontal: {
         type: Boolean,
         required: false,
         default: false
@@ -53,30 +43,14 @@ const props = defineProps({
         default: false
     }
 })
-const {filter, list, loadAll} = toRefs(props)
+const {list, loadAll} = toRefs(props)
 
 const store = useRecipeStore();
 const elements: ComputedRef<unknown[]> = computed(() => (list.value
     ? (list.value ?? [])
     : store.getRecipesAsList));
 const loadedElements: Ref<unknown[]> = ref([]);
-const loadedFilteredElements: Ref<unknown[]> = ref([]);
 const loadedElementsIndex = ref(0);
-
-/**
- * Filter the ingredients
- */
-const handleFilter = () => {
-    const query = filter.value?.toLowerCase() ?? '';
-    loadedFilteredElements.value = elements.value.filter((listItem: unknown) => {
-        return JSON.stringify(listItem)
-            .toLowerCase()
-            .includes(query)
-    })
-}
-watch(filter, () => {
-    handleFilter();
-}, {immediate: true})
 
 const loadNextElements = (amountLoaded = 15) => {
     loadedElements.value.push(...elements.value.slice(loadedElementsIndex.value,
@@ -102,10 +76,6 @@ watch(elements, () => {
         loadedElements.value = elements.value;
     }
 }, {immediate: true})
-
-watch(loadedElements, () => {
-    loadedFilteredElements.value = loadedElements.value;
-}, {immediate: true})
 </script>
 
 <style scoped>
@@ -114,40 +84,14 @@ watch(loadedElements, () => {
     height: 100%;
 }
 
-.element-list-wrapper.horizontal {
-    overflow-x: scroll;
-    overflow-y: visible;
-    width: 100%;
-}
-
 ul.element-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-ul.element-list.horizontal {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-}
-
-ul.element-list.horizontal.wrap {
-    flex-wrap: wrap;
-}
-
 li.element {
     margin-bottom: 0.3rem;
-}
-
-li.element, li.element.horizontal.wrap {
     margin-right: 0;
-}
-
-li.element.horizontal {
-    margin-right: 1rem;
-    margin-bottom: 0;
 }
 </style>

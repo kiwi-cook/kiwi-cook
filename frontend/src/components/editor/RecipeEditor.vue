@@ -80,13 +80,6 @@
                 <IonRow>
                     <IonCol size="12">
                         <IonItem class="tags-editor" lines="none">
-                            <IonChip v-for="(tag, tagIndex) in mutableRecipe.getTags()" :key="tagIndex"
-                                     class="tag">
-                                <IonLabel>{{ tag }}</IonLabel>
-                                <IonIcon :icon="closeCircleOutline"
-                                         @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)"/>
-                            </IonChip>
-
                             <!-- Add tag to the list -->
                             <DropDownSearch :items="allTags" :reset-after="true" placeholder="e.g. vegan"
                                             @select-item="mutableRecipe.addTag($event)"
@@ -97,6 +90,13 @@
                                     </IonChip>
                                 </template>
                             </DropDownSearch>
+
+                            <IonChip v-for="(tag, tagIndex) in mutableRecipe.getTags()" :key="tagIndex"
+                                     class="tag">
+                                <IonLabel>{{ tag }}</IonLabel>
+                                <IonIcon :icon="closeCircleOutline"
+                                         @click="(mutableRecipe.props?.tags ?? []).splice(tagIndex, 1)"/>
+                            </IonChip>
                         </IonItem>
                     </IonCol>
                 </IonRow>
@@ -188,7 +188,7 @@
 
                     <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
                               :key="missingItemIndex">
-                        <ItemComponent :item="missingItem" @select="addMissingItem(stepIndex, $event)"/>
+                        <ItemComponent :item="missingItem" @click="addMissingItem(stepIndex, $event)"/>
                     </template>
                 </div>
             </IonCardContent>
@@ -213,7 +213,7 @@
 </template>
 
 <script setup lang="ts">
-import {extractStepItemsFromText, findMostSimilarItem, formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
+import {formatDate, Item, Recipe, Step, StepItem} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import {
     IonAvatar,
@@ -236,8 +236,9 @@ import {
 import {computed, ComputedRef, PropType, ref, toRefs, watch} from 'vue';
 import {addOutline, calendar, closeCircleOutline, create, save, time, trash} from 'ionicons/icons';
 import DropDownSearch from '../utility/DropDownSearch.vue';
-import ItemList from "@/components/recipe/ItemList.vue";
+import ItemList from "@/components/utility/list/ItemList.vue";
 import ItemComponent from "@/components/recipe/Item.vue";
+import {extractStepItemsFromText, findMostSimilarItem} from "@/tastebuddy/parser/utils.ts";
 
 const props = defineProps({
     recipe: {

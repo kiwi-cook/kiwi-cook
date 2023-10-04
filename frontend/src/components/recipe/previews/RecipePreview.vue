@@ -1,7 +1,7 @@
 <template>
-    <div class="recipe-preview" @click="toRecipe">
+    <div v-once class="recipe-preview" @click="toRecipe">
         <div class="recipe-img-title-wrapper">
-            <img class="recipe-preview-image" :src="_recipe?.props?.imgUrl"
+            <img :key="_recipe?.getId()" class="recipe-preview-image" :src="_recipe?.props?.imgUrl"
                  :alt="`Preview Image of ${name}`">
             <div class="recipe-title-author-mobile">
                 <h2 class="recipe-title">
@@ -44,9 +44,8 @@
                     </template>
                 </div>
             </div>
-            <div class="recipe-item-list">
-                <ItemList v-if="possessedItems.length > 0" :items="possessedItems" :disable-click="true"
-                          :no-lines="true"/>
+            <div class="item-list">
+                <ItemList v-if="possessedItems.length > 0" :items="possessedItems"/>
             </div>
         </div>
     </div>
@@ -56,11 +55,11 @@
 import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/tastebuddy";
 import {IonChip, IonLabel, useIonRouter} from "@ionic/vue";
-import ItemList from "@/components/recipe/ItemList.vue";
+import ItemList from "@/components/utility/list/ItemList.vue";
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<RecipeSuggestion|Recipe>,
+        type: Object as PropType<RecipeSuggestion | Recipe>,
         required: true
     }
 })
@@ -90,15 +89,13 @@ const possessedItems = computed<Item[]>(() => {
 })
 
 const router = useIonRouter();
-const toRecipe = () => {
-    router.push({name: 'Recipe', params: {id: _recipe.value?.getId()}})
-}
+const toRecipe = () => router.push({name: 'Recipe', params: {id: _recipe.value?.getId()}})
 
-const name = computed(() => _recipe?.value?.getName())
-const authors = computed(() => _recipe?.value?.getAuthors())
-const duration = computed(() => _recipe?.value?.getDuration())
-const price = computed(() => _recipe?.value?.getPrice())
-const tags = computed(() => _recipe?.value?.getTags()?.slice(0, 3))
+const name = _recipe?.value?.getName()
+const authors = _recipe?.value?.computeAuthors()
+const duration = _recipe?.value?.getDuration()
+const price = _recipe?.value?.getPrice()
+const tags = _recipe?.value?.getTags()?.slice(0, 3)
 </script>
 
 <style>
@@ -145,6 +142,7 @@ const tags = computed(() => _recipe?.value?.getTags()?.slice(0, 3))
     margin-bottom: var(--margin-medium);
     display: flex;
     flex-direction: row;
+    height: 350px;
 }
 
 @media (width <= 500px) {
@@ -203,22 +201,7 @@ const tags = computed(() => _recipe?.value?.getTags()?.slice(0, 3))
     padding: 16px;
 }
 
-.recipe-item-list-and-description {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-.recipe-description {
-    font-size: var(--font-size-small);
-    color: var(--ion-color-medium);
-    width: 40%;
-    overflow-y: auto;
-    max-height: 250px;
-}
-
-.recipe-item-list {
-    overflow-y: auto;
-    max-height: 250px;
+.item-list {
+    height: 150px;
 }
 </style>

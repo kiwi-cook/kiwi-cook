@@ -7,8 +7,8 @@ import {compress, decompress} from 'lz-string'
 // Types
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
-import {Geolocation, Position} from '@capacitor/geolocation';
 import {API_ROUTE, APIResponse, Item, logDebug, logError, presentToast, Recipe, sendToAPI} from "@/tastebuddy";
+import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/locales/i18n.ts";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -69,7 +69,6 @@ async function getCachedItem<T>(key: string): Promise<{ value: T | null, isOld: 
 interface UserState {
     user: {
         authenticated: boolean
-        position?: Position
     },
     language: {
         lang: string,
@@ -83,11 +82,10 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
     state: (): UserState => ({
         user: {
             authenticated: false,
-            position: undefined
         },
         language: {
             lang: 'en',
-            supportedLanguages: ['en', 'de']
+            supportedLanguages: SUPPORT_LOCALES
         },
         greetings: [],
         cities: ['Tübingen', 'Stuttgart', 'Berlin', 'München', 'Hamburg', 'Köln', 'Frankfurt', 'Düsseldorf', 'Dortmund', 'Essen', 'Leipzig', 'Bremen', 'Dresden', 'Hannover', 'Nürnberg', 'Duisburg', 'Bochum', 'Wuppertal', 'Bielefeld', 'Bonn', 'Münster', 'Karlsruhe', 'Mannheim', 'Augsburg', 'Wiesbaden', 'Gelsenkirchen', 'Mönchengladbach', 'Braunschweig', 'Chemnitz', 'Kiel', 'Aachen', 'Halle', 'Magdeburg', 'Freiburg', 'Krefeld', 'Lübeck', 'Oberhausen', 'Erfurt', 'Mainz', 'Rostock', 'Kassel', 'Hagen', 'Hamm', 'Saarbrücken', 'Mülheim an der Ruhr', 'Potsdam', 'Ludwigshafen am Rhein', 'Oldenburg', 'Leverkusen', 'Osnabrück', 'Solingen', 'Heidelberg', 'Herne', 'Neuss', 'Darmstadt', 'Paderborn', 'Regensburg', 'Ingolstadt', 'Würzburg', 'Wolfsburg', 'Fürth', 'Ulm', 'Heilbronn', 'Pforzheim', 'Göttingen', 'Bottrop', 'Recklinghausen', 'Reutlingen', 'Koblenz', 'Bremerhaven', 'Bergisch Gladbach', 'Remscheid', 'Jena', 'Trier', 'Erlangen', 'Moers', 'Siegen', 'Hildesheim', 'Salzgitter', 'Cottbus', 'Gera', 'Kaiserslautern', 'Witten', 'Gütersloh', 'Schwerin', 'Iserlohn', 'Ludwigsburg', 'Hanau', 'Esslingen am Neckar', 'Zwickau', 'Düren', 'Ratingen', 'Flensburg', 'Villingen-Schwenningen', 'Lünen', 'Marl', 'Lüneburg', 'Dessau-Roßlau', 'Konstanz']
@@ -109,14 +107,15 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          * Change the language
          * @param language
          */
-        changeLanguage(language: string) {
-            this.language.lang = this.language.supportedLanguages.includes(language) ? language : 'en'
+        setLanguage(language: SUPPORT_LOCALES_TYPE) {
+            this.language.lang = language
         },
         /**
-         * Authenticate the user using the session cookie
+         * Authenticate the user using the session cookie+
+         * @return true, if user was authenticated successfully
          */
-        async sessionAuth() {
-            logDebug('sessionAuth', 'logging in')
+        async authenticate(): Promise<boolean> {
+            logDebug('authenticate', 'logging in')
             // if the user is already authenticated, return true
             if (this.isAuthenticated) {
                 return Promise.resolve(true)
@@ -126,7 +125,11 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
                 .then((apiResponse: APIResponse<string>) => {
                     this.user.authenticated = !apiResponse.error
-                    return !apiResponse.error
+                    logDebug('sessionAuth', `user is${!this.user.authenticated ? ' not ' : ' '}authenticated`)
+                    return this.user.authenticated
+                }).catch(() => {
+                    this.user.authenticated = false
+                    return false
                 })
         },
         /**
@@ -152,41 +155,13 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             })
         },
         /**
-         * Get the user's position
-         */
-        async getPosition() {
-            const getPositionViaCapacitor = () => {
-                Geolocation.getCurrentPosition().then((position: Position) => {
-                    this.user.position = position
-                }).catch((error) => {
-                    logError('getGeolocation.getPositionViaCapacitor', error)
-                })
-            }
-
-            const getPositionViaBrowser = () => {
-                navigator.geolocation.getCurrentPosition((position: Position) => {
-                    this.user.position = position
-                }, (error) => {
-                    logError('getGeolocation.getPositionViaBrowser', error)
-                })
-            }
-
-            if (typeof navigator.geolocation !== 'undefined') {
-                getPositionViaBrowser()
-            } else {
-                getPositionViaCapacitor()
-            }
-        },
-        /**
          * Get the greetings
          */
         async getGreeting(): Promise<string[]> {
             const selectRand = (greetings: string[][]): string[] => greetings[Math.floor(Math.random() * greetings.length)]
 
             if (this.greetings.length > 0) {
-                return new Promise((resolve) => {
-                    resolve(selectRand(this.greetings))
-                })
+                return Promise.resolve(selectRand(this.greetings))
             } else {
                 return getCachedItem<string[][]>('greetings')
                     .then((cachedGreetings) => {
@@ -286,6 +261,9 @@ export const useRecipeStore = defineStore('recipes', {
         },
         getItemsAsList: (state): Item[] => {
             return Object.values(state.items ?? {}) ?? []
+        },
+        getItemNamesAsList(): string[] {
+            return (this.getItemsAsList ?? []).map((item: Item) => item.getName())
         },
         getItemsSortedByName(): Item[] {
             const itemsAsArray = this.getItemsAsList ?? []
@@ -488,7 +466,7 @@ export const useRecipeStore = defineStore('recipes', {
 
             logDebug('saveRecipe', recipes)
             this.setLoadingState('saveRecipe')
-            return sendToAPI<string>(API_ROUTE.ADD_RECIPE, {
+            return sendToAPI<string>(API_ROUTE.ADD_RECIPES, {
                 body: recipes,
                 errorMessage: 'Could not save recipe in database. Please retry later!',
                 successMessage: 'Updated recipe'
@@ -505,21 +483,29 @@ export const useRecipeStore = defineStore('recipes', {
                 })
                 .catch(() => this.setRecipes(recipes))
         },
-        async deleteRecipe(recipe: Recipe): Promise<void> {
-            logDebug('deleteRecipe', recipe)
-            this.setLoadingState('deleteRecipe')
-            delete this.recipes[recipe.getId()]
-            if (typeof recipe.id !== 'undefined') {
-                return sendToAPI<string>(API_ROUTE.DELETE_RECIPE, {
-                    formatObject: {RECIPE_ID: recipe.id ?? ''},
-                    errorMessage: `Could not delete recipe ${recipe.id} from database. Please retry later!`
-                }).then((apiResponse: APIResponse<string>) => {
-                    this.finishLoading('deleteRecipe')
-                    return presentToast(apiResponse.response)
-                })
+        async deleteRecipes(recipes: Recipe[] | Recipe) {
+            // if the recipes is not defined, save all recipes
+            if (typeof recipes === 'undefined') {
+                recipes = Object.values(this.getRecipesAsMap)
             }
-            // eslint-disable-next-line @typescript-eslint/no-empty-function
-            return new Promise(() => {
+
+            // if the recipes is not an array, make it an array
+            if (!Array.isArray(recipes)) {
+                recipes = [recipes]
+            }
+
+            const recipeIds = recipes.map((recipe: Recipe) => recipe.getId())
+            recipeIds.forEach((recipeId: string) => {
+                delete this.recipes[recipeId]
+            })
+            logDebug('deleteRecipes', recipeIds)
+            this.setLoadingState('deleteRecipes')
+            return sendToAPI<string>(API_ROUTE.DELETE_RECIPES, {
+                errorMessage: `Could not delete recipes from database. Please retry later!`,
+                body: recipeIds
+            }).then((apiResponse: APIResponse<string>) => {
+                this.finishLoading('deleteRecipes')
+                return presentToast(apiResponse.response)
             })
         },
         async fetchItems(): Promise<Item[]> {
@@ -551,9 +537,9 @@ export const useRecipeStore = defineStore('recipes', {
 
             logDebug('saveItem', items)
             this.setLoadingState('saveItem')
-            return sendToAPI<string>(API_ROUTE.ADD_ITEM, {
+            return sendToAPI<string>(API_ROUTE.ADD_ITEMS, {
                 body: items,
-                errorMessage: 'Could not save item in database. Please retry later!'
+                errorMessage: 'Could not save items in database. Please retry later!'
             })
                 .then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('saveItem')
@@ -567,19 +553,30 @@ export const useRecipeStore = defineStore('recipes', {
                 })
                 .catch(() => this.setItems(items))
         },
-        deleteItem(item: Item) {
-            logDebug('deleteItem', item)
-            this.setLoadingState('deleteItem')
-            this.removeItem(item)
-            if (typeof item.id !== 'undefined') {
-                return sendToAPI<string>(API_ROUTE.DELETE_ITEM, {
-                    formatObject: {ITEM_ID: item.id ?? ''},
-                    errorMessage: `Could not delete item ${item.id} from database. Please retry later!`
-                }).then((apiResponse: APIResponse<string>) => {
-                    this.finishLoading('deleteItem')
-                    return presentToast(apiResponse.response)
-                })
+        async deleteItems(items: Item[] | Item) {
+            // if the recipes is not defined, save all recipes
+            if (typeof items === 'undefined') {
+                items = Object.values(this.getItemsAsMap)
             }
+
+            // if the recipes is not an array, make it an array
+            if (!Array.isArray(items)) {
+                items = [items]
+            }
+
+            const itemIds = items.map((item: Item) => item.getId())
+            itemIds.forEach((recipeId: string) => {
+                delete this.recipes[recipeId]
+            })
+            logDebug('deleteItems', itemIds)
+            this.setLoadingState('deleteItems')
+            return sendToAPI<string>(API_ROUTE.DELETE_ITEMS, {
+                errorMessage: `Could not delete items from database. Please retry later!`,
+                body: itemIds
+            }).then((apiResponse: APIResponse<string>) => {
+                this.finishLoading('deleteItems')
+                return presentToast(apiResponse.response)
+            })
         }
     },
 })
