@@ -40,6 +40,18 @@
             </IonCardTitle>
         </IonCardHeader>
 
+        <!-- Item merger -->
+        <IonCardContent>
+            <IonItem lines="none">
+                <IonInput v-model="itemMergerInput" label="Merge with" label-placement="stacked" type="text"
+                          placeholder="Enter item id" @keyup.enter="mergeItems()"/>
+                <IonButton color="success" fill="outline" @click="mergeItems()">
+                    <IonIcon :icon="save"/>
+                </IonButton>
+            </IonItem>
+
+        </IonCardContent>
+
         <IonCardContent>
             Used in {{ usedInRecipes.length }} recipes
             <IonButton v-if="usedInRecipes.length > 0" size="small"
@@ -62,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import {Item, Recipe} from '@/tastebuddy/types';
+import {Item, logDebug, Recipe} from '@/tastebuddy';
 import {
     IonAvatar,
     IonButton,
@@ -113,4 +125,26 @@ const usedInRecipes: ComputedRef<Recipe[]> = computed(() => {
 
 const saveItem = () => mutableItem.value.save()
 const deleteItem = () => mutableItem.value.delete()
+
+// Item merger
+const itemMergerInput: Ref<string> = ref('')
+const mergeItems = () => {
+    if (!itemMergerInput.value) {
+        return
+    }
+    const isValidId = recipeStore.getItemsAsList.some((item: Item) => item.getId() === itemMergerInput.value)
+    if (!isValidId) {
+        return
+    }
+    logDebug('ItemEditor.mergeItems', `Merging ${itemMergerInput.value} => ${mutableItem.value.getId()}`)
+    const recipesByItemIds = recipeStore.getRecipesByItemIds[itemMergerInput.value]
+    for (const recipeId of recipesByItemIds) {
+        const recipe = recipeStore.getRecipesAsMap[recipeId]
+        if (recipe) {
+            logDebug('ItemEditor.mergeItems', `Merging recipe ${recipeId}`)
+            recipe.replaceItem(itemMergerInput.value, mutableItem.value)
+            recipe.save()
+        }
+    }
+}
 </script>

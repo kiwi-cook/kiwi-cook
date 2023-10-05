@@ -15,6 +15,11 @@
     "Direction": "Schritt | Schritte",
     "Ingredient": "Zutat | Zutaten"
   },
+  "Tag": {
+    "Special": {
+        "FastAndCheap": "schnell & günstig"
+    }
+  },
   "Suggestions": {
     "Title": "Entdecke;neue Rezepte",
     "SearchbarPrompt": "Nach welchen Zutaten oder Rezepten sehnst du dich heute?",
@@ -32,11 +37,16 @@
     },
     "Search": {
       "Title": "{0} Rezepte gefunden",
-      "Subtitle": "Diese Rezepte passen zu deiner Suche"
+      "Subtitle": "Diese Rezepte passen zu deiner Suche",
+      "NoRecipesFound": "Keine Rezepte gefunden"
     }
   },
   "Favorites": {
     "Title": "Deine;Lieblingsrezepte",
     "NoRecipesSaved": "Du hast noch keine Rezepte favorisiert."
+  },
+  "SignIn": {
+    "SignIn": "Anmelden",
+    "ShowPassword": "Zeige Passwort"
   }
 }

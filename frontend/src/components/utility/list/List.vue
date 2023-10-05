@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
 import {IonInfiniteScroll, IonInfiniteScrollContent} from '@ionic/vue';
-import {computed, ComputedRef, Ref, ref, shallowRef, toRefs, watch} from 'vue';
+import {computed, ComputedRef, Ref, ref, toRefs, watch} from 'vue';
 import {useRecipeStore} from '@/storage';
 
 

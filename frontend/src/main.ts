@@ -58,6 +58,7 @@ const router = createTasteBuddyRouter();
 
 /* Initialize internalisation */
 import {i18n} from "@/locales/i18n.ts";
+import {useTasteBuddyStore} from "@/storage";
 
 /* Initialize app */
 const app = createApp(App)
@@ -74,3 +75,7 @@ logDebug('main.config', app.config)
 router.isReady().then(() => {
     app.mount('#tastebuddy');
 });
+
+/* Set language */
+const store = useTasteBuddyStore()
+store.setLanguage('de')

@@ -1,7 +1,7 @@
 <template>
     {{ computedText }}
     <a v-if="showButton" class="read-more-button" @click="isExpanded = !isExpanded">
-        {{ isExpanded ? 'Read less' : 'Read more' }}
+        {{ isExpanded ? 'Read less' : '...Read more' }}
     </a>
 </template>
 
@@ -13,22 +13,41 @@ const props = defineProps({
         type: String,
         required: true,
     },
-    maxLength: {
+    length: {
         type: Number,
         required: false,
-        default: 100,
+        default: 2,
     },
 })
-const {text, maxLength} = toRefs(props);
+const {text, length} = toRefs(props);
 const isExpanded = ref(false);
 
-const showButton = computed(() => text.value.length > maxLength.value)
+const showButton = computed(() => text.value.length > length.value)
+
+/**
+ * Get the nth occurrence of a string in a string
+ * @author kennebec at https://stackoverflow.com/a/14482123
+ *
+ * @param str
+ * @param pat
+ * @param n
+ */
+const nthIndex = (str: string, pat: string, n: number) => {
+    const L = str.length
+    let i = -1
+    while (n-- && i++ < L) {
+        i = str.indexOf(pat, i);
+        if (i < 0) break;
+    }
+    return i;
+}
 
 const computedText = computed(() => {
-    if (isExpanded.value || text.value.length <= maxLength.value) {
+    if (isExpanded.value || text.value.length <= length.value) {
         return text.value;
     } else {
-        return text.value.substring(0, maxLength.value) + '...';
+        const index = nthIndex(text.value, '.', length.value);
+        return text.value.substring(0, index + 1);
     }
 });
 
@@ -36,10 +55,9 @@ const computedText = computed(() => {
 
 <style>
 .read-more-button {
-    margin-left: 8px;
+    margin-left: 4px;
     color: var(--ion-color-primary);
     cursor: pointer;
-    font-size: var(--font-size-small);
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
 }
 </style>

@@ -8,7 +8,7 @@ import {compress, decompress} from 'lz-string'
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
 import {API_ROUTE, APIResponse, Item, logDebug, logError, presentToast, Recipe, sendToAPI} from "@/tastebuddy";
-import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/locales/i18n.ts";
+import {i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/locales/i18n.ts";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -109,6 +109,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          */
         setLanguage(language: SUPPORT_LOCALES_TYPE) {
             this.language.lang = language
+            setI18nLanguage(i18n, language)
         },
         /**
          * Authenticate the user using the session cookie+
@@ -223,15 +224,15 @@ export const useRecipeStore = defineStore('recipes', {
             const recipes = this.getRecipesAsList ?? []
             const recipesByItemId: { [key: string]: string[] } = {}
 
-            recipes.forEach((recipe: Recipe) => {
+            for (const recipe of recipes) {
                 const items = recipe.getStepItems()
-                items.forEach((item: Item) => {
+                for (const item of items) {
                     if (!(item.getId() in recipesByItemId)) {
                         recipesByItemId[item.getId()] = []
                     }
                     recipesByItemId[item.getId()].push(recipe.getId())
-                })
-            })
+                }
+            }
             logDebug('getRecipesByItemIds', recipesByItemId)
 
             return recipesByItemId

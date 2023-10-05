@@ -15,6 +15,11 @@
     "Direction": "Direction | Directions",
     "Ingredient": "Ingredient | Ingredients"
   },
+  "Tag": {
+    "Special": {
+        "FastAndCheap": "fast & cheap"
+    }
+  },
   "Suggestions": {
     "Title": "Discover;new recipes",
     "SearchbarPrompt": "What ingredients or recipes are you craving today?",
@@ -32,11 +37,16 @@
     },
     "Search": {
       "Title": "Found {0} recipes",
-      "Subtitle": "These recipes match your search"
+      "Subtitle": "These recipes match your search",
+      "NoRecipesFound": "No recipes found"
     }
   },
   "Favorites": {
     "Title": "Your;favorite recipes",
     "NoRecipesSaved": "You have no saved recipes yet."
+  },
+  "SignIn": {
+    "SignIn": "Sign in",
+    "ShowPassword": "Show password"
   }
 }

@@ -31,7 +31,7 @@
 import {computed, ComputedRef, ref, watch} from 'vue';
 import {useRoute} from 'vue-router';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import {Recipe} from '@/tastebuddy/types';
+import {Recipe} from '@/tastebuddy';
 import {useRecipeStore} from '@/storage';
 import RecipeEditor from "@/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";

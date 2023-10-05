@@ -1,13 +1,13 @@
 <template>
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
         <img class="mini-recipe-preview-image" :src="recipe?.props?.imgUrl" :alt="`Preview Image of ${name}`">
-        <h3 class="mini-recipe-preview-title">{{ name }}</h3>
-        <h4 class="preview-subtitle">
-            <IonChip v-if="duration ?? 0 > 0">
-                <IonIcon :icon="time"/>
+        <div class="mini-recipe-tags">
+            <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag" color="dark">
+                <IonIcon :icon="time" size="small"/>
                 <IonLabel>{{ duration }} min.</IonLabel>
             </IonChip>
-        </h4>
+        </div>
+        <h3 class="mini-recipe-preview-title">{{ name }}</h3>
     </div>
 </template>
 
@@ -33,30 +33,31 @@ const duration = computed(() => recipe?.value?.getDuration())
 
 <style>
 :root {
-    --mini-recipe-image-size: 200px;
+    --mini-recipe-width: 220px;
+    --mini-recipe-height: 150px;
 }
 
 @media (width <= 1280px) {
     :root {
-        --mini-recipe-image-size: 170px;
+        --mini-recipe-width: 170px;
     }
 }
 
 @media (width <= 768px) {
     :root {
-        --mini-recipe-image-size: 150px;
+        --mini-recipe-width: 150px;
     }
 }
 
 .mini-recipe-preview-container {
-    width: var(--mini-recipe-image-size); /* Set a maximum width for the preview */
+    width: var(--mini-recipe-width); /* Set a maximum width for the preview */
     margin: 0 var(--margin) 0 auto;
     cursor: pointer;
 }
 
 .mini-recipe-preview-image {
-    width: var(--mini-recipe-image-size); /* Set a fixed width */
-    height: var(--mini-recipe-image-size); /* Set a fixed height */
+    width: var(--mini-recipe-width); /* Set a fixed width */
+    height: var(--mini-recipe-height); /* Set a fixed height */
     object-fit: cover; /* Crop the image if necessary */
     border-radius: 8px; /* Optional: Add rounded corners */
     border: var(--border);
@@ -80,9 +81,7 @@ const duration = computed(() => recipe?.value?.getDuration())
     box-sizing: border-box;
 }
 
-.preview-subtitle {
-    font-size: var(--font-size-tiny);
-    font-weight: var(--font-weight-light);
-
+.mini-recipe-preview-tag {
+    font-size: var(--font-size-small);
 }
 </style>

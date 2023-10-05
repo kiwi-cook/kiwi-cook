@@ -1,3 +1,5 @@
+import {RouteLocationNormalized} from "vue-router";
+
 /**
  * Log a message to the console
  * @param functionName the name of the function
@@ -32,4 +34,8 @@ export const logError = (functionName: string, error: any, ...errors: any[]) => 
     } else {
         console.error(`[${functionName}]:`, error, ...errors)
     }
+}
+
+export const beforeEachLog = (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
+    logDebug('middleware.router', `routing from ${from.path} => ${to.path}`)
 }

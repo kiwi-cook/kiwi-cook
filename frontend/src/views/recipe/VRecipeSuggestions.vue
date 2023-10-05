@@ -6,38 +6,35 @@
                     <FancyHeader :big-text="$t('Suggestions.Title').split(';')"/>
 
                     <!-- Searchbar for ingredients, tools and recipes -->
-                    <Searchbar v-model="filterInput"
-                               class="searchbar"
+                    <Searchbar v-model="filterInput" class="searchbar"
                                :elements="[...filteredRecipes, ...filteredItems, ...filteredTags]"
-                               :placeholder="$t('Suggestions.SearchbarPrompt')"
-                               @select-item="includeItem($event)"
-                               @select-recipe="routeRecipe($event)"
-                               @select-tag="includeTag($event)"/>
+                               :placeholder="$t('Suggestions.SearchbarPrompt')" @select-item="includeItem($event)"
+                               @select-recipe="routeRecipe($event)" @select-tag="includeTag($event)"/>
 
                     <TwoColumnLayout layout="rightBigger">
                         <template #left>
                             <div class="sticky">
                                 <section>
                                     <h3>
-                                        {{ $t('Suggestions.Preferences.Title')}}
+                                        {{ $t('Suggestions.Preferences.Title') }}
                                     </h3>
                                     <h4 class="subheader">
-                                        {{ $t('Suggestions.Preferences.Subtitle')}}
+                                        {{ $t('Suggestions.Preferences.Subtitle') }}
                                     </h4>
 
                                     <div class="over-x-scroll">
                                         <!-- Selected tags -->
                                         <IonChip v-for="(tag, tagIndex) in selectedTags"
-                                                 :key="`selected-tag-${tagIndex}`" outline
-                                                 class="tag">
+                                                 :key="`selected-tag-${tagIndex}`"
+                                                 outline class="tag">
                                             <IonLabel>{{ tag }}</IonLabel>
                                             <IonIcon :icon="closeCircleOutline" color="danger"
                                                      @click="(selectedTags ?? []).splice(tagIndex, 1)"/>
                                         </IonChip>
                                         <!-- Special tags -->
                                         <IonChip v-for="(specialTag, tagIndex) in specialTags"
-                                                 :key="`special-tag-${tagIndex}`"
-                                                 class="tag" color="primary" outline @click="specialTag.click()">
+                                                 :key="`special-tag-${tagIndex}`" class="tag" color="primary" outline
+                                                 @click="specialTag.click()">
                                             <IonLabel>{{ specialTag.title }}</IonLabel>
                                         </IonChip>
                                         <!-- Suggested tags -->
@@ -53,7 +50,7 @@
                                         <IonAccordion value="items" class="search-filter">
                                             <IonItem slot="header">
                                                 <IonLabel>
-                                                    {{ $t('Suggestions.Preferences.Inventory')}}
+                                                    {{ $t('Suggestions.Preferences.Inventory') }}
                                                 </IonLabel>
                                             </IonItem>
                                             <div slot="content">
@@ -62,18 +59,15 @@
                                                     <IonCardContent>
                                                         <List :list="[...selectedItems, ...itemSuggestions]" load-all>
                                                             <template #element="{ element }">
-                                                                <ItemComponent
-
-                                                                    :item="element as Item"
-                                                                    :include="itemQueries[(element as Item).getId()]">
+                                                                <ItemComponent :item="element as Item"
+                                                                               :include="itemQueries[(element as Item).getId()]">
                                                                     <template #end>
                                                                         <div class="item-buttons">
                                                                             <IonButton
                                                                                 :color="itemQueries[(element as Item).getId()] === false ? 'danger' : 'light'"
                                                                                 :disabled="itemQueries[(element as Item).getId()] === false"
                                                                                 aria-description="Exclude item"
-                                                                                class="item-button"
-                                                                                shape="round"
+                                                                                class="item-button" shape="round"
                                                                                 @click="excludeItem(element)">
                                                                                 <IonIcon :icon="remove"/>
                                                                             </IonButton>
@@ -81,16 +75,14 @@
                                                                                 :color="itemQueries[(element as Item).getId()] ? 'success' : 'light'"
                                                                                 :disabled="itemQueries[(element as Item).getId()]"
                                                                                 aria-description="Include item"
-                                                                                class="item-button"
-                                                                                shape="round"
+                                                                                class="item-button" shape="round"
                                                                                 @click="includeItem(element)">
                                                                                 <IonIcon :icon="add"/>
                                                                             </IonButton>
                                                                             <IonButton
                                                                                 v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
                                                                                 aria-description="Remove item"
-                                                                                class="item-button"
-                                                                                color="light"
+                                                                                class="item-button" color="light"
                                                                                 shape="round"
                                                                                 @click="removeItem(element)">
                                                                                 <IonIcon :icon="close"/>
@@ -109,7 +101,7 @@
                                         <IonAccordion class="suggestion-filter" value="duration">
                                             <IonItem slot="header">
                                                 <IonLabel>
-                                                    {{ $t('Suggestions.Preferences.Time')}}
+                                                    {{ $t('Suggestions.Preferences.Time') }}
                                                 </IonLabel>
                                             </IonItem>
                                             <div slot="content">
@@ -126,11 +118,10 @@
                                                             Any duration
                                                         </IonChip>
                                                         <IonRange v-model="maxCookingTime"
-                                                                  :label="`${ maxCookingTime ? `${maxCookingTime} min.` : 'Any duration' }`"
+                                                                  :label="`${maxCookingTime ? `${maxCookingTime} min.` : 'Any duration'}`"
                                                                   :max="60" :min="5" :pin="true"
                                                                   :pin-formatter="(value: number) => `${value} min.`"
-                                                                  :snaps="true"
-                                                                  :step="5" :ticks="false"
+                                                                  :snaps="true" :step="5" :ticks="false"
                                                                   label-placement="end"/>
                                                     </IonCardContent>
                                                 </IonCard>
@@ -141,7 +132,7 @@
                                         <IonAccordion class="suggestion-filter" value="price">
                                             <IonItem slot="header">
                                                 <IonLabel>
-                                                    {{ $t('Suggestions.Preferences.Budget')}}
+                                                    {{ $t('Suggestions.Preferences.Budget') }}
                                                 </IonLabel>
                                             </IonItem>
                                             <div slot="content">
@@ -158,12 +149,11 @@
                                                             Any price
                                                         </IonChip>
                                                         <IonRange v-model="maxPrice"
-                                                                  :label="`${ maxPrice ? `${maxPrice} €` : 'Any price' }`"
+                                                                  :label="`${maxPrice ? `${maxPrice} €` : 'Any price'}`"
                                                                   :max="20" :min="1" :pin="true"
                                                                   :pin-formatter="(value: number) => `${value} €`"
                                                                   :snaps="true"
-                                                                  :step="1" :ticks="false"
-                                                                  label-placement="end"/>
+                                                                  :step="1" :ticks="false" label-placement="end"/>
                                                     </IonCardContent>
                                                 </IonCard>
                                             </div>
@@ -173,7 +163,7 @@
                                         <IonAccordion class="suggestion-filter" value="servings">
                                             <IonItem slot="header">
                                                 <IonLabel>
-                                                    {{ $t('Suggestions.Preferences.Serving')}}
+                                                    {{ $t('Suggestions.Preferences.Serving') }}
                                                 </IonLabel>
                                             </IonItem>
                                             <div slot="content">
@@ -214,9 +204,7 @@
                                 </h4>
                                 <HorizontalList :list="suggestedRecipes">
                                     <template #element="{ element }">
-                                        <div class="mini-recipe-preview">
-                                            <MiniRecipePreview :recipe="element as Recipe"/>
-                                        </div>
+                                        <MiniRecipePreview :recipe="element as Recipe"/>
                                     </template>
                                 </HorizontalList>
                             </section>
@@ -238,7 +226,7 @@
                             </section>
                             <section v-else-if="submitted">
                                 <h3>
-                                    No recipes found
+                                    {{ $t('Suggestions.Search.NoRecipesFound') }}
                                 </h3>
                             </section>
                         </template>
@@ -246,8 +234,7 @@
 
                     <!-- Submit button -->
                     <div class="search-button-wrapper">
-                        <IonButton :color="submitColor" class="search-button"
-                                   type="submit" @click="submit()">
+                        <IonButton :color="submitColor" class="search-button" type="submit" @click="submit()">
                             {{ submitButton }}
                             <IonIcon v-if="!submitted" :icon="search" class="search-button-icon"/>
                         </IonButton>
@@ -401,11 +388,16 @@ const suggestedRecipes: ComputedRef<Recipe[]> = computed(() => {
 const searchedRecipes: Ref<RecipeSuggestion[]> = ref([])
 const suggest = () => {
     const searchQueryBuilder = new SearchQueryBuilder()
-    searchQueryBuilder.setCity(city.value)
     searchQueryBuilder.setDuration(maxCookingTime.value)
     searchQueryBuilder.setItemIds(itemQueries.value)
-    searchQueryBuilder.setPrice(maxPrice.value)
     searchQueryBuilder.setTags(selectedTags.value)
+
+    // TODO: fix price calculation
+    // searchQueryBuilder.setPrice(maxPrice.value)
+
+    // TODO: enable city search
+    //searchQueryBuilder.setCity(city.value)
+
     const query = searchQueryBuilder.build()
     searchedRecipes.value = index(query)
 }
@@ -420,7 +412,7 @@ const submit = () => {
         suggest()
         setTimeout(() => {
             recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: "start"})
-        }, 100)
+        }, 50)
     } else {
         // reset
         submitted.value = false
@@ -468,17 +460,20 @@ section {
 }
 
 .item-buttons .item-button:not(:last-child)::part(native) {
-    border-right: none; /* Prevent double borders */
+    border-right: none;
+    /* Prevent double borders */
 }
 
 .item-buttons .item-button:first-child::part(native) {
-    border-right: none; /* Prevent double borders */
+    border-right: none;
+    /* Prevent double borders */
     border-top-left-radius: var(--border-radius);
     border-bottom-left-radius: var(--border-radius);
 }
 
 .item-buttons .item-button:last-child::part(native) {
-    border-right: none; /* Prevent double borders */
+    border-right: none;
+    /* Prevent double borders */
     border-top-right-radius: var(--border-radius);
     border-bottom-right-radius: var(--border-radius);
 }
@@ -508,10 +503,5 @@ section {
 
 .search-button-icon {
     margin-left: 10px;
-}
-
-.mini-recipe-preview {
-    width: 100%;
-    max-width: 200px;
 }
 </style>

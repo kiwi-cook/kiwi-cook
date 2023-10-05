@@ -86,7 +86,6 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import {logError, Recipe} from "@/tastebuddy";
 import FancyHeader from "@/components/utility/fancy/FancyHeader.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/storage";
@@ -108,6 +107,7 @@ import {
     useIonRouter
 } from "@ionic/vue";
 import {availableParsers, parseRecipes, RecipeParser} from "@/tastebuddy/parser";
+import {logError, Recipe} from "@/tastebuddy";
 
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
@@ -137,7 +137,7 @@ const onFileChange = (event: any) => {
 }
 
 const addRecipe = () => {
-    const newRecipeId = Recipe.newRecipe().update().tmpId
+    const newRecipeId = Recipe.newRecipe().update().getId()
     router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
 }
 const saveRecipes = () => {

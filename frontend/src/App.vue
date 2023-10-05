@@ -1,16 +1,13 @@
 <template>
     <IonApp>
-        <IonRouterOutlet/>
+        <IonRouterOutlet />
     </IonApp>
-    <IonText>
-        Made with ♥️ by Josef & Vasilij
-    </IonText>
 </template>
 
 <script setup lang="ts">
-import {IonApp, IonRouterOutlet, IonText} from '@ionic/vue';
-import {useRecipeStore} from './storage';
-import {prefersDark, toggleDarkTheme} from "@/tastebuddy";
+import { IonApp, IonRouterOutlet } from '@ionic/vue';
+import { prefersDark, toggleDarkTheme } from "@/tastebuddy";
+import { useRecipeStore } from '@/storage';
 
 const recipeStore = useRecipeStore();
 

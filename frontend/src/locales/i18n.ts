@@ -2,6 +2,8 @@ import {useTasteBuddyStore} from "@/storage";
 import {createI18n} from "vue-i18n";
 import {nextTick} from 'vue'
 import enUS from '@/locales/en.json'
+import {RouteLocationNormalized} from "vue-router";
+import {logDebug} from "@/tastebuddy";
 
 export type LocaleStr = {
     [lang: string]: string
@@ -23,11 +25,10 @@ export function setLocaleStr(localeStr: LocaleStr, value: string, lang?: string)
     localeStr[lang ?? store.language.lang] = value;
 }
 
-export const SUPPORT_LOCALES = ['en', 'de']
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
+export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']
 
 export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: 'en'}) {
-    // Type-define 'en-US' as the master schema for the resource
     type MessageSchema = typeof enUS
     const locale = options.locale
 
@@ -36,14 +37,17 @@ export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: '
         legacy: false,
     })
     setI18nLanguage(i18n, locale)
-
-    // Load texts in english
-    loadLocaleMessages(i18n, locale)
     return i18n
 }
 
 export const i18n = setupI18n({locale: 'de'})
 
+/**
+ * Change the language of the app
+ * IMPORTANT: Should only be called by store since the store is the SSOT!
+ * @param i18n the i18n instance
+ * @param locale the locale to change to
+ */
 export function setI18nLanguage(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
     if (i18n.mode === 'legacy') {
         i18n.global.locale = locale
@@ -58,9 +62,15 @@ export function setI18nLanguage(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
      * axios.defaults.headers.common['Accept-Language'] = locale
      */
     document.querySelector('html')?.setAttribute('lang', locale)
+    loadLocaleMessages(i18n, locale)
 }
 
-export async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
+/**
+ * Load the locale messages
+ * @param i18n the i18n instance
+ * @param locale the locale to load
+ */
+async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
     // load locale messages with dynamic import
     const messages = await import(
         /* webpackChunkName: "locale-[request]" */ `@/locales/${locale}.json`
@@ -70,4 +80,29 @@ export async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE
     i18n.global.setLocaleMessage(locale, messages.default)
 
     return nextTick()
+}
+
+/**
+ * Vue Router middleware to set the language.
+ * This middleware is called before each route change.
+ * @param to the route to change to. It contains the language in the query parameter "lang"
+ */
+export const beforeEachSetLang = async (to: RouteLocationNormalized) => {
+    const paramsLocationQueryValue = to.query.lang
+    const lang: SUPPORT_LOCALES_TYPE = (Array.isArray(paramsLocationQueryValue) ? paramsLocationQueryValue[0] : paramsLocationQueryValue) as SUPPORT_LOCALES_TYPE
+    logDebug('setI18nLangMiddleware', 'set lang:', lang)
+
+    // use locale if paramsLocale is not in SUPPORT_LOCALES
+    if (!SUPPORT_LOCALES.includes(lang)) {
+        return
+    }
+
+    // load locale messages
+    if (!i18n.global.availableLocales.includes(lang)) {
+        await loadLocaleMessages(i18n, lang)
+    }
+
+    // set i18n language via the store
+    const store = useTasteBuddyStore()
+    store.setLanguage(lang)
 }

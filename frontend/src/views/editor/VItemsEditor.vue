@@ -109,7 +109,7 @@ const formatItems = () => {
 
         // Add img url
         if (!item.imgUrl || item.imgUrl === '') {
-            item.imgUrl = `https://spoonacular.com/cdn/ingredients_100x100/${name}.jpg`
+            item.imgUrl = `https://spoonacular.com/cdn/ingredients_100x100/${name.toLowerCase()}.jpg`
         }
     })
 }

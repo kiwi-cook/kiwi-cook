@@ -1,27 +1,29 @@
 <template>
     <IonCard class="login-card">
         <IonCardHeader>
-            <TasteBuddyLogo/>
+            <TasteBuddyLogo />
         </IonCardHeader>
         <IonCardContent>
             <IonItem lines="none">
                 <IonInput v-model="username" :clear-input="true" autocomplete="username" label="Username"
-                          label-placement="floating" type="text"/>
+                          label-placement="floating" type="text" />
             </IonItem>
             <IonItem lines="none">
                 <IonInput v-model="password" :clear-input="true" autocomplete="current-password" label="Password"
-                          label-placement="floating" :type="visible ? 'text' : 'password'"/>
-                <IonCheckbox slot="end" v-model="visible" color="primary"
-                             label-placement="end">Show password
+                          label-placement="floating" :type="visible ? 'text' : 'password'" />
+                <IonCheckbox slot="end" v-model="visible" color="primary" label-placement="end">{{ $t('SignIn.ShowPassword')
+                }}
                 </IonCheckbox>
             </IonItem>
-            <IonButton :disabled="isDisabled" expand="block" @click="authenticate()">Sign in</IonButton>
+            <IonButton :disabled="isDisabled" expand="block" @click="authenticate()">
+                {{ $t('SignIn.SignIn') }}
+            </IonButton>
         </IonCardContent>
     </IonCard>
 </template>
 
 <script setup lang="ts">
-import {computed, ref, watch} from 'vue';
+import { computed, ref, watch } from 'vue';
 import {
     IonButton,
     IonCard,
@@ -33,8 +35,8 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import TasteBuddyLogo from '@/components/TasteBuddyLogo.vue'
-import {useTasteBuddyStore} from '@/storage';
-import {useRoute} from 'vue-router';
+import { useTasteBuddyStore } from '@/storage';
+import { useRoute } from 'vue-router';
 
 const store = useTasteBuddyStore();
 const isDevMode = computed(() => store.isDevMode)

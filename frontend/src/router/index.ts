@@ -1,10 +1,12 @@
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
-import {checkAuthMiddleware, logMiddleware, setI18nLangMiddleware} from "@/router/middleware";
+import {beforeEachCheckAuth} from "@/router/middleware";
 
 // Pages
 import TabsPage from '../views/VTabs.vue'
 import VRecipeSuggestions from "@/views/recipe/VRecipeSuggestions.vue";
+import {afterEachResumeHead, beforeEachLog, beforeEachPauseHead} from "@/tastebuddy";
+import {beforeEachSetLang} from "@/locales/i18n.ts";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -90,9 +92,14 @@ export function createTasteBuddyRouter(): Router {
     })
 
     router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-        logMiddleware(to, from);
-        setI18nLangMiddleware(to);
-        checkAuthMiddleware(to, from, next);
+        beforeEachLog(to, from);
+        beforeEachSetLang(to);
+        beforeEachCheckAuth(to, from, next);
+        beforeEachPauseHead()
+    })
+
+    router.afterEach(() => {
+        afterEachResumeHead()
     })
 
     return router;

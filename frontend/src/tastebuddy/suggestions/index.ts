@@ -52,8 +52,9 @@ class SearchQueryBuilder {
     constructor() {
         this.items = []
         this.tags = []
-        this.price = 0
-        this.duration = 0
+        this.price = undefined
+        this.duration = undefined
+        this.city = undefined
     }
 
     public addItem(item: ItemQuery): this {

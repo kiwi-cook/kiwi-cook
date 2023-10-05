@@ -134,7 +134,7 @@ import {
     IonText,
     useIonRouter,
 } from '@ionic/vue';
-import {Recipe, Step, StepItem} from '@/tastebuddy/types';
+import {Recipe, Step, StepItem} from '@/tastebuddy';
 import ItemList from "@/components/utility/list/ItemList.vue";
 import TwoColumnLayout from "@/components/layout/TwoColumnLayout.vue";
 import {add, flame, heart, heartOutline, pencil, remove, shareSocial, time} from "ionicons/icons";
