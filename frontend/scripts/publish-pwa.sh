@@ -1,7 +1,7 @@
 # This script is used to publish the PWA to the gh-pages branch
 
 # build the app
-bun run build
+bun run build:app
 
 # navigate into the build output directory
 cd dist || exit

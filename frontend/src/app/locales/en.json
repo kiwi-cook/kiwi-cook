@@ -1,0 +1,58 @@
+{
+  "Tabs": {
+    "Explore": "Explore",
+    "RecipeOfTheDay": "Recipe of the day",
+    "Favorites": "Favorites"
+  },
+  "General": {
+    "Recipe": "Recipe | Recipes",
+    "Item": "Item | Items",
+    "Tag": "Tag | Tags",
+    "ReadMore": "Read more",
+    "ReadLess": "Read less"
+  },
+  "Recipe": {
+    "By": "By",
+    "Serving": "Serving | Servings",
+    "Direction": "Direction | Directions",
+    "Ingredient": "Ingredient | Ingredients",
+    "GoodAppetite": "Good appetite!"
+  },
+  "Tag": {
+    "Special": {
+      "FastAndCheap": "fast & cheap"
+    }
+  },
+  "Suggestions": {
+    "Title": "Discover;new recipes",
+    "SearchbarPrompt": "What ingredients or recipes are you craving today?",
+    "Preferences": {
+      "Title": "Set your search preferences",
+      "Subtitle": "Filter by ingredients, cooking time, price and more.",
+      "Ingredients": "Ingredient | Ingredients",
+      "Duration": "Duration",
+      "Budget": "Budget",
+      "Servings": "Serving | Servings",
+      "Tags": "Tag | Tags"
+    },
+    "Recommendations": {
+      "Title": "Recommendations",
+      "Subtitle": "Based on your preferences"
+    },
+    "Search": {
+      "Title": "Found {0} recipes",
+      "Subtitle": "These recipes match your search",
+      "Submit": "Search",
+      "Clear": "Clear",
+      "NoRecipesFound": "No recipes found"
+    }
+  },
+  "Favorites": {
+    "Title": "Your;favorite recipes",
+    "NoRecipesSaved": "You have no saved recipes yet."
+  },
+  "SignIn": {
+    "SignIn": "Sign in",
+    "ShowPassword": "Show password"
+  }
+}

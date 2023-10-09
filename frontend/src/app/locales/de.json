@@ -1,0 +1,58 @@
+{
+  "Tabs": {
+    "Explore": "Entdecken",
+    "RecipeOfTheDay": "Rezept des Tages",
+    "Favorites": "Favoriten"
+  },
+  "General": {
+    "Recipe": "Rezept | Rezepte",
+    "Item": "Zutat | Zutaten",
+    "Tag": "Stichwort | Stichwörter",
+    "ReadMore": "Mehr lesen",
+    "ReadLess": "Weniger lesen"
+  },
+  "Recipe": {
+    "By": "Von",
+    "Serving": "Portion | Portionen",
+    "Direction": "Schritt | Schritte",
+    "Ingredient": "Zutat | Zutaten",
+    "GoodAppetite": "Guten Appetit!"
+  },
+  "Tag": {
+    "Special": {
+      "FastAndCheap": "schnell & günstig"
+    }
+  },
+  "Suggestions": {
+    "Title": "Entdecke;neue Rezepte",
+    "SearchbarPrompt": "Nach welchen Zutaten oder Rezepten sehnst du dich heute?",
+    "Preferences": {
+      "Title": "Lege deine Präferenzen fest",
+      "Subtitle": "Filtere nach Zutaten, Kochzeit, Preis und mehr.",
+      "Ingredients": "Zutat | Zutaten",
+      "Duration": "Dauer",
+      "Budget": "Budget",
+      "Servings": "Portion | Portionen",
+      "Tags": "Tag | Tags"
+    },
+    "Recommendations": {
+      "Title": "Vorschläge",
+      "Subtitle": "Basierend auf deinen Vorlieben"
+    },
+    "Search": {
+      "Title": "{0} Rezepte gefunden",
+      "Subtitle": "Diese Rezepte passen zu deiner Suche",
+      "Submit": "Suchen",
+      "Clear": "Zurücksetzen",
+      "NoRecipesFound": "Keine Rezepte gefunden"
+    }
+  },
+  "Favorites": {
+    "Title": "Deine;Lieblingsrezepte",
+    "NoRecipesSaved": "Du hast noch keine Rezepte favorisiert."
+  },
+  "SignIn": {
+    "SignIn": "Anmelden",
+    "ShowPassword": "Zeige Passwort"
+  }
+}

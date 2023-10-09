@@ -15,30 +15,30 @@
     ```
    
 2. Install NPM packages
-3. Run the app
+3. Run the main
    ```sh
-   bun run serve
+   bun run serve:app
    ```
    
 ## Usage
 
 ### Development
 
-1. Run the app
+1. Run the main
    ```sh
-   bun run serve
+   bun run serve:app
    ```
    
-2. Open the app in your [browser](http://localhost:8080) or use the command below
+2. Open the main in your [browser](http://localhost:8080) or use the command below
    ```sh
     open http://localhost:8080
     ```
    
-3. Make changes to the code and the app will automatically reload
+3. Make changes to the code and the main will automatically reload
 
 ### Production
 
-1. Build the app
+1. Build the main
    ```sh
-   bun run build
+   bun run build:app
    ```
