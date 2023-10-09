@@ -256,7 +256,12 @@ export const useRecipeStore = defineStore('recipes', {
          * @returns a list of saved recipes
          */
         getSavedRecipes(state): Recipe[] {
-            return [...state.savedRecipes.keys()].map((recipeId) => this.recipes[recipeId])
+            return [...state.savedRecipes.keys()].reduce((recipes: Recipe[], recipeId: string) => {
+                if (recipeId in this.recipes) {
+                    recipes.push(this.recipes[recipeId])
+                }
+                return recipes
+            }, [])
         },
         /**
          * Get saved recipes as a map

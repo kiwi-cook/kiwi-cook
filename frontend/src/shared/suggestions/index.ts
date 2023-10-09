@@ -2,7 +2,6 @@ import {useRecipeStore} from "@/app/storage";
 import {Recipe, StepItem} from "@/shared";
 
 class RecipeSuggestion {
-
     id: string;
     recipe?: Recipe;
     recipe_price?: number;

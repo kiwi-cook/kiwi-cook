@@ -80,7 +80,7 @@ import {
 } from "@ionic/vue";
 import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
-import ItemEditor from "@/shared/components/editor/ItemEditor.vue";
+import ItemEditor from "@/editor/components/editor/ItemEditor.vue";
 import {Item, MutableItem} from "@/shared";
 import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
 

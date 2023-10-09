@@ -61,8 +61,8 @@ export class Item {
     public getId(): string {
         // if the id is undefined, throw an error
         if (this.id === undefined && this.tmpId === undefined) {
-            logError("item id is undefined", this)
-            throw new Error("item.id is undefined: " + JSON.stringify(this))
+            logError("Item id is undefined", this)
+            throw new Error("Item.id is undefined: " + JSON.stringify(this))
         }
         return this.id ?? this.tmpId as string
     }

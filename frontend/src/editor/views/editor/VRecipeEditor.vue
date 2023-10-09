@@ -33,7 +33,7 @@ import {useRoute} from 'vue-router';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import {MutableRecipe} from '@/shared';
 import {useRecipeStore} from '@/app/storage';
-import RecipeEditor from "@/shared/components/editor/RecipeEditor.vue";
+import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
 

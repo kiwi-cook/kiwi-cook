@@ -89,7 +89,7 @@ import {ref} from "vue";
 import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/app/storage";
-import RecipeEditor from "@/shared/components/editor/RecipeEditor.vue";
+import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {
     IonButton,
     IonCard,
