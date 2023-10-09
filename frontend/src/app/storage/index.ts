@@ -18,7 +18,7 @@ import {
     recipeFromJSON,
     sendToAPI
 } from "@/shared";
-import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/app/locales/i18n.ts";
+import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
 
 const ionicStorage = new Storage({
     name: '__mydb',

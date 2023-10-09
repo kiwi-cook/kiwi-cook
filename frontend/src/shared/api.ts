@@ -1,4 +1,4 @@
-import {Item, logDebug, logError, presentToast, Recipe, RecipeSuggestion} from "@/shared/index.ts";
+import {Item, logDebug, logError, presentToast, Recipe, RecipeSuggestion} from "@/shared";
 
 type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 
@@ -63,7 +63,7 @@ export const DURATIONS = {
 }
 
 /**
- * This is a response from the API
+ * This is the response interface from the API
  */
 export interface APIResponse<T extends APIResponseBody> {
     error: boolean
@@ -71,7 +71,21 @@ export interface APIResponse<T extends APIResponseBody> {
     id?: string
 }
 
+// Abort Controller for the fetch function used in sendToAPI
 const controller = new AbortController()
+
+/**
+ * Options Type for sendToAPI function that is used to
+ * communicate with the API of Taste Buddy
+ */
+export type SendToApiOptions = {
+    formatObject?: { [key: string]: string | number },
+    body?: unknown,
+    headers?: { key: string, value: string }[],
+    successMessage?: string,
+    errorMessage?: string,
+    timeout?: number
+}
 
 /**
  * Get different data from the API by providing the API_ROUTE
@@ -89,16 +103,10 @@ const controller = new AbortController()
  * })
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: {
-    formatObject?: { [key: string]: string | number },
-    body?: unknown,
-    headers?: { key: string, value: string }[],
-    successMessage?: string,
-    errorMessage?: string
-}): Promise<APIResponse<R>> {
+export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
     let url = API_URL + API_ROUTES[route].url;
 
-    const {formatObject, body, headers, errorMessage, successMessage} = options ?? {};
+    const {formatObject, body, headers, errorMessage, successMessage, timeout} = options ?? {};
 
     // replace placeholders in url, e.g. CITY
     // please check the keys that can be replaced in constants.ts
@@ -126,6 +134,8 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         signal: controller.signal
     }
 
+    const id = setTimeout(() => controller.abort(), timeout ?? 1000)
+
     // call fetch
     logDebug('sendToAPI ' + route, fetchOptions)
     return fetch(url, fetchOptions).then(async (response: Response) => {
@@ -136,6 +146,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
                 document.cookie = cookie
             }
         }
+        clearTimeout(id)
 
         return response
     })

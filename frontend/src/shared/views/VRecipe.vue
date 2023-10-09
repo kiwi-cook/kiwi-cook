@@ -18,7 +18,7 @@
 <script setup lang="ts">
 import {computed} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import RecipeComponent from '@/app/components/recipe/Recipe.vue';
+import RecipeComponent from '@/shared/components/recipe/Recipe.vue';
 import {useRecipeStore} from "@/app/storage";
 import {useRoute} from 'vue-router';
 import {Recipe} from '@/shared';

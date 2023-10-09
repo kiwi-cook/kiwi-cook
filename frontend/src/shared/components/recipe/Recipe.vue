@@ -102,12 +102,12 @@ import {
     IonText,
 } from '@ionic/vue';
 import {Recipe, Step, StepItem} from '@/shared';
-import ItemList from "@/app/components/utility/list/ItemList.vue";
+import ItemList from "@/shared/components/utility/list/ItemList.vue";
 import StepComponent from "@/app/components/recipe/Step.vue";
 import TwoColumnLayout from "@/app/components/layout/TwoColumnLayout.vue";
 import {add, heart, heartOutline, remove, shareSocial, time} from "ionicons/icons";
 import {CanShareResult, Share} from "@capacitor/share";
-import ReadMore from "@/app/components/utility/ReadMore.vue";
+import ReadMore from "@/shared/components/utility/ReadMore.vue";
 import {useI18n} from "vue-i18n";
 
 /* Recipe */

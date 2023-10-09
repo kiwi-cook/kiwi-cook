@@ -86,9 +86,9 @@
 
 <script setup lang="ts">
 import {ref} from "vue";
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
-import {useRecipeStore} from "@/app/storage";
+import {useRecipeStore} from "@/editor/storage";
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {
     IonButton,
@@ -106,13 +106,14 @@ import {
     IonPage,
     useIonRouter
 } from "@ionic/vue";
-import {availableParsers, parseRecipes, RecipeParser} from "src/editor/parser";
+import {availableParsers, parseRecipes, RecipeParser} from "@/editor/parser";
 import {logError, Recipe} from "@/shared";
+import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
 
-const parsedRecipes = ref<Recipe[]>([])
+const parsedRecipes = ref<MutableRecipe[]>([])
 const file = ref<File | null>(null)
 const selectedParser = ref<RecipeParser>(RecipeParser.Cookstr)
 
@@ -137,7 +138,7 @@ const onFileChange = (event: any) => {
 }
 
 const addRecipe = () => {
-    const newRecipeId = Recipe.newRecipe().update().getId()
+    const newRecipeId = MutableRecipe.newRecipe().update().getId()
     router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
 }
 const saveRecipes = () => {

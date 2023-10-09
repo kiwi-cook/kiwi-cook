@@ -1,5 +1,5 @@
 import {StepItem, stepItemFromJSON} from "@/shared";
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/app/locales/i18n.ts";
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/shared/locales/i18n.ts";
 import {parseTemperature} from "@/editor/parser/utils.ts";
 
 /**

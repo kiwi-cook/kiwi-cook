@@ -1,18 +1,24 @@
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
-import {beforeEachCheckAuth} from "@/app/router/middleware";
+import {beforeEachCheckAuth} from "@/editor/router/middleware";
 
 // Pages
-import TabsPage from '@/shared/views/VTabs.vue'
+import TabsPage from '@/editor/views/VTabs.vue'
 import VRecipe from "@/shared/views/VRecipe.vue";
+import VHome from "@/editor/views/VHome.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
-        name: 'Home',
+        name: 'Tabs',
         path: '/',
         component: TabsPage,
-        redirect: () => ({name: 'RecipeSuggestions'}),
+        redirect: () => ({name: 'Home'}),
         children: [
+            {
+                name: 'Home',
+                path: 'editor',
+                component: VHome
+            },
             // Recipes
             {
                 name: 'Recipe',
@@ -22,32 +28,32 @@ const routes: Array<RouteRecordRaw> = [
             // Editor
             {
                 name: 'RecipeEditor',
-                path: 'recipe/edit/:id',
+                path: 'editor/recipe/:id',
                 meta: {
                     auth: true,
                 },
-                component: () => import('@/app/views/editor/VRecipeEditor.vue'),
+                component: () => import('@/editor/views/VRecipeEditor.vue'),
             },
             {
                 name: 'RecipesEditor',
-                path: 'recipe/edit',
+                path: 'editor/recipe',
                 meta: {
                     auth: true,
                 },
-                component: () => import('@/app/views/editor/VRecipesEditor.vue'),
+                component: () => import('@/editor/views/VRecipesEditor.vue'),
             },
             {
                 name: 'ItemEditor',
-                path: 'item/edit/',
+                path: 'editor/item',
                 meta: {
                     auth: true,
                 },
-                component: () => import('@/app/views/editor/VItemsEditor.vue'),
+                component: () => import('@/editor/views/VItemsEditor.vue'),
             },
             {
                 name: 'Login',
                 path: 'login',
-                component: () => import('@/app/views/editor/VSignIn.vue'),
+                component: () => import('@/editor/views/VSignIn.vue'),
             },
             // 404
             {

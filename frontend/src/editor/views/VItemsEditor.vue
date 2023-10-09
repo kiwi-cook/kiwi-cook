@@ -79,10 +79,11 @@ import {
     IonSearchbar
 } from "@ionic/vue";
 import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
-import {useRecipeStore} from '@/app/storage';
+import {useRecipeStore} from '@/editor/storage';
 import ItemEditor from "@/editor/components/editor/ItemEditor.vue";
-import {Item, MutableItem} from "@/shared";
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
+import {Item} from "@/shared";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import {MutableItem} from "@/editor/types/item.ts";
 
 const recipeStore = useRecipeStore();
 const items = computed<MutableItem[]>(() => {

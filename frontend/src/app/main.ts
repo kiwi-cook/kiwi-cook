@@ -33,16 +33,16 @@ import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
 /* Custom variables */
-import '@/app/theme/colors.css';
-import '@/app/theme/global.css';
-import '@/app/theme/ionic.css'
-import '@/app/theme/layout.css';
-import '@/app/theme/font.css';
+import '@/shared/theme/colors.css';
+import '@/shared/theme/global.css';
+import '@/shared/theme/ionic.css'
+import '@/shared/theme/layout.css';
+import '@/shared/theme/font.css';
 
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from "@/app/locales/i18n.ts";
+import {i18n} from "@/shared/locales/i18n.ts";
 
 // Initializations
 

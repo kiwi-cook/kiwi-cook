@@ -55,7 +55,7 @@
 import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared";
 import {IonChip, IonLabel, useIonRouter} from "@ionic/vue";
-import ItemList from "@/app/components/utility/list/ItemList.vue";
+import ItemList from "@/shared/components/utility/list/ItemList.vue";
 
 const props = defineProps({
     recipe: {

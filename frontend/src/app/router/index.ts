@@ -2,7 +2,7 @@ import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 
 // Pages
-import TabsPage from '@/shared/views/VTabs.vue'
+import TabsPage from '@/app/views/VTabs.vue'
 import VRecipe from "@/shared/views/VRecipe.vue";
 import VRecipeSuggestions from "@/app/views/recipe/VRecipeSuggestions.vue";
 import VRecipeOfTheDay from "@/app/views/recipe/VRecipeOfTheDay.vue";

@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import {computed, PropType, toRefs} from "vue";
 import {Item, StepItem} from "@/shared";
-import ItemComponent from "@/app/components/recipe/Item.vue";
+import ItemComponent from "@/shared/components/recipe/Item.vue";
 
 const props = defineProps({
     items: {

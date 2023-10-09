@@ -35,16 +35,15 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import TasteBuddyLogo from '@/app/components/TasteBuddyLogo.vue'
-import { useTasteBuddyStore } from '@/app/storage';
+import { useTasteBuddyStore } from '@/editor/storage';
 import { useRoute } from 'vue-router';
 
 const store = useTasteBuddyStore();
-const isDevMode = computed(() => store.isDevMode)
 
 const username = ref('');
 const password = ref('');
 const visible = ref(false);
-const isDisabled = computed(() => !isDevMode.value || username.value.length === 0 || password.value.length === 0)
+const isDisabled = computed(() => username.value.length === 0 || password.value.length === 0)
 
 const route = useRoute()
 const router = useIonRouter()

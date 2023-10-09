@@ -17,8 +17,9 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue';
 import {IonContent, IonPage} from '@ionic/vue';
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
-import RecipeComponent from '@/app/components/recipe/Recipe.vue';
+import FancyHeader from "@/shared/components/utility/fancy/
+FancyHeader.vue";
+import RecipeComponent from '@/shared/components/recipe/Recipe.vue';
 import {Recipe} from "@/shared";
 import {useRecipeStore, useTasteBuddyStore} from "@/app/storage";
 

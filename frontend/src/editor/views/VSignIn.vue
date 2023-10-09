@@ -16,5 +16,5 @@
 
 <script setup lang="ts">
 import {IonContent, IonPage} from '@ionic/vue';
-import SignIn from "@/app/components/user/SignInComponent.vue";
+import SignIn from "@/editor/components/user/SignInComponent.vue";
 </script>

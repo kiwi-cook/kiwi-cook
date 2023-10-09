@@ -213,8 +213,8 @@
 </template>
 
 <script setup lang="ts">
-import {formatDate, Item, MutableItem, MutableRecipe, newItemFromName, Recipe, Step, StepItem} from '@/shared';
-import {useRecipeStore} from '@/app/storage';
+import {formatDate, Item, Step, StepItem} from '@/shared';
+import {useRecipeStore} from '@/editor/storage';
 import {
     IonAvatar,
     IonButton,
@@ -235,10 +235,11 @@ import {
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {addOutline, calendar, closeCircleOutline, create, save, time, trash} from 'ionicons/icons';
-import DropDownSearch from '../../../app/components/utility/DropDownSearch.vue';
-import ItemList from "@/app/components/utility/list/ItemList.vue";
-import ItemComponent from "@/app/components/recipe/Item.vue";
+import ItemComponent from "@/shared/components/recipe/Item.vue";
 import {extractStepItemsFromText, findMostSimilarItem} from "@/editor/parser/utils.ts";
+import {MutableRecipe} from "@/editor/types/recipe.ts";
+import DropDownSearch from "@/shared/components/utility/DropDownSearch.vue";
+import ItemList from "@/shared/components/utility/list/ItemList.vue";
 
 const props = defineProps({
     recipe: {

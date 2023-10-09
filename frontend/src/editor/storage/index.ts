@@ -1,9 +1,6 @@
 // Vue
 import {defineStore} from 'pinia'
 
-// Compression
-// Types
-// Ionic
 import {
     API_ROUTE,
     APIResponse,
@@ -169,7 +166,7 @@ export const useRecipeStore = defineStore('recipes', {
          * Prepare the Ionic Storage by fetching the items and recipes
          */
         async prepare() {
-            this.fetchItems().then(() => this.fetchRecipes())
+            // this.fetchItems().then(() => this.fetchRecipes())
         },
         /**
          * Override all recipes

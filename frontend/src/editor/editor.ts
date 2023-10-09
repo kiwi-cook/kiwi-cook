@@ -3,18 +3,15 @@ import {IonicVue} from '@ionic/vue';
 
 // Vue + App
 import {createApp} from 'vue'
-import App from '@/app/App.vue'
-import {logDebug} from "@/shared";
+import App from '@/editor/App.vue'
 
 // Router
-import {createTasteBuddyRouter} from '@/app/router';
+import {createTasteBuddyRouter} from '@/editor/router';
 
 // Store
 import {createPinia} from "pinia";
 
 // Styles
-/* Add service worker */
-import '@/registerServiceWorker.ts';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -33,16 +30,16 @@ import '@ionic/vue/css/flex-utils.css';
 import '@ionic/vue/css/display.css';
 
 /* Custom variables */
-import '@/app/theme/colors.css';
-import '@/app/theme/global.css';
-import '@/app/theme/ionic.css'
-import '@/app/theme/layout.css';
-import '@/app/theme/font.css';
+import '@/shared/theme/colors.css';
+import '@/shared/theme/global.css';
+import '@/shared/theme/ionic.css'
+import '@/shared/theme/layout.css';
+import '@/shared/theme/font.css';
 
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from "@/app/locales/i18n.ts";
+import {i18n} from "@/shared/locales/i18n.ts";
 
 // Initializations
 
@@ -58,10 +55,6 @@ const app = createApp(App)
     .use(pinia)
     .use(router)
     .use(i18n)
-
-/* Configure app */
-app.config.performance = true
-logDebug('main.config', app.config)
 
 router.isReady().then(() => {
     app.mount('#tastebuddy');

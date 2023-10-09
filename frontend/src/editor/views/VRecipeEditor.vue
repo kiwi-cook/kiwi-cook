@@ -31,11 +31,11 @@
 import {computed, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import {MutableRecipe} from '@/shared';
-import {useRecipeStore} from '@/app/storage';
+import {useRecipeStore} from '@/editor/storage';
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const route = useRoute();
 const recipeId = ref(route.params.id as string);

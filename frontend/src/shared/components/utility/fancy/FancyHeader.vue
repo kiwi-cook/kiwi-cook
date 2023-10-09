@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import {PropType, Ref, ref, toRefs, watch} from "vue";
-import FancyText from "@/app/components/utility/fancy/FancyText.vue";
+import FancyText from "@/shared/components/utility/fancy/FancyText.vue";
 
 const props = defineProps({
     smallText: {

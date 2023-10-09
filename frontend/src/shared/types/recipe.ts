@@ -1,7 +1,7 @@
 import {useRecipeStore} from "@/app/storage";
 import {useIonRouter} from "@ionic/vue";
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/app/locales/i18n.ts";
-import {Item, logDebug, logError, Step, StepItem, tmpId} from "@/shared";
+import {getLocaleStr, LocaleStr, newLocaleStr} from "@/shared/locales/i18n.ts";
+import {Item, logError, Step, StepItem, tmpId} from "@/shared";
 import {CanShareResult, Share} from "@capacitor/share";
 
 /**

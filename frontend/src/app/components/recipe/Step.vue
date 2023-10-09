@@ -29,7 +29,7 @@
 </template>
 <script setup lang="ts">
 import {flame, time} from "ionicons/icons";
-import ItemList from "@/app/components/utility/list/ItemList.vue";
+import ItemList from "@/shared/components/utility/list/ItemList.vue";
 import {
     IonCard,
     IonCardContent,

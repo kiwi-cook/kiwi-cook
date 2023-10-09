@@ -1,7 +1,7 @@
 import {useTasteBuddyStore} from "@/app/storage";
 import {createI18n} from "vue-i18n";
 import {nextTick} from 'vue'
-import enUS from '@/app/locales/en.json'
+import enUS from '@/shared/locales/en.json'
 import {RouteLocationNormalized} from "vue-router";
 import {logDebug} from "@/shared";
 
@@ -75,7 +75,7 @@ export function setI18nLanguage(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
 async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
     // load locale messages with dynamic import
     const messages = await import(
-        /* webpackChunkName: "locale-[request]" */ `@/app/locales/${locale}.json`
+        /* webpackChunkName: "locale-[request]" */ `@/shared/locales/${locale}.json`
         )
 
     // set locale and locale message

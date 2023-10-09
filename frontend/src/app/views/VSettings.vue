@@ -20,8 +20,9 @@
 
 <script setup lang="ts">
 import {IonContent, IonPage, IonSelect, IonSelectOption} from '@ionic/vue';
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
-import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/app/locales/i18n.ts";
+import FancyHeader from "@/shared/components/utility/fancy/
+FancyHeader.vue";
+import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
 import {ref, watch} from "vue";
 import {useTasteBuddyStore} from "@/app/storage";
 

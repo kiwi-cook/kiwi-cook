@@ -259,13 +259,13 @@ import {
 import {useRecipeStore} from '@/app/storage';
 import {index, Item, logDebug, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared';
 import Searchbar from "@/app/components/recipe/Searchbar.vue";
-import FancyHeader from "@/app/components/utility/fancy/FancyHeader.vue";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/app/components/recipe/previews/MiniRecipePreview.vue";
-import ItemComponent from "@/app/components/recipe/Item.vue";
+import ItemComponent from "@/shared/components/recipe/Item.vue";
 import {add, close, closeCircleOutline, list, remove, search, time} from "ionicons/icons";
 import TwoColumnLayout from "@/app/components/layout/TwoColumnLayout.vue";
-import HorizontalList from "@/app/components/utility/list/HorizontalList.vue";
-import List from "@/app/components/utility/list/List.vue";
+import HorizontalList from "@/shared/components/utility/list/HorizontalList.vue";
+import List from "@/shared/components/utility/list/List.vue";
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
 import {useI18n} from "vue-i18n";
 

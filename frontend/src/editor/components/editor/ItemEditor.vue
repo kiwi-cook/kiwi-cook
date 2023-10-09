@@ -74,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import {Item, logDebug, MutableItem, MutableRecipe, Recipe} from '@/shared';
+import {Item, logDebug, Recipe} from '@/shared';
 import {
     IonAvatar,
     IonButton,
@@ -91,8 +91,10 @@ import {
     IonSelectOption
 } from '@ionic/vue';
 import {computed, PropType, Ref, ref, toRefs, watch} from 'vue';
-import {useRecipeStore, useTasteBuddyStore} from '@/app/storage';
+import {useRecipeStore, useTasteBuddyStore} from '@/editor/storage';
 import {chevronDown, chevronUp, save, trash} from "ionicons/icons";
+import {MutableItem} from "@/editor/types/item.ts";
+import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const props = defineProps({
     item: {
