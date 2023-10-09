@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "publish": "sh ./scripts/publish-pwa.sh"
   },
   "dependencies": {
     "@capacitor/android": "5.2.3",
@@ -20,10 +21,8 @@
     "@ionic/vue": "^7.3.0",
     "@ionic/vue-router": "^7.4.1",
     "@unhead/vue": "^1.7.4",
-    "compromise": "^14.10.0",
     "core-js": "^3.32.2",
     "fastest-levenshtein": "^1.0.16",
-    "ionicons": "^7.1.2",
     "lz-string": "^1.5.0",
     "pinia": "^2.1.6",
     "register-service-worker": "^1.7.2",
@@ -33,6 +32,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "5.3.0",
+    "compromise": "^14.10.0",
     "@typescript-eslint/eslint-plugin": "5.60.0",
     "@typescript-eslint/parser": "5.62.0",
     "@vue/cli-plugin-babel": "~5.0.8",
