@@ -16,7 +16,7 @@ const routes: Array<RouteRecordRaw> = [
         children: [
             {
                 name: 'Home',
-                path: 'editor',
+                path: 'home',
                 component: VHome
             },
             // Recipes

@@ -134,7 +134,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         signal: controller.signal
     }
 
-    const id = setTimeout(() => controller.abort(), timeout ?? 1000)
+    const id = setTimeout(() => controller.abort(), timeout ?? 10000)
 
     // call fetch
     logDebug('sendToAPI ' + route, fetchOptions)

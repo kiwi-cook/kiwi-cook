@@ -15,6 +15,11 @@
     ```
    
 2. Install NPM packages
+
+    ```sh
+    bun install
+    ```
+
 3. Run the main
    ```sh
    bun run serve:app
@@ -36,9 +41,9 @@
    
 3. Make changes to the code and the main will automatically reload
 
-### Production
+### Publish to Production
 
 1. Build the main
    ```sh
-   bun run build:app
+   bun run publish
    ```

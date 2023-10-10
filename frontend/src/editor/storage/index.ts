@@ -12,6 +12,7 @@ import {
     recipeFromJSON,
     sendToAPI
 } from "@/shared";
+import {SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
 
 
 // Define typings for the store state
@@ -19,14 +20,16 @@ import {
 interface UserState {
     user: {
         authenticated: boolean
-    }
+    },
+    language: SUPPORT_LOCALES_TYPE
 }
 
 export const useTasteBuddyStore = defineStore('tastebuddy', {
     state: (): UserState => ({
         user: {
             authenticated: false,
-        }
+        },
+        language: 'en'
     }),
     getters: {
         /**
@@ -166,7 +169,7 @@ export const useRecipeStore = defineStore('recipes', {
          * Prepare the Ionic Storage by fetching the items and recipes
          */
         async prepare() {
-            // this.fetchItems().then(() => this.fetchRecipes())
+            this.fetchItems().then(() => this.fetchRecipes())
         },
         /**
          * Override all recipes

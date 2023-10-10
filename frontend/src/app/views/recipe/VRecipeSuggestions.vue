@@ -257,7 +257,7 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
-import {index, Item, logDebug, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared';
+import {index, Item, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared';
 import Searchbar from "@/app/components/recipe/Searchbar.vue";
 import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
 import MiniRecipePreview from "@/app/components/recipe/previews/MiniRecipePreview.vue";

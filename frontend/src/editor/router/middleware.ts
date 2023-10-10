@@ -1,4 +1,3 @@
-import {logDebug} from "@/shared";
 import {useTasteBuddyStore} from "@/editor/storage";
 import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
 
@@ -12,13 +11,8 @@ import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
  */
 export const beforeEachCheckAuth = (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
     const store = useTasteBuddyStore();
-    let authenticated = false
-    if (to.meta.auth) {
-        authenticated = store.isAuthenticated
-    }
 
-    // if user is not in dev mode, redirect to home if they try to go to login page
-    if (!authenticated && to.meta.auth) {
+    if (!store.isAuthenticated && to.meta.auth) {
         const redirect = to.query.redirect ? to.query.redirect : to.path;
         next({name: 'Login', query: {redirect: redirect}});
     } else {

@@ -3,9 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="page">
                 <div class="content">
-                    <h1 class="header-title">
-                        Hello 🍻
-                    </h1>
+                    <FancyHeader :big-text="['Log into', 'Taste Buddy']"/>
 
                     <SignIn/>
                 </div>
@@ -17,4 +15,5 @@
 <script setup lang="ts">
 import {IonContent, IonPage} from '@ionic/vue';
 import SignIn from "@/editor/components/user/SignInComponent.vue";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
 </script>

@@ -30,8 +30,7 @@ import {IonContent, IonPage} from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {Recipe} from '@/shared';
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
-import FancyHeader from "@/shared/components/utility/fancy/
-FancyHeader.vue";
+import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
 import TasteBuddyLogo from "@/app/components/TasteBuddyLogo.vue";
 import List from "@/shared/components/utility/list/List.vue";
 
