@@ -89,6 +89,10 @@ export class Recipe {
         return getLocaleStr(this.desc)
     }
 
+    public getShortDescription(): string {
+        return getLocaleStr(this.desc).split('.').slice(0, 2).join('.') + '.';
+    }
+
     public getAuthors(): string {
         return this.computed.authors
     }

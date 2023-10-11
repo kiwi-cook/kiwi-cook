@@ -6,6 +6,7 @@
   "scripts": {
     "serve:app": "vue-cli-service serve src/app/main.ts",
     "serve:editor": "vue-cli-service serve src/editor/editor.ts",
+    "build:app": "vue-cli-service build src/app/main.ts",
     "publish": "sh ./scripts/publish-pwa.sh"
   },
   "dependencies": {
@@ -26,7 +27,7 @@
     "register-service-worker": "^1.7.2",
     "vue": "latest",
     "vue-i18n": "^9.5.0",
-    "vue-router": "latest"
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
     "@capacitor/cli": "5.3.0",

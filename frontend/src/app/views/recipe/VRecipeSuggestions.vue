@@ -12,6 +12,8 @@
                                @select-recipe="routeRecipe($event)" @select-tag="includeTag($event)">
                     </Searchbar>
 
+                    <RecipeOfTheDayHeader :recipe="recipeOfTheDay"/>
+
                     <TwoColumnLayout layout="rightBigger">
                         <template #left>
                             <div class="sticky">
@@ -268,10 +270,13 @@ import HorizontalList from "@/shared/components/utility/list/HorizontalList.vue"
 import List from "@/shared/components/utility/list/List.vue";
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
 import {useI18n} from "vue-i18n";
+import RecipeOfTheDayHeader from "@/app/components/recipe/previews/RecipeOfTheDayHeader.vue";
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
 const router = useIonRouter()
+
+const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
 
 const itemsById = computed(() => recipeStore.getItemsAsMap)
 const items = computed<Item[]>(() => Object.values(itemsById.value ?? {}))

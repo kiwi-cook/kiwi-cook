@@ -2,7 +2,7 @@
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
         <img class="mini-recipe-preview-image" :src="imgUrl" :alt="`Preview Image of ${name}`">
         <div class="mini-recipe-tags">
-            <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag" color="dark">
+            <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag">
                 <IonIcon :icon="time" size="small"/>
                 <IonLabel>{{ duration }} min.</IonLabel>
             </IonChip>

@@ -273,6 +273,18 @@ export const useRecipeStore = defineStore('recipes', {
                 return recipes
             }, {})
         },
+        getRecipeOfTheDay(): Recipe {
+            // Calculate the day of the year
+            const now: Date = new Date();
+            const start: Date = new Date(now.getFullYear(), 0, 0);
+            const diff: number = (now.getTime() - start.getTime()) +
+                ((start.getTimezoneOffset() - now.getTimezoneOffset()) * 60 * 1000);
+            const oneDay: number = 1000 * 60 * 60 * 24;
+            const day: number = Math.floor(diff / oneDay);
+
+            // Get the recipe of the day depending on the day of the year
+            return this.getRecipesAsList[day % this.getRecipesAsList.length]
+        },
         getItemsAsList: (state): Item[] => {
             return Object.values(state.items ?? {}) ?? []
         },

@@ -1,52 +1,31 @@
 <template>
-    <div v-once class="recipe-preview" @click="toRecipe">
-        <div class="recipe-img-title-wrapper">
-            <img :key="_recipe?.getId()" class="recipe-preview-image" :src="_recipe?.props?.imgUrl"
-                 :alt="`Preview Image of ${name}`">
-            <div class="recipe-title-author-mobile">
-                <h2 class="recipe-title">
-                    {{ name }}
-                </h2>
-                <h3 class="recipe-author subheader">
-                    {{ authors }}
-                </h3>
-                <div>
-                    <IonChip color="medium">
-                        <IonLabel>{{ duration }} min.</IonLabel>
-                    </IonChip>
-                    <IonChip color="medium">
-                        <IonLabel>{{ price }} €</IonLabel>
-                    </IonChip>
-                    <template v-for="(tag, tagIndex) in tags" :key="tagIndex">
-                        <IonChip color="medium">
-                            <IonLabel>{{ tag }}</IonLabel>
-                        </IonChip>
-                    </template>
-                </div>
+    <div class="recipe-preview">
+        <div class="recipe-details">
+            <h2 class="recipe-title">
+                <RouterLink :to="recipe.getRoute()">{{ recipe?.getName() }}</RouterLink>
+            </h2>
+            <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
+                <strong>By <a :href="recipe?.src?.url">{{ recipe?.getAuthors() }}</a></strong>
+            </div>
+            <p class="recipe-description desc">{{ recipe.getShortDescription() }}</p>
+            <div class="pill-container">
+                <div v-for="tag in tags" :key="tag" class="pill">{{ tag }}</div>
+                <div class="pill static">Prep: {{ duration }} mins</div>
+                <div class="pill static">Servings: 1</div>
+            </div>
+            <div class="recipe-ingredients">
+                <h3>Ingredients</h3>
+                <ul>
+                    <li v-for="(item, index) in recipe.getStepItems()" :key="index">{{ item.quantity }} {{ item.unit }}
+                        {{ item.getName() }}
+                    </li>
+                </ul>
             </div>
         </div>
-        <div class="recipe-details">
-            <div class="recipe-title-author-large">
-                <h2 class="recipe-title">
-                    {{ name }}
-                </h2>
-                <h3 class="recipe-author subheader">
-                    {{ authors }}
-                </h3>
-                <div>
-                    <IonChip color="medium">
-                        <IonLabel>{{ duration }} min.</IonLabel>
-                    </IonChip>
-                    <template v-for="(tag, tagIndex) in tags" :key="tagIndex">
-                        <IonChip color="light">
-                            <IonLabel>{{ tag }}</IonLabel>
-                        </IonChip>
-                    </template>
-                </div>
-            </div>
-            <div class="item-list">
-                <ItemList v-if="possessedItems.length > 0" :items="possessedItems"/>
-            </div>
+        <div class="recipe-image">
+            <img :src="recipe?.props.imgUrl"
+                 :alt="recipe?.getName()"
+                 class="link" @click="toRecipe">
         </div>
     </div>
 </template>
@@ -54,8 +33,8 @@
 <script setup lang="ts">
 import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared";
-import {IonChip, IonLabel, useIonRouter} from "@ionic/vue";
-import ItemList from "@/shared/components/utility/list/ItemList.vue";
+import {useIonRouter} from "@ionic/vue";
+import {RouterLink} from "vue-router";
 
 const props = defineProps({
     recipe: {
@@ -63,8 +42,10 @@ const props = defineProps({
         required: true
     }
 })
-const {recipe} = toRefs(props)
-const _recipe = computed<Recipe>(() => {
+
+const recipe = computed<Recipe>(() => {
+    const {recipe} = toRefs(props)
+
     if (recipe?.value instanceof Recipe) {
         return recipe?.value
     } else if (recipe?.value instanceof RecipeSuggestion) {
@@ -75,8 +56,8 @@ const _recipe = computed<Recipe>(() => {
 })
 
 const missingItems = computed<StepItem[]>(() => {
-    if (_recipe?.value instanceof Recipe) {
-        return _recipe?.value?.getStepItems() ?? []
+    if (recipe?.value instanceof Recipe) {
+        return recipe?.value?.getStepItems() ?? []
     } else if (recipe?.value instanceof RecipeSuggestion) {
         return recipe?.value?.getMissingItems() ?? []
     } else {
@@ -85,123 +66,129 @@ const missingItems = computed<StepItem[]>(() => {
 })
 const possessedItems = computed<Item[]>(() => {
     const missingItemIds = missingItems?.value?.map((item: Item) => item.getId())
-    return _recipe?.value?.getStepItems()?.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
+    return recipe?.value?.getStepItems()?.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
 })
 
 const router = useIonRouter();
-const toRecipe = () => router.push({name: 'Recipe', params: {id: _recipe.value?.getId()}})
+const toRecipe = () => router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
 
-const name = _recipe?.value?.getName()
-const authors = _recipe?.value?.computeAuthors()
-const duration = _recipe?.value?.getDuration()
-const price = _recipe?.value?.getPrice()
-const tags = _recipe?.value?.getTags()?.slice(0, 3)
+const name = recipe?.value?.getName()
+const authors = recipe?.value?.getAuthors()
+const duration = recipe?.value?.getDuration()
+const tags = recipe?.value?.getTags()?.slice(0, 3)
 </script>
 
-<style>
-
-:root {
-    --recipe-preview-image-size: 200px;
-}
-
-@media (width <= 1280px) {
-    :root {
-        --recipe-preview-image-size: 170px;
-    }
-}
-
-@media (width <= 768px) {
-    :root {
-        --recipe-preview-image-size: 150px;
-    }
-}
-
-.recipe-preview-image {
-    /* Layout */
-    width: var(--recipe-preview-image-size); /* Set a fixed width */
-    height: var(--recipe-preview-image-size); /* Set a fixed height */
-    object-fit: cover; /* Crop the image if necessary */
-    border-radius: 8px; /* Optional: Add rounded corners */
-    border: var(--border);
-
-    /* Animation */
-    transition: var(--transition);
-
-    /* Positioning */
-    margin: var(--margin);
-}
-</style>
-
 <style scoped>
+a {
+    text-decoration: none;
+    transition: color 0.3s ease;
+    color: var(--ion-text-color);
+}
+
 .recipe-preview {
-    border: var(--border);
-    border-radius: var(--border-radius);
-    cursor: pointer;
-
-    /* Layout */
-    margin-bottom: var(--margin-medium);
     display: flex;
-    flex-direction: row;
-    height: 350px;
-}
-
-@media (width <= 500px) {
-    .recipe-preview {
-        flex-direction: column;
-        height: auto;
-    }
-}
-
-.recipe-img-title-wrapper {
-    display: flex;
-}
-
-.recipe-title-author-mobile {
-    margin-top: var(--margin-large);
-    display: none;
-}
-
-.recipe-title-author-large {
-    margin-bottom: var(--margin-large);
-}
-
-.recipe-title {
-    font-weight: var(--font-weight-bold);
-    margin: 0;
-}
-
-.recipe-author {
-    margin-top: 0;
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-normal);
-    color: var(--ion-color-medium);
-}
-
-@media (width <= 500px) {
-    .recipe-title {
-        max-width: 200px;
-    }
-
-    .recipe-title-author-mobile {
-        display: initial;
-    }
-
-    .recipe-title-author-large {
-        display: none;
-    }
-}
-
-
-.recipe-preview-image:hover {
-    box-shadow: var(--box-shadow-hover) !important;
-    transform: scale(1.02, 1.02);
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
 }
 
 .recipe-details {
-    padding: 16px;
+    flex: 2;
+    padding: 20px;
 }
 
-.item-list {
-    height: 150px;
+.recipe-title {
+    font-size: var(--font-size-medium);
+    font-family: var(--font-special);
+    margin-bottom: 10px;
+}
+
+.recipe-title a {
+    font-family: var(--font-special);
+    color: var(--ion-color-primary);
+    transition: color 0.3s ease;
+}
+
+.recipe-title a:hover {
+    color: var(--ion-color-primary-shade);
+}
+
+.recipe-author {
+    margin-top: 8px;
+    font-size: var(--font-size-small);
+}
+
+.recipe-description {
+    margin-top: 20px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.pill-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.pill {
+    background-color: #f0f0f0;
+    color: #333;
+    font-size: 14px;
+    padding: 5px 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    border-radius: 20px;
+}
+
+.pill.static {
+    background-color: #e0e0e0;
+}
+
+.recipe-ingredients {
+    margin-top: 20px;
+}
+
+.recipe-ingredients h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+.recipe-ingredients ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.recipe-ingredients li {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+/* Style for the recipe image */
+.recipe-image {
+    flex: 1;
+}
+
+.recipe-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px; /* Increased border radius */
+    box-shadow: var(--box-shadow-strong);
+}
+
+/* Mobile Screen Support */
+@media screen and (max-width: 736px) {
+    .recipe-preview {
+        flex-direction: column-reverse; /* Stack items vertically */
+    }
+
+    .recipe-image,
+    .recipe-details {
+        flex: none; /* Reset flex properties for mobile layout */
+        width: 100%; /* Make both sections take full width */
+    }
+
+    .recipe-details {
+        margin-top: 20px; /* Add margin between image and details */
+    }
 }
 </style>

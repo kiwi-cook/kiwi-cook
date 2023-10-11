@@ -2,8 +2,8 @@
     <div class="recipe-wrapper">
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
-                <div class="recipe-title">
-                    <h1>{{ name }}</h1>
+                <div class="recipe-title-wrapper">
+                    <h1 class="recipe-title">{{ name }}</h1>
                     <h2 v-if="authors.length > 0" class="subheader">{{ $t('Recipe.By') }} {{ authors }}</h2>
                 </div>
                 <IonButtons>
@@ -20,7 +20,7 @@
                         {{ tag }}
                     </IonChip>
                 </div>
-                <IonText class="recipe-description ion-margin-top">
+                <IonText class="recipe-description desc ion-margin-top">
                     <ReadMore :text="recipe?.getDescription()"/>
                 </IonText>
             </div>
@@ -33,35 +33,26 @@
             <template #left>
                 <div class="sticky">
                     <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
-                    <TwoColumnLayout v-if="itemsFromRecipe.length > 0" layout="leftBigger">
-                        <template #left>
-                            <IonCard>
-                                <IonCardContent>
-                                    <IonItem lines="none" color="light" class="recipe-servings">
-                                        <IonButtons slot="start">
-                                            <IonButton :disabled="servings == 1" @click="servings--">
-                                                <IonIcon :icon="remove"/>
-                                            </IonButton>
-                                            <IonButton :disabled="servings == 100" @click="servings++">
-                                                <IonIcon :icon="add"/>
-                                            </IonButton>
-                                        </IonButtons>
-                                        <IonLabel>
-                                            {{ servings }} {{ $t('Recipe.Serving', servings) }}
-                                        </IonLabel>
-                                    </IonItem>
-                                    <ItemList :items="ingredients"/>
-                                </IonCardContent>
-                            </IonCard>
-                        </template>
-                        <template v-if="tools.length > 0" #right>
-                            <IonCard>
-                                <IonCardContent>
-                                    <ItemList :items="tools"/>
-                                </IonCardContent>
-                            </IonCard>
-                        </template>
-                    </TwoColumnLayout>
+                    <IonCard>
+                        <IonCardContent>
+                            <IonItem lines="none" color="light" class="recipe-servings">
+                                <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
+                                <IonButton :disabled="servings == 1" color="light" @click="servings--">
+                                    <IonIcon :icon="remove"/>
+                                </IonButton>
+                                {{ servings }}
+                                <IonButton :disabled="servings == 100" color="light" @click="servings++">
+                                    <IonIcon :icon="add"/>
+                                </IonButton>
+                            </IonItem>
+                            <ItemList :items="ingredients"/>
+                        </IonCardContent>
+                    </IonCard>
+                    <IonCard>
+                        <IonCardContent>
+                            <ItemList :items="tools"/>
+                        </IonCardContent>
+                    </IonCard>
                 </div>
             </template>
 
@@ -182,10 +173,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 }
 
 .recipe-description {
-    white-space: pre-wrap;
-    font-size: var(--font-size-smaller);
-    color: var(--ion-color-medium);
-    line-height: 150%;
     overflow-y: auto;
     max-height: 250px;
 }
@@ -212,9 +199,13 @@ Share.canShare().then((canShareResult: CanShareResult) => {
     margin: 0 var(--margin) 0 0;
 }
 
-.recipe-title {
+.recipe-title-wrapper {
     font-size: 1.5rem;
     font-weight: bold;
+}
+
+.recipe-title {
+    font-family: var(--font-special);
 }
 
 .recipe-tags {
@@ -239,6 +230,7 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 
 .recipe-servings {
     --border-radius: 15px;
+    margin-bottom: var(--margin);
 }
 
 .recipe-step-index-max {

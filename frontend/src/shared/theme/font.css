@@ -1,6 +1,6 @@
 :root {
     /* Font sizes */
-    --font-size-huge: 3.3rem;
+    --font-size-larger: 2.8rem;
     --font-size-large: 2.3rem;
     --font-size-medium: 1.65rem;
     --font-size-small-medium: 1.55rem;
@@ -9,15 +9,22 @@
     --font-size-tiny: 0.75rem;
 
     /* Font weights */
-    --font-weight-bolder: 600;
-    --font-weight-bold: 450;
+    --font-weight-bolder: 700;
+    --font-weight-bold: 550;
     --font-weight-normal: 400;
-    --font-weight-light: 300;
+    --font-weight-light: 350;
+    
+    /* Fonts */
+    --font-special: lora, serif;
+    --font-body: lato, sans-serif;
+
+    /* Line height */
+    --desc-line-height: 1.6;
 }
 
 @media (width <= 768px) {
     :root {
-        --font-size-huge: 2.75rem;
+        --font-size-larger: 2.75rem;
         --font-size-large: 2.1rem;
         --font-size-medium: 1.65rem;
         --font-size-small-medium: 1.4rem;
@@ -28,7 +35,7 @@
 
 @media (width <= 414px) {
     :root {
-        --font-size-huge: 1.85rem;
+        --font-size-larger: 1.85rem;
         --font-size-large: 1.75rem;
         --font-size-medium: 1.4rem;
         --font-size-small-medium: 1.25rem;
@@ -39,13 +46,17 @@
 
 @media (width <= 375px) {
     :root {
-        --font-size-huge: 1.74rem;
+        --font-size-larger: 1.74rem;
         --font-size-large: 1.65rem;
         --font-size-medium: 1.35rem;
         --font-size-small-medium: 1.2rem;
         --font-size-small: 1rem;
         --font-size-smaller: 0.9rem;
     }
+}
+
+* {
+    font-family: var(--font-body);
 }
 
 h1, h2, h3, h4, h5, h6 {
