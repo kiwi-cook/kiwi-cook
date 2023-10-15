@@ -47,13 +47,6 @@ module.exports = {
 		"vue/this-in-template": ["error", "never"],
 		"vue/no-v-html": "off",
 		"vue/html-closing-bracket-newline": "off",
-		"vue/max-attributes-per-line": ["error", {
-			"singleline": 3,
-			"multiline": {
-				"max": 3,
-				"allowFirstLine": false
-			}
-		}],
 		"vue/html-self-closing": ["error", {
 			"html": {
 				"void": "always",
