@@ -1,17 +1,18 @@
 <template>
     <IonCard class="login-card">
         <IonCardHeader>
-            <TasteBuddyLogo />
+            <TasteBuddyLogo/>
         </IonCardHeader>
         <IonCardContent>
             <IonItem lines="none">
                 <IonInput v-model="username" :clear-input="true" autocomplete="username" label="Username"
-                          label-placement="floating" type="text" />
+                          label-placement="floating" type="text"/>
             </IonItem>
             <IonItem lines="none">
-                <IonInput v-model="password" :clear-input="true" autocomplete="current-password" label="Password"
-                          label-placement="floating" :type="visible ? 'text' : 'password'" />
-                <IonCheckbox slot="end" v-model="visible" color="primary" label-placement="end">{{ $t('SignIn.ShowPassword')
+                <IonInput v-model="password" :clear-input="true" :type="visible ? 'text' : 'password'" autocomplete="current-password"
+                          label="Password" label-placement="floating"/>
+                <IonCheckbox slot="end" v-model="visible" color="primary" label-placement="end">{{
+                    $t('SignIn.ShowPassword')
                 }}
                 </IonCheckbox>
             </IonItem>
@@ -22,8 +23,8 @@
     </IonCard>
 </template>
 
-<script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+<script lang="ts" setup>
+import {computed, ref, watch} from 'vue';
 import {
     IonButton,
     IonCard,
@@ -35,8 +36,8 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import TasteBuddyLogo from '@/app/components/TasteBuddyLogo.vue'
-import { useTasteBuddyStore } from '@/editor/storage';
-import { useRoute } from 'vue-router';
+import {useTasteBuddyStore} from '@/editor/storage';
+import {useRoute} from 'vue-router';
 
 const store = useTasteBuddyStore();
 

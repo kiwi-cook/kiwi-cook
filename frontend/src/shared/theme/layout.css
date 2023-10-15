@@ -1,5 +1,5 @@
 :root {
-    --max-width: 1320px;
+    --max-width: 1280px;
 
     /* Margin */
     --margin-auto: 0 auto;
@@ -33,12 +33,8 @@
 
 .page {
     margin: var(--margin-page);
-}
-
-.content {
     inset: 0 !important;
     max-width: var(--max-width) !important;
-    margin: unset !important;
     margin-left: auto !important;
     margin-right: auto !important;
 }

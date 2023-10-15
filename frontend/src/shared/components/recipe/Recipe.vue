@@ -2,17 +2,14 @@
     <div class="recipe-wrapper">
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
-                <div class="recipe-title-wrapper">
-                    <h1 class="recipe-title">{{ name }}</h1>
-                    <h2 v-if="authors.length > 0" class="subheader">{{ $t('Recipe.By') }} {{ authors }}</h2>
-                </div>
+                <RecipeTitle :recipe="recipe" disable-link title="Let's start cooking!"/>
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
                     </IonButton>
-                    <IonButton aria-valuetext="Like Recipe" @click="recipe?.toggleLike()">
-                        <IonIcon :icon="recipe?.liked ?? false ? heart: heartOutline"
-                                 :color="recipe?.liked ?? false ? 'favorite' : undefined "/>
+                    <IonButton aria-valuetext="Like Recipe" @click="recipe?.toggleSave()">
+                        <IonIcon :color="isSaved ?? false ? 'favorite' : undefined "
+                                 :icon="isSaved ?? false ? heart: heartOutline"/>
                     </IonButton>
                 </IonButtons>
                 <div class="recipe-tags ion-margin-bottom">
@@ -25,7 +22,7 @@
                 </IonText>
             </div>
             <div class="recipe-image-wrapper">
-                <IonImg class="recipe-image" :src="recipe?.props?.imgUrl" alt="Header Image"/>
+                <IonImg :src="recipe?.props?.imgUrl" alt="Header Image" class="recipe-image"/>
             </div>
         </div>
 
@@ -35,7 +32,7 @@
                     <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
                     <IonCard>
                         <IonCardContent>
-                            <IonItem lines="none" color="light" class="recipe-servings">
+                            <IonItem class="recipe-servings" color="light" lines="none">
                                 <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
                                 <IonButton :disabled="servings == 1" color="light" @click="servings--">
                                     <IonIcon :icon="remove"/>
@@ -64,7 +61,7 @@
                     </IonChip>
                 </h2>
                 <template v-for="(step, stepIndex) in [...steps, goodAppetiteStep]" :key="stepIndex">
-                    <StepComponent :step="step" :step-index="stepIndex" :amount-steps="steps.length + 1"/>
+                    <StepComponent :amount-steps="steps.length + 1" :step="step" :step-index="stepIndex"/>
                 </template>
             </template>
         </TwoColumnLayout>
@@ -77,7 +74,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {
     IonButton,
@@ -100,6 +97,7 @@ import {add, heart, heartOutline, remove, shareSocial, time} from "ionicons/icon
 import {CanShareResult, Share} from "@capacitor/share";
 import ReadMore from "@/shared/components/utility/ReadMore.vue";
 import {useI18n} from "vue-i18n";
+import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
 
 /* Recipe */
 const props = defineProps({
@@ -111,6 +109,7 @@ const props = defineProps({
 const {recipe} = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
 const name = computed(() => recipe?.value?.getName() ?? '');
+const isSaved = computed(() => recipe?.value?.isSaved() ?? false);
 
 const itemsFromRecipe = computed<StepItem[]>(() => recipe?.value?.getStepItems() ?? []);
 const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'ingredient'))

@@ -1,8 +1,8 @@
 <template>
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
-            <div class="content">
-                <FancyHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
+            <div class="page">
+                <TypedHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
                 <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
                 <IonButtons>
@@ -61,7 +61,7 @@
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, ref} from 'vue';
 import {
     IonAccordion,
@@ -82,7 +82,7 @@ import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutlin
 import {useRecipeStore} from '@/editor/storage';
 import ItemEditor from "@/editor/components/editor/ItemEditor.vue";
 import {Item} from "@/shared";
-import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
 import {MutableItem} from "@/editor/types/item.ts";
 
 const recipeStore = useRecipeStore();

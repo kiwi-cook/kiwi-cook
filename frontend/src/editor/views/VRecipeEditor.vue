@@ -2,10 +2,8 @@
     <IonPage id="recipe-editor-page">
         <IonContent :fullscreen="true">
             <div class="page">
-                <div class="content">
-                    <FancyHeader :big-text="['Recipe', 'Editor']"/>
-                    <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
-                </div>
+                <TypedHeader :big-text="['Recipe', 'Editor']"/>
+                <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton>
@@ -27,14 +25,14 @@
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import {useRecipeStore} from '@/editor/storage';
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";
-import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
 import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const route = useRoute();

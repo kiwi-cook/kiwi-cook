@@ -6,16 +6,16 @@ export class MutableRecipe extends Recipe {
 
     private readonly tmpId?: string;
 
-    public getId(): string {
-        return this.tmpId ?? super.getId()
-    }
-
     /**
      * Initialize a new recipe with a temporary id
      * @returns a new recipe with a temporary id
      */
     public static newRecipe(): MutableRecipe {
         return new MutableRecipe()
+    }
+
+    public getId(): string {
+        return this.tmpId ?? super.getId()
     }
 
     /**

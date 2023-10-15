@@ -1,7 +1,7 @@
 <template>
     <IonItem lines="none">
-        <IonInput :aria-label="inputValue" :label="label" :label-placement="labelPlacement"
-                  :placeholder="placeholder ?? ''" :clear-input="true"
+        <IonInput :aria-label="inputValue" :clear-input="true" :label="label"
+                  :label-placement="labelPlacement" :placeholder="placeholder ?? ''"
                   :value="inputValue" type="text" @input="handleInput($event)" @keyup.enter="addItem()"/>
     </IonItem>
 
@@ -26,7 +26,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {PropType, ref, toRefs, watch} from 'vue';
 import {IonButton, IonIcon, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
 import {addOutline} from "ionicons/icons";

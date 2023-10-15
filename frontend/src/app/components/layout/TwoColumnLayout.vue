@@ -1,22 +1,22 @@
 <template>
     <IonGrid>
         <IonRow>
-            <IonCol class="left"
-                    :size-xl="selectedLayout.left.xl"
-                    :size-lg="selectedLayout.left.lg"
+            <IonCol :size-lg="selectedLayout.left.lg"
                     :size-md="selectedLayout.left.md"
-                    size-sm="12"
+                    :size-xl="selectedLayout.left.xl"
+                    class="left"
                     size="12"
+                    size-sm="12"
                     v-bind="$props">
                 <slot name="left"></slot>
             </IonCol>
 
-            <IonCol v-if="$slots.right" class="right"
-                    :size-xl="selectedLayout.right.xl"
-                    :size-lg="selectedLayout.right.lg"
+            <IonCol v-if="$slots.right" :size-lg="selectedLayout.right.lg"
                     :size-md="selectedLayout.right.md"
-                    size-sm="12"
+                    :size-xl="selectedLayout.right.xl"
+                    class="right"
                     size="12"
+                    size-sm="12"
                     v-bind="$props">
                 <slot name="right"></slot>
             </IonCol>
@@ -24,7 +24,7 @@
     </IonGrid>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, PropType, toRefs, useSlots} from 'vue';
 import {IonCol, IonGrid, IonRow} from "@ionic/vue";
 

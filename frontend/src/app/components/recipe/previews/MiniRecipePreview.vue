@@ -1,6 +1,6 @@
 <template>
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
-        <img class="mini-recipe-preview-image" :src="imgUrl" :alt="`Preview Image of ${name}`">
+        <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image">
         <div class="mini-recipe-tags">
             <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag">
                 <IonIcon :icon="time" size="small"/>
@@ -11,7 +11,7 @@
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {toRefs} from "vue";
 import {IonChip, IonIcon, IonLabel, useIonRouter} from "@ionic/vue";
 import {time} from "ionicons/icons";

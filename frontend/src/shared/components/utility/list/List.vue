@@ -1,6 +1,6 @@
 <template>
-    <div v-if="loadedElements.length > 0" class="element-list-wrapper" :style="{'max-height': maxHeight}">
-        <ul :tabindex="0" :class="['element-list', {'wrap': !noWrap}]">
+    <div v-if="loadedElements.length > 0" :style="{'max-height': maxHeight}" class="element-list-wrapper">
+        <ul :class="['element-list', {'wrap': !noWrap}]" :tabindex="0">
             <li v-for="(element, elementIndex) in loadedElements" :key="elementIndex"
                 :class="['element', {'wrap': !noWrap}]">
                 <slot :element="element" name="element">
@@ -14,7 +14,7 @@
     </IonInfiniteScroll>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {IonInfiniteScroll, IonInfiniteScrollContent} from '@ionic/vue';
 import {computed, ref, toRefs, watch} from 'vue';
 import {useRecipeStore} from '@/app/storage';

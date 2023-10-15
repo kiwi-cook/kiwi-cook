@@ -1,41 +1,45 @@
 <template>
     <section class="recipe-of-the-day">
-        <div class="recipe-image">
-            <img :src="recipe?.props.imgUrl"
-                 :alt="recipe?.getName()"
-                 class="link" @click="routeToRecipe()">
-        </div>
-        <div class="recipe-details">
-            <h3 class="subheader">
-                <RouterLink :to="{name: 'RecipeOfTheDay'}">Recipe of the day</RouterLink>
-            </h3>
-            <h2 class="recipe-title">
-                <RouterLink :to="{name: 'RecipeOfTheDay'}">{{ recipe?.getName() }}</RouterLink>
-            </h2>
-            <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-                <strong>By <a :href="recipe?.src?.url">{{ recipe?.getAuthors() }}</a></strong>
-            </div>
-            <p class="recipe-description desc">{{ recipe?.getShortDescription() }}</p>
-        </div>
+        <TwoColumnLayout layout="rightBigger">
+            <template #left>
+                <div class="recipe-image">
+                    <img :alt="recipe?.getName()"
+                         :src="recipe?.props.imgUrl"
+                         class="link" @click="routeToRecipe()">
+                </div>
+            </template>
+            <template #right>
+                <div class="recipe-details">
+                    <RecipeTitle :recipe="recipe" :title="title"/>
+                    <p class="recipe-description desc">{{ recipe?.getShortDescription() }}</p>
+                </div>
+            </template>
+        </TwoColumnLayout>
     </section>
 </template>
 
-<script setup lang="ts">
-import {PropType, toRefs} from "vue";
+<script lang="ts" setup>
+import {computed, PropType, toRefs} from "vue";
 import {Recipe} from "@/shared";
 import {useIonRouter} from "@ionic/vue";
-import {RouterLink} from "vue-router";
+import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
+import TwoColumnLayout from "@/app/components/layout/TwoColumnLayout.vue";
 
 const props = defineProps({
     recipe: {
         type: Object as PropType<Recipe>,
         required: true
+    },
+    title: {
+        type: String,
+        required: false
     }
 })
 
 const {recipe} = toRefs(props)
 const router = useIonRouter();
-const routeToRecipe = () => router.push({ name: 'RecipeOfTheDay' })
+const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
+const routeToRecipe = () => router.push(recipeRoute?.value)
 </script>
 
 <style scoped>
@@ -61,15 +65,10 @@ a:hover {
 
 /* Basic styles for the recipe section */
 .recipe-of-the-day {
-    display: flex;
     margin-bottom: 20px;
 }
 
 /* Style for the recipe image */
-.recipe-image {
-    flex: 1;
-}
-
 .recipe-image img {
     width: 100%;
     height: auto;
@@ -79,30 +78,9 @@ a:hover {
 
 /* Style for the recipe details */
 .recipe-details {
-    flex: 2;
     display: flex;
     flex-direction: column;
     justify-content: center; /* Vertically center content */
-    padding: 0 20px;
-}
-
-.recipe-title {
-    font-size: var(--font-size-larger);
-    margin-bottom: 10px;
-}
-
-.recipe-title a {
-    font-family: var(--font-special);
-    color: var(--ion-color-primary);
-    transition: color 0.3s ease;
-}
-
-.recipe-title a:hover {
-    color: var(--ion-color-primary-shade);
-}
-
-.recipe-author {
-    font-size: 20px; /* Increased font size */
 }
 
 .recipe-description {
@@ -125,6 +103,7 @@ a:hover {
 
     .recipe-details {
         margin-top: 20px; /* Add margin between image and details */
+        padding: 0;
     }
 }
 </style>

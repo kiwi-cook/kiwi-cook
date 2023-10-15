@@ -12,7 +12,6 @@ import {createTasteBuddyRouter} from '@/editor/router';
 import {createPinia} from "pinia";
 
 // Styles
-
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
 

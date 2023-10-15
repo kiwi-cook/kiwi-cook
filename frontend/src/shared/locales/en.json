@@ -14,9 +14,13 @@
   "Recipe": {
     "By": "By",
     "Serving": "Serving | Servings",
-    "Direction": "Direction | Directions",
+    "Direction": "Step | Steps",
     "Ingredient": "Ingredient | Ingredients",
-    "GoodAppetite": "Good appetite!"
+    "GoodAppetite": "Good appetite!",
+    "NotFound": {
+      "Title": "Recipe not found",
+      "Description": "The recipe you are looking for does not exist."
+    }
   },
   "Tag": {
     "Special": {

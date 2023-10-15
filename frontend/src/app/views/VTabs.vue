@@ -11,7 +11,7 @@
                     {{ $t('Tabs.Explore') }}
                 </IonTabButton>
 
-                <IonTabButton href="/recipe/of-the-day" tab="recipe-of-the-day">
+                <IonTabButton :href="recipeOfTheDay?.getRoute() ?? '/recipe/of-the-day'" tab="recipe-of-the-day">
                     <IonIcon :icon="sparkles"/>
                     {{ $t('Tabs.RecipeOfTheDay') }}
                 </IonTabButton>
@@ -25,12 +25,14 @@
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
 import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
+import {Recipe} from "@/shared";
 
 const recipeStore = useRecipeStore()
+const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
 const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)
 </script>

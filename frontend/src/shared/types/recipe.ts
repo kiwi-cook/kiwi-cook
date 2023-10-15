@@ -34,7 +34,7 @@ export class Recipe {
         }
     };
     servings: number;
-    liked: boolean;
+    saved: boolean;
     computed: {
         itemsById: { [id: string]: StepItem }
         items: StepItem[],
@@ -54,7 +54,7 @@ export class Recipe {
         }
         this.steps = [new Step()]
         this.servings = 1
-        this.liked = false;
+        this.saved = false;
         this.src = {
             url: '',
             authors: [],
@@ -178,12 +178,20 @@ export class Recipe {
     }
 
     /**
-     * Like or unlike the recipe
+     * Save or unsave the recipe
      */
-    public toggleLike() {
+    public toggleSave() {
         const store = useRecipeStore()
-        this.liked = !this.liked
-        store.setLike(this)
+        this.saved = !this.saved
+        store.setSaved(this)
+    }
+
+    /**
+     * Check if the recipe is saved
+     */
+    public isSaved(): boolean {
+        const store = useRecipeStore()
+        return this.getId() in store.getSavedRecipesAsMap
     }
 
     /**

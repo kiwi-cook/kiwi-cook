@@ -2,18 +2,16 @@
     <IonPage>
         <IonContent :fullscreen="true">
             <div class="page">
-                <div class="content">
-                    <FancyHeader :big-text="['Log into', 'Taste Buddy']"/>
+                <TypedHeader :big-text="['Log into', 'Taste Buddy']"/>
 
-                    <SignIn/>
-                </div>
+                <SignIn/>
             </div>
         </IonContent>
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {IonContent, IonPage} from '@ionic/vue';
 import SignIn from "@/editor/components/user/SignInComponent.vue";
-import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
 </script>

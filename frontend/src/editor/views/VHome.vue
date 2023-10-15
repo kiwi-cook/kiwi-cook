@@ -2,30 +2,28 @@
     <IonPage>
         <IonContent :fullscreen="true">
             <div class="page">
-                <div class="content">
-                    <FancyHeader :big-text="['Taste Buddy', 'Editor']"/>
+                <TypedHeader :big-text="['Taste Buddy', 'Editor']"/>
 
-                    <table>
-                        <tr>
-                            <th>Stats</th>
-                            <th>Value</th>
-                        </tr>
-                        <tr v-for="(entry, index) in stats.entries()" :key="index">
-                            <td>{{ entry[0] }}</td>
-                            <td>{{ entry[1] }}</td>
-                        </tr>
-                    </table>
-                </div>
+                <table>
+                    <tr>
+                        <th>Stats</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr v-for="(entry, index) in stats.entries()" :key="index">
+                        <td>{{ entry[0] }}</td>
+                        <td>{{ entry[1] }}</td>
+                    </tr>
+                </table>
             </div>
         </IonContent>
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {IonContent, IonPage} from '@ionic/vue';
 import {useRecipeStore} from "@/editor/storage";
 import {computed} from "vue";
-import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
 
 const recipeStore = useRecipeStore()
 const recipes = computed(() => recipeStore.getRecipesAsList)

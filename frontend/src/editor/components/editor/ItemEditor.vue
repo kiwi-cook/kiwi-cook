@@ -43,8 +43,8 @@
         <!-- Item merger -->
         <IonCardContent>
             <IonItem lines="none">
-                <IonInput v-model="itemMergerInput" label="Merge with" label-placement="stacked" type="text"
-                          placeholder="Enter item id" @keyup.enter="mergeItems()"/>
+                <IonInput v-model="itemMergerInput" label="Merge with" label-placement="stacked" placeholder="Enter item id"
+                          type="text" @keyup.enter="mergeItems()"/>
                 <IonButton color="success" fill="outline" @click="mergeItems()">
                     <IonIcon :icon="save"/>
                 </IonButton>
@@ -73,7 +73,7 @@
     </IonCard>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {Item, logDebug, Recipe} from '@/shared';
 import {
     IonAvatar,

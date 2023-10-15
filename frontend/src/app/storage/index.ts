@@ -203,7 +203,9 @@ interface RecipeState {
 // called by main.ts
 export const useRecipeStore = defineStore('recipes', {
     state: (): RecipeState => ({
-        loading: {},
+        loading: {
+            app: true,
+        },
         recipes: {},
         savedRecipes: new Set(),
         items: {},
@@ -370,6 +372,7 @@ export const useRecipeStore = defineStore('recipes', {
                             this.setSavedRecipes(cachedItem.value)
                         }
                         this.finishLoading('getCachedSavedRecipes')
+                        this.finishLoading('app')
                         const end = performance.now()
                         logDebug('prepare', `Loaded in ${end - start}ms`)
                     })
@@ -404,8 +407,8 @@ export const useRecipeStore = defineStore('recipes', {
          * Remove or add a recipe to the saved recipes
          * @param recipe
          */
-        setLike(recipe: Recipe) {
-            if (recipe.liked) {
+        setSaved(recipe: Recipe) {
+            if (recipe.saved) {
                 this.savedRecipes.add(recipe.getId())
             } else {
                 this.savedRecipes.delete(recipe.getId())

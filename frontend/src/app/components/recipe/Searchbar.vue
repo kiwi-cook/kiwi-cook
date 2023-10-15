@@ -4,7 +4,7 @@
                       class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
-                <IonList lines="none" class="ion-no-padding">
+                <IonList class="ion-no-padding" lines="none">
                     <IonItemGroup v-if="recipes.length > 0">
                         <IonItemDivider>
                             <IonLabel>{{ $t('General.Recipe', recipes.length) }}</IonLabel>
@@ -18,7 +18,7 @@
                         <IonItemDivider>
                             <IonLabel>{{ $t('General.Tag', tags.length) }}</IonLabel>
                         </IonItemDivider>
-                        <IonItem lines="none" class="over-x-scroll">
+                        <IonItem class="over-x-scroll" lines="none">
                             <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
                                      class="link" @click="selectTag(tag)">
                                 {{ tag }}
@@ -41,7 +41,7 @@
 </template>
 
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, PropType, ref, toRefs, watch} from "vue";
 import {IonChip, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList, IonSearchbar} from "@ionic/vue";
 import {Item, Recipe} from "@/shared";

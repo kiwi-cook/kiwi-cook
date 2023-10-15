@@ -3,7 +3,7 @@
             class="taste-buddy-logo" src="./img/icon.png"/>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {IonImg} from '@ionic/vue'
 import {computed, PropType, toRefs} from "vue";
 

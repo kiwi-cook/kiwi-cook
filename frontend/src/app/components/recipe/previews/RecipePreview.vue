@@ -1,12 +1,7 @@
 <template>
     <div class="recipe-preview">
         <div class="recipe-details">
-            <h2 class="recipe-title">
-                <RouterLink :to="recipe.getRoute()">{{ recipe?.getName() }}</RouterLink>
-            </h2>
-            <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-                <strong>By <a :href="recipe?.src?.url">{{ recipe?.getAuthors() }}</a></strong>
-            </div>
+            <RecipeTitle :recipe="recipe"/>
             <p class="recipe-description desc">{{ recipe.getShortDescription() }}</p>
             <div class="pill-container">
                 <div v-for="tag in tags" :key="tag" class="pill">{{ tag }}</div>
@@ -23,18 +18,18 @@
             </div>
         </div>
         <div class="recipe-image">
-            <img :src="recipe?.props.imgUrl"
-                 :alt="recipe?.getName()"
+            <img :alt="recipe?.getName()"
+                 :src="recipe?.props.imgUrl"
                  class="link" @click="toRecipe">
         </div>
     </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, PropType, toRefs} from "vue";
 import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared";
 import {useIonRouter} from "@ionic/vue";
-import {RouterLink} from "vue-router";
+import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
 
 const props = defineProps({
     recipe: {
@@ -72,8 +67,6 @@ const possessedItems = computed<Item[]>(() => {
 const router = useIonRouter();
 const toRecipe = () => router.push({name: 'Recipe', params: {id: recipe.value?.getId()}})
 
-const name = recipe?.value?.getName()
-const authors = recipe?.value?.getAuthors()
 const duration = recipe?.value?.getDuration()
 const tags = recipe?.value?.getTags()?.slice(0, 3)
 </script>

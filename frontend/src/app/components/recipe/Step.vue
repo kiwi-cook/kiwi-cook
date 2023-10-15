@@ -27,7 +27,7 @@
         </IonCardContent>
     </IonCard>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import {flame, time} from "ionicons/icons";
 import ItemList from "@/shared/components/utility/list/ItemList.vue";
 import {

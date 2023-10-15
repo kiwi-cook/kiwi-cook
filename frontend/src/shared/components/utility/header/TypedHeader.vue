@@ -1,16 +1,15 @@
 <template>
-    <h2 class="small-header">
+    <h2 class="subheader">
         {{ smallText }}
     </h2>
     <h1 class="big-header">
         {{ bigText[0] }}
-        <FancyText v-if="bigText.length > 1" :text="typedText"/>
+        <span v-if="bigText.length > 1" class="header-msg-highlight">{{ typedText }}</span>
     </h1>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {PropType, Ref, ref, toRefs, watch} from "vue";
-import FancyText from "@/shared/components/utility/fancy/FancyText.vue";
 
 const props = defineProps({
     smallText: {
@@ -36,6 +35,9 @@ const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<numb
 }
 
 const startTyping = () => {
+    if (interval !== -1) {
+        clearInterval(interval)
+    }
     interval = setInterval(() => {
         if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
             clearInterval(interval)
@@ -46,19 +48,15 @@ watch(bigText, startTyping)
 </script>
 
 <style scoped>
-.small-header {
-    font-size: var(--font-size-medium);
-    font-weight: var(--font-weight-normal);
-    margin-bottom: 0;
-    margin-left: 0;
-    color: var(--ion-color-dark);
+.header-msg-highlight {
+    color: var(--ion-color-primary);
+    font-weight: var(--font-weight-bolder);
 }
 
 .big-header {
-    margin-top: 0;
     font-size: var(--font-size-large);
     font-weight: var(--font-weight-bold);
-    margin-bottom: 10px;
-    margin-left: 0;
+    margin: 0 0 10px;
 }
+
 </style>

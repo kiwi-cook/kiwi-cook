@@ -23,7 +23,7 @@
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/vue';
 import {useRecipeStore} from '@/editor/storage';

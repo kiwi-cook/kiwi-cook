@@ -13,7 +13,7 @@
     --font-weight-bold: 550;
     --font-weight-normal: 400;
     --font-weight-light: 350;
-    
+
     /* Fonts */
     --font-special: lora, serif;
     --font-body: lato, sans-serif;
@@ -75,6 +75,7 @@ h2 {
 
 h2.subheader {
     margin-top: 0;
+    margin-bottom: 0;
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
     color: var(--ion-color-medium);

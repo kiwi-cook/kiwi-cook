@@ -36,12 +36,12 @@
                             </IonRow>
                             <IonRow>
                                 <IonCol>
-                                    <IonTextarea :value="mutableRecipe.getDescription()"
-                                                 :counter="true"
-                                                 :rows="3" :spellcheck="true"
+                                    <IonTextarea :counter="true"
+                                                 :rows="3"
+                                                 :spellcheck="true" :value="mutableRecipe.getDescription()"
                                                  label="Description"
-                                                 wrap="soft"
-                                                 label-placement="stacked" placeholder="e.g. The best recipe in Germany"
+                                                 label-placement="stacked"
+                                                 placeholder="e.g. The best recipe in Germany" wrap="soft"
                                                  @keyup.enter="mutableRecipe.setDescription($event.target.value ?? '')"
                                                  @ion-blur="mutableRecipe.setDescription($event.target.value ?? '')"/>
                                 </IonCol>
@@ -123,22 +123,22 @@
             </IonCardHeader>
 
             <IonCardContent>
-                <IonTextarea :value="step.getDescription()"
-                             :counter="true"
-                             :rows="3" :spellcheck="true"
+                <IonTextarea :counter="true"
+                             :rows="3"
+                             :spellcheck="true" :value="step.getDescription()"
                              label="Description"
-                             wrap="soft"
-                             label-placement="stacked" placeholder="e.g. Mix the ingredients together"
+                             label-placement="stacked"
+                             placeholder="e.g. Mix the ingredients together" wrap="soft"
                              @keyup.enter="step.setDescription($event.target.value ?? '')"
                              @ion-blur="step.setDescription($event.target.value ?? '')"/>
 
-                <IonInput v-model.number="step.duration" label="Preparation time (minutes)" label-placement="stacked"
-                          max="2400"
-                          min="1" type="number" inputmode="numeric"/>
+                <IonInput v-model.number="step.duration" inputmode="numeric" label="Preparation time (minutes)"
+                          label-placement="stacked"
+                          max="2400" min="1" type="number"/>
 
-                <IonInput v-model.number="step.temperature" label="Temperature (°C)" label-placement="stacked"
-                          max="1000"
-                          min="-50" type="number" inputmode="numeric"/>
+                <IonInput v-model.number="step.temperature" inputmode="numeric" label="Temperature (°C)"
+                          label-placement="stacked"
+                          max="1000" min="-50" type="number"/>
 
                 <IonInput v-model.trim="step.imgUrl" :placeholder="`e.g. https://source.unsplash.com/`"
                           label="Image URL"
@@ -212,7 +212,7 @@
     </IonItem>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {formatDate, Item, Step, StepItem} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
 import {

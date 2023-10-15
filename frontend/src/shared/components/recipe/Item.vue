@@ -2,7 +2,7 @@
     <IonItem v-if="mappedItem" class="item" lines="none">
         <IonThumbnail slot="start" class="item-thumbnail">
             <img :key="mappedItem.name"
-                 :src="mappedItem.imgUrl ?? ''" :alt="`Image of ${mappedItem.name}`" loading="lazy"/>
+                 :alt="`Image of ${mappedItem.name}`" :src="mappedItem.imgUrl ?? ''" loading="lazy"/>
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}]">
             {{ mappedItem.name }}
@@ -18,7 +18,7 @@
     </IonItem>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {IonItem, IonLabel, IonThumbnail} from "@ionic/vue";
 import {computed, PropType, toRefs} from "vue";
 import {Item, ItemType, StepItem} from "@/shared";

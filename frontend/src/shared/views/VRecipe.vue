@@ -2,9 +2,17 @@
     <IonPage>
         <IonContent :fullscreen="true">
             <div class="page">
-                <div v-if="recipe" class="content">
+                <template v-if="recipe">
                     <RecipeComponent :recipe="recipe"/>
-                </div>
+                </template>
+                <template v-else>
+                    <IonText>
+                        <h1>{{ $t('Recipe.NotFound.Title') }}</h1>
+                    </IonText>
+                    <IonText>
+                        <p>{{ $t('Recipe.NotFound.Description') }}</p>
+                    </IonText>
+                </template>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton color="primary" @click="goBack()">
@@ -15,7 +23,7 @@
     </IonPage>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
 import RecipeComponent from '@/shared/components/recipe/Recipe.vue';

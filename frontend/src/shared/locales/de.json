@@ -16,7 +16,11 @@
     "Serving": "Portion | Portionen",
     "Direction": "Schritt | Schritte",
     "Ingredient": "Zutat | Zutaten",
-    "GoodAppetite": "Guten Appetit!"
+    "GoodAppetite": "Guten Appetit!",
+    "NotFound": {
+      "Title": "Ups, da ist etwas schiefgelaufen.",
+      "Description": "Das Rezept konnte nicht gefunden werden."
+    }
   },
   "Tag": {
     "Special": {

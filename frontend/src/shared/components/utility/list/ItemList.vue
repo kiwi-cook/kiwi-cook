@@ -6,7 +6,7 @@
     </ul>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {computed, PropType, toRefs} from "vue";
 import {Item, StepItem} from "@/shared";
 import ItemComponent from "@/shared/components/recipe/Item.vue";

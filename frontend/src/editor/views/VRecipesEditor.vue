@@ -1,13 +1,13 @@
 <template>
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
-            <div class="content">
-                <FancyHeader :big-text="['Recipe Parser']"/>
+            <div class="page">
+                <TypedHeader :big-text="['Recipe Parser']"/>
 
                 <IonCard>
                     <IonCardHeader>
                         <IonCardTitle>
-                            Parse recipes {{ selectedParser ? `with ${selectedParser}` : ''}}
+                            Parse recipes {{ selectedParser ? `with ${selectedParser}` : '' }}
                         </IonCardTitle>
                         <IonCardSubtitle>
                             Select the recipe parser
@@ -16,7 +16,7 @@
 
                     <IonCardContent>
                         <!-- File uploader for JSON recipes files -->
-                        <IonItem lines="none" class="ion-no-padding">
+                        <IonItem class="ion-no-padding" lines="none">
                             <label for="recipe-parser">
                                 Recipe parser
                             </label>
@@ -27,11 +27,11 @@
                             </select>
                         </IonItem>
 
-                        <IonItem lines="none" class="ion-no-padding">
+                        <IonItem class="ion-no-padding" lines="none">
                             <label for="file-input">
                                 Recipe JSON file<br/>
                             </label>
-                            <input id="file-input" ref="file" type="file" accept=".json" @change="onFileChange"/>
+                            <input id="file-input" ref="file" accept=".json" type="file" @change="onFileChange"/>
                         </IonItem>
                     </IonCardContent>
                 </IonCard>
@@ -49,7 +49,7 @@
                     <IonCardContent>
                         <ul class="recipe-button-list">
                             <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
-                                <IonButton size="small" fill="outline" @click="showEditor(recipe.getId())">
+                                <IonButton fill="outline" size="small" @click="showEditor(recipe.getId())">
                                     {{ recipe.getName() }}
                                 </IonButton>
                             </li>
@@ -84,9 +84,9 @@
 </template>
 
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {ref} from "vue";
-import FancyHeader from "@/shared/components/utility/fancy/FancyHeader.vue";
+import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/editor/storage";
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
