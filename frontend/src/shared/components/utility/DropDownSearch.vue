@@ -11,7 +11,7 @@
                 <IonList>
                     <template v-for="(filteredItem, index) in filteredItems" :key="index">
                         <IonItem lines="none" @click="selectItem(filteredItem)">
-                            <slot :filteredItem="filteredItem" name="item">
+                            <slot :filtered-item="filteredItem" name="item">
                                 <IonLabel>{{ filteredItem }}</IonLabel>
                             </slot>
                         </IonItem>

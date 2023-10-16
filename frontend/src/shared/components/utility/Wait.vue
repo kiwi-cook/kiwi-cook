@@ -1,7 +1,7 @@
 <template>
     <div class="container">
         <div class="waiting-container">
-            <div ref="floatingFoods"></div>
+            <div ref="floatingFoods"/>
         </div>
     </div>
 </template>

@@ -1,7 +1,12 @@
 <template>
     <div class="searchbar-wrapper">
-        <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
-                      class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
+        <div class="searchbar-search-wrapper">
+            <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
+                          class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
+            <IonButton shape="round" @click="selectPreferences()">
+                <IonIcon :icon="optionsOutline"/>
+            </IonButton>
+        </div>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
                 <IonList class="ion-no-padding" lines="none">
@@ -43,8 +48,19 @@
 
 <script lang="ts" setup>
 import {computed, PropType, ref, toRefs, watch} from "vue";
-import {IonChip, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList, IonSearchbar} from "@ionic/vue";
+import {
+    IonButton,
+    IonChip,
+    IonIcon,
+    IonItem,
+    IonItemDivider,
+    IonItemGroup,
+    IonLabel,
+    IonList,
+    IonSearchbar
+} from "@ionic/vue";
 import {Item, Recipe} from "@/shared";
+import {optionsOutline} from "ionicons/icons";
 
 // Props
 const props = defineProps({
@@ -81,6 +97,7 @@ const emit = defineEmits({
     'selectTag': (tag: string) => tag,
     'selectRecipe': (recipe: Recipe) => recipe,
     'selectItem': (item: Item) => item,
+    'selectPreferences': (value: boolean) => value
 })
 
 /* Searchbar state */
@@ -116,6 +133,11 @@ const selectItem = (item: Item) => {
     closeSearch()
 }
 
+const selectPreferences = () => {
+    closeSearch()
+    emit('selectPreferences', true)
+}
+
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
     return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0) && (searchInput.value !== '' || searchActive.value) && !disableList.value
@@ -130,6 +152,10 @@ watch(searchInput, (newFilterInput) => {
 <style scoped>
 .searchbar-wrapper {
     width: 100%;
+}
+
+.searchbar-search-wrapper {
+    display: flex;
 }
 
 .searchbar-list-wrapper {

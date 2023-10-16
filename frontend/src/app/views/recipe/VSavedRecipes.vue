@@ -1,22 +1,24 @@
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="$t('Favorites.Title').split(';')"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="$t('Favorites.Title').split(';')"/>
 
-                <template v-if="savedRecipes.length > 0">
-                    <List :list="savedRecipes">
-                        <template #element="{ element }">
-                            <RecipePreview :recipe="element as Recipe"/>
-                        </template>
-                    </List>
-                </template>
-                <template v-else>
-                    <TasteBuddyLogo size="small"/>
-                    <h2 class="ion-text-center">
-                        {{ $t('Favorites.NoRecipesSaved') }}
-                    </h2>
-                </template>
+                    <template v-if="savedRecipes.length > 0">
+                        <List :list="savedRecipes">
+                            <template #element="{ element }">
+                                <RecipePreview :recipe="element as Recipe"/>
+                            </template>
+                        </List>
+                    </template>
+                    <template v-else>
+                        <TasteBuddyLogo size="small"/>
+                        <h2 class="ion-text-center">
+                            {{ $t('Favorites.NoRecipesSaved') }}
+                        </h2>
+                    </template>
+                </div>
             </div>
         </IonContent>
     </IonPage>

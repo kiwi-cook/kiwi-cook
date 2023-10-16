@@ -1,48 +1,50 @@
 <template>
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
-                <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
-                <IonButtons>
-                    <IonButton @click="saveItems()">
-                        <IonIcon :icon="save"/>
-                        Save
-                    </IonButton>
-                    <IonButton @click="addItem()">
-                        <IonIcon :icon="addOutline"/>
-                        Add
-                    </IonButton>
-                    <IonButton @click="formatItems()">
-                        <IonIcon :icon="colorWand"/>
-                        Format
-                    </IonButton>
-                    <IonButton color="danger" @click="removeDuplicates()">
-                        <IonIcon :icon="documents"/>
-                        Remove duplicates
-                    </IonButton>
-                    <IonButton color="danger" @click="removeUnusedItems()">
-                        <IonIcon :icon="trash"/>
-                        Remove unused
-                    </IonButton>
-                </IonButtons>
+                    <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
+                    <IonButtons>
+                        <IonButton @click="saveItems()">
+                            <IonIcon :icon="save"/>
+                            Save
+                        </IonButton>
+                        <IonButton @click="addItem()">
+                            <IonIcon :icon="addOutline"/>
+                            Add
+                        </IonButton>
+                        <IonButton @click="formatItems()">
+                            <IonIcon :icon="colorWand"/>
+                            Format
+                        </IonButton>
+                        <IonButton color="danger" @click="removeDuplicates()">
+                            <IonIcon :icon="documents"/>
+                            Remove duplicates
+                        </IonButton>
+                        <IonButton color="danger" @click="removeUnusedItems()">
+                            <IonIcon :icon="trash"/>
+                            Remove unused
+                        </IonButton>
+                    </IonButtons>
 
-                <IonAccordionGroup :multiple="true">
-                    <IonAccordion v-for="(item, index) in items" :key="index" :value="item.getId()">
-                        <IonItem slot="header">
-                            <IonLabel>
-                                {{ item.getName() }}
-                            </IonLabel>
-                        </IonItem>
-                        <div slot="content" class="ion-padding">
-                            <ItemEditor :item="item"/>
-                        </div>
-                    </IonAccordion>
-                </IonAccordionGroup>
+                    <IonAccordionGroup :multiple="true">
+                        <IonAccordion v-for="(item, index) in items" :key="index" :value="item.getId()">
+                            <IonItem slot="header">
+                                <IonLabel>
+                                    {{ item.getName() }}
+                                </IonLabel>
+                            </IonItem>
+                            <div slot="content" class="ion-padding">
+                                <ItemEditor :item="item"/>
+                            </div>
+                        </IonAccordion>
+                    </IonAccordionGroup>
+
+                </div>
 
             </div>
-
             <!-- Buttons -->
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton>

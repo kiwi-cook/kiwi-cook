@@ -5,7 +5,7 @@
                 <div class="recipe-image">
                     <img :alt="recipe?.getName()"
                          :src="recipe?.props.imgUrl"
-                         class="link" @click="routeToRecipe()">
+                         class="link" @click="routeToRecipe()"/>
                 </div>
             </template>
             <template #right>

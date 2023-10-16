@@ -1,16 +1,18 @@
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :bigText="['Settings']"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Settings']"/>
 
-                <IonSelect v-model="locale" label="Language" label-placement="floating">
-                    <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale">
-                        {{ locale }}
-                    </IonSelectOption>
-                </IonSelect>
+                    <IonSelect v-model="locale" label="Language" label-placement="floating">
+                        <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale">
+                            {{ locale }}
+                        </IonSelectOption>
+                    </IonSelect>
 
-                {{ $i18n.locale }}
+                    {{ $i18n.locale }}
+                </div>
             </div>
         </IonContent>
     </IonPage>

@@ -1,18 +1,20 @@
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="page">
-                <template v-if="recipe">
-                    <RecipeComponent :recipe="recipe"/>
-                </template>
-                <template v-else>
-                    <IonText>
-                        <h1>{{ $t('Recipe.NotFound.Title') }}</h1>
-                    </IonText>
-                    <IonText>
-                        <p>{{ $t('Recipe.NotFound.Description') }}</p>
-                    </IonText>
-                </template>
+            <div class="content-wrapper">
+                <div class="content">
+                    <template v-if="recipe">
+                        <RecipeComponent :recipe="recipe"/>
+                    </template>
+                    <template v-else>
+                        <IonText>
+                            <h1>{{ $t('Recipe.NotFound.Title') }}</h1>
+                        </IonText>
+                        <IonText>
+                            <p>{{ $t('Recipe.NotFound.Description') }}</p>
+                        </IonText>
+                    </template>
+                </div>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton color="primary" @click="goBack()">

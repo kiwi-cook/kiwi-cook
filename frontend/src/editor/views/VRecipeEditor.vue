@@ -1,9 +1,11 @@
 <template>
     <IonPage id="recipe-editor-page">
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="['Recipe', 'Editor']"/>
-                <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Recipe', 'Editor']"/>
+                    <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
+                </div>
             </div>
             <IonFab slot="fixed" horizontal="start" vertical="bottom">
                 <IonFabButton>

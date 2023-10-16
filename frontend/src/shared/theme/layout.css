@@ -31,9 +31,13 @@
     }
 }
 
-.page {
+.content-wrapper {
     margin: var(--margin-page);
+}
+
+.content {
     inset: 0 !important;
+    margin: unset !important;
     max-width: var(--max-width) !important;
     margin-left: auto !important;
     margin-right: auto !important;

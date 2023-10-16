@@ -140,8 +140,10 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
     logDebug('sendToAPI ' + route, fetchOptions)
     return fetch(url, fetchOptions).then(async (response: Response) => {
         // set cookie if it is in the response
+        console.log(response.headers.entries())
         if (response.headers.has('set-cookie')) {
             const cookie = response.headers.get('set-cookie')
+            console.log(cookie)
             if (cookie) {
                 document.cookie = cookie
             }

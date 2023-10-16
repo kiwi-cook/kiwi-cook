@@ -19,11 +19,11 @@
             <IonCardTitle color="primary">
                 <template v-for="lang in supportedLanguages" :key="lang">
                     <IonItem lines="none">
-                        <IonInput :label="`Name in ${lang}`" :maxlength="40" :value="item.getName(lang)"
+                        <IonInput :label="`Name in ${lang}`" :maxlength="40" :value="item?.getName(lang)"
                                   label-placement="stacked"
                                   placeholder="e.g. Baking powder" type="text"
-                                  @keyup.enter="item.setName($event.target.value, lang)"
-                                  @ion-blur="item.setName(($event.target.value ?? '').toString(), lang)"/>
+                                  @keyup.enter="item?.setName($event.target.value, lang)"
+                                  @ion-blur="item?.setName(($event.target.value ?? '').toString(), lang)"/>
                     </IonItem>
                 </template>
 
@@ -43,7 +43,8 @@
         <!-- Item merger -->
         <IonCardContent>
             <IonItem lines="none">
-                <IonInput v-model="itemMergerInput" label="Merge with" label-placement="stacked" placeholder="Enter item id"
+                <IonInput v-model="itemMergerInput" label="Merge with" label-placement="stacked"
+                          placeholder="Enter item id"
                           type="text" @keyup.enter="mergeItems()"/>
                 <IonButton color="success" fill="outline" @click="mergeItems()">
                     <IonIcon :icon="save"/>
@@ -74,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import {Item, logDebug, Recipe} from '@/shared';
+import {Item, logDebug} from '@/shared';
 import {
     IonAvatar,
     IonButton,
@@ -90,11 +91,12 @@ import {
     IonSelect,
     IonSelectOption
 } from '@ionic/vue';
-import {computed, PropType, Ref, ref, toRefs, watch} from 'vue';
-import {useRecipeStore, useTasteBuddyStore} from '@/editor/storage';
+import {computed, PropType, ref, toRefs, watch} from 'vue';
+import {useRecipeStore} from '@/editor/storage';
 import {chevronDown, chevronUp, save, trash} from "ionicons/icons";
 import {MutableItem} from "@/editor/types/item.ts";
 import {MutableRecipe} from "@/editor/types/recipe.ts";
+import {SUPPORT_LOCALES} from "@/shared/locales/i18n.ts";
 
 const props = defineProps({
     item: {
@@ -104,8 +106,7 @@ const props = defineProps({
 })
 
 const {item} = toRefs(props)
-const tasteBuddyStore = useTasteBuddyStore()
-const supportedLanguages = tasteBuddyStore.language.supportedLanguages
+const supportedLanguages = SUPPORT_LOCALES
 
 const recipeStore = useRecipeStore()
 
@@ -115,8 +116,8 @@ watch(item, () => {
     mutableItem.value = item.value
 })
 
-const showUsedInRecipes: Ref<boolean> = ref(false)
-const usedInRecipes = computed<Recipe[]>(() => {
+const showUsedInRecipes = ref<boolean>(false)
+const usedInRecipes = computed<MutableRecipe[]>(() => {
     const recipesByItemIds = recipeStore.getRecipesByItemIds
     if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
         return []

@@ -1,6 +1,6 @@
 <template>
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
-        <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image">
+        <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image"/>
         <div class="mini-recipe-tags">
             <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag">
                 <IonIcon :icon="time" size="small"/>

@@ -61,9 +61,7 @@
                                               type="text"
                                               @keydown.enter="mutableRecipe.addAuthor($event.target.value)"/>
                                 </IonCol>
-                                <IonCol size="auto">
-
-                                </IonCol>
+                                <IonCol size="auto"/>
                             </IonRow>
                             <IonRow>
                                 <IonCol>

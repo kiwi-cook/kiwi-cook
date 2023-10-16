@@ -8,7 +8,7 @@
                     size="12"
                     size-sm="12"
                     v-bind="$props">
-                <slot name="left"></slot>
+                <slot name="left"/>
             </IonCol>
 
             <IonCol v-if="$slots.right" :size-lg="selectedLayout.right.lg"
@@ -18,7 +18,7 @@
                     size="12"
                     size-sm="12"
                     v-bind="$props">
-                <slot name="right"></slot>
+                <slot name="right"/>
             </IonCol>
         </IonRow>
     </IonGrid>

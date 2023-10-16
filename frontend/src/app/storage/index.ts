@@ -98,18 +98,6 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         },
         greetings: [],
     }),
-    getters: {
-        /**
-         * Get the current app state
-         * @returns
-         */
-        isDevMode: (): boolean => process.env.NODE_ENV === 'development',
-        /**
-         * Get the current language
-         * @param state
-         */
-        isAuthenticated: (state): boolean => state.user.authenticated ?? false,
-    },
     actions: {
         /**
          * Change the language
@@ -118,50 +106,6 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         setLanguage(language: SUPPORT_LOCALES_TYPE) {
             this.language.lang = language
             setI18nLanguage(i18n, language)
-        },
-        /**
-         * Authenticate the user using the session cookie+
-         * @return true, if user was authenticated successfully
-         */
-        async authenticate(): Promise<boolean> {
-            logDebug('authenticate', 'logging in')
-            // if the user is already authenticated, return true
-            if (this.isAuthenticated) {
-                return Promise.resolve(true)
-            }
-
-            // try to authenticate the user using the session cookie
-            return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
-                .then((apiResponse: APIResponse<string>) => {
-                    this.user.authenticated = !apiResponse.error
-                    logDebug('sessionAuth', `user is${!this.user.authenticated ? ' not ' : ' '}authenticated`)
-                    return this.user.authenticated
-                }).catch(() => {
-                    this.user.authenticated = false
-                    return false
-                })
-        },
-        /**
-         * Authenticate the user using the username and password
-         * @param payload username and password
-         * @returns true if the authentication was successful, false otherwise
-         */
-        async basicAuth(payload: { username: string, password: string }): Promise<boolean> {
-            logDebug('basicAuth', 'logging in')
-            const {username, password} = payload
-            return sendToAPI<string>(API_ROUTE.POST_AUTH, {
-                headers: [
-                    {
-                        key: 'Authorization',
-                        value: 'Basic ' + btoa(username + ':' + password)
-                    }
-                ],
-                errorMessage: 'Could not log in'
-            }).then((apiResponse: APIResponse<string>) => {
-                this.user.authenticated = !apiResponse.error
-                // return true if the authentication was successful, false otherwise
-                return !apiResponse.error
-            })
         },
         /**
          * Get the greetings

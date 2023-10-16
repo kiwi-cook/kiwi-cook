@@ -20,7 +20,7 @@
         <div class="recipe-image">
             <img :alt="recipe?.getName()"
                  :src="recipe?.props.imgUrl"
-                 class="link" @click="toRecipe">
+                 class="link" @click="toRecipe"/>
         </div>
     </div>
 </template>

@@ -9,7 +9,8 @@
                           label-placement="floating" type="text"/>
             </IonItem>
             <IonItem lines="none">
-                <IonInput v-model="password" :clear-input="true" :type="visible ? 'text' : 'password'" autocomplete="current-password"
+                <IonInput v-model="password" :clear-input="true" :type="visible ? 'text' : 'password'"
+                          autocomplete="current-password"
                           label="Password" label-placement="floating"/>
                 <IonCheckbox slot="end" v-model="visible" color="primary" label-placement="end">{{
                     $t('SignIn.ShowPassword')

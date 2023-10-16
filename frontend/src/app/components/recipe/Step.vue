@@ -22,7 +22,7 @@
                 <ItemList :horizontal="true" :items="step.getStepItems()"/>
             </IonItem>
             <IonItem lines="none">
-                <div v-html="step?.printDescription('item-highlight')"></div>
+                <div v-html="step?.printDescription('item-highlight')"/>
             </IonItem>
         </IonCardContent>
     </IonCard>

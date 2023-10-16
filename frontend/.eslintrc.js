@@ -56,11 +56,6 @@ module.exports = {
 			"svg": "always",
 			"math": "always"
 		}],
-		"vue/html-closing-bracket-spacing": ["error", {
-			"startTag": "never",
-			"endTag": "never",
-			"selfClosingTag": "always"
-		}],
 		"vue/html-quotes": ["error", "double"],
 		"vue/prop-name-casing": ["error", "camelCase"],
 		"vue/require-prop-types": "error",

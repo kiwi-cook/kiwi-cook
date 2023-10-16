@@ -1,18 +1,10 @@
 // Vue
 import {defineStore} from 'pinia'
 
-import {
-    API_ROUTE,
-    APIResponse,
-    Item,
-    itemFromJSON,
-    logDebug,
-    presentToast,
-    Recipe,
-    recipeFromJSON,
-    sendToAPI
-} from "@/shared";
+import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from "@/shared";
 import {SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
+import {MutableRecipe} from "@/editor/types/recipe.ts";
+import {MutableItem} from "@/editor/types/item.ts";
 
 
 // Define typings for the store state
@@ -80,6 +72,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             }).then((apiResponse: APIResponse<string>) => {
                 this.user.authenticated = !apiResponse.error
                 // return true if the authentication was successful, false otherwise
+
                 return !apiResponse.error
             })
         }
@@ -88,8 +81,8 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
 
 interface RecipeState {
     loading: { [key: string]: boolean }
-    recipes: { [id: string]: Recipe }
-    items: { [id: string]: Item }
+    recipes: { [id: string]: MutableRecipe }
+    items: { [id: string]: MutableItem }
     recipesByItemId: { [itemId: string]: string[] }
 }
 
@@ -108,19 +101,19 @@ export const useRecipeStore = defineStore('recipes', {
          * Get the recipes as list
          * @param state
          */
-        getRecipesAsList: (state): Recipe[] => {
-            const recipesAsList: Recipe[] = Object.values(state.recipes ?? {})
+        getRecipesAsList: (state): MutableRecipe[] => {
+            const recipesAsList: MutableRecipe[] = Object.values(state.recipes ?? {})
             if (recipesAsList.length === 0) {
                 return []
             }
-            recipesAsList.sort((a: Recipe, b: Recipe) => a.getName().localeCompare(b.getName()))
+            recipesAsList.sort((a: MutableRecipe, b: MutableRecipe) => a.getName().localeCompare(b.getName()))
             return recipesAsList
         },
         /**
          * Get the recipes mapped by their id
          * @param state
          */
-        getRecipesAsMap: (state): { [id: string]: Recipe } => state.recipes ?? {},
+        getRecipesAsMap: (state): { [id: string]: MutableRecipe } => state.recipes ?? {},
         getRecipesByItemIds(): { [key: string]: string[] } {
             const recipes = this.getRecipesAsList ?? []
             const recipesByItemId: { [key: string]: string[] } = {}
@@ -143,23 +136,23 @@ export const useRecipeStore = defineStore('recipes', {
          * @param state
          */
         getRecipesAsListByItemId: (state) => (itemId?: string): string[] => state.recipesByItemId[itemId ?? ''] ?? [],
-        getItemsAsList: (state): Item[] => {
+        getItemsAsList: (state): MutableItem[] => {
             return Object.values(state.items ?? {}) ?? []
         },
         getItemNamesAsList(): string[] {
-            return (this.getItemsAsList ?? []).map((item: Item) => item.getName())
+            return (this.getItemsAsList ?? []).map((item: MutableItem) => item.getName())
         },
-        getItemsSortedByName(): Item[] {
+        getItemsSortedByName(): MutableItem[] {
             const itemsAsArray = this.getItemsAsList ?? []
             if (itemsAsArray.length === 0) {
                 return []
             }
-            itemsAsArray.sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
+            itemsAsArray.sort((a: MutableItem, b: MutableItem) => a.getName().localeCompare(b.getName()))
             return itemsAsArray
         },
-        getItemsAsMap: (state): { [id: string]: Item } => state.items ?? {},
+        getItemsAsMap: (state): { [id: string]: MutableItem } => state.items ?? {},
         getTags(): string[] {
-            return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
+            return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: MutableRecipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
             }, []))]
         }
@@ -175,60 +168,60 @@ export const useRecipeStore = defineStore('recipes', {
          * Override all recipes
          * @param recipes
          */
-        replaceRecipes(recipes: Recipe[]) {
-            this.recipes = Object.assign({}, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
+        replaceRecipes(recipes: MutableRecipe[]) {
+            this.recipes = Object.assign({}, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
         },
         /**
          * Update multiple recipes
          * @param recipes
          */
-        setRecipes(recipes?: Recipe[] | Recipe) {
+        setRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
             if (typeof recipes === 'undefined') {
                 this.recipes = {}
-                return new Promise<Recipe[]>(() => [])
+                return new Promise<MutableRecipe[]>(() => [])
             }
 
             if (!Array.isArray(recipes)) {
                 this.recipes[recipes.getId()] = recipes
             } else {
-                this.recipes = Object.assign(this.recipes, ...recipes.map((recipe: Recipe) => ({[recipe.getId()]: recipe})))
+                this.recipes = Object.assign(this.recipes, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
             }
         },
         /**
          * Override all items
          * @param items
          */
-        replaceItems(items: Item[]) {
-            this.items = Object.assign({}, ...items.map((item: Item) => ({[item.getId()]: item})))
+        replaceItems(items: MutableItem[]) {
+            this.items = Object.assign({}, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
         },
         /**
          * Override all items
          * @param items
          */
-        setItems(items?: Item[] | Item) {
+        setItems(items?: MutableItem[] | MutableItem) {
             if (typeof items === 'undefined') {
                 this.items = {}
-                return new Promise<Item[]>(() => [])
+                return new Promise<MutableItem[]>(() => [])
             }
 
             if (!Array.isArray(items)) {
                 this.items[items.getId()] = items
             } else {
-                this.items = Object.assign(this.items, ...items.map((item: Item) => ({[item.getId()]: item})))
+                this.items = Object.assign(this.items, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
             }
         },
         /**
          * Update a single item
          * @param item
          */
-        setItem(item: Item) {
+        setItem(item: MutableItem) {
             this.items[item.getId()] = item
         },
         /**
          * Remove a single item
          * @param item
          */
-        removeItem(item: Item) {
+        removeItem(item: MutableItem) {
             delete this.items[item.getId()]
         },
         /**
@@ -248,23 +241,23 @@ export const useRecipeStore = defineStore('recipes', {
         /**
          * Fetch the recipes from the API and store them in the store
          */
-        async fetchRecipes(): Promise<Recipe[]> {
+        async fetchRecipes(): Promise<MutableRecipe[]> {
             logDebug('fetchRecipes', 'fetching recipes')
             this.setLoadingState('fetchRecipes')
-            return sendToAPI<Recipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
-                .then((apiResponse: APIResponse<Recipe[]>) => {
-                    // map the recipes JSON to Recipe objects
-                    // this is because the JSON is not a valid Recipe object,
-                    // and we need to use the Recipe class methods
+            return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
+                .then((apiResponse: APIResponse<MutableRecipe[]>) => {
+                    // map the recipes JSON to MutableRecipeobjects
+                    // this is because the JSON is not a valid MutableRecipeobject,
+                    // and we need to use the MutableRecipeclass methods
                     if (!apiResponse.error) {
-                        Promise.all(apiResponse.response.map((recipe: Recipe) => recipeFromJSON(recipe)))
-                            .then((recipes: Recipe[]) => this.replaceRecipes(recipes))
+                        Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe) as Promise<MutableRecipe>))
+                            .then((recipes: MutableRecipe[]) => this.replaceRecipes(recipes))
                     }
                     this.finishLoading('fetchRecipes')
                     return apiResponse.response
                 });
         },
-        async saveRecipes(recipes?: Recipe[] | Recipe) {
+        async saveRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
             // if the recipes is not defined, save all recipes
             if (typeof recipes === 'undefined') {
                 recipes = Object.values(this.getRecipesAsMap)
@@ -294,7 +287,7 @@ export const useRecipeStore = defineStore('recipes', {
                 })
                 .catch(() => this.setRecipes(recipes))
         },
-        async deleteRecipes(recipes: Recipe[] | Recipe) {
+        async deleteRecipes(recipes: MutableRecipe[] | MutableRecipe) {
             // if the recipes is not defined, save all recipes
             if (typeof recipes === 'undefined') {
                 recipes = Object.values(this.getRecipesAsMap)
@@ -305,7 +298,7 @@ export const useRecipeStore = defineStore('recipes', {
                 recipes = [recipes]
             }
 
-            const recipeIds = recipes.map((recipe: Recipe) => recipe.getId())
+            const recipeIds = recipes.map((recipe: MutableRecipe) => recipe.getId())
             recipeIds.forEach((recipeId: string) => {
                 delete this.recipes[recipeId]
             })
@@ -319,23 +312,23 @@ export const useRecipeStore = defineStore('recipes', {
                 return presentToast(apiResponse.response)
             })
         },
-        async fetchItems(): Promise<Item[]> {
+        async fetchItems(): Promise<MutableItem[]> {
             logDebug('fetchItems', 'fetching items')
             this.setLoadingState('fetchItems')
-            return sendToAPI<Item[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
-                .then((apiResponse: APIResponse<Item[]>) => {
-                    // map the items JSON to Item objects
-                    // this is because the JSON is not a valid Item object,
-                    // and we need to use the Item class methods
+            return sendToAPI<MutableItem[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
+                .then((apiResponse: APIResponse<MutableItem[]>) => {
+                    // map the items JSON to MutableItem objects
+                    // this is because the JSON is not a valid MutableItem object,
+                    // and we need to use the MutableItem class methods
                     if (!apiResponse.error) {
-                        const items: Item[] = apiResponse.response.map((item: Item) => itemFromJSON(item))
+                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => itemFromJSON(item) as MutableItem)
                         this.setItems(items)
                     }
                     this.finishLoading('fetchItems')
                     return apiResponse.response
                 });
         },
-        async saveItems(items?: Item[] | Item) {
+        async saveItems(items?: MutableItem[] | MutableItem) {
             // if the recipes is not defined, save all recipes
             if (typeof items === 'undefined') {
                 items = Object.values(this.getItemsAsMap)
@@ -364,7 +357,7 @@ export const useRecipeStore = defineStore('recipes', {
                 })
                 .catch(() => this.setItems(items))
         },
-        async deleteItems(items: Item[] | Item) {
+        async deleteItems(items: MutableItem[] | MutableItem) {
             // if the recipes is not defined, save all recipes
             if (typeof items === 'undefined') {
                 items = Object.values(this.getItemsAsMap)
@@ -375,7 +368,7 @@ export const useRecipeStore = defineStore('recipes', {
                 items = [items]
             }
 
-            const itemIds = items.map((item: Item) => item.getId())
+            const itemIds = items.map((item: MutableItem) => item.getId())
             itemIds.forEach((recipeId: string) => {
                 delete this.recipes[recipeId]
             })

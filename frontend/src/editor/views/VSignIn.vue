@@ -1,10 +1,12 @@
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="['Log into', 'Taste Buddy']"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Log into', 'Taste Buddy']"/>
 
-                <SignIn/>
+                    <SignIn/>
+                </div>
             </div>
         </IonContent>
     </IonPage>

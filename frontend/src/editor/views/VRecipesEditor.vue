@@ -1,68 +1,70 @@
 <template>
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="['Recipe Parser']"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Recipe Parser']"/>
 
-                <IonCard>
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            Parse recipes {{ selectedParser ? `with ${selectedParser}` : '' }}
-                        </IonCardTitle>
-                        <IonCardSubtitle>
-                            Select the recipe parser
-                        </IonCardSubtitle>
-                    </IonCardHeader>
+                    <IonCard>
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                Parse recipes {{ selectedParser ? `with ${selectedParser}` : '' }}
+                            </IonCardTitle>
+                            <IonCardSubtitle>
+                                Select the recipe parser
+                            </IonCardSubtitle>
+                        </IonCardHeader>
 
-                    <IonCardContent>
-                        <!-- File uploader for JSON recipes files -->
-                        <IonItem class="ion-no-padding" lines="none">
-                            <label for="recipe-parser">
-                                Recipe parser
-                            </label>
-                            <select id="recipe-parser" v-model="selectedParser">
-                                <option v-for="parser in availableParsers" :key="parser">
-                                    {{ parser }}
-                                </option>
-                            </select>
-                        </IonItem>
+                        <IonCardContent>
+                            <!-- File uploader for JSON recipes files -->
+                            <IonItem class="ion-no-padding" lines="none">
+                                <label for="recipe-parser">
+                                    Recipe parser
+                                </label>
+                                <select id="recipe-parser" v-model="selectedParser">
+                                    <option v-for="parser in availableParsers" :key="parser">
+                                        {{ parser }}
+                                    </option>
+                                </select>
+                            </IonItem>
 
-                        <IonItem class="ion-no-padding" lines="none">
-                            <label for="file-input">
-                                Recipe JSON file<br/>
-                            </label>
-                            <input id="file-input" ref="file" accept=".json" type="file" @change="onFileChange"/>
-                        </IonItem>
-                    </IonCardContent>
-                </IonCard>
+                            <IonItem class="ion-no-padding" lines="none">
+                                <label for="file-input">
+                                    Recipe JSON file<br/>
+                                </label>
+                                <input id="file-input" ref="file" accept=".json" type="file" @change="onFileChange"/>
+                            </IonItem>
+                        </IonCardContent>
+                    </IonCard>
 
-                <!-- List of recipes -->
-                <IonCard>
-                    <IonCardHeader>
-                        <IonCardTitle>
-                            {{ parsedRecipes.length }} Recipes
-                        </IonCardTitle>
-                        <IonCardSubtitle>
-                            Select the recipe parser
-                        </IonCardSubtitle>
-                    </IonCardHeader>
-                    <IonCardContent>
-                        <ul class="recipe-button-list">
-                            <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
-                                <IonButton fill="outline" size="small" @click="showEditor(recipe.getId())">
-                                    {{ recipe.getName() }}
-                                </IonButton>
-                            </li>
-                        </ul>
-                    </IonCardContent>
-                </IonCard>
+                    <!-- List of recipes -->
+                    <IonCard>
+                        <IonCardHeader>
+                            <IonCardTitle>
+                                {{ parsedRecipes.length }} Recipes
+                            </IonCardTitle>
+                            <IonCardSubtitle>
+                                Select the recipe parser
+                            </IonCardSubtitle>
+                        </IonCardHeader>
+                        <IonCardContent>
+                            <ul class="recipe-button-list">
+                                <li v-for="recipe in parsedRecipes" :key="recipe.getId()">
+                                    <IonButton fill="outline" size="small" @click="showEditor(recipe.getId())">
+                                        {{ recipe.getName() }}
+                                    </IonButton>
+                                </li>
+                            </ul>
+                        </IonCardContent>
+                    </IonCard>
 
-                <!-- Recipe editor -->
-                <h2>
-                    Recipe Editor
-                </h2>
-                <RecipeEditor v-if="selectedRecipe !== null" :recipe="selectedRecipe"/>
+                    <!-- Recipe editor -->
+                    <h2>
+                        Recipe Editor
+                    </h2>
+                    <RecipeEditor v-if="selectedRecipe !== null" :recipe="selectedRecipe"/>
 
+                </div>
             </div>
 
             <!-- Buttons -->

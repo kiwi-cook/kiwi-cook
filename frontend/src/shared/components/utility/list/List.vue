@@ -10,7 +10,7 @@
         </ul>
     </div>
     <IonInfiniteScroll v-if="!loadAll && loadedElements.length > 0" @ionInfinite="ionInfinite">
-        <IonInfiniteScrollContent></IonInfiniteScrollContent>
+        <IonInfiniteScrollContent/>
     </IonInfiniteScroll>
 </template>
 

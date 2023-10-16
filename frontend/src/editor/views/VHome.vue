@@ -1,19 +1,21 @@
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="page">
-                <TypedHeader :big-text="['Taste Buddy', 'Editor']"/>
+            <div class="content-wrapper">
+                <div class="content">
+                    <TypedHeader :big-text="['Taste Buddy', 'Editor']"/>
 
-                <table>
-                    <tr>
-                        <th>Stats</th>
-                        <th>Value</th>
-                    </tr>
-                    <tr v-for="(entry, index) in stats.entries()" :key="index">
-                        <td>{{ entry[0] }}</td>
-                        <td>{{ entry[1] }}</td>
-                    </tr>
-                </table>
+                    <table>
+                        <tr>
+                            <th>Stats</th>
+                            <th>Value</th>
+                        </tr>
+                        <tr v-for="(entry, index) in stats.entries()" :key="index">
+                            <td>{{ entry[0] }}</td>
+                            <td>{{ entry[1] }}</td>
+                        </tr>
+                    </table>
+                </div>
             </div>
         </IonContent>
     </IonPage>

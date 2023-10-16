@@ -38,6 +38,7 @@ import '@/shared/theme/global.css';
 import '@/shared/theme/ionic.css'
 import '@/shared/theme/layout.css';
 import '@/shared/theme/font.css';
+import '@/shared/theme/transitions.css'
 
 /* Icons */
 import 'ionicons/icons';
