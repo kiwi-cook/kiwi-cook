@@ -10,7 +10,7 @@
     "publish": "sh ./scripts/publish-pwa.sh"
   },
   "dependencies": {
-    "@capacitor/android": "5.2.3",
+    "@capacitor/android": "5.4.2",
     "@capacitor/app": "5.0.6",
     "@capacitor/core": "5.4.2",
     "@capacitor/ios": "5.3.0",
