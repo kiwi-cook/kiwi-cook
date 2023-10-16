@@ -3,6 +3,26 @@
   "version": "0.0.1",
   "private": true,
   "description": "Taste Buddy helps you cook with what you have in your fridge",
+  "contributors": [
+    {
+      "name": "Josef Müller",
+      "email": "46693545+am9zZWY@users.noreply.github.com"
+    },
+    {
+      "name": "Vasilij Slabinski"
+    }
+  ],
+  "keywords": [
+    "vue",
+    "typescript",
+    "ionic",
+    "capacitor",
+    "pwa",
+    "vue-cli",
+    "recipe",
+    "cooking",
+    "food"
+  ],
   "scripts": {
     "serve:app": "vue-cli-service serve src/app/main.ts",
     "serve:editor": "vue-cli-service serve src/editor/editor.ts",
