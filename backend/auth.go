@@ -128,6 +128,7 @@ type Session struct {
 func (server *TasteBuddyServer) CheckSessionTokenMiddleware() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		cookie, err := context.Request.Cookie("session_token")
+		server.Log("CheckSessionTokenMiddleware", "cookie", cookie, "err", err)
 
 		if err != nil || !server.HasEnvFile() {
 			context.Next()

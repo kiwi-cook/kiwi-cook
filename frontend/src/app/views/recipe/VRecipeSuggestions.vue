@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="$t('Suggestions.Title').split(';')" small-text="Welcome"/>
+                    <Header :big-text="$t('Suggestions.Title').split(';')" small-text="Welcome"/>
 
                     <!-- Searchbar for ingredients, tools and recipes -->
                     <Searchbar v-model="filterInput" :items="filteredItems"
@@ -254,9 +254,9 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
-import {index, Item, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared';
+import {index, Item, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared/ts';
 import Searchbar from "@/app/components/recipe/Searchbar.vue";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
 import MiniRecipePreview from "@/app/components/recipe/previews/MiniRecipePreview.vue";
 import ItemComponent from "@/shared/components/recipe/Item.vue";
 import {add, close, closeCircleOutline, list, remove, search, time} from "ionicons/icons";

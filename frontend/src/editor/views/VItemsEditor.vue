@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
+                    <Header :big-text="['Items', 'Editor']" :small-text="`${items.length} Items`"/>
 
                     <IonSearchbar v-model="filterInput" :debounce="500" placeholder="Search Items"/>
                     <IonButtons>
@@ -83,8 +83,8 @@ import {
 import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
 import {useRecipeStore} from '@/editor/storage';
 import ItemEditor from "@/editor/components/editor/ItemEditor.vue";
-import {Item} from "@/shared";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import {Item} from "@/shared/ts";
+import Header from "@/shared/components/utility/header/Header.vue";
 import {MutableItem} from "@/editor/types/item.ts";
 
 const recipeStore = useRecipeStore();

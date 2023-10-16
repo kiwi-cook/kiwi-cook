@@ -1,4 +1,4 @@
-import {logError, Recipe} from "@/shared";
+import {logError, Recipe} from "@/shared/ts";
 import {Ref} from "vue";
 import {CookstrParser} from "@/editor/parser/cookstr.ts";
 import {AllRecipesParser} from "@/editor/parser/allrecipes.ts";

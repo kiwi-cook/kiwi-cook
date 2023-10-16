@@ -38,8 +38,6 @@ func TasteBuddyServerFactory(app *TasteBuddyApp) *TasteBuddyServer {
 }
 
 func (server *TasteBuddyServer) SetGin() *TasteBuddyServer {
-	tasteBuddyGin := gin.Default()
-
 	// CORS Configuration
 	corsConfig := cors.Config{
 		AllowMethods:     []string{"GET", "POST", "DELETE", "OPTIONS"},
@@ -50,9 +48,12 @@ func (server *TasteBuddyServer) SetGin() *TasteBuddyServer {
 	}
 	if server.mode == DEV {
 		corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+		gin.SetMode(gin.DebugMode)
 	} else {
 		corsConfig.AllowOrigins = []string{"http://localhost:8080", "https://taste-buddy.github.io"}
+		gin.SetMode(gin.ReleaseMode)
 	}
+	tasteBuddyGin := gin.Default()
 	tasteBuddyGin.Use(cors.New(corsConfig))
 	tasteBuddyGin.Use(gzip.Gzip(gzip.DefaultCompression))
 

@@ -1,4 +1,4 @@
-import {Item, logDebug} from "@/shared";
+import {Item, logDebug} from "@/shared/ts";
 import {useRecipeStore} from "@/editor/storage";
 
 export class MutableItem extends Item {

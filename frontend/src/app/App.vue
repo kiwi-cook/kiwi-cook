@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts" setup>
-import {prefersDark, toggleDarkTheme} from "@/shared";
+import {prefersDark, toggleDarkTheme} from "@/shared/ts";
 import {useRecipeStore, useTasteBuddyStore} from '@/app/storage';
 import {DEFAULT_LOCALE} from "@/shared/locales/i18n.ts";
 import {IonApp, IonRouterOutlet} from "@ionic/vue";

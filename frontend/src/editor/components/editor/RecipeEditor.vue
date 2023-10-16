@@ -211,7 +211,7 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDate, Item, Step, StepItem} from '@/shared';
+import {formatDate, Item, Step, StepItem} from '@/shared/ts';
 import {useRecipeStore} from '@/editor/storage';
 import {
     IonAvatar,

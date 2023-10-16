@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="recipe">
         <h3 class="subheader">
             <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ title }}</RouterLink>
         </h3>
@@ -14,7 +14,7 @@
 <script lang="ts" setup>
 import {RouterLink} from "vue-router";
 import {computed, PropType, toRefs} from "vue";
-import {Recipe} from "@/shared";
+import {Recipe} from "@/shared/ts";
 
 const props = defineProps({
     recipe: {

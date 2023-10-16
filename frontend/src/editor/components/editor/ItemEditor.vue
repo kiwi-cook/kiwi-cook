@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts" setup>
-import {Item, logDebug} from '@/shared';
+import {Item, logDebug} from '@/shared/ts';
 import {
     IonAvatar,
     IonButton,

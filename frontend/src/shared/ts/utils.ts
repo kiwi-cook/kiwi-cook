@@ -1,5 +1,5 @@
 import {toastController} from "@ionic/vue";
-import {DURATIONS} from "@/shared/index.ts";
+import {DURATIONS} from "@/shared/ts/index.ts";
 
 /**
  * Format a date to DD.MM.YYYY, e.g. 1.1.2020

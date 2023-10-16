@@ -31,7 +31,7 @@ import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '
 import RecipeComponent from '@/shared/components/recipe/Recipe.vue';
 import {useRecipeStore} from "@/app/storage";
 import {useRoute} from 'vue-router';
-import {Recipe} from '@/shared';
+import {Recipe} from '@/shared/ts';
 import {arrowBack} from "ionicons/icons";
 
 

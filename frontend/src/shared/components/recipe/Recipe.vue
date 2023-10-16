@@ -89,7 +89,7 @@ import {
     IonNote,
     IonText,
 } from '@ionic/vue';
-import {Recipe, Step, StepItem} from '@/shared';
+import {Recipe, Step, StepItem} from '@/shared/ts';
 import ItemList from "@/shared/components/utility/list/ItemList.vue";
 import StepComponent from "@/app/components/recipe/Step.vue";
 import TwoColumnLayout from "@/app/components/layout/TwoColumnLayout.vue";

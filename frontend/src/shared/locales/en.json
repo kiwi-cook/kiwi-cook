@@ -2,7 +2,8 @@
   "Tabs": {
     "Explore": "Explore",
     "RecipeOfTheDay": "Recipe of the day",
-    "Favorites": "Favorites"
+    "Favorites": "Favorites",
+    "InstallPWA": "Install app"
   },
   "General": {
     "Recipe": "Recipe | Recipes",

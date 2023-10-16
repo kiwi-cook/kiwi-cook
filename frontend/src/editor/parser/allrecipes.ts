@@ -1,4 +1,4 @@
-import {logDebug, Recipe, StepItem} from "@/shared";
+import {logDebug, Recipe, StepItem} from "@/shared/ts";
 import nlp from "compromise";
 import {findMostSimilarItem, normalizeUnit} from "@/editor/parser/utils.ts";
 import {newItemFromName} from "@/editor/types/item.ts";

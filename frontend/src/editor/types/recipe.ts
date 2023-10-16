@@ -1,4 +1,4 @@
-import {Item, logDebug, Recipe, Step, StepItem} from "@/shared";
+import {Item, logDebug, Recipe, Step, StepItem} from "@/shared/ts";
 import {useRecipeStore} from "@/editor/storage";
 import {setLocaleStr} from "@/shared/locales/i18n.ts";
 

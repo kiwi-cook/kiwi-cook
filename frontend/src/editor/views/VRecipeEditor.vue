@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="['Recipe', 'Editor']"/>
+                    <Header :big-text="['Recipe', 'Editor']"/>
                     <RecipeEditor v-if="recipe" :key="recipe?.getId()" :recipe="recipe"/>
                 </div>
             </div>
@@ -34,7 +34,7 @@ import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRo
 import {useRecipeStore} from '@/editor/storage';
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from "ionicons/icons";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
 import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const route = useRoute();

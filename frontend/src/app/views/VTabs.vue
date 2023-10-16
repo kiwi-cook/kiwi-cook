@@ -20,6 +20,11 @@
                     <IonIcon :icon="heart"/>
                     {{ $t('Tabs.Favorites') }}
                 </IonTabButton>
+
+                <!-- <IonTabButton v-if="canBeInstalled()" @click="install()">
+                    <IonIcon :icon="downloadOutline"/>
+                    {{ $t('Tabs.InstallPWA') }}
+                </IonTabButton> -->
             </IonTabBar>
         </IonTabs>
     </IonPage>
@@ -30,9 +35,14 @@ import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
 import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
-import {Recipe} from "@/shared";
+import {Recipe} from "@/shared/ts";
+import {showInstallationPrompt} from "@/app/ts";
 
 const recipeStore = useRecipeStore()
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
 const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)
+
+const install = () => {
+    showInstallationPrompt()
+}
 </script>

@@ -42,7 +42,7 @@ import {
     IonLabel
 } from "@ionic/vue";
 import {PropType} from "vue";
-import {Step} from "@/shared";
+import {Step} from "@/shared/ts";
 
 defineProps({
     step: {

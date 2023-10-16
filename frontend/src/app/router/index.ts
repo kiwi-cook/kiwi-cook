@@ -50,6 +50,12 @@ const routes: Array<RouteRecordRaw> = [
                 name: 'NotFound',
                 path: '/:pathMatch(.*)*',
                 redirect: () => ({name: 'Home'}),
+            },
+            // Preflight
+            {
+                name: 'Preflight',
+                path: '/preflight',
+                component: () => import('@/app/views/VPreflight.vue')
             }
         ]
     }

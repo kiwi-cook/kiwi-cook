@@ -1,9 +1,9 @@
 import {useRecipeStore} from "@/app/storage";
 import {useIonRouter} from "@ionic/vue";
 import {getLocaleStr, LocaleStr, newLocaleStr} from "@/shared/locales/i18n.ts";
-import {Item, logError, Step, StepItem, tmpId} from "@/shared";
-import {CanShareResult, Share} from "@capacitor/share";
+import {APP_NAME, Item, logError, Step, StepItem, tmpId} from "@/shared/ts";
 import {distance} from "fastest-levenshtein";
+import {share} from "@/shared/ts/share.ts";
 
 /**
  * Recipe
@@ -108,7 +108,7 @@ export class Recipe {
     }
 
     public getAuthors(): string {
-        return this.computed.authors
+        return this.computed.authors ?? ''
     }
 
     /**
@@ -145,23 +145,11 @@ export class Recipe {
      * @returns a promise that resolves when the share dialog is closed
      */
     public async share() {
-        return Share.canShare().then((canShare: CanShareResult) => {
-            if (!canShare.value) {
-                return
-            }
-
-            try {
-                return Share.share({
-                    title: 'Share with your recipe with your buddies',
-                    text: `Check out this recipe for ${this.getName()} on Taste Buddy!`,
-                    url: '#' + this.getRoute(),
-                    dialogTitle: 'Share with buddies',
-                })
-            } catch (e) {
-                logError('sharing failed', e)
-            }
-        }).catch((error: Error) => {
-            logError('sharing failed', error)
+        return share({
+            title: 'Share your recipe with your friends',
+            text: `Check out this recipe for ${this.getName()} on ${APP_NAME}!`,
+            url: '#' + this.getRoute(),
+            dialogTitle: 'Share with your friends',
         })
     }
 

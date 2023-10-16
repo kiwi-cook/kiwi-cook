@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="['Recipe Parser']"/>
+                    <Header :big-text="['Recipe Parser']"/>
 
                     <IonCard>
                         <IonCardHeader>
@@ -88,7 +88,7 @@
 
 <script lang="ts" setup>
 import {ref} from "vue";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
 import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
 import {useRecipeStore} from "@/editor/storage";
 import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
@@ -109,7 +109,7 @@ import {
     useIonRouter
 } from "@ionic/vue";
 import {availableParsers, parseRecipes, RecipeParser} from "@/editor/parser";
-import {logError, Recipe} from "@/shared";
+import {logError, Recipe} from "@/shared/ts";
 import {MutableRecipe} from "@/editor/types/recipe.ts";
 
 const router = useIonRouter()

@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="$t('Favorites.Title').split(';')"/>
+                    <Header :big-text="$t('Favorites.Title').split(';')"/>
 
                     <template v-if="savedRecipes.length > 0">
                         <List :list="savedRecipes">
@@ -28,9 +28,9 @@
 import {computed} from 'vue';
 import {IonContent, IonPage} from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared';
+import {Recipe} from '@/shared/ts';
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
 import TasteBuddyLogo from "@/app/components/TasteBuddyLogo.vue";
 import List from "@/shared/components/utility/list/List.vue";
 

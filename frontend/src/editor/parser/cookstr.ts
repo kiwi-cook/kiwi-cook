@@ -1,4 +1,4 @@
-import {Recipe, Step, StepItem} from "@/shared";
+import {Recipe, Step, StepItem} from "@/shared/ts";
 import {
     convertUnits,
     extractDurationFromText,

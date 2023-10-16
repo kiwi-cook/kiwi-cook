@@ -1,4 +1,4 @@
-import {Item, logDebug, logError, presentToast, Recipe, RecipeSuggestion} from "@/shared";
+import {Item, logDebug, logError, presentToast, Recipe, RecipeSuggestion} from "@/shared/ts/index.ts";
 
 type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 

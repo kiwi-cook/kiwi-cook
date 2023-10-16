@@ -27,7 +27,7 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from "vue";
-import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared";
+import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared/ts";
 import {useIonRouter} from "@ionic/vue";
 import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
 

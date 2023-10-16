@@ -59,7 +59,7 @@ import {
     IonList,
     IonSearchbar
 } from "@ionic/vue";
-import {Item, Recipe} from "@/shared";
+import {Item, Recipe} from "@/shared/ts";
 import {optionsOutline} from "ionicons/icons";
 
 // Props

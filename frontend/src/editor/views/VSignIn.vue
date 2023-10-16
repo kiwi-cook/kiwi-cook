@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="['Log into', 'Taste Buddy']"/>
+                    <Header :big-text="['Log into', APP_NAME]"/>
 
                     <SignIn/>
                 </div>
@@ -15,5 +15,6 @@
 <script lang="ts" setup>
 import {IonContent, IonPage} from '@ionic/vue';
 import SignIn from "@/editor/components/user/SignInComponent.vue";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
+import {APP_NAME} from "@/shared/ts";
 </script>

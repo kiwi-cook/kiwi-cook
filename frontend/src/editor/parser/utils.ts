@@ -1,5 +1,5 @@
 import {useRecipeStore} from "@/editor/storage";
-import {Item, StepItem} from "@/shared";
+import {Item, StepItem} from "@/shared/ts";
 import {closest, distance} from "fastest-levenshtein";
 
 /**

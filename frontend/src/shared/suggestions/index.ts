@@ -1,5 +1,5 @@
 import {useRecipeStore} from "@/app/storage";
-import {Recipe, StepItem} from "@/shared";
+import {Recipe, StepItem} from "@/shared/ts";
 
 class RecipeSuggestion {
     id: string;

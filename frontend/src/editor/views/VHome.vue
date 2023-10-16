@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <TypedHeader :big-text="['Taste Buddy', 'Editor']"/>
+                    <Header :big-text="[APP_NAME, 'Editor']"/>
 
                     <table>
                         <tr>
@@ -25,7 +25,8 @@
 import {IonContent, IonPage} from '@ionic/vue';
 import {useRecipeStore} from "@/editor/storage";
 import {computed} from "vue";
-import TypedHeader from "@/shared/components/utility/header/TypedHeader.vue";
+import Header from "@/shared/components/utility/header/Header.vue";
+import {APP_NAME} from "@/shared/ts";
 
 const recipeStore = useRecipeStore()
 const recipes = computed(() => recipeStore.getRecipesAsList)

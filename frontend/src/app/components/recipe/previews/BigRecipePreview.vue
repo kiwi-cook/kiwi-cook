@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from "vue";
-import {Recipe} from "@/shared";
+import {Recipe} from "@/shared/ts";
 import {useIonRouter} from "@ionic/vue";
 import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
 import TwoColumnLayout from "@/app/components/layout/TwoColumnLayout.vue";

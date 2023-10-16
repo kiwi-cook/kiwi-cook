@@ -1,7 +1,7 @@
 // Vue
 import {defineStore} from 'pinia'
 
-import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from "@/shared";
+import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from "@/shared/ts";
 import {SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
 import {MutableRecipe} from "@/editor/types/recipe.ts";
 import {MutableItem} from "@/editor/types/item.ts";

@@ -4,7 +4,7 @@ import {IonicVue} from '@ionic/vue';
 // Vue + App
 import {createApp} from 'vue'
 import App from '@/app/App.vue'
-import {logDebug} from "@/shared";
+import {logDebug} from "@/shared/ts";
 
 // Router
 import {createTasteBuddyRouter} from '@/app/router';
