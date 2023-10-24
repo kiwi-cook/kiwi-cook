@@ -3,9 +3,16 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="$t('Favorites.Title').split(';')"/>
+                    <Header :big-text="$t('Favorites.Title').split(';')"
+                            :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
 
                     <template v-if="savedRecipes.length > 0">
+                        <IonItem>
+                            <IonButton @click="removeSavedRecipes">
+                                Remove all
+                            </IonButton>
+                        </IonItem>
+
                         <List :list="savedRecipes">
                             <template #element="{ element }">
                                 <RecipePreview :recipe="element as Recipe"/>
@@ -26,7 +33,7 @@
 
 <script lang="ts" setup>
 import {computed} from 'vue';
-import {IonContent, IonPage} from '@ionic/vue';
+import {IonButton, IonContent, IonItem, IonPage} from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {Recipe} from '@/shared/ts';
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
@@ -36,4 +43,6 @@ import List from "@/shared/components/utility/list/List.vue";
 
 const recipeStore = useRecipeStore()
 const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes)
+
+const removeSavedRecipes = () => recipeStore.setSavedRecipes([])
 </script>

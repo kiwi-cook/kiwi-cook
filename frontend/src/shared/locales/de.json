@@ -41,8 +41,12 @@
       "Tags": "Tag | Tags"
     },
     "Recommendations": {
-      "Title": "Vorschläge",
+      "Title": "Vorschlag | Vorschläge",
       "Subtitle": "Basierend auf deinen Vorlieben"
+    },
+    "Random": {
+      "Title": "Entdecke neue Rezepte",
+      "Subtitle": "Lass dich überraschen"
     },
     "Search": {
       "Title": "{0} Rezepte gefunden",

@@ -1,5 +1,5 @@
 <template>
-    <section class="recipe-of-the-day">
+    <section v-if="recipe" class="recipe-of-the-day">
         <TwoColumnLayout layout="rightBigger">
             <template #left>
                 <div class="recipe-image">

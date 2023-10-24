@@ -20,7 +20,8 @@
     "baseUrl": ".",
     "types": [
       "webpack-env",
-      "bun-types" // add Bun global
+      "bun-types"
+      // add Bun global
     ],
     "paths": {
       "@/*": [
@@ -32,9 +33,10 @@
     "composite": true,
     "downlevelIteration": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": true,
+    "allowJs": true
   },
   "include": [
+    "src/**/*.js",
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",

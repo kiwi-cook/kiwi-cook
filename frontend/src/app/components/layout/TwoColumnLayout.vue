@@ -109,10 +109,26 @@ const selectedLayout = computed(() => hasRightSlot.value ? layouts[layout.value]
 
 <style>
 .left {
+    margin: 0;
+    padding-left: 0;
     padding-right: 1rem;
 }
 
 .right {
+    margin: 0;
     padding-left: 1rem;
+    padding-right: 0;
+}
+
+@media (max-width: 768px) {
+    .left {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .right {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 </style>

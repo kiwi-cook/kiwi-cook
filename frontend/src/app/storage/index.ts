@@ -16,9 +16,10 @@ import {
     logError,
     Recipe,
     recipeFromJSON,
-    sendToAPI
+    sendToAPI,
 } from "@/shared/ts";
 import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
+import {predictRecipes} from "@/app/suggestions/ml.ts";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -138,6 +139,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
 interface RecipeState {
     loading: { [key: string]: boolean }
     recipes: { [id: string]: Recipe }
+    recipePredictions: Recipe[]
     savedRecipes: Set<string>
     items: { [id: string]: Item }
     recipesByItemId: { [itemId: string]: string[] }
@@ -151,6 +153,7 @@ export const useRecipeStore = defineStore('recipes', {
             app: true,
         },
         recipes: {},
+        recipePredictions: [],
         savedRecipes: new Set(),
         items: {},
         recipesByItemId: {},
@@ -261,6 +264,9 @@ export const useRecipeStore = defineStore('recipes', {
             return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: Recipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
             }, []))]
+        },
+        getRecipePredictions(): Recipe[] {
+            return this.recipePredictions ?? []
         }
     },
     actions: {
@@ -323,6 +329,15 @@ export const useRecipeStore = defineStore('recipes', {
                 })
         },
         /**
+         * Update the recipe predictions
+         */
+        updateRecipePredictions() {
+            predictRecipes((recipes: Recipe[]) => {
+                // Get the 10 best predictions
+                this.recipePredictions = recipes.slice(0, 10)
+            })
+        },
+        /**
          * Override all recipes
          * @param recipes
          */
@@ -357,6 +372,8 @@ export const useRecipeStore = defineStore('recipes', {
             } else {
                 this.savedRecipes.delete(recipe.getId())
             }
+
+            this.updateRecipePredictions()
             return setCachedItem('savedRecipes', [...this.savedRecipes])
         },
         /**
@@ -365,6 +382,8 @@ export const useRecipeStore = defineStore('recipes', {
          */
         setSavedRecipes(savedRecipes: string[]) {
             this.savedRecipes = new Set(savedRecipes)
+            this.updateRecipePredictions()
+            setCachedItem('savedRecipes', [...this.savedRecipes])
         },
         /**
          * Override all items

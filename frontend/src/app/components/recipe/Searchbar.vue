@@ -4,7 +4,12 @@
             <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
                           class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
             <IonButton shape="round" @click="selectPreferences()">
-                <IonIcon :icon="optionsOutline"/>
+                <template v-if="!showPreferences">
+                    <IonIcon :icon="optionsOutline"/>
+                </template>
+                <template v-else>
+                    <IonIcon :icon="closeOutline"/>
+                </template>
             </IonButton>
         </div>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
@@ -60,7 +65,7 @@ import {
     IonSearchbar
 } from "@ionic/vue";
 import {Item, Recipe} from "@/shared/ts";
-import {optionsOutline} from "ionicons/icons";
+import {closeOutline, optionsOutline} from "ionicons/icons";
 
 // Props
 const props = defineProps({
@@ -101,7 +106,6 @@ const emit = defineEmits({
 })
 
 /* Searchbar state */
-const searchActive = ref(false)
 const searchInput = ref('')
 
 /**
@@ -133,14 +137,16 @@ const selectItem = (item: Item) => {
     closeSearch()
 }
 
+const showPreferences = ref(false)
 const selectPreferences = () => {
     closeSearch()
-    emit('selectPreferences', true)
+    showPreferences.value = !showPreferences.value
+    emit('selectPreferences', showPreferences.value)
 }
 
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
-    return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0) && (searchInput.value !== '' || searchActive.value) && !disableList.value
+    return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0) && searchInput.value !== '' && !disableList.value
 })
 
 watch(searchInput, (newFilterInput) => {

@@ -11,7 +11,7 @@
                                :tags="filteredTags"
                                class="searchbar"
                                @select-item="includeItem($event); preferencesActive = true; activePreference = 'ingredients'"
-                               @select-preferences="preferencesActive = !preferencesActive"
+                               @select-preferences="preferencesActive = $event"
                                @select-recipe="routeRecipe($event)" @select-tag="includeTag($event)"/>
 
                     <!-- Preferences -->
@@ -185,15 +185,34 @@
 
                     <BigRecipePreview :recipe="recipeOfTheDay" title="Recipe of the day"/>
 
-                    <!-- Suggested recipes -->
-                    <section v-if="suggestedRecipes.length > 0">
+                    <!-- Predicted/Recommended recipes -->
+                    <section v-if="predictedRecipes.length > 0">
                         <h3>
-                            {{ $t('Suggestions.Recommendations.Title') }}
+                            {{ predictedRecipes.length }}
+                            {{ $t('Suggestions.Recommendations.Title', predictedRecipes.length) }}
                         </h3>
                         <h4 class="subheader">
                             {{ $t('Suggestions.Recommendations.Subtitle') }}
                         </h4>
-                        <HorizontalList :list="suggestedRecipes">
+                        <HorizontalList :list="predictedRecipes">
+                            <template #element="{ element }: { element: Recipe}">
+                                <MiniRecipePreview :key="element.id" :duration="element.getDuration()"
+                                                   :img-url="element.props.imgUrl"
+                                                   :link="element.getRoute()"
+                                                   :name="element.getName()"/>
+                            </template>
+                        </HorizontalList>
+                    </section>
+
+                    <!-- Random recipes -->
+                    <section v-if="randomRecipes.length > 0">
+                        <h3>
+                            {{ $t('Suggestions.Random.Title') }}
+                        </h3>
+                        <h4 class="subheader">
+                            {{ $t('Suggestions.Random.Subtitle') }}
+                        </h4>
+                        <HorizontalList :list="randomRecipes">
                             <template #element="{ element }: { element: Recipe}">
                                 <MiniRecipePreview :key="element.id" :duration="element.getDuration()"
                                                    :img-url="element.props.imgUrl"
@@ -254,7 +273,7 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
-import {index, Item, Recipe, RecipeSuggestion, SearchQueryBuilder} from '@/shared/ts';
+import {Item, Recipe} from '@/shared/ts';
 import Searchbar from "@/app/components/recipe/Searchbar.vue";
 import Header from "@/shared/components/utility/header/Header.vue";
 import MiniRecipePreview from "@/app/components/recipe/previews/MiniRecipePreview.vue";
@@ -265,6 +284,7 @@ import List from "@/shared/components/utility/list/List.vue";
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
 import {useI18n} from "vue-i18n";
 import BigRecipePreview from "@/app/components/recipe/previews/BigRecipePreview.vue";
+import {index, RecipeSuggestion, SearchQueryBuilder} from "@/app/suggestions";
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
@@ -372,13 +392,17 @@ const servings = ref(1)
 watch(servings, () => searchFilters.value.add('servings'))
 
 // Recipe suggestions
-const suggestedRecipesLength = 15
-const suggestedRecipes = computed<Recipe[]>(() => {
-    const suggestedRecipes = [...recipes.value, ...savedRecipes.value]
-        .filter(() => Math.random() < 1 / (recipes.value.length * 0.1)).slice(0, suggestedRecipesLength)
-    suggestedRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
-    return suggestedRecipes
+/* Random recipes */
+const randomRecipesLength = 15
+const randomRecipes = computed<Recipe[]>(() => {
+    const randomRecipes = [...recipes.value]
+        .filter(() => Math.random() < 1 / (recipes.value.length * 0.1)).slice(0, randomRecipesLength)
+    randomRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
+    return randomRecipes
 })
+
+/* Recipe suggestions based on Neural Network */
+const predictedRecipes = computed<Recipe[]>(() => recipeStore.getRecipePredictions)
 
 /* Recipe search */
 const searchedRecipes = ref<RecipeSuggestion[]>([])

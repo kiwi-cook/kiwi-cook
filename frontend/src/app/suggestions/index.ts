@@ -186,5 +186,5 @@ export {
     ItemQuery,
     index,
     RecipeSuggestion,
-    SearchQueryBuilder
+    SearchQueryBuilder,
 }

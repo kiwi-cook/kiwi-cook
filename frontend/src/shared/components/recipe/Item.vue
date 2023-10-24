@@ -1,8 +1,7 @@
 <template>
     <IonItem v-if="mappedItem" class="item" lines="none">
         <IonThumbnail slot="start" class="item-thumbnail">
-            <img :key="mappedItem.name"
-                 :alt="`Image of ${mappedItem.name}`" :src="mappedItem.imgUrl ?? ''" loading="lazy"/>
+            <img :key="mappedItem.name" :alt="mappedItem.name" :src="mappedItem.imgUrl ?? ''" loading="lazy"/>
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}]">
             {{ mappedItem.name }}

@@ -34,13 +34,15 @@
                         <IonCardContent>
                             <IonItem class="recipe-servings" color="light" lines="none">
                                 <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
-                                <IonButton :disabled="servings == 1" color="light" @click="servings--">
-                                    <IonIcon :icon="remove"/>
-                                </IonButton>
-                                {{ servings }}
-                                <IonButton :disabled="servings == 100" color="light" @click="servings++">
-                                    <IonIcon :icon="add"/>
-                                </IonButton>
+                                <div class="recipe-servings-button">
+                                    <IonButton :disabled="servings === 1" color="light" @click="servings--">
+                                        <IonIcon :icon="remove"/>
+                                    </IonButton>
+                                    {{ servings }}
+                                    <IonButton :disabled="servings === 100" color="light" @click="servings++">
+                                        <IonIcon :icon="add"/>
+                                    </IonButton>
+                                </div>
                             </IonItem>
                             <ItemList :items="ingredients"/>
                         </IonCardContent>
@@ -230,6 +232,12 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 .recipe-servings {
     --border-radius: 15px;
     margin-bottom: var(--margin);
+}
+
+.recipe-servings-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .recipe-step-index-max {

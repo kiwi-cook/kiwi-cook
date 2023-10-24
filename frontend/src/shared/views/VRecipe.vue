@@ -27,12 +27,12 @@
 
 <script lang="ts" setup>
 import {computed} from 'vue';
-import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import RecipeComponent from '@/shared/components/recipe/Recipe.vue';
+import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, IonText, useIonRouter} from '@ionic/vue';
 import {useRecipeStore} from "@/app/storage";
 import {useRoute} from 'vue-router';
 import {Recipe} from '@/shared/ts';
 import {arrowBack} from "ionicons/icons";
+import RecipeComponent from '@/shared/components/recipe/Recipe.vue';
 
 
 const route = useRoute()

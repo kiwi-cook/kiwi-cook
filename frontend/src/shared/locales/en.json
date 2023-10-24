@@ -41,8 +41,12 @@
       "Tags": "Tag | Tags"
     },
     "Recommendations": {
-      "Title": "Recommendations",
+      "Title": "Recommendation | Recommendations",
       "Subtitle": "Based on your preferences"
+    },
+    "Random": {
+      "Title": "Explore new recipes",
+      "Subtitle": "Surprise me!"
     },
     "Search": {
       "Title": "Found {0} recipes",

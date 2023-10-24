@@ -27,9 +27,10 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from "vue";
-import {Item, Recipe, RecipeSuggestion, StepItem} from "@/shared/ts";
+import {Item, Recipe, StepItem} from "@/shared/ts";
 import {useIonRouter} from "@ionic/vue";
 import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
+import {RecipeSuggestion} from "@/app/suggestions";
 
 const props = defineProps({
     recipe: {
@@ -159,12 +160,15 @@ a {
 /* Style for the recipe image */
 .recipe-image {
     flex: 1;
+    margin: 20px;
 }
 
 .recipe-image img {
     width: 100%;
     height: auto;
     border-radius: 6px; /* Increased border radius */
+
+    /* Shadow */
     box-shadow: var(--box-shadow-strong);
 }
 
@@ -177,7 +181,6 @@ a {
     .recipe-image,
     .recipe-details {
         flex: none; /* Reset flex properties for mobile layout */
-        width: 100%; /* Make both sections take full width */
     }
 
     .recipe-details {
