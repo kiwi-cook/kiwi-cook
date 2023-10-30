@@ -284,7 +284,7 @@ import List from "@/shared/components/utility/list/List.vue";
 import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
 import {useI18n} from "vue-i18n";
 import BigRecipePreview from "@/app/components/recipe/previews/BigRecipePreview.vue";
-import {index, RecipeSuggestion, SearchQueryBuilder} from "@/app/suggestions";
+import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from "@/app/suggestions";
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
@@ -296,7 +296,6 @@ const itemsById = computed(() => recipeStore.getItemsAsMap)
 const items = computed<Item[]>(() => Object.values(itemsById.value ?? {}))
 const recipes = computed(() => recipeStore.getRecipesAsList)
 const tags = computed(() => recipeStore.getTags)
-const savedRecipes = computed(() => recipeStore.getSavedRecipes)
 
 /* Filtered tags, recipes & items */
 const filterInput = ref<string>('')
@@ -395,16 +394,16 @@ watch(servings, () => searchFilters.value.add('servings'))
 /* Random recipes */
 const randomRecipesLength = 15
 const randomRecipes = computed<Recipe[]>(() => {
-    const randomRecipes = [...recipes.value]
-        .filter(() => Math.random() < 1 / (recipes.value.length * 0.1)).slice(0, randomRecipesLength)
-    randomRecipes.sort((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
-    return randomRecipes
+    return [...recipes.value]
+        .filter(() => Math.random() < 1 / (recipes.value.length * 0.1))
+        .slice(0, randomRecipesLength)
+        .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
 })
 
 /* Recipe suggestions based on Neural Network */
 const predictedRecipes = computed<Recipe[]>(() => recipeStore.getRecipePredictions)
 
-/* Recipe search */
+/* Recipe index */
 const searchedRecipes = ref<RecipeSuggestion[]>([])
 const suggest = () => {
     const searchQueryBuilder = new SearchQueryBuilder()
@@ -415,11 +414,11 @@ const suggest = () => {
     // TODO: fix price calculation
     // searchQueryBuilder.setPrice(maxPrice.value)
 
-    // TODO: enable city search
+    // TODO: enable city index
     //searchQueryBuilder.setCity(city.value)
 
     const query = searchQueryBuilder.build()
-    searchedRecipes.value = index(query)
+    searchedRecipes.value = searchRecipes(query)
 }
 
 /* Submit button */

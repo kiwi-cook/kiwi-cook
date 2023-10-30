@@ -19,7 +19,7 @@ import {
     sendToAPI,
 } from "@/shared/ts";
 import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
-import {predictRecipes} from "@/app/suggestions/ml.ts";
+import {simpleRecipePrediction} from "@/app/suggestions/simple.ts";
 
 const ionicStorage = new Storage({
     name: '__mydb',
@@ -85,7 +85,6 @@ interface UserState {
         lang: string,
         supportedLanguages: string[]
     },
-    greetings: string[][]
 }
 
 export const useTasteBuddyStore = defineStore('tastebuddy', {
@@ -97,7 +96,6 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             lang: DEFAULT_LOCALE,
             supportedLanguages: SUPPORT_LOCALES
         },
-        greetings: [],
     }),
     actions: {
         /**
@@ -107,31 +105,6 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         setLanguage(language: SUPPORT_LOCALES_TYPE) {
             this.language.lang = language
             setI18nLanguage(i18n, language)
-        },
-        /**
-         * Get the greetings
-         */
-        async getGreeting(): Promise<string[]> {
-            const selectRand = (greetings: string[][]): string[] => greetings[Math.floor(Math.random() * greetings.length)]
-
-            if (this.greetings.length > 0) {
-                return Promise.resolve(selectRand(this.greetings))
-            } else {
-                return getCachedItem<string[][]>('greetings')
-                    .then((cachedGreetings) => {
-                        if (cachedGreetings.isOld) {
-                            logDebug('fetchGreetings', 'fetching greetings')
-                            return fetch('https://raw.githubusercontent.com/taste-buddy/greetings/master/greetings.json')
-                                .then((response) => response.json())
-                                .then((greetings: string[][]) => {
-                                    this.greetings = greetings
-                                    setCachedItem('greetings', greetings)
-                                    return greetings
-                                })
-                        }
-                        return cachedGreetings.value ?? []
-                    }).then((greetings: string[][]) => selectRand(greetings))
-            }
         }
     }
 })
@@ -142,7 +115,6 @@ interface RecipeState {
     recipePredictions: Recipe[]
     savedRecipes: Set<string>
     items: { [id: string]: Item }
-    recipesByItemId: { [itemId: string]: string[] }
 }
 
 // Create the store
@@ -156,49 +128,21 @@ export const useRecipeStore = defineStore('recipes', {
         recipePredictions: [],
         savedRecipes: new Set(),
         items: {},
-        recipesByItemId: {},
     }),
     getters: {
         isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
         /**
          * Get the recipes as list
-         * @param state
          */
-        getRecipesAsList: (state): Recipe[] => {
-            const recipesAsList: Recipe[] = Object.values(state.recipes ?? {})
-            if (recipesAsList.length === 0) {
-                return []
-            }
-            recipesAsList.sort((a: Recipe, b: Recipe) => a.getName().localeCompare(b.getName()))
-            return recipesAsList
+        getRecipesAsList(): Recipe[] {
+            return (Object.values(this.getRecipesAsMap) ?? [])
+                .toSorted((a: Recipe, b: Recipe) => a.getName().localeCompare(b.getName()))
         },
         /**
          * Get the recipes mapped by their id
          * @param state
          */
         getRecipesAsMap: (state): { [id: string]: Recipe } => state.recipes ?? {},
-        getRecipesByItemIds(): { [key: string]: string[] } {
-            const recipes = this.getRecipesAsList ?? []
-            const recipesByItemId: { [key: string]: string[] } = {}
-
-            for (const recipe of recipes) {
-                const items = recipe.getStepItems()
-                for (const item of items) {
-                    if (!(item.getId() in recipesByItemId)) {
-                        recipesByItemId[item.getId()] = []
-                    }
-                    recipesByItemId[item.getId()].push(recipe.getId())
-                }
-            }
-            logDebug('getRecipesByItemIds', recipesByItemId)
-
-            return recipesByItemId
-        },
-        /**
-         * Get the recipes by the item id
-         * @param state
-         */
-        getRecipesAsListByItemId: (state) => (itemId?: string): string[] => state.recipesByItemId[itemId ?? ''] ?? [],
         /**
          * Get saved recipes
          * @param state
@@ -211,6 +155,33 @@ export const useRecipeStore = defineStore('recipes', {
                 }
                 return recipes
             }, [])
+        },
+        getSavedKeyValues(): {
+            numberOfSteps: number[],
+            numberOfIngredients: number[],
+            duration: number[]
+        } {
+            const keyValues: {
+                numberOfSteps: number[],
+                numberOfIngredients: number[],
+                duration: number[]
+            } = {
+                numberOfSteps: [],
+                numberOfIngredients: [],
+                duration: []
+            }
+            const savedRecipes = this.getSavedRecipes
+            for (const savedRecipe of savedRecipes) {
+                keyValues.numberOfSteps.push(savedRecipe.steps.length)
+                keyValues.numberOfIngredients.push(savedRecipe.getStepItems().length)
+                keyValues.duration.push(savedRecipe.getDuration())
+            }
+
+            return {
+                numberOfSteps: keyValues.numberOfSteps,
+                numberOfIngredients: keyValues.numberOfIngredients,
+                duration: keyValues.duration
+            }
         },
         /**
          * Get saved recipes as a map
@@ -239,14 +210,6 @@ export const useRecipeStore = defineStore('recipes', {
         },
         getItemNamesAsList(): string[] {
             return (this.getItemsAsList ?? []).map((item: Item) => item.getName())
-        },
-        getItemsSortedByName(): Item[] {
-            const itemsAsArray = this.getItemsAsList ?? []
-            if (itemsAsArray.length === 0) {
-                return []
-            }
-            itemsAsArray.sort((a: Item, b: Item) => a.getName().localeCompare(b.getName()))
-            return itemsAsArray
         },
         getItemsAsMap: (state): { [id: string]: Item } => state.items ?? {},
         getItemSuggestions(): Item[] {
@@ -332,10 +295,10 @@ export const useRecipeStore = defineStore('recipes', {
          * Update the recipe predictions
          */
         updateRecipePredictions() {
-            predictRecipes((recipes: Recipe[]) => {
-                // Get the 10 best predictions
-                this.recipePredictions = recipes.slice(0, 10)
-            })
+            const predictedRecipes = simpleRecipePrediction().slice(0, 10)
+            logDebug('updateRecipePredictions', predictedRecipes)
+            // Get the 10 best predictions
+            this.recipePredictions = predictedRecipes
         },
         /**
          * Override all recipes
