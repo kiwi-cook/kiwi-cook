@@ -37,6 +37,8 @@ export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: D
     const i18n = createI18n<[MessageSchema], SUPPORT_LOCALES_TYPE>({
         locale,
         legacy: false,
+        fallbackWarn: false,
+        missingWarn: false,
     })
     setI18nLanguage(i18n, locale)
     return i18n
