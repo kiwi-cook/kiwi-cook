@@ -58,7 +58,7 @@ const handleFilter = () => {
             .includes(query)
     })
 }
-watch(filter, () => {
+watch([filter, list], () => {
     handleFilter();
 }, {immediate: true})
 </script>
