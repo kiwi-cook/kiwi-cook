@@ -106,8 +106,7 @@ export const useRecipeStore = defineStore('recipes', {
             if (recipesAsList.length === 0) {
                 return []
             }
-            recipesAsList.sort((a: MutableRecipe, b: MutableRecipe) => a.getName().localeCompare(b.getName()))
-            return recipesAsList
+            return recipesAsList.toSorted((a: MutableRecipe, b: MutableRecipe) => a.getName().localeCompare(b.getName()))
         },
         /**
          * Get the recipes mapped by their id
@@ -143,12 +142,8 @@ export const useRecipeStore = defineStore('recipes', {
             return (this.getItemsAsList ?? []).map((item: MutableItem) => item.getName())
         },
         getItemsSortedByName(): MutableItem[] {
-            const itemsAsArray = this.getItemsAsList ?? []
-            if (itemsAsArray.length === 0) {
-                return []
-            }
-            itemsAsArray.sort((a: MutableItem, b: MutableItem) => a.getName().localeCompare(b.getName()))
-            return itemsAsArray
+            return (this.getItemsAsList ?? [])
+                .toSorted((a: MutableItem, b: MutableItem) => a.getName().localeCompare(b.getName()))
         },
         getItemsAsMap: (state): { [id: string]: MutableItem } => state.items ?? {},
         getTags(): string[] {

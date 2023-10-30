@@ -89,10 +89,9 @@ import {MutableItem} from "@/editor/types/item.ts";
 
 const recipeStore = useRecipeStore();
 const items = computed<MutableItem[]>(() => {
-    const items = (recipeStore.getItemsAsList as MutableItem[])
+    return recipeStore.getItemsAsList
         .filter(item => item.getName().toLowerCase().includes(filterInput.value.toLowerCase()))
-    items.sort((a, b) => a.getName().localeCompare(b.getName()))
-    return items
+        .toSorted((a, b) => a.getName().localeCompare(b.getName()))
 })
 const recipesByItemIds = computed(() => recipeStore.getRecipesByItemIds)
 
