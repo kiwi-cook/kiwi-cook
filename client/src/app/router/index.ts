@@ -10,15 +10,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Home',
         path: '/',
         component: TabsPage,
-        redirect: () => {
-            const recipeStore = useRecipeStore()
-            const isLoadingInitialData = recipeStore.isLoadingInitial
-            if (isLoadingInitialData) {
-                return {name: 'Preflight'}
-            } else {
-                return {name: 'RecipeSuggestions'}
-            }
-        },
+        redirect: () => ({name: 'RecipeSuggestions'}),
         children: [
             // Recipes
             {
@@ -59,11 +51,11 @@ const routes: Array<RouteRecordRaw> = [
                 path: '/:pathMatch(.*)*',
                 redirect: () => ({name: 'Home'}),
             },
-            // Preflight
+            // Hello
             {
-                name: 'Preflight',
-                path: '/preflight',
-                component: () => import('@/app/views/VPreflight.vue')
+                name: 'Hello',
+                path: '/hello',
+                component: () => import('@/app/views/VHello.vue')
             }
         ]
     }
@@ -74,8 +66,21 @@ const routes: Array<RouteRecordRaw> = [
  * @returns {Router}
  */
 export function createTasteBuddyRouter(): Router {
-    return createRouter({
+    const router = createRouter({
         history: createWebHashHistory(process.env.BASE_URL),
         routes
     })
+
+    router.beforeEach((to, from, next) => {
+        const recipeStore = useRecipeStore()
+        const isLoadingInitialData = recipeStore.isLoadingInitial
+        if (isLoadingInitialData && to.name !== 'Hello') {
+            next({name: 'Hello'})
+        } else {
+            return next()
+        }
+    })
+
+
+    return router
 }

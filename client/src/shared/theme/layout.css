@@ -33,6 +33,7 @@
 
 .content-wrapper {
     margin: var(--margin-page);
+    height: 100%;
 }
 
 .content {
@@ -41,6 +42,7 @@
     max-width: var(--max-width) !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    height: 100%;
 }
 
 .center {
@@ -48,6 +50,13 @@
     text-align: center;
     object-fit: fill;
     width: 100%;
+}
+
+.vertical-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 .flex {

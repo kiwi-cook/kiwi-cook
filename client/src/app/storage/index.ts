@@ -283,10 +283,11 @@ export const useRecipeStore = defineStore('recipes', {
                             this.setSavedRecipes(cachedSavedRecipes.value)
                         }
                         this.finishLoading('getCachedSavedRecipes')
-                        this.finishLoading('initial')
                         const end = performance.now()
                         logDebug("prepare", `Loaded in ${end - start}ms`)
                     })
+                }).then(() => {
+                    this.finishLoading('initial')
                 })
         },
         /**
