@@ -4,14 +4,14 @@
 version: 2
 updates:
   - package-ecosystem: "gomod"
-    directory: "/backend"
+    directory: "/server"
     schedule:
       interval: "weekly"
     assignees:
       - "am9zZWY"
 
   - package-ecosystem: "npm"
-    directory: "/frontend"
+    directory: "/client"
     schedule:
       interval: "weekly"
 

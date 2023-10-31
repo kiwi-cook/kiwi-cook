@@ -2,10 +2,10 @@ name: "Go Static Analysis"
 on:
   push:
     paths:
-      - backend/**
+      - server/**
   pull_request:
     paths:
-      - backend/**
+      - server/**
 
 jobs:
   ci:
@@ -17,4 +17,4 @@ jobs:
         fetch-depth: 1
     - uses: dominikh/staticcheck-action@v1.3.0
       with:
-        working-directory: "./backend"
+        working-directory: "./server"

@@ -1,12 +1,11 @@
 # https://github.com/actions/labeler
 
-backend:
-- backend/**
+server:
+- server/**
 
-frontend:
-- frontend/**/*
+client:
+- client/**/*
 
 infrastructure:
 - .github/**/*
 - .vscode/**/*
-- scripts/**/*

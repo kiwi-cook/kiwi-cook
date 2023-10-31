@@ -2,19 +2,19 @@
 
 ## Getting started
 
-### Backend
+### Server
 
-#### Start Backend
+#### Start Server
 
 1. Clone this repository
-2. `cd backend`
+2. `cd server`
 3. `go run . serve -m dev`
   
-### Frontend
+### Client
 
-#### Start Frontend
+#### Start Client
 
 1. Clone this repository
-2. `cd frontend`
+2. `cd client`
 3. `npm ci`
-4. `npm run serve`
+4. `npm run serve:app`
