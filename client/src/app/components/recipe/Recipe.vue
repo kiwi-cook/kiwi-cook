@@ -7,7 +7,7 @@
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
                     </IonButton>
-                    <IonButton aria-valuetext="Like Recipe" @click="recipe?.toggleSave()">
+                    <IonButton aria-valuetext="Like Recipe" @click="toggleSave()">
                         <IonIcon :color="isSaved ?? false ? 'favorite' : undefined "
                                  :icon="isSaved ?? false ? heart: heartOutline"/>
                     </IonButton>
@@ -99,7 +99,8 @@ import {add, heart, heartOutline, remove, shareSocial, time} from 'ionicons/icon
 import {CanShareResult, Share} from '@capacitor/share';
 import ReadMore from '@/shared/components/utility/ReadMore.vue';
 import {useI18n} from 'vue-i18n';
-import RecipeTitle from '@/shared/components/recipe/RecipeTitle.vue';
+import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
+import {useRecipeStore} from '@/app/storage';
 
 /* Recipe */
 const props = defineProps({
@@ -111,7 +112,9 @@ const props = defineProps({
 const {recipe} = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
 const name = computed(() => recipe?.value?.getName() ?? '');
-const isSaved = computed(() => recipe?.value?.isSaved() ?? false);
+const store = useRecipeStore();
+const isSaved = computed(() => store.getSavedRecipesIds.includes(recipe?.value?.getId()));
+const toggleSave = () => store.setSaved(recipe?.value);
 
 const itemsFromRecipe = computed<StepItem[]>(() => recipe?.value?.getStepItems() ?? []);
 const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'ingredient'))

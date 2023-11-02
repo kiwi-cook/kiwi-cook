@@ -1,6 +1,6 @@
 <template>
     <IonPage id="recipe-editor-page">
-        <IonContent :fullscreen="true">
+        <IonContent>
             <div class="content-wrapper">
                 <div class="content">
                     <Header :big-text="['Recipe', 'Editor']"/>
@@ -40,7 +40,7 @@ import {MutableRecipe} from '@/editor/types/recipe.ts';
 const route = useRoute();
 const recipeId = ref(route.params.id as string);
 const store = useRecipeStore();
-const recipe = computed<MutableRecipe>(() => store.getRecipesAsMap[recipeId.value] as MutableRecipe);
+const recipe = computed<MutableRecipe>(() => store.getRecipesAsMap[recipeId.value]);
 
 const router = useIonRouter()
 const addRecipe = () => {

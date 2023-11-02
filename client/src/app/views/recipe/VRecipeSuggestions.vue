@@ -1,5 +1,5 @@
 <template>
-    <IonPage id="recipe-list-page">
+    <IonPage>
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">

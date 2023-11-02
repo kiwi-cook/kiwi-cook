@@ -3,7 +3,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="['Recipe Parser']"/>
+                    <Header :big-text="['Recipe', 'Parser']"/>
 
                     <IonCard>
                         <IonCardHeader>

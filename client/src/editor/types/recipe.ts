@@ -55,6 +55,10 @@ export class MutableRecipe extends Recipe {
         setLocaleStr(this.name, name, lang)
     }
 
+    public isSaved(): boolean {
+        return false;
+    }
+
     /**
      * Add a step to the recipe
      * @param step
@@ -158,5 +162,14 @@ export class MutableRecipe extends Recipe {
         }
         this.props.tags.push(tag)
         return this
+    }
+
+    setSteps(steps: string[], lang?: string): void {
+        this.steps = steps.map((description: string) => {
+            const step = new Step()
+            step.setDescription(description, lang)
+            return step
+        })
+        this.computeItems()
     }
 }

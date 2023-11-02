@@ -22,7 +22,7 @@ import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_
 import {simpleRecipePrediction} from '@/app/suggestions/simple.ts';
 
 const ionicStorage = new Storage({
-    name: '__mydb',
+    name: 'tastebuddy_db',
     driverOrder: [Drivers.LocalStorage]
 });
 await ionicStorage.create();
@@ -222,7 +222,13 @@ export const useRecipeStore = defineStore('recipes', {
             }
         },
         /**
-         * Get saved recipes
+         * Get the ids of saved recipes as a list
+         */
+        getSavedRecipesIds(state): string[] {
+            return [...state.savedRecipes ?? []]
+        },
+        /**
+         * Get the saved recipes as a list
          * @param state
          * @returns a list of saved recipes
          */
@@ -372,7 +378,7 @@ export const useRecipeStore = defineStore('recipes', {
          * @param recipe
          */
         setSaved(recipe: Recipe) {
-            if (recipe.saved) {
+            if (!this.savedRecipes.has(recipe.getId())) {
                 this.savedRecipes.add(recipe.getId())
             } else {
                 this.savedRecipes.delete(recipe.getId())

@@ -2,11 +2,11 @@
     <IonCard>
         <IonCardHeader>
             <IonItem lines="none">
-                <IonAvatar v-if="mutableItem.imgUrl">
-                    <img :alt="`Image of ${mutableItem.getName()}`" :src="mutableItem.imgUrl"/>
+                <IonAvatar v-if="item?.imgUrl">
+                    <img :alt="`Image of ${item?.getName()}`" :src="item?.imgUrl"/>
                 </IonAvatar>
                 <IonChip>
-                    {{ mutableItem.getId() }}
+                    {{ item?.getId() }}
                 </IonChip>
                 <IonButton color="success" fill="outline" @click="saveItem()">
                     <IonIcon :icon="save"/>
@@ -28,11 +28,11 @@
                 </template>
 
                 <IonItem lines="none">
-                    <IonInput v-model="mutableItem.imgUrl" label="Image URL" label-placement="stacked" type="url"/>
+                    <IonInput v-model="item.imgUrl" label="Image URL" label-placement="stacked" type="url"/>
                 </IonItem>
 
                 <IonItem lines="none">
-                    <IonSelect v-model="mutableItem.type" label="Type" label-placement="stacked" placeholder="Type">
+                    <IonSelect v-model="item.type" label="Type" label-placement="stacked" placeholder="Type">
                         <IonSelectOption value="ingredient">Ingredient</IonSelectOption>
                         <IonSelectOption value="tool">Tool</IonSelectOption>
                     </IonSelect>
@@ -91,7 +91,7 @@ import {
     IonSelect,
     IonSelectOption
 } from '@ionic/vue';
-import {computed, PropType, ref, toRefs, watch} from 'vue';
+import {computed, PropType, ref, toRefs} from 'vue';
 import {useRecipeStore} from '@/editor/storage';
 import {chevronDown, chevronUp, save, trash} from 'ionicons/icons';
 import {MutableItem} from '@/editor/types/item.ts';
@@ -110,12 +110,6 @@ const supportedLanguages = SUPPORT_LOCALES
 
 const recipeStore = useRecipeStore()
 
-const mutableItem = ref<MutableItem>(item.value)
-// update mutableItem when item changes
-watch(item, () => {
-    mutableItem.value = item.value
-})
-
 const showUsedInRecipes = ref<boolean>(false)
 const usedInRecipes = computed<MutableRecipe[]>(() => {
     const recipesByItemIds = recipeStore.getRecipesByItemIds
@@ -126,8 +120,8 @@ const usedInRecipes = computed<MutableRecipe[]>(() => {
         .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId])
 })
 
-const saveItem = () => mutableItem.value.save()
-const deleteItem = () => mutableItem.value.delete()
+const saveItem = () => item?.value?.save()
+const deleteItem = () => item?.value?.delete()
 
 // Item merger
 const itemMergerInput = ref<string>('')
@@ -139,13 +133,13 @@ const mergeItems = () => {
     if (!isValidId) {
         return
     }
-    logDebug('ItemEditor.mergeItems', `Merging ${itemMergerInput.value} => ${mutableItem.value.getId()}`)
+    logDebug('ItemEditor.mergeItems', `Merging ${itemMergerInput.value} => ${item.value.getId()}`)
     const recipesByItemIds = recipeStore.getRecipesByItemIds[itemMergerInput.value]
     for (const recipeId of recipesByItemIds) {
         const recipe = recipeStore.getRecipesAsMap[recipeId] as MutableRecipe
         if (recipe) {
             logDebug('ItemEditor.mergeItems', `Merging recipe ${recipeId}`)
-            recipe.replaceItem(itemMergerInput.value, mutableItem.value)
+            recipe.replaceItem(itemMergerInput.value, item.value)
             recipe.save()
         }
     }

@@ -4,8 +4,8 @@ import {beforeEachCheckAuth} from '@/editor/router/middleware';
 
 // Pages
 import TabsPage from '@/editor/views/VTabs.vue'
-import VRecipe from '@/shared/views/VRecipe.vue';
 import VHome from '@/editor/views/VHome.vue';
+import VRecipe from '@/editor/views/recipe/VRecipe.vue';
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -19,36 +19,32 @@ const routes: Array<RouteRecordRaw> = [
                 path: 'home',
                 component: VHome
             },
-            // Recipes
+            // Recipe
             {
                 name: 'Recipe',
-                path: 'recipe/show/:id',
-                component: VRecipe
+                path: 'recipe',
+                component: VRecipe,
+                children: [
+                    {
+                        name: 'RecipeEditor',
+                        path: 'editor/:id',
+                        component: () => import('@/editor/views/recipe/VRecipeEditor.vue'),
+                    },
+                    {
+                        name: 'RecipeParser',
+                        path: 'parser',
+                        component: () => import('@/editor/views/recipe/VRecipeParser.vue'),
+                    },
+                ]
             },
-            // Editor
-            {
-                name: 'RecipeEditor',
-                path: 'editor/recipe/:id',
-                meta: {
-                    auth: true,
-                },
-                component: () => import('@/editor/views/VRecipeEditor.vue'),
-            },
-            {
-                name: 'RecipesEditor',
-                path: 'editor/recipe',
-                meta: {
-                    auth: true,
-                },
-                component: () => import('@/editor/views/VRecipesEditor.vue'),
-            },
+            // Item
             {
                 name: 'ItemEditor',
-                path: 'editor/item',
+                path: 'item/editor',
                 meta: {
                     auth: true,
                 },
-                component: () => import('@/editor/views/VItemsEditor.vue'),
+                component: () => import('@/editor/views/item/VItemsEditor.vue'),
             },
             {
                 name: 'Login',

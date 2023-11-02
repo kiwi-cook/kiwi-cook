@@ -1,8 +1,10 @@
 import {logDebug, Recipe, StepItem} from '@/shared/ts';
 import nlp from 'compromise';
-import {findMostSimilarItem, normalizeUnit} from '@/editor/parser/utils.ts';
+import {findMostSimilarItem} from '@/editor/parser/utils.ts';
 import {newItemFromName} from '@/editor/types/item.ts';
 import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {newLocaleStr} from '@/shared/locales/i18n.ts';
+import {normalizeUnit} from '@/shared/ts/parser.ts';
 
 type AllRecipesRecipe = {
     images: string[];
@@ -61,19 +63,27 @@ export class AllRecipesParser {
         for (const ingredient of allRecipesRecipe.ingredients) {
             const doc = nlp(ingredient);
             const quantities = doc.match('#Value+').out('text').split(' ');
-            console.log(quantities)
             const unit = doc.match('#Unit').out('text');
             const ingredientName = doc.not('#Value').not('#Unit').text();
 
             const stepItem = new StepItem()
-            let item = findMostSimilarItem(ingredientName, 2)
+            let item = findMostSimilarItem(ingredientName)
             if (!item) {
                 item = newItemFromName(ingredientName)
             }
             stepItem.updateItem(item)
             stepItem.unit = normalizeUnit(unit)
+            logDebug('parseAllRecipes', quantities, unit, ingredientName)
             stepItems.push(stepItem)
         }
+
+        // Steps
+        const steps = allRecipesRecipe.steps.map((step) => step.instruction)
+        recipe.setSteps(steps, 'en')
+
+        // Notes
+        recipe.notes = newLocaleStr(allRecipesRecipe.notes ?? '', 'en')
+
 
         logDebug('parseAllRecipes', stepItems)
         return recipe

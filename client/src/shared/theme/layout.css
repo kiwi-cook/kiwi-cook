@@ -31,6 +31,10 @@
     }
 }
 
+ion-content {
+    --offset-bottom: 1px !important;
+}
+
 .content-wrapper {
     margin: var(--margin-page);
     height: 100%;

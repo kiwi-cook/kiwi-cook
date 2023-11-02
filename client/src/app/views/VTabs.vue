@@ -4,19 +4,20 @@
             <!-- Router views -->
             <IonRouterOutlet/>
 
-            <IonProgressBar v-show="loadingState" type="indeterminate"/>
+            <IonProgressBar v-show="showLoadingBar" type="indeterminate"/>
             <IonTabBar slot="bottom">
-                <IonTabButton href="/recipe/suggestions" tab="recipe-suggestions">
+                <IonTabButton :disabled="isLoadingInitialData" href="/recipe/suggestions" tab="recipe-suggestions">
                     <IonIcon :icon="search"/>
                     {{ $t('Tabs.Explore') }}
                 </IonTabButton>
 
-                <IonTabButton :href="recipeOfTheDay?.getRoute() ?? '/recipe/of-the-day'" tab="recipe-of-the-day">
+                <IonTabButton :disabled="isLoadingInitialData"
+                              :href="recipeOfTheDay?.getRoute() ?? '/recipe/of-the-day'" tab="recipe-of-the-day">
                     <IonIcon :icon="sparkles"/>
                     {{ $t('Tabs.RecipeOfTheDay') }}
                 </IonTabButton>
 
-                <IonTabButton href="/recipe/saved" tab="saved-recipes">
+                <IonTabButton :disabled="isLoadingInitialData" href="/recipe/saved" tab="saved-recipes">
                     <IonIcon :icon="heart"/>
                     {{ $t('Tabs.Favorites') }}
                 </IonTabButton>
@@ -40,7 +41,8 @@ import {showInstallationPrompt} from '@/app/ts';
 
 const recipeStore = useRecipeStore()
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
-const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)
+const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
+const showLoadingBar = computed<boolean>(() => (recipeStore.isLoading && !isLoadingInitialData.value) ?? false)
 
 const install = () => {
     showInstallationPrompt()

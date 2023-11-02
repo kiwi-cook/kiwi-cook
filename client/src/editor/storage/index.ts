@@ -1,7 +1,16 @@
 // Vue
 import {defineStore} from 'pinia'
 
-import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from '@/shared/ts';
+import {
+    API_ROUTE,
+    APIResponse,
+    itemFromJSON,
+    logDebug,
+    presentToast,
+    Recipe,
+    recipeFromJSON,
+    sendToAPI
+} from '@/shared/ts';
 import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
 import {MutableRecipe} from '@/editor/types/recipe.ts';
 import {MutableItem} from '@/editor/types/item.ts';
@@ -241,12 +250,13 @@ export const useRecipeStore = defineStore('recipes', {
             this.setLoadingState('fetchRecipes')
             return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
                 .then((apiResponse: APIResponse<MutableRecipe[]>) => {
-                    // map the recipes JSON to MutableRecipeobjects
-                    // this is because the JSON is not a valid MutableRecipeobject,
-                    // and we need to use the MutableRecipeclass methods
+                    // map the recipes JSON to MutableRecipe objects
+                    // this is because the JSON is not a valid MutableRecipe object,
+                    // and we need to use the MutableRecipe class methods
                     if (!apiResponse.error) {
-                        Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe) as Promise<MutableRecipe>))
-                            .then((recipes: MutableRecipe[]) => this.replaceRecipes(recipes))
+                        // TODO That's some shitty code...
+                        Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe)))
+                            .then((recipes: Recipe[]) => this.replaceRecipes(recipes.map((recipe: Recipe) => new MutableRecipe(recipe))))
                     }
                     this.finishLoading('fetchRecipes')
                     return apiResponse.response
@@ -316,7 +326,7 @@ export const useRecipeStore = defineStore('recipes', {
                     // this is because the JSON is not a valid MutableItem object,
                     // and we need to use the MutableItem class methods
                     if (!apiResponse.error) {
-                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => itemFromJSON(item) as MutableItem)
+                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => new MutableItem(itemFromJSON(item)))
                         this.setItems(items)
                     }
                     this.finishLoading('fetchItems')

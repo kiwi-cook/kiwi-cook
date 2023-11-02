@@ -105,9 +105,18 @@ const formatItems = () => {
     items.value.forEach((item: Item) => {
         // Fix name
         let name = item.getName()
+        // Capitalize first letter
         name = name[0].toUpperCase() + name.slice(1)
+        // Replace dashes with spaces
         name = name.replace(/-/g, ' ')
-        item.setName(name)
+        // Add plurals
+        if (!name.endsWith('s') && !name.includes('|')) {
+            name += ' | ' + name + 's'
+        } else if (name.endsWith('s') && !name.includes('|')) {
+            name = name.slice(0, -1) + ' | ' + name
+        }
+
+        item.setName(name, 'en')
 
         // Add img url
         if (!item.imgUrl || item.imgUrl === '') {

@@ -11,11 +11,13 @@
                     Home
                 </IonTabButton>
 
-                <IonTabButton href="/editor/recipe" tab="recipe-editor">
-                    Recipe Editor
+                <IonTabButton href="/recipe" tab="recipe">
+                    <IonIcon :icon="add"/>
+                    Recipe
                 </IonTabButton>
 
-                <IonTabButton href="/editor/item" tab="item-editor">
+                <IonTabButton href="/item/editor" tab="item-editor">
+                    <IonIcon :icon="add"/>
                     Item Editor
                 </IonTabButton>
             </IonTabBar>
@@ -27,7 +29,7 @@
 import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/vue';
 import {useRecipeStore} from '@/editor/storage';
-import {homeOutline} from 'ionicons/icons';
+import {add, homeOutline} from 'ionicons/icons';
 
 const recipeStore = useRecipeStore()
 const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)

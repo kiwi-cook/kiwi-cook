@@ -1,4 +1,3 @@
-import {useRecipeStore} from '@/app/storage';
 import {useIonRouter} from '@ionic/vue';
 import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n.ts';
 import {APP_NAME, Item, logError, Step, StepItem, tmpId} from '@/shared/ts';
@@ -34,29 +33,27 @@ export class Recipe {
             pub?: string;
         }
     };
+    notes?: LocaleStr;
     servings: number;
-    saved: boolean;
     computed: {
         itemsById: { [id: string]: StepItem }
         items: StepItem[],
         authors: string
     }
 
-    constructor() {
+    constructor(recipe?: Recipe) {
         // create a temporary id to identify the recipe in the store before it is saved
-        this.id = tmpId()
-        this.name = newLocaleStr()
-        this.desc = newLocaleStr()
-        this.props = {
+        this.id = recipe?.id ?? tmpId()
+        this.name = recipe?.name ?? newLocaleStr()
+        this.desc = recipe?.desc ?? newLocaleStr()
+        this.props = recipe?.props ?? {
             imgUrl: '',
             duration: 0,
             date: new Date(),
             tags: [],
         }
-        this.steps = [new Step()]
-        this.servings = 1
-        this.saved = false;
-        this.src = {
+        this.steps = recipe?.steps ?? [new Step()]
+        this.src = recipe?.src ?? {
             url: '',
             authors: [],
         }
@@ -65,6 +62,8 @@ export class Recipe {
             items: [],
             authors: ''
         }
+        this.servings = 1
+        this.notes = newLocaleStr()
     }
 
     /**
@@ -177,23 +176,6 @@ export class Recipe {
         for (const step of this.steps) {
             step.updateServings(servings)
         }
-    }
-
-    /**
-     * Save or unsave the recipe
-     */
-    public toggleSave() {
-        const store = useRecipeStore()
-        this.saved = !this.saved
-        store.setSaved(this)
-    }
-
-    /**
-     * Check if the recipe is saved
-     */
-    public isSaved(): boolean {
-        const store = useRecipeStore()
-        return this.getId() in store.getSavedRecipesAsMap
     }
 
     /**

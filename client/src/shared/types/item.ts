@@ -1,6 +1,6 @@
 import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
 import {distance} from 'fastest-levenshtein';
-import {logError, tmpId} from '@/shared/ts';
+import {tmpId} from '@/shared/ts';
 import {useRecipeStore} from '@/app/storage';
 
 export enum ItemType {
@@ -13,21 +13,14 @@ export enum ItemType {
  * It can be an ingredient or a tool
  */
 export class Item {
-    id?: string;
-    tmpId?: string;
+    id: string;
     name: LocaleStr;
     type: ItemType;
     imgUrl: string;
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
-        this.id = item?.id
-        this.tmpId = item?.tmpId
-        if (this.id === undefined) {
-            this.tmpId = item?.tmpId ?? tmpId()
-        } else {
-            delete this.tmpId
-        }
+        this.id = item?.id ?? tmpId()
         this.name = item?.name ?? newLocaleStr()
         this.type = item?.type ?? ItemType.Ingredient
         this.imgUrl = item?.imgUrl ?? ''
@@ -37,8 +30,12 @@ export class Item {
      * Get the localized name of the item
      * @param lang
      */
-    public getName(lang?: string): string {
-        return getLocaleStr(this.name, lang)
+    public getName(lang?: string, amount?: number): string {
+        const locale = getLocaleStr(this.name, lang).split('|')
+        if (amount === 1 || locale.length === 1) {
+            return locale[0]
+        }
+        return locale[1]
     }
 
     /**
@@ -59,12 +56,7 @@ export class Item {
      * @throws an error if the id is undefined
      */
     public getId(): string {
-        // if the id is undefined, throw an error
-        if (this.id === undefined && this.tmpId === undefined) {
-            logError('Item id is undefined', this)
-            throw new Error('Item.id is undefined: ' + JSON.stringify(this))
-        }
-        return this.id ?? this.tmpId as string
+        return this.id
     }
 
     /**
@@ -102,8 +94,6 @@ export class Item {
 export function itemFromJSON(json: any): Item {
     const item = new Item()
     item.id = json.id
-    // remove the temporary id
-    delete item.tmpId
     item.name = json.name
     item.type = json.type
     item.imgUrl = json.imgUrl ?? ''

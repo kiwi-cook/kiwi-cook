@@ -46,13 +46,13 @@ const mappedItem = computed<CustomItem | undefined>(() => {
     if (!item?.value) {
         return undefined;
     }
-    const servings = item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.servings : 0;
+    const servings = item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.servings : 1;
 
     return {
-        name: item?.value?.getName(),
+        name: item?.value?.getName(undefined, servings),
         imgUrl: item?.value?.imgUrl,
         servings,
-        unit: item?.value instanceof StepItem ? item?.value?.unit : '',
+        unit: item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '',
     }
 })
 </script>

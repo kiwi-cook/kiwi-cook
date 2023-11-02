@@ -45,7 +45,6 @@ setInterval(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #e6f3e6; /* Soft Green Background */
     overflow: hidden;
 }
 

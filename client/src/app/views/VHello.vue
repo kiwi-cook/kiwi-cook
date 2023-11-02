@@ -18,18 +18,22 @@ import {IonContent, IonPage, useIonRouter} from '@ionic/vue';
 import HeaderTyped from '@/shared/components/utility/header/HeaderTyped.vue';
 import {APP_NAME} from '@/shared/ts';
 import {useRecipeStore} from '@/app/storage';
-import {computed, ref, watch} from 'vue';
+import {computed, onUnmounted, ref, watch} from 'vue';
 
 const finished = ref(false)
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
-const loading = computed(() => recipeStore.loading)
 const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
+const timeout = ref(0)
 watch([isLoadingInitialData, finished], () => {
     if (!isLoadingInitialData.value && finished.value) {
-        setTimeout(() => {
+        timeout.value = setTimeout(() => {
             router.replace({name: 'Home'})
         }, 1000)
     }
 }, {immediate: true})
+
+onUnmounted(() => {
+    clearTimeout(timeout.value)
+})
 </script>

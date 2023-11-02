@@ -186,7 +186,8 @@
 
                     <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
                               :key="missingItemIndex">
-                        <ItemComponent :item="missingItem" @click="addMissingItem(stepIndex, $event)"/>
+                        <ItemComponent :item="missingItem" class="link"
+                                       @click="addMissingItem(stepIndex, missingItem.getId())"/>
                     </template>
                 </div>
             </IonCardContent>
