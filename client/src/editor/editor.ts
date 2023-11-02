@@ -9,7 +9,7 @@ import App from '@/editor/App.vue'
 import {createTasteBuddyRouter} from '@/editor/router';
 
 // Store
-import {createPinia} from "pinia";
+import {createPinia} from 'pinia';
 
 // Styles
 /* Core CSS required for Ionic components to work properly */
@@ -38,7 +38,7 @@ import '@/shared/theme/font.css';
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from "@/shared/locales/i18n.ts";
+import {i18n} from '@/shared/locales/i18n.ts';
 
 // Initializations
 

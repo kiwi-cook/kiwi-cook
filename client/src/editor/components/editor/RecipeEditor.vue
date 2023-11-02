@@ -233,11 +233,11 @@ import {
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {addOutline, calendar, closeCircleOutline, create, save, time, trash} from 'ionicons/icons';
-import ItemComponent from "@/shared/components/recipe/Item.vue";
-import {extractStepItemsFromText, findMostSimilarItem} from "@/editor/parser/utils.ts";
-import {MutableRecipe} from "@/editor/types/recipe.ts";
-import DropDownSearch from "@/shared/components/utility/DropDownSearch.vue";
-import ItemList from "@/shared/components/utility/list/ItemList.vue";
+import ItemComponent from '@/shared/components/recipe/Item.vue';
+import {extractStepItemsFromText, findMostSimilarItem} from '@/editor/parser/utils.ts';
+import {MutableRecipe} from '@/editor/types/recipe.ts';
+import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
+import ItemList from '@/shared/components/utility/list/ItemList.vue';
 
 const props = defineProps({
     recipe: {

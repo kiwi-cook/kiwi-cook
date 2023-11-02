@@ -1,8 +1,8 @@
-import {logDebug, Recipe, StepItem} from "@/shared/ts";
-import nlp from "compromise";
-import {findMostSimilarItem, normalizeUnit} from "@/editor/parser/utils.ts";
-import {newItemFromName} from "@/editor/types/item.ts";
-import {MutableRecipe} from "@/editor/types/recipe.ts";
+import {logDebug, Recipe, StepItem} from '@/shared/ts';
+import nlp from 'compromise';
+import {findMostSimilarItem, normalizeUnit} from '@/editor/parser/utils.ts';
+import {newItemFromName} from '@/editor/types/item.ts';
+import {MutableRecipe} from '@/editor/types/recipe.ts';
 
 type AllRecipesRecipe = {
     images: string[];
@@ -75,7 +75,7 @@ export class AllRecipesParser {
             stepItems.push(stepItem)
         }
 
-        logDebug("parseAllRecipes", stepItems)
+        logDebug('parseAllRecipes', stepItems)
         return recipe
     }
 

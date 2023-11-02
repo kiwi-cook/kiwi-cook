@@ -1,5 +1,5 @@
-import {Item, logDebug} from "@/shared/ts";
-import {useRecipeStore} from "@/editor/storage";
+import {Item, logDebug} from '@/shared/ts';
+import {useRecipeStore} from '@/editor/storage';
 
 export class MutableItem extends Item {
 
@@ -8,7 +8,7 @@ export class MutableItem extends Item {
      * @returns the item to allow chaining
      */
     public update(): this {
-        logDebug("MutableItem.update", this.getId())
+        logDebug('MutableItem.update', this.getId())
         const store = useRecipeStore()
         store.setItem(this)
         return this
@@ -19,7 +19,7 @@ export class MutableItem extends Item {
      * @returns the item to allow chaining
      */
     public save() {
-        logDebug("MutableItem.save", this.getId())
+        logDebug('MutableItem.save', this.getId())
         const store = useRecipeStore()
         store.saveItems([this])
     }
@@ -28,7 +28,7 @@ export class MutableItem extends Item {
      * Delete the item from the database
      */
     public delete() {
-        logDebug("MutableItem.delete", this.getId())
+        logDebug('MutableItem.delete', this.getId())
         const store = useRecipeStore()
         store.deleteItems(this)
     }

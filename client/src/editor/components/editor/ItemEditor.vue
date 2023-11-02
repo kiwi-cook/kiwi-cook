@@ -93,10 +93,10 @@ import {
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {useRecipeStore} from '@/editor/storage';
-import {chevronDown, chevronUp, save, trash} from "ionicons/icons";
-import {MutableItem} from "@/editor/types/item.ts";
-import {MutableRecipe} from "@/editor/types/recipe.ts";
-import {SUPPORT_LOCALES} from "@/shared/locales/i18n.ts";
+import {chevronDown, chevronUp, save, trash} from 'ionicons/icons';
+import {MutableItem} from '@/editor/types/item.ts';
+import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {SUPPORT_LOCALES} from '@/shared/locales/i18n.ts';
 
 const props = defineProps({
     item: {
@@ -139,12 +139,12 @@ const mergeItems = () => {
     if (!isValidId) {
         return
     }
-    logDebug("ItemEditor.mergeItems", `Merging ${itemMergerInput.value} => ${mutableItem.value.getId()}`)
+    logDebug('ItemEditor.mergeItems', `Merging ${itemMergerInput.value} => ${mutableItem.value.getId()}`)
     const recipesByItemIds = recipeStore.getRecipesByItemIds[itemMergerInput.value]
     for (const recipeId of recipesByItemIds) {
         const recipe = recipeStore.getRecipesAsMap[recipeId] as MutableRecipe
         if (recipe) {
-            logDebug("ItemEditor.mergeItems", `Merging recipe ${recipeId}`)
+            logDebug('ItemEditor.mergeItems', `Merging recipe ${recipeId}`)
             recipe.replaceItem(itemMergerInput.value, mutableItem.value)
             recipe.save()
         }

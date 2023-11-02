@@ -1,6 +1,6 @@
-import {useRecipeStore} from "@/editor/storage";
-import {Item, StepItem} from "@/shared/ts";
-import {closest, distance} from "fastest-levenshtein";
+import {useRecipeStore} from '@/editor/storage';
+import {Item, StepItem} from '@/shared/ts';
+import {closest, distance} from 'fastest-levenshtein';
 
 /**
  * Parses a string into a list of step items.
@@ -111,11 +111,11 @@ export function normalizeUnit(unit?: string, defaultUnit = 'pcs'): string {
     }
 
     const unitMap: { [unit: string]: string } = {
-        "teaspoon": "tsp",
-        "tablespoon": "tbsp",
-        "fluid ounce": "fl oz",
-        "cup": "cup",
-        "piece": "pcs",
+        'teaspoon': 'tsp',
+        'tablespoon': 'tbsp',
+        'fluid ounce': 'fl oz',
+        'cup': 'cup',
+        'piece': 'pcs',
     };
 
     // Format unit
@@ -135,21 +135,21 @@ export function normalizeUnit(unit?: string, defaultUnit = 'pcs'): string {
  */
 export function convertUnits(value: number, normalizedUnit: string): { value: number, unit: string } {
     const unitConversion: { [fromUnit: string]: { factor: number, unit: string } } = {
-        "tsp": {
-            "factor": 1 / 3,
-            "unit": "tbsp",
+        'tsp': {
+            'factor': 1 / 3,
+            'unit': 'tbsp',
         },
-        "tbsp": {
-            "factor": 3,
-            "unit": "tsp",
+        'tbsp': {
+            'factor': 3,
+            'unit': 'tsp',
         },
-        "l": {
-            "factor": 1000,
-            "unit": "ml",
+        'l': {
+            'factor': 1000,
+            'unit': 'ml',
         },
-        "kg": {
-            "factor": 1000,
-            "unit": "g",
+        'kg': {
+            'factor': 1000,
+            'unit': 'g',
         }
     };
 

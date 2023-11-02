@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, PropType, toRefs} from "vue";
-import {Item, Recipe, StepItem} from "@/shared/ts";
-import {useIonRouter} from "@ionic/vue";
-import RecipeTitle from "@/shared/components/recipe/RecipeTitle.vue";
-import {RecipeSuggestion} from "@/app/suggestions";
+import {computed, PropType, toRefs} from 'vue';
+import {Item, Recipe, StepItem} from '@/shared/ts';
+import {useIonRouter} from '@ionic/vue';
+import RecipeTitle from '@/shared/components/recipe/RecipeTitle.vue';
+import {RecipeSuggestion} from '@/app/suggestions';
 
 const props = defineProps({
     recipe: {

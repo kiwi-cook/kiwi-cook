@@ -1,6 +1,6 @@
-import {Item, logDebug, Recipe, Step, StepItem} from "@/shared/ts";
-import {useRecipeStore} from "@/editor/storage";
-import {setLocaleStr} from "@/shared/locales/i18n.ts";
+import {Item, logDebug, Recipe, Step, StepItem} from '@/shared/ts';
+import {useRecipeStore} from '@/editor/storage';
+import {setLocaleStr} from '@/shared/locales/i18n.ts';
 
 export class MutableRecipe extends Recipe {
 
@@ -23,7 +23,7 @@ export class MutableRecipe extends Recipe {
      * @returns the recipe to allow chaining
      */
     public update(): this {
-        logDebug("recipe.update", this.getId())
+        logDebug('recipe.update', this.getId())
         const store = useRecipeStore()
         store.setRecipes(this)
         return this
@@ -34,7 +34,7 @@ export class MutableRecipe extends Recipe {
      * @returns the id of the recipe
      */
     public save() {
-        logDebug("recipe.save", this.getId())
+        logDebug('recipe.save', this.getId())
         const store = useRecipeStore()
         return store.saveRecipes([this])
     }
@@ -44,7 +44,7 @@ export class MutableRecipe extends Recipe {
      */
     public delete() {
         const store = useRecipeStore()
-        logDebug("recipe.delete", this.getId())
+        logDebug('recipe.delete', this.getId())
         return store.deleteRecipes(this)
     }
 
@@ -95,7 +95,7 @@ export class MutableRecipe extends Recipe {
      */
     public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
         item = item ?? new Item();
-        logDebug("recipe.addItem", `add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
+        logDebug('recipe.addItem', `add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
         const stepItem = new StepItem(item);
 
         if (stepIndex === undefined) {

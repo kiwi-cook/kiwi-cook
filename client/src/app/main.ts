@@ -4,13 +4,13 @@ import {IonicVue} from '@ionic/vue';
 // Vue + App
 import {createApp} from 'vue'
 import App from '@/app/App.vue'
-import {logDebug} from "@/shared/ts";
+import {logDebug} from '@/shared/ts';
 
 // Router
 import {createTasteBuddyRouter} from '@/app/router';
 
 // Store
-import {createPinia} from "pinia";
+import {createPinia} from 'pinia';
 
 // Styles
 /* Add service worker */
@@ -43,7 +43,7 @@ import '@/shared/theme/transitions.css'
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from "@/shared/locales/i18n.ts";
+import {i18n} from '@/shared/locales/i18n.ts';
 
 // Initializations
 
@@ -62,7 +62,7 @@ const app = createApp(App)
 
 /* Configure app */
 app.config.performance = true
-logDebug("main.config", app.config)
+logDebug('main.config', app.config)
 
 router.isReady().then(() => {
     app.mount('#tastebuddy');

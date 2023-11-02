@@ -1,5 +1,5 @@
-import {useTasteBuddyStore} from "@/editor/storage";
-import {NavigationGuardNext, RouteLocationNormalized} from "vue-router";
+import {useTasteBuddyStore} from '@/editor/storage';
+import {NavigationGuardNext, RouteLocationNormalized} from 'vue-router';
 
 
 /**

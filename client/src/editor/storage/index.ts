@@ -1,10 +1,10 @@
 // Vue
 import {defineStore} from 'pinia'
 
-import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from "@/shared/ts";
-import {SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
-import {MutableRecipe} from "@/editor/types/recipe.ts";
-import {MutableItem} from "@/editor/types/item.ts";
+import {API_ROUTE, APIResponse, itemFromJSON, logDebug, presentToast, recipeFromJSON, sendToAPI} from '@/shared/ts';
+import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
+import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {MutableItem} from '@/editor/types/item.ts';
 
 
 // Define typings for the store state
@@ -36,7 +36,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          * @return true, if user was authenticated successfully
          */
         async authenticate(): Promise<boolean> {
-            logDebug("authenticate", 'logging in')
+            logDebug('authenticate', 'logging in')
             // if the user is already authenticated, return true
             if (this.isAuthenticated) {
                 return Promise.resolve(true)
@@ -46,7 +46,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
             return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
                 .then((apiResponse: APIResponse<string>) => {
                     this.user.authenticated = !apiResponse.error
-                    logDebug("sessionAuth", `user is${!this.user.authenticated ? ' not ' : ' '}authenticated`)
+                    logDebug('sessionAuth', `user is${!this.user.authenticated ? ' not ' : ' '}authenticated`)
                     return this.user.authenticated
                 }).catch(() => {
                     this.user.authenticated = false
@@ -59,7 +59,7 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
          * @returns true if the authentication was successful, false otherwise
          */
         async basicAuth(payload: { username: string, password: string }): Promise<boolean> {
-            logDebug("basicAuth", 'logging in')
+            logDebug('basicAuth', 'logging in')
             const {username, password} = payload
             return sendToAPI<string>(API_ROUTE.POST_AUTH, {
                 headers: [
@@ -126,7 +126,7 @@ export const useRecipeStore = defineStore('recipes', {
                     recipesByItemId[item.getId()].push(recipe.getId())
                 }
             }
-            logDebug("getRecipesByItemIds", recipesByItemId)
+            logDebug('getRecipesByItemIds', recipesByItemId)
 
             return recipesByItemId
         },
@@ -173,7 +173,7 @@ export const useRecipeStore = defineStore('recipes', {
         setRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
             if (typeof recipes === 'undefined') {
                 this.recipes = {}
-                return new Promise<MutableRecipe[]>(() => [])
+                return Promise.resolve([])
             }
 
             if (!Array.isArray(recipes)) {
@@ -237,7 +237,7 @@ export const useRecipeStore = defineStore('recipes', {
          * Fetch the recipes from the API and store them in the store
          */
         async fetchRecipes(): Promise<MutableRecipe[]> {
-            logDebug("fetchRecipes", 'fetching recipes')
+            logDebug('fetchRecipes', 'fetching recipes')
             this.setLoadingState('fetchRecipes')
             return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
                 .then((apiResponse: APIResponse<MutableRecipe[]>) => {
@@ -263,7 +263,7 @@ export const useRecipeStore = defineStore('recipes', {
                 recipes = [recipes]
             }
 
-            logDebug("saveRecipe", recipes)
+            logDebug('saveRecipe', recipes)
             this.setLoadingState('saveRecipe')
             return sendToAPI<string>(API_ROUTE.ADD_RECIPES, {
                 body: recipes,
@@ -297,10 +297,10 @@ export const useRecipeStore = defineStore('recipes', {
             recipeIds.forEach((recipeId: string) => {
                 delete this.recipes[recipeId]
             })
-            logDebug("deleteRecipes", recipeIds)
+            logDebug('deleteRecipes', recipeIds)
             this.setLoadingState('deleteRecipes')
             return sendToAPI<string>(API_ROUTE.DELETE_RECIPES, {
-                errorMessage: `Could not delete recipes from database. Please retry later!`,
+                errorMessage: 'Could not delete recipes from database. Please retry later!',
                 body: recipeIds
             }).then((apiResponse: APIResponse<string>) => {
                 this.finishLoading('deleteRecipes')
@@ -308,7 +308,7 @@ export const useRecipeStore = defineStore('recipes', {
             })
         },
         async fetchItems(): Promise<MutableItem[]> {
-            logDebug("fetchItems", 'fetching items')
+            logDebug('fetchItems', 'fetching items')
             this.setLoadingState('fetchItems')
             return sendToAPI<MutableItem[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
                 .then((apiResponse: APIResponse<MutableItem[]>) => {
@@ -334,7 +334,7 @@ export const useRecipeStore = defineStore('recipes', {
                 items = [items]
             }
 
-            logDebug("saveItem", items)
+            logDebug('saveItem', items)
             this.setLoadingState('saveItem')
             return sendToAPI<string>(API_ROUTE.ADD_ITEMS, {
                 body: items,
@@ -367,10 +367,10 @@ export const useRecipeStore = defineStore('recipes', {
             itemIds.forEach((recipeId: string) => {
                 delete this.recipes[recipeId]
             })
-            logDebug("deleteItems", itemIds)
+            logDebug('deleteItems', itemIds)
             this.setLoadingState('deleteItems')
             return sendToAPI<string>(API_ROUTE.DELETE_ITEMS, {
-                errorMessage: `Could not delete items from database. Please retry later!`,
+                errorMessage: 'Could not delete items from database. Please retry later!',
                 body: itemIds
             }).then((apiResponse: APIResponse<string>) => {
                 this.finishLoading('deleteItems')

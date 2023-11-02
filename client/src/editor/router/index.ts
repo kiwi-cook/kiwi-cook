@@ -1,11 +1,11 @@
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
-import {beforeEachCheckAuth} from "@/editor/router/middleware";
+import {beforeEachCheckAuth} from '@/editor/router/middleware';
 
 // Pages
 import TabsPage from '@/editor/views/VTabs.vue'
-import VRecipe from "@/shared/views/VRecipe.vue";
-import VHome from "@/editor/views/VHome.vue";
+import VRecipe from '@/shared/views/VRecipe.vue';
+import VHome from '@/editor/views/VHome.vue';
 
 const routes: Array<RouteRecordRaw> = [
     {

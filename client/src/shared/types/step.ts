@@ -1,6 +1,6 @@
-import {StepItem, stepItemFromJSON} from "@/shared/ts";
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/shared/locales/i18n.ts";
-import {parseTemperature} from "@/editor/parser/utils.ts";
+import {StepItem, stepItemFromJSON} from '@/shared/ts';
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
+import {parseTemperature} from '@/editor/parser/utils.ts';
 
 /**
  * Step of a recipe

@@ -5,7 +5,7 @@
 
 <script lang="ts" setup>
 import {IonImg} from '@ionic/vue'
-import {computed, PropType, toRefs} from "vue";
+import {computed, PropType, toRefs} from 'vue';
 
 const props = defineProps({
     size: {

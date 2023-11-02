@@ -12,9 +12,9 @@
 </template>
 
 <script lang="ts" setup>
-import {toRefs} from "vue";
-import {IonChip, IonIcon, IonLabel, useIonRouter} from "@ionic/vue";
-import {time} from "ionicons/icons";
+import {toRefs} from 'vue';
+import {IonChip, IonIcon, IonLabel, useIonRouter} from '@ionic/vue';
+import {time} from 'ionicons/icons';
 
 const props = defineProps({
     name: {

@@ -1,7 +1,5 @@
-import {Item, logDebug, logError, presentToast, Recipe} from "@/shared/ts/index.ts";
-import {RecipeSuggestion} from "@/app/suggestions";
-
-type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
+import {Item, logDebug, logError, presentToast, Recipe} from '@/shared/ts/index.ts';
+import {RecipeSuggestion} from '@/app/suggestions';
 
 // URLs for the API
 
@@ -62,6 +60,8 @@ export const DURATIONS = {
     MEDIUM: 4000,
     LONG: 5000,
 }
+
+type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
 
 /**
  * This is the response interface from the API
@@ -144,7 +144,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         console.log(response.headers.entries())
         if (response.headers.has('set-cookie')) {
             const cookie = response.headers.get('set-cookie')
-            console.log(cookie)
+            logDebug('sendToAPI.cookie', cookie)
             if (cookie) {
                 document.cookie = cookie
             }
@@ -187,5 +187,5 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
  * @param expirationDate
  */
 export function setCookie(cookie: string, value: string, expirationDate: Date) {
-    document.cookie = cookie + "=" + value + ";path=/;expires=" + expirationDate.toUTCString();
+    document.cookie = cookie + '=' + value + ';path=/;expires=' + expirationDate.toUTCString();
 }

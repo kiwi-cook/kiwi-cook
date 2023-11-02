@@ -1,6 +1,6 @@
-import {ItemQuery, RecipeSuggestion, SearchQuery} from "@/app/suggestions/index.ts";
-import {useRecipeStore} from "@/app/storage";
-import {Recipe} from "@/shared/types";
+import {ItemQuery, RecipeSuggestion, SearchQuery} from '@/app/suggestions/index.ts';
+import {useRecipeStore} from '@/app/storage';
+import {Recipe} from '@/shared/types';
 
 /**
  * Search recipes based on the given query

@@ -28,8 +28,8 @@
     </IonCard>
 </template>
 <script lang="ts" setup>
-import {flame, time} from "ionicons/icons";
-import ItemList from "@/shared/components/utility/list/ItemList.vue";
+import {flame, time} from 'ionicons/icons';
+import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {
     IonCard,
     IonCardContent,
@@ -40,9 +40,9 @@ import {
     IonImg,
     IonItem,
     IonLabel
-} from "@ionic/vue";
-import {PropType} from "vue";
-import {Step} from "@/shared/ts";
+} from '@ionic/vue';
+import {PropType} from 'vue';
+import {Step} from '@/shared/ts';
 
 defineProps({
     step: {

@@ -20,10 +20,10 @@
 
 <script lang="ts" setup>
 import {IonContent, IonPage, IonSelect, IonSelectOption} from '@ionic/vue';
-import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from "@/shared/locales/i18n.ts";
-import {ref, watch} from "vue";
-import {useTasteBuddyStore} from "@/app/storage";
-import Header from "@/shared/components/utility/header/Header.vue";
+import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
+import {ref, watch} from 'vue';
+import {useTasteBuddyStore} from '@/app/storage';
+import Header from '@/shared/components/utility/header/Header.vue';
 
 const tasteBuddyStore = useTasteBuddyStore();
 const locale = ref<SUPPORT_LOCALES_TYPE>(SUPPORT_LOCALES[0]);

@@ -52,7 +52,7 @@
 
 
 <script lang="ts" setup>
-import {computed, PropType, ref, toRefs, watch} from "vue";
+import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {
     IonButton,
     IonChip,
@@ -63,9 +63,9 @@ import {
     IonLabel,
     IonList,
     IonSearchbar
-} from "@ionic/vue";
-import {Item, Recipe} from "@/shared/ts";
-import {closeOutline, optionsOutline} from "ionicons/icons";
+} from '@ionic/vue';
+import {Item, Recipe} from '@/shared/ts';
+import {closeOutline, optionsOutline} from 'ionicons/icons';
 
 // Props
 const props = defineProps({

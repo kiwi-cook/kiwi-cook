@@ -1,7 +1,7 @@
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from "@/shared/locales/i18n.ts";
-import {distance} from "fastest-levenshtein";
-import {logError, tmpId} from "@/shared/ts";
-import {useRecipeStore} from "@/app/storage";
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
+import {distance} from 'fastest-levenshtein';
+import {logError, tmpId} from '@/shared/ts';
+import {useRecipeStore} from '@/app/storage';
 
 export enum ItemType {
     Ingredient = 'ingredient',
@@ -61,8 +61,8 @@ export class Item {
     public getId(): string {
         // if the id is undefined, throw an error
         if (this.id === undefined && this.tmpId === undefined) {
-            logError("Item id is undefined", this)
-            throw new Error("Item.id is undefined: " + JSON.stringify(this))
+            logError('Item id is undefined', this)
+            throw new Error('Item.id is undefined: ' + JSON.stringify(this))
         }
         return this.id ?? this.tmpId as string
     }

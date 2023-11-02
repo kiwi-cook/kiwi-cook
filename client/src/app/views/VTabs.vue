@@ -35,8 +35,8 @@ import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/vue';
 import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
-import {Recipe} from "@/shared/ts";
-import {showInstallationPrompt} from "@/app/ts";
+import {Recipe} from '@/shared/ts';
+import {showInstallationPrompt} from '@/app/ts';
 
 const recipeStore = useRecipeStore()
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)

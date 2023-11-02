@@ -29,7 +29,7 @@
 <script lang="ts" setup>
 import {PropType, ref, toRefs, watch} from 'vue';
 import {IonButton, IonIcon, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
-import {addOutline} from "ionicons/icons";
+import {addOutline} from 'ionicons/icons';
 
 const props = defineProps({
     label: {
@@ -38,7 +38,7 @@ const props = defineProps({
         default: undefined,
     },
     labelPlacement: {
-        type: String as PropType<"start" | "end" | "floating" | "stacked" | "fixed">,
+        type: String as PropType<'start' | 'end' | 'floating' | 'stacked' | 'fixed'>,
         required: false,
         default: 'stacked'
     },

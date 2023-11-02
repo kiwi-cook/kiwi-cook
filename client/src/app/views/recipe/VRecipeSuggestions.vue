@@ -274,17 +274,17 @@ import {
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {Item, Recipe} from '@/shared/ts';
-import Searchbar from "@/app/components/recipe/Searchbar.vue";
-import Header from "@/shared/components/utility/header/Header.vue";
-import MiniRecipePreview from "@/app/components/recipe/previews/MiniRecipePreview.vue";
-import ItemComponent from "@/shared/components/recipe/Item.vue";
-import {add, close, closeCircleOutline, list, remove, search, time} from "ionicons/icons";
-import HorizontalList from "@/shared/components/utility/list/HorizontalList.vue";
-import List from "@/shared/components/utility/list/List.vue";
-import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
-import {useI18n} from "vue-i18n";
-import BigRecipePreview from "@/app/components/recipe/previews/BigRecipePreview.vue";
-import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from "@/app/suggestions";
+import Searchbar from '@/app/components/recipe/Searchbar.vue';
+import Header from '@/shared/components/utility/header/Header.vue';
+import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
+import ItemComponent from '@/shared/components/recipe/Item.vue';
+import {add, close, closeCircleOutline, list, remove, search, time} from 'ionicons/icons';
+import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
+import List from '@/shared/components/utility/list/List.vue';
+import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
+import {useI18n} from 'vue-i18n';
+import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
+import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/suggestions';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
@@ -430,7 +430,7 @@ const submit = () => {
         submitted.value = true
         suggest()
         setTimeout(() => {
-            recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: "start"})
+            recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: 'start'})
         }, 50)
     } else {
         // reset

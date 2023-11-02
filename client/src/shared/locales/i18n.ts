@@ -1,9 +1,9 @@
-import {useTasteBuddyStore} from "@/app/storage";
-import {createI18n} from "vue-i18n";
+import {useTasteBuddyStore} from '@/app/storage';
+import {createI18n} from 'vue-i18n';
 import {nextTick} from 'vue'
 import enUS from '@/shared/locales/en.json'
-import {RouteLocationNormalized} from "vue-router";
-import {logDebug} from "@/shared/ts";
+import {RouteLocationNormalized} from 'vue-router';
+import {logDebug} from '@/shared/ts';
 
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']

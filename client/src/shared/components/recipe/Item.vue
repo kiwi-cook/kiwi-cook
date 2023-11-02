@@ -18,9 +18,9 @@
 </template>
 
 <script lang="ts" setup>
-import {IonItem, IonLabel, IonThumbnail} from "@ionic/vue";
-import {computed, PropType, toRefs} from "vue";
-import {Item, ItemType, StepItem} from "@/shared/ts";
+import {IonItem, IonLabel, IonThumbnail} from '@ionic/vue';
+import {computed, PropType, toRefs} from 'vue';
+import {Item, ItemType, StepItem} from '@/shared/ts';
 
 const props = defineProps({
     item: {

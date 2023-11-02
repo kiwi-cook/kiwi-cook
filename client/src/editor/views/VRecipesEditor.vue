@@ -87,11 +87,11 @@
 
 
 <script lang="ts" setup>
-import {ref} from "vue";
-import Header from "@/shared/components/utility/header/Header.vue";
-import {addOutline, chevronForwardCircle, saveOutline} from "ionicons/icons";
-import {useRecipeStore} from "@/editor/storage";
-import RecipeEditor from "@/editor/components/editor/RecipeEditor.vue";
+import {ref} from 'vue';
+import Header from '@/shared/components/utility/header/Header.vue';
+import {addOutline, chevronForwardCircle, saveOutline} from 'ionicons/icons';
+import {useRecipeStore} from '@/editor/storage';
+import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {
     IonButton,
     IonCard,
@@ -107,10 +107,10 @@ import {
     IonItem,
     IonPage,
     useIonRouter
-} from "@ionic/vue";
-import {availableParsers, parseRecipes, RecipeParser} from "@/editor/parser";
-import {logError, Recipe} from "@/shared/ts";
-import {MutableRecipe} from "@/editor/types/recipe.ts";
+} from '@ionic/vue';
+import {availableParsers, parseRecipes, RecipeParser} from '@/editor/parser';
+import {logError, Recipe} from '@/shared/ts';
+import {MutableRecipe} from '@/editor/types/recipe.ts';
 
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
@@ -123,7 +123,7 @@ const onFileChange = (event: any) => {
     file.value = event.target.files[0]
     if (file.value) {
         const reader = new FileReader()
-        reader.readAsText(file.value, "UTF-8")
+        reader.readAsText(file.value, 'UTF-8')
         reader.onload = (evt) => {
             if (evt.target) {
                 parseRecipes(evt.target.result as string, {

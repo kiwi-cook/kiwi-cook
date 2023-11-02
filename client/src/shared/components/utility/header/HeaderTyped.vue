@@ -11,7 +11,7 @@
 </template>
 
 <script lang="ts" setup>
-import {PropType, Ref, ref, toRefs, watch} from "vue";
+import {PropType, Ref, ref, toRefs, watch} from 'vue';
 
 const props = defineProps({
     smallText: {

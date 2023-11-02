@@ -1,6 +1,6 @@
-import {Recipe} from "@/shared/types"
-import {useRecipeStore} from "@/app/storage";
-import {median} from "@/app/suggestions/util.ts";
+import {Recipe} from '@/shared/types'
+import {useRecipeStore} from '@/app/storage';
+import {median} from '@/app/suggestions/util.ts';
 
 
 /**

@@ -35,10 +35,10 @@ import {
     IonTitle,
     IonToolbar,
     modalController
-} from "@ionic/vue";
+} from '@ionic/vue';
 
-import {canBeInstalled, showInstallationPrompt} from "@/app/ts";
-import {APP_NAME} from "../../../shared/ts";
+import {canBeInstalled, showInstallationPrompt} from '@/app/ts';
+import {APP_NAME} from '../../../shared/ts';
 
 const install = () => {
     showInstallationPrompt()

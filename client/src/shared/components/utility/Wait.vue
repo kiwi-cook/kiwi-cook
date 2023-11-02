@@ -7,9 +7,9 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from "vue";
+import {ref} from 'vue';
 
-const foodEmojis = ["🍕", "🥗", "🍔", "🍣", "🥙", "🥞", "🍝", "🍜", "🍛", "🍲", "🍥", "🍱", "🍙", "🍚", "🍘", "🍧", "🍨", "🍮"]
+const foodEmojis = ['🍕', '🥗', '🍔', '🍣', '🥙', '🥞', '🍝', '🍜', '🍛', '🍲', '🍥', '🍱', '🍙', '🍚', '🍘', '🍧', '🍨', '🍮']
 const floatingFoods = ref<HTMLElement | null>(null);
 
 function createFood(floatingFoods: HTMLElement | null) {
@@ -17,8 +17,8 @@ function createFood(floatingFoods: HTMLElement | null) {
         return;
     }
 
-    const food = document.createElement("div");
-    food.classList.add("food");
+    const food = document.createElement('div');
+    food.classList.add('food');
     food.innerHTML = foodEmojis[Math.floor(Math.random() * foodEmojis.length)];
     const position = Math.random() * 100;
     food.style.left = `${position}%`;

@@ -14,15 +14,16 @@
 </template>
 
 <script lang="ts" setup>
-import {IonContent, IonPage, useIonRouter} from "@ionic/vue";
-import HeaderTyped from "@/shared/components/utility/header/HeaderTyped.vue";
-import {APP_NAME} from "@/shared/ts";
-import {useRecipeStore} from "@/app/storage";
-import {computed, ref, watch} from "vue";
+import {IonContent, IonPage, useIonRouter} from '@ionic/vue';
+import HeaderTyped from '@/shared/components/utility/header/HeaderTyped.vue';
+import {APP_NAME} from '@/shared/ts';
+import {useRecipeStore} from '@/app/storage';
+import {computed, ref, watch} from 'vue';
 
 const finished = ref(false)
 const router = useIonRouter()
 const recipeStore = useRecipeStore()
+const loading = computed(() => recipeStore.loading)
 const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
 watch([isLoadingInitialData, finished], () => {
     if (!isLoadingInitialData.value && finished.value) {
@@ -30,5 +31,5 @@ watch([isLoadingInitialData, finished], () => {
             router.replace({name: 'Home'})
         }, 1000)
     }
-})
+}, {immediate: true})
 </script>

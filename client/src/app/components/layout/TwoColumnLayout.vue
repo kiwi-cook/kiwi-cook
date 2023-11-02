@@ -26,13 +26,13 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs, useSlots} from 'vue';
-import {IonCol, IonGrid, IonRow} from "@ionic/vue";
+import {IonCol, IonGrid, IonRow} from '@ionic/vue';
 
 const props = defineProps({
     layout: {
-        type: String as PropType<"default" | "leftBigger" | "rightBigger" | "noRight">,
+        type: String as PropType<'default' | 'leftBigger' | 'rightBigger' | 'noRight'>,
         required: false,
-        default: "default"
+        default: 'default'
     }
 })
 const {layout} = toRefs(props)
@@ -56,55 +56,55 @@ type Layout = {
 const layouts: { [key: string]: Layout } = {
     default: {
         left: {
-            xl: "6",
-            lg: "6",
-            md: "12"
+            xl: '6',
+            lg: '6',
+            md: '12'
         },
         right: {
-            xl: "6",
-            lg: "6",
-            md: "12"
+            xl: '6',
+            lg: '6',
+            md: '12'
         }
     },
     leftBigger: {
         left: {
-            xl: "8",
-            lg: "8",
-            md: "7"
+            xl: '8',
+            lg: '8',
+            md: '7'
         },
         right: {
-            xl: "4",
-            lg: "4",
-            md: "5"
+            xl: '4',
+            lg: '4',
+            md: '5'
         }
     },
     rightBigger: {
         left: {
-            xl: "4",
-            lg: "4",
-            md: "5"
+            xl: '4',
+            lg: '4',
+            md: '5'
         },
         right: {
-            xl: "8",
-            lg: "8",
-            md: "7"
+            xl: '8',
+            lg: '8',
+            md: '7'
         }
     },
     noRight: {
         left: {
-            xl: "12",
-            lg: "12",
-            md: "12"
+            xl: '12',
+            lg: '12',
+            md: '12'
         },
         right: {
-            xl: "0",
-            lg: "0",
-            md: "0"
+            xl: '0',
+            lg: '0',
+            md: '0'
         }
     }
 }
 
-const selectedLayout = computed(() => hasRightSlot.value ? layouts[layout.value] : layouts["noRight"])
+const selectedLayout = computed(() => hasRightSlot.value ? layouts[layout.value] : layouts['noRight'])
 </script>
 
 <style>

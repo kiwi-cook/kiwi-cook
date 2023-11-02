@@ -1,9 +1,9 @@
-import {useRecipeStore} from "@/app/storage";
-import {useIonRouter} from "@ionic/vue";
-import {getLocaleStr, LocaleStr, newLocaleStr} from "@/shared/locales/i18n.ts";
-import {APP_NAME, Item, logError, Step, StepItem, tmpId} from "@/shared/ts";
-import {distance} from "fastest-levenshtein";
-import {share} from "@/shared/ts/share.ts";
+import {useRecipeStore} from '@/app/storage';
+import {useIonRouter} from '@ionic/vue';
+import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n.ts';
+import {APP_NAME, Item, logError, Step, StepItem, tmpId} from '@/shared/ts';
+import {distance} from 'fastest-levenshtein';
+import {share} from '@/shared/ts/share.ts';
 
 /**
  * Recipe
@@ -258,7 +258,7 @@ export function recipeFromJSON(json: any): Promise<Recipe> {
         recipe.id = json.id
         // if the id is undefined, throw an error
         if (recipe.id === undefined) {
-            throw reject(Error("recipe id is undefined"))
+            throw reject(Error('recipe id is undefined'))
         }
 
         recipe.name = json.name

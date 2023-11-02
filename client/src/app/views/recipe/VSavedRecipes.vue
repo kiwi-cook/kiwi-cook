@@ -36,10 +36,10 @@ import {computed} from 'vue';
 import {IonButton, IonContent, IonItem, IonPage} from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {Recipe} from '@/shared/ts';
-import RecipePreview from "@/app/components/recipe/previews/RecipePreview.vue";
-import Header from "@/shared/components/utility/header/Header.vue";
-import TasteBuddyLogo from "@/app/components/TasteBuddyLogo.vue";
-import List from "@/shared/components/utility/list/List.vue";
+import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
+import Header from '@/shared/components/utility/header/Header.vue';
+import TasteBuddyLogo from '@/app/components/TasteBuddyLogo.vue';
+import List from '@/shared/components/utility/list/List.vue';
 
 const recipeStore = useRecipeStore()
 const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes)

@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import {IonContent, IonPage} from '@ionic/vue';
-import SignIn from "@/editor/components/user/SignInComponent.vue";
-import Header from "@/shared/components/utility/header/Header.vue";
-import {APP_NAME} from "@/shared/ts";
+import SignIn from '@/editor/components/user/SignInComponent.vue';
+import Header from '@/shared/components/utility/header/Header.vue';
+import {APP_NAME} from '@/shared/ts';
 </script>
