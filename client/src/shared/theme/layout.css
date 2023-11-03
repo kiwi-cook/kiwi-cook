@@ -37,7 +37,6 @@ ion-content {
 
 .content-wrapper {
     margin: var(--margin-page);
-    height: 100%;
 }
 
 .content {
@@ -46,6 +45,10 @@ ion-content {
     max-width: var(--max-width) !important;
     margin-left: auto !important;
     margin-right: auto !important;
+    height: 100%;
+}
+
+.h100 {
     height: 100%;
 }
 

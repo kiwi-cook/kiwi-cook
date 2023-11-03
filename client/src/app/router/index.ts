@@ -1,5 +1,5 @@
 import {createRouter} from '@ionic/vue-router';
-import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
+import {createWebHashHistory, NavigationGuardNext, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '@/app/views/VTabs.vue'
 import VRecipe from '@/app/views/recipe/VRecipe.vue';
 import VRecipeSuggestions from '@/app/views/recipe/VRecipeSuggestions.vue';
@@ -71,11 +71,11 @@ export function createTasteBuddyRouter(): Router {
         routes
     })
 
-    router.beforeEach((to, from, next) => {
+    router.beforeEach((to, from, next: NavigationGuardNext) => {
         const recipeStore = useRecipeStore()
         const isLoadingInitialData = recipeStore.isLoadingInitial
         if (isLoadingInitialData && to.name !== 'Hello') {
-            next({name: 'Hello'})
+            next({name: 'Hello', query: {redirect: to.path}})
         } else {
             return next()
         }

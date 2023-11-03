@@ -29,7 +29,9 @@
         <TwoColumnLayout layout="rightBigger">
             <template #left>
                 <div class="sticky">
-                    <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
+                    <div class="header">
+                        <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
+                    </div>
                     <IonCard>
                         <IonCardContent>
                             <IonItem class="recipe-servings" color="light" lines="none">
@@ -56,12 +58,14 @@
             </template>
 
             <template #right>
-                <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
+                <div class="header">
+                    <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
+                    </h2>
                     <IonChip v-if="recipe?.getDuration() ?? 0 > 0">
                         <IonIcon :icon="time"/>
                         <IonLabel>{{ recipe?.getDuration() }} min.</IonLabel>
                     </IonChip>
-                </h2>
+                </div>
                 <template v-for="(step, stepIndex) in [...steps, goodAppetiteStep]" :key="stepIndex">
                     <StepComponent :amount-steps="steps.length + 1" :step="step" :step-index="stepIndex"/>
                 </template>
@@ -246,5 +250,12 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 .recipe-step-index-max {
     font-size: var(--font-size-small);
     font-weight: var(--font-weight-normal);
+}
+
+.header {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 </style>
