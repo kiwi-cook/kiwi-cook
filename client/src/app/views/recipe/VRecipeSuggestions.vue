@@ -5,14 +5,19 @@
                 <div class="content">
                     <Header :big-text="$t('Suggestions.Title').split(';')" small-text="Welcome"/>
 
-                    <!-- Searchbar for ingredients, tools and recipes -->
+                    <!-- Searchbar for ingredients, tools, recipes and tags -->
                     <Searchbar v-model="filterInput" :items="filteredItems"
                                :placeholder="$t('Suggestions.SearchbarPrompt')" :recipes="filteredRecipes"
                                :tags="filteredTags"
                                class="searchbar"
-                               @select-item="includeItem($event); preferencesActive = true; activePreference = 'ingredients'"
+                               @select-item="includeItem($event);
+                                             preferencesActive = true;
+                                             activePreference = 'ingredients'"
                                @select-preferences="preferencesActive = $event"
-                               @select-recipe="routeRecipe($event)" @select-tag="includeTag($event)"/>
+                               @select-recipe="routeRecipe($event)"
+                               @select-tag="includeTag($event);
+                                            preferencesActive = true;
+                                            activePreference = 'tags'"/>
 
                     <!-- Preferences -->
                     <Transition name="fade-top">
@@ -248,6 +253,9 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Fab timer -->
+            <FabTimer/>
         </IonContent>
     </IonPage>
 </template>
@@ -282,6 +290,7 @@ import {useI18n} from 'vue-i18n';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
 import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/suggestions';
 import Duration from '@/app/components/recipe/chip/Duration.vue';
+import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()

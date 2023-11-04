@@ -21,6 +21,7 @@
                     <IonIcon :icon="arrowBack"/>
                 </IonFabButton>
             </IonFab>
+            <FabTimer no-routing/>
         </IonContent>
     </IonPage>
 </template>
@@ -33,6 +34,7 @@ import {useRoute} from 'vue-router';
 import {Recipe} from '@/shared/ts';
 import {arrowBack} from 'ionicons/icons';
 import RecipeComponent from '@/app/components/recipe/Recipe.vue';
+import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 
 const route = useRoute()

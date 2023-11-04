@@ -81,6 +81,5 @@ export function createTasteBuddyRouter(): Router {
         }
     })
 
-
     return router
 }

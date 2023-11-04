@@ -64,7 +64,8 @@
                     <Duration :duration="recipe?.getDuration()"/>
                 </div>
                 <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
-                    <StepComponent :amount-steps="steps.length" :step="step" :step-index="stepIndex"/>
+                    <StepComponent :amount-steps="steps.length" :recipe-id="recipe?.getId()" :step="step"
+                                   :step-index="stepIndex"/>
                 </template>
                 <!-- if no steps are available, don't show the good appetite message -->
                 <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep"/>

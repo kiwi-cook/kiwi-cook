@@ -8,7 +8,7 @@
                     <span v-if="amountSteps > 0"
                           class="recipe-step-index-max"> / {{ amountSteps }}</span>
                 </h3>
-                <Duration :duration="step?.duration"/>
+                <Duration :duration="step?.duration" @click="startTimer"/>
                 <Temperature :temperature="step?.temperature"/>
             </IonCardTitle>
             <IonCardTitle v-else-if="step.type === STEP_TYPES.HEADER">
@@ -31,10 +31,11 @@
 <script lang="ts" setup>
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
-import {computed, PropType, ref} from 'vue';
+import {computed, PropType, toRefs} from 'vue';
 import {Step, STEP_TYPES} from '@/shared/ts';
 import Duration from '@/app/components/recipe/chip/Duration.vue';
 import Temperature from '@/app/components/recipe/chip/Temperature.vue';
+import {useTasteBuddyStore} from '@/app/storage';
 
 const props = defineProps({
     step: {
@@ -50,11 +51,20 @@ const props = defineProps({
         type: Number,
         required: false,
         default: -1
-    }
+    },
+    recipeId: {
+        type: String,
+        required: false
+    },
 })
 
-const step = ref<Step>(props.step)
+const {step, recipeId} = toRefs(props)
 const stepItems = computed(() => step.value.getStepItems())
+
+const store = useTasteBuddyStore()
+const startTimer = () => {
+    store.setTimer(step?.value?.duration, recipeId?.value)
+}
 </script>
 
 <style>

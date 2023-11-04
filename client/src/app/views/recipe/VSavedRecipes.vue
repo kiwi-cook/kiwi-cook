@@ -27,6 +27,7 @@
                     </template>
                 </div>
             </div>
+            <FabTimer/>
         </IonContent>
     </IonPage>
 </template>
@@ -40,6 +41,7 @@ import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import TasteBuddyLogo from '@/app/components/TasteBuddyLogo.vue';
 import List from '@/shared/components/utility/list/List.vue';
+import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 const recipeStore = useRecipeStore()
 const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes)

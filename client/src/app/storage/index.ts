@@ -104,19 +104,26 @@ async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() => Prom
 
 // Define typings for the store state
 
-interface UserState {
+interface TasteBuddyAppState {
     language: {
         lang: string,
         supportedLanguages: string[]
     },
+    timer: {
+        recipeId?: string,
+        time: number,
+        remaining: number,
+        timerInterval: number | null
+    } | null
 }
 
-export const useTasteBuddyStore = defineStore('tastebuddy', {
-    state: (): UserState => ({
+export const useTasteBuddyStore = defineStore('tastebuddy-app', {
+    state: (): TasteBuddyAppState => ({
         language: {
             lang: DEFAULT_LOCALE,
             supportedLanguages: SUPPORT_LOCALES
         },
+        timer: null
     }),
     actions: {
         /**
@@ -126,21 +133,77 @@ export const useTasteBuddyStore = defineStore('tastebuddy', {
         setLanguage(language: SUPPORT_LOCALES_TYPE) {
             this.language.lang = language
             setI18nLanguage(i18n, language)
-        }
+        },
+        /**
+         * Set step timer for a recipe
+         * @param time in minutes
+         * @param recipeId
+         */
+        async setTimer(time?: number, recipeId?: string) {
+            // If no time is given, return immediately
+            if (!time) {
+                return Promise.resolve()
+            }
+
+            // Stop the timer if it is already running
+            if (this.timer !== null) {
+                await this.stopTimer()
+            }
+
+            this.timer = {
+                recipeId: recipeId,
+                time: time * 60,
+                remaining: time * 60,
+                timerInterval: null
+            }
+
+            // Start the timer
+            this.timer.timerInterval = setInterval(() => {
+                if (this.timer !== null) {
+                    this.timer.remaining -= 1
+                } else {
+                    const audio = new Audio('/assets/audio/timer.mp3');
+                    audio.play();
+                    this.stopTimer()
+                }
+            }, 1000)
+        },
+        async resetTimer() {
+            if (this.timer === null) {
+                return
+            }
+            this.timer.remaining = this.timer.time
+        },
+        async stopTimer() {
+            if (this.timer === null) {
+                return
+            }
+            if (this.timer.timerInterval !== null) {
+                clearInterval(this.timer.timerInterval)
+            }
+            this.timer = null
+        },
     }
 })
 
 interface RecipeState {
-    loading: { [key: string]: boolean }
-    recipes: { [id: string]: Recipe }
+    loading: {
+        [key: string]: boolean
+    }
+    recipes: {
+        [id: string]: Recipe
+    }
     recipePredictions: Recipe[]
     savedRecipes: Set<string>
-    items: { [id: string]: Item }
+    items: {
+        [id: string]: Item
+    },
+
 }
 
 // Create the store
 // called by main.ts
-export const useRecipeStore = defineStore('recipes', {
+export const useRecipeStore = defineStore('recipes-app', {
     state: (): RecipeState => ({
         loading: {
             initial: true,
@@ -148,7 +211,7 @@ export const useRecipeStore = defineStore('recipes', {
         recipes: {},
         recipePredictions: [],
         savedRecipes: new Set(),
-        items: {},
+        items: {}
     }),
     getters: {
         getItemNamesAsList(): string[] {
@@ -166,7 +229,9 @@ export const useRecipeStore = defineStore('recipes', {
             return [...itemIds].map((itemId: string) => this.items[itemId]).filter((item: Item) => typeof item !== 'undefined')
         },
         getItemsAsList: (state): Item[] => Object.values(state.items ?? {}) ?? [],
-        getItemsAsMap: (state): { [id: string]: Item } => state.items ?? {},
+        getItemsAsMap: (state): {
+            [id: string]: Item
+        } => state.items ?? {},
         getRecipeOfTheDay(): Recipe {
             // Calculate the day of the year
             const now: Date = new Date();
@@ -193,7 +258,9 @@ export const useRecipeStore = defineStore('recipes', {
          * Get the recipes mapped by their id
          * @param state
          */
-        getRecipesAsMap: (state): { [id: string]: Recipe } => state.recipes ?? {},
+        getRecipesAsMap: (state): {
+            [id: string]: Recipe
+        } => state.recipes ?? {},
         getSavedKeyValues(): {
             numberOfSteps: number[],
             numberOfIngredients: number[],
@@ -244,8 +311,12 @@ export const useRecipeStore = defineStore('recipes', {
          * Get saved recipes as a map
          * @param state
          */
-        getSavedRecipesAsMap(state): { [id: string]: Recipe } {
-            return [...state.savedRecipes.keys()].reduce((recipes: { [id: string]: Recipe }, recipeId) => {
+        getSavedRecipesAsMap(state): {
+            [id: string]: Recipe
+        } {
+            return [...state.savedRecipes.keys()].reduce((recipes: {
+                [id: string]: Recipe
+            }, recipeId) => {
                 recipes[recipeId] = this.recipes[recipeId]
                 return recipes
             }, {})
