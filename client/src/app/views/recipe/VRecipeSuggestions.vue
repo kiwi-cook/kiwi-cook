@@ -24,14 +24,12 @@
                                     {{ $t('Suggestions.Preferences.Ingredients', selectedItems.length) }}
                                 </IonLabel>
                             </IonChip>
-                            <IonChip :outline="activePreference === 'duration'"
-                                     @click="activePreference = 'duration'">
-                                <IonIcon :icon="time"/>
-                                <IonLabel>{{ maxCookingTime ?? 0 }} min. {{
-                                    $t('Suggestions.Preferences.Duration')
-                                }}
-                                </IonLabel>
-                            </IonChip>
+                            <Duration :always-show="true"
+                                      :class="`ion-chip-outline ${activePreference === 'duration' ? 'active' : ''}`"
+                                      :duration="maxCookingTime"
+                                      @click="activePreference = 'duration'">
+                                {{ $t('Suggestions.Preferences.Duration') }}
+                            </Duration>
                             <IonChip :outline="activePreference === 'tags'"
                                      @click="activePreference = 'tags'">
                                 <IonLabel># {{ selectedTags.length }}
@@ -91,18 +89,16 @@
                             <IonCard v-if="activePreference === 'duration'">
                                 <IonCardContent>
                                     <template v-for="time in cookingTimes" :key="time">
-                                        <IonChip :outline="true" class="cooking-time"
-                                                 @click="maxCookingTime = time">
-                                            {{ time }} min.
-                                        </IonChip>
+                                        <Duration :duration="time" class="cooking-time" no-icon outline
+                                                  @click="maxCookingTime = time"/>
                                     </template>
-                                    <IonChip :outline="true" class="recipe-price"
+                                    <IonChip class="recipe-price" outline
                                              @click="maxCookingTime = undefined">
                                         Any duration
                                     </IonChip>
                                     <IonRange v-model="maxCookingTime"
                                               :label="`${maxCookingTime ? `${maxCookingTime} min.` : 'Any duration'}`"
-                                              :max="60" :min="5" :pin="true"
+                                              :max="60" :min="0" :pin="true"
                                               :pin-formatter="(value: number) => `${value} min.`"
                                               :snaps="true" :step="5" :ticks="false"
                                               label-placement="end"/>
@@ -134,12 +130,12 @@
                             <IonCard v-if="activePreference === 'price'">
                                 <IonCardContent>
                                     <template v-for="price in prices" :key="price">
-                                        <IonChip :outline="true" class="recipe-price"
+                                        <IonChip class="recipe-price" outline
                                                  @click="maxPrice = price">
                                             {{ price }} €
                                         </IonChip>
                                     </template>
-                                    <IonChip :outline="true" class="recipe-price"
+                                    <IonChip class="recipe-price" outline
                                              @click="maxPrice = undefined">
                                         Any price
                                     </IonChip>
@@ -278,13 +274,14 @@ import Searchbar from '@/app/components/recipe/Searchbar.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
 import ItemComponent from '@/shared/components/recipe/Item.vue';
-import {add, close, closeCircleOutline, list, remove, search, time} from 'ionicons/icons';
+import {add, close, closeCircleOutline, list, remove, search} from 'ionicons/icons';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import List from '@/shared/components/utility/list/List.vue';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import {useI18n} from 'vue-i18n';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
 import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/suggestions';
+import Duration from '@/app/components/recipe/chip/Duration.vue';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
@@ -382,7 +379,7 @@ const maxPrice = ref<number | undefined>(undefined)
 watch(maxPrice, () => searchFilters.value.add('price'))
 
 // Cooking time
-const cookingTimes = [5, 10, 20, 45]
+const cookingTimes = [5, 10, 20, 45, 60, 90, 120, 60 * 24]
 const maxCookingTime = ref<number | undefined>(undefined)
 watch(maxCookingTime, () => searchFilters.value.add('duration'))
 

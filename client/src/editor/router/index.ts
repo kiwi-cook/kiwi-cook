@@ -1,6 +1,6 @@
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
-import {beforeEachCheckAuth} from '@/editor/router/middleware';
+import {beforeEachCheckAuth, beforeEachPrepareStore} from '@/editor/router/middleware';
 
 // Pages
 import TabsPage from '@/editor/views/VTabs.vue'
@@ -71,8 +71,13 @@ export function createTasteBuddyRouter(): Router {
         routes
     })
 
+
     router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-        beforeEachCheckAuth(to, from, next);
+        // prepare the store
+        beforeEachPrepareStore(to, from, next).then(() => {
+            // check if the user is authenticated
+            beforeEachCheckAuth(to, from, next);
+        })
     })
 
     return router;

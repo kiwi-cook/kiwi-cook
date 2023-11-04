@@ -27,12 +27,12 @@
         </div>
 
         <TwoColumnLayout layout="rightBigger">
-            <template #left>
+            <template v-if="ingredients.length > 0 || tools.length > 0" #left>
                 <div class="sticky">
                     <div class="header">
                         <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
                     </div>
-                    <IonCard>
+                    <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
                             <IonItem class="recipe-servings" color="light" lines="none">
                                 <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
@@ -49,7 +49,7 @@
                             <ItemList :items="ingredients"/>
                         </IonCardContent>
                     </IonCard>
-                    <IonCard>
+                    <IonCard v-if="tools.length > 0">
                         <IonCardContent>
                             <ItemList :items="tools"/>
                         </IonCardContent>
@@ -61,14 +61,13 @@
                 <div class="header">
                     <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
                     </h2>
-                    <IonChip v-if="recipe?.getDuration() ?? 0 > 0">
-                        <IonIcon :icon="time"/>
-                        <IonLabel>{{ recipe?.getDuration() }} min.</IonLabel>
-                    </IonChip>
+                    <Duration :duration="recipe?.getDuration()"/>
                 </div>
-                <template v-for="(step, stepIndex) in [...steps, goodAppetiteStep]" :key="stepIndex">
-                    <StepComponent :amount-steps="steps.length + 1" :step="step" :step-index="stepIndex"/>
+                <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
+                    <StepComponent :amount-steps="steps.length" :step="step" :step-index="stepIndex"/>
                 </template>
+                <!-- if no steps are available, don't show the good appetite message -->
+                <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep"/>
             </template>
         </TwoColumnLayout>
 
@@ -95,16 +94,17 @@ import {
     IonNote,
     IonText,
 } from '@ionic/vue';
-import {Recipe, Step, StepItem} from '@/shared/ts';
+import {Recipe, Step, STEP_TYPES, StepItem} from '@/shared/ts';
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import StepComponent from '@/app/components/recipe/Step.vue';
 import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
-import {add, heart, heartOutline, remove, shareSocial, time} from 'ionicons/icons';
+import {add, heart, heartOutline, remove, shareSocial} from 'ionicons/icons';
 import {CanShareResult, Share} from '@capacitor/share';
 import ReadMore from '@/shared/components/utility/ReadMore.vue';
 import {useI18n} from 'vue-i18n';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {useRecipeStore} from '@/app/storage';
+import Duration from '@/app/components/recipe/chip/Duration.vue';
 
 /* Recipe */
 const props = defineProps({
@@ -153,11 +153,9 @@ watch(servings, (newServings, oldServings) => {
 const {t} = useI18n()
 
 // Good Appetite Step
-const goodAppetiteStep = computed<Step>(() => {
-    const goodAppetiteStep = new Step()
-    goodAppetiteStep.setDescription(t('Recipe.GoodAppetite'))
-    return goodAppetiteStep
-})
+const goodAppetiteStep = new Step()
+goodAppetiteStep.type = STEP_TYPES.HEADER
+goodAppetiteStep.setDescription(t('Recipe.GoodAppetite'))
 
 /* Share */
 const shareRecipe = () => recipe?.value?.share();
@@ -168,12 +166,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 })
 </script>
 
-<style>
-.item-highlight {
-    font-weight: bold;
-    color: var(--ion-color-primary);
-}
-</style>
 
 <style scoped>
 .recipe-wrapper {
@@ -245,11 +237,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-}
-
-.recipe-step-index-max {
-    font-size: var(--font-size-small);
-    font-weight: var(--font-weight-normal);
 }
 
 .header {

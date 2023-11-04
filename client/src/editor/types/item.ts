@@ -4,6 +4,13 @@ import {useRecipeStore} from '@/editor/storage';
 export class MutableItem extends Item {
 
     /**
+     * Get the localized name of the item
+     */
+    public getRawName(lang: string): string {
+        return this.name[lang]
+    }
+
+    /**
      * Update the item in the store
      * @returns the item to allow chaining
      */

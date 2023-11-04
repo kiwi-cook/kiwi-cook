@@ -1,6 +1,7 @@
-import {Item, logDebug, Recipe, Step, StepItem} from '@/shared/ts';
+import {logDebug, Recipe, Step, StepItem} from '@/shared/ts';
 import {useRecipeStore} from '@/editor/storage';
 import {setLocaleStr} from '@/shared/locales/i18n.ts';
+import {MutableItem} from '@/editor/types/item.ts';
 
 export class MutableRecipe extends Recipe {
 
@@ -97,8 +98,11 @@ export class MutableRecipe extends Recipe {
      * @param item the item to add
      * @returns the recipe and the item
      */
-    public addItem(stepIndex?: number, itemIndex?: number, item?: Item): { item: Item, recipe: Recipe } {
-        item = item ?? new Item();
+    public addItem(stepIndex?: number, itemIndex?: number, item?: MutableItem): {
+        item: MutableItem,
+        recipe: MutableRecipe
+    } {
+        item = item ?? new MutableItem();
         logDebug('recipe.addItem', `add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
         const stepItem = new StepItem(item);
 
@@ -135,7 +139,7 @@ export class MutableRecipe extends Recipe {
         this.computeAuthors()
     }
 
-    public replaceItem(itemId: string, newItem?: Item) {
+    public replaceItem(itemId: string, newItem?: MutableItem) {
         if (!newItem) {
             return
         }

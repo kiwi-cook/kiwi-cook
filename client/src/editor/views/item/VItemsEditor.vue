@@ -33,7 +33,7 @@
                         <IonAccordion v-for="(item, index) in items" :key="index" :value="item.getId()">
                             <IonItem slot="header">
                                 <IonLabel>
-                                    {{ item.getName() }}
+                                    {{ item.getName(undefined, 1) }}
                                 </IonLabel>
                             </IonItem>
                             <div slot="content" class="ion-padding">
@@ -109,12 +109,6 @@ const formatItems = () => {
         name = name[0].toUpperCase() + name.slice(1)
         // Replace dashes with spaces
         name = name.replace(/-/g, ' ')
-        // Add plurals
-        if (!name.endsWith('s') && !name.includes('|')) {
-            name += ' | ' + name + 's'
-        } else if (name.endsWith('s') && !name.includes('|')) {
-            name = name.slice(0, -1) + ' | ' + name
-        }
 
         item.setName(name, 'en')
 
@@ -127,7 +121,7 @@ const formatItems = () => {
 
 const removeDuplicates = () => {
     const itemNames: string[] = []
-    items.value.forEach((item: Item) => {
+    items.value.forEach((item: MutableItem) => {
         const name = item.getName()
         if (itemNames.includes(name)) {
             item.delete()
@@ -138,7 +132,7 @@ const removeDuplicates = () => {
 }
 
 const removeUnusedItems = () => {
-    items.value.forEach((item: Item) => {
+    items.value.forEach((item: MutableItem) => {
         if (!(item.getId() in recipesByItemIds.value)) {
             item.delete();
         }

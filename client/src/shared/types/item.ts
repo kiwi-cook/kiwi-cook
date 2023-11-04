@@ -29,6 +29,7 @@ export class Item {
     /**
      * Get the localized name of the item
      * @param lang
+     * @param amount
      */
     public getName(lang?: string, amount?: number): string {
         const locale = getLocaleStr(this.name, lang).split('|')

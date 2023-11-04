@@ -4,9 +4,10 @@
             <RecipeTitle :recipe="recipe"/>
             <p class="recipe-description desc">{{ recipe.getShortDescription() }}</p>
             <div class="pill-container">
-                <div v-for="tag in tags" :key="tag" class="pill">{{ tag }}</div>
-                <div class="pill static">Prep: {{ duration }} mins</div>
-                <div class="pill static">Servings: 1</div>
+
+                <IonChip v-for="tag in tags" :key="tag">{{ tag }}</IonChip>
+                <Duration :duration="duration"/>
+                <IonChip>Servings: 1</IonChip>
             </div>
             <div class="recipe-ingredients">
                 <h3>Ingredients</h3>
@@ -28,9 +29,10 @@
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from 'vue';
 import {Item, Recipe, StepItem} from '@/shared/ts';
-import {useIonRouter} from '@ionic/vue';
+import {IonChip, useIonRouter} from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {RecipeSuggestion} from '@/app/suggestions';
+import Duration from '@/app/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     recipe: {

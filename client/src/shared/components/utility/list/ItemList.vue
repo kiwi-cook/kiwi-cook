@@ -1,7 +1,7 @@
 <template>
     <ul v-if="items.length > 0" :class="['item-list', {'horizontal': horizontal}]">
         <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" class="item">
-            <ItemComponent :item="item"/>
+            <ItemComponent :item="item" :quantity-position="quantityPosition"/>
         </li>
     </ul>
 </template>
@@ -25,20 +25,15 @@ const props = defineProps({
         type: Array as PropType<string[]>,
         required: false
     },
-    sort: {
-        type: Boolean,
-        required: false,
-        default: true
-    },
     horizontal: {
         type: Boolean,
         required: false,
         default: false
     },
-    noLines: {
-        type: Boolean,
+    quantityPosition: {
+        type: String as PropType<'start' | 'end'>,
         required: false,
-        default: false
+        default: 'end'
     },
     enableEmit: {
         type: Boolean,

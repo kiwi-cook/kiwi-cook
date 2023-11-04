@@ -20,7 +20,7 @@
                             <IonLabel>{{ $t('General.Recipe', recipes.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(recipe, recipeIndex) in recipes" :key="recipeIndex"
-                                 class="link" @click="selectRecipe(recipe)">
+                                 button @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
                         </IonItem>
                     </IonItemGroup>
@@ -29,18 +29,16 @@
                             <IonLabel>{{ $t('General.Tag', tags.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem class="over-x-scroll" lines="none">
-                            <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex"
-                                     class="link" @click="selectTag(tag)">
+                            <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex" button @click="selectTag(tag)">
                                 {{ tag }}
                             </IonChip>
                         </IonItem>
                     </IonItemGroup>
                     <IonItemGroup v-if="items.length > 0">
                         <IonItemDivider>
-                            <IonLabel>{{ $t('General.Item', 2) }}</IonLabel>
+                            <IonLabel>{{ $t('General.Item', items.length) }}</IonLabel>
                         </IonItemDivider>
-                        <IonItem v-for="(item, itemIndex) in items" :key="itemIndex"
-                                 class="link" @click="selectItem(item)">
+                        <IonItem v-for="(item, itemIndex) in items" :key="itemIndex" button @click="selectItem(item)">
                             {{ item.getName() }}
                         </IonItem>
                     </IonItemGroup>
@@ -69,29 +67,29 @@ import {closeOutline, optionsOutline} from 'ionicons/icons';
 
 // Props
 const props = defineProps({
-    placeholder: {
-        type: String,
-        required: true
-    },
-    tags: {
-        type: Array as PropType<string[]>,
+    disableList: {
+        type: Boolean,
         required: false,
-        default: () => []
-    },
-    recipes: {
-        type: Array as PropType<Recipe[]>,
-        required: false,
-        default: () => []
+        default: false
     },
     items: {
         type: Array as PropType<Item[]>,
         required: false,
         default: () => []
     },
-    disableList: {
-        type: Boolean,
+    placeholder: {
+        type: String,
+        required: true
+    },
+    recipes: {
+        type: Array as PropType<Recipe[]>,
         required: false,
-        default: false
+        default: () => []
+    },
+    tags: {
+        type: Array as PropType<string[]>,
+        required: false,
+        default: () => []
     }
 })
 const {tags, recipes, items, disableList} = toRefs(props);

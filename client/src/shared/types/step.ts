@@ -2,6 +2,12 @@ import {StepItem, stepItemFromJSON} from '@/shared/ts';
 import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
 import {parseTemperature} from '@/shared/ts/parser.ts';
 
+export enum STEP_TYPES {
+    HEADER = 'header',
+    STEP = 'step',
+    NOTE = 'note'
+}
+
 /**
  * Step of a recipe
  * It is a step with a list of StepItems
@@ -13,12 +19,14 @@ export class Step {
     desc: LocaleStr;
     duration?: number;
     temperature?: number;
+    type: STEP_TYPES
 
     constructor() {
         this.items = []
         this.imgUrl = ''
         this.desc = newLocaleStr()
         this.duration = 0
+        this.type = STEP_TYPES.STEP
     }
 
     /**
@@ -35,6 +43,7 @@ export class Step {
         item.desc = json.desc
         item.duration = json.duration
         item.temperature = parseTemperature(json.temperature, item.getDescription())
+        item.type = json.type ?? STEP_TYPES.STEP
         return item
     }
 
@@ -76,11 +85,14 @@ export class Step {
             return ''
         }
 
-        this.getStepItems().forEach((item: StepItem) => {
+        for (const item of this.getStepItems()) {
             const itemName = item.getName()
+            if (!itemName || itemName === '') {
+                continue;
+            }
             const regex = new RegExp(`\\s+${itemName}`, 'ig')
             description = description.replace(regex, ` <span class="${className}">${itemName}</span>`)
-        })
+        }
         return description
     }
 

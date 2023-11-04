@@ -2,10 +2,7 @@
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
         <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image"/>
         <div class="mini-recipe-tags">
-            <IonChip v-if="duration ?? 0 > 0" class="mini-recipe-tag">
-                <IonIcon :icon="time" size="small"/>
-                <IonLabel>{{ duration }} min.</IonLabel>
-            </IonChip>
+            <Duration :duration="duration" class="mini-recipe-tag"/>
         </div>
         <h3 class="mini-recipe-preview-title">{{ name }}</h3>
     </div>
@@ -13,8 +10,8 @@
 
 <script lang="ts" setup>
 import {toRefs} from 'vue';
-import {IonChip, IonIcon, IonLabel, useIonRouter} from '@ionic/vue';
-import {time} from 'ionicons/icons';
+import {useIonRouter} from '@ionic/vue';
+import Duration from '@/app/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     name: {

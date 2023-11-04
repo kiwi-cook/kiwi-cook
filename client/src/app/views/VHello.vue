@@ -31,7 +31,7 @@ const timeout = ref(0)
 watch([isLoadingInitialData, finished], () => {
     if (!isLoadingInitialData.value && finished.value) {
         timeout.value = setTimeout(() => {
-            router.push(redirect.value)
+            router.replace(redirect.value)
         }, 1000)
     }
 }, {immediate: true})

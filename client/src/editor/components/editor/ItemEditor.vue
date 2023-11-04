@@ -17,9 +17,10 @@
                 </IonButton>
             </IonItem>
             <IonCardTitle color="primary">
-                <template v-for="lang in supportedLanguages" :key="lang">
+                <template v-for="lang in SUPPORT_LOCALES" :key="lang">
                     <IonItem lines="none">
-                        <IonInput :label="`Name in ${lang}`" :maxlength="40" :value="item?.getName(lang)"
+                        <IonInput :label="`Name in ${lang}`" :maxlength="40"
+                                  :value="item?.getRawName(lang)"
                                   label-placement="stacked"
                                   placeholder="e.g. Baking powder" type="text"
                                   @keyup.enter="item?.setName($event.target.value, lang)"
@@ -106,19 +107,11 @@ const props = defineProps({
 })
 
 const {item} = toRefs(props)
-const supportedLanguages = SUPPORT_LOCALES
 
 const recipeStore = useRecipeStore()
-
 const showUsedInRecipes = ref<boolean>(false)
-const usedInRecipes = computed<MutableRecipe[]>(() => {
-    const recipesByItemIds = recipeStore.getRecipesByItemIds
-    if (!recipesByItemIds || !item.value || !(item.value.getId() in recipesByItemIds)) {
-        return []
-    }
-    return recipesByItemIds[item.value?.getId() ?? '']
-        .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId])
-})
+const usedInRecipes = computed(() => recipeStore.getRecipesAsListByItemId(item?.value?.getId() ?? '')
+    .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId]))
 
 const saveItem = () => item?.value?.save()
 const deleteItem = () => item?.value?.delete()

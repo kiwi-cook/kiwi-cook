@@ -3,15 +3,18 @@
         <IonThumbnail slot="start" class="item-thumbnail">
             <img :key="mappedItem.name" :alt="mappedItem.name" :src="mappedItem.imgUrl ?? ''" loading="lazy"/>
         </IonThumbnail>
-        <IonLabel :class="[{'item-excluded': include === false}]">
+        <IonLabel :class="[{'item-excluded': include === false}, 'item-label']">
+            <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
+                {{ mappedItem.quantity }} {{ mappedItem.unit }}
+            </span>
             {{ mappedItem.name }}
             <span v-if="include" class="item-included">✓</span>
         </IonLabel>
         <div slot="end">
             <slot name="end">
-                <template v-if="mappedItem.servings !== 0">
-                    {{ mappedItem.servings }} {{ mappedItem.unit }}
-                </template>
+                <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'end'" class="item-quantity">
+                    {{ mappedItem.quantity }} {{ mappedItem.unit }}
+                </span>
             </slot>
         </div>
     </IonItem>
@@ -32,12 +35,17 @@ const props = defineProps({
         required: false,
         default: undefined
     },
+    quantityPosition: {
+        type: String as PropType<'start' | 'end'>,
+        required: false,
+        default: 'end'
+    }
 })
 const {item} = toRefs(props);
 
 type CustomItem = {
     name: string,
-    servings: number,
+    quantity: number,
     unit: string,
     imgUrl: string,
 }
@@ -46,13 +54,20 @@ const mappedItem = computed<CustomItem | undefined>(() => {
     if (!item?.value) {
         return undefined;
     }
-    const servings = item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.servings : 1;
+    let quantity: number | undefined;
+    if (item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient) {
+        quantity = item?.value?.servings;
+    } else {
+        quantity = 1;
+    }
+    const name = item?.value?.getName(undefined, quantity)
+    const unit = item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '';
 
     return {
-        name: item?.value?.getName(undefined, servings),
+        name,
         imgUrl: item?.value?.imgUrl,
-        servings,
-        unit: item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '',
+        quantity,
+        unit,
     }
 })
 </script>
@@ -60,11 +75,7 @@ const mappedItem = computed<CustomItem | undefined>(() => {
 <style scoped>
 ion-item.item::part(native) {
     padding: 0;
-    min-width: 230px;
-}
-
-.item.button {
-    cursor: pointer;
+    min-width: 200px;
 }
 
 .item-thumbnail {

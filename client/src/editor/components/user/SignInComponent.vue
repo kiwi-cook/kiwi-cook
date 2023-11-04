@@ -61,6 +61,7 @@ watch(isAuthenticated, () => {
 
 /* Login */
 const authenticate = () => {
+    console.log(store)
     store.basicAuth({
         username: username.value,
         password: password.value,
