@@ -33,8 +33,8 @@ import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
 import {computed, PropType, toRefs} from 'vue';
 import {Step, STEP_TYPES} from '@/shared/ts';
-import Duration from '@/app/components/recipe/chip/Duration.vue';
-import Temperature from '@/app/components/recipe/chip/Temperature.vue';
+import Duration from '@/shared/components/recipe/chip/Duration.vue';
+import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
 import {useTasteBuddyStore} from '@/app/storage';
 
 const props = defineProps({

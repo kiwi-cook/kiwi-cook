@@ -11,7 +11,7 @@
 <script lang="ts" setup>
 import {toRefs} from 'vue';
 import {useIonRouter} from '@ionic/vue';
-import Duration from '@/app/components/recipe/chip/Duration.vue';
+import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     name: {

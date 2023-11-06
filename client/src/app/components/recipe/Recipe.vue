@@ -105,7 +105,7 @@ import ReadMore from '@/shared/components/utility/ReadMore.vue';
 import {useI18n} from 'vue-i18n';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {useRecipeStore} from '@/app/storage';
-import Duration from '@/app/components/recipe/chip/Duration.vue';
+import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 /* Recipe */
 const props = defineProps({

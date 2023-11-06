@@ -52,6 +52,10 @@ ion-content {
     height: 100%;
 }
 
+.w100 {
+    width: 100%;
+}
+
 .center {
     position: relative;
     text-align: center;

@@ -10,7 +10,7 @@ export function formatDate(date?: Date): string {
     if (!date) {
         return '';
     }
-    return `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
+    return date.toISOString().split('T')[0].split('-').reverse().join('.');
 }
 
 

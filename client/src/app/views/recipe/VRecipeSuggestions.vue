@@ -289,7 +289,7 @@ import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import {useI18n} from 'vue-i18n';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
 import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/suggestions';
-import Duration from '@/app/components/recipe/chip/Duration.vue';
+import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 const {t} = useI18n()

@@ -32,7 +32,7 @@ import {Item, Recipe, StepItem} from '@/shared/ts';
 import {IonChip, useIonRouter} from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {RecipeSuggestion} from '@/app/suggestions';
-import Duration from '@/app/components/recipe/chip/Duration.vue';
+import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     recipe: {
