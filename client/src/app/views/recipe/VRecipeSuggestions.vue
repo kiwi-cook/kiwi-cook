@@ -408,7 +408,7 @@ const randomRecipes = computed<Recipe[]>(() => {
         .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
 })
 
-/* Recipe suggestions based on Neural Network */
+/* Computed recipe suggestions */
 const predictedRecipes = computed<Recipe[]>(() => recipeStore.getRecipePredictions)
 
 /* Recipe index */

@@ -6,6 +6,7 @@
     "InstallPWA": "Install app"
   },
   "General": {
+    "WelcomeText": "Hi;Welcome to;{appName}",
     "Recipe": "Recipe | Recipes",
     "Item": "Item | Items",
     "Tag": "Tag | Tags",
@@ -14,7 +15,8 @@
   },
   "Recipe": {
     "Src": {
-      "By": "Recipe by",
+      "By": "By",
+      "RecipeBy": "Recipe by",
       "From": "from"
     },
     "Serving": "Serving | Servings",

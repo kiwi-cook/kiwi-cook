@@ -48,13 +48,13 @@ const startTyping = () => {
         clearInterval(interval)
     }
     interval = setInterval(() => {
-        if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
+        if (!typeText(bigText?.value[1] ?? '', typedText, typedTextIndex)) {
             emit('finish')
             clearInterval(interval)
         }
     }, speed?.value)
 }
-watch(bigText, startTyping)
+watch(bigText, startTyping, {immediate: true})
 </script>
 
 <style scoped>

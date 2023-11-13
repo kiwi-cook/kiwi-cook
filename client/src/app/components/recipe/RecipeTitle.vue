@@ -7,7 +7,7 @@
             <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ recipe?.getName() }}</RouterLink>
         </h2>
         <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-            <strong>By <a :href="recipe?.src?.url" rel="nofollow" target="_blank">{{
+            <strong>{{ $t('Recipe.Src.By') }} <a :href="recipe?.src?.url" rel="nofollow" target="_blank">{{
                 recipe?.getAuthors()
             }}</a></strong>
         </div>

@@ -6,6 +6,7 @@
     "InstallPWA": "Installiere die App"
   },
   "General": {
+    "WelcomeText": "Schön,; dass du da bist! 🍻",
     "Recipe": "Rezept | Rezepte",
     "Item": "Zutat | Zutaten",
     "Tag": "Stichwort | Stichwörter",
@@ -14,7 +15,8 @@
   },
   "Recipe": {
     "Src": {
-      "By": "Rezept von",
+      "By": "Von",
+      "RecipeBy": "Rezept von",
       "From": "von"
     },
     "Serving": "Portion | Portionen",

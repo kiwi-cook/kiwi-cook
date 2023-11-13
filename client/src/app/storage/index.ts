@@ -249,8 +249,20 @@ export const useRecipeStore = defineStore('recipes-app', {
             const oneDay: number = 1000 * 60 * 60 * 24;
             const day: number = Math.floor(diff / oneDay);
 
+            // Sort array pseudo-randomly
+            let state = 5021 % 2147483647;
+            if (state <= 0) {
+                state += 2147483646;
+            }
+
+            const getRandom = () => {
+                state = (state * 16807) % 2147483647;
+                return (state - 1) / 2147483646;
+            };
+            const randSortedRecipesAsList = this.getRecipesAsList.toSorted(() => getRandom() - 0.5);
+
             // Get the recipe of the day depending on the day of the year
-            return this.getRecipesAsList[day % this.getRecipesAsList.length]
+            return randSortedRecipesAsList[day % randSortedRecipesAsList.length]
         },
         getRecipePredictions(): Recipe[] {
             return this.recipePredictions ?? []
