@@ -1,0 +1,17 @@
+a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a.disabled {
+    pointer-events: none;
+    cursor: default;
+}
+
+.link {
+    cursor: pointer;
+}
+
+a:hover, .link:hover {
+    text-decoration: underline;
+}

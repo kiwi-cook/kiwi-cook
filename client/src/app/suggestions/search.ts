@@ -18,9 +18,7 @@ export function searchRecipes(query: SearchQuery): RecipeSuggestion[] {
     })
 
     return suggestedRecipes.map((recipe: Recipe) => {
-        const suggestion = new RecipeSuggestion()
-        suggestion.recipe = recipe
-        suggestion.id = recipe.getId()
+        const suggestion = new RecipeSuggestion(recipe)
         suggestion.recipe_price = recipe.getPrice()
         suggestion.missing_items = []
         return suggestion

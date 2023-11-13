@@ -6,7 +6,6 @@
                     <img v-if="recipe" :alt="recipe?.getName()"
                          :src="recipe?.props.imgUrl"
                          class="link" @click="routeToRecipe()"/>
-                    <IonSkeletonText v-else animated class="recipe-image"/>
                 </div>
             </template>
             <template #right>
@@ -22,7 +21,7 @@
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from 'vue';
 import {Recipe} from '@/shared/ts';
-import {IonSkeletonText, useIonRouter} from '@ionic/vue';
+import {useIonRouter} from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
 
@@ -52,8 +51,6 @@ const routeToRecipe = () => router.push(recipeRoute?.value)
 }
 
 a {
-    text-decoration: none;
-    transition: color 0.3s ease;
     color: var(--ion-text-color);
 }
 

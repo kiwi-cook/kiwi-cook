@@ -231,18 +231,19 @@ export const useRecipeStore = defineStore('recipes-editor', {
             logDebug('fetchRecipes', 'fetching recipes')
             this.setLoadingState('fetchRecipes')
             return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
-                .then((apiResponse: APIResponse<MutableRecipe[]>) => {
+                .then(async (apiResponse: APIResponse<MutableRecipe[]>) => {
                     // map the recipes JSON to MutableRecipe objects
                     // this is because the JSON is not a valid MutableRecipe object,
                     // and we need to use the MutableRecipe class methods
                     if (!apiResponse.error) {
-                        // TODO That's some shitty code...
-                        Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe)))
+                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe)))
                             .then((recipes: Recipe[]) => this.replaceRecipes(recipes.map((recipe: Recipe) => new MutableRecipe(recipe))))
                     }
-                    this.finishLoading('fetchRecipes')
                     return apiResponse.response
-                });
+                }).then((recipes: MutableRecipe[]) => {
+                    this.finishLoading('fetchRecipes')
+                    return recipes
+                })
         },
         /**
          * Finish the loading state
@@ -283,6 +284,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
          */
         replaceItems(items: MutableItem[]) {
             this.items = Object.assign({}, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
+            return items
         },
         /**
          * Override all recipes
@@ -290,6 +292,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
          */
         replaceRecipes(recipes: MutableRecipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
+            return recipes
         },
         async saveItems(items?: MutableItem[] | MutableItem) {
             // if the recipes is not defined, save all recipes

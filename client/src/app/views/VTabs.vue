@@ -21,11 +21,6 @@
                     <IonIcon :icon="heart"/>
                     {{ $t('Tabs.Favorites') }}
                 </IonTabButton>
-
-                <!-- <IonTabButton v-if="canBeInstalled()" @click="install()">
-                    <IonIcon :icon="downloadOutline"/>
-                    {{ $t('Tabs.InstallPWA') }}
-                </IonTabButton> -->
             </IonTabBar>
         </IonTabs>
     </IonPage>

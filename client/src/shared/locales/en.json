@@ -30,7 +30,7 @@
   },
   "Suggestions": {
     "Title": "Discover;new recipes",
-    "SearchbarPrompt": "What ingredients or recipes are you craving today?",
+    "SearchbarPrompt": "Search Recipes and Ingredients",
     "Preferences": {
       "Title": "Set your search preferences",
       "Subtitle": "Filter by ingredients, cooking time, price and more.",

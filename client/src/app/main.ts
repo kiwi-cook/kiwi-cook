@@ -39,6 +39,7 @@ import '@/shared/theme/ionic.css'
 import '@/shared/theme/layout.css';
 import '@/shared/theme/font.css';
 import '@/shared/theme/transitions.css'
+import '@/shared/theme/links.css';
 
 /* Icons */
 import 'ionicons/icons';

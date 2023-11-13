@@ -2,26 +2,18 @@ import {Recipe, StepItem} from '@/shared/ts';
 import {searchRecipes} from '@/app/suggestions/search.ts';
 
 export class RecipeSuggestion {
-    id: string;
-    recipe?: Recipe;
+
+    recipe: Recipe;
     recipe_price?: number;
     missing_items?: {
         item: StepItem;
         price?: number;
     }[]
 
-    constructor() {
-        this.id = ''
+    constructor(recipe: Recipe) {
+        this.recipe = recipe
         this.recipe_price = 0
         this.missing_items = []
-    }
-
-
-    /**
-     * Get the recipe of the suggestion
-     */
-    public getRecipe(): Recipe {
-        return this.recipe ?? new Recipe()
     }
 
     public getMissingItems(): StepItem[] {

@@ -25,7 +25,7 @@ const JSONTYPE = 'application/json'
 type API_ROUTE_OPTIONS = {
     url: string;
     method: string;
-    contentType?: 'application/json' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
+    contentType: 'application/json' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
     credentials?: 'include' | 'omit' | 'same-origin';
 }
 
@@ -103,34 +103,22 @@ export type SendToApiOptions = {
  *   }
  * })
  */
-// eslint-disable-next-line sonarjs/cognitive-complexity
 export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
-    let url = API_URL + API_ROUTES[route].url;
+    const url = API_URL + API_ROUTES[route].url;
 
-    const {formatObject, body, headers, errorMessage, successMessage, timeout} = options ?? {};
-
-    // replace placeholders in url, e.g. CITY
-    // please check the keys that can be replaced in constants.ts
-    // use Object.keys to get all keys of the formatObject
-    for (const key of Object.keys(formatObject ?? {})) {
-        if (formatObject) {
-            url = url.replace(key, formatObject[key].toString());
-        }
-    }
+    const {body, headers, errorMessage, successMessage, timeout} = options ?? {}
 
     // headers
     const requestHeaders = new Headers();
-    if (body) {
-        requestHeaders.append('Content-Type', API_ROUTES[route].contentType ?? 'application/json');
-    }
+    requestHeaders.append('Content-Type', API_ROUTES[route].contentType);
     for (const header of headers ?? []) {
         requestHeaders.append(header.key, header.value);
     }
 
     const fetchOptions: RequestInit = {
-        method: API_ROUTES[route].method ?? 'GET',
+        method: API_ROUTES[route].method,
         headers: requestHeaders,
-        credentials: API_ROUTES[route].credentials ?? undefined,
+        credentials: API_ROUTES[route].credentials,
         body: body ? JSON.stringify(body) : null,
         signal: controller.signal
     }
@@ -139,43 +127,38 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
 
     // call fetch
     logDebug('sendToAPI ' + route, fetchOptions)
-    return fetch(url, fetchOptions).then(async (response: Response) => {
-        // set cookie if it is in the response
-        console.log(response.headers.entries())
-        if (response.headers.has('set-cookie')) {
-            const cookie = response.headers.get('set-cookie')
-            logDebug('sendToAPI.cookie', cookie)
-            if (cookie) {
-                document.cookie = cookie
-            }
-        }
-        clearTimeout(id)
-
-        return response
-    })
+    return fetch(url, fetchOptions)
         .then((response: Response) => {
-            const jsonResponse: Promise<APIResponse<R>> = response.json()
-                .then((apiResponse: APIResponse<R>) => {
-                    // show toast if the response is a string
-                    if (!apiResponse.error && successMessage) {
-                        return presentToast(successMessage, false, DURATIONS.MEDIUM).then(() => apiResponse)
-                    }
-                    return apiResponse
-                })
-            logDebug('sendToAPI ' + route, jsonResponse)
-            return jsonResponse
+            // set cookie if it is in the response
+            if (response.headers.has('set-cookie')) {
+                const cookie = response.headers.get('set-cookie')
+                logDebug('sendToAPI.cookie', cookie)
+                if (cookie) {
+                    document.cookie = cookie
+                }
+            }
+            clearTimeout(id)
+
+            return response
+        })
+        .then((response: Response) => response.json())
+        .then((apiResponse: APIResponse<R>) => {
+            // show toast if the response is a string
+            if (!apiResponse.error && successMessage) {
+                return presentToast(successMessage, false, DURATIONS.MEDIUM).then(() => apiResponse)
+            }
+            return apiResponse
         })
         .catch(error => {
             // log the error
             logError('sendToAPI ' + route, error)
 
             // present a toast to the user
-            return presentToast(errorMessage, true, DURATIONS.LONG).then(() => {
-                return {
+            return presentToast(errorMessage, true, DURATIONS.LONG)
+                .then(() => ({
                     error: true,
                     response: (errorMessage ?? 'An error occurred') as R
-                }
-            })
+                }))
         })
 }
 

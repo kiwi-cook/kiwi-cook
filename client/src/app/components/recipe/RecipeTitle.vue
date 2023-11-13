@@ -1,13 +1,15 @@
 <template>
     <div v-if="recipe">
         <h3 class="subheader">
-            <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ title }}</RouterLink>
+            {{ title }}
         </h3>
         <h2 class="recipe-title">
             <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ recipe?.getName() }}</RouterLink>
         </h2>
         <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-            <strong>By <a :href="recipe?.src?.url">{{ recipe?.getAuthors() }}</a></strong>
+            <strong>By <a :href="recipe?.src?.url" rel="nofollow" target="_blank">{{
+                recipe?.getAuthors()
+            }}</a></strong>
         </div>
     </div>
 </template>
@@ -46,8 +48,6 @@ const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
 
 
 a {
-    text-decoration: none;
-    transition: color 0.3s ease;
     color: var(--ion-text-color);
 }
 
@@ -59,7 +59,6 @@ a {
 .recipe-title a {
     font-family: var(--font-special);
     color: var(--ion-color-primary);
-    transition: color 0.3s ease;
 }
 
 .recipe-title a:hover {

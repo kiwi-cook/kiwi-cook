@@ -189,6 +189,7 @@ import {MutableRecipe} from '@/editor/types/recipe.ts';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
+import {newItemFromName} from '@/editor/types/item.ts';
 
 const props = defineProps({
     recipe: {
@@ -239,7 +240,8 @@ const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIn
  * @param itemIndex index of the item to add after
  * @param itemName name of the item to add
  */
-const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe?.value?.addItem(stepIndex, itemIndex, newItemFromName(itemName)).item.update()
+const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe?.value
+    ?.addItem(stepIndex, itemIndex, newItemFromName(itemName)).item.update()
 
 
 /**

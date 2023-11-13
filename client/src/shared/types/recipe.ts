@@ -41,6 +41,10 @@ export class Recipe {
         authors: string
     }
 
+    /**
+     * Copy constructor for a recipe
+     * @param recipe the recipe to copy
+     */
     constructor(recipe?: Recipe) {
         // create a temporary id to identify the recipe in the store before it is saved
         this.id = recipe?.id ?? tmpId()

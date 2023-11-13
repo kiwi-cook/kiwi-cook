@@ -116,13 +116,13 @@ const props = defineProps({
 });
 const {recipe} = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
-const name = computed(() => recipe?.value?.getName() ?? '');
-const store = useRecipeStore();
-const isSaved = computed(() => store.getSavedRecipesIds.includes(recipe?.value?.getId()));
-const toggleSave = () => store.setSaved(recipe?.value);
+const recipeStore = useRecipeStore();
+const isSaved = computed(() => recipeStore.getSavedRecipesIds.includes(recipe?.value?.getId()));
+const toggleSave = () => recipeStore.setSaved(recipe?.value);
 
 const itemsFromRecipe = computed<StepItem[]>(() => recipe?.value?.getStepItems() ?? []);
-const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'ingredient'))
+const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value
+    .filter((item: StepItem) => item.type === 'ingredient'))
 const tools = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'tool'))
 const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
 

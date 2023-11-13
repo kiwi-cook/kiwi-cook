@@ -61,6 +61,7 @@ th, td {
 th {
     background-color: var(--ion-color-primary);
     font-weight: bold;
+    border-bottom: 2px solid #ddd;
 }
 
 tr {
@@ -81,11 +82,6 @@ tbody tr:first-child td {
 tbody tr:last-child td {
     border-bottom-left-radius: 10px;
     border-bottom-right-radius: 10px;
-}
-
-/* Add a border to the bottom of the table header */
-th {
-    border-bottom: 2px solid #ddd;
 }
 
 /* Apply a border to the bottom of the table body */

@@ -59,7 +59,8 @@
                                                 <template #end>
                                                     <div class="item-buttons">
                                                         <IonButton
-                                                            :color="itemQueries[(element as Item).getId()] === false ? 'danger' : 'light'"
+                                                            :color="itemQueries[(element as Item).getId()] === false ?
+                                                                'danger' : 'light'"
                                                             :disabled="itemQueries[(element as Item).getId()] === false"
                                                             aria-description="Exclude item"
                                                             class="item-button" shape="round"
@@ -67,7 +68,8 @@
                                                             <IonIcon :icon="remove"/>
                                                         </IonButton>
                                                         <IonButton
-                                                            :color="itemQueries[(element as Item).getId()] ? 'success' : 'light'"
+                                                            :color="itemQueries[(element as Item).getId()] ?
+                                                                'success' : 'light'"
                                                             :disabled="itemQueries[(element as Item).getId()]"
                                                             aria-description="Include item"
                                                             class="item-button" shape="round"
@@ -75,7 +77,7 @@
                                                             <IonIcon :icon="add"/>
                                                         </IonButton>
                                                         <IonButton
-                                                            v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
+                                                            v-if="!((element as Item).getId() in itemQueries)"
                                                             aria-description="Remove item"
                                                             class="item-button"
                                                             shape="round"
@@ -445,7 +447,10 @@ const submit = () => {
     }
 }
 
-const submitButton = computed<string>(() => searchedRecipes.value.length === 0 ? t('Suggestions.Search.Submit') : t('Suggestions.Search.Clear'));
+const submitButton = computed<string>(() => searchedRecipes.value.length === 0 ?
+    t('Suggestions.Search.Submit') :
+    t('Suggestions.Search.Clear')
+);
 const submitColor = computed<string>(() => searchedRecipes.value.length === 0 ? 'success' : 'danger');
 </script>
 

@@ -21,10 +21,10 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
     const recipes = store.getRecipesAsList
 
     // Sorted by the number of times the item is used in recipes
-    const sortedItemIds: string[] = [...savedKeyValues.itemsIds.entries()].sort((a, b) => b[1] - a[1]).map((item) => item[0])
+    // const sortedItemIds: string[] = [...savedKeyValues.itemsIds.entries()].sort((a, b) => b[1] - a[1]).map((item) => item[0])
     // Use the median to avoid outliers
     const duration: number = median(savedKeyValues.duration)
-    const numberOfSteps: number = median(savedKeyValues.numberOfSteps)
+    // const numberOfSteps: number = median(savedKeyValues.numberOfSteps)
 
     const percentages: {
         duration: number,
@@ -44,8 +44,8 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
     }) => {
         return recipes.filter((recipe: Recipe) => {
             const recipeDuration = recipe.getDuration()
-            const recipeNumberOfSteps = recipe.steps.length
-            const recipeItemIds = recipe.getItems().map((item) => item.getId())
+            // const recipeNumberOfSteps = recipe.steps.length
+            // const recipeItemIds = recipe.getItems().map((item) => item.getId())
 
             // Filter recipes by duration
             const durationOk: boolean = duration * (1 + percentages.duration) >= recipeDuration && recipeDuration >= (duration * (1 - percentages.duration))

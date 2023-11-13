@@ -9,16 +9,16 @@ export function share(options: { title: string, text: string, url: string, dialo
             return
         }
 
-        try {
-            return Share.share({
+        return Share
+            .share({
                 title,
                 text,
                 url,
                 dialogTitle,
             })
-        } catch (e) {
-            logError('sharing failed', e)
-        }
+            .catch((error: Error) => {
+                logError('sharing failed', error)
+            })
     }).catch((error: Error) => {
         logError('sharing failed', error)
     })

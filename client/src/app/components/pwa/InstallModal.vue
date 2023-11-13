@@ -33,17 +33,13 @@ import {
     IonList,
     IonModal,
     IonTitle,
-    IonToolbar,
-    modalController
+    IonToolbar
 } from '@ionic/vue';
 
 import {canBeInstalled, showInstallationPrompt} from '@/app/ts';
-import {APP_NAME} from '../../../shared/ts';
+import {APP_NAME} from '@/shared/ts';
 
 const install = () => {
     showInstallationPrompt()
 }
-
-const cancel = () => modalController.dismiss(null, 'cancel');
-const confirm = () => modalController.dismiss(name.value, 'confirm');
 </script>

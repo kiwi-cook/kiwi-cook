@@ -22,6 +22,8 @@
                         <IonItem v-for="(recipe, recipeIndex) in recipes" :key="recipeIndex"
                                  button @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
+                            <!-- Add link icon to indicate that it is a link -->
+                            <IonIcon slot="end" :icon="chevronForwardOutline"/>
                         </IonItem>
                     </IonItemGroup>
                     <IonItemGroup v-if="tags.length > 0">
@@ -63,7 +65,7 @@ import {
     IonSearchbar
 } from '@ionic/vue';
 import {Item, Recipe} from '@/shared/ts';
-import {closeOutline, optionsOutline} from 'ionicons/icons';
+import {chevronForwardOutline, closeOutline, optionsOutline} from 'ionicons/icons';
 
 // Props
 const props = defineProps({
@@ -144,7 +146,9 @@ const selectPreferences = () => {
 
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
-    return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0) && searchInput.value !== '' && !disableList.value
+    return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0)
+        && searchInput.value !== ''
+        && !disableList.value
 })
 
 watch(searchInput, (newFilterInput) => {
