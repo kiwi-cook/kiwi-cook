@@ -19,7 +19,7 @@ import {
     sendToAPI,
 } from '@/shared/ts';
 import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
-import {simpleRecipePrediction} from '@/app/suggestions/simple.ts';
+import {simpleRecipeSuggestion} from '@/app/suggestions/simple.ts';
 
 const ionicStorage = new Storage({
     name: 'tastebuddy_db',
@@ -261,31 +261,39 @@ export const useRecipeStore = defineStore('recipes-app', {
         getRecipesAsMap: (state): {
             [id: string]: Recipe
         } => state.recipes ?? {},
-        getSavedKeyValues(): {
+        getSavedRecipesStats(): {
             numberOfSteps: number[],
             numberOfIngredients: number[],
-            duration: number[]
+            duration: number[],
+            itemsIds: Map<string, number>
         } {
             const keyValues: {
                 numberOfSteps: number[],
                 numberOfIngredients: number[],
-                duration: number[]
+                duration: number[],
+                itemsIds: Map<string, number>
             } = {
                 numberOfSteps: [],
                 numberOfIngredients: [],
-                duration: []
+                duration: [],
+                itemsIds: new Map()
             }
             const savedRecipes = this.getSavedRecipes
             for (const savedRecipe of savedRecipes) {
                 keyValues.numberOfSteps.push(savedRecipe.steps.length)
                 keyValues.numberOfIngredients.push(savedRecipe.getStepItems().length)
                 keyValues.duration.push(savedRecipe.getDuration())
+                for (const item of savedRecipe.getItems()) {
+                    const count = keyValues.itemsIds.get(item.getId()) ?? 0
+                    keyValues.itemsIds.set(item.getId(), count + 1)
+                }
             }
 
             return {
                 numberOfSteps: keyValues.numberOfSteps,
                 numberOfIngredients: keyValues.numberOfIngredients,
-                duration: keyValues.duration
+                duration: keyValues.duration,
+                itemsIds: keyValues.itemsIds
             }
         },
         /**
@@ -396,7 +404,7 @@ export const useRecipeStore = defineStore('recipes-app', {
                     return getCachedItem<Recipe[]>('recipes', [], this.fetchRecipes)
                 })
                 .then((recipes: CachedItem<Recipe[]>) => {
-                    Promise.all((recipes.value ?? [])
+                    return Promise.all((recipes.value ?? [])
                         .map((recipe: Recipe) => recipeFromJSON(recipe)))
                         .then((recipes: Recipe[]) => this.setRecipes(recipes, false))
                 })
@@ -471,7 +479,7 @@ export const useRecipeStore = defineStore('recipes-app', {
          * Update the recipe predictions
          */
         updateRecipePredictions() {
-            const predictedRecipes = simpleRecipePrediction().slice(0, 10)
+            const predictedRecipes = simpleRecipeSuggestion(15)
             logDebug('updateRecipePredictions', predictedRecipes)
             // Get the 10 best predictions
             this.recipePredictions = predictedRecipes

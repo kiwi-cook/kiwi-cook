@@ -34,18 +34,6 @@ export const presentToast = async (message?: string, isError = false, duration =
     await (await toast).present()
 }
 
-// Use matchMedia to check the user preference
-export const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
-
-// Listen for changes to the prefers-color-scheme media query
-prefersDark.addEventListener('change', (e) => {
-    toggleDarkTheme(e.matches);
-});
-
-
-// Add or remove the "dark" class based on if the media query matches
-export const toggleDarkTheme = (shouldAdd: boolean) => document.body.classList.toggle('dark', shouldAdd);
-
 
 /**
  * Returns a hash code from a string

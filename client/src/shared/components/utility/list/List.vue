@@ -1,7 +1,7 @@
 <template>
     <div v-if="loadedElements.length > 0" :style="{'max-height': maxHeight}" class="element-list-wrapper">
         <ul :class="['element-list', {'wrap': !noWrap}]" :tabindex="0">
-            <li v-for="(element, elementIndex) in loadedElements" :key="elementIndex"
+            <li v-for="(element, elementIndex) in loadedElements" :key="element[listKey] ?? elementIndex"
                 :class="['element', {'wrap': !noWrap}]">
                 <slot :element="element" name="element">
                     {{ element }}
@@ -25,6 +25,10 @@ const props = defineProps({
         type: Array,
         required: false,
         default: null
+    },
+    listKey: {
+        type: String,
+        required: false
     },
     noWrap: {
         type: Boolean,

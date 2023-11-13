@@ -7,7 +7,7 @@
 
             <IonGrid class="w100">
                 <IonRow>
-                    <IonCol size="6">
+                    <IonCol size="12" size-md="6">
                         <IonRow>
                             <IonInput :maxlength="100" :value="mutableRecipe.getName()" color="primary"
                                       label="Recipe name"
@@ -24,11 +24,10 @@
                             <Duration :duration="mutableRecipe.getDuration()" always-show/>
                         </IonRow>
                     </IonCol>
-                    <IonCol size="6">
+                    <IonCol size="12" size-md="6">
                         <!-- Add tag to the list -->
-                        <DropDownSearch :items="allTags" :reset-after="true" placeholder="e.g. vegan"
-                                        @select-item="mutableRecipe.addTag($event)"
-                                        @add-item="mutableRecipe.addTag($event)">
+                        <DropDownSearch :items="allTags" :reset-after="true" label="Tag" placeholder="e.g. vegan"
+                                        @select-item="mutableRecipe.addTag($event)">
                             <template #item="{ filteredItem }">
                                 <IonChip class="tag">
                                     <IonLabel>{{ filteredItem }}</IonLabel>

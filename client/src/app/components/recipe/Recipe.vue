@@ -34,14 +34,14 @@
                     </div>
                     <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
-                            <IonItem class="recipe-servings" color="light" lines="none">
+                            <IonItem class="recipe-servings" lines="none">
                                 <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
                                 <div class="recipe-servings-button">
-                                    <IonButton :disabled="servings === 1" color="light" @click="servings--">
+                                    <IonButton :disabled="servings === 1" @click="servings--">
                                         <IonIcon :icon="remove"/>
                                     </IonButton>
                                     {{ servings }}
-                                    <IonButton :disabled="servings === 100" color="light" @click="servings++">
+                                    <IonButton :disabled="servings === 100" @click="servings++">
                                         <IonIcon :icon="add"/>
                                     </IonButton>
                                 </div>

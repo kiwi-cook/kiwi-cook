@@ -1,35 +1,26 @@
 <template>
-    <IonItem lines="none">
-        <IonInput :aria-label="inputValue" :clear-input="true" :label="label"
-                  :label-placement="labelPlacement" :placeholder="placeholder ?? ''"
-                  :value="inputValue" type="text" @input="handleInput($event)" @keyup.enter="addItem()"/>
-    </IonItem>
+    <IonInput :aria-label="inputValue" :clear-input="true" :label="label"
+              :label-placement="labelPlacement" :placeholder="placeholder ?? ''"
+              :value="inputValue" type="text" @input="handleInput($event)" @keyup.enter="addItem()"/>
 
     <div v-show="showItemsList" class="dropdown-wrapper">
-        <div class="dropdown-list-wrapper">
-            <div class="dropdown-list">
-                <IonList>
-                    <template v-for="(filteredItem, index) in filteredItems" :key="index">
-                        <IonItem lines="none" @click="selectItem(filteredItem)">
-                            <slot :filtered-item="filteredItem" name="item">
-                                <IonLabel>{{ filteredItem }}</IonLabel>
-                            </slot>
-                        </IonItem>
-                    </template>
-                </IonList>
-            </div>
+        <div class="dropdown-list">
+            <IonList>
+                <template v-for="(filteredItem, index) in filteredItems" :key="index">
+                    <IonItem lines="none" @click="selectItem(filteredItem)">
+                        <slot :filtered-item="filteredItem" name="item">
+                            <IonLabel>{{ filteredItem }}</IonLabel>
+                        </slot>
+                    </IonItem>
+                </template>
+            </IonList>
         </div>
-
-        <IonButton v-if="isTemporaryInput" @click="addItem()">
-            <IonIcon :icon="addOutline"/>
-        </IonButton>
     </div>
 </template>
 
 <script lang="ts" setup>
 import {PropType, ref, toRefs, watch} from 'vue';
-import {IonButton, IonIcon, IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
-import {addOutline} from 'ionicons/icons';
+import {IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
 
 const props = defineProps({
     label: {
@@ -77,7 +68,7 @@ const props = defineProps({
 })
 const {modelValue, item, customMapper, items, maxItems, resetAfter} = toRefs(props)
 
-const emit = defineEmits(['update:modelValue', 'addItem', 'selectItem'])
+const emit = defineEmits(['update:modelValue', 'selectItem'])
 
 // define the input value
 const inputValue = ref<string>('')
@@ -133,39 +124,20 @@ const selectItem = (selectedItem: any) => {
         inputValue.value = ''
     }
 }
-
-const addItem = () => {
-    showItemsList.value = false
-    isTemporaryInput.value = false
-
-    // emit the input value to the parent component and add the item
-    emit('addItem', inputValue.value)
-
-    // reset the input value after selecting an item
-    if (resetAfter.value) {
-        inputValue.value = ''
-    }
-}
 </script>
 
 <style scoped>
 .dropdown-wrapper {
-    width: 100%;
-}
-
-.dropdown-list-wrapper {
     position: absolute;
     left: 0;
-    z-index: 10;
+    z-index: 110;
     width: 100%;
 }
 
 .dropdown-list {
+    width: 90%;
     max-width: var(--max-width);
-    max-height: 30vh;
-    overflow-y: scroll;
-    padding: var(--padding-large);
-    background: var(--background);
+    
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-strong);

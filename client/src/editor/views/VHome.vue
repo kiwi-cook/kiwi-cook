@@ -59,22 +59,17 @@ th, td {
 }
 
 th {
-    background-color: #f2f2f2;
-}
-
-/* Style even and odd rows differently for better readability */
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Make the table header text bold */
-th {
+    background-color: var(--ion-color-primary);
     font-weight: bold;
+}
+
+tr {
+    transition: all .2s ease-in-out;
 }
 
 /* Add some hover effect for better interactivity */
 tr:hover {
-    background-color: #e2e2e2;
+    background-color: var(--ion-color-medium);
 }
 
 /* Apply a border radius to the first and last child of the table body */

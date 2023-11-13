@@ -36,12 +36,12 @@ import {arrowBack} from 'ionicons/icons';
 import RecipeComponent from '@/app/components/recipe/Recipe.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
-
 const route = useRoute()
-const recipeId = computed<string>(() => (route.params.id ?? '') as string)
-
 const store = useRecipeStore()
-const recipe = computed<Recipe>(() => store.getRecipesAsMap[recipeId.value])
+const recipe = computed<Recipe>(() => {
+    const recipeId = (route.params.id ?? '') as string
+    return store.getRecipesAsMap[recipeId]
+})
 
 const router = useIonRouter()
 const goBack = () => router.back()

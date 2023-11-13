@@ -1,25 +1,83 @@
 import {Recipe} from '@/shared/types'
 import {useRecipeStore} from '@/app/storage';
 import {median} from '@/app/suggestions/util.ts';
-
+import {logDebug} from '@/shared/ts';
 
 /**
  * Very simple function to predict recipes
  * depending on the following params:
  * - duration
- * TODO: - number of steps
- * TODO: - number of ingredients
+ * - number of steps
+ * - items used
+ *
  * of liked recipes
+ *
+ * It's a really simple function that can be improved
+ * @param maxRecipes maximum number of recipes to return
  */
-export function simpleRecipePrediction(): Recipe[] {
+export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
     const store = useRecipeStore()
-    const savedKeyValues = store.getSavedKeyValues
+    const savedKeyValues = store.getSavedRecipesStats
     const recipes = store.getRecipesAsList
 
-    // use median since it is not influenced by very large or very small values
+    // Sorted by the number of times the item is used in recipes
+    const sortedItemIds: string[] = [...savedKeyValues.itemsIds.entries()].sort((a, b) => b[1] - a[1]).map((item) => item[0])
+    // Use the median to avoid outliers
     const duration: number = median(savedKeyValues.duration)
+    const numberOfSteps: number = median(savedKeyValues.numberOfSteps)
 
-    return recipes.toSorted((a: Recipe, b: Recipe) => {
-        return Math.abs(a.getDuration() - duration) - Math.abs(b.getDuration() - duration)
-    })
+    const percentages: {
+        duration: number,
+        numberOfSteps: number
+        items: number
+    } = {
+        duration: 0.05,
+        numberOfSteps: 0.05,
+        items: 0.05
+    }
+
+    // Filter recipes by duration and number of steps
+    const suggestRecipes = (recipes: Recipe[], percentages: {
+        duration: number,
+        numberOfSteps: number
+        items: number
+    }) => {
+        return recipes.filter((recipe: Recipe) => {
+            const recipeDuration = recipe.getDuration()
+            const recipeNumberOfSteps = recipe.steps.length
+            const recipeItemIds = recipe.getItems().map((item) => item.getId())
+
+            // Filter recipes by duration
+            const durationOk: boolean = duration * (1 + percentages.duration) >= recipeDuration && recipeDuration >= (duration * (1 - percentages.duration))
+            logDebug('simpleRecipeSuggestion', 'durationOk', durationOk)
+            // Filter recipes by number of steps
+            // const numberOfStepsOk: boolean = recipeNumberOfSteps <= numberOfSteps * (1 + percentages.numberOfSteps) && recipeNumberOfSteps >= numberOfSteps * (1 - percentages.numberOfSteps)
+            // Filter recipes by ingredients
+            // const numberOfItemsInRecipe = recipeItemIds.filter((itemId) => sortedItemIds.includes(itemId)).length
+            // const itemsOk: boolean = numberOfItemsInRecipe >= recipeItemIds.length * (1 - percentages.items)
+
+            return durationOk
+        })
+    }
+
+    // Train function
+    const train = (recipes: Recipe[], learningRate = 0.1) => {
+        // const suggestedRecipes = suggestRecipes(recipes, percentages)
+        // Update percentages
+        percentages.duration += learningRate
+        percentages.numberOfSteps += learningRate
+        percentages.items += learningRate
+    }
+
+    // Train the model until we have enough recipes
+    let suggestedRecipes: Recipe[] = []
+    let maxIterations = 100
+    while (suggestedRecipes.length < maxRecipes && maxIterations-- > 0) {
+        train(suggestedRecipes)
+        suggestedRecipes = suggestRecipes(recipes, percentages)
+    }
+
+    logDebug('simpleRecipeSuggestion', 'percentages', percentages)
+    logDebug('simpleRecipeSuggestion', 'suggestedRecipes', suggestedRecipes)
+    return suggestedRecipes.slice(0, maxRecipes)
 }

@@ -77,7 +77,7 @@
                                                         <IonButton
                                                             v-if="typeof itemQueries[(element as Item).getId()] !== 'undefined'"
                                                             aria-description="Remove item"
-                                                            class="item-button" color="light"
+                                                            class="item-button"
                                                             shape="round"
                                                             @click="removeItem(element)">
                                                             <IonIcon :icon="close"/>

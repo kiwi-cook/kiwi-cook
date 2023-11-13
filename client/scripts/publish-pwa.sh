@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # This script is used to publish the PWA to the gh-pages branch
 
 # build the app
