@@ -16,7 +16,7 @@
 <script lang="ts" setup>
 import {RouterLink} from 'vue-router';
 import {computed, PropType, toRefs} from 'vue';
-import {Recipe} from '@/shared/ts';
+import {Recipe} from '@/shared';
 
 const props = defineProps({
     recipe: {

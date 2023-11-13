@@ -137,7 +137,7 @@ const selectItem = (selectedItem: any) => {
 .dropdown-list {
     width: 90%;
     max-width: var(--max-width);
-    
+
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-strong);

@@ -95,17 +95,13 @@ import {
     IonNote,
     IonText,
 } from '@ionic/vue';
-import {Recipe, Step, STEP_TYPES, StepItem} from '@/shared/ts';
-import ItemList from '@/shared/components/utility/list/ItemList.vue';
-import StepComponent from '@/app/components/recipe/Step.vue';
-import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
+import {ItemList, ReadMore, Recipe, recipeBy, Step, STEP_TYPES, StepItem} from '@/shared';
 import {add, heart, heartOutline, remove, shareSocial} from 'ionicons/icons';
 import {CanShareResult, Share} from '@capacitor/share';
-import ReadMore from '@/shared/components/utility/ReadMore.vue';
 import {useI18n} from 'vue-i18n';
-import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {useRecipeStore} from '@/app/storage';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
+import {RecipeTitle, StepComponent, TwoColumnLayout} from '@/app/components';
 
 /* Recipe */
 const props = defineProps({
@@ -127,20 +123,7 @@ const tools = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: Ste
 const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
 
 // Source
-const source = computed(() => {
-    const source = recipe?.value?.src?.url
-    const sourceTag = source ? `<a href="${source}" target="_blank">${source}</a>` : ''
-
-    if (authors.value !== '' && source !== '') {
-        return `Recipe by ${authors.value} on ${sourceTag}`
-    } else if (source === '') {
-        return `Recipe by ${authors.value}`
-    } else if (authors.value === '') {
-        return `Recipe on ${sourceTag}`
-    } else {
-        return ''
-    }
-})
+const source = computed(() => recipeBy())
 
 // Servings
 const servings = ref(1)

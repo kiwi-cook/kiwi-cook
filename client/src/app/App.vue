@@ -6,15 +6,12 @@
 
 <script lang="ts" setup>
 import {useRecipeStore, useTasteBuddyStore} from '@/app/storage';
-import {DEFAULT_LOCALE} from '@/shared/locales/i18n.ts';
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
 import {prepareThemeColor} from '@/shared/ts/theme.ts';
 
 // Initialize the app store
-setTimeout(() => {
-    const store = useTasteBuddyStore()
-    store.setLanguage(DEFAULT_LOCALE)
-}, 0);
+const store = useTasteBuddyStore()
+store.setLanguage()
 
 // Initialize the recipe store
 const recipeStore = useRecipeStore();

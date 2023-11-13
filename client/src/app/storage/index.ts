@@ -18,7 +18,13 @@ import {
     recipeFromJSON,
     sendToAPI,
 } from '@/shared/ts';
-import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
+import getBrowserLocale, {
+    DEFAULT_LOCALE,
+    i18n,
+    setI18nLanguage,
+    SUPPORT_LOCALES,
+    SUPPORT_LOCALES_TYPE
+} from '@/shared/locales/i18n.ts';
 import {simpleRecipeSuggestion} from '@/app/suggestions/simple.ts';
 
 const ionicStorage = new Storage({
@@ -130,9 +136,11 @@ export const useTasteBuddyStore = defineStore('tastebuddy-app', {
          * Change the language
          * @param language
          */
-        setLanguage(language: SUPPORT_LOCALES_TYPE) {
-            this.language.lang = language
-            setI18nLanguage(i18n, language)
+        setLanguage(language?: SUPPORT_LOCALES_TYPE) {
+            const browserLocale = getBrowserLocale()
+            const lang = language ?? browserLocale ?? DEFAULT_LOCALE
+            this.language.lang = lang
+            setI18nLanguage(i18n, lang)
         },
         /**
          * Set step timer for a recipe

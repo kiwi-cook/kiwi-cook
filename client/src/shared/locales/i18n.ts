@@ -87,8 +87,34 @@ async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
 }
 
 /**
+ * Get the browser locale
+ *
+ * @copyright Mohammad Ashour
+ * @see https://phrase.com/blog/posts/ultimate-guide-to-vue-localization-with-vue-i18n/
+ */
+export default function getBrowserLocale(): SUPPORT_LOCALES_TYPE | undefined {
+    const navigatorLocale =
+        navigator.languages !== undefined
+            ? navigator.languages[0]
+            : navigator.language
+    logDebug('getBrowserLocale', 'navigatorLocale:', navigatorLocale)
+
+    if (!navigatorLocale) {
+        return undefined
+    }
+
+    const locale = navigatorLocale.trim().split(/[-_]/)[0]
+    logDebug('getBrowserLocale', 'locale:', locale)
+    if (!SUPPORT_LOCALES.includes(locale as SUPPORT_LOCALES_TYPE)) {
+        return undefined
+    }
+    return locale as SUPPORT_LOCALES_TYPE
+}
+
+/**
  * Vue Router middleware to set the language.
  * This middleware is called before each route change.
+ *
  * @param to the route to change to. It contains the language in the query parameter "lang"
  */
 export const beforeEachSetLang = async (to: RouteLocationNormalized) => {

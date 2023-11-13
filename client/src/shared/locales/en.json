@@ -13,7 +13,10 @@
     "ReadLess": "Read less"
   },
   "Recipe": {
-    "By": "By",
+    "Src": {
+      "By": "Recipe by",
+      "From": "from"
+    },
     "Serving": "Serving | Servings",
     "Direction": "Step | Steps",
     "Ingredient": "Ingredient | Ingredients",

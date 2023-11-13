@@ -13,7 +13,10 @@
     "ReadLess": "Weniger lesen"
   },
   "Recipe": {
-    "By": "Von",
+    "Src": {
+      "By": "Rezept von",
+      "From": "von"
+    },
     "Serving": "Portion | Portionen",
     "Direction": "Schritt | Schritte",
     "Ingredient": "Zutat | Zutaten",

@@ -28,6 +28,7 @@
         </IonCardContent>
     </IonCard>
 </template>
+
 <script lang="ts" setup>
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
