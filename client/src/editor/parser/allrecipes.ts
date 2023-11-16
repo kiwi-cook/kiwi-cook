@@ -1,4 +1,9 @@
-import {logDebug, normalizeUnit, Recipe, StepItem} from '@/shared';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {normalizeUnit, Recipe, StepItem} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 import nlp from 'compromise';
 import {findMostSimilarItem} from '@/editor/parser/utils';
 import {newItemFromName} from '@/editor/types/item';

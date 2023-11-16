@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <div>
         <h2 class="subheader">

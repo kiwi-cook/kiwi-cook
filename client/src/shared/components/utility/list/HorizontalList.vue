@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <div v-if="filteredElements.length > 0" class="element-list-wrapper horizontal">
         <ul :tabindex="0" class="element-list horizontal">

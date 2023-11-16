@@ -1,5 +1,10 @@
-import {Item, logDebug} from '@/shared';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {Item} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
+import {logDebug} from '@/shared/utils/logging';
 
 export class MutableItem extends Item {
 

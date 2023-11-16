@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <!-- A simple timer that can be used to show the remaining time for a recipe -->
 <template>
     <IonFab slot="fixed" :horizontal="horizontal" vertical="bottom">

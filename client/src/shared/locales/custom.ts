@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {useI18n} from 'vue-i18n';
 
 export function recipeBy(authors: string, url: string, noLink = false): string {

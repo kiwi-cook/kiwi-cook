@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonPage id="recipe-editor-page">
         <IonContent>

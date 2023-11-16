@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, Router, RouteRecordRaw} from 'vue-router';
 import TabsPage from '@/app/views/VTabs.vue'

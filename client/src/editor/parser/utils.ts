@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {useRecipeStore} from '@/editor/storage';
 import {Item, StepItem} from '@/shared';
 import {closest, distance} from 'fastest-levenshtein';

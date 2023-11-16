@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import Step from '@/app/components/recipe/Step.vue';
 import Recipe from '@/app/components/recipe/Recipe.vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';

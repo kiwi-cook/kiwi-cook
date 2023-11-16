@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonInput :aria-label="inputValue" :clear-input="true" :label="label"
               :label-placement="labelPlacement" :placeholder="placeholder ?? ''"

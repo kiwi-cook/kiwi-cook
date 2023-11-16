@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 // Ionic
 import {IonicVue} from '@ionic/vue';
 
 // Vue + App
 import {createApp} from 'vue'
 import App from '@/app/App.vue'
-import {logDebug} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 
 // Router
 import {createTasteBuddyRouter} from '@/app/router';

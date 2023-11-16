@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonChip v-if="temperature ?? 0 > 0">
         <IonIcon :icon="flame"/>

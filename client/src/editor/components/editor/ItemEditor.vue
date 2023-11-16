@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonCard>
         <IonCardHeader>
@@ -76,7 +80,8 @@
 </template>
 
 <script lang="ts" setup>
-import {Item, logDebug} from '@/shared';
+import {Item} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 import {
     IonAvatar,
     IonButton,

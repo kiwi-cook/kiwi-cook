@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonPage id="items-editor-page">
         <IonContent :fullscreen="true">
@@ -109,7 +113,8 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {availableParsers, parseRecipes, RecipeParser} from '@/editor/parser';
-import {logError, Recipe} from '@/shared';
+import {Recipe} from '@/shared';
+import {logError} from '@/shared/utils/logging';
 import {MutableRecipe} from '@/editor/types/recipe';
 
 const router = useIonRouter()

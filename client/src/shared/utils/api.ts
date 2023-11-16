@@ -1,5 +1,10 @@
-import {Item, logDebug, logError, presentToast, Recipe} from '@/shared/index';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {Item, presentToast, Recipe} from '@/shared';
 import {RecipeSuggestion} from '@/app/search';
+import {logDebug, logError} from '@/shared/utils/logging';
 
 // URLs for the API
 

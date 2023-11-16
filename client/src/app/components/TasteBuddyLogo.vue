@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonImg v-once :style="{ width: pixelSize, height: pixelSize }"
             class="taste-buddy-logo" src="./img/icon.png"/>

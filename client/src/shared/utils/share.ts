@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {CanShareResult, Share} from '@capacitor/share';
 import {logError} from '@/shared/utils/logging';
 

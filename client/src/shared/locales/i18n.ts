@@ -1,9 +1,13 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {useTasteBuddyStore} from '@/app/storage';
 import {createI18n} from 'vue-i18n';
 import {nextTick} from 'vue'
 import enUS from '@/shared/locales/en.json'
 import {RouteLocationNormalized} from 'vue-router';
-import {logDebug} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']

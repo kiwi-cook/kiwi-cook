@@ -1,7 +1,11 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {Recipe} from '@/shared/types'
 import {useRecipeStore} from '@/app/storage';
 import {median} from '@/app/search/util';
-import {logDebug} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 
 /**
  * Very simple function to predict recipes

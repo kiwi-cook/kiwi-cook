@@ -1,4 +1,9 @@
-import {logError, Recipe} from '@/shared';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {Recipe} from '@/shared';
+import {logError} from '@/shared/utils/logging';
 import {Ref} from 'vue';
 import {CookstrParser} from '@/editor/parser/cookstr';
 import {AllRecipesParser} from '@/editor/parser/allrecipes';

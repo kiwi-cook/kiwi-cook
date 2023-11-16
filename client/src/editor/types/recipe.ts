@@ -1,4 +1,9 @@
-import {logDebug, Recipe, Step, StepItem} from '@/shared';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {Recipe, Step, StepItem} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 import {useRecipeStore} from '@/editor/storage';
 import {setLocaleStr} from '@/shared/locales/i18n';
 import {MutableItem} from '@/editor/types/item';

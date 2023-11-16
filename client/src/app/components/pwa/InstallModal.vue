@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonModal v-if="canBeInstalled" @on-did-dismiss="setShowModal(false)">
         <IonHeader>

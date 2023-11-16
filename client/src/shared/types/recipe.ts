@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {useIonRouter} from '@ionic/vue';
 import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
-import {APP_NAME, Item, logError, share, Step, StepItem, tmpId} from '@/shared';
+import {APP_NAME, Item, share, Step, StepItem, tmpId} from '@/shared';
+import {logError} from '@/shared/utils/logging';
 
 /**
  * Recipe

@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonPage>
         <IonTabs>
@@ -32,14 +36,9 @@ import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButt
 import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
 import {Recipe} from '@/shared';
-import {showInstallationPrompt} from '@/app/ts';
 
 const recipeStore = useRecipeStore()
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
 const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
 const showLoadingBar = computed<boolean>(() => (recipeStore.isLoading && !isLoadingInitialData.value) ?? false)
-
-const install = () => {
-    showInstallationPrompt()
-}
 </script>

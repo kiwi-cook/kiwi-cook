@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonCard>
         <IonImg :src="step?.imgUrl ?? ''"/>

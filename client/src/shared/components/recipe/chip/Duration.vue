@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonChip v-if="(duration ?? 0 > 0) || alwaysShow">
         <IonIcon v-if="!noIcon" :icon="time"/>

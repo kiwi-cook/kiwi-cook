@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <IonItem v-if="mappedItem" class="item" lines="none">
         <IonThumbnail slot="start" class="item-thumbnail">

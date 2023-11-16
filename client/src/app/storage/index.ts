@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 // Vue
 import {defineStore} from 'pinia'
 
@@ -7,17 +11,8 @@ import {compress, decompress} from 'lz-string'
 // Types
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
-import {
-    API_ROUTE,
-    APIResponse,
-    Item,
-    itemFromJSON,
-    logDebug,
-    logError,
-    Recipe,
-    recipeFromJSON,
-    sendToAPI,
-} from '@/shared';
+import {API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, recipeFromJSON, sendToAPI,} from '@/shared';
+import {logDebug, logError} from '@/shared/utils/logging';
 import getBrowserLocale, {
     DEFAULT_LOCALE,
     i18n,

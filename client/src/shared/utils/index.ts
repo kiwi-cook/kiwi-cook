@@ -1,4 +1,7 @@
-export * from '@/shared/utils/logging';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 export * from '@/shared/utils/api';
 export * from '@/shared/utils/utils';
 export * from '@/shared/utils/share';

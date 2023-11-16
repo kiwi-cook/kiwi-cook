@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {Recipe, StepItem} from '@/shared';
 import {searchRecipes} from '@/app/search/search';
 

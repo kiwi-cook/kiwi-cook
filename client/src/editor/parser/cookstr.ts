@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {convertUnits, normalizeUnit, parseQuantity, parseTemperature, Recipe, Step, StepItem} from '@/shared';
 import {extractDurationFromText, extractStepItemsFromText, findMostSimilarItems,} from '@/editor/parser/utils';
 import {closest, distance} from 'fastest-levenshtein';

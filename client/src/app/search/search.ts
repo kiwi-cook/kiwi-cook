@@ -1,6 +1,11 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {ItemQuery, RecipeSuggestion, SearchQuery} from '@/app/search';
 import {useRecipeStore} from '@/app/storage';
-import {logError, Recipe} from '@/shared';
+import {Recipe} from '@/shared';
+import {logError} from '@/shared/utils/logging';
 import {mutateString} from '@/app/search/util';
 import {PrefixIdTree} from '@/app/search/radix';
 

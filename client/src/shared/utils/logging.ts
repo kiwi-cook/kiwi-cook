@@ -1,4 +1,6 @@
-import {RouteLocationNormalized} from 'vue-router';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
 
 /**
  * Log a message to the console
@@ -34,8 +36,4 @@ export const logError = (functionName: string, error: any, ...errors: any[]) => 
     } else {
         console.error(`[${functionName}]:`, error, ...errors)
     }
-}
-
-export const beforeEachLog = (to: RouteLocationNormalized, from: RouteLocationNormalized) => {
-    logDebug('middleware.router', `routing from ${from.path} => ${to.path}`)
 }

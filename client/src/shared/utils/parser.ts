@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 /**
  * Extract temperature from text and convert it to Celsius
  *

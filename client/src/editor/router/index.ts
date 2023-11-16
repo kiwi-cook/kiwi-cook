@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {createRouter} from '@ionic/vue-router';
 import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
 import {beforeEachCheckAuth, beforeEachPrepareStore} from '@/editor/router/middleware';
@@ -80,7 +84,7 @@ export function createTasteBuddyRouter(): Router {
 
     router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
         // prepare the store
-        beforeEachPrepareStore(to, from, next).then(() => {
+        beforeEachPrepareStore().then(() => {
             // check if the user is authenticated
             beforeEachCheckAuth(to, from, next);
         })

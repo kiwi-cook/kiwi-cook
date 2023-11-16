@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 /* eslint-disable no-console */
 
 import {register} from 'register-service-worker'

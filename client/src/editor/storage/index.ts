@@ -1,16 +1,12 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 // Vue
 import {defineStore} from 'pinia'
 
-import {
-    API_ROUTE,
-    APIResponse,
-    itemFromJSON,
-    logDebug,
-    presentToast,
-    Recipe,
-    recipeFromJSON,
-    sendToAPI
-} from '@/shared';
+import {API_ROUTE, APIResponse, itemFromJSON, presentToast, Recipe, recipeFromJSON, sendToAPI} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
 import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n';
 import {MutableRecipe} from '@/editor/types/recipe';
 import {MutableItem} from '@/editor/types/item';
@@ -263,7 +259,6 @@ export const useRecipeStore = defineStore('recipes-editor', {
          * Prepare the Ionic Storage by fetching the items and recipes
          */
         async prepare() {
-            console.log('prepare', this.isLoadingInitial)
             if (!this.isLoadingInitial) {
                 return Promise.resolve()
             }

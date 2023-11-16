@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {useRecipeStore, useTasteBuddyStore} from '@/editor/storage';
 import {NavigationGuardNext, RouteLocationNormalized} from 'vue-router';
 
@@ -20,7 +24,7 @@ export const beforeEachCheckAuth = (to: RouteLocationNormalized, from: RouteLoca
     }
 }
 
-export const beforeEachPrepareStore = async (to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
+export const beforeEachPrepareStore = async () => {
     const recipeStore = useRecipeStore()
     await recipeStore.prepare()
 }

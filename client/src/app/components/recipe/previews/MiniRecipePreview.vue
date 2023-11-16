@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <div class="mini-recipe-preview-container" @click="routeToRecipe()">
         <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image"/>

@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <div class="recipe-wrapper">
         <div class="recipe-header ion-margin-bottom">
@@ -181,15 +185,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
 .recipe-header-text-wrapper {
     flex: 2;
     margin: 0 var(--margin) 0 0;
-}
-
-.recipe-title-wrapper {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.recipe-title {
-    font-family: var(--font-special);
 }
 
 .recipe-tags {

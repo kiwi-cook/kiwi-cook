@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <section class="recipe-of-the-day">
         <TwoColumnLayout layout="rightBigger">

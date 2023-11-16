@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 /**
  * Calculate the median of an array of numbers
  * @param array

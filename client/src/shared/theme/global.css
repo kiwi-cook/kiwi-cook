@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 :root {
     /* shadows */
     --shadow-color: var(--ion-color-medium-shade);

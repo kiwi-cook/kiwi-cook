@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     {{ readMore.text }}
     <span v-if="readMore.showButton" class="read-more-button" @click="isExpanded = !isExpanded">

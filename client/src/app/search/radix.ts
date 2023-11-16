@@ -1,4 +1,8 @@
-import {logDebug} from '@/shared';
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
+import {logDebug} from '@/shared/utils/logging';
 
 class PrefixIdTreeNode {
     leaves: { [char: string]: PrefixIdTreeNode };

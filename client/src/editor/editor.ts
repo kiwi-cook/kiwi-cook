@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 // Ionic
 import {IonicVue} from '@ionic/vue';
 

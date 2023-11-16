@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 export * from '@/shared/types/item';
 export * from '@/shared/types/recipe';
 export * from '@/shared/types/step';

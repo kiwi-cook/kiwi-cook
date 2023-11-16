@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import {isPlatform} from '@ionic/vue';
 import {APP_NAME, share} from '@/shared';
 

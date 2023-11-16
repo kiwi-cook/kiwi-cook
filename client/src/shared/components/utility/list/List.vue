@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <div v-if="loadedElements.length > 0" :style="{'max-height': maxHeight}" class="element-list-wrapper">
         <ul :class="['element-list', {'wrap': !noWrap}]" :tabindex="0">

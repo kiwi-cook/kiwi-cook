@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023 Josef Müller.
+ */
+
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';
 import ReadMore from '@/shared/components/utility/ReadMore.vue';

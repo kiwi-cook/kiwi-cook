@@ -1,3 +1,7 @@
+<!--
+  - Copyright (c) 2023 Josef Müller.
+  -->
+
 <template>
     <ul v-if="items.length > 0" :class="['item-list', {'horizontal': horizontal}]">
         <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" class="item">
