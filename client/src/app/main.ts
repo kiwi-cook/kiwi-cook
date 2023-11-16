@@ -4,7 +4,7 @@ import {IonicVue} from '@ionic/vue';
 // Vue + App
 import {createApp} from 'vue'
 import App from '@/app/App.vue'
-import {logDebug} from '@/shared/ts';
+import {logDebug} from '@/shared';
 
 // Router
 import {createTasteBuddyRouter} from '@/app/router';
@@ -14,7 +14,7 @@ import {createPinia} from 'pinia';
 
 // Styles
 /* Add service worker */
-import '@/registerServiceWorker.ts';
+import '@/registerServiceWorker';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css';
@@ -44,7 +44,7 @@ import '@/shared/theme/links.css';
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from '@/shared/locales/i18n.ts';
+import {i18n} from '@/shared/locales/i18n';
 
 // Initializations
 

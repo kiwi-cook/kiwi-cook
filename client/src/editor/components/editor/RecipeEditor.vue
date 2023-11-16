@@ -162,7 +162,7 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDate, Item, Step, StepItem} from '@/shared/ts';
+import {formatDate, Item, Step, StepItem} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
 import {
     IonButton,
@@ -184,12 +184,12 @@ import {
 import {computed, PropType, ref, toRefs, watch} from 'vue';
 import {calendar, closeCircleOutline} from 'ionicons/icons';
 import ItemComponent from '@/shared/components/recipe/Item.vue';
-import {extractStepItemsFromText, findMostSimilarItem} from '@/editor/parser/utils.ts';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {extractStepItemsFromText, findMostSimilarItem} from '@/editor/parser/utils';
+import {MutableRecipe} from '@/editor/types/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
-import {newItemFromName} from '@/editor/types/item.ts';
+import {newItemFromName} from '@/editor/types/item';
 
 const props = defineProps({
     recipe: {

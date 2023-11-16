@@ -33,7 +33,7 @@
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
 import {computed, PropType, toRefs} from 'vue';
-import {Step, STEP_TYPES} from '@/shared/ts';
+import {Step, STEP_TYPES} from '@/shared';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
 import {useTasteBuddyStore} from '@/app/storage';

@@ -1,5 +1,5 @@
 import {CanShareResult, Share} from '@capacitor/share';
-import {logError} from '@/shared/ts/logging.ts';
+import {logError} from '@/shared/utils/logging';
 
 export function share(options: { title: string, text: string, url: string, dialogTitle: string }) {
     const {title, text, url, dialogTitle} = options || {}

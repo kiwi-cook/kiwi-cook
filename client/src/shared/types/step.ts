@@ -1,6 +1,5 @@
-import {StepItem, stepItemFromJSON} from '@/shared/ts';
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
-import {parseTemperature} from '@/shared/ts/parser.ts';
+import {parseTemperature, StepItem, stepItemFromJSON} from '@/shared';
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n';
 
 export enum STEP_TYPES {
     HEADER = 'header',

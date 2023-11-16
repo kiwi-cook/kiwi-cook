@@ -1,7 +1,7 @@
 import {Recipe} from '@/shared/types'
 import {useRecipeStore} from '@/app/storage';
-import {median} from '@/app/suggestions/util.ts';
-import {logDebug} from '@/shared/ts';
+import {median} from '@/app/search/util';
+import {logDebug} from '@/shared';
 
 /**
  * Very simple function to predict recipes

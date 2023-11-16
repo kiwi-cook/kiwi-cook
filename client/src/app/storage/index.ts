@@ -17,15 +17,16 @@ import {
     Recipe,
     recipeFromJSON,
     sendToAPI,
-} from '@/shared/ts';
+} from '@/shared';
 import getBrowserLocale, {
     DEFAULT_LOCALE,
     i18n,
     setI18nLanguage,
     SUPPORT_LOCALES,
     SUPPORT_LOCALES_TYPE
-} from '@/shared/locales/i18n.ts';
-import {simpleRecipeSuggestion} from '@/app/suggestions/simple.ts';
+} from '@/shared/locales/i18n';
+import {TasteBuddySearch} from '@/app/search/search';
+import {simpleRecipeSuggestion} from '@/app/search/suggestion';
 
 const ionicStorage = new Storage({
     name: 'tastebuddy_db',
@@ -206,6 +207,7 @@ interface RecipeState {
     items: {
         [id: string]: Item
     },
+    search: TasteBuddySearch | null
 
 }
 
@@ -219,7 +221,8 @@ export const useRecipeStore = defineStore('recipes-app', {
         recipes: {},
         recipePredictions: [],
         savedRecipes: new Set(),
-        items: {}
+        items: {},
+        search: null
     }),
     getters: {
         getItemNamesAsList(): string[] {
@@ -358,6 +361,9 @@ export const useRecipeStore = defineStore('recipes-app', {
         isLoadingInitial: (state): boolean => state.loading.initial
     },
     actions: {
+        async prepareSearch() {
+            this.search = new TasteBuddySearch(this.getRecipesAsList)
+        },
         async fetchItems(): Promise<Item[] | null> {
             logDebug('fetchItems', 'fetching items')
             this.setLoadingState('fetchItems')
@@ -434,6 +440,9 @@ export const useRecipeStore = defineStore('recipes-app', {
                 })
                 .then((savedRecipes: CachedItem<string[]>) => {
                     return this.setSavedRecipes(savedRecipes.value ?? [])
+                })
+                .then(() => {
+                    return this.prepareSearch()
                 })
                 /* Finish preparation */
                 .then(() => {

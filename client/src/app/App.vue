@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import {useRecipeStore, useTasteBuddyStore} from '@/app/storage';
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
-import {prepareThemeColor} from '@/shared/ts/theme.ts';
+import {prepareThemeColor} from '@/shared';
 
 // Initialize the app store
 const store = useTasteBuddyStore()

@@ -16,8 +16,8 @@
   "Recipe": {
     "Src": {
       "By": "By",
-      "RecipeBy": "Recipe by",
-      "From": "from"
+      "RecipeBy": "Recipe by {0}",
+      "RecipeByWithUrl": "Recipe by {0} ({1})"
     },
     "Serving": "Serving | Servings",
     "Direction": "Step | Steps",

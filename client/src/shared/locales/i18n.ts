@@ -3,7 +3,7 @@ import {createI18n} from 'vue-i18n';
 import {nextTick} from 'vue'
 import enUS from '@/shared/locales/en.json'
 import {RouteLocationNormalized} from 'vue-router';
-import {logDebug} from '@/shared/ts';
+import {logDebug} from '@/shared';
 
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']

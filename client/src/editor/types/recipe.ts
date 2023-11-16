@@ -1,7 +1,7 @@
-import {logDebug, Recipe, Step, StepItem} from '@/shared/ts';
+import {logDebug, Recipe, Step, StepItem} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
-import {setLocaleStr} from '@/shared/locales/i18n.ts';
-import {MutableItem} from '@/editor/types/item.ts';
+import {setLocaleStr} from '@/shared/locales/i18n';
+import {MutableItem} from '@/editor/types/item';
 
 export class MutableRecipe extends Recipe {
 

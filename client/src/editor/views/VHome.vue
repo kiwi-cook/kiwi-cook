@@ -26,7 +26,7 @@ import {IonContent, IonPage} from '@ionic/vue';
 import {useRecipeStore} from '@/editor/storage';
 import {computed} from 'vue';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {APP_NAME} from '@/shared/ts';
+import {APP_NAME} from '@/shared';
 
 const recipeStore = useRecipeStore()
 const recipes = computed(() => recipeStore.getRecipesAsList)

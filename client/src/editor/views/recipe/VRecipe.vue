@@ -36,7 +36,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {addOutline, colorWand} from 'ionicons/icons';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {MutableRecipe} from '@/editor/types/recipe';
 
 const router = useIonRouter()
 const addRecipe = () => {

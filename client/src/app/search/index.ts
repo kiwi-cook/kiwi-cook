@@ -1,5 +1,5 @@
-import {Recipe, StepItem} from '@/shared/ts';
-import {searchRecipes} from '@/app/suggestions/search.ts';
+import {Recipe, StepItem} from '@/shared';
+import {searchRecipes} from '@/app/search/search';
 
 export class RecipeSuggestion {
 

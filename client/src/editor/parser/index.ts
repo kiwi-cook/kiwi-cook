@@ -1,7 +1,7 @@
-import {logError, Recipe} from '@/shared/ts';
+import {logError, Recipe} from '@/shared';
 import {Ref} from 'vue';
-import {CookstrParser} from '@/editor/parser/cookstr.ts';
-import {AllRecipesParser} from '@/editor/parser/allrecipes.ts';
+import {CookstrParser} from '@/editor/parser/cookstr';
+import {AllRecipesParser} from '@/editor/parser/allrecipes';
 
 export enum RecipeParser {
     Cookstr = 'cookstr',

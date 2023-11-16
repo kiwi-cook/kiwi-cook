@@ -109,8 +109,8 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {availableParsers, parseRecipes, RecipeParser} from '@/editor/parser';
-import {logError, Recipe} from '@/shared/ts';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {logError, Recipe} from '@/shared';
+import {MutableRecipe} from '@/editor/types/recipe';
 
 const router = useIonRouter()
 const recipeStore = useRecipeStore()

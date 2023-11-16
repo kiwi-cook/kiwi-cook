@@ -1,6 +1,59 @@
-import {ItemQuery, RecipeSuggestion, SearchQuery} from '@/app/suggestions/index.ts';
+import {ItemQuery, RecipeSuggestion, SearchQuery} from '@/app/search';
 import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared/types';
+import {logError, Recipe} from '@/shared';
+import {mutateString} from '@/app/search/util';
+import {PrefixIdTree} from '@/app/search/radix';
+
+export class TasteBuddySearch {
+    // Map of search terms to recipe ids
+    private readonly _tree: PrefixIdTree
+
+    constructor(recipes: Recipe[]) {
+        this._tree = new PrefixIdTree()
+        for (const recipe of recipes) {
+            this.addRecipe(recipe)
+        }
+    }
+
+    /**
+     * Add a recipe to the search index
+     * @param recipe
+     */
+    addRecipe(recipe: Recipe) {
+        const fields = [
+            // Name
+            ...Object.values(recipe.name),
+        ]
+
+        // Add all possible mutations
+        for (const field of fields) {
+            for (const mutation of mutateString(field)) {
+                this._tree.insert(mutation, recipe.id)
+            }
+        }
+    }
+
+    /**
+     * Search for a recipe based on the given query
+     * @param query is a plain string
+     * @return {string[]} list of recipe ids
+     */
+    search(query: string): string[] {
+        return this._tree.search(query)
+    }
+}
+
+export function searchRecipesByString(query: string): Recipe[] {
+    const store = useRecipeStore()
+    const recipesAsMap = store.getRecipesAsMap
+    const recipeSearch = store.search
+    if (recipeSearch === null) {
+        logError('searchRecipesByString', 'search is not initialized')
+        return []
+    }
+    return recipeSearch.search(query).map((recipeId: string) => recipesAsMap[recipeId])
+}
+
 
 /**
  * Search recipes based on the given query

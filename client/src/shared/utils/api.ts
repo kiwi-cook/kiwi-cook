@@ -1,5 +1,5 @@
-import {Item, logDebug, logError, presentToast, Recipe} from '@/shared/ts/index.ts';
-import {RecipeSuggestion} from '@/app/suggestions';
+import {Item, logDebug, logError, presentToast, Recipe} from '@/shared/index';
+import {RecipeSuggestion} from '@/app/search';
 
 // URLs for the API
 

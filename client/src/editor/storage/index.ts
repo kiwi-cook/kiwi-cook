@@ -10,10 +10,10 @@ import {
     Recipe,
     recipeFromJSON,
     sendToAPI
-} from '@/shared/ts';
-import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n.ts';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
-import {MutableItem} from '@/editor/types/item.ts';
+} from '@/shared';
+import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n';
+import {MutableRecipe} from '@/editor/types/recipe';
+import {MutableItem} from '@/editor/types/item';
 
 
 // Define typings for the store state

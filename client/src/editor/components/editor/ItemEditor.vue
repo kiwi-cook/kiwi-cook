@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import {Item, logDebug} from '@/shared/ts';
+import {Item, logDebug} from '@/shared';
 import {
     IonAvatar,
     IonButton,
@@ -95,8 +95,8 @@ import {
 import {computed, PropType, ref, toRefs} from 'vue';
 import {useRecipeStore} from '@/editor/storage';
 import {chevronDown, chevronUp, save, trash} from 'ionicons/icons';
-import {MutableItem} from '@/editor/types/item.ts';
-import {SUPPORT_LOCALES} from '@/shared/locales/i18n.ts';
+import {MutableItem} from '@/editor/types/item';
+import {SUPPORT_LOCALES} from '@/shared/locales/i18n';
 
 const props = defineProps({
     item: {

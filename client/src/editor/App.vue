@@ -6,7 +6,7 @@
 
 <script lang="ts" setup>
 import {IonApp, IonRouterOutlet} from '@ionic/vue';
-import {prepareThemeColor} from '@/shared/ts/theme.ts';
+import {prepareThemeColor} from '@/shared/theme';
 
 // Initialize the dark theme
 prepareThemeColor()

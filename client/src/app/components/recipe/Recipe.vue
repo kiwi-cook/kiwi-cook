@@ -123,7 +123,7 @@ const tools = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: Ste
 const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
 
 // Source
-const source = computed(() => recipeBy())
+const source = computed(() => recipeBy(authors.value, recipe?.value?.src.url ?? ''))
 
 // Servings
 const servings = ref(1)

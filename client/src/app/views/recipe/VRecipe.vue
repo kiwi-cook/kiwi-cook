@@ -31,7 +31,7 @@ import {computed} from 'vue';
 import {IonContent, IonFab, IonFabButton, IonIcon, IonPage, IonText, useIonRouter} from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {useRoute} from 'vue-router';
-import {Recipe} from '@/shared/ts';
+import {Recipe} from '@/shared';
 import {arrowBack} from 'ionicons/icons';
 import RecipeComponent from '@/app/components/recipe/Recipe.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';

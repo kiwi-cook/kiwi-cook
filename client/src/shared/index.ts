@@ -1,2 +1,5 @@
-export * from '@/shared/ts'
+export * from '@/shared'
+export * from '@/shared/utils'
 export * from '@/shared/components'
+export * from '@/shared/types'
+export * from '@/shared/locales'

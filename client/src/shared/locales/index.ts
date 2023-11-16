@@ -1,2 +1,2 @@
-export * from './custom.ts'
-export * from './i18n.ts'
+export * from './custom'
+export * from './i18n'

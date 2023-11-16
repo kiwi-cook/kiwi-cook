@@ -39,7 +39,7 @@ import '@/shared/theme/links.css';
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from '@/shared/locales/i18n.ts';
+import {i18n} from '@/shared/locales/i18n';
 
 // Initializations
 

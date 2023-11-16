@@ -1,10 +1,9 @@
-import {logDebug, Recipe, StepItem} from '@/shared/ts';
+import {logDebug, normalizeUnit, Recipe, StepItem} from '@/shared';
 import nlp from 'compromise';
-import {findMostSimilarItem} from '@/editor/parser/utils.ts';
-import {newItemFromName} from '@/editor/types/item.ts';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
-import {newLocaleStr} from '@/shared/locales/i18n.ts';
-import {normalizeUnit} from '@/shared/ts/parser.ts';
+import {findMostSimilarItem} from '@/editor/parser/utils';
+import {newItemFromName} from '@/editor/types/item';
+import {MutableRecipe} from '@/editor/types/recipe';
+import {newLocaleStr} from '@/shared/locales/i18n';
 
 type AllRecipesRecipe = {
     images: string[];

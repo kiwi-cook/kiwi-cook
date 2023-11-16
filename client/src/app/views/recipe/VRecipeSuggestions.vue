@@ -7,14 +7,13 @@
 
                     <!-- Searchbar for ingredients, tools, recipes and tags -->
                     <Searchbar v-model="filterInput" :items="filteredItems"
-                               :placeholder="$t('Suggestions.SearchbarPrompt')" :recipes="filteredRecipes"
+                               :placeholder="$t('Suggestions.SearchbarPrompt')" :recipes="recipes"
                                :tags="filteredTags"
                                class="searchbar"
                                @select-item="includeItem($event);
                                              preferencesActive = true;
                                              activePreference = 'ingredients'"
                                @select-preferences="preferencesActive = $event"
-                               @select-recipe="routeRecipe($event)"
                                @select-tag="includeTag($event);
                                             preferencesActive = true;
                                             activePreference = 'tags'"/>
@@ -263,7 +262,7 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, shallowRef, Transition, watch} from 'vue';
+import {computed, ref, Transition, watch} from 'vue';
 import {
     IonButton,
     IonButtons,
@@ -279,7 +278,7 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
-import {Item, Recipe} from '@/shared/ts';
+import {Item, Recipe} from '@/shared';
 import Searchbar from '@/app/components/recipe/Searchbar.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
@@ -290,7 +289,7 @@ import List from '@/shared/components/utility/list/List.vue';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import {useI18n} from 'vue-i18n';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
-import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/suggestions';
+import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/search';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
@@ -318,22 +317,6 @@ watch(filterInput, () => {
         .filter((tag: string) => tag.toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
     filteredTags.value = _filteredTags.slice(0, 3)
 })
-
-// Recipes
-const filteredRecipes = shallowRef<Recipe[]>([])
-watch(filterInput, () => {
-    let _filteredRecipes: Recipe[];
-    if (filterInput.value === '') {
-        _filteredRecipes = [];
-    } else {
-        _filteredRecipes = (recipes.value ?? [])
-            .filter((recipe: Recipe) => recipe.hasName(filterInput.value ?? ''));
-    }
-    filteredRecipes.value = _filteredRecipes.slice(0, 3)
-})
-const routeRecipe = (recipe?: Recipe) => {
-    router.push({name: 'Recipe', params: {id: recipe?.getId() ?? ''}})
-}
 
 // Items
 const filteredItems = ref<Item[]>([])

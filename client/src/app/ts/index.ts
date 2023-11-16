@@ -1,1 +1,1 @@
-export * from '@/app/ts/pwa.ts';
+export * from '@/app/ts/pwa';

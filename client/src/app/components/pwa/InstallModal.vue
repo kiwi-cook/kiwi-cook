@@ -37,7 +37,7 @@ import {
 } from '@ionic/vue';
 
 import {canBeInstalled, showInstallationPrompt} from '@/app/ts';
-import {APP_NAME} from '@/shared/ts';
+import {APP_NAME} from '@/shared';
 
 const install = () => {
     showInstallationPrompt()

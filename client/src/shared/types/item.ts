@@ -1,6 +1,6 @@
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n.ts';
+import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n';
 import {distance} from 'fastest-levenshtein';
-import {tmpId} from '@/shared/ts';
+import {tmpId} from '@/shared';
 import {useRecipeStore} from '@/app/storage';
 
 export enum ItemType {

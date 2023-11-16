@@ -19,7 +19,7 @@
                         <IonItemDivider>
                             <IonLabel>{{ $t('General.Recipe', recipes.length) }}</IonLabel>
                         </IonItemDivider>
-                        <IonItem v-for="(recipe, recipeIndex) in recipes" :key="recipeIndex"
+                        <IonItem v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipeIndex"
                                  button @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
                             <!-- Add link icon to indicate that it is a link -->
@@ -52,7 +52,7 @@
 
 
 <script lang="ts" setup>
-import {computed, PropType, ref, toRefs, watch} from 'vue';
+import {computed, PropType, ref, shallowRef, toRefs, watch} from 'vue';
 import {
     IonButton,
     IonChip,
@@ -62,10 +62,12 @@ import {
     IonItemGroup,
     IonLabel,
     IonList,
-    IonSearchbar
+    IonSearchbar,
+    useIonRouter
 } from '@ionic/vue';
-import {Item, Recipe} from '@/shared/ts';
+import {Item, Recipe} from '@/shared';
 import {chevronForwardOutline, closeOutline, optionsOutline} from 'ionicons/icons';
+import {searchRecipesByString} from '@/app/search/search.ts';
 
 // Props
 const props = defineProps({
@@ -95,47 +97,18 @@ const props = defineProps({
     }
 })
 const {tags, recipes, items, disableList} = toRefs(props);
+const router = useIonRouter()
 
 // Emits
 const emit = defineEmits({
     'update:modelValue': (value: string) => value,
     'selectTag': (tag: string) => tag,
-    'selectRecipe': (recipe: Recipe) => recipe,
     'selectItem': (item: Item) => item,
     'selectPreferences': (value: boolean) => value
 })
 
 /* Searchbar state */
 const searchInput = ref('')
-
-/**
- * Close list if mouse leaves searchbar and searchbar is not focussed
- * or on "esc" keydown
- */
-const closeSearch = () => {
-    searchInput.value = ''
-}
-
-const selectTag = (tag: string) => {
-    emit('selectTag', tag)
-    closeSearch()
-}
-
-/**
- * Select recipe and close list
- */
-const selectRecipe = (recipe: Recipe) => {
-    emit('selectRecipe', recipe)
-    closeSearch()
-}
-
-/**
- * Select item and close list
- */
-const selectItem = (item: Item) => {
-    emit('selectItem', item)
-    closeSearch()
-}
 
 const showPreferences = ref(false)
 const selectPreferences = () => {
@@ -155,6 +128,46 @@ watch(searchInput, (newFilterInput) => {
     // Emit new filter input
     emit('update:modelValue', newFilterInput)
 })
+
+// Filter recipes
+const filteredRecipes = shallowRef<Recipe[]>([])
+watch(searchInput, () => {
+    filteredRecipes.value = searchRecipesByString(searchInput.value ?? '').slice(0, 6)
+})
+const routeRecipe = (recipe?: Recipe) => {
+    if (recipe) {
+        router.push(recipe.getRoute())
+    }
+}
+
+/**
+ * Close list if mouse leaves searchbar and searchbar is not focussed
+ * or on "esc" keydown
+ */
+const closeSearch = () => {
+    searchInput.value = ''
+}
+
+const selectTag = (tag: string) => {
+    emit('selectTag', tag)
+    closeSearch()
+}
+
+/**
+ * Select recipe and close list
+ */
+const selectRecipe = (recipe: Recipe) => {
+    routeRecipe(recipe)
+    closeSearch()
+}
+
+/**
+ * Select item and close list
+ */
+const selectItem = (item: Item) => {
+    emit('selectItem', item)
+    closeSearch()
+}
 </script>
 
 <style scoped>

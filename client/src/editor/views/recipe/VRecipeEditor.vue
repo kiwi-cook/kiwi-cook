@@ -35,7 +35,7 @@ import {useRecipeStore} from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
+import {MutableRecipe} from '@/editor/types/recipe';
 
 const route = useRoute();
 const recipeId = ref(route.params.id as string);

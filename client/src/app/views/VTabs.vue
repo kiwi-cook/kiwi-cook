@@ -31,7 +31,7 @@ import {computed} from 'vue';
 import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/vue';
 import {heart, search, sparkles} from 'ionicons/icons';
 import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared/ts';
+import {Recipe} from '@/shared';
 import {showInstallationPrompt} from '@/app/ts';
 
 const recipeStore = useRecipeStore()

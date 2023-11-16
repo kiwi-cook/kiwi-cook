@@ -83,9 +83,9 @@ import {
 import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
 import {useRecipeStore} from '@/editor/storage';
 import ItemEditor from '@/editor/components/editor/ItemEditor.vue';
-import {Item} from '@/shared/ts';
+import {Item} from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {MutableItem} from '@/editor/types/item.ts';
+import {MutableItem} from '@/editor/types/item';
 
 const recipeStore = useRecipeStore();
 const items = computed<MutableItem[]>(() => {

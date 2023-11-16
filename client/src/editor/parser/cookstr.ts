@@ -1,8 +1,7 @@
-import {Recipe, Step, StepItem} from '@/shared/ts';
-import {extractDurationFromText, extractStepItemsFromText, findMostSimilarItems,} from '@/editor/parser/utils.ts';
+import {convertUnits, normalizeUnit, parseQuantity, parseTemperature, Recipe, Step, StepItem} from '@/shared';
+import {extractDurationFromText, extractStepItemsFromText, findMostSimilarItems,} from '@/editor/parser/utils';
 import {closest, distance} from 'fastest-levenshtein';
-import {MutableRecipe} from '@/editor/types/recipe.ts';
-import {convertUnits, normalizeUnit, parseQuantity, parseTemperature} from '@/shared/ts/parser.ts';
+import {MutableRecipe} from '@/editor/types/recipe';
 
 type CookstrRecipe = {
     chef: string;

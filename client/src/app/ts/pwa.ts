@@ -1,5 +1,5 @@
 import {isPlatform} from '@ionic/vue';
-import {APP_NAME, share} from '@/shared/ts';
+import {APP_NAME, share} from '@/shared';
 
 export const canBeInstalled = () => !isPlatform('pwa') && (isPlatform('mobile') || isPlatform('tablet'))
 

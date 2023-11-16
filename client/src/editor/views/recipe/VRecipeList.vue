@@ -23,7 +23,7 @@
 import {computed} from 'vue';
 import {IonButton, IonContent, IonIcon, IonItem, IonLabel, IonList, IonPage, useIonRouter} from '@ionic/vue';
 import {useRecipeStore} from '@/editor/storage';
-import {Recipe} from '@/shared/ts';
+import {Recipe} from '@/shared';
 import {createOutline} from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
 

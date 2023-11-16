@@ -1,8 +1,6 @@
 import {useIonRouter} from '@ionic/vue';
-import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n.ts';
-import {APP_NAME, Item, logError, Step, StepItem, tmpId} from '@/shared/ts';
-import {distance} from 'fastest-levenshtein';
-import {share} from '@/shared/ts/share.ts';
+import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
+import {APP_NAME, Item, logError, share, Step, StepItem, tmpId} from '@/shared';
 
 /**
  * Recipe
@@ -84,19 +82,6 @@ export class Recipe {
      */
     public getName(): string {
         return getLocaleStr(this.name)
-    }
-
-    /**
-     * Checks if the item has the name
-     * @param name
-     */
-    public hasName(name: string): boolean {
-        name = name.toLowerCase()
-        return Object.values(this.name)/* .flatMap((recipeName: string) => recipeName.split(/\s|-/))*/
-            .some((recipeName: string) => {
-                recipeName = recipeName.toLowerCase()
-                return distance(recipeName, name) < 5 || recipeName.includes(name)
-            })
     }
 
     /**

@@ -28,10 +28,10 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from 'vue';
-import {Item, Recipe, StepItem} from '@/shared/ts';
+import {Item, Recipe, StepItem} from '@/shared';
 import {IonChip, useIonRouter} from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
-import {RecipeSuggestion} from '@/app/suggestions';
+import {RecipeSuggestion} from '@/app/search';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
