@@ -38,7 +38,7 @@
     "@capacitor/share": "^5.0.6",
     "@capacitor/status-bar": "5.0.6",
     "@ionic/storage": "^4.0.0",
-    "@ionic/vue": "^7.5.4",
+    "@ionic/vue": "^7.5.7",
     "@ionic/vue-router": "^7.5.5",
     "core-js": "^3.33.3",
     "fastest-levenshtein": "^1.0.16",
