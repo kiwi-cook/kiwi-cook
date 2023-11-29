@@ -1,15 +1,15 @@
-name: "Go Static Analysis"
+name: "Production Server Static Analysis"
 on:
   push:
     paths:
-      - server/**
+      - server-prod/**
   pull_request:
     paths:
-      - server/**
+      - server-prod/**
 
 jobs:
   ci:
-    name: "Run CI"
+    name: "Run Production Server CI"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -17,4 +17,4 @@ jobs:
         fetch-depth: 1
     - uses: dominikh/staticcheck-action@v1.3.0
       with:
-        working-directory: "./server"
+        working-directory: "./server-prod"
