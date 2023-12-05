@@ -31,7 +31,7 @@ type Recipe struct {
 		} `json:"authors,omitempty" bson:"authors,omitempty"`
 		Copyright string `json:"cr,omitempty" bson:"copyright,omitempty"`
 		CookBook  struct {
-			Name      string `json:"name,omitempty" bson:"name,omitempty""`
+			Name      string `json:"name,omitempty" bson:"name,omitempty"`
 			Url       string `json:"url,omitempty" bson:"url,omitempty"`
 			Publisher string `json:"pub,omitempty" bson:"publisher,omitempty"`
 		} `json:"cookBook,omitempty" bson:"cookBook,omitempty"`
