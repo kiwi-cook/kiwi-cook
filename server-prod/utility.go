@@ -6,7 +6,6 @@ package main
 
 import (
 	"context"
-	"strconv"
 	"time"
 )
 
@@ -40,9 +39,4 @@ func (ls *LocalizedString) GetDefault() string {
 func DefaultContext() context.Context {
 	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
 	return ctx
-}
-
-// GenerateID generates a new ID
-func GenerateID(pre string) string {
-	return pre + strconv.FormatInt(time.Now().UnixNano(), 10)
 }

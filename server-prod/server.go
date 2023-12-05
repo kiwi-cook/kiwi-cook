@@ -6,6 +6,8 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 )
 
@@ -33,6 +35,15 @@ func (server *TasteBuddyServer) SetFiber() *TasteBuddyServer {
 		GETOnly:               true,
 	}
 	app := fiber.New(config)
+
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost, https://taste-buddy.github.io",
+		AllowHeaders: "Origin, Content-Type, Accept, Options",
+	}))
+
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelBestCompression,
+	}))
 
 	server.fiber = app
 	return server
@@ -110,6 +121,6 @@ func (server *TasteBuddyServer) Serve() {
 		server.LogError("Serve", err)
 	}
 
-	// Finish gin
+	// Finish fiber
 	////////////////////////////////////////////////////////////////////////
 }

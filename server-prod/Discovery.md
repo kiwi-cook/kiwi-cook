@@ -1,6 +1,6 @@
 ---
 app_name: TasteBuddy
-tagline: Taste Buddy Backend for the Taste Buddy App
+tagline: Taste Buddy Server for the Taste Buddy App
 ---
 
 
