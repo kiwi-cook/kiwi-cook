@@ -24,4 +24,4 @@ jobs:
         bun-version: latest
 
     - run: cd ./client && bun install
-    - run: cd ./client && bun run build
+    - run: cd ./client && bun run build:app
