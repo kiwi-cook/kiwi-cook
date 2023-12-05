@@ -12,10 +12,8 @@ import (
 )
 
 type TasteBuddyApp struct {
-	logger       *TasteBuddyLogger
-	client       *TasteBuddyDatabase
-	jwtSecretKey []byte
-	jwtPublicKey []byte
+	logger *TasteBuddyLogger
+	client *TasteBuddyDatabase
 }
 
 // TasteBuddyAppFactory creates a new TasteBuddyApp
@@ -28,8 +26,7 @@ func (app *TasteBuddyApp) Default() *TasteBuddyApp {
 	return app.
 		SetLogger("default").
 		SetupViper().
-		SetDatabase().
-		SetJWTKeys()
+		SetDatabase()
 }
 
 // SetupViper sets up viper to handle different environments
@@ -87,37 +84,6 @@ func (app *TasteBuddyApp) SetDatabase() *TasteBuddyApp {
 
 	// Register database client
 	app.client = databaseClient
-	return app
-}
-
-// SetJWTKeys sets the JWT keys
-func (app *TasteBuddyApp) SetJWTKeys() *TasteBuddyApp {
-	// Check if JWT keys are set
-	if viper.GetString("JWT_RSA_KEY") == "" || viper.GetString("JWT_RSA_PUB_KEY") == "" {
-		app.FatalError("SetJWTKeys", errors.New("JWT_RSA_KEY or JWT_RSA_PUB_KEY not set"))
-	}
-
-	// Set JWT keys
-	var JWTSecretKey = []byte(viper.GetString("JWT_RSA_KEY"))
-	var JWTPublicKey = []byte(viper.GetString("JWT_RSA_PUB_KEY"))
-
-	// Check if JWT keys are filepaths
-	if checkIfPathIsFile(viper.GetString("JWT_RSA_KEY")) && checkIfPathIsFile(viper.GetString("JWT_RSA_PUB_KEY")) {
-		var err error
-		// Set JWT secret key
-		JWTSecretKey, err = os.ReadFile(viper.GetString("JWT_RSA_KEY"))
-		if err != nil {
-			app.FatalError("SetJWTKeys", err)
-		}
-		JWTPublicKey, err = os.ReadFile(viper.GetString("JWT_RSA_PUB_KEY"))
-		if err != nil {
-			app.FatalError("SetJWTKeys", err)
-		}
-	}
-
-	// Set JWT keys
-	app.jwtSecretKey = JWTSecretKey
-	app.jwtPublicKey = JWTPublicKey
 	return app
 }
 

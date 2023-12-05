@@ -7,7 +7,6 @@ package main
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -145,21 +144,4 @@ func (app *TasteBuddyApp) ConnectToDatabase(databaseAuth DatabaseAuth) (*TasteBu
 	}
 	app.Log("ConnectToDatabase", "Successfully connected to MongoDB")
 	return &TasteBuddyDatabase{client, app.logger, false}, nil
-}
-
-func (server *TasteBuddyServer) HandleDropAllCollections(context *gin.Context) {
-	if err := server.DropAll(); err != nil {
-		server.LogError("HandleDropAllCollections", err)
-		ServerError(context, false)
-		return
-	}
-	Success(context, "Successfully dropped all collections")
-}
-
-func (app *TasteBuddyApp) DropAll() error {
-	ctx := DefaultContext()
-	if err := app.client.Database("tastebuddy").Drop(ctx); err != nil {
-		return app.LogError("DropAll", err)
-	}
-	return nil
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
 )
 
@@ -83,15 +82,6 @@ func (app *TasteBuddyApp) LogWarning(functionName string, message ...any) {
 // LogWarning prints a warning
 func (logger *TasteBuddyLogger) LogWarning(functionName string, message ...any) {
 	logger.Printf(WarnLogLevel, "WARNING", colorYellow, functionName, message...)
-}
-
-func (app *TasteBuddyApp) LogContextHandle(context *gin.Context, functionName string, message ...any) {
-	app.logger.LogContextHandle(context, functionName, message...)
-}
-
-// LogContextHandle prints an error message that is caused by the context
-func (logger *TasteBuddyLogger) LogContextHandle(context *gin.Context, functionName string, message ...any) {
-	logger.Printf(DefaultLogLevel, "LOG "+context.ClientIP(), colorNone, functionName, message...)
 }
 
 func (app *TasteBuddyApp) LogError(functionName string, err error) error {

@@ -5,65 +5,60 @@ Copyright © 2023 JOSEF MUELLER
 package main
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"math/rand"
-	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
-func responseJSON(response interface{}, isError bool) gin.H {
-	return gin.H{"response": response, "error": isError}
-}
-
-func responseJSONwithID(response interface{}, isError bool, id string) gin.H {
-	return gin.H{"response": response, "error": isError, "id": id}
+func responseJSON(response interface{}, isError bool) fiber.Map {
+	return fiber.Map{"response": response, "error": isError}
 }
 
 // Success returns a 200 success with a message
-func Success(context *gin.Context, response interface{}) {
-	context.JSON(http.StatusOK, responseJSON(response, false))
+func Success(context *fiber.Ctx, response interface{}) error {
+	return context.Status(fiber.StatusOK).JSON(responseJSON(response, false))
 }
 
-// Updated returns a 200 success with a message
-func Updated(context *gin.Context, t string) {
-	context.JSON(http.StatusOK, responseJSONwithID("Updated "+t, false, ""))
-}
-
-// BadRequestError returns a 400 error with a message
-func BadRequestError(context *gin.Context, response string) {
-	context.JSON(http.StatusBadRequest, responseJSON(response, true))
-}
-
-// NotAuthenticated returns a 401 error with a message
-func NotAuthenticated(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, responseJSON("Not authenticated.", true))
-}
-
-// MissingRights returns a 401 error with a message
-func MissingRights(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusUnauthorized, responseJSON("Missing rights.", true))
-}
-
-// ForbiddenError returns a 403 error with a message
-func ForbiddenError(context *gin.Context) {
-	context.AbortWithStatusJSON(http.StatusForbidden, responseJSON("Forbidden.", true))
-}
-
-// ServerError returns a 500 error with a message
-// If funny is true, a funny message is returned
-func ServerError(context *gin.Context, funny bool) {
-	var message string
-	if funny {
-		message = funnyErrorMessage()
-	} else {
-		message = "Internal Server Error"
-	}
-	ErrorMessage(context, message)
+// NotFoundError returns a 404 error with a funny message
+func NotFoundError(context *fiber.Ctx) error {
+	return context.Status(fiber.StatusNotFound).JSON(responseJSON(funnyNotFoundMessage(), true))
 }
 
 // ErrorMessage returns a 500 error with a message
-func ErrorMessage(context *gin.Context, message string) {
-	context.AbortWithStatusJSON(http.StatusInternalServerError, responseJSON(message, true))
+func ErrorMessage(context *fiber.Ctx, message string) error {
+	return context.Status(fiber.StatusInternalServerError).JSON(responseJSON(message, true))
+}
+
+// ServerError returns a 500 error with a message
+func ServerError(context *fiber.Ctx) error {
+	return ErrorMessage(context, "Internal Server Error")
+}
+
+func funnyNotFoundMessage() string {
+	funnyMessages := []string{
+		"The page is on a lunch break. It went out for tacos without telling us. Hungry much?",
+		"Oh no! The page is lost in the sauce. Literally. We're sending a rescue team with spaghetti.",
+		"The page is off searching for the perfect pizza. Priorities, right?",
+		"Culinary Catastrophe: The page got eaten by the cookie monster. RIP.",
+		"Well, this is egg-stremely awkward. The page got poached and is now brunching in a secret location.",
+		"The page is on a dessert island. Yes, it's a sweet escape.",
+		"It's lost in the spice aisle, searching for its sense of flavor. Too much paprika, not enough page.",
+		"The page is off having a picnic with other missing pages. No invitation? Rude!",
+		"Oops! The page is in a food coma. Too many bytes, not enough bites.",
+		"The page is baking cookies. Don't worry; it'll crumble back to reality soon.",
+		"Lost page alert! It's stuck in a corn maze, trying to find its way back to the server farm.",
+		"Menu not found. The page is dining at a digital restaurant. Hopefully, the servers are faster than ours.",
+		"The page is on a coffee break, contemplating the meaning of espresso. Deep thoughts in a tiny cup.",
+		"The page is on a sushi adventure. It heard the internet is full of raw data, so it's exploring the menu.",
+		"Uh-oh! The page is on a quest for the legendary chocolate fountain. We hope it doesn't drown in sweetness.",
+		"The page is at a food truck festival. It couldn't resist the call of the mobile kitchens.",
+		"It's off foraging for Wi-Fi mushrooms in the digital forest. Edible or not, who knows?",
+		"The page is in a noodle incident. Don't ask what happened; it's a saucy story.",
+		"Oh crumbs! The page got crumpled in the cookie jar. It's having an existential crisis in there.",
+		"The page is on a burger pilgrimage. It believes in the power of a good patty.",
+	}
+
+	randomIndex := rand.Intn(len(funnyMessages))
+	return funnyMessages[randomIndex]
 }
 
 func funnyErrorMessage() string {
