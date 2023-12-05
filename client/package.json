@@ -45,8 +45,8 @@
     "lz-string": "^1.5.0",
     "pinia": "^2.1.7",
     "register-service-worker": "^1.7.2",
-    "vue": "^3.3.9",
-    "vue-i18n": "^9.7.0",
+    "vue": "^3.3.10",
+    "vue-i18n": "^9.8.0",
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
@@ -62,9 +62,9 @@
     "@vue/eslint-config-typescript": "^12.0.0",
     "compromise": "^14.10.1",
     "cypress": "^13.6.0",
-    "eslint": "^8.54.0",
+    "eslint": "^8.55.0",
     "eslint-plugin-sonarjs": "^0.23.0",
-    "eslint-plugin-vue": "9.18.1",
+    "eslint-plugin-vue": "9.19.2",
     "postcss-html": "^1.5.0",
     "stylelint": "^15.11.0",
     "stylelint-config-recommended-vue": "^1.5.0",

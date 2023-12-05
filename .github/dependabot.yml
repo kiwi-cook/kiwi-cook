@@ -2,22 +2,33 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
+
+
 updates:
+  # Updates for Go modules
   - package-ecosystem: "gomod"
     directory: "/server-prod"
     schedule:
       interval: "weekly"
-    assignees:
-      - "am9zZWY"
+    assignees: ["am9zZWY"]
 
+  # Updates for Python modules
+  - package-ecosystem: "pip"
+    directory: "/server-dev"
+    schedule:
+      interval: "weekly"
+    assignees: ["am9zZWY"]
+
+  # Updates for npm packages
   - package-ecosystem: "npm"
     directory: "/client"
     schedule:
       interval: "weekly"
+    assignees: ["am9zZWY"]
 
+  # Updates for GitHub Actions workflows
   - package-ecosystem: "github-actions"
-    # Workflow files stored in the
-    # default location of `.github/workflows`
     directory: "/"
     schedule:
       interval: "weekly"
+    assignees: ["am9zZWY"]
