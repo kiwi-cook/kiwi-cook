@@ -1,4 +1,4 @@
-certifi==2021.10.8
+certifi==2023.7.22
 fastapi==0.104.1
 Flask==3.0.0
 nltk==3.8.1
