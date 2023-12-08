@@ -32,20 +32,20 @@ func (server *TasteBuddyServer) SetFiber() *TasteBuddyServer {
 	config := fiber.Config{
 		AppName:               "Taste Buddy",
 		DisableStartupMessage: true,
-		GETOnly:               true,
 	}
-	app := fiber.New(config)
+	f := fiber.New(config)
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost, https://taste-buddy.github.io",
-		AllowHeaders: "Origin, Content-Type, Accept, Options",
+	f.Use(cors.New(cors.Config{
+		AllowOrigins: "http://localhost:8080, https://taste-buddy.github.io",
+		AllowHeaders: "Origin, Content-Type, Accept",
+		AllowMethods: "GET",
 	}))
 
-	app.Use(compress.New(compress.Config{
+	f.Use(compress.New(compress.Config{
 		Level: compress.LevelBestCompression,
 	}))
 
-	server.fiber = app
+	server.fiber = f
 	return server
 }
 
