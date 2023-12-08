@@ -1,9 +1,15 @@
 {
+  "Locale": {
+    "en": "Englisch",
+    "de": "Deutsch"
+  },
   "Tabs": {
     "Explore": "Entdecken",
     "RecipeOfTheDay": "Rezept des Tages",
+    "AddOwn": "Hinzufügen",
     "Favorites": "Favoriten",
-    "InstallPWA": "Installiere die App"
+    "InstallPWA": "Installiere die App",
+    "Settings": "Einstellungen"
   },
   "General": {
     "WelcomeText": "Schön,; dass du da bist! 🍻",
@@ -35,6 +41,7 @@
   },
   "Suggestions": {
     "Title": "Entdecke;neue Rezepte",
+    "Subtitle": "Hey Buddy!",
     "SearchbarPrompt": "Suche nach Rezepten und Zutaten",
     "Preferences": {
       "Title": "Lege deine Präferenzen fest",
@@ -46,7 +53,7 @@
       "Tags": "Tag | Tags"
     },
     "Recommendations": {
-      "Title": "Vorschlag | Vorschläge",
+      "Title": "Vorschlag für dich | Vorschläge für dich",
       "Subtitle": "Basierend auf deinen Vorlieben"
     },
     "Random": {

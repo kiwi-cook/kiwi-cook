@@ -7,7 +7,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="$t('Suggestions.Title').split(';')" small-text="Welcome"/>
+                    <Header :big-text="$t('Suggestions.Title').split(';')" :small-text="$t('Suggestions.Subtitle')"/>
 
                     <!-- Searchbar for ingredients, tools, recipes and tags -->
                     <Searchbar v-model="filterInput" :items="filteredItems"
@@ -80,9 +80,10 @@
                                                             <IonIcon :icon="add"/>
                                                         </IonButton>
                                                         <IonButton
-                                                            v-if="!((element as Item).getId() in itemQueries)"
+                                                            v-if="((element as Item).getId() in itemQueries)"
                                                             aria-description="Remove item"
                                                             class="item-button"
+                                                            color="light"
                                                             shape="round"
                                                             @click="removeItem(element)">
                                                             <IonIcon :icon="close"/>
@@ -248,19 +249,17 @@
                             {{ $t('Suggestions.Search.NoRecipesFound') }}
                         </h3>
                     </section>
-
-                    <!-- Submit button -->
-                    <div class="search-button-wrapper">
-                        <IonButton :color="submitColor" class="search-button" type="submit" @click="submit()">
-                            {{ submitButton }}
-                            <IonIcon v-if="!submitted" :icon="search" class="search-button-icon"/>
-                        </IonButton>
-                    </div>
                 </div>
             </div>
 
             <!-- Fab timer -->
             <FabTimer/>
+            <IonFab slot="fixed" horizontal="center" vertical="bottom">
+                <IonButton class="smart-search-button" color="secondary" shape="round" @click="submit">
+                    <IonIcon slot="start" :icon="sparklesOutline"/>
+                    <strong>Smart Search</strong>
+                </IonButton>
+            </IonFab>
         </IonContent>
     </IonPage>
 </template>
@@ -274,6 +273,7 @@ import {
     IonCardContent,
     IonChip,
     IonContent,
+    IonFab,
     IonIcon,
     IonItem,
     IonLabel,
@@ -287,7 +287,7 @@ import Searchbar from '@/app/components/recipe/Searchbar.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
 import ItemComponent from '@/shared/components/recipe/Item.vue';
-import {add, close, closeCircleOutline, list, remove, search} from 'ionicons/icons';
+import {add, close, closeCircleOutline, list, remove, sparklesOutline} from 'ionicons/icons';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import List from '@/shared/components/utility/list/List.vue';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
@@ -311,7 +311,7 @@ const tags = computed(() => recipeStore.getTags)
 /* Filtered tags, recipes & items */
 const filterInput = ref<string>('')
 const searchFilters = ref<Set<string>>(new Set(['items']))
-const preferencesActive = ref(false)
+const preferencesActive = ref(true)
 const activePreference = ref('ingredients')
 
 // Tags
@@ -504,22 +504,22 @@ section {
     scroll-margin-top: 500px;
 }
 
-.search-button-wrapper {
-    position: fixed;
-    width: 70%;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 100;
-}
-
-.search-button::part(native) {
-    border-radius: var(--border-radius);
+.smart-search-button::part(native) {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
     font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 20px; /* Adjust the value to control the roundness of the corners */
+    cursor: pointer;
+    color: #fff; /* Text color */
+    background: linear-gradient(45deg, #C362B5, #6AB1E1); /* Gradient colors based on #C362B5 */
+    transition: background 0.3s ease-in-out;
 }
 
-.search-button-icon {
-    margin-left: 10px;
+.smart-search-button::part(native):hover {
+    background: linear-gradient(45deg, #6AB1E1, #C362B5); /* Gradient colors on hover with a reverse order */
 }
 </style>

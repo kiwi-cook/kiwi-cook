@@ -8,12 +8,8 @@
             <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
                           class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
             <IonButton shape="round" @click="selectPreferences()">
-                <template v-if="!showPreferences">
-                    <IonIcon :icon="optionsOutline"/>
-                </template>
-                <template v-else>
-                    <IonIcon :icon="closeOutline"/>
-                </template>
+                <IonIcon v-if="!showPreferences" :icon="optionsOutline"/>
+                <IonIcon v-else :icon="closeOutline"/>
             </IonButton>
         </div>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
@@ -45,7 +41,7 @@
                             <IonLabel>{{ $t('General.Item', items.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(item, itemIndex) in items" :key="itemIndex" button @click="selectItem(item)">
-                            {{ item.getName() }}
+                            {{ item.getName(undefined, 1) }}
                         </IonItem>
                     </IonItemGroup>
                 </IonList>
@@ -75,19 +71,14 @@ import {searchRecipesByString} from '@/app/search/search.ts';
 
 // Props
 const props = defineProps({
-    disableList: {
-        type: Boolean,
-        required: false,
-        default: false
+    placeholder: {
+        type: String,
+        required: true
     },
     items: {
         type: Array as PropType<Item[]>,
         required: false,
         default: () => []
-    },
-    placeholder: {
-        type: String,
-        required: true
     },
     recipes: {
         type: Array as PropType<Recipe[]>,
@@ -100,7 +91,7 @@ const props = defineProps({
         default: () => []
     }
 })
-const {tags, recipes, items, disableList} = toRefs(props);
+const {tags, recipes, items} = toRefs(props);
 const router = useIonRouter()
 
 // Emits
@@ -123,9 +114,8 @@ const selectPreferences = () => {
 
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
-    return (items.value.length > 0 && tags.value.length > 0 || recipes.value.length > 0)
-        && searchInput.value !== ''
-        && !disableList.value
+    return ((items.value.length > 0 || tags.value.length > 0 || recipes.value.length > 0)
+        && searchInput.value !== '')
 })
 
 watch(searchInput, (newFilterInput) => {
@@ -194,7 +184,7 @@ const selectItem = (item: Item) => {
     width: 90%;
     max-width: var(--max-width);
     margin: var(--margin-auto);
-    max-height: 30vh;
+    max-height: 50vh;
     overflow-y: scroll;
     padding: var(--padding-large);
     background: var(--background);

@@ -9,13 +9,11 @@
                 <div class="content">
                     <Header :big-text="['Settings']"/>
 
-                    <IonSelect v-model="locale" label="Language" label-placement="floating">
-                        <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale">
-                            {{ locale }}
+                    <IonSelect v-model="locale" label="Set Language" label-placement="floating">
+                        <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale" :value="locale">
+                            {{ $t(`Locale.${locale}`) }}
                         </IonSelectOption>
                     </IonSelect>
-
-                    {{ $i18n.locale }}
                 </div>
             </div>
         </IonContent>
@@ -30,7 +28,7 @@ import {useTasteBuddyStore} from '@/app/storage';
 import Header from '@/shared/components/utility/header/Header.vue';
 
 const tasteBuddyStore = useTasteBuddyStore();
-const locale = ref<SUPPORT_LOCALES_TYPE>(SUPPORT_LOCALES[0]);
+const locale = ref<SUPPORT_LOCALES_TYPE>(tasteBuddyStore.language.lang);
 watch(locale, (newLocale) => {
     tasteBuddyStore.setLanguage(newLocale);
 });

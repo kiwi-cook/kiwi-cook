@@ -1,9 +1,16 @@
 {
+  "Locales": {
+    "en": "English",
+    "de": "German"
+  },
   "Tabs": {
     "Explore": "Explore",
     "RecipeOfTheDay": "Recipe of the day",
+    "AddOwn": "Add your own",
     "Favorites": "Favorites",
-    "InstallPWA": "Install app"
+    "InstallPWA": "Install app",
+    "SignIn": "Sign in",
+    "Settings": "Settings"
   },
   "General": {
     "WelcomeText": "Hi;Welcome to;{appName}",
@@ -35,6 +42,7 @@
   },
   "Suggestions": {
     "Title": "Discover;new recipes",
+    "Subtitle": "Hey Buddy!",
     "SearchbarPrompt": "Search Recipes and Ingredients",
     "Preferences": {
       "Title": "Set your search preferences",
@@ -46,7 +54,7 @@
       "Tags": "Tag | Tags"
     },
     "Recommendations": {
-      "Title": "Recommendation | Recommendations",
+      "Title": "Recommendation for you | Recommendations for you",
       "Subtitle": "Based on your preferences"
     },
     "Random": {

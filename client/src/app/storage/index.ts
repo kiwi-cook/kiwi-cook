@@ -108,7 +108,7 @@ async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() => Prom
 
 interface TasteBuddyAppState {
     language: {
-        lang: string,
+        lang: SUPPORT_LOCALES_TYPE,
         supportedLanguages: string[]
     },
     timer: {

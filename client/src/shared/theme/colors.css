@@ -150,3 +150,14 @@
     --ion-tab-bar-background: #1f1f1f;
     --ion-card-background: #1e1e1e;
 }
+
+.magic-gradient {
+    color: #fff !important;
+    background: linear-gradient(45deg, #C362B5, #6AB1E1);
+    transition: background 0.3s ease-in-out;
+}
+
+.magic-gradient:hover {
+    color: #fff !important;
+    background: linear-gradient(45deg, #C362B5, #6AB1E1);
+}
