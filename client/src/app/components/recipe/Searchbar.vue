@@ -22,8 +22,6 @@
                         <IonItem v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipeIndex"
                                  button @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
-                            <!-- Add link icon to indicate that it is a link -->
-                            <IonIcon slot="end" :icon="chevronForwardOutline"/>
                         </IonItem>
                     </IonItemGroup>
                     <IonItemGroup v-if="tags.length > 0">
@@ -66,7 +64,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {Item, Recipe} from '@/shared';
-import {chevronForwardOutline, closeOutline, optionsOutline} from 'ionicons/icons';
+import {closeOutline, optionsOutline} from 'ionicons/icons';
 import {searchRecipesByString} from '@/app/search/search.ts';
 
 // Props
