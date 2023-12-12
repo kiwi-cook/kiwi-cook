@@ -5,7 +5,7 @@
 <template>
     <IonGrid>
         <IonRow>
-            <IonCol :size-lg="selectedLayout.left.lg"
+            <IonCol v-if="$slots.left" :size-lg="selectedLayout.left.lg"
                     :size-md="selectedLayout.left.md"
                     :size-xl="selectedLayout.left.xl"
                     class="left"
@@ -15,9 +15,9 @@
                 <slot name="left"/>
             </IonCol>
 
-            <IonCol v-if="$slots.right" :size-lg="selectedLayout.right.lg"
-                    :size-md="selectedLayout.right.md"
-                    :size-xl="selectedLayout.right.xl"
+            <IonCol v-if="$slots.right" :size-lg="$slots.left ? selectedLayout.right.lg : '12'"
+                    :size-md="$slots.left ? selectedLayout.right.md : '12'"
+                    :size-xl="$slots.left ? selectedLayout.right.xl : '12'"
                     class="right"
                     size="12"
                     size-sm="12"
