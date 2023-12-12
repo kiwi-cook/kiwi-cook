@@ -1,16 +1,7 @@
 {
-  "Locales": {
-    "en": "English",
-    "de": "German"
-  },
-  "Tabs": {
-    "Explore": "Explore",
-    "RecipeOfTheDay": "Recipe of the day",
-    "AddOwn": "Add your own",
-    "Favorites": "Favorites",
-    "InstallPWA": "Install app",
-    "SignIn": "Sign in",
-    "Settings": "Settings"
+  "Favorites": {
+    "Title": "Your;favorite recipes",
+    "NoRecipesSaved": "You have no saved recipes yet."
   },
   "General": {
     "WelcomeText": "Hi;Welcome to;{appName}",
@@ -19,6 +10,10 @@
     "Tag": "Tag | Tags",
     "ReadMore": "Read more",
     "ReadLess": "Read less"
+  },
+  "Locales": {
+    "en": "English",
+    "de": "German"
   },
   "Recipe": {
     "Src": {
@@ -35,10 +30,28 @@
       "Description": "The recipe you are looking for does not exist."
     }
   },
-  "Tag": {
-    "Special": {
-      "FastAndCheap": "fast & cheap"
+  "RecipeOfTheDay": {
+    "Title": "Recipe of the day",
+    "NotFound": "No recipe of the day available"
+  },
+  "Settings": {
+    "Title": "Settings",
+    "Language": "Language",
+    "Theme": "Theme",
+    "Light": "Light",
+    "Dark": "Dark",
+    "System": "System",
+    "Reset": {
+      "Button": "Reset settings",
+      "ResetConfirmation": "Are you sure you want to reset all settings?",
+      "ResetButton": "Reset settings",
+      "ResetSuccess": "Settings have been reset",
+      "ResetError": "Could not reset settings"
     }
+  },
+  "SignIn": {
+    "SignIn": "Sign in",
+    "ShowPassword": "Show password"
   },
   "Suggestions": {
     "Title": "Discover;new recipes",
@@ -69,12 +82,18 @@
       "NoRecipesFound": "No recipes found"
     }
   },
-  "Favorites": {
-    "Title": "Your;favorite recipes",
-    "NoRecipesSaved": "You have no saved recipes yet."
-  },
-  "SignIn": {
+  "Tabs": {
+    "Explore": "Explore",
+    "RecipeOfTheDay": "Today",
+    "AddOwn": "Add your own",
+    "Favorites": "Favorites",
+    "InstallPWA": "Install app",
     "SignIn": "Sign in",
-    "ShowPassword": "Show password"
+    "Settings": "Settings"
+  },
+  "Tag": {
+    "Special": {
+      "FastAndCheap": "fast & cheap"
+    }
   }
 }

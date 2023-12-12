@@ -1,15 +1,7 @@
 {
-  "Locale": {
-    "en": "Englisch",
-    "de": "Deutsch"
-  },
-  "Tabs": {
-    "Explore": "Entdecken",
-    "RecipeOfTheDay": "Rezept des Tages",
-    "AddOwn": "Hinzufügen",
-    "Favorites": "Favoriten",
-    "InstallPWA": "Installiere die App",
-    "Settings": "Einstellungen"
+  "Favorites": {
+    "Title": "Deine;Lieblingsrezepte",
+    "NoRecipesSaved": "Du hast noch keine Rezepte favorisiert."
   },
   "General": {
     "WelcomeText": "Schön,; dass du da bist! 🍻",
@@ -18,6 +10,10 @@
     "Tag": "Stichwort | Stichwörter",
     "ReadMore": "Mehr lesen",
     "ReadLess": "Weniger lesen"
+  },
+  "Locale": {
+    "en": "Englisch",
+    "de": "Deutsch"
   },
   "Recipe": {
     "Src": {
@@ -34,10 +30,28 @@
       "Description": "Das Rezept konnte nicht gefunden werden."
     }
   },
-  "Tag": {
-    "Special": {
-      "FastAndCheap": "schnell & günstig"
+  "RecipeOfTheDay": {
+    "Title": "Rezept des Tages",
+    "NotFound": "Heute gibt es leider kein Rezept des Tages."
+  },
+  "Settings": {
+    "Title": "Einstellungen",
+    "Language": "Sprache",
+    "Theme": "Thema",
+    "Light": "Hell",
+    "Dark": "Dunkel",
+    "System": "System",
+    "Reset": {
+      "Button": "Zurücksetzen",
+      "ResetConfirmation": "Möchtest du wirklich alle Einstellungen zurücksetzen?",
+      "ResetButton": "Zurücksetzen",
+      "ResetSuccess": "Einstellungen wurden zurückgesetzt.",
+      "ResetError": "Einstellungen konnten nicht zurückgesetzt werden."
     }
+  },
+  "SignIn": {
+    "SignIn": "Anmelden",
+    "ShowPassword": "Zeige Passwort"
   },
   "Suggestions": {
     "Title": "Entdecke;neue Rezepte",
@@ -68,12 +82,17 @@
       "NoRecipesFound": "Keine Rezepte gefunden"
     }
   },
-  "Favorites": {
-    "Title": "Deine;Lieblingsrezepte",
-    "NoRecipesSaved": "Du hast noch keine Rezepte favorisiert."
+  "Tabs": {
+    "Explore": "Entdecken",
+    "RecipeOfTheDay": "Heute",
+    "AddOwn": "Hinzufügen",
+    "Favorites": "Favoriten",
+    "InstallPWA": "Installiere die App",
+    "Settings": "Einstellungen"
   },
-  "SignIn": {
-    "SignIn": "Anmelden",
-    "ShowPassword": "Zeige Passwort"
+  "Tag": {
+    "Special": {
+      "FastAndCheap": "schnell & günstig"
+    }
   }
 }
