@@ -504,6 +504,18 @@ section {
     scroll-margin-top: 500px;
 }
 
+@keyframes liquidGradient {
+    0% {
+        background-position: 0% 50%
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
 .smart-search-button::part(native) {
     display: inline-block;
     padding: 10px 20px;
@@ -512,14 +524,20 @@ section {
     text-align: center;
     text-decoration: none;
     border: none;
-    border-radius: 20px; /* Adjust the value to control the roundness of the corners */
+    border-radius: 20px;
     cursor: pointer;
-    color: #fff; /* Text color */
-    background: linear-gradient(45deg, #C362B5, #6AB1E1); /* Gradient colors based on #C362B5 */
-    transition: background 0.3s ease-in-out;
+    color: #fff;
+    background: radial-gradient(circle at top left, #62c370, #c362b5, #6ab1e1),
+    linear-gradient(45deg, #6ab1e1, #62c370, #c362b5, #6ab1e1),
+    radial-gradient(circle at bottom right, #62c370, #c362b5, #6ab1e1),
+    linear-gradient(135deg, #6ab1e1, #62c370, #c362b5, #6ab1e1);
+    background-size: 200% 200%; /* Increase background size for the gradient animation */
+    transition: background 1s ease-in-out;
+    animation: liquidGradient 5s infinite ease; /* Apply the liquid gradient animation */
 }
 
 .smart-search-button::part(native):hover {
-    background: linear-gradient(45deg, #6AB1E1, #C362B5); /* Gradient colors on hover with a reverse order */
+    background: linear-gradient(45deg, #6ab1e1, #62c370, #c362b5,); /* Gradient colors on hover with a reverse order */
+    animation: liquidGradient 3s infinite; /* Apply the liquid gradient animation */
 }
 </style>
