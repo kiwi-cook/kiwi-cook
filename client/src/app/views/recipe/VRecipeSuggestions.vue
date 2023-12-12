@@ -255,7 +255,7 @@
             <!-- Fab timer -->
             <FabTimer/>
             <IonFab slot="fixed" horizontal="center" vertical="bottom">
-                <IonButton class="smart-search-button" color="secondary" shape="round" @click="submit">
+                <IonButton class="smart-search-button" shape="round" @click="submit">
                     <IonIcon slot="start" :icon="sparklesOutline"/>
                     <strong>Smart Search</strong>
                 </IonButton>
@@ -517,6 +517,7 @@ section {
 }
 
 .smart-search-button::part(native) {
+    /* Basic styling */
     display: inline-block;
     padding: 10px 20px;
     font-size: 16px;
@@ -526,18 +527,28 @@ section {
     border: none;
     border-radius: 20px;
     cursor: pointer;
+
+    /* Colors and shadows */
     color: #fff;
     background: radial-gradient(circle at top left, #62c370, #c362b5, #6ab1e1),
     linear-gradient(45deg, #6ab1e1, #62c370, #c362b5, #6ab1e1),
     radial-gradient(circle at bottom right, #62c370, #c362b5, #6ab1e1),
     linear-gradient(135deg, #6ab1e1, #62c370, #c362b5, #6ab1e1);
     background-size: 200% 200%; /* Increase background size for the gradient animation */
-    transition: background 1s ease-in-out;
+    box-shadow: 0 17px 10px -10px rgba(0, 0, 0, 0.4);
+
+    /* Animations */
+    transition: background 1s ease-in-out,
+    transform ease-in-out 300ms,
+    box-shadow ease-in-out 300ms,
+    scale ease-in-out 300ms;
     animation: liquidGradient 5s infinite ease; /* Apply the liquid gradient animation */
 }
 
 .smart-search-button::part(native):hover {
-    background: linear-gradient(45deg, #6ab1e1, #62c370, #c362b5,); /* Gradient colors on hover with a reverse order */
-    animation: liquidGradient 3s infinite; /* Apply the liquid gradient animation */
+    /* Hover effects */
+    box-shadow: 0 37px 20px -15px rgba(0, 0, 0, 0.2);
+    transform: translate(0px, -5px);
+    scale: 1.05;
 }
 </style>
