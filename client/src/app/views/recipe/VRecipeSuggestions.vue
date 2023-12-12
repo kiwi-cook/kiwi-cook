@@ -190,7 +190,8 @@
                         </div>
                     </Transition>
 
-                    <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay" :title="t('Tabs.RecipeOfTheDay')"/>
+                    <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay"
+                                      :title="t('RecipeOfTheDay.Title')"/>
 
                     <!-- Predicted/Recommended recipes -->
                     <section v-if="predictedRecipes.length > 0">

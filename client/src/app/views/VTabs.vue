@@ -9,7 +9,7 @@
             <IonRouterOutlet/>
 
             <IonProgressBar v-show="showLoadingBar" type="indeterminate"/>
-            <IonTabBar slot="bottom">
+            <IonTabBar slot="bottom" :translucent="true" selected-tab="recipe-suggestions">
                 <IonTabButton :disabled="isLoadingInitialData"
                               :href="recipeOfTheDay?.getRoute() ?? '/recipe/of-the-day'" tab="recipe-of-the-day">
                     <IonIcon :icon="calendar"/>
