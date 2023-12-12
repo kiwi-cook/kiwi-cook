@@ -17,7 +17,7 @@ Ready to get cooking with Taste Buddy's backend? Follow these simple steps:
 
 2. **Navigate to Server Directory:**
    ```bash
-   cd taste-buddy/server-dev
+   cd taste-buddy/server-prod
    ```
 
 3. **Run the Server:**
