@@ -6,7 +6,9 @@
     <div class="recipe-wrapper">
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
+                <!-- Title -->
                 <RecipeTitle :recipe="recipe" disable-link title="Let's start cooking!"/>
+                <!-- Save and Share -->
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
@@ -16,11 +18,13 @@
                                  :icon="isSaved ?? false ? heart: heartOutline"/>
                     </IonButton>
                 </IonButtons>
+                <!-- Tags -->
                 <div class="recipe-tags ion-margin-bottom">
                     <IonChip v-for="tag in recipe?.getTags()" :key="tag" outline>
                         {{ tag }}
                     </IonChip>
                 </div>
+                <!-- Description -->
                 <IonText class="recipe-description desc ion-margin-top">
                     <ReadMore :text="recipe?.getDescription()"/>
                 </IonText>
@@ -31,15 +35,19 @@
         </div>
 
         <TwoColumnLayout layout="rightBigger">
+            <!-- Left -->
+            <!-- Ingredients and tools that are needed -->
             <template v-if="ingredients.length > 0 || tools.length > 0" #left>
                 <div class="sticky">
                     <div class="header">
+                        <!-- Show the amount of ingredients -->
                         <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
                     </div>
                     <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
                             <IonItem class="recipe-servings" lines="none">
                                 <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
+                                <!-- Increase or decrease the servings to adjust the amount of ingredients -->
                                 <div class="recipe-servings-button">
                                     <IonButton :disabled="servings === 1" @click="servings--">
                                         <IonIcon :icon="remove"/>
@@ -50,32 +58,41 @@
                                     </IonButton>
                                 </div>
                             </IonItem>
+                            <!-- Show the ingredients -->
                             <ItemList :items="ingredients"/>
                         </IonCardContent>
                     </IonCard>
                     <IonCard v-if="tools.length > 0">
                         <IonCardContent>
+                            <!-- ... and the tools -->
                             <ItemList :items="tools"/>
                         </IonCardContent>
                     </IonCard>
                 </div>
             </template>
 
+            <!-- Right -->
+            <!-- Steps -->
             <template #right>
                 <div class="header">
+                    <!-- Show the amount of steps -->
                     <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
                     </h2>
+                    <!-- ... and the duration -->
                     <Duration :duration="recipe?.getDuration()"/>
                 </div>
+                <!-- Steps -->
                 <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
                     <StepComponent :amount-steps="steps.length" :recipe-id="recipe?.getId()" :step="step"
                                    :step-index="stepIndex"/>
                 </template>
-                <!-- if no steps are available, don't show the good appetite message -->
+                <!-- Good Appetite -->
+                <!-- If there are no steps, don't show the good appetite step -->
                 <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep"/>
             </template>
         </TwoColumnLayout>
 
+        <!-- Source -->
         <IonItem lines="none">
             <IonNote>
                 <p v-html="source"/>
