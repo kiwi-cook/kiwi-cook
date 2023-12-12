@@ -280,7 +280,6 @@ import {
     IonLabel,
     IonPage,
     IonRange,
-    useIonRouter,
 } from '@ionic/vue';
 import {useRecipeStore} from '@/app/storage';
 import {Item, Recipe} from '@/shared';
@@ -300,7 +299,6 @@ import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
-const router = useIonRouter()
 
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
 
@@ -434,12 +432,6 @@ const submit = () => {
         searchedRecipes.value = []
     }
 }
-
-const submitButton = computed<string>(() => searchedRecipes.value.length === 0 ?
-    t('Suggestions.Search.Submit') :
-    t('Suggestions.Search.Clear')
-);
-const submitColor = computed<string>(() => searchedRecipes.value.length === 0 ? 'success' : 'danger');
 </script>
 
 <style scoped>
@@ -507,13 +499,13 @@ section {
 
 @keyframes liquidGradient {
     0% {
-        background-position: 0% 50%
+        background-position: 0 50%
     }
     50% {
         background-position: 100% 50%;
     }
     100% {
-        background-position: 0% 50%;
+        background-position: 0 50%;
     }
 }
 
