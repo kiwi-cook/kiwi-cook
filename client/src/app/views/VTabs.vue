@@ -60,13 +60,4 @@ const showLoadingBar = computed<boolean>(() => (recipeStore.isLoading && !isLoad
 ion-tab-bar {
     contain: none;
 }
-
-.middle-button {
-    height: 65px;
-    max-width: 65px;
-    border-radius: 50%;
-    z-index: 100;
-    margin-top: -18px;
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
-}
 </style>
