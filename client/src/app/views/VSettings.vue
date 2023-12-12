@@ -7,7 +7,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="['Settings']"/>
+                    <Header :big-text="[$t('Settings.Title')]"/>
 
                     <IonSelect v-model="locale" label="Set Language" label-placement="floating">
                         <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale" :value="locale">
