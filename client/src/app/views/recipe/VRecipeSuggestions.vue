@@ -311,7 +311,7 @@ const tags = computed(() => recipeStore.getTags)
 /* Filtered tags, recipes & items */
 const filterInput = ref<string>('')
 const searchFilters = ref<Set<string>>(new Set(['items']))
-const preferencesActive = ref(true)
+const preferencesActive = ref(false) /* Overridden by Searchbar */
 const activePreference = ref('ingredients')
 
 // Tags

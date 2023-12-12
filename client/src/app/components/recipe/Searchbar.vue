@@ -105,12 +105,14 @@ const emit = defineEmits({
 /* Searchbar state */
 const searchInput = ref('')
 
-const showPreferences = ref(false)
+const showPreferences = ref(true)
 const selectPreferences = () => {
     closeSearch()
     showPreferences.value = !showPreferences.value
-    emit('selectPreferences', showPreferences.value)
 }
+watch(showPreferences, (newShowPreferences) => {
+    emit('selectPreferences', newShowPreferences)
+}, {immediate: true})
 
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
