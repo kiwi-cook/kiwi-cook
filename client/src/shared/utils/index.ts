@@ -10,4 +10,4 @@ export * from '@/shared/utils/theme';
 export * from '@/shared/types';
 export * from '@/shared/locales';
 
-export const APP_NAME = 'Taste Buddy 🍻'
+export const APP_NAME = 'Taste Buddy 🍳'
