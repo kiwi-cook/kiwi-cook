@@ -14,6 +14,12 @@
                             {{ $t(`Locale.${locale}`) }}
                         </IonSelectOption>
                     </IonSelect>
+
+                    <IonNote>
+                        Made in Germany with
+                        <IonIcon :icon="heart" color="danger"/>
+                        by Josef and Vasilij
+                    </IonNote>
                 </div>
             </div>
         </IonContent>
@@ -21,11 +27,12 @@
 </template>
 
 <script lang="ts" setup>
-import {IonContent, IonPage, IonSelect, IonSelectOption} from '@ionic/vue';
+import {IonContent, IonIcon, IonNote, IonPage, IonSelect, IonSelectOption} from '@ionic/vue';
 import {SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n';
 import {ref, watch} from 'vue';
 import {useTasteBuddyStore} from '@/app/storage';
 import Header from '@/shared/components/utility/header/Header.vue';
+import {heart} from 'ionicons/icons';
 
 const tasteBuddyStore = useTasteBuddyStore();
 const locale = ref<SUPPORT_LOCALES_TYPE>(tasteBuddyStore.language.lang);
