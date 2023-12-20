@@ -7,9 +7,9 @@
  * @param functionName the name of the function
  * @param message the message to log
  */
-export const log = (functionName: string, message?: any) => {
+export const log = (functionName: string, message?: any, ...messages: any[]) => {
     if (process.env.NODE_ENV === 'development') {
-        console.log(`[${functionName}]:`, message)
+        console.log(`[${functionName}]:`, message, ...messages)
     }
 }
 /**
@@ -18,9 +18,21 @@ export const log = (functionName: string, message?: any) => {
  * @param message the message to log
  * @param messages
  */
-export const logDebug = (functionName: string, message: any, ...messages: any[]) => {
+export const logDebug = (functionName: string, message?: any, ...messages: any[]) => {
     if (process.env.NODE_ENV === 'development') {
         console.debug(`[${functionName}]:`, message, ...messages)
+    }
+}
+
+/**
+ * Warn a message to the console
+ * @param functionName the name of the function
+ * @param message the message to log
+ * @param messages
+ */
+export const logWarn = (functionName: string, message?: any, ...messages: any[]) => {
+    if (process.env.NODE_ENV === 'development') {
+        console.warn(`[${functionName}]:`, message, ...messages)
     }
 }
 

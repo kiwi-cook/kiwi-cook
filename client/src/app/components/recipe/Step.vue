@@ -17,30 +17,29 @@
             </IonCardTitle>
             <IonCardTitle v-else-if="step.type === STEP_TYPES.HEADER">
                 <h3>
-                    <div v-html="step?.printDescription('item-highlight')"/>
+                    <span v-html="step?.pPrintStepDescription('item-highlight')"/>
                 </h3>
             </IonCardTitle>
         </IonCardHeader>
         <IonCardContent>
-            <IonItem v-if="stepItems.length > 0" lines="none">
-                <ItemList :items="stepItems" horizontal quantity-position="start"/>
-            </IonItem>
+            <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
+                <ItemList :items="recipeItems" horizontal quantity-position="start"/>
+            </IonItem> -->
             <!-- Show the description here of the step if it is not a header -->
             <IonItem v-if="step.type !== STEP_TYPES.HEADER" lines="none">
-                <div v-html="step?.printDescription('item-highlight')"/>
+                <div v-html="step?.pPrintStepDescription('item-highlight')"/>
             </IonItem>
         </IonCardContent>
     </IonCard>
 </template>
 
 <script lang="ts" setup>
-import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
-import {computed, PropType, toRefs} from 'vue';
+import {PropType, toRefs} from 'vue';
 import {Step, STEP_TYPES} from '@/shared';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
-import {useTasteBuddyStore} from '@/app/storage';
+import {useAppStore} from '@/app/storage';
 
 const props = defineProps({
     step: {
@@ -64,9 +63,8 @@ const props = defineProps({
 })
 
 const {step, recipeId} = toRefs(props)
-const stepItems = computed(() => step.value.getStepItems())
 
-const store = useTasteBuddyStore()
+const store = useAppStore()
 const startTimer = () => {
     store.setTimer(step?.value?.duration, recipeId?.value)
 }

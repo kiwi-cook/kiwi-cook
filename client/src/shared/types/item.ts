@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n';
+import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
 import {distance} from 'fastest-levenshtein';
 import {tmpId} from '@/shared';
 import {useRecipeStore} from '@/app/storage';
@@ -31,16 +31,37 @@ export class Item {
     }
 
     /**
+     * Update the item in the step
+     * @param item
+     */
+    updateItem(item: Item): this {
+        this.id = item.id
+        this.name = item.name
+        this.type = item.type
+        this.imgUrl = item.imgUrl
+        return this
+    }
+
+    /**
      * Get the localized name of the item
      * @param lang
      * @param amount
      */
     public getName(lang?: string, amount?: number): string {
-        const locale = getLocaleStr(this.name, lang).split('|')
-        if (amount === 1 || locale.length === 1) {
-            return locale[0]
+        const locale = getLocaleStr(this.name, lang)
+        const [one, many] = locale.split('|')
+        if (amount === 1) {
+            return one
         }
-        return locale[1]
+        return many ?? one
+    }
+
+
+    /**
+     * Get all names of the item
+     */
+    public getAllNames(): string[] {
+        return Object.values(this.name).map((name: string) => name.split('|')).flat()
     }
 
     /**
@@ -61,7 +82,7 @@ export class Item {
      * @throws an error if the id is undefined
      */
     public getId(): string {
-        return this.id
+        return this.id ?? ''
     }
 
     /**
@@ -77,15 +98,6 @@ export class Item {
      */
     public getPrice(): number {
         return Math.random()
-    }
-
-    /**
-     * Set the localized name of the item
-     * @param name
-     * @param lang
-     */
-    public setName(name?: string, lang?: string): void {
-        setLocaleStr(this.name, name ?? '', lang)
     }
 }
 
@@ -106,14 +118,13 @@ export function itemFromJSON(json: any): Item {
     return item
 }
 
-
 /**
- * StepItem of a recipe
+ * RecipeItem of a recipe
  * It is an item with a quantity and a unit
  * It is used in a step
  * This is done to make the item reusable
  */
-export class StepItem extends Item {
+export class RecipeItem extends Item {
     quantity: number;
     servings: number;
     unit: string;
@@ -122,18 +133,11 @@ export class StepItem extends Item {
         super(item)
         this.quantity = 1
         this.servings = 1
-        this.unit = 'pcs'
+        this.unit = ''
     }
 
-    /**
-     * Update the item in the step
-     * @param item
-     */
-    updateItem(item: Item): void {
-        this.id = item.id
-        this.name = item.name
-        this.type = item.type
-        this.imgUrl = item.imgUrl
+    public getQuantity(): number {
+        return this.quantity * this.servings
     }
 
     /**
@@ -151,23 +155,31 @@ export class StepItem extends Item {
         this.unit = unit
         return this
     }
+
+    /**
+     * Set the servings of the item
+     */
+    public setServings(servings: number): this {
+        this.servings = servings
+        return this
+    }
 }
 
 /**
- * Initialize an stepItem from a json object
+ * Initialize a recipeItem from a json object
  * This is done because the json object does not have the methods of the class
  *
  * @param json
  * @returns a new step item
  */
-export function stepItemFromJSON(json: any): StepItem {
-    const stepItem = new StepItem()
-    stepItem.quantity = !json.quantity || json.quantity === 0 ? 1 : json.quantity
-    stepItem.unit = json.unit ?? 'pcs'
+export function recipeItemFromJSON(json: any): RecipeItem {
+    const recipeItem = new RecipeItem()
+    recipeItem.quantity = !json.quantity || json.quantity === 0 ? 1 : json.quantity
+    recipeItem.unit = json.unit ?? 'pcs'
 
     const store = useRecipeStore()
     const item = store.getItemsAsMap[json.id ?? ''] ?? new Item()
-    stepItem.updateItem(item)
+    recipeItem.updateItem(item)
 
-    return stepItem
+    return recipeItem
 }

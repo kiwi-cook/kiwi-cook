@@ -12,12 +12,12 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from 'vue';
-import {Item, StepItem} from '@/shared';
+import {Item, RecipeItem} from '@/shared';
 import ItemComponent from '@/shared/components/recipe/Item.vue';
 
 const props = defineProps({
     items: {
-        type: Array as PropType<(StepItem[] | Item[])>,
+        type: Array as PropType<(RecipeItem[] | Item[])>,
         required: true,
     },
     showLimit: {

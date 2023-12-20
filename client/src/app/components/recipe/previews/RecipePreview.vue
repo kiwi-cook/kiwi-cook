@@ -32,7 +32,7 @@
 
 <script lang="ts" setup>
 import {computed, PropType, toRefs} from 'vue';
-import {Item, Recipe, StepItem} from '@/shared';
+import {Item, Recipe, RecipeItem} from '@/shared';
 import {IonChip, useIonRouter} from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import {RecipeSuggestion} from '@/app/search';
@@ -64,16 +64,16 @@ const suggestion = computed(() => {
     }
 })
 
-const missingItems = computed<StepItem[]>(() => suggestion?.value?.getMissingItems() ?? [])
+const missingItems = computed<RecipeItem[]>(() => suggestion?.value?.getMissingItems() ?? [])
 
-const items = computed<StepItem[]>(() => {
-    const stepItems = uRecipe?.value?.getStepItems()
+const items = computed<RecipeItem[]>(() => {
+    const recipeItems = uRecipe?.value?.getRecipeItems()
     if (missingItems.value.length === 0) {
-        return stepItems
+        return recipeItems
     }
 
     const missingItemIds = missingItems?.value?.map((item: Item) => item.getId())
-    return stepItems.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
+    return recipeItems.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
 })
 
 const router = useIonRouter();

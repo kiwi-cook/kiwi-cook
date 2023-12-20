@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe, StepItem} from '@/shared';
+import {Recipe, RecipeItem} from '@/shared';
 import {searchRecipes} from '@/app/search/search';
 
 export class RecipeSuggestion {
@@ -10,7 +10,7 @@ export class RecipeSuggestion {
     recipe: Recipe;
     recipe_price?: number;
     missing_items?: {
-        item: StepItem;
+        item: RecipeItem;
         price?: number;
     }[]
 
@@ -20,8 +20,8 @@ export class RecipeSuggestion {
         this.missing_items = []
     }
 
-    public getMissingItems(): StepItem[] {
-        return this.missing_items?.map(missing_item => missing_item.item ?? new StepItem()) ?? []
+    public getMissingItems(): RecipeItem[] {
+        return this.missing_items?.map(missing_item => missing_item.item ?? new RecipeItem()) ?? []
     }
 }
 

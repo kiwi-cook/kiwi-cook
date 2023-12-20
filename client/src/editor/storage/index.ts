@@ -7,7 +7,6 @@ import {defineStore} from 'pinia'
 
 import {API_ROUTE, APIResponse, itemFromJSON, presentToast, Recipe, recipeFromJSON, sendToAPI} from '@/shared';
 import {logDebug} from '@/shared/utils/logging';
-import {SUPPORT_LOCALES_TYPE} from '@/shared/locales/i18n';
 import {MutableRecipe} from '@/editor/types/recipe';
 import {MutableItem} from '@/editor/types/item';
 
@@ -17,16 +16,14 @@ import {MutableItem} from '@/editor/types/item';
 interface UserState {
     user: {
         authenticated: boolean
-    },
-    language: SUPPORT_LOCALES_TYPE
+    }
 }
 
 export const useTasteBuddyStore = defineStore('tastebuddy-editor', {
     state: (): UserState => ({
         user: {
             authenticated: false,
-        },
-        language: 'en'
+        }
     }),
     getters: {
         /**
@@ -124,7 +121,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
             const recipesByItemId: { [key: string]: string[] } = {}
 
             for (const recipe of recipes) {
-                const items = recipe.getStepItems()
+                const items = recipe.getRecipeItems()
                 for (const item of items) {
                     if (!(item.getId() in recipesByItemId)) {
                         recipesByItemId[item.getId()] = []
@@ -140,7 +137,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
             return Object.values(state.items ?? {}) ?? []
         },
         getItemNamesAsList(): string[] {
-            return (this.getItemsAsList ?? []).map((item: MutableItem) => item.getName())
+            return (this.getItemsAsList ?? []).flatMap((item: MutableItem) => item.getAllNames())
         },
         getItemsSortedByName(): MutableItem[] {
             return (this.getItemsAsList ?? [])

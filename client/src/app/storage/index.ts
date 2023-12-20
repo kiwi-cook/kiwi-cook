@@ -13,13 +13,6 @@ import {compress, decompress} from 'lz-string'
 import {Drivers, Storage} from '@ionic/storage';
 import {API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, recipeFromJSON, sendToAPI,} from '@/shared';
 import {logDebug, logError} from '@/shared/utils/logging';
-import getBrowserLocale, {
-    DEFAULT_LOCALE,
-    i18n,
-    setI18nLanguage,
-    SUPPORT_LOCALES,
-    SUPPORT_LOCALES_TYPE
-} from '@/shared/locales/i18n';
 import {TasteBuddySearch} from '@/app/search/search';
 import {simpleRecipeSuggestion} from '@/app/search/suggestion';
 
@@ -107,10 +100,6 @@ async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() => Prom
 // Define typings for the store state
 
 interface TasteBuddyAppState {
-    language: {
-        lang: SUPPORT_LOCALES_TYPE,
-        supportedLanguages: string[]
-    },
     timer: {
         recipeId?: string,
         time: number,
@@ -119,25 +108,11 @@ interface TasteBuddyAppState {
     } | null
 }
 
-export const useTasteBuddyStore = defineStore('tastebuddy-app', {
+export const useAppStore = defineStore('tastebuddy-app', {
     state: (): TasteBuddyAppState => ({
-        language: {
-            lang: DEFAULT_LOCALE,
-            supportedLanguages: SUPPORT_LOCALES
-        },
         timer: null
     }),
     actions: {
-        /**
-         * Change the language
-         * @param language
-         */
-        setLanguage(language?: SUPPORT_LOCALES_TYPE) {
-            const browserLocale = getBrowserLocale()
-            const lang = language ?? browserLocale ?? DEFAULT_LOCALE
-            this.language.lang = lang
-            setI18nLanguage(i18n, lang)
-        },
         /**
          * Set step timer for a recipe
          * @param time in minutes
@@ -228,7 +203,7 @@ export const useRecipeStore = defineStore('recipes-app', {
             const randomItems: Item[] = (this.getItemsAsList ?? []).filter(() => Math.random() < 0.5)
 
             const itemsFromSavedRecipes: Item[] = (this.getSavedRecipes ?? []).reduce((items: Item[], recipe: Recipe) => {
-                return [...items, ...recipe.getStepItems()]
+                return [...items, ...recipe.getRecipeItems()]
             }, [])
 
             const itemIds = new Set([...randomItems, ...itemsFromSavedRecipes].map((item: Item) => item.getId()))
@@ -299,7 +274,7 @@ export const useRecipeStore = defineStore('recipes-app', {
             const savedRecipes = this.getSavedRecipes
             for (const savedRecipe of savedRecipes) {
                 keyValues.numberOfSteps.push(savedRecipe.steps.length)
-                keyValues.numberOfIngredients.push(savedRecipe.getStepItems().length)
+                keyValues.numberOfIngredients.push(savedRecipe.getRecipeItems().length)
                 keyValues.duration.push(savedRecipe.getDuration())
                 for (const item of savedRecipe.getItems()) {
                     const count = keyValues.itemsIds.get(item.getId()) ?? 0

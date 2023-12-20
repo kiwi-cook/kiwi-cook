@@ -2,11 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe, Step, StepItem} from '@/shared';
+import {Recipe, RecipeItem, Step} from '@/shared';
 import {logDebug} from '@/shared/utils/logging';
 import {useRecipeStore} from '@/editor/storage';
 import {setLocaleStr} from '@/shared/locales/i18n';
-import {MutableItem} from '@/editor/types/item';
 
 export class MutableRecipe extends Recipe {
 
@@ -81,7 +80,6 @@ export class MutableRecipe extends Recipe {
             // add the step to the end
             this.steps.push(_step)
         }
-        this.computeItems()
         return this
     }
 
@@ -92,37 +90,25 @@ export class MutableRecipe extends Recipe {
      */
     public removeStep(index: number): this {
         this.steps.splice(index, 1)
-        this.computeItems()
         return this
     }
 
     /**
      * Add an item to a step
-     * @param stepIndex index of the step
-     * @param itemIndex index of the item
      * @param item the item to add
      * @returns the recipe and the item
      */
-    public addItem(stepIndex?: number, itemIndex?: number, item?: MutableItem): {
-        item: MutableItem,
+    public putRecipeItem(item?: RecipeItem): {
+        item: RecipeItem,
         recipe: MutableRecipe
     } {
-        item = item ?? new MutableItem();
-        logDebug('recipe.addItem', `add item to recipe ${this.getId()} at step ${stepIndex} and item position ${itemIndex}:`, item)
-        const stepItem = new StepItem(item);
-
-        if (stepIndex === undefined) {
-            // add a new step if no step is specified
-            this.steps[this.steps.length - 1].items.push(stepItem);
-        } else if (itemIndex === undefined) {
-            // add a new item to the step if no item is specified
-            this.steps[stepIndex].items.push(stepItem);
-        } else {
-            // update the item at the specified index
-            this.steps[stepIndex].items[itemIndex] = stepItem;
-        }
-        this.computeItems()
+        item = item ?? new RecipeItem();
+        this.items.add(item)
         return {item, recipe: this};
+    }
+
+    public removeRecipeItem(item: RecipeItem): void {
+        this.items.delete(item)
     }
 
     /**
@@ -141,22 +127,6 @@ export class MutableRecipe extends Recipe {
             this.src.authors = []
         }
         this.src.authors.push({name: author})
-        this.computeAuthors()
-    }
-
-    public replaceItem(itemId: string, newItem?: MutableItem) {
-        if (!newItem) {
-            return
-        }
-
-        for (const step of this.steps) {
-            for (const item of step.items) {
-                if (item.getId() === itemId) {
-                    item.updateItem(newItem)
-                }
-            }
-        }
-        this.computeItems()
     }
 
     /**
@@ -179,6 +149,5 @@ export class MutableRecipe extends Recipe {
             step.setDescription(description, lang)
             return step
         })
-        this.computeItems()
     }
 }

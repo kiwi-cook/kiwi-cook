@@ -9,7 +9,7 @@
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}, 'item-label']">
             <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
-                {{ mappedItem.quantity }} {{ mappedItem.unit }}
+                {{ mappedItem.quantity }}{{ mappedItem.unit }}
             </span>
             {{ mappedItem.name }}
             <span v-if="include" class="item-included">✓</span>
@@ -17,7 +17,7 @@
         <div slot="end">
             <slot name="end">
                 <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'end'" class="item-quantity">
-                    {{ mappedItem.quantity }} {{ mappedItem.unit }}
+                    {{ mappedItem.quantity }}{{ mappedItem.unit }}
                 </span>
             </slot>
         </div>
@@ -27,11 +27,11 @@
 <script lang="ts" setup>
 import {IonItem, IonLabel, IonThumbnail} from '@ionic/vue';
 import {computed, PropType, toRefs} from 'vue';
-import {Item, ItemType, StepItem} from '@/shared';
+import {Item, ItemType, RecipeItem} from '@/shared';
 
 const props = defineProps({
     item: {
-        type: Object as PropType<(StepItem | Item)>,
+        type: Object as PropType<(RecipeItem | Item)>,
         required: true,
     },
     include: {
@@ -59,13 +59,13 @@ const mappedItem = computed<CustomItem | undefined>(() => {
         return undefined;
     }
     let quantity: number | undefined;
-    if (item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient) {
-        quantity = item?.value?.servings;
+    if (item?.value instanceof RecipeItem && item?.value?.type === ItemType.Ingredient) {
+        quantity = item?.value?.getQuantity()
     } else {
         quantity = 1;
     }
     const name = item?.value?.getName(undefined, quantity)
-    const unit = item?.value instanceof StepItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '';
+    const unit = item?.value instanceof RecipeItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '';
 
     return {
         name,
@@ -103,5 +103,10 @@ ion-thumbnail {
 .item-included {
     color: var(--ion-color-success);
     margin-left: 0.5rem;
+}
+
+.item-quantity {
+    font-weight: bold;
+    color: var(--ion-color-secondary);
 }
 </style>

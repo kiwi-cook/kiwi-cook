@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {parseTemperature, StepItem, stepItemFromJSON} from '@/shared';
+import {parseTemperature} from '@/shared';
 import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n';
 
 export enum STEP_TYPES {
@@ -13,19 +13,19 @@ export enum STEP_TYPES {
 
 /**
  * Step of a recipe
- * It is a step with a list of StepItems
+ * It is a step with a list of RecipeItems
  * It can have an image, a description and a preparation time for the step
  */
 export class Step {
-    items: StepItem[];
-    imgUrl?: string;
+    itemNames: string[]; // list of item names
     desc: LocaleStr;
+    imgUrl?: string;
     duration?: number;
     temperature?: number;
     type: STEP_TYPES
 
     constructor() {
-        this.items = []
+        this.itemNames = []
         this.imgUrl = ''
         this.desc = newLocaleStr()
         this.duration = 0
@@ -33,7 +33,7 @@ export class Step {
     }
 
     /**
-     * Initialize an stepItem from a json object
+     * Initialize an recipeItem from a json object
      * This is done because the json object does not have the methods of the class
      *
      * @param json
@@ -41,7 +41,7 @@ export class Step {
      */
     public static fromJSON(json: any): Step {
         const item = new Step()
-        item.items = json.items?.map((item: any) => stepItemFromJSON(item)) ?? []
+        item.itemNames = json.items
         item.imgUrl = json.imgUrl
         item.desc = json.desc
         item.duration = json.duration
@@ -52,13 +52,13 @@ export class Step {
 
     /**
      * Create a step from a list of step items
-     * @param stepItems
+     * @param recipeItems
      * @param description
      * @returns a new step
      */
-    public static fromStepItems(stepItems: StepItem[], description?: string): Step {
+    public static fromRecipeItems(recipeItems: string[], description?: string): Step {
         const step = new Step()
-        step.items = stepItems
+        step.itemNames = recipeItems
         step.setDescription(description ?? '')
         return step
     }
@@ -78,18 +78,16 @@ export class Step {
     }
 
     /**
-     * Get the description of the step
-     * as HTML with highlighted items
+     * Pretty print the description of the recipe
      * @param className the class name of the highlighted items
      */
-    public printDescription(className: string): string {
+    public pPrintStepDescription(className: string): string {
         let description = this.getDescription()
         if (!description) {
             return ''
         }
 
-        for (const item of this.getStepItems()) {
-            const itemName = item.getName()
+        for (const itemName of this.itemNames) {
             if (!itemName || itemName === '') {
                 continue;
             }
@@ -103,19 +101,7 @@ export class Step {
      * Get all unique items in the step
      * @returns a list of all items in the step
      */
-    public getStepItems(): StepItem[] {
-        return [...new Set(this.items)]
-    }
-
-    /**
-     * Update the servings of the step
-     * @param servings
-     * @returns the step to allow chaining
-     */
-    public updateServings(servings = 1): this {
-        this.items.forEach((stepItem: StepItem) => {
-            stepItem.servings = stepItem.quantity * servings
-        })
-        return this
+    public getRecipeItems(): string[] {
+        return [...new Set(this.itemNames)]
     }
 }

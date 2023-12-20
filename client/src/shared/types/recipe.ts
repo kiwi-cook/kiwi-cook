@@ -4,8 +4,8 @@
 
 import {useIonRouter} from '@ionic/vue';
 import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
-import {APP_NAME, Item, share, Step, StepItem, tmpId} from '@/shared';
-import {logError} from '@/shared/utils/logging';
+import {APP_NAME, Item, RecipeItem, recipeItemFromJSON, share, Step, tmpId} from '@/shared';
+import {logError, logWarn} from '@/shared/utils/logging';
 
 /**
  * Recipe
@@ -17,6 +17,7 @@ export class Recipe {
     name: LocaleStr;
     desc: LocaleStr;
     steps: Step[];
+    items: Set<RecipeItem>;
     props: {
         imgUrl?: string;
         duration?: number;
@@ -39,8 +40,8 @@ export class Recipe {
     notes?: LocaleStr;
     servings: number;
     computed: {
-        itemsById: { [id: string]: StepItem }
-        items: StepItem[],
+        itemsById: { [id: string]: RecipeItem }
+        items: RecipeItem[],
         authors: string
     }
 
@@ -59,7 +60,8 @@ export class Recipe {
             date: new Date(),
             tags: [],
         }
-        this.steps = recipe?.steps ?? [new Step()]
+        this.steps = recipe?.steps ?? []
+        this.items = new Set(recipe?.items ?? [])
         this.src = recipe?.src ?? {
             url: '',
             authors: [],
@@ -120,12 +122,12 @@ export class Recipe {
      * Get all unique items in the recipe
      * @returns a list of all items in the recipe
      */
-    public getStepItems(): StepItem[] {
-        return this.computed.items ?? []
+    public getRecipeItems(): RecipeItem[] {
+        return Array.from(this.items)
     }
 
     public getItems(): Item[] {
-        return this.getStepItems().map(stepItem => stepItem.narrow(stepItem))
+        return this.getRecipeItems().map(recipeItem => recipeItem.narrow(recipeItem))
     }
 
     public hasItem(id?: string): boolean {
@@ -165,11 +167,11 @@ export class Recipe {
      * Update the servings of the recipe
      * @param servings
      */
-    public updateServings(servings: number) {
+    public setServings(servings: number) {
         this.servings = servings
-        for (const step of this.steps) {
-            step.updateServings(servings)
-        }
+        this.items.forEach((item) => {
+            item.setServings(servings)
+        })
     }
 
     /**
@@ -177,31 +179,19 @@ export class Recipe {
      */
     public getPrice(): number {
         let price = 0
-        for (const item of this.getStepItems()) {
+        for (const item of this.getRecipeItems()) {
             price += item.getPrice() * item.servings
         }
         return Math.floor(price)
     }
 
     /**
-     * Compute items
-     */
-    computeItems(): void {
-        // Iterate over all steps and all items to compute the list of items
-        this.computed.itemsById = {}
-        for (const step of this.steps) {
-            for (const item of step.getStepItems()) {
-                this.computed.itemsById[item.getId()] = item
-            }
-        }
-        this.computed.items = Object.values(this.computed.itemsById)
-    }
-
-    /**
      * Compute authors
      */
+    /* broken
     computeAuthors(): void {
-        switch ((this.src.authors ?? []).length) {
+        logDebug('recipe.computeAuthors', this.src)
+        switch ((this?.src?.authors ?? []).length) {
             case 0:
                 this.computed.authors = ''
                 break
@@ -216,7 +206,7 @@ export class Recipe {
                     .slice(0, length - 1).join(', ') + ' and ' + this.src.authors[length - 1].name
                 break
         }
-    }
+    } */
 }
 
 /**
@@ -232,14 +222,14 @@ export function recipeFromJSON(json: any): Promise<Recipe> {
 
         // Id
         recipe.id = json.id
-        // if the id is undefined, throw an error
         if (recipe.id === undefined) {
-            throw reject(Error('recipe id is undefined'))
+            logWarn('recipeFromJSON', 'id is undefined.')
         }
 
         recipe.name = json.name
         recipe.desc = json.desc
-        recipe.steps = json.steps?.map((step: any) => Step.fromJSON(step)) ?? [new Step()]
+        recipe.steps = json.steps?.map(Step.fromJSON) ?? [new Step()]
+        recipe.items = json.items?.map(recipeItemFromJSON) ?? []
 
         // Props
         recipe.props.imgUrl = json?.props?.imgUrl
@@ -250,12 +240,6 @@ export function recipeFromJSON(json: any): Promise<Recipe> {
         // Source
         recipe.src = json.src
         resolve(recipe)
-    }).then((recipe) => {
-        recipe.computeItems()
-        return recipe
-    }).then((recipe) => {
-        recipe.computeAuthors()
-        return recipe
     }).catch((error: Error) => {
         logError('recipe.fromJSON', error)
         throw error

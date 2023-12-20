@@ -3,21 +3,22 @@
  */
 
 import {useRecipeStore} from '@/editor/storage';
-import {Item, StepItem} from '@/shared';
+import {Item, RecipeItem} from '@/shared';
 import {closest, distance} from 'fastest-levenshtein';
+import {logDebug} from '@/shared/utils/logging.ts';
 
 /**
  * Parses a string into a list of step items.
  * @param text
  */
-export function extractStepItemsFromText(text: string): StepItem[] {
+export function extractRecipeItemsFromText(text: string): RecipeItem[] {
     const recipeStore = useRecipeStore()
     const items = recipeStore.getItemsAsList
-    const itemsFromDescription: Set<StepItem> = new Set()
+    const itemsFromDescription: Set<RecipeItem> = new Set()
     items.forEach((item: Item) => {
         const itemName = item.getName().toLowerCase()
         if (itemName !== '' && text.toLowerCase().includes(itemName)) {
-            itemsFromDescription.add(new StepItem(item))
+            itemsFromDescription.add(new RecipeItem(item))
         }
     })
     return [...itemsFromDescription]
@@ -46,21 +47,21 @@ export function extractDurationFromText(text: string): number {
     return dur
 }
 
-export function findMostSimilarItems(stepItemsFromRecipe: StepItem[]): StepItem[] {
+export function findMostSimilarItems(recipeItemsFromRecipe: RecipeItem[]): RecipeItem[] {
     const recipeStore = useRecipeStore()
     const items = recipeStore.getItemsAsList
     const itemsNames = items.map((item: Item) => item.getName())
     const maxDistance = 2
-    stepItemsFromRecipe.forEach((stepItem: StepItem, index: number) => {
-        const closestItemName = closest(stepItem.getName(), itemsNames)
-        if (distance(stepItem.getName(), closestItemName) <= maxDistance) {
+    recipeItemsFromRecipe.forEach((recipeItem: RecipeItem, index: number) => {
+        const closestItemName = closest(recipeItem.getName(), itemsNames)
+        if (distance(recipeItem.getName(), closestItemName) <= maxDistance) {
             const closestItem = items.find((item: Item) => item.getName() === closestItemName)
-            stepItemsFromRecipe[index].id = closestItem?.id ?? ''
-            stepItemsFromRecipe[index].setName(closestItemName)
+            recipeItemsFromRecipe[index].id = closestItem?.id ?? ''
+            // recipeItemsFromRecipe[index].setName(closestItemName) // broken
         }
     })
 
-    return stepItemsFromRecipe
+    return recipeItemsFromRecipe
 }
 
 /**
@@ -68,6 +69,11 @@ export function findMostSimilarItems(stepItemsFromRecipe: StepItem[]): StepItem[
  * @param itemName
  */
 export function findMostSimilarItem(itemName: string): Item | undefined {
+    // Check if the item name is empty
+    if (itemName === '') {
+        return undefined
+    }
+
     // Prepare store
     const recipeStore = useRecipeStore()
     const items = recipeStore.getItemsAsList
@@ -76,8 +82,9 @@ export function findMostSimilarItem(itemName: string): Item | undefined {
     // Get the closest item name from list
     const closestItemName = closest(itemName, itemNames)
     const computedDistance = distance(closestItemName, itemName)
+    logDebug('findMostSimilarItem', `compare ${itemName} with ${closestItemName} (distance: ${computedDistance})`)
     if (computedDistance > 2) {
         return undefined
     }
-    return items.find((item: Item) => item.getName() === closestItemName)
+    return items.find((item: Item) => item.hasName(closestItemName))
 }

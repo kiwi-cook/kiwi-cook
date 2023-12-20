@@ -2,8 +2,8 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {convertUnits, normalizeUnit, parseQuantity, parseTemperature, Recipe, Step, StepItem} from '@/shared';
-import {extractDurationFromText, extractStepItemsFromText, findMostSimilarItems,} from '@/editor/parser/utils';
+import {convertUnits, normalizeUnit, parseQuantity, parseTemperature, Recipe, RecipeItem, Step} from '@/shared';
+import {extractDurationFromText, extractRecipeItemsFromText, findMostSimilarItems,} from '@/editor/parser/utils';
 import {closest, distance} from 'fastest-levenshtein';
 import {MutableRecipe} from '@/editor/types/recipe';
 
@@ -135,12 +135,12 @@ export class CookstrParser {
         newRecipe.props.date = new Date(recipe.date_modified)
 
         // Ingredients
-        const stepItemsFromIngredients = this.ingredientsToStepItems(recipe.ingredients_detailed)
-        const stepItemsFromInstructions = this.instructionsToStepItems(recipe.instructions)
-        let stepItemsFromIngredientsAndInstructions = [...stepItemsFromIngredients, ...stepItemsFromInstructions]
-        stepItemsFromIngredientsAndInstructions = findMostSimilarItems(stepItemsFromIngredientsAndInstructions)
+        const recipeItemsFromIngredients = this.ingredientsToRecipeItems(recipe.ingredients_detailed)
+        const recipeItemsFromInstructions = this.instructionsToRecipeItems(recipe.instructions)
+        let recipeItemsFromIngredientsAndInstructions = [...recipeItemsFromIngredients, ...recipeItemsFromInstructions]
+        recipeItemsFromIngredientsAndInstructions = findMostSimilarItems(recipeItemsFromIngredientsAndInstructions)
 
-        newRecipe.steps = recipe.instructions.map(instruction => this.instructionToStep(instruction, stepItemsFromIngredientsAndInstructions))
+        newRecipe.steps = recipe.instructions.map(instruction => this.instructionToStep(instruction, recipeItemsFromIngredientsAndInstructions))
 
         return newRecipe
     }
@@ -148,13 +148,13 @@ export class CookstrParser {
     /**
      * Parse a cookstr ingredient into a step item
      */
-    static ingredientsToStepItems(cookstrIngredients: {
+    static ingredientsToRecipeItems(cookstrIngredients: {
         ingredients: string[],
         line: string
-    }[]): StepItem[] {
-        const stepItems: StepItem[] = []
+    }[]): RecipeItem[] {
+        const recipeItems: RecipeItem[] = []
         for (const ingredient of cookstrIngredients) {
-            const stepItem = new StepItem()
+            const recipeItem = new RecipeItem()
 
             // Set the name based on the first ingredient
             let itemName = ingredient.ingredients[0] ?? ''
@@ -168,7 +168,7 @@ export class CookstrParser {
                 }
 
                 if (itemName !== '') {
-                    stepItem.setName(itemName)
+                    // recipeItem.setName(itemName) // broken
                 } else {
                     continue
                 }
@@ -177,35 +177,35 @@ export class CookstrParser {
                 const quantity = parseQuantity(matchesLine[1])
                 const normalizedUnit = normalizeUnit(matchesLine[2])
                 const {value, unit} = convertUnits(quantity, normalizedUnit)
-                stepItem.quantity = value
-                stepItem.unit = unit
+                recipeItem.quantity = value
+                recipeItem.unit = unit
 
-                stepItems.push(stepItem)
+                recipeItems.push(recipeItem)
             }
 
         }
 
-        return stepItems
+        return recipeItems
     }
 
     /**
      * Parse a cookstr instruction into a list of step items
      * @param instruction
      */
-    static instructionsToStepItems(instruction: string[]): StepItem[] {
-        return instruction.flatMap(extractStepItemsFromText)
+    static instructionsToRecipeItems(instruction: string[]): RecipeItem[] {
+        return instruction.flatMap(extractRecipeItemsFromText)
     }
 
     /**
      * Parse a cookstr instruction into a step
      * @param instruction
-     * @param stepItems
+     * @param recipeItems
      */
-    static instructionToStep(instruction: string, stepItems: StepItem[]): Step {
+    static instructionToStep(instruction: string, recipeItems: RecipeItem[]): Step {
         const step = new Step()
 
         step.setDescription(instruction)
-        const items = new Set<StepItem>()
+        const items = new Set<RecipeItem>()
 
         // Prepare the instruction
         const words = instruction
@@ -215,21 +215,21 @@ export class CookstrParser {
 
         // Find the step items
         const maxDistance = 2
-        const stepItemNames = stepItems.map(stepItem => stepItem.getName())
+        const recipeItemNames = recipeItems.map(recipeItem => recipeItem.getName())
         words.forEach((word) => {
-            const closestWord = closest(word, stepItemNames)
-            const closestWordIndex = stepItemNames.indexOf(closestWord)
+            const closestWord = closest(word, recipeItemNames)
+            const closestWordIndex = recipeItemNames.indexOf(closestWord)
             if (distance(word, closestWord) <= maxDistance) {
-                const stepItem = stepItems[closestWordIndex]
-                // logDebug("parseCookstrInstruction", `Found step item ${closestWord} for word ${word} with distance ${distance(word, closestWord)} and step item ${stepItem.getName()}`)
-                items.add(stepItem)
+                const recipeItem = recipeItems[closestWordIndex]
+                // logDebug("parseCookstrInstruction", `Found step item ${closestWord} for word ${word} with distance ${distance(word, closestWord)} and step item ${recipeItem.getName()}`)
+                items.add(recipeItem)
             }
         })
 
         step.duration = extractDurationFromText(instruction)
         step.temperature = parseTemperature(undefined, instruction)
 
-        step.items = [...items]
+        step.itemNames = Array.from(items).map((item: RecipeItem) => item.getName())
 
         return step
     }

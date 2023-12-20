@@ -24,7 +24,7 @@
 
 <script lang="ts" setup>
 import {IonFab, IonFabButton, IonFabList, IonIcon, useIonRouter} from '@ionic/vue';
-import {useTasteBuddyStore} from '@/app/storage';
+import {useAppStore} from '@/app/storage';
 import {computed, PropType} from 'vue';
 import {arrowForwardOutline, closeOutline, refreshOutline} from 'ionicons/icons';
 
@@ -42,7 +42,7 @@ defineProps({
 })
 
 const router = useIonRouter()
-const store = useTasteBuddyStore()
+const store = useAppStore()
 const timer = computed(() => store.timer)
 const pad = (n: number) => n < 10 ? `0${n}` : n;
 const strTimer = computed(() => {

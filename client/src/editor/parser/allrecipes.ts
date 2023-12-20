@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {normalizeUnit, Recipe, StepItem} from '@/shared';
+import {normalizeUnit, Recipe, RecipeItem} from '@/shared';
 import {logDebug} from '@/shared/utils/logging';
 import nlp from 'compromise';
 import {findMostSimilarItem} from '@/editor/parser/utils';
@@ -62,23 +62,23 @@ export class AllRecipesParser {
             ...allRecipesRecipe.categories,
         ].filter(tag => tag !== '').map(tag => tag.trim().toLowerCase())
 
-        // StepItems
-        const stepItems: StepItem[] = []
+        // RecipeItems
+        const recipeItems: RecipeItem[] = []
         for (const ingredient of allRecipesRecipe.ingredients) {
             const doc = nlp(ingredient);
             const quantities = doc.match('#Value+').out('text').split(' ');
             const unit = doc.match('#Unit').out('text');
             const ingredientName = doc.not('#Value').not('#Unit').text();
 
-            const stepItem = new StepItem()
+            const recipeItem = new RecipeItem()
             let item = findMostSimilarItem(ingredientName)
             if (!item) {
                 item = newItemFromName(ingredientName)
             }
-            stepItem.updateItem(item)
-            stepItem.unit = normalizeUnit(unit)
+            recipeItem.updateItem(item)
+            recipeItem.unit = normalizeUnit(unit)
             logDebug('parseAllRecipes', quantities, unit, ingredientName)
-            stepItems.push(stepItem)
+            recipeItems.push(recipeItem)
         }
 
         // Steps
@@ -89,7 +89,7 @@ export class AllRecipesParser {
         recipe.notes = newLocaleStr(allRecipesRecipe.notes ?? '', 'en')
 
 
-        logDebug('parseAllRecipes', stepItems)
+        logDebug('parseAllRecipes', recipeItems)
         return recipe
     }
 

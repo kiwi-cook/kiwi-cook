@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Item} from '@/shared';
+import {Item, RecipeItem, setLocaleStr} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
 import {logDebug} from '@/shared/utils/logging';
 
@@ -13,6 +13,15 @@ export class MutableItem extends Item {
      */
     public getRawName(lang: string): string {
         return this.name[lang]
+    }
+
+    /**
+     * Set the localized name of the item
+     * @param name
+     * @param lang
+     */
+    public setName(name?: string, lang?: string): void {
+        setLocaleStr(this.name, name ?? '', lang)
     }
 
     /**
@@ -52,8 +61,8 @@ export class MutableItem extends Item {
  * @param name
  * @returns the item to allow chaining
  */
-export function newItemFromName(name?: string): MutableItem {
-    const item = new MutableItem()
-    item.setName(name)
+export function newItemFromName(name?: string): RecipeItem {
+    const item = new RecipeItem()
+    item.name['en'] = name ?? ''
     return item
 }

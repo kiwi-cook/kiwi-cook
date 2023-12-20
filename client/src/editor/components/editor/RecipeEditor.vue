@@ -8,6 +8,7 @@
             <IonImg :src="recipe?.props?.imgUrl" alt="Header Image" class="recipe-image"/>
         </div>
         <IonCardHeader>
+            <IonCardTitle>Edit general information</IonCardTitle>
 
             <IonGrid class="w100">
                 <IonRow>
@@ -71,24 +72,66 @@
             </IonChip>
             <IonInput v-model="mutableRecipe.src.url" label="Source URL"
                       label-placement="stacked" type="url"/>
-            <ItemList :horizontal="true" :items="mutableRecipe.getStepItems()"/>
+            <!-- <ItemList :horizontal="true" :items="mutableRecipe.getRecipeItems()"/> -->
         </IonCardContent>
     </IonCard>
 
+    <IonCard>
+        <IonCardHeader>
+            <IonCardTitle>Add Items</IonCardTitle>
+        </IonCardHeader>
+
+        <IonCardContent>
+            <template v-if="itemToEdit">
+                <IonChip color="medium">{{ itemToEdit.getId() }}</IonChip>
+                <div class="item-edit">
+                    <IonInput :value="itemToEdit.getName()" class="item-attribute"
+                              label="Item Name" label-placement="stacked" placeholder="e.g., Tomatoes" type="text"
+                              @focusin="updateName($event.target.value)"
+                              @focusout="updateName($event.target.value)"
+                              @keydown.enter="updateName($event.target.value)"/>
+                    <IonInput v-model="itemToEdit.quantity" class="item-attribute" label="Quantity"
+                              label-placement="stacked"
+                              placeholder="e.g., 2"
+                              type="number"/>
+                    <IonInput v-model="itemToEdit.unit" class="item-attribute" label="Unit" label-placement="stacked"
+                              placeholder="e.g., kg"
+                              type="text"/>
+                </div>
+            </template>
+
+            <IonList>
+                <ItemComponent v-for="(recipeItem, itemIndex) in (Array.from<RecipeItem>(recipe?.items) ?? [])"
+                               :key="`${itemIndex} - ${recipeItem.getId()}` ?? ''" :item="recipeItem"
+                               quantity-position="start" @click="editItem(recipeItem)"/>
+            </IonList>
+        </IonCardContent>
+        <IonButton color="success" fill="outline" shape="round" size="small"
+                   @click="addItemToRecipe">
+            <IonIcon slot="start" :icon="add"/>
+            Add Item
+        </IonButton>
+    </IonCard>
+
     <!-- Steps -->
-    <IonButton @click="addStep(-1)">
-        Add Step
-    </IonButton>
+    <div class="w100 center">
+        <IonButton color="success" fill="outline" shape="round" size="small" @click="addStep(-1)">
+            <IonIcon slot="start" :icon="add"/>
+            Add Step
+        </IonButton>
+    </div>
     <template v-for="(step, stepIndex) in mutableRecipe.steps" :key="stepIndex">
         <IonCard class="step-editor">
-            <IonButton color="danger" fill="solid" @click="removeStep(stepIndex)">
-                Remove Step
-            </IonButton>
             <IonCardHeader>
                 <IonCardTitle>
                     Step {{ stepIndex + 1 }}
                 </IonCardTitle>
             </IonCardHeader>
+
+            <IonButton color="danger" fill="outline" shape="round" size="small" @click="removeStep(stepIndex)">
+                <IonIcon slot="start" :icon="remove"/>
+                Remove Step
+            </IonButton>
 
             <IonCardContent>
                 <IonTextarea :counter="true"
@@ -121,52 +164,52 @@
                         </IonCol>
                     </IonRow>
                 </IonGrid>
-
-
-                <!-- Items -->
-                <div class="items-editor">
-                    <div v-for="(stepItem, itemIndex) in step.items"
-                         :key="`${stepIndex} - ${itemIndex} - ${stepItem.getId()}` ?? ''"
-                         class="item-editor">
-
-                        <div class="item-edit">
-                            <IonInput v-model="stepItem.quantity" class="item-quantity" step=".1" type="number"/>
-                            <IonInput v-model="stepItem.unit" class="item-unit"/>
-                            <IonInput :value="stepItem.name['en']" class="item-name"
-                                      label="Name"
-                                      label-placement="floating" type="text"
-                                      @focusout="updateName($event.target.value, stepIndex, itemIndex)"/>
-                            <IonButton color="danger" @click="removeItem(stepIndex, itemIndex)">Remove</IonButton>
-                        </div>
-                    </div>
-
-                    <template v-for="(missingItem, missingItemIndex) in missingItems[stepIndex]"
-                              :key="missingItemIndex">
-                        <ItemComponent :item="missingItem" class="link"
-                                       @click="addMissingItem(stepIndex, missingItem.getId())"/>
-                    </template>
-                </div>
             </IonCardContent>
-            <IonButton @click="addItem(stepIndex)">
-                Add Item
-            </IonButton>
         </IonCard>
-        <IonButton @click="addStep(stepIndex)">
-            Add Step
-        </IonButton>
+
+        <!-- Steps -->
+        <div class="w100 center">
+            <IonButton color="success" fill="outline" shape="round" size="small" @click="addStep(stepIndex)">
+                <IonIcon slot="start" :icon="add"/>
+                Add Step
+            </IonButton>
+        </div>
     </template>
-    <IonButton fill="solid"
+
+    <!-- JSON Textarea -->
+    <IonCard v-show="showJSON">
+        <IonCardHeader>
+            <IonCardTitle>JSON</IonCardTitle>
+        </IonCardHeader>
+        <IonCardContent>
+            <IonTextarea :value="recipeAsJSON" auto-grow class="recipe-json"
+                         label="Recipe as JSON" label-placement="stacked" wrap="soft"/>
+        </IonCardContent>
+        <IonButton color="success" fill="outline" shape="round"
+                   @click="saveRecipeFromJSON()">
+            <IonIcon slot="start" :icon="save"/>
+            Update Recipe (JSON)
+        </IonButton>
+    </IonCard>
+
+    <IonButton color="success" fill="outline" shape="round"
                @click="saveRecipe()">
+        <IonIcon slot="start" :icon="save"/>
         Save Recipe
     </IonButton>
-    <IonButton color="danger" fill="solid"
+    <IonButton color="danger" fill="outline" shape="round"
                @click="deleteRecipe()">
-        Remove Recipe
+        <IonIcon slot="start" :icon="trash"/>
+        Delete Recipe
+    </IonButton>
+    <IonButton color="medium" fill="outline" shape="round" @click="showJSON = !showJSON">
+        <IonIcon slot="start" :icon="information"/>
+        Show JSON
     </IonButton>
 </template>
 
 <script lang="ts" setup>
-import {formatDate, Item, Step, StepItem} from '@/shared';
+import {formatDate, recipeFromJSON, RecipeItem} from '@/shared';
 import {useRecipeStore} from '@/editor/storage';
 import {
     IonButton,
@@ -181,19 +224,20 @@ import {
     IonImg,
     IonInput,
     IonLabel,
+    IonList,
     IonRow,
     IonTextarea,
     useIonRouter
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs, watch} from 'vue';
-import {calendar, closeCircleOutline} from 'ionicons/icons';
-import ItemComponent from '@/shared/components/recipe/Item.vue';
-import {extractStepItemsFromText, findMostSimilarItem} from '@/editor/parser/utils';
+import {add, calendar, closeCircleOutline, information, remove, save, trash} from 'ionicons/icons';
 import {MutableRecipe} from '@/editor/types/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
-import ItemList from '@/shared/components/utility/list/ItemList.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
-import {newItemFromName} from '@/editor/types/item';
+import {findMostSimilarItem} from '@/editor/parser/utils.ts';
+import {logDebug} from '@/shared/utils/logging.ts';
+import {newItemFromName} from '@/editor/types/item.ts';
+import ItemComponent from '@/shared/components/recipe/Item.vue';
 
 const props = defineProps({
     recipe: {
@@ -238,15 +282,16 @@ const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, s
  */
 const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIndex)
 
+/* Select an item from the list to edit */
+const itemToEdit = ref<RecipeItem | undefined>(newItemFromName(''))
+
 /**
  * Add an item to a step
- * @param stepIndex index of the step to add the item to
- * @param itemIndex index of the item to add after
- * @param itemName name of the item to add
  */
-const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => mutableRecipe?.value
-    ?.addItem(stepIndex, itemIndex, newItemFromName(itemName)).item.update()
-
+const addItemToRecipe = () => {
+    mutableRecipe?.value?.putRecipeItem(itemToEdit.value)
+    itemToEdit.value = newItemFromName('')
+}
 
 /**
  * Remove an item from a step
@@ -254,67 +299,53 @@ const addItem = (stepIndex?: number, itemIndex?: number, itemName?: string) => m
  * @param itemIndex index of the item to remove
  */
 const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
-    .value?.steps[stepIndex].items.splice(itemIndex, 1);
+    .value?.steps[stepIndex].itemNames.splice(itemIndex, 1);
 
 /**
  * Edit the item
- * @param stepIndex index of the step to edit the item from
- * @param itemIndex index of the item to edit
  */
-const editItem = (stepIndex: number, itemIndex: number) => router.push({
-    name: 'ItemEditor',
-    params: {id: mutableRecipe.value?.steps?.[stepIndex].items?.[itemIndex]}
-})
-
-/**
- * Update the quantity and unit of an item
- * @param quantityUnit
- * @param stepIndex
- * @param itemIndex
- */
-const updateQuantityUnit = (quantityUnit: string, stepIndex: number, itemIndex: number) => {
-    const [quantity, unit] = quantityUnit.split(' ')
-    mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.setUnit(unit)
-    mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.setQuantity(parseFloat(quantity))
-}
-
-const updateName = (name: string, stepIndex: number, itemIndex: number) => {
-    const item = findMostSimilarItem(name)
-    if (typeof item === 'undefined') {
-        return
-    }
-    mutableRecipe.value?.steps?.[stepIndex]?.items?.[itemIndex]?.updateItem(item)
-}
-
-/**
- * Get a map of missing items for each step
- */
-const missingItems = computed<{ [stepIndex: number]: Item[] }>(() => {
-    const missingItems: { [stepIndex: number]: Item[] } = {}
-    const steps = recipe.value.steps
-    steps.forEach((step: Step, stepIndex: number) => {
-        const stepItems = step.getStepItems()
-        // return only items that aren't in the step
-        missingItems[stepIndex] = extractStepItemsFromText(step.getDescription())
-            .filter((item: Item) => !stepItems.some((stepItem: StepItem) => item.getName() == stepItem.getName()))
-    })
-    return missingItems
-})
-
-/**
- * Add missing item to recipe
- * @param stepIndex
- * @param itemId
- */
-const addMissingItem = (stepIndex: number, itemId: string) => {
-    const item = recipeStore.getItemsAsMap[itemId]
-    mutableRecipe.value?.addItem(stepIndex, undefined, item)
-}
+const editItem = (recipeItem: RecipeItem) => itemToEdit.value = recipeItem
 
 /**
  * Get all tags from the store
  */
 const allTags = computed<string[]>(() => recipeStore.getTags);
+
+const updateName = (name: string) => {
+    logDebug('updateName.input', name)
+
+    // check if there is an item to edit
+    if (!itemToEdit.value) {
+        logDebug('updateName', 'no item to edit')
+        return
+    }
+
+    // find the most similar item
+    const item = findMostSimilarItem(name)
+    if (!item) {
+        logDebug('updateName', 'no similar item found')
+        return
+    }
+    logDebug('updateName', `most similar item: ${item.getName()}`)
+
+    logDebug('updateName',
+        `updating item ${itemToEdit.value.getName()} to ${item.getName()}
+        and recipe ${mutableRecipe.value.getName()}`)
+    itemToEdit.value = itemToEdit.value?.updateItem(item)
+    logDebug('updateName', itemToEdit.value)
+    mutableRecipe.value.putRecipeItem(itemToEdit.value)
+}
+
+/* JSON */
+const recipeAsJSON = ref('')
+const showJSON = ref(false)
+watch(mutableRecipe, (newRecipe: MutableRecipe) => {
+    recipeAsJSON.value = JSON.stringify(newRecipe, null, 2)
+}, {immediate: true})
+
+const saveRecipeFromJSON = async () => {
+    mutableRecipe.value = await recipeFromJSON(recipeAsJSON.value) as MutableRecipe
+}
 </script>
 
 <style scoped>
@@ -332,7 +363,8 @@ const allTags = computed<string[]>(() => recipeStore.getTags);
 
 ion-textarea {
     width: 100%;
-    height: 100px;
+    max-height: 40vh;
+    overflow-y: scroll;
 }
 
 ion-card {
@@ -394,7 +426,7 @@ ion-button {
     justify-content: space-between;
 }
 
-.item-quantity, .item-unit, .item-name {
+.item-attribute {
     width: 30%;
 }
 </style>

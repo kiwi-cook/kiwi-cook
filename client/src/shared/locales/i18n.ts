@@ -2,12 +2,12 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {useTasteBuddyStore} from '@/app/storage';
 import {createI18n} from 'vue-i18n';
 import {nextTick} from 'vue'
 import enUS from '@/shared/locales/en.json'
 import {RouteLocationNormalized} from 'vue-router';
 import {logDebug} from '@/shared/utils/logging';
+import {useSharedStore} from '@/shared/storage';
 
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']
@@ -25,13 +25,13 @@ export function newLocaleStr(value?: string, lang?: string) {
 }
 
 export function getLocaleStr(localeStr: LocaleStr, lang?: string): string {
-    const store = useTasteBuddyStore()
-    return localeStr[lang ?? store.language.lang] ?? localeStr[DEFAULT_LOCALE]
+    const sharedStore = useSharedStore()
+    return localeStr[lang ?? sharedStore.language.lang ?? DEFAULT_LOCALE] ?? localeStr[DEFAULT_LOCALE] ?? ''
 }
 
 export function setLocaleStr(localeStr: LocaleStr, value: string, lang?: string) {
-    const store = useTasteBuddyStore()
-    localeStr[lang ?? store.language.lang] = value;
+    const sharedStore = useSharedStore()
+    localeStr[lang ?? sharedStore.language.lang] = value;
 }
 
 export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: DEFAULT_LOCALE}) {
@@ -137,6 +137,6 @@ export const beforeEachSetLang = async (to: RouteLocationNormalized) => {
     }
 
     // set i18n language via the store
-    const store = useTasteBuddyStore()
-    store.setLanguage(lang)
+    const sharedStore = useSharedStore()
+    sharedStore.setLanguage(lang)
 }

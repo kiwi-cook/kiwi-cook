@@ -116,7 +116,7 @@ import {
     IonNote,
     IonText,
 } from '@ionic/vue';
-import {ItemList, ReadMore, Recipe, recipeBy, Step, STEP_TYPES, StepItem} from '@/shared';
+import {ItemList, ReadMore, Recipe, recipeBy, RecipeItem, Step, STEP_TYPES} from '@/shared';
 import {add, heart, heartOutline, remove, shareSocial} from 'ionicons/icons';
 import {CanShareResult, Share} from '@capacitor/share';
 import {useI18n} from 'vue-i18n';
@@ -137,10 +137,10 @@ const recipeStore = useRecipeStore();
 const isSaved = computed(() => recipeStore.getSavedRecipesIds.includes(recipe?.value?.getId()));
 const toggleSave = () => recipeStore.setSaved(recipe?.value);
 
-const itemsFromRecipe = computed<StepItem[]>(() => recipe?.value?.getStepItems() ?? []);
-const ingredients = computed<StepItem[]>(() => itemsFromRecipe.value
-    .filter((item: StepItem) => item.type === 'ingredient'))
-const tools = computed<StepItem[]>(() => itemsFromRecipe.value.filter((item: StepItem) => item.type === 'tool'))
+const itemsFromRecipe = computed<RecipeItem[]>(() => recipe?.value?.getRecipeItems() ?? []);
+const ingredients = computed<RecipeItem[]>(() => itemsFromRecipe.value
+    .filter((item: RecipeItem) => item.type === 'ingredient'))
+const tools = computed<RecipeItem[]>(() => itemsFromRecipe.value.filter((item: RecipeItem) => item.type === 'tool'))
 const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
 
 // Source
@@ -150,7 +150,7 @@ const source = computed(() => recipeBy(authors.value, recipe?.value?.src.url ?? 
 const servings = ref(1)
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
-        recipe?.value?.updateServings(newServings);
+        recipe?.value?.setServings(newServings);
     }
 });
 
