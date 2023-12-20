@@ -1,18 +1,10 @@
-from datetime import datetime
 from typing import List, Optional
 
 from bson import ObjectId
-from pydantic import BaseModel, Field, BaseConfig, ConfigDict, validator
+from pydantic import BaseModel, Field, ConfigDict
 
 from models.mongo import PyObjectId
-
-
-class LocalizedString(BaseModel):
-    De: Optional[str] = Field(alias="de", default=None)
-    En: Optional[str] = Field(alias="en", default=None)
-    Es: Optional[str] = Field(alias="es", default=None)
-    Fr: Optional[str] = Field(alias="fr", default=None)
-    It: Optional[str] = Field(alias="it", default=None)
+from models.shared import LocalizedString
 
 
 class Author(BaseModel):
@@ -33,25 +25,26 @@ class Source(BaseModel):
     cookBook: CookBook
 
 
-class StepItem(BaseModel):
+class Step(BaseModel):
+    desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
+    items: Optional[List[str]] = Field(alias="items", default=[])
+    imgUrl: Optional[str] = Field(alias="imgUrl", default=None)
+    duration: int = Field(alias="duration", default=None)
+    temperature: float = Field(alias="temperature", default=None)
+
+
+class RecipeItem(BaseModel):
     id: PyObjectId = Field(alias="_id", default=None)
     quantity: float = Field(alias="quantity", default=None)
     unit: str = Field(alias="unit", default=None)
 
 
-class Step(BaseModel):
-    desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
-    items: List[StepItem] = Field(alias="items", default=[])
-    imgUrl: str = Field(alias="imgUrl", default=None)
-    duration: int = Field(alias="duration", default=None)
-    temperature: float = Field(alias="temperature", default=None)
-
-
 class Recipe(BaseModel):
-    id: PyObjectId = Field(alias="_id", default=None)
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: LocalizedString = Field(alias="name", default=LocalizedString(lang="en", value=""))
     desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
-    steps: List[Step]
+    items: List[RecipeItem] = Field(alias="items", default=[])
+    steps: List[Step] = Field(alias="steps", default=[])
     props: dict = Field(alias="props", default={})
     src: Optional[Source] = Field(alias="src", default=None)
     deleted: bool = Field(alias="deleted", default=False)
@@ -69,6 +62,13 @@ class Recipe(BaseModel):
                     "lang": "en",
                     "value": "This is an example recipe."
                 },
+                "items": [
+                    {
+                        "id": "507f1f77bcf86cd799439011",
+                        "quantity": 1,
+                        "unit": "cup"
+                    }
+                ],
                 "steps": [
                     {
                         "desc": {
@@ -76,10 +76,7 @@ class Recipe(BaseModel):
                             "value": "This is an example step."
                         },
                         "items": [
-                            {
-                                "quantity": 1,
-                                "unit": "cup"
-                            }
+                            "507f1f77bcf86cd799439011",
                         ],
                         "imgUrl": "https://example.com/example.jpg",
                         "duration": 10,
