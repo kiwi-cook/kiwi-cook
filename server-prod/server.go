@@ -86,7 +86,7 @@ func (server *TasteBuddyServer) Serve() {
 
 	// Check
 	apiRoutes.Get("", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).SendString("Hello from Taste Buddy 🍻")
+		return c.Status(fiber.StatusOK).SendString("Hello from Taste Buddy!\nThe Student-Friendly Recipe Suggestion App: Crafted by Students, for Students")
 	})
 
 	////////////////////////////////////////////////////////////////////////

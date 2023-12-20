@@ -15,8 +15,9 @@ import (
 type Recipe struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Name        LocalizedString    `json:"name,omitempty" bson:"name,omitempty"`
-	Description LocalizedString    `json:"desc" bson:"description"`
+	Description LocalizedString    `json:"desc" bson:"desc,omitempty"`
 	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
+	Items       []RecipeItem       `json:"items" bson:"items" binding:"required"`
 	Props       struct {
 		ImgUrl    string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 		Duration  int       `json:"duration,omitempty" bson:"duration,omitempty"`
@@ -29,28 +30,28 @@ type Recipe struct {
 			Name string `json:"name" bson:"name" binding:"required"`
 			Url  string `json:"url,omitempty" bson:"url,omitempty"`
 		} `json:"authors,omitempty" bson:"authors,omitempty"`
-		Copyright string `json:"cr,omitempty" bson:"copyright,omitempty"`
+		Copyright string `json:"cr,omitempty" bson:"cr,omitempty"`
 		CookBook  struct {
 			Name      string `json:"name,omitempty" bson:"name,omitempty"`
 			Url       string `json:"url,omitempty" bson:"url,omitempty"`
-			Publisher string `json:"pub,omitempty" bson:"publisher,omitempty"`
+			Publisher string `json:"pub,omitempty" bson:"pub,omitempty"`
 		} `json:"cookBook,omitempty" bson:"cookBook,omitempty"`
-	} `json:"src,omitempty" bson:"source,omitempty"`
+	} `json:"src,omitempty" bson:"src,omitempty"`
 	Deleted bool `json:"-" bson:"deleted,omitempty"`
 }
 
+type RecipeItem struct {
+	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	Quantity float64            `json:"quantity" bson:"quantity" binding:"required"`
+	Unit     string             `json:"unit,omitempty" bson:"unit,omitempty" binding:"required"`
+}
+
 type Step struct {
-	Description LocalizedString `json:"desc" bson:"description" binding:"required"`
-	Items       []StepItem      `json:"items,omitempty" bson:"items,omitempty"`
+	Description LocalizedString `json:"desc" bson:"desc" binding:"required"`
+	Items       []string        `json:"items,omitempty" bson:"items,omitempty"`
 	ImgUrl      string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Duration    int             `json:"duration,omitempty" bson:"duration,omitempty"`
 	Temperature float32         `json:"temperature,omitempty" bson:"temperature,omitempty"`
-}
-
-type StepItem struct {
-	ID     primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Amount float64            `json:"quantity" bson:"amount" binding:"required"`
-	Unit   string             `json:"unit,omitempty" bson:"unit,omitempty" binding:"required"`
 }
 
 // HandleGetRecipes gets called by server

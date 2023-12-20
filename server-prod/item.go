@@ -14,7 +14,7 @@ import (
 
 type Item struct {
 	ID     primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Name   LocalizedString    `json:"name,omitempty" bson:"localizedName,omitempty"`
+	Name   LocalizedString    `json:"name,omitempty" bson:"name,omitempty"`
 	Type   string             `json:"type,omitempty" bson:"type,omitempty"`
 	ImgUrl string             `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 }
