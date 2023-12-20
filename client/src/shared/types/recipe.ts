@@ -41,8 +41,6 @@ export class Recipe {
     servings: number;
     computed: {
         itemsById: { [id: string]: RecipeItem }
-        items: RecipeItem[],
-        authors: string
     }
 
     /**
@@ -67,9 +65,7 @@ export class Recipe {
             authors: [],
         }
         this.computed = {
-            itemsById: {},
-            items: [],
-            authors: ''
+            itemsById: {}
         }
         this.servings = 1
         this.notes = newLocaleStr()
@@ -103,7 +99,7 @@ export class Recipe {
     }
 
     public getAuthors(): string {
-        return this.computed.authors ?? ''
+        return this.src.authors.map(author => author.name).join(', ')
     }
 
     /**
@@ -184,29 +180,6 @@ export class Recipe {
         }
         return Math.floor(price)
     }
-
-    /**
-     * Compute authors
-     */
-    /* broken
-    computeAuthors(): void {
-        logDebug('recipe.computeAuthors', this.src)
-        switch ((this?.src?.authors ?? []).length) {
-            case 0:
-                this.computed.authors = ''
-                break
-            case 1:
-                this.computed.authors = this.src.authors[0].name
-                break
-            case 2:
-                this.computed.authors = this.src.authors[0].name + ' and ' + this.src.authors[1].name
-                break
-            default:
-                this.computed.authors = this.src.authors.map((author) => author.name)
-                    .slice(0, length - 1).join(', ') + ' and ' + this.src.authors[length - 1].name
-                break
-        }
-    } */
 }
 
 /**
