@@ -17,33 +17,36 @@ def read_root():
     return "Hello from Taste Buddy!"
 
 
-@app.post("/recipes/",
+@app.post("/recipe/",
           response_description="Add new recipes",
           response_model=Recipe,
           status_code=status.HTTP_201_CREATED,
           response_model_by_alias=False,
+          response_model_exclude_none=True,
           )
 def create_recipes(recipe: list[Recipe]):
     return client['recipes'].insert_many(recipe)
 
 
-@app.put("/recipes/",
+@app.put("/recipe/",
          response_description="Update recipes",
          response_model=Recipe,
          status_code=status.HTTP_201_CREATED,
          response_model_by_alias=False,
+         response_model_exclude_none=True,
          )
 def update_recipes(recipe: list[Recipe]):
     return client['recipes'].insert_many(recipe)
 
 
-@app.get("/recipes/",
+@app.get("/recipe/",
          response_description="Get all recipes",
          response_model=list[Recipe],
          response_model_by_alias=False,
+         response_model_exclude_none=True,
          )
 def read_recipes():
-    return list(client['recipes'].find())
+    return client['recipes'].find()
 
 
 @app.post("/recipes/parse/",
