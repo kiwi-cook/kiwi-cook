@@ -7,7 +7,7 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="['Recipe', 'Parser']"/>
+                    <Header :big-text="['Recipe', 'JSON Parser']"/>
 
                     <IonCard>
                         <IonCardHeader>
@@ -94,7 +94,7 @@
 import {ref} from 'vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import {addOutline, chevronForwardCircle, saveOutline} from 'ionicons/icons';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {
     IonButton,
@@ -118,7 +118,7 @@ import {logError} from '@/shared/utils/logging';
 import {MutableRecipe} from '@/editor/types/recipe';
 
 const router = useIonRouter()
-const recipeStore = useRecipeStore()
+const recipeStore = useRecipeEditorStore()
 
 const parsedRecipes = ref<MutableRecipe[]>([])
 const file = ref<File | null>(null)

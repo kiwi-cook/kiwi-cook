@@ -3,8 +3,7 @@
  */
 
 import {createRouter} from '@ionic/vue-router';
-import {createWebHashHistory, NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw} from 'vue-router';
-import {beforeEachCheckAuth, beforeEachPrepareStore} from '@/editor/router/middleware';
+import {createWebHashHistory, Router, RouteRecordRaw} from 'vue-router';
 
 // Pages
 import TabsPage from '@/editor/views/VTabs.vue'
@@ -41,9 +40,14 @@ const routes: Array<RouteRecordRaw> = [
                         component: () => import('@/editor/views/recipe/VRecipeEditor.vue'),
                     },
                     {
-                        name: 'RecipeParser',
-                        path: 'parser',
-                        component: () => import('@/editor/views/recipe/VRecipeParser.vue'),
+                        name: 'RecipeJsonParser',
+                        path: 'parser/json',
+                        component: () => import('@/editor/views/recipe/parser/VRecipeJsonParser.vue'),
+                    },
+                    {
+                        name: 'RecipeUrlParser',
+                        path: 'parser/url',
+                        component: () => import('@/editor/views/recipe/parser/VRecipeUrlParser.vue'),
                     },
                 ]
             },
@@ -51,15 +55,7 @@ const routes: Array<RouteRecordRaw> = [
             {
                 name: 'ItemEditor',
                 path: 'item/editor',
-                meta: {
-                    auth: true,
-                },
                 component: () => import('@/editor/views/item/VItemsEditor.vue'),
-            },
-            {
-                name: 'Login',
-                path: 'login',
-                component: () => import('@/editor/views/VSignIn.vue'),
             },
             // 404
             {
@@ -76,19 +72,8 @@ const routes: Array<RouteRecordRaw> = [
  * @returns {Router}
  */
 export function createTasteBuddyRouter(): Router {
-    const router = createRouter({
+    return createRouter({
         history: createWebHashHistory(process.env.BASE_URL),
         routes
-    })
-
-
-    router.beforeEach((to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) => {
-        // prepare the store
-        beforeEachPrepareStore().then(() => {
-            // check if the user is authenticated
-            beforeEachCheckAuth(to, from, next);
-        })
-    })
-
-    return router;
+    });
 }

@@ -9,13 +9,21 @@
                 <div class="ion-padding">
                     <!-- Navigation -->
                     <IonButtons>
+                        <IonButton @click="goBack()">
+                            <IonIcon :icon="arrowBack"/>
+                            Back
+                        </IonButton>
                         <IonButton @click="addRecipe()">
                             <IonIcon :icon="addOutline"/>
                             Add Recipe
                         </IonButton>
-                        <IonButton @click="parseRecipes()">
+                        <IonButton @click="parseJSON()">
                             <IonIcon :icon="colorWand"/>
-                            Parse Recipes
+                            Parse JSON
+                        </IonButton>
+                        <IonButton @click="parseURL()">
+                            <IonIcon :icon="colorWand"/>
+                            Parse URL
                         </IonButton>
                     </IonButtons>
                 </div>
@@ -39,15 +47,21 @@ import {
     IonToolbar,
     useIonRouter
 } from '@ionic/vue';
-import {addOutline, colorWand} from 'ionicons/icons';
+import {addOutline, arrowBack, colorWand} from 'ionicons/icons';
 import {MutableRecipe} from '@/editor/types/recipe';
 
 const router = useIonRouter()
+
+const goBack = () => router.back()
 const addRecipe = () => {
     const newRecipeId = MutableRecipe.newRecipe().update().getId()
     router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
 }
-const parseRecipes = () => {
-    router.push({name: 'RecipeParser'})
+const parseJSON = () => {
+    router.push({name: 'RecipeJsonParser'})
+}
+
+const parseURL = () => {
+    router.push({name: 'RecipeUrlParser'})
 }
 </script>

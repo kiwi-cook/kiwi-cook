@@ -9,34 +9,41 @@ from models.shared import LocalizedString
 
 class Author(BaseModel):
     name: str
-    url: str
+    url: Optional[str] = Field(alias="url", default=None)
 
 
 class CookBook(BaseModel):
-    name: str
+    name: Optional[str] = Field(alias="name", default=None)
     url: str
-    publisher: str
+    publisher: Optional[str] = Field(alias="publisher", default=None)
 
 
 class Source(BaseModel):
-    url: str
-    authors: List[Author]
-    copyright: str
-    cookBook: CookBook
+    authors: List[Author] = Field(alias="authors", default=[])
+    url: Optional[str] = Field(alias="url", default=None)
+    cookBook: Optional[CookBook] = Field(alias="cookBook", default=None)
 
 
 class Step(BaseModel):
     desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
     items: Optional[List[str]] = Field(alias="items", default=[])
     imgUrl: Optional[str] = Field(alias="imgUrl", default=None)
-    duration: int = Field(alias="duration", default=None)
-    temperature: float = Field(alias="temperature", default=None)
+    duration: Optional[int] = Field(alias="duration", default=None, ge=1)
+    temperature: Optional[float] = Field(alias="temperature", default=None)
+
+    @staticmethod
+    def new(desc: LocalizedString, items: List[str], imgUrl: str, duration: int, temperature: float):
+        return Step(desc=desc, items=items, imgUrl=imgUrl, duration=duration, temperature=temperature)
 
 
 class RecipeItem(BaseModel):
-    id: PyObjectId = Field(alias="_id", default=None)
-    quantity: float = Field(alias="quantity", default=None)
-    unit: str = Field(alias="unit", default=None)
+    id: PyObjectId = Field(alias="id", default=None)
+    quantity: Optional[float] = Field(alias="quantity", default=None, ge=0)
+    unit: Optional[str] = Field(alias="unit", default=None)
+
+    @staticmethod
+    def new(item_id: ObjectId, quantity: float, unit: str):
+        return RecipeItem(id=item_id, quantity=quantity, unit=unit)
 
 
 class Recipe(BaseModel):
@@ -76,7 +83,7 @@ class Recipe(BaseModel):
                             "value": "This is an example step."
                         },
                         "items": [
-                            "507f1f77bcf86cd799439011",
+                            "507f1f77bcf86cd799439011"
                         ],
                         "imgUrl": "https://example.com/example.jpg",
                         "duration": 10,
@@ -90,24 +97,14 @@ class Recipe(BaseModel):
                     "tags": [
                         "example",
                         "recipe"
-                    ],
-                    "ingredients": [
-                        {
-                            "name": {
-                                "lang": "en",
-                                "value": "Example Ingredient"
-                            },
-                            "quantity": 1,
-                            "unit": "cup"
-                        }
                     ]
                 },
                 "src": {
                     "url": "https://example.com/example.html",
                     "authors": [
                         {
-                            "name": "Example Author",
-                            "url": "https://example.com/author"
+                            "name": "John Smith",
+                            "url": "https://example.com/john-smith"
                         }
                     ],
                     "cookBook": {
@@ -117,5 +114,5 @@ class Recipe(BaseModel):
                     }
                 }
             }
-        },
+        }
     )

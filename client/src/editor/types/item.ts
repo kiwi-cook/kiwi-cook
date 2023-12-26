@@ -3,8 +3,9 @@
  */
 
 import {Item, RecipeItem, setLocaleStr} from '@/shared';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import {logDebug} from '@/shared/utils/logging';
+import {findMostSimilarItem} from '@/editor/parser/utils.ts';
 
 export class MutableItem extends Item {
 
@@ -30,7 +31,7 @@ export class MutableItem extends Item {
      */
     public update(): this {
         logDebug('MutableItem.update', this.getId())
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         store.setItem(this)
         return this
     }
@@ -41,7 +42,7 @@ export class MutableItem extends Item {
      */
     public save() {
         logDebug('MutableItem.save', this.getId())
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         store.saveItems([this])
     }
 
@@ -50,7 +51,7 @@ export class MutableItem extends Item {
      */
     public delete() {
         logDebug('MutableItem.delete', this.getId())
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         store.deleteItems(this)
     }
 }
@@ -62,7 +63,10 @@ export class MutableItem extends Item {
  * @returns the item to allow chaining
  */
 export function newItemFromName(name?: string): RecipeItem {
-    const item = new RecipeItem()
-    item.name['en'] = name ?? ''
-    return item
+    const item = findMostSimilarItem(name)
+    const recipeItem = new RecipeItem()
+    if (item) {
+        recipeItem.id = item.getId()
+    }
+    return recipeItem
 }

@@ -4,7 +4,7 @@
 
 import {Recipe, RecipeItem, Step} from '@/shared';
 import {logDebug} from '@/shared/utils/logging';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import {setLocaleStr} from '@/shared/locales/i18n';
 
 export class MutableRecipe extends Recipe {
@@ -29,7 +29,7 @@ export class MutableRecipe extends Recipe {
      */
     public update(): this {
         logDebug('recipe.update', this.getId())
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         store.setRecipes(this)
         return this
     }
@@ -40,7 +40,7 @@ export class MutableRecipe extends Recipe {
      */
     public save() {
         logDebug('recipe.save', this.getId())
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         return store.saveRecipes([this])
     }
 
@@ -48,7 +48,7 @@ export class MutableRecipe extends Recipe {
      * Delete the recipe from the database
      */
     public delete() {
-        const store = useRecipeStore()
+        const store = useRecipeEditorStore()
         logDebug('recipe.delete', this.getId())
         return store.deleteRecipes(this)
     }

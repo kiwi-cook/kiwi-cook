@@ -9,7 +9,7 @@
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}, 'item-label']">
             <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
-                {{ mappedItem.quantity }}{{ mappedItem.unit }}
+                {{ mappedItem.quantity }} {{ mappedItem.unit }}
             </span>
             {{ mappedItem.name }}
             <span v-if="include" class="item-included">✓</span>
@@ -17,7 +17,7 @@
         <div slot="end">
             <slot name="end">
                 <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'end'" class="item-quantity">
-                    {{ mappedItem.quantity }}{{ mappedItem.unit }}
+                    {{ mappedItem.quantity }} {{ mappedItem.unit }}
                 </span>
             </slot>
         </div>

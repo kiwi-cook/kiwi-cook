@@ -19,6 +19,16 @@
                             <td>{{ entry[1] }}</td>
                         </tr>
                     </table>
+
+                    <!-- <IonButton>
+                        <IonIcon slot="start" :icon="addOutline"/>
+                        Add Recipe
+                    </IonButton>
+
+                    <IonButton>
+                        <IonIcon slot="start" :icon="addOutline"/>
+                        Add Item
+                    </IonButton> -->
                 </div>
             </div>
         </IonContent>
@@ -27,12 +37,12 @@
 
 <script lang="ts" setup>
 import {IonContent, IonPage} from '@ionic/vue';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import {computed} from 'vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import {APP_NAME} from '@/shared';
 
-const recipeStore = useRecipeStore()
+const recipeStore = useRecipeEditorStore()
 const recipes = computed(() => recipeStore.getRecipesAsList)
 const items = computed(() => recipeStore.getItemsAsList)
 
@@ -105,5 +115,4 @@ td {
         min-width: 150px;
     }
 }
-
 </style>

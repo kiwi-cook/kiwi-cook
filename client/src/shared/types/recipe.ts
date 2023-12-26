@@ -4,7 +4,7 @@
 
 import {useIonRouter} from '@ionic/vue';
 import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
-import {APP_NAME, Item, RecipeItem, recipeItemFromJSON, share, Step, tmpId} from '@/shared';
+import {APP_NAME, Item, RecipeItem, share, Step, tmpId} from '@/shared';
 import {logError, logWarn} from '@/shared/utils/logging';
 
 /**
@@ -122,10 +122,6 @@ export class Recipe {
         return Array.from(this.items)
     }
 
-    public getItems(): Item[] {
-        return this.getRecipeItems().map(recipeItem => recipeItem.narrow(recipeItem))
-    }
-
     public hasItem(id?: string): boolean {
         return typeof id !== 'undefined' && typeof this.computed.itemsById[id] !== 'undefined'
     }
@@ -176,7 +172,8 @@ export class Recipe {
     public getPrice(): number {
         let price = 0
         for (const item of this.getRecipeItems()) {
-            price += item.getPrice() * item.servings
+            // TODO: get price from item
+            price += 1 * item.servings
         }
         return Math.floor(price)
     }
@@ -189,7 +186,7 @@ export class Recipe {
  * @param json
  * @returns a new recipe
  */
-export function recipeFromJSON(json: any): Promise<Recipe> {
+export function recipeFromJSON(json: any, itemsAsMap: { [id: string]: Item }): Promise<Recipe> {
     return new Promise<Recipe>((resolve, reject) => {
         const recipe = new Recipe()
 
@@ -202,7 +199,7 @@ export function recipeFromJSON(json: any): Promise<Recipe> {
         recipe.name = json.name
         recipe.desc = json.desc
         recipe.steps = json.steps?.map(Step.fromJSON) ?? [new Step()]
-        recipe.items = json.items?.map(recipeItemFromJSON) ?? []
+        recipe.items = json.items?.map((recipeItem: RecipeItem) => RecipeItem.fromJSON(recipeItem, itemsAsMap)) ?? []
 
         // Props
         recipe.props.imgUrl = json?.props?.imgUrl

@@ -35,7 +35,7 @@
 import {computed, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
@@ -43,7 +43,7 @@ import {MutableRecipe} from '@/editor/types/recipe';
 
 const route = useRoute();
 const recipeId = ref(route.params.id as string);
-const store = useRecipeStore();
+const store = useRecipeEditorStore();
 const recipe = computed<MutableRecipe>(() => store.getRecipesAsMap[recipeId.value]);
 
 const router = useIonRouter()

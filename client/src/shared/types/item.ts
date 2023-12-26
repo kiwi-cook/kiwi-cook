@@ -5,7 +5,7 @@
 import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
 import {distance} from 'fastest-levenshtein';
 import {tmpId} from '@/shared';
-import {useRecipeStore} from '@/app/storage';
+import {logError} from '@/shared/utils/logging.ts';
 
 export enum ItemType {
     Ingredient = 'ingredient',
@@ -129,11 +129,36 @@ export class RecipeItem extends Item {
     servings: number;
     unit: string;
 
-    constructor(item?: Item) {
-        super(item)
-        this.quantity = 1
+    constructor(recipeItem?: RecipeItem) {
+        super(recipeItem)
+        if (this.id === undefined) {
+            logError('RecipeItem', 'id is undefined.')
+            throw new Error('id is undefined.')
+        }
+        this.quantity = recipeItem?.quantity ?? 1
         this.servings = 1
-        this.unit = ''
+        this.unit = recipeItem?.unit ?? ''
+    }
+
+    /**
+     * Initialize a recipeItem from a json object
+     * This is done because the json object does not have the methods of the class
+     *
+     * @param json
+     * @param itemsAsMap
+     * @returns a new step item
+     */
+    static fromJSON(json: any, itemsAsMap: { [id: string]: Item }): RecipeItem {
+        const item = itemsAsMap[json.id] ?? new Item()
+        if (item === undefined) {
+            logError('RecipeItem', 'item is undefined', json)
+        }
+
+        const recipeItem = new RecipeItem()
+        recipeItem.updateItem(item)
+        recipeItem.quantity = !json.quantity || json.quantity === 0 ? 1 : json.quantity
+        recipeItem.unit = json.unit ?? ''
+        return recipeItem
     }
 
     public getQuantity(): number {
@@ -163,23 +188,4 @@ export class RecipeItem extends Item {
         this.servings = servings
         return this
     }
-}
-
-/**
- * Initialize a recipeItem from a json object
- * This is done because the json object does not have the methods of the class
- *
- * @param json
- * @returns a new step item
- */
-export function recipeItemFromJSON(json: any): RecipeItem {
-    const recipeItem = new RecipeItem()
-    recipeItem.quantity = !json.quantity || json.quantity === 0 ? 1 : json.quantity
-    recipeItem.unit = json.unit ?? 'pcs'
-
-    const store = useRecipeStore()
-    const item = store.getItemsAsMap[json.id ?? ''] ?? new Item()
-    recipeItem.updateItem(item)
-
-    return recipeItem
 }

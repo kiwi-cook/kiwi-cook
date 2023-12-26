@@ -3,10 +3,11 @@ from dotenv import load_dotenv
 from starlette import status
 from starlette.middleware.cors import CORSMiddleware
 
-from models.api import APIResponse, APIResponseList
+from models.api import APIResponseList
 from models.item import Item
 from models.recipe import Recipe
 from mongodb import get_database
+from scraper import scrape_parse_convert
 
 load_dotenv()
 
@@ -36,44 +37,50 @@ def read_root():
 
 @app.post("/recipe/",
           response_description="Add new recipes",
-          response_model=APIResponse,
+          response_model=APIResponseList[str],
           status_code=status.HTTP_201_CREATED,
           response_model_by_alias=False,
           response_model_exclude_none=True,
           )
-def create_recipes(recipe: list[Recipe]):
-    return {"error": False, "response": client['recipes'].insert_many(recipe)}
+def create_recipes(recipes: list[Recipe]):
+    error = False
+    inserted_recipes = client['recipes'].insert_many(
+        [recipe.model_dump(by_alias=True, exclude_none=True) for recipe in recipes])
+    if len(inserted_recipes.inserted_ids) != len(recipes):
+        error = True
+    inserted_ids = [str(recipeId) for recipeId in inserted_recipes.inserted_ids]
+    return {"error": error, "response": inserted_ids}
 
 
-@app.put("/recipe/",
-         response_description="Update recipes",
-         response_model=APIResponse,
-         status_code=status.HTTP_201_CREATED,
-         response_model_by_alias=False,
-         response_model_exclude_none=True,
-         )
-def update_recipes(recipe: list[Recipe]):
-    return {"error": False, "response": client['recipes'].insert_many(recipe)}
+@app.post("/recipe/parse",
+          response_description="Parse recipes from URLs",
+          response_model=APIResponseList[str],
+          status_code=status.HTTP_201_CREATED,
+          response_model_by_alias=False,
+          response_model_exclude_none=True,
+          )
+def parse_recipes(recipe_urls: list[str]):
+    error = False
+    parsed_recipes = []
+    for url in recipe_urls:
+        recipe = scrape_parse_convert(url, client)
+        parsed_recipes.append(recipe)
+    inserted_recipes = client['recipes'].insert_many(
+        [recipe.model_dump(by_alias=True, exclude_none=True) for recipe in parsed_recipes])
+    if len(inserted_recipes.inserted_ids) != len(recipe_urls):
+        error = True
+    inserted_ids = [str(recipeId) for recipeId in inserted_recipes.inserted_ids]
+    return {"error": error, "response": inserted_ids}
 
 
 @app.get("/recipe/",
          response_description="Get all recipes",
-         response_model=APIResponse,
+         response_model=APIResponseList[Recipe],
          response_model_by_alias=False,
          response_model_exclude_none=True,
          )
 def read_recipes():
     return {"error": False, "response": list(client['recipes'].find())}
-
-
-@app.post("/recipes/parse/",
-          response_description="Parse recipes using a specified parser",
-          status_code=status.HTTP_201_CREATED,
-          response_model_by_alias=False,
-          )
-def parse_recipes():
-    # TODO document why this method is empty
-    pass
 
 
 @app.get("/item",

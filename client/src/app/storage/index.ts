@@ -11,7 +11,7 @@ import {compress, decompress} from 'lz-string'
 // Types
 // Ionic
 import {Drivers, Storage} from '@ionic/storage';
-import {API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, recipeFromJSON, sendToAPI,} from '@/shared';
+import {API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, recipeFromJSON, RecipeItem, sendToAPI,} from '@/shared';
 import {logDebug, logError} from '@/shared/utils/logging';
 import {TasteBuddySearch} from '@/app/search/search';
 import {simpleRecipeSuggestion} from '@/app/search/suggestion';
@@ -203,7 +203,8 @@ export const useRecipeStore = defineStore('recipes-app', {
             const randomItems: Item[] = (this.getItemsAsList ?? []).filter(() => Math.random() < 0.5)
 
             const itemsFromSavedRecipes: Item[] = (this.getSavedRecipes ?? []).reduce((items: Item[], recipe: Recipe) => {
-                return [...items, ...recipe.getRecipeItems()]
+                const recipeItems: Item[] = recipe.getRecipeItems().map((item: RecipeItem) => this.getItemsAsMap[item.id])
+                return [...items, ...recipeItems]
             }, [])
 
             const itemIds = new Set([...randomItems, ...itemsFromSavedRecipes].map((item: Item) => item.getId()))
@@ -213,6 +214,9 @@ export const useRecipeStore = defineStore('recipes-app', {
         getItemsAsMap: (state): {
             [id: string]: Item
         } => state.items ?? {},
+        /**
+         * Get the recipe of the day
+         */
         getRecipeOfTheDay(): Recipe {
             // Calculate the day of the year
             const now: Date = new Date();
@@ -276,9 +280,9 @@ export const useRecipeStore = defineStore('recipes-app', {
                 keyValues.numberOfSteps.push(savedRecipe.steps.length)
                 keyValues.numberOfIngredients.push(savedRecipe.getRecipeItems().length)
                 keyValues.duration.push(savedRecipe.getDuration())
-                for (const item of savedRecipe.getItems()) {
-                    const count = keyValues.itemsIds.get(item.getId()) ?? 0
-                    keyValues.itemsIds.set(item.getId(), count + 1)
+                for (const item of savedRecipe.getRecipeItems()) {
+                    const count = keyValues.itemsIds.get(item.id) ?? 0
+                    keyValues.itemsIds.set(item.id, count + 1)
                 }
             }
 
@@ -367,7 +371,8 @@ export const useRecipeStore = defineStore('recipes-app', {
                     // this is because the JSON is not a valid Recipe object,
                     // and we need to use the Recipe class methods
                     if (!apiResponse.error) {
-                        return await Promise.all(apiResponse.response.map((recipe: Recipe) => recipeFromJSON(recipe)))
+                        return await Promise.all(apiResponse.response
+                            .map((recipe: Recipe) => recipeFromJSON(recipe, this.getItemsAsMap)))
                             .then((recipes: Recipe[]) => this.setRecipes(recipes))
                             .then(() => apiResponse.response)
                     }
@@ -401,7 +406,7 @@ export const useRecipeStore = defineStore('recipes-app', {
                 })
                 .then((recipes: CachedItem<Recipe[]>) => {
                     return Promise.all((recipes.value ?? [])
-                        .map((recipe: Recipe) => recipeFromJSON(recipe)))
+                        .map((recipe: Recipe) => recipeFromJSON(recipe, this.getItemsAsMap)))
                         .then((recipes: Recipe[]) => this.setRecipes(recipes, false))
                 })
                 /* Saved Recipes */

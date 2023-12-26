@@ -85,13 +85,13 @@ import {
     IonSearchbar
 } from '@ionic/vue';
 import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import ItemEditor from '@/editor/components/editor/ItemEditor.vue';
 import {Item} from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
 import {MutableItem} from '@/editor/types/item';
 
-const recipeStore = useRecipeStore();
+const recipeStore = useRecipeEditorStore();
 const items = computed<MutableItem[]>(() => {
     return recipeStore.getItemsAsList
         .filter(item => item.getName().toLowerCase().includes(filterInput.value.toLowerCase()))

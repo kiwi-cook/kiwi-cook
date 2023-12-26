@@ -5,8 +5,6 @@
 import {Recipe} from '@/shared';
 import {logError} from '@/shared/utils/logging';
 import {Ref} from 'vue';
-import {CookstrParser} from '@/editor/parser/cookstr';
-import {AllRecipesParser} from '@/editor/parser/allrecipes';
 
 export enum RecipeParser {
     Cookstr = 'cookstr',
@@ -28,14 +26,8 @@ export function parseRecipes(jsonString: string, options: { parser: RecipeParser
     }
 
     let parse: (recipe: unknown) => Recipe
-    switch (options.parser) {
-        case RecipeParser.Cookstr:
-            parse = CookstrParser.parse as (recipe: unknown) => Recipe
-            break
-        case RecipeParser.AllRecipes:
-            parse = AllRecipesParser.parse as (recipe: unknown) => Recipe
-            break
-    }
+    // Not implemented yet
+    throw new Error('Not implemented yet')
 
     // Convert recipes to array
     if (!Array.isArray(recipes)) {

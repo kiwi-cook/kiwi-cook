@@ -22,10 +22,10 @@
                                       label-placement="stacked" type="url"/>
                         </IonRow>
                         <IonRow>
-                            <IonChip v-if="mutableRecipe.props.date">
+                            <!-- <IonChip v-if="mutableRecipe.props.date">
                                 <IonIcon :icon="calendar"/>
                                 <IonLabel>{{ formatDate(mutableRecipe.props.date) }}</IonLabel>
-                            </IonChip>
+                            </IonChip> -->
                             <Duration :duration="mutableRecipe.getDuration()" always-show/>
                         </IonRow>
                     </IonCol>
@@ -209,8 +209,8 @@
 </template>
 
 <script lang="ts" setup>
-import {formatDate, recipeFromJSON, RecipeItem} from '@/shared';
-import {useRecipeStore} from '@/editor/storage';
+import {recipeFromJSON, RecipeItem} from '@/shared';
+import {useRecipeEditorStore} from '@/editor/storage';
 import {
     IonButton,
     IonCard,
@@ -230,7 +230,7 @@ import {
     useIonRouter
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs, watch} from 'vue';
-import {add, calendar, closeCircleOutline, information, remove, save, trash} from 'ionicons/icons';
+import {add, closeCircleOutline, information, remove, save, trash} from 'ionicons/icons';
 import {MutableRecipe} from '@/editor/types/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
@@ -248,7 +248,7 @@ const props = defineProps({
 const {recipe} = toRefs(props)
 
 const router = useIonRouter();
-const recipeStore = useRecipeStore();
+const recipeStore = useRecipeEditorStore();
 
 const mutableRecipe = ref<MutableRecipe>(recipe.value)
 // update recipe and steps when prop changes
@@ -266,7 +266,7 @@ const saveRecipe = () => mutableRecipe?.value?.save()
  * Redirect to SavedRecipes
  */
 const deleteRecipe = () => mutableRecipe?.value?.delete().then(() => {
-    router.push({name: 'SavedRecipes'})
+    router.push({name: 'Home'})
 })
 
 /**
@@ -344,7 +344,7 @@ watch(mutableRecipe, (newRecipe: MutableRecipe) => {
 }, {immediate: true})
 
 const saveRecipeFromJSON = async () => {
-    mutableRecipe.value = await recipeFromJSON(recipeAsJSON.value) as MutableRecipe
+    mutableRecipe.value = await recipeFromJSON(recipeAsJSON.value, recipeStore.getItemsAsMap) as MutableRecipe
 }
 </script>
 

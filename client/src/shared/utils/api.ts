@@ -14,10 +14,9 @@ const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://loca
 export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS[1] : possibleAPI_URLS[0]
 
 export enum API_ROUTE {
-    POST_AUTH,
-    GET_AUTH,
     GET_RECIPES,
     ADD_RECIPES,
+    PARSE_RECIPES,
     DELETE_RECIPES,
     GET_ITEMS,
     ADD_ITEMS,
@@ -35,15 +34,9 @@ type API_ROUTE_OPTIONS = {
 }
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
-    [API_ROUTE.POST_AUTH]: {
-        url: '/user/auth',
-        method: 'POST',
-        contentType: 'application/x-www-form-urlencoded',
-        credentials: 'include'
-    },
-    [API_ROUTE.GET_AUTH]: {url: '/user/auth', method: 'GET', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: JSONTYPE},
     [API_ROUTE.ADD_RECIPES]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
+    [API_ROUTE.PARSE_RECIPES]: {url: '/recipe/parse', method: 'POST', contentType: JSONTYPE},
     [API_ROUTE.DELETE_RECIPES]: {
         url: '/recipe',
         method: 'DELETE',
@@ -165,15 +158,4 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
                     response: (errorMessage ?? 'An error occurred') as R
                 }))
         })
-}
-
-
-/**
- * Set the cookie details
- * @param cookie
- * @param value
- * @param expirationDate
- */
-export function setCookie(cookie: string, value: string, expirationDate: Date) {
-    document.cookie = cookie + '=' + value + ';path=/;expires=' + expirationDate.toUTCString();
 }

@@ -2,27 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {useRecipeStore} from '@/editor/storage';
-import {Item, RecipeItem} from '@/shared';
+import {useRecipeEditorStore} from '@/editor/storage';
+import {Item} from '@/shared';
 import {closest, distance} from 'fastest-levenshtein';
 import {logDebug} from '@/shared/utils/logging.ts';
-
-/**
- * Parses a string into a list of step items.
- * @param text
- */
-export function extractRecipeItemsFromText(text: string): RecipeItem[] {
-    const recipeStore = useRecipeStore()
-    const items = recipeStore.getItemsAsList
-    const itemsFromDescription: Set<RecipeItem> = new Set()
-    items.forEach((item: Item) => {
-        const itemName = item.getName().toLowerCase()
-        if (itemName !== '' && text.toLowerCase().includes(itemName)) {
-            itemsFromDescription.add(new RecipeItem(item))
-        }
-    })
-    return [...itemsFromDescription]
-}
 
 /**
  * Extracts the duration from a text in minutes.
@@ -47,35 +30,18 @@ export function extractDurationFromText(text: string): number {
     return dur
 }
 
-export function findMostSimilarItems(recipeItemsFromRecipe: RecipeItem[]): RecipeItem[] {
-    const recipeStore = useRecipeStore()
-    const items = recipeStore.getItemsAsList
-    const itemsNames = items.map((item: Item) => item.getName())
-    const maxDistance = 2
-    recipeItemsFromRecipe.forEach((recipeItem: RecipeItem, index: number) => {
-        const closestItemName = closest(recipeItem.getName(), itemsNames)
-        if (distance(recipeItem.getName(), closestItemName) <= maxDistance) {
-            const closestItem = items.find((item: Item) => item.getName() === closestItemName)
-            recipeItemsFromRecipe[index].id = closestItem?.id ?? ''
-            // recipeItemsFromRecipe[index].setName(closestItemName) // broken
-        }
-    })
-
-    return recipeItemsFromRecipe
-}
-
 /**
  * Finds the most similar item in the list of items
  * @param itemName
  */
-export function findMostSimilarItem(itemName: string): Item | undefined {
+export function findMostSimilarItem(itemName?: string): Item | undefined {
     // Check if the item name is empty
-    if (itemName === '') {
+    if (!itemName || itemName === '') {
         return undefined
     }
 
     // Prepare store
-    const recipeStore = useRecipeStore()
+    const recipeStore = useRecipeEditorStore()
     const items = recipeStore.getItemsAsList
     const itemNames = recipeStore.getItemNamesAsList
 

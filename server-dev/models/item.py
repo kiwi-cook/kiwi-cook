@@ -8,16 +8,13 @@ from models.shared import LocalizedString
 
 
 class Item(BaseModel):
-    id: Optional[PyObjectId] = Field(default=None, alias='_id')
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: LocalizedString = Field(default=LocalizedString(lang='en', value=''), alias='name')
     type: str = Field(default=None, alias='type')
     imgUrl: Optional[str] = Field(default=None, alias='imgUrl')
 
     class Config:
         allow_population_by_field_name = True
-        json_encoders = {
-            ObjectId: lambda v: str(v)
-        }
         schema_extra = {
             "example": {
                 "id": "507f1f77bcf86cd799439011",
@@ -26,3 +23,14 @@ class Item(BaseModel):
                 "imgUrl": "http://example.com/image.jpg"
             }
         }
+
+    @staticmethod
+    def create(name: str, type: str, imgUrl: str = None):
+        """
+        Creates a new item.
+        :param name: name of the item
+        :param type: type of the item: 'ingredient', 'tool
+        :param imgUrl: URL to an image of the item
+        :return: the created item
+        """
+        return Item(name=LocalizedString.new('en', name), type=type, imgUrl=imgUrl)

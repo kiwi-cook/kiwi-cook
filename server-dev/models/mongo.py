@@ -1,13 +1,13 @@
-from typing import Annotated, Any
-from bson.objectid import ObjectId as _ObjectId
-from pydantic import (AfterValidator, GetPydanticSchema,
-                      PlainSerializer, WithJsonSchema)
+from typing import Annotated
 
-PyObjectId = Annotated[
-    _ObjectId,
-    AfterValidator(lambda id: PyObjectId(id)),
-    PlainSerializer(lambda id: str(id), return_type=str, when_used='json-unless-none'),
-    WithJsonSchema({'type': 'string'}, mode='serialization'),
-    WithJsonSchema({'type': 'string'}, mode='validation'),
-    GetPydanticSchema(lambda _s, h: h(Any))
-]
+from pydantic import (BeforeValidator, AfterValidator)
+from bson import ObjectId as _ObjectId
+
+
+def check_object_id(value: str) -> str:
+    if not _ObjectId.is_valid(value):
+        raise ValueError('Invalid ObjectId')
+    return value
+
+
+PyObjectId = Annotated[str, AfterValidator(check_object_id), BeforeValidator(str)]

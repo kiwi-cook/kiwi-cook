@@ -13,74 +13,6 @@ import {MutableItem} from '@/editor/types/item';
 
 // Define typings for the store state
 
-interface UserState {
-    user: {
-        authenticated: boolean
-    }
-}
-
-export const useTasteBuddyStore = defineStore('tastebuddy-editor', {
-    state: (): UserState => ({
-        user: {
-            authenticated: false,
-        }
-    }),
-    getters: {
-        /**
-         * Get the current language
-         * @param state
-         */
-        isAuthenticated: (state): boolean => state.user.authenticated ?? false,
-    },
-    actions: {
-        /**
-         * Authenticate the user using the session cookie+
-         * @return true, if user was authenticated successfully
-         */
-        async authenticate(): Promise<boolean> {
-            logDebug('authenticate', 'logging in')
-            // if the user is already authenticated, return true
-            if (this.isAuthenticated) {
-                return Promise.resolve(true)
-            }
-
-            // try to authenticate the user using the session cookie
-            return sendToAPI<string>(API_ROUTE.GET_AUTH, {errorMessage: 'Could not log in'})
-                .then((apiResponse: APIResponse<string>) => {
-                    this.user.authenticated = !apiResponse.error
-                    logDebug('sessionAuth', `user is${!this.user.authenticated ? ' not ' : ' '}authenticated`)
-                    return this.user.authenticated
-                }).catch(() => {
-                    this.user.authenticated = false
-                    return false
-                })
-        },
-        /**
-         * Authenticate the user using the username and password
-         * @param payload username and password
-         * @returns true if the authentication was successful, false otherwise
-         */
-        async basicAuth(payload: { username: string, password: string }): Promise<boolean> {
-            logDebug('basicAuth', 'logging in')
-            const {username, password} = payload
-            return sendToAPI<string>(API_ROUTE.POST_AUTH, {
-                headers: [
-                    {
-                        key: 'Authorization',
-                        value: 'Basic ' + btoa(username + ':' + password)
-                    }
-                ],
-                errorMessage: 'Could not log in'
-            }).then((apiResponse: APIResponse<string>) => {
-                this.user.authenticated = !apiResponse.error
-                // return true if the authentication was successful, false otherwise
-
-                return !apiResponse.error
-            })
-        }
-    }
-})
-
 interface RecipeState {
     loading: { [key: string]: boolean }
     recipes: { [id: string]: MutableRecipe }
@@ -89,7 +21,7 @@ interface RecipeState {
 
 // Create the store
 // called by main.ts
-export const useRecipeStore = defineStore('recipes-editor', {
+export const useRecipeEditorStore = defineStore('recipes-editor', {
     state: (): RecipeState => ({
         loading: {
             initial: true,
@@ -122,11 +54,11 @@ export const useRecipeStore = defineStore('recipes-editor', {
 
             for (const recipe of recipes) {
                 const items = recipe.getRecipeItems()
-                for (const item of items) {
-                    if (!(item.getId() in recipesByItemId)) {
-                        recipesByItemId[item.getId()] = []
+                for (const recipeItem of items) {
+                    if (!(recipeItem.id in recipesByItemId)) {
+                        recipesByItemId[recipeItem.id] = []
                     }
-                    recipesByItemId[item.getId()].push(recipe.getId())
+                    recipesByItemId[recipeItem.id].push(recipe.getId())
                 }
             }
             logDebug('getRecipesByItemIds', recipesByItemId)
@@ -139,11 +71,19 @@ export const useRecipeStore = defineStore('recipes-editor', {
         getItemNamesAsList(): string[] {
             return (this.getItemsAsList ?? []).flatMap((item: MutableItem) => item.getAllNames())
         },
+        getItemIdsToName(): { [id: string]: string } {
+            return (this.getItemsAsList ?? []).reduce((map: { [id: string]: string }, item: MutableItem) => {
+                map[item.getId()] = item.getName()
+                return map
+            }, {})
+        },
         getItemsSortedByName(): MutableItem[] {
             return (this.getItemsAsList ?? [])
                 .toSorted((a: MutableItem, b: MutableItem) => a.getName().localeCompare(b.getName()))
         },
-        getItemsAsMap: (state): { [id: string]: MutableItem } => state.items ?? {},
+        getItemsAsMap: (state): { [id: string]: MutableItem } => {
+            return state.items ?? {}
+        },
         getTags(): string[] {
             return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: MutableRecipe) => {
                 return [...tags, ...(recipe.props.tags ?? [])]
@@ -229,7 +169,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
                     // this is because the JSON is not a valid MutableRecipe object,
                     // and we need to use the MutableRecipe class methods
                     if (!apiResponse.error) {
-                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe)))
+                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe, this.getItemsAsMap)))
                             .then((recipes: Recipe[]) => this.replaceRecipes(recipes.map((recipe: Recipe) => new MutableRecipe(recipe))))
                     }
                     return apiResponse.response
@@ -243,6 +183,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
          * @param key
          */
         finishLoading(key: string) {
+            logDebug('finishLoading', key)
             this.loading[key] = false
         },
         /**
@@ -359,7 +300,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
         setItems(items?: MutableItem[] | MutableItem) {
             if (typeof items === 'undefined') {
                 this.items = {}
-                return new Promise<MutableItem[]>(() => [])
+                return Promise.resolve([])
             }
 
             if (!Array.isArray(items)) {
@@ -367,6 +308,7 @@ export const useRecipeStore = defineStore('recipes-editor', {
             } else {
                 this.items = Object.assign(this.items, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
             }
+            return Promise.resolve(items)
         },
         /**
          * Set the loading state

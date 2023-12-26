@@ -98,7 +98,7 @@ import {
     IonSelectOption
 } from '@ionic/vue';
 import {computed, PropType, ref, toRefs} from 'vue';
-import {useRecipeStore} from '@/editor/storage';
+import {useRecipeEditorStore} from '@/editor/storage';
 import {chevronDown, chevronUp, save, trash} from 'ionicons/icons';
 import {MutableItem} from '@/editor/types/item';
 import {SUPPORT_LOCALES} from '@/shared/locales/i18n';
@@ -112,7 +112,7 @@ const props = defineProps({
 
 const {item} = toRefs(props)
 
-const recipeStore = useRecipeStore()
+const recipeStore = useRecipeEditorStore()
 const showUsedInRecipes = ref<boolean>(false)
 const usedInRecipes = computed(() => recipeStore.getRecipesAsListByItemId(item?.value?.getId() ?? '')
     .map((recipeId: string) => recipeStore.getRecipesAsMap[recipeId]))
