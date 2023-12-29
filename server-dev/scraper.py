@@ -55,11 +55,11 @@ def scrape_parse_convert(url: str, client) -> Recipe:
     )
 
 
-def parse_scraper_ingredients(items: str | list[str], client):
+def parse_scraper_ingredients(items: str | list[str], client) -> list[RecipeItem]:
     if isinstance(items, str):
         items = [items]
 
-    recipe_items = []
+    recipe_items = list()
     for ingredient in items:
 
         # Parse the ingredient
@@ -68,7 +68,8 @@ def parse_scraper_ingredients(items: str | list[str], client):
         # ... and find the most similar item
         most_similar = find_most_similar_item(parsed_ingredient.name.text, client)
         print(
-            f'Parsed {ingredient} -> {parsed_ingredient}. Most similar {most_similar[0][0]} [{most_similar[0][1] * 100}%]', end='\n---\n')
+            f'Parsed {ingredient} -> {parsed_ingredient}. Most similar {most_similar[0][0]} [{most_similar[0][1] * 100}%]',
+            end='\n---\n')
 
         # Check if the most similar item is similar enough
         if most_similar[0][1] < 0.5:
@@ -109,7 +110,7 @@ def parse_scraper_steps(steps: str, lang: str = 'en'):
         summed_durations = sum(durations) if len(durations) > 0 else None
         # TODO: add more fields to the recipe step
 
-        recipe_step = Step.new(desc, [], None, summed_durations, temperature)
+        recipe_step = Step.new(desc, None, summed_durations, temperature)
         recipe_steps.append(recipe_step)
 
     return recipe_steps

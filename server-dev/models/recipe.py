@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Set
 
 from bson import ObjectId
 from pydantic import BaseModel, Field, ConfigDict
@@ -26,20 +26,20 @@ class Source(BaseModel):
 
 class Step(BaseModel):
     desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
-    items: Optional[List[str]] = Field(alias="items", default=[])
     imgUrl: Optional[str] = Field(alias="imgUrl", default=None)
     duration: Optional[int] = Field(alias="duration", default=None, ge=1)
     temperature: Optional[float] = Field(alias="temperature", default=None)
 
     @staticmethod
-    def new(desc: LocalizedString, items: List[str], imgUrl: str, duration: int, temperature: float):
-        return Step(desc=desc, items=items, imgUrl=imgUrl, duration=duration, temperature=temperature)
+    def new(desc: LocalizedString, imgUrl: str, duration: int, temperature: float):
+        return Step(desc=desc, imgUrl=imgUrl, duration=duration, temperature=temperature)
 
 
 class RecipeItem(BaseModel):
     id: PyObjectId = Field(alias="id", default=None)
     quantity: Optional[float] = Field(alias="quantity", default=None, ge=0)
     unit: Optional[str] = Field(alias="unit", default=None)
+    notes: Optional[LocalizedString] = Field(alias="notes", default=None)
 
     @staticmethod
     def new(item_id: ObjectId, quantity: float, unit: str):
@@ -48,8 +48,8 @@ class RecipeItem(BaseModel):
 
 class Recipe(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    name: LocalizedString = Field(alias="name", default=LocalizedString(lang="en", value=""))
-    desc: LocalizedString = Field(alias="desc", default=LocalizedString(lang="en", value=""))
+    name: LocalizedString = Field(alias="name", default=None)
+    desc: LocalizedString = Field(alias="desc", default=None)
     items: List[RecipeItem] = Field(alias="items", default=[])
     steps: List[Step] = Field(alias="steps", default=[])
     props: dict = Field(alias="props", default={})
