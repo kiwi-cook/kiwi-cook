@@ -20,7 +20,6 @@ store.setLanguage()
 
 // Initialize the recipe store
 const recipeStore = useRecipeStore();
-
 setTimeout(() => {
     recipeStore.prepare()
 }, 0)

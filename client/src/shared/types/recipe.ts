@@ -17,7 +17,7 @@ export class Recipe {
     name: LocaleStr;
     desc: LocaleStr;
     steps: Step[];
-    items: Set<RecipeItem>;
+    items: RecipeItem[];
     props: {
         imgUrl?: string;
         duration?: number;
@@ -59,7 +59,7 @@ export class Recipe {
             tags: [],
         }
         this.steps = recipe?.steps ?? []
-        this.items = new Set(recipe?.items ?? [])
+        this.items = recipe?.items ?? []
         this.src = recipe?.src ?? {
             url: '',
             authors: [],
@@ -184,11 +184,20 @@ export class Recipe {
  * This is done because the json object does not have the methods of the class
  *
  * @param json
+ * @param itemsAsMap
  * @returns a new recipe
  */
 export function recipeFromJSON(json: any, itemsAsMap: { [id: string]: Item }): Promise<Recipe> {
     return new Promise<Recipe>((resolve, reject) => {
         const recipe = new Recipe()
+
+        if (typeof json === 'undefined' || json === null) {
+            logWarn('recipeFromJSON', 'json is undefined.')
+            resolve(recipe)
+            return
+        }
+
+        console.log('recipeFromJSON', json)
 
         // Id
         recipe.id = json.id
@@ -196,10 +205,10 @@ export function recipeFromJSON(json: any, itemsAsMap: { [id: string]: Item }): P
             logWarn('recipeFromJSON', 'id is undefined.')
         }
 
-        recipe.name = json.name
-        recipe.desc = json.desc
-        recipe.steps = json.steps?.map(Step.fromJSON) ?? [new Step()]
-        recipe.items = json.items?.map((recipeItem: RecipeItem) => RecipeItem.fromJSON(recipeItem, itemsAsMap)) ?? []
+        recipe.name = json?.name
+        recipe.desc = json?.desc
+        recipe.steps = json?.steps?.map(Step.fromJSON) ?? [new Step()]
+        recipe.items = json?.items?.map((recipeItem: RecipeItem) => RecipeItem.fromJSON(recipeItem, itemsAsMap)) ?? []
 
         // Props
         recipe.props.imgUrl = json?.props?.imgUrl

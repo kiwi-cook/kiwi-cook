@@ -8,6 +8,7 @@ import TabsPage from '@/app/views/VTabs.vue'
 import VRecipe from '@/app/views/recipe/VRecipe.vue';
 import VRecipeSuggestions from '@/app/views/recipe/VRecipeSuggestions.vue';
 import {useRecipeStore} from '@/app/storage';
+import {useSharedStore} from '@/shared/storage';
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -76,8 +77,8 @@ export function createTasteBuddyRouter(): Router {
     })
 
     router.beforeEach((to, from, next: NavigationGuardNext) => {
-        const recipeStore = useRecipeStore()
-        const isLoadingInitialData = recipeStore.isLoadingInitial
+        const sharedStore = useSharedStore()
+        const isLoadingInitialData = sharedStore.isLoadingInitial
         if (isLoadingInitialData && to.name !== 'Hello') {
             next({name: 'Hello', query: {redirect: to.path}})
         } else {

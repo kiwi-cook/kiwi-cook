@@ -299,7 +299,7 @@ const addItemToRecipe = () => {
  * @param itemIndex index of the item to remove
  */
 const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
-    .value?.steps[stepIndex].itemNames.splice(itemIndex, 1);
+    .value?.steps[stepIndex].items.splice(itemIndex, 1);
 
 /**
  * Edit the item

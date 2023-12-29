@@ -370,7 +370,7 @@ const specialTags = [
 const includeTag = (tag: string) => selectedTags.value.push(tag)
 
 // City
-const city = ref('')
+// const city = ref('')
 const prices = [2, 3, 5, 10]
 const maxPrice = ref<number | undefined>(undefined)
 watch(maxPrice, () => searchFilters.value.add('price'))

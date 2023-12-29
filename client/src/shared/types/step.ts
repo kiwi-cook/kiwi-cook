@@ -17,7 +17,7 @@ export enum STEP_TYPES {
  * It can have an image, a description and a preparation time for the step
  */
 export class Step {
-    itemNames: string[]; // list of item names
+    items: string[]; // list of item names
     desc: LocaleStr;
     imgUrl?: string;
     duration?: number;
@@ -25,7 +25,7 @@ export class Step {
     type: STEP_TYPES
 
     constructor() {
-        this.itemNames = []
+        this.items = []
         this.imgUrl = ''
         this.desc = newLocaleStr()
         this.duration = 0
@@ -41,7 +41,7 @@ export class Step {
      */
     public static fromJSON(json: any): Step {
         const item = new Step()
-        item.itemNames = json.items
+        item.items = json.items
         item.imgUrl = json.imgUrl
         item.desc = json.desc
         item.duration = json.duration
@@ -58,7 +58,7 @@ export class Step {
      */
     public static fromRecipeItems(recipeItems: string[], description?: string): Step {
         const step = new Step()
-        step.itemNames = recipeItems
+        step.items = recipeItems
         step.setDescription(description ?? '')
         return step
     }
@@ -87,7 +87,7 @@ export class Step {
             return ''
         }
 
-        for (const itemName of this.itemNames) {
+        for (const itemName of this.getItems()) {
             if (!itemName || itemName === '') {
                 continue;
             }
@@ -101,7 +101,7 @@ export class Step {
      * Get all unique items in the step
      * @returns a list of all items in the step
      */
-    public getRecipeItems(): string[] {
-        return [...new Set(this.itemNames)]
+    public getItems(): string[] {
+        return [...new Set(this.items ?? [])]
     }
 }

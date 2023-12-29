@@ -3,7 +3,9 @@
  */
 
 import {useSharedStore} from './shared.ts'
+import {useSharedRecipeStore} from './recipe.ts'
 
 export {
-    useSharedStore
+    useSharedStore,
+    useSharedRecipeStore
 }

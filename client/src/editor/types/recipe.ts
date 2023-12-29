@@ -103,12 +103,12 @@ export class MutableRecipe extends Recipe {
         recipe: MutableRecipe
     } {
         item = item ?? new RecipeItem();
-        this.items.add(item)
+        this.items.push(item)
         return {item, recipe: this};
     }
 
     public removeRecipeItem(item: RecipeItem): void {
-        this.items.delete(item)
+        this.items = this.items.filter((i: RecipeItem) => i !== item)
     }
 
     /**

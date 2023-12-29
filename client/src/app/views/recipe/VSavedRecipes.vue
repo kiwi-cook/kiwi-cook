@@ -68,7 +68,6 @@ import {average} from '@/app/search/util';
 
 const recipeStore = useRecipeStore()
 const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes)
-const items = computed(() => recipeStore.getItemsAsMap)
 
 const savedRecipesStats = computed<{
     desc: string,
