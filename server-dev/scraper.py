@@ -101,11 +101,11 @@ def parse_scraper_steps(steps: str, lang: str = 'en'):
     split_steps = steps.split('\n')
 
     recipe_steps = []
-    for desc in split_steps:
+    for step_desc in split_steps:
         # Create the recipe step
-        desc = LocalizedString.new(lang, desc)
-        temperature = extract_temperature(desc) # TODO: throws an error
-        durations = extract_durations(desc)
+        desc = LocalizedString.new(lang, step_desc)
+        temperature = extract_temperature(step_desc)
+        durations = extract_durations(step_desc)
         summed_durations = sum(durations) if len(durations) > 0 else None
         # TODO: add more fields to the recipe step
 

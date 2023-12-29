@@ -1,14 +1,17 @@
 import re
 
 
-def extract_temperature(instruction: str) -> (int, str):
+def extract_temperature(instruction: str) -> float:
     """Extract the temperature from a string."""
+    print(f'Extracting temperature from instruction: {instruction}')
     match = re.search(r'\b(\d{1,3})\s*°?\s*(C|F)\b', instruction)
-    temperature = int(match.group(1))
+    if not match:
+        return None
+    temperature = float(match.group(1))
     unit = match.group(2)
     if unit == 'F':
         temperature = (temperature - 32) * 5 / 9
-    return temperature, unit
+    return temperature
 
 
 def extract_durations(instruction: str) -> list[int]:
