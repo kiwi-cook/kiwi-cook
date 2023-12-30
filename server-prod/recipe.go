@@ -16,8 +16,8 @@ type Recipe struct {
 	ID          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Name        LocalizedString    `json:"name,omitempty" bson:"name,omitempty"`
 	Description LocalizedString    `json:"desc" bson:"desc,omitempty"`
-	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
 	Items       []RecipeItem       `json:"items" bson:"items" binding:"required"`
+	Steps       []Step             `json:"steps" bson:"steps" binding:"required"`
 	Props       struct {
 		ImgUrl    string    `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 		Duration  int       `json:"duration,omitempty" bson:"duration,omitempty"`
@@ -41,14 +41,14 @@ type Recipe struct {
 }
 
 type RecipeItem struct {
-	ID       primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	ID       primitive.ObjectID `json:"id,omitempty" bson:"id,omitempty"`
 	Quantity float64            `json:"quantity" bson:"quantity" binding:"required"`
 	Unit     string             `json:"unit,omitempty" bson:"unit,omitempty" binding:"required"`
+	Notes    LocalizedString    `json:"notes,omitempty" bson:"notes,omitempty"`
 }
 
 type Step struct {
 	Description LocalizedString `json:"desc" bson:"desc" binding:"required"`
-	Items       []string        `json:"items,omitempty" bson:"items,omitempty"`
 	ImgUrl      string          `json:"imgUrl,omitempty" bson:"imgUrl,omitempty"`
 	Duration    int             `json:"duration,omitempty" bson:"duration,omitempty"`
 	Temperature float32         `json:"temperature,omitempty" bson:"temperature,omitempty"`
