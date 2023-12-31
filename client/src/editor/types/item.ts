@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Item, RecipeItem, setLocaleStr} from '@/shared';
-import {useRecipeEditorStore} from '@/editor/storage';
-import {logDebug} from '@/shared/utils/logging';
-import {findMostSimilarItem} from '@/editor/parser/utils.ts';
+import { Item, RecipeItem, setLocaleStr } from '@/shared';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { logDebug } from '@/shared/utils/logging';
+import { findMostSimilarItem } from '@/editor/parser/utils.ts';
 
 export class MutableItem extends Item {
 

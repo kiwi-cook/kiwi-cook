@@ -2,9 +2,9 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Item, presentToast, Recipe} from '@/shared';
-import {RecipeSuggestion} from '@/app/search';
-import {logDebug, logError} from '@/shared/utils/logging';
+import { Item, presentToast, Recipe } from '@/shared';
+import { RecipeSuggestion } from '@/app/search';
+import { logDebug, logError } from '@/shared/utils/logging';
 
 // URLs for the API
 
@@ -14,13 +14,7 @@ const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://loca
 export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS[1] : possibleAPI_URLS[0]
 
 export enum API_ROUTE {
-    GET_RECIPES,
-    ADD_RECIPES,
-    PARSE_RECIPES,
-    DELETE_RECIPES,
-    GET_ITEMS,
-    ADD_ITEMS,
-    DELETE_ITEMS
+    GET_RECIPES, ADD_RECIPES, PARSE_RECIPES, DELETE_RECIPES, GET_ITEMS, ADD_ITEMS, DELETE_ITEMS
 }
 
 const JSONTYPE = 'application/json'
@@ -38,25 +32,17 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.ADD_RECIPES]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.PARSE_RECIPES]: {url: '/recipe/parse', method: 'POST', contentType: JSONTYPE},
     [API_ROUTE.DELETE_RECIPES]: {
-        url: '/recipe',
-        method: 'DELETE',
-        contentType: JSONTYPE,
-        credentials: 'include'
+        url: '/recipe', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
     },
     [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: JSONTYPE},
     [API_ROUTE.ADD_ITEMS]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
     [API_ROUTE.DELETE_ITEMS]: {
-        url: '/item',
-        method: 'DELETE',
-        contentType: JSONTYPE,
-        credentials: 'include'
+        url: '/item', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
     }
 }
 
 export const DURATIONS = {
-    SHORT: 3000,
-    MEDIUM: 4000,
-    LONG: 5000,
+    SHORT: 3000, MEDIUM: 4000, LONG: 5000,
 }
 
 type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
@@ -154,8 +140,7 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
             // present a toast to the user
             return presentToast(errorMessage, true, DURATIONS.LONG)
                 .then(() => ({
-                    error: true,
-                    response: (errorMessage ?? 'An error occurred') as R
+                    error: true, response: (errorMessage ?? 'An error occurred') as R
                 }))
         })
 }

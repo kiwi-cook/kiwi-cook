@@ -2,16 +2,15 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe, RecipeItem} from '@/shared';
-import {searchRecipes} from '@/app/search/search';
+import { Recipe, RecipeItem } from '@/shared';
+import { searchRecipes } from '@/app/search/search';
 
 export class RecipeSuggestion {
 
     recipe: Recipe;
     recipe_price?: number;
     missing_items?: {
-        item: RecipeItem;
-        price?: number;
+        item: RecipeItem; price?: number;
     }[]
 
     constructor(recipe: Recipe) {
@@ -26,15 +25,12 @@ export class RecipeSuggestion {
 }
 
 export type ItemQuery = {
-    id?: string,
-    exclude?: boolean,
+    id?: string, exclude?: boolean,
 }
 
 export type SearchQuery = {
-    items: ItemQuery[],
-    tags: string[]
-    price?: number,
-    duration?: number,
+    items: ItemQuery[], tags: string[]
+    price?: number, duration?: number,
 }
 
 export class SearchQueryBuilder {
@@ -61,9 +57,7 @@ export class SearchQueryBuilder {
         [id: string]: boolean
     }): this {
         const items = Object.entries(itemIds).map(([id, include]: [string, boolean]) => ({
-            id,
-            name: '',
-            exclude: !include
+            id, name: '', exclude: !include
         }))
         this.items.push(...items)
         return this
@@ -96,10 +90,7 @@ export class SearchQueryBuilder {
 
     public build(): SearchQuery {
         return {
-            items: this.items,
-            tags: this.tags,
-            price: this.price,
-            duration: this.duration
+            items: this.items, tags: this.tags, price: this.price, duration: this.duration
         }
     }
 }

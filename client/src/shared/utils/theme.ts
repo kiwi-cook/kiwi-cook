@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {logDebug} from '@/shared/utils/logging.ts';
+import { logDebug } from '@/shared/utils/logging.ts';
 
 export const toggleDarkTheme = (shouldAdd: boolean) => {
     logDebug('toggleDarkTheme', shouldAdd)

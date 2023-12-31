@@ -71,11 +71,7 @@ export function normalizeUnit(unit?: string, defaultUnit = 'pcs'): string {
     }
 
     const unitMap: { [unit: string]: string } = {
-        'teaspoon': 'tsp',
-        'tablespoon': 'tbsp',
-        'fluid ounce': 'fl oz',
-        'cup': 'cup',
-        'piece': 'pcs',
+        'teaspoon': 'tsp', 'tablespoon': 'tbsp', 'fluid ounce': 'fl oz', 'cup': 'cup', 'piece': 'pcs',
     };
 
     // Format unit
@@ -96,26 +92,18 @@ export function normalizeUnit(unit?: string, defaultUnit = 'pcs'): string {
 export function convertUnits(value: number, normalizedUnit: string): { value: number, unit: string } {
     const unitConversion: { [fromUnit: string]: { factor: number, unit: string } } = {
         'tsp': {
-            'factor': 1 / 3,
-            'unit': 'tbsp',
-        },
-        'tbsp': {
-            'factor': 3,
-            'unit': 'tsp',
-        },
-        'l': {
-            'factor': 1000,
-            'unit': 'ml',
-        },
-        'kg': {
-            'factor': 1000,
-            'unit': 'g',
+            'factor': 1 / 3, 'unit': 'tbsp',
+        }, 'tbsp': {
+            'factor': 3, 'unit': 'tsp',
+        }, 'l': {
+            'factor': 1000, 'unit': 'ml',
+        }, 'kg': {
+            'factor': 1000, 'unit': 'g',
         }
     };
 
     const conversionResult: { value: number, unit: string } = {
-        value: value,
-        unit: normalizedUnit,
+        value: value, unit: normalizedUnit,
     }
 
     // Convert unit if possible

@@ -3,20 +3,20 @@
   -->
 
 <template>
-    <div class="recipe-preview">
+    <article class="recipe-preview">
         <div class="recipe-details">
             <RecipeTitle :recipe="uRecipe"/>
             <p class="recipe-description desc">{{ uRecipe.getShortDescription() }}</p>
             <div class="pill-container">
-
                 <IonChip v-for="tag in tags" :key="tag">{{ tag }}</IonChip>
                 <Duration :duration="duration"/>
-                <IonChip>Servings: 1</IonChip>
+                <IonChip>{{ uRecipe.servings }} {{ $t('Recipe.Serving', uRecipe.servings) }}</IonChip>
             </div>
             <div class="recipe-ingredients">
-                <h3>Ingredients</h3>
+                <h3>{{ uRecipe.getRecipeItems().length }}
+                    {{ $t('Recipe.Ingredient', uRecipe.getRecipeItems().length) }}</h3>
                 <ul>
-                    <li v-for="(item, index) in items" :key="index">{{ item.quantity }} {{ item.unit }}
+                    <li v-for="(item, index) in items" :key="index">{{ item.getQuantity() }} {{ item.unit }}
                         {{ item.getName() }}
                     </li>
                 </ul>
@@ -27,21 +27,20 @@
                  :src="uRecipe.props.imgUrl"
                  class="link" @click="toRecipe"/>
         </div>
-    </div>
+    </article>
 </template>
 
 <script lang="ts" setup>
-import {computed, PropType, toRefs} from 'vue';
-import {Item, Recipe, RecipeItem} from '@/shared';
-import {IonChip, useIonRouter} from '@ionic/vue';
+import { computed, PropType, toRefs } from 'vue';
+import { Item, Recipe, RecipeItem } from '@/shared';
+import { IonChip, useIonRouter } from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
-import {RecipeSuggestion} from '@/app/search';
+import { RecipeSuggestion } from '@/app/search';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<RecipeSuggestion | Recipe>,
-        required: true
+        type: Object as PropType<RecipeSuggestion | Recipe>, required: true
     }
 })
 const {recipe} = toRefs(props)

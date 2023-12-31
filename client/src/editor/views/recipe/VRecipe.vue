@@ -37,18 +37,10 @@
 
 <script lang="ts" setup>
 import {
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonHeader,
-    IonIcon,
-    IonPage,
-    IonRouterOutlet,
-    IonToolbar,
-    useIonRouter
+    IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonRouterOutlet, IonToolbar, useIonRouter
 } from '@ionic/vue';
-import {addOutline, arrowBack, colorWand} from 'ionicons/icons';
-import {MutableRecipe} from '@/editor/types/recipe';
+import { addOutline, arrowBack, colorWand } from 'ionicons/icons';
+import { MutableRecipe } from '@/editor/types/recipe';
 
 const router = useIonRouter()
 

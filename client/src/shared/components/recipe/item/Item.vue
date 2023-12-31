@@ -25,33 +25,23 @@
 </template>
 
 <script lang="ts" setup>
-import {IonItem, IonLabel, IonThumbnail} from '@ionic/vue';
-import {computed, PropType, toRefs} from 'vue';
-import {Item, ItemType, RecipeItem} from '@/shared';
+import { IonItem, IonLabel, IonThumbnail } from '@ionic/vue';
+import { computed, PropType, toRefs } from 'vue';
+import { Item, ItemType, RecipeItem } from '@/shared';
 
 const props = defineProps({
     item: {
-        type: Object as PropType<(RecipeItem | Item)>,
-        required: true,
-    },
-    include: {
-        type: Boolean,
-        required: false,
-        default: undefined
-    },
-    quantityPosition: {
-        type: String as PropType<'start' | 'end'>,
-        required: false,
-        default: 'end'
+        type: Object as PropType<(RecipeItem | Item)>, required: true,
+    }, include: {
+        type: Boolean, required: false, default: undefined
+    }, quantityPosition: {
+        type: String as PropType<'start' | 'end'>, required: false, default: 'end'
     }
 })
 const {item} = toRefs(props);
 
 type CustomItem = {
-    name: string,
-    quantity: number,
-    unit: string,
-    imgUrl: string,
+    name: string, quantity: number, unit: string, imgUrl: string,
 }
 
 const mappedItem = computed<CustomItem | undefined>(() => {
@@ -65,13 +55,11 @@ const mappedItem = computed<CustomItem | undefined>(() => {
         quantity = 1;
     }
     const name = item?.value?.getName(undefined, quantity)
-    const unit = item?.value instanceof RecipeItem && item?.value?.type === ItemType.Ingredient ? item?.value?.unit : '';
+    const unit = item?.value instanceof RecipeItem && item?.value?.type ===
+    ItemType.Ingredient ? item?.value?.unit : '';
 
     return {
-        name,
-        imgUrl: item?.value?.imgUrl,
-        quantity,
-        unit,
+        name, imgUrl: item?.value?.imgUrl, quantity, unit,
     }
 })
 </script>

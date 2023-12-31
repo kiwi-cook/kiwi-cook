@@ -10,17 +10,13 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, toRefs} from 'vue';
+import { computed, ref, toRefs } from 'vue';
 
 const props = defineProps({
     text: {
-        type: String,
-        required: true,
-    },
-    length: {
-        type: Number,
-        required: false,
-        default: 2,
+        type: String, required: true,
+    }, length: {
+        type: Number, required: false, default: 2,
     },
 })
 const {text, length} = toRefs(props);

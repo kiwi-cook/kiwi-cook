@@ -68,28 +68,17 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref} from 'vue';
+import { computed, ref } from 'vue';
 import {
-    IonAccordion,
-    IonAccordionGroup,
-    IonButton,
-    IonButtons,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonFabList,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonPage,
-    IonSearchbar
+    IonAccordion, IonAccordionGroup, IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonFabList, IonIcon,
+    IonItem, IonLabel, IonPage, IonSearchbar
 } from '@ionic/vue';
-import {addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash} from 'ionicons/icons';
-import {useRecipeEditorStore} from '@/editor/storage';
+import { addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash } from 'ionicons/icons';
+import { useRecipeEditorStore } from '@/editor/storage';
 import ItemEditor from '@/editor/components/editor/ItemEditor.vue';
-import {Item} from '@/shared';
+import { Item } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {MutableItem} from '@/editor/types/item';
+import { MutableItem } from '@/editor/types/item';
 
 const recipeStore = useRecipeEditorStore();
 const items = computed<MutableItem[]>(() => {

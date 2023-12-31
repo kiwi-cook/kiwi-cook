@@ -23,21 +23,16 @@
 </template>
 
 <script lang="ts" setup>
-import {IonFab, IonFabButton, IonFabList, IonIcon, useIonRouter} from '@ionic/vue';
-import {useAppStore} from '@/app/storage';
-import {computed, PropType} from 'vue';
-import {arrowForwardOutline, closeOutline, refreshOutline} from 'ionicons/icons';
+import { IonFab, IonFabButton, IonFabList, IonIcon, useIonRouter } from '@ionic/vue';
+import { useAppStore } from '@/app/storage';
+import { computed, PropType } from 'vue';
+import { arrowForwardOutline, closeOutline, refreshOutline } from 'ionicons/icons';
 
 defineProps({
     horizontal: {
-        type: String as PropType<'start' | 'end'>,
-        required: false,
-        default: 'end'
-    },
-    noRouting: {
-        type: Boolean,
-        required: false,
-        default: false
+        type: String as PropType<'start' | 'end'>, required: false, default: 'end'
+    }, noRouting: {
+        type: Boolean, required: false, default: false
     }
 })
 

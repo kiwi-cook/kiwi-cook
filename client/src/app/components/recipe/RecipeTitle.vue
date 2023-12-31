@@ -3,7 +3,7 @@
   -->
 
 <template>
-    <div v-if="recipe">
+    <div v-if="recipe" class="recipe-title-wrapper">
         <h3 class="subheader">
             {{ title }}
         </h3>
@@ -11,30 +11,25 @@
             <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ recipe?.getName() }}</RouterLink>
         </h2>
         <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-            <strong>{{ $t('Recipe.Src.By') }} <a :href="recipe?.src?.url" rel="nofollow" target="_blank">{{
-                recipe?.getAuthors()
-            }}</a></strong>
+            <strong>{{ $t('Recipe.Src.By') }} <a :href="recipe?.src?.url" class="recipe-author-link" rel="nofollow"
+                                                 target="_blank">{{
+                                                     recipe?.getAuthors()
+                                                 }}</a></strong>
         </div>
     </div>
 </template>
 <script lang="ts" setup>
-import {RouterLink} from 'vue-router';
-import {computed, PropType, toRefs} from 'vue';
-import {Recipe} from '@/shared';
+import { RouterLink } from 'vue-router';
+import { computed, PropType, toRefs } from 'vue';
+import { Recipe } from '@/shared';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>,
-        required: true
-    },
-    title: {
-        type: String,
-        required: false
-    },
-    disableLink: {
-        type: Boolean,
-        required: false,
-        default: false
+        type: Object as PropType<Recipe>, required: true
+    }, title: {
+        type: String, required: false
+    }, disableLink: {
+        type: Boolean, required: false, default: false
     }
 })
 
@@ -55,6 +50,10 @@ a {
     color: var(--ion-text-color);
 }
 
+.recipe-title-wrapper {
+    margin-bottom: 20px;
+}
+
 .recipe-title {
     font-size: var(--font-size-larger);
     margin-bottom: 10px;
@@ -71,5 +70,9 @@ a {
 
 .recipe-author {
     font-size: 20px; /* Increased font size */
+}
+
+.recipe-author-link {
+    cursor: pointer;
 }
 </style>

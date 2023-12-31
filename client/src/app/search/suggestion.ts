@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe} from '@/shared/types'
-import {useRecipeStore} from '@/app/storage';
-import {median} from '@/app/search/util';
-import {logDebug} from '@/shared/utils/logging';
+import { Recipe } from '@/shared/types'
+import { useRecipeStore } from '@/app/storage';
+import { median } from '@/app/search/util';
+import { logDebug } from '@/shared/utils/logging';
 
 /**
  * Very simple function to predict recipes
@@ -31,19 +31,15 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
     // const numberOfSteps: number = median(savedKeyValues.numberOfSteps)
 
     const percentages: {
-        duration: number,
-        numberOfSteps: number
+        duration: number, numberOfSteps: number
         items: number
     } = {
-        duration: 0.05,
-        numberOfSteps: 0.05,
-        items: 0.05
+        duration: 0.05, numberOfSteps: 0.05, items: 0.05
     }
 
     // Filter recipes by duration and number of steps
     const suggestRecipes = (recipes: Recipe[], percentages: {
-        duration: number,
-        numberOfSteps: number
+        duration: number, numberOfSteps: number
         items: number
     }) => {
         return recipes.filter((recipe: Recipe) => {
@@ -52,7 +48,8 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
             // const recipeItemIds = recipe.getItems().map((item) => item.getId())
 
             // Filter recipes by duration
-            const durationOk: boolean = duration * (1 + percentages.duration) >= recipeDuration && recipeDuration >= (duration * (1 - percentages.duration))
+            const durationOk: boolean = duration * (1 + percentages.duration) >= recipeDuration && recipeDuration >=
+                (duration * (1 - percentages.duration))
             logDebug('simpleRecipeSuggestion', 'durationOk', durationOk)
             // Filter recipes by number of steps
             // const numberOfStepsOk: boolean = recipeNumberOfSteps <= numberOfSteps * (1 + percentages.numberOfSteps) && recipeNumberOfSteps >= numberOfSteps * (1 - percentages.numberOfSteps)

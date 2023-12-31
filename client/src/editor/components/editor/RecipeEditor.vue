@@ -209,40 +209,24 @@
 </template>
 
 <script lang="ts" setup>
-import {recipeFromJSON, RecipeItem} from '@/shared';
-import {useRecipeEditorStore} from '@/editor/storage';
+import { ItemComponent, Recipe, RecipeItem } from '@/shared';
+import { useRecipeEditorStore } from '@/editor/storage';
 import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonChip,
-    IonCol,
-    IonGrid,
-    IonIcon,
-    IonImg,
-    IonInput,
-    IonLabel,
-    IonList,
-    IonRow,
-    IonTextarea,
-    useIonRouter
+    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonCol, IonGrid, IonIcon, IonImg,
+    IonInput, IonLabel, IonList, IonRow, IonTextarea, useIonRouter
 } from '@ionic/vue';
-import {computed, PropType, ref, toRefs, watch} from 'vue';
-import {add, closeCircleOutline, information, remove, save, trash} from 'ionicons/icons';
-import {MutableRecipe} from '@/editor/types/recipe';
+import { computed, PropType, ref, toRefs, watch } from 'vue';
+import { add, closeCircleOutline, information, remove, save, trash } from 'ionicons/icons';
+import { MutableRecipe } from '@/editor/types/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
-import {findMostSimilarItem} from '@/editor/parser/utils.ts';
-import {logDebug} from '@/shared/utils/logging.ts';
-import {newItemFromName} from '@/editor/types/item.ts';
-import ItemComponent from '@/shared/components/recipe/Item.vue';
+import { findMostSimilarItem } from '@/editor/parser/utils.ts';
+import { logDebug } from '@/shared/utils/logging.ts';
+import { newItemFromName } from '@/editor/types/item.ts';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<MutableRecipe>,
-        required: true,
+        type: Object as PropType<MutableRecipe>, required: true,
     },
 });
 const {recipe} = toRefs(props)
@@ -298,8 +282,7 @@ const addItemToRecipe = () => {
  * @param stepIndex index of the step to remove the item from
  * @param itemIndex index of the item to remove
  */
-const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe
-    .value?.steps[stepIndex].items.splice(itemIndex, 1);
+const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value?.steps[stepIndex].items.splice(itemIndex, 1);
 
 /**
  * Edit the item
@@ -328,8 +311,7 @@ const updateName = (name: string) => {
     }
     logDebug('updateName', `most similar item: ${item.getName()}`)
 
-    logDebug('updateName',
-        `updating item ${itemToEdit.value.getName()} to ${item.getName()}
+    logDebug('updateName', `updating item ${itemToEdit.value.getName()} to ${item.getName()}
         and recipe ${mutableRecipe.value.getName()}`)
     itemToEdit.value = itemToEdit.value?.updateItem(item)
     logDebug('updateName', itemToEdit.value)
@@ -344,7 +326,7 @@ watch(mutableRecipe, (newRecipe: MutableRecipe) => {
 }, {immediate: true})
 
 const saveRecipeFromJSON = async () => {
-    mutableRecipe.value = await recipeFromJSON(recipeAsJSON.value, recipeStore.getItemsAsMap) as MutableRecipe
+    mutableRecipe.value = await Recipe.fromJSON(recipeAsJSON.value) as MutableRecipe
 }
 </script>
 

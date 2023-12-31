@@ -16,34 +16,20 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, toRefs, watch} from 'vue';
+import { computed, ref, toRefs, watch } from 'vue';
 
 
 const props = defineProps({
     filter: {
-        type: String,
-        required: false,
-        default: ''
-    },
-    list: {
-        type: Array,
-        required: false,
-        default: null
-    },
-    noWrap: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    maxHeight: {
-        type: String,
-        required: false,
-        default: '100%'
-    },
-    loadAll: {
-        type: Boolean,
-        required: false,
-        default: false
+        type: String, required: false, default: ''
+    }, list: {
+        type: Array, required: false, default: null
+    }, noWrap: {
+        type: Boolean, required: false, default: false
+    }, maxHeight: {
+        type: String, required: false, default: '100%'
+    }, loadAll: {
+        type: Boolean, required: false, default: false
     }
 })
 const {filter, list} = toRefs(props)

@@ -2,8 +2,8 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {isPlatform} from '@ionic/vue';
-import {APP_NAME, share} from '@/shared';
+import { isPlatform } from '@ionic/vue';
+import { APP_NAME, share } from '@/shared';
 
 export const canBeInstalled = () => !isPlatform('pwa') && (isPlatform('mobile') || isPlatform('tablet'))
 

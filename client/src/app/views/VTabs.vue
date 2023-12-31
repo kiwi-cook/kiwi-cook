@@ -44,11 +44,11 @@
 </template>
 
 <script lang="ts" setup>
-import {computed} from 'vue';
-import {IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/vue';
-import {add, calendar, heart, settings, sparkles} from 'ionicons/icons';
-import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared';
+import { computed } from 'vue';
+import { IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
+import { add, calendar, heart, settings, sparkles } from 'ionicons/icons';
+import { useRecipeStore } from '@/app/storage';
+import { Recipe } from '@/shared';
 
 const recipeStore = useRecipeStore()
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)

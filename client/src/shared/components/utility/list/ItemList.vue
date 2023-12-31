@@ -11,51 +11,34 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, PropType, toRefs} from 'vue';
-import {Item, RecipeItem} from '@/shared';
-import ItemComponent from '@/shared/components/recipe/Item.vue';
+import { computed, PropType, toRefs } from 'vue';
+import { Item, ItemComponent, RecipeItem } from '@/shared';
 
 const props = defineProps({
     items: {
-        type: Array as PropType<(RecipeItem[] | Item[])>,
-        required: true,
-    },
-    showLimit: {
-        type: Number,
-        required: false,
-        default: 30
-    },
-    type: {
-        type: Array as PropType<string[]>,
-        required: false
-    },
-    horizontal: {
-        type: Boolean,
-        required: false,
-        default: false
-    },
-    quantityPosition: {
-        type: String as PropType<'start' | 'end'>,
-        required: false,
-        default: 'end'
-    },
-    enableEmit: {
-        type: Boolean,
-        required: false,
-        default: false
+        type: Array as PropType<(RecipeItem[] | Item[])>, required: true,
+    }, showLimit: {
+        type: Number, required: false, default: 30
+    }, type: {
+        type: Array as PropType<string[]>, required: false
+    }, horizontal: {
+        type: Boolean, required: false, default: false
+    }, quantityPosition: {
+        type: String as PropType<'start' | 'end'>, required: false, default: 'end'
+    }, enableEmit: {
+        type: Boolean, required: false, default: false
     }
 })
 const {items, type, showLimit} = toRefs(props);
 
 const mappedItems = computed<Item[]>(() => {
-        const mappedItems = items.value
-            .slice(0, showLimit.value)
-        if (!type?.value) {
-            return mappedItems
-        }
-        return mappedItems.filter((item: Item) => type.value?.includes(item.type))
+    const mappedItems = items.value
+        .slice(0, showLimit.value)
+    if (!type?.value) {
+        return mappedItems
     }
-)
+    return mappedItems.filter((item: Item) => type.value?.includes(item.type))
+})
 </script>
 
 <style scoped>

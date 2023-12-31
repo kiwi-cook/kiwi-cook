@@ -9,10 +9,10 @@
 </template>
 
 <script lang="ts" setup>
-import {IonApp, IonRouterOutlet} from '@ionic/vue';
-import {prepareThemeColor} from '@/shared';
-import {useRecipeEditorStore} from '@/editor/storage';
-import {useRecipeStore} from '@/app/storage';
+import { IonApp, IonRouterOutlet } from '@ionic/vue';
+import { prepareThemeColor } from '@/shared';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { useRecipeStore } from '@/app/storage';
 
 // Initialize the dark theme
 prepareThemeColor()
@@ -22,7 +22,7 @@ const recipeEditorStore = useRecipeEditorStore();
 const recipeAppStore = useRecipeStore();
 
 setTimeout(() => {
-    recipeAppStore.prepare().then(() => {
+    recipeAppStore.prepareStore().then(() => {
         recipeEditorStore.prepare()
     })
 }, 0)

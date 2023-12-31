@@ -52,23 +52,13 @@
 
 <script lang="ts" setup>
 import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonContent,
-    IonIcon,
-    IonInput,
-    IonItem,
-    IonList,
-    IonPage
+    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonIcon, IonInput,
+    IonItem, IonList, IonPage
 } from '@ionic/vue';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {ref} from 'vue';
-import {API_ROUTE, sendToAPI} from '@/shared';
-import {closeOutline} from 'ionicons/icons';
+import { ref } from 'vue';
+import { API_ROUTE, sendToAPI } from '@/shared';
+import { closeOutline } from 'ionicons/icons';
 
 const url = ref<string>('')
 const addUrl = () => {

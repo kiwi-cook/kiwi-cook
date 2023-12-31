@@ -3,18 +3,18 @@
  */
 
 // Ionic
-import {IonicVue} from '@ionic/vue';
+import { IonicVue } from '@ionic/vue';
 
 // Vue + App
-import {createApp} from 'vue'
+import { createApp } from 'vue'
 import App from '@/app/App.vue'
-import {logDebug} from '@/shared/utils/logging';
+import { logDebug } from '@/shared/utils/logging';
 
 // Router
-import {createTasteBuddyRouter} from '@/app/router';
+import { createTasteBuddyRouter } from '@/app/router';
 
 // Store
-import {createPinia} from 'pinia';
+import { createPinia } from 'pinia';
 
 // Styles
 /* Add service worker */
@@ -48,7 +48,7 @@ import '@/shared/theme/links.css';
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from '@/shared/locales/i18n';
+import { i18n } from '@/shared/locales/i18n';
 
 // Initializations
 

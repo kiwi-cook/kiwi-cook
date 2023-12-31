@@ -22,7 +22,9 @@
       "RecipeByWithUrl": "Recipe by {0} ({1})"
     },
     "Serving": "Serving | Servings",
-    "Direction": "Step | Steps",
+    "Direction": "Instruction | Instructions",
+    "Preparation": "Preparation",
+    "Step": "Step",
     "Ingredient": "Ingredient | Ingredients",
     "GoodAppetite": "Good appetite!",
     "NotFound": {

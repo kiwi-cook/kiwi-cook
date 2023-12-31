@@ -24,11 +24,11 @@
 </template>
 
 <script lang="ts" setup>
-import {computed} from 'vue';
-import {IonButton, IonContent, IonIcon, IonItem, IonLabel, IonList, IonPage, useIonRouter} from '@ionic/vue';
-import {useRecipeEditorStore} from '@/editor/storage';
-import {Recipe} from '@/shared';
-import {createOutline} from 'ionicons/icons';
+import { computed } from 'vue';
+import { IonButton, IonContent, IonIcon, IonItem, IonLabel, IonList, IonPage, useIonRouter } from '@ionic/vue';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { Recipe } from '@/shared';
+import { createOutline } from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
 
 const router = useIonRouter()

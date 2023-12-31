@@ -91,31 +91,19 @@
 
 
 <script lang="ts" setup>
-import {ref} from 'vue';
+import { ref } from 'vue';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {addOutline, chevronForwardCircle, saveOutline} from 'ionicons/icons';
-import {useRecipeEditorStore} from '@/editor/storage';
+import { addOutline, chevronForwardCircle, saveOutline } from 'ionicons/icons';
+import { useRecipeEditorStore } from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonContent,
-    IonFab,
-    IonFabButton,
-    IonFabList,
-    IonIcon,
-    IonItem,
-    IonPage,
-    useIonRouter
+    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton,
+    IonFabList, IonIcon, IonItem, IonPage, useIonRouter
 } from '@ionic/vue';
-import {availableParsers, parseRecipes, RecipeParser} from '@/editor/parser';
-import {Recipe} from '@/shared';
-import {logError} from '@/shared/utils/logging';
-import {MutableRecipe} from '@/editor/types/recipe';
+import { availableParsers, parseRecipes, RecipeParser } from '@/editor/parser';
+import { Recipe } from '@/shared';
+import { logError } from '@/shared/utils/logging';
+import { MutableRecipe } from '@/editor/types/recipe';
 
 const router = useIonRouter()
 const recipeStore = useRecipeEditorStore()
@@ -132,9 +120,7 @@ const onFileChange = (event: any) => {
         reader.onload = (evt) => {
             if (evt.target) {
                 parseRecipes(evt.target.result as string, {
-                    parser: selectedParser.value,
-                    list: parsedRecipes,
-                    max: 500
+                    parser: selectedParser.value, list: parsedRecipes, max: 500
                 })
             }
         }

@@ -15,21 +15,15 @@
 </template>
 
 <script lang="ts" setup>
-import {PropType, Ref, ref, toRefs, watch} from 'vue';
+import { PropType, Ref, ref, toRefs, watch } from 'vue';
 
 const props = defineProps({
     smallText: {
-        type: String,
-        required: false
-    },
-    bigText: {
-        type: Object as PropType<string[]>,
-        required: true
-    },
-    speed: {
-        type: Number,
-        required: false,
-        default: 150
+        type: String, required: false
+    }, bigText: {
+        type: Object as PropType<string[]>, required: true
+    }, speed: {
+        type: Number, required: false, default: 150
     }
 })
 const {bigText, speed} = toRefs(props);

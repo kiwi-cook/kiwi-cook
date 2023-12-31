@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {useRecipeEditorStore} from '@/editor/storage';
-import {Item} from '@/shared';
-import {closest, distance} from 'fastest-levenshtein';
-import {logDebug} from '@/shared/utils/logging.ts';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { Item } from '@/shared';
+import { closest, distance } from 'fastest-levenshtein';
+import { logDebug } from '@/shared/utils/logging.ts';
 
 /**
  * Extracts the duration from a text in minutes.

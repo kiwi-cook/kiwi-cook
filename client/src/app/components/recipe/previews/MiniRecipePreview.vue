@@ -13,29 +13,19 @@
 </template>
 
 <script lang="ts" setup>
-import {toRefs} from 'vue';
-import {useIonRouter} from '@ionic/vue';
+import { toRefs } from 'vue';
+import { useIonRouter } from '@ionic/vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     name: {
-        type: String,
-        required: true
-    },
-    imgUrl: {
-        type: String,
-        required: false,
-        default: undefined
-    },
-    duration: {
-        type: Number,
-        required: false,
-        default: undefined
-    },
-    link: {
-        type: String,
-        required: false,
-        default: undefined
+        type: String, required: true
+    }, imgUrl: {
+        type: String, required: false, default: undefined
+    }, duration: {
+        type: Number, required: false, default: undefined
+    }, link: {
+        type: String, required: false, default: undefined
     },
 })
 

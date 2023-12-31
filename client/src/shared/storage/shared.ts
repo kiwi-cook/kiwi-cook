@@ -2,15 +2,14 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {defineStore} from 'pinia';
-import {DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE} from '@/shared';
+import { defineStore } from 'pinia';
+import { DEFAULT_LOCALE, i18n, setI18nLanguage, SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE } from '@/shared';
 import getBrowserLocale from '@/shared/locales/i18n.ts';
-import {logDebug} from '@/shared/utils/logging.ts';
+import { logDebug } from '@/shared/utils/logging.ts';
 
 interface SharedState {
     language: {
-        lang: SUPPORT_LOCALES_TYPE,
-        supportedLanguages: string[]
+        lang: SUPPORT_LOCALES_TYPE, supportedLanguages: string[]
     },
     loading: { [key: string]: boolean }
 }
@@ -18,14 +17,11 @@ interface SharedState {
 export const useSharedStore = defineStore('shared', {
     state: (): SharedState => ({
         language: {
-            lang: DEFAULT_LOCALE,
-            supportedLanguages: SUPPORT_LOCALES
-        },
-        loading: {
+            lang: DEFAULT_LOCALE, supportedLanguages: SUPPORT_LOCALES
+        }, loading: {
             initial: true,
         },
-    }),
-    actions: {
+    }), actions: {
         /**
          * Change the language
          * @param language
@@ -35,16 +31,14 @@ export const useSharedStore = defineStore('shared', {
             const lang = language ?? browserLocale ?? DEFAULT_LOCALE
             this.language.lang = lang
             setI18nLanguage(i18n, lang)
-        },
-        /**
+        }, /**
          * Set the loading state
          * @param key
          */
         startLoading(key: string) {
             logDebug('startLoading', key)
             this.loading[key] = true
-        },
-        /**
+        }, /**
          * Finish the loading state
          * @param key
          */
@@ -52,8 +46,7 @@ export const useSharedStore = defineStore('shared', {
             logDebug('finishLoading', key)
             this.loading[key] = false
         },
-    },
-    getters: {
+    }, getters: {
         isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
         isLoadingInitial: (state): boolean => state.loading.initial,
     }

@@ -80,33 +80,21 @@
 </template>
 
 <script lang="ts" setup>
-import {Item} from '@/shared';
-import {logDebug} from '@/shared/utils/logging';
+import { Item } from '@/shared';
+import { logDebug } from '@/shared/utils/logging';
 import {
-    IonAvatar,
-    IonButton,
-    IonCard,
-    IonCardContent,
-    IonCardHeader,
-    IonCardTitle,
-    IonChip,
-    IonIcon,
-    IonInput,
-    IonItem,
-    IonList,
-    IonSelect,
-    IonSelectOption
+    IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonIcon, IonInput, IonItem,
+    IonList, IonSelect, IonSelectOption
 } from '@ionic/vue';
-import {computed, PropType, ref, toRefs} from 'vue';
-import {useRecipeEditorStore} from '@/editor/storage';
-import {chevronDown, chevronUp, save, trash} from 'ionicons/icons';
-import {MutableItem} from '@/editor/types/item';
-import {SUPPORT_LOCALES} from '@/shared/locales/i18n';
+import { computed, PropType, ref, toRefs } from 'vue';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { chevronDown, chevronUp, save, trash } from 'ionicons/icons';
+import { MutableItem } from '@/editor/types/item';
+import { SUPPORT_LOCALES } from '@/shared/locales/i18n';
 
 const props = defineProps({
     item: {
-        type: Object as PropType<MutableItem>,
-        required: true
+        type: Object as PropType<MutableItem>, required: true
     }
 })
 

@@ -3,12 +3,12 @@
  */
 
 // Vue
-import {defineStore} from 'pinia'
+import { defineStore } from 'pinia'
 
-import {API_ROUTE, APIResponse, itemFromJSON, presentToast, Recipe, recipeFromJSON, sendToAPI} from '@/shared';
-import {logDebug} from '@/shared/utils/logging';
-import {MutableRecipe} from '@/editor/types/recipe';
-import {MutableItem} from '@/editor/types/item';
+import { API_ROUTE, APIResponse, itemFromJSON, presentToast, Recipe, sendToAPI } from '@/shared';
+import { logDebug } from '@/shared/utils/logging';
+import { MutableRecipe } from '@/editor/types/recipe';
+import { MutableItem } from '@/editor/types/item';
 
 
 // Define typings for the store state
@@ -25,11 +25,8 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
     state: (): RecipeState => ({
         loading: {
             initial: true,
-        },
-        recipes: {},
-        items: {}
-    }),
-    getters: {
+        }, recipes: {}, items: {}
+    }), getters: {
         isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
         isLoadingInitial: (state): boolean => state.loading.initial,
         /**
@@ -89,8 +86,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                 return [...tags, ...(recipe.props.tags ?? [])]
             }, []))]
         }
-    },
-    actions: {
+    }, actions: {
         async deleteItems(items: MutableItem[] | MutableItem) {
             // if the recipes is not defined, save all recipes
             if (typeof items === 'undefined') {
@@ -109,14 +105,12 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
             logDebug('deleteItems', itemIds)
             this.setLoadingState('deleteItems')
             return sendToAPI<string>(API_ROUTE.DELETE_ITEMS, {
-                errorMessage: 'Could not delete items from database. Please retry later!',
-                body: itemIds
+                errorMessage: 'Could not delete items from database. Please retry later!', body: itemIds
             }).then((apiResponse: APIResponse<string>) => {
                 this.finishLoading('deleteItems')
                 return presentToast(apiResponse.response)
             })
-        },
-        async deleteRecipes(recipes: MutableRecipe[] | MutableRecipe) {
+        }, async deleteRecipes(recipes: MutableRecipe[] | MutableRecipe) {
             // if the recipes is not defined, save all recipes
             if (typeof recipes === 'undefined') {
                 recipes = Object.values(this.getRecipesAsMap)
@@ -134,14 +128,12 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
             logDebug('deleteRecipes', recipeIds)
             this.setLoadingState('deleteRecipes')
             return sendToAPI<string>(API_ROUTE.DELETE_RECIPES, {
-                errorMessage: 'Could not delete recipes from database. Please retry later!',
-                body: recipeIds
+                errorMessage: 'Could not delete recipes from database. Please retry later!', body: recipeIds
             }).then((apiResponse: APIResponse<string>) => {
                 this.finishLoading('deleteRecipes')
                 return presentToast(apiResponse.response)
             })
-        },
-        async fetchItems(): Promise<MutableItem[]> {
+        }, async fetchItems(): Promise<MutableItem[]> {
             logDebug('fetchItems', 'fetching items')
             this.setLoadingState('fetchItems')
             return sendToAPI<MutableItem[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
@@ -156,8 +148,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     this.finishLoading('fetchItems')
                     return apiResponse.response
                 });
-        },
-        /**
+        }, /**
          * Fetch the recipes from the API and store them in the store
          */
         async fetchRecipes(): Promise<MutableRecipe[]> {
@@ -169,7 +160,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     // this is because the JSON is not a valid MutableRecipe object,
                     // and we need to use the MutableRecipe class methods
                     if (!apiResponse.error) {
-                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => recipeFromJSON(recipe, this.getItemsAsMap)))
+                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => Recipe.fromJSON(recipe)))
                             .then((recipes: Recipe[]) => this.replaceRecipes(recipes.map((recipe: Recipe) => new MutableRecipe(recipe))))
                     }
                     return apiResponse.response
@@ -177,23 +168,20 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     this.finishLoading('fetchRecipes')
                     return recipes
                 })
-        },
-        /**
+        }, /**
          * Finish the loading state
          * @param key
          */
         finishLoading(key: string) {
             logDebug('finishLoading', key)
             this.loading[key] = false
-        },
-        /**
+        }, /**
          * Get the recipes by the item id
          * @param itemId
          */
         getRecipesAsListByItemId(itemId?: string): string[] {
             return this.getRecipesByItemIds[itemId ?? ''] ?? []
-        },
-        /**
+        }, /**
          * Prepare the Ionic Storage by fetching the items and recipes
          */
         async prepare() {
@@ -203,31 +191,27 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
             return this.fetchItems().then(() => this.fetchRecipes()).then(() => {
                 this.finishLoading('initial')
             })
-        },
-        /**
+        }, /**
          * Remove a single item
          * @param item
          */
         removeItem(item: MutableItem) {
             delete this.items[item.getId()]
-        },
-        /**
+        }, /**
          * Override all items
          * @param items
          */
         replaceItems(items: MutableItem[]) {
             this.items = Object.assign({}, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
             return items
-        },
-        /**
+        }, /**
          * Override all recipes
          * @param recipes
          */
         replaceRecipes(recipes: MutableRecipe[]) {
             this.recipes = Object.assign({}, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
             return recipes
-        },
-        async saveItems(items?: MutableItem[] | MutableItem) {
+        }, async saveItems(items?: MutableItem[] | MutableItem) {
             // if the recipes is not defined, save all recipes
             if (typeof items === 'undefined') {
                 items = Object.values(this.getItemsAsMap)
@@ -241,8 +225,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
             logDebug('saveItem', items)
             this.setLoadingState('saveItem')
             return sendToAPI<string>(API_ROUTE.ADD_ITEMS, {
-                body: items,
-                errorMessage: 'Could not save items in database. Please retry later!'
+                body: items, errorMessage: 'Could not save items in database. Please retry later!'
             })
                 .then((apiResponse: APIResponse<string>) => {
                     this.finishLoading('saveItem')
@@ -255,8 +238,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     return []
                 })
                 .catch(() => this.setItems(items))
-        },
-        async saveRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
+        }, async saveRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
             // if the recipes is not defined, save all recipes
             if (typeof recipes === 'undefined') {
                 recipes = Object.values(this.getRecipesAsMap)
@@ -285,15 +267,13 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     return []
                 })
                 .catch(() => this.setRecipes(recipes))
-        },
-        /**
+        }, /**
          * Update a single item
          * @param item
          */
         setItem(item: MutableItem) {
             this.items[item.getId()] = item
-        },
-        /**
+        }, /**
          * Override all items
          * @param items
          */
@@ -309,15 +289,13 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                 this.items = Object.assign(this.items, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
             }
             return Promise.resolve(items)
-        },
-        /**
+        }, /**
          * Set the loading state
          * @param key
          */
         setLoadingState(key: string) {
             this.loading[key] = true
-        },
-        /**
+        }, /**
          * Update multiple recipes
          * @param recipes
          */

@@ -2,7 +2,7 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {logDebug} from '@/shared/utils/logging';
+import { logDebug } from '@/shared/utils/logging';
 
 class PrefixIdTreeNode {
     leaves: { [char: string]: PrefixIdTreeNode };
@@ -91,7 +91,7 @@ export class PrefixIdTree {
      */
     search(word: string): string[] {
         if (!word || word.length === 0) {
-            logDebug('searchHelper', 'empty string');
+            logDebug('PrefixIdTree.search', 'empty string');
             return [];
         }
 
@@ -102,7 +102,7 @@ export class PrefixIdTree {
             if (node.containsKey(currentChar)) {
                 node = node.getNode(currentChar);
             } else {
-                logDebug('searchHelper', `could not find ${word} in tree`);
+                logDebug('PrefixIdTree.search', `could not find ${word} in tree`);
                 return [];
             }
         }

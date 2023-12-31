@@ -10,13 +10,12 @@
 </template>
 
 <script lang="ts" setup>
-import {flame} from 'ionicons/icons';
-import {IonChip, IonIcon, IonLabel} from '@ionic/vue';
+import { flame } from 'ionicons/icons';
+import { IonChip, IonIcon, IonLabel } from '@ionic/vue';
 
 defineProps({
     temperature: {
-        type: Number,
-        required: false
+        type: Number, required: false
     }
 })
 </script>

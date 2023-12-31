@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {useIonRouter} from '@ionic/vue';
-import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
-import {APP_NAME, Item, RecipeItem, share, Step, tmpId} from '@/shared';
-import {logError, logWarn} from '@/shared/utils/logging';
+import { useIonRouter } from '@ionic/vue';
+import { getLocaleStr, LocaleStr, newLocaleStr } from '@/shared/locales/i18n';
+import { APP_NAME, RecipeItem, share, Step, tmpId } from '@/shared';
+import { logDebug, logError, logWarn } from '@/shared/utils/logging';
 
 /**
  * Recipe
@@ -19,29 +19,17 @@ export class Recipe {
     steps: Step[];
     items: RecipeItem[];
     props: {
-        imgUrl?: string;
-        duration?: number;
-        date: Date;
-        tags?: string[];
+        imgUrl?: string; duration?: number; date: Date; tags?: string[];
     };
     src: {
-        url?: string;
-        authors: {
-            name: string;
-            url?: string;
-        }[];
-        cr?: string;
-        cookBook?: {
-            name: string;
-            url?: string;
-            pub?: string;
+        url?: string; authors: {
+            name: string; url?: string;
+        }[]; cr?: string; cookBook?: {
+            name: string; url?: string; pub?: string;
         }
     };
     notes?: LocaleStr;
     servings: number;
-    computed: {
-        itemsById: { [id: string]: RecipeItem }
-    }
 
     /**
      * Copy constructor for a recipe
@@ -53,28 +41,65 @@ export class Recipe {
         this.name = recipe?.name ?? newLocaleStr()
         this.desc = recipe?.desc ?? newLocaleStr()
         this.props = recipe?.props ?? {
-            imgUrl: '',
-            duration: 0,
-            date: new Date(),
-            tags: [],
+            imgUrl: '', duration: 0, date: new Date(), tags: [],
         }
         this.steps = recipe?.steps ?? []
-        this.items = recipe?.items ?? []
+        this.items = recipe?.items.map((recipeItem: any) => RecipeItem.fromJSON(recipeItem)) ?? []
         this.src = recipe?.src ?? {
-            url: '',
-            authors: [],
-        }
-        this.computed = {
-            itemsById: {}
+            url: '', authors: [],
         }
         this.servings = 1
         this.notes = newLocaleStr()
     }
 
     /**
+     * Initialize a recipe from a json object
+     * This is done because the json object does not have the methods of the class
+     *
+     * @param json the json object
+     * @returns a new recipe
+     */
+    static fromJSON(json: any): Promise<Recipe> {
+        const funcName = 'Recipe.fromJSON'
+        return new Promise<Recipe>((resolve, reject) => {
+            const recipe = new Recipe()
+
+            if (typeof json === 'undefined' || json === null) {
+                logError(funcName, 'json is undefined.')
+                return reject(new Error('json is undefined.'))
+            }
+
+            logDebug(funcName, json)
+
+            // Id
+            recipe.id = json.id
+            if (recipe.id === undefined) {
+                logWarn(funcName, 'id is undefined.')
+            }
+
+            recipe.name = json?.name
+            recipe.desc = json?.desc
+            recipe.steps = json?.steps?.map(Step.fromJSON) ?? [new Step()]
+            recipe.items = json?.items?.map((recipeItem: RecipeItem) => RecipeItem.fromJSON(recipeItem)) ?? []
+
+            // Props
+            recipe.props.imgUrl = json?.props?.imgUrl
+            recipe.props.tags = json?.props?.tags
+            recipe.props.duration = json?.props?.duration
+            recipe.props.date = new Date(json?.props?.date)
+
+            // Source
+            recipe.src = json.src
+            resolve(recipe)
+        }).catch((error: Error) => {
+            logError('Recipe.fromJSON', error)
+            throw error
+        })
+    }
+
+    /**
      * Get the id of the recipe
      * @returns the id of the recipe
-     * @throws an error if the id is undefined
      */
     public getId(): string {
         return this.id
@@ -95,7 +120,11 @@ export class Recipe {
     }
 
     public getShortDescription(): string {
-        return getLocaleStr(this.desc).split('.').slice(0, 2).join('.') + '.';
+        const desc = getLocaleStr(this.desc).split('.').slice(0, 2).join('.');
+        if (desc[desc.length - 1] === '.') {
+            return desc
+        }
+        return desc + '.'
     }
 
     public getAuthors(): string {
@@ -119,11 +148,15 @@ export class Recipe {
      * @returns a list of all items in the recipe
      */
     public getRecipeItems(): RecipeItem[] {
-        return Array.from(this.items)
+        return this.items
     }
 
     public hasItem(id?: string): boolean {
-        return typeof id !== 'undefined' && typeof this.computed.itemsById[id] !== 'undefined'
+        if (typeof id === 'undefined') {
+            logWarn('Recipe.hasItem', 'id is undefined.')
+            return false
+        }
+        return this.items.some((item: RecipeItem) => item.getId() === id)
     }
 
     /**
@@ -177,50 +210,4 @@ export class Recipe {
         }
         return Math.floor(price)
     }
-}
-
-/**
- * Initialize a recipe from a json object
- * This is done because the json object does not have the methods of the class
- *
- * @param json
- * @param itemsAsMap
- * @returns a new recipe
- */
-export function recipeFromJSON(json: any, itemsAsMap: { [id: string]: Item }): Promise<Recipe> {
-    return new Promise<Recipe>((resolve, reject) => {
-        const recipe = new Recipe()
-
-        if (typeof json === 'undefined' || json === null) {
-            logWarn('recipeFromJSON', 'json is undefined.')
-            resolve(recipe)
-            return
-        }
-
-        console.log('recipeFromJSON', json)
-
-        // Id
-        recipe.id = json.id
-        if (recipe.id === undefined) {
-            logWarn('recipeFromJSON', 'id is undefined.')
-        }
-
-        recipe.name = json?.name
-        recipe.desc = json?.desc
-        recipe.steps = json?.steps?.map(Step.fromJSON) ?? [new Step()]
-        recipe.items = json?.items?.map((recipeItem: RecipeItem) => RecipeItem.fromJSON(recipeItem, itemsAsMap)) ?? []
-
-        // Props
-        recipe.props.imgUrl = json?.props?.imgUrl
-        recipe.props.tags = json?.props?.tags
-        recipe.props.duration = json?.props?.duration
-        recipe.props.date = new Date(json?.props?.date)
-
-        // Source
-        recipe.src = json.src
-        resolve(recipe)
-    }).catch((error: Error) => {
-        logError('recipe.fromJSON', error)
-        throw error
-    })
 }

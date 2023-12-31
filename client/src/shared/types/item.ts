@@ -2,14 +2,14 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
-import {distance} from 'fastest-levenshtein';
-import {tmpId} from '@/shared';
-import {logError} from '@/shared/utils/logging.ts';
+import { getLocaleStr, LocaleStr, newLocaleStr } from '@/shared/locales/i18n';
+import { distance } from 'fastest-levenshtein';
+import { tmpId } from '@/shared';
+import { logError, logWarn } from '@/shared/utils/logging.ts';
+import { useSharedRecipeStore } from '@/shared/storage';
 
 export enum ItemType {
-    Ingredient = 'ingredient',
-    Tool = 'tool'
+    Ingredient = 'ingredient', Tool = 'tool'
 }
 
 /**
@@ -118,6 +118,7 @@ export function itemFromJSON(json: any): Item {
     return item
 }
 
+
 /**
  * RecipeItem of a recipe
  * It is an item with a quantity and a unit
@@ -132,7 +133,7 @@ export class RecipeItem extends Item {
     constructor(recipeItem?: RecipeItem) {
         super(recipeItem)
         if (this.id === undefined) {
-            logError('RecipeItem', 'id is undefined.')
+            logError('RecipeItem.new', 'id is undefined.')
             throw new Error('id is undefined.')
         }
         this.quantity = recipeItem?.quantity ?? 1
@@ -141,17 +142,18 @@ export class RecipeItem extends Item {
     }
 
     /**
-     * Initialize a recipeItem from a json object
-     * This is done because the json object does not have the methods of the class
+     * Initialize a recipe item from a json object
+     * This is done because the RecipeItem only contains the id of the item
      *
-     * @param json
-     * @param itemsAsMap
-     * @returns a new step item
+     * @returns a RecipeItem created from its id
+     * @param json the json object
      */
-    static fromJSON(json: any, itemsAsMap: { [id: string]: Item }): RecipeItem {
+    static fromJSON(json: any): RecipeItem {
+        const sharedRecipeStore = useSharedRecipeStore()
+        const itemsAsMap = sharedRecipeStore.getItemsAsMap
         const item = itemsAsMap[json.id] ?? new Item()
         if (item === undefined) {
-            logError('RecipeItem', 'item is undefined', json)
+            logWarn('RecipeItem.fromJSON', 'item is undefined', json)
         }
 
         const recipeItem = new RecipeItem()

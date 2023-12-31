@@ -2,12 +2,12 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {ItemQuery, RecipeSuggestion, SearchQuery} from '@/app/search';
-import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared';
-import {logError} from '@/shared/utils/logging';
-import {mutateString} from '@/app/search/util';
-import {PrefixIdTree} from '@/app/search/radix';
+import { ItemQuery, RecipeSuggestion, SearchQuery } from '@/app/search';
+import { useRecipeStore } from '@/app/storage';
+import { Recipe } from '@/shared';
+import { logError } from '@/shared/utils/logging';
+import { mutateString } from '@/app/search/util';
+import { PrefixIdTree } from '@/app/search/radix';
 
 export class TasteBuddySearch {
     // Map of search terms to recipe ids
@@ -25,10 +25,8 @@ export class TasteBuddySearch {
      * @param recipe
      */
     addRecipe(recipe: Recipe) {
-        const fields = [
-            // Name
-            ...Object.values(recipe.name),
-        ]
+        const fields = [// Name
+            ...Object.values(recipe.name),]
 
         // Add all possible mutations
         for (const field of fields) {
@@ -69,10 +67,8 @@ export function searchRecipes(query: SearchQuery): RecipeSuggestion[] {
     const recipes: Recipe[] = store.getRecipesAsList
 
     const suggestedRecipes = recipes.filter((recipe: Recipe) => {
-        return filterRecipeByItems(recipe, query.items) &&
-            filterRecipeByDuration(recipe, query.duration) &&
-            filterRecipeByTag(recipe, query.tags) &&
-            filterByPrice(recipe, query.price)
+        return filterRecipeByItems(recipe, query.items) && filterRecipeByDuration(recipe, query.duration) &&
+            filterRecipeByTag(recipe, query.tags) && filterByPrice(recipe, query.price)
     })
 
     return suggestedRecipes.map((recipe: Recipe) => {

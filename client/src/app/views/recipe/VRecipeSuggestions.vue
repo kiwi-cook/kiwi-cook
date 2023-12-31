@@ -24,7 +24,7 @@
 
                     <!-- Preferences -->
                     <Transition name="fade-top">
-                        <div v-if="preferencesActive">
+                        <section v-if="preferencesActive">
                             <IonChip :outline="activePreference === 'ingredients'"
                                      @click="activePreference = 'ingredients'">
                                 <IonIcon :icon="list"/>
@@ -46,9 +46,7 @@
                             </IonChip>
                             <IonChip :outline="activePreference === 'servings'"
                                      @click="activePreference = 'servings'">
-                                <IonLabel>{{ servings }} {{
-                                    $t('Suggestions.Preferences.Servings', servings)
-                                }}
+                                <IonLabel>{{ servings }} {{ $t('Suggestions.Preferences.Servings', servings) }}
                                 </IonLabel>
                             </IonChip>
 
@@ -173,7 +171,8 @@
                                         </IonChip>
                                         <!-- Special tags -->
                                         <IonChip v-for="(specialTag, tagIndex) in specialTags"
-                                                 :key="`special-tag-${tagIndex}`" class="tag" color="primary" outline
+                                                 :key="`special-tag-${tagIndex}`" class="tag" color="primary"
+                                                 outline
                                                  @click="specialTag.click()">
                                             <IonLabel>{{ specialTag.title }}</IonLabel>
                                         </IonChip>
@@ -187,11 +186,15 @@
                                     </div>
                                 </IonCardContent>
                             </IonCard>
-                        </div>
+
+
+                        </section>
                     </Transition>
 
-                    <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay"
-                                      :title="t('RecipeOfTheDay.Title')"/>
+                    <article>
+                        <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay"
+                                          :title="t('RecipeOfTheDay.Title')"/>
+                    </article>
 
                     <!-- Predicted/Recommended recipes -->
                     <section v-if="predictedRecipes.length > 0">
@@ -231,8 +234,8 @@
                     </section>
 
                     <!-- Searched recipes -->
-                    <a id="recipe-search" ref="recipeSearchAnchor"/>
                     <section v-if="searchedRecipes.length > 0 && submitted">
+                        <a id="recipe-search" ref="recipeSearchAnchor"/>
                         <h3>
                             {{ $t('Suggestions.Search.Title', [searchedRecipes.length]) }}
                         </h3>
@@ -245,11 +248,11 @@
                             </template>
                         </List>
                     </section>
-                    <section v-else-if="submitted">
+                    <div v-else-if="submitted">
                         <h3>
                             {{ $t('Suggestions.Search.NoRecipesFound') }}
                         </h3>
-                    </section>
+                    </div>
                 </div>
             </div>
 
@@ -266,36 +269,24 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref, Transition, watch} from 'vue';
+import { computed, ref, Transition, watch } from 'vue';
 import {
-    IonButton,
-    IonButtons,
-    IonCard,
-    IonCardContent,
-    IonChip,
-    IonContent,
-    IonFab,
-    IonIcon,
-    IonItem,
-    IonLabel,
-    IonPage,
+    IonButton, IonButtons, IonCard, IonCardContent, IonChip, IonContent, IonFab, IonIcon, IonItem, IonLabel, IonPage,
     IonRange,
 } from '@ionic/vue';
-import {useRecipeStore} from '@/app/storage';
-import {Item, Recipe} from '@/shared';
+import { useRecipeStore } from '@/app/storage';
+import { FabTimer, Item, ItemComponent, Recipe } from '@/shared';
 import Searchbar from '@/app/components/recipe/Searchbar.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
-import ItemComponent from '@/shared/components/recipe/Item.vue';
-import {add, close, closeCircleOutline, list, remove, sparklesOutline} from 'ionicons/icons';
+import { add, close, closeCircleOutline, list, remove, sparklesOutline } from 'ionicons/icons';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import List from '@/shared/components/utility/list/List.vue';
+import { useI18n } from 'vue-i18n';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
-import {useI18n} from 'vue-i18n';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
-import {RecipeSuggestion, SearchQueryBuilder, searchRecipes} from '@/app/search';
+import { RecipeSuggestion, SearchQueryBuilder, searchRecipes } from '@/app/search';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
-import FabTimer from '@/shared/components/utility/FabTimer.vue';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
@@ -349,24 +340,19 @@ const removeItem = (item?: Item) => delete itemQueries.value[item?.getId() ?? ''
 const maxItemSuggestionsLength = 3
 const itemSuggestions = computed(() => recipeStore.getItemSuggestions
     .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
-    .slice(0, maxItemSuggestionsLength)
-)
+    .slice(0, maxItemSuggestionsLength))
 
 // Tags
 const selectedTags = ref<string[]>([])
 const suggestedTags = computed(() => recipeStore.getTags
     .filter((tag: string) => !selectedTags.value.includes(tag))
-    .slice(0, 3)
-)
-const specialTags = [
-    {
-        title: 'fast & cheap',
-        click: () => {
-            maxCookingTime.value = 8
-            maxPrice.value = 3
-        }
+    .slice(0, 3))
+const specialTags = [{
+    title: 'fast & cheap', click: () => {
+        maxCookingTime.value = 8
+        maxPrice.value = 3
     }
-]
+}]
 const includeTag = (tag: string) => selectedTags.value.push(tag)
 
 // City

@@ -2,10 +2,10 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe, RecipeItem, Step} from '@/shared';
-import {logDebug} from '@/shared/utils/logging';
-import {useRecipeEditorStore} from '@/editor/storage';
-import {setLocaleStr} from '@/shared/locales/i18n';
+import { Recipe, RecipeItem, Step } from '@/shared';
+import { logDebug } from '@/shared/utils/logging';
+import { useRecipeEditorStore } from '@/editor/storage';
+import { setLocaleStr } from '@/shared/locales/i18n';
 
 export class MutableRecipe extends Recipe {
 
@@ -99,8 +99,7 @@ export class MutableRecipe extends Recipe {
      * @returns the recipe and the item
      */
     public putRecipeItem(item?: RecipeItem): {
-        item: RecipeItem,
-        recipe: MutableRecipe
+        item: RecipeItem, recipe: MutableRecipe
     } {
         item = item ?? new RecipeItem();
         this.items.push(item)

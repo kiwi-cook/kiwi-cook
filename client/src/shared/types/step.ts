@@ -2,13 +2,11 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {parseTemperature} from '@/shared';
-import {getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr} from '@/shared/locales/i18n';
+import { parseTemperature } from '@/shared';
+import { getLocaleStr, LocaleStr, newLocaleStr, setLocaleStr } from '@/shared/locales/i18n';
 
 export enum STEP_TYPES {
-    HEADER = 'header',
-    STEP = 'step',
-    NOTE = 'note'
+    HEADER = 'header', STEP = 'step', NOTE = 'note'
 }
 
 /**

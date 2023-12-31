@@ -11,11 +11,6 @@ import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePrevie
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 
 export {
-    Step as StepComponent,
-    Recipe as RecipeComponent,
-    RecipeTitle,
-    Searchbar,
-    BigRecipePreview,
-    MiniRecipePreview,
+    Step as StepComponent, Recipe as RecipeComponent, RecipeTitle, Searchbar, BigRecipePreview, MiniRecipePreview,
     RecipePreview
 };

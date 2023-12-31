@@ -32,14 +32,14 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, ref} from 'vue';
-import {useRoute} from 'vue-router';
-import {IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter} from '@ionic/vue';
-import {useRecipeEditorStore} from '@/editor/storage';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { IonContent, IonFab, IonFabButton, IonFabList, IonIcon, IonPage, useIonRouter } from '@ionic/vue';
+import { useRecipeEditorStore } from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
-import {addOutline, arrowBack, chevronForwardCircle, saveOutline} from 'ionicons/icons';
+import { addOutline, arrowBack, chevronForwardCircle, saveOutline } from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
-import {MutableRecipe} from '@/editor/types/recipe';
+import { MutableRecipe } from '@/editor/types/recipe';
 
 const route = useRoute();
 const recipeId = ref(route.params.id as string);

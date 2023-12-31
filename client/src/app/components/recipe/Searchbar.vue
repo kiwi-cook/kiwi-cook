@@ -5,8 +5,9 @@
 <template>
     <div class="searchbar-wrapper">
         <div class="searchbar-search-wrapper">
-            <IonSearchbar v-model="searchInput" :debounce="100" :placeholder="placeholder"
-                          class="searchbar-search" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
+            <IonSearchbar v-model="searchInput" :animated="true" :debounce="100" :placeholder="placeholder"
+                          class="searchbar-search" enterkeyhint="enter" inputmode="text"
+                          type="text" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
             <IonButton shape="round" @click="selectPreferences()">
                 <IonIcon v-if="!showPreferences" :icon="optionsOutline"/>
                 <IonIcon v-else :icon="closeOutline"/>
@@ -15,18 +16,18 @@
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
                 <IonList class="ion-no-padding" lines="none">
-                    <IonItemGroup v-if="recipes.length > 0">
+                    <IonItemGroup v-if="recipes?.length > 0">
                         <IonItemDivider>
-                            <IonLabel>{{ $t('General.Recipe', recipes.length) }}</IonLabel>
+                            <IonLabel>{{ $t('General.Recipe', recipes?.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipeIndex"
                                  button @click="selectRecipe(recipe)">
                             {{ recipe.getName() }}
                         </IonItem>
                     </IonItemGroup>
-                    <IonItemGroup v-if="tags.length > 0">
+                    <IonItemGroup v-if="tags?.length > 0">
                         <IonItemDivider>
-                            <IonLabel>{{ $t('General.Tag', tags.length) }}</IonLabel>
+                            <IonLabel>{{ $t('General.Tag', tags?.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem class="over-x-scroll" lines="none">
                             <IonChip v-for="(tag, tagIndex) in tags" :key="tagIndex" button @click="selectTag(tag)">
@@ -34,9 +35,9 @@
                             </IonChip>
                         </IonItem>
                     </IonItemGroup>
-                    <IonItemGroup v-if="items.length > 0">
+                    <IonItemGroup v-if="items?.length > 0">
                         <IonItemDivider>
-                            <IonLabel>{{ $t('General.Item', items.length) }}</IonLabel>
+                            <IonLabel>{{ $t('General.Item', items?.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(item, itemIndex) in items" :key="itemIndex" button @click="selectItem(item)">
                             {{ item.getName(undefined, 1) }}
@@ -50,43 +51,24 @@
 
 
 <script lang="ts" setup>
-import {computed, PropType, ref, shallowRef, toRefs, watch} from 'vue';
+import { computed, PropType, ref, shallowRef, toRefs, watch } from 'vue';
 import {
-    IonButton,
-    IonChip,
-    IonIcon,
-    IonItem,
-    IonItemDivider,
-    IonItemGroup,
-    IonLabel,
-    IonList,
-    IonSearchbar,
-    useIonRouter
+    IonButton, IonChip, IonIcon, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList, IonSearchbar, useIonRouter
 } from '@ionic/vue';
-import {Item, Recipe} from '@/shared';
-import {closeOutline, optionsOutline} from 'ionicons/icons';
-import {searchRecipesByString} from '@/app/search/search.ts';
+import { Item, Recipe } from '@/shared';
+import { closeOutline, optionsOutline } from 'ionicons/icons';
+import { searchRecipesByString } from '@/app/search/search.ts';
 
 // Props
 const props = defineProps({
     placeholder: {
-        type: String,
-        required: true
-    },
-    items: {
-        type: Array as PropType<Item[]>,
-        required: false,
-        default: () => []
-    },
-    recipes: {
-        type: Array as PropType<Recipe[]>,
-        required: false,
-        default: () => []
-    },
-    tags: {
-        type: Array as PropType<string[]>,
-        required: false,
-        default: () => []
+        type: String, required: true
+    }, items: {
+        type: Array as PropType<Item[]>, required: false, default: () => []
+    }, recipes: {
+        type: Array as PropType<Recipe[]>, required: false, default: () => []
+    }, tags: {
+        type: Array as PropType<string[]>, required: false, default: () => []
     }
 })
 const {tags, recipes, items} = toRefs(props);
@@ -99,6 +81,11 @@ const emit = defineEmits({
     'selectItem': (item: Item) => item,
     'selectPreferences': (value: boolean) => value
 })
+
+/* Configuration */
+const CONFIG = {
+    MAX_ITEMS: 6, MAX_TAGS: 6, MAX_RECIPES: 6
+}
 
 /* Searchbar state */
 const searchInput = ref('')
@@ -114,8 +101,7 @@ watch(showPreferences, (newShowPreferences) => {
 
 /* State whether list should be open */
 const listIsOpen = computed<boolean>(() => {
-    return ((items.value.length > 0 || tags.value.length > 0 || recipes.value.length > 0)
-        && searchInput.value !== '')
+    return ((items.value.length > 0 || tags.value.length > 0 || recipes.value.length > 0) && searchInput.value !== '')
 })
 
 watch(searchInput, (newFilterInput) => {
@@ -126,7 +112,7 @@ watch(searchInput, (newFilterInput) => {
 // Filter recipes
 const filteredRecipes = shallowRef<Recipe[]>([])
 watch(searchInput, () => {
-    filteredRecipes.value = searchRecipesByString(searchInput.value ?? '').slice(0, 6)
+    filteredRecipes.value = searchRecipesByString(searchInput.value ?? '').slice(0, CONFIG.MAX_RECIPES)
 })
 const routeRecipe = (recipe?: Recipe) => {
     if (recipe) {

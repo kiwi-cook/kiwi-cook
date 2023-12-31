@@ -9,9 +9,9 @@
     --margin-auto: 0 auto;
     --margin-page: 25px 25px;
     --margin-small: 5px;
-    --margin-medium: 16px;
+    --margin-medium: 15px;
     --margin: var(--margin-medium);
-    --margin-large: 25px;
+    --margin-large: 30px;
 
     /* Margin sections */
     --margin-s-medium: 20px;
@@ -78,3 +78,28 @@ ion-content {
     display: flex;
 }
 
+/* Horizontal Line */
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/* Show horizontal line after each section */
+section::after, article::after {
+    content: "";
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 2px solid var(--ion-color-light);
+    margin: 1em 1em;
+    padding: 0;
+}
+
+/* Don't show horizontal line after last section */
+section:last-child::after {
+    display: none;
+}

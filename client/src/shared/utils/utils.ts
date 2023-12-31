@@ -2,8 +2,8 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {toastController} from '@ionic/vue';
-import {DURATIONS} from '@/shared/utils';
+import { toastController } from '@ionic/vue';
+import { DURATIONS } from '@/shared/utils';
 
 /**
  * Format a date to DD.MM.YYYY, e.g. 1.1.2020
@@ -30,10 +30,7 @@ export const presentToast = async (message?: string, isError = false, duration =
     }
 
     const toast = toastController.create({
-        message,
-        duration,
-        position: 'top',
-        color: isError ? 'danger' : 'success'
+        message, duration, position: 'top', color: isError ? 'danger' : 'success'
     });
     await (await toast).present()
 }

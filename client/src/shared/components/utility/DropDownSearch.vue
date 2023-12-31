@@ -23,51 +23,30 @@
 </template>
 
 <script lang="ts" setup>
-import {PropType, ref, toRefs, watch} from 'vue';
-import {IonInput, IonItem, IonLabel, IonList} from '@ionic/vue';
+import { PropType, ref, toRefs, watch } from 'vue';
+import { IonInput, IonItem, IonLabel, IonList } from '@ionic/vue';
 
 const props = defineProps({
     label: {
-        type: String,
-        required: false,
-        default: undefined,
-    },
-    labelPlacement: {
+        type: String, required: false, default: undefined,
+    }, labelPlacement: {
         type: String as PropType<'start' | 'end' | 'floating' | 'stacked' | 'fixed'>,
         required: false,
         default: 'stacked'
-    },
-    modelValue: {
-        type: Object,
-        required: false
-    },
-    item: {
-        type: Object,
-        required: false
-    },
-    customMapper: {
-        type: Function as PropType<(item: any) => any>,
-        required: false,
-        default: (item: any) => item,
-    },
-    items: {
-        type: Array,
-        required: true,
-    },
-    maxItems: {
-        type: Number,
-        required: false,
-        default: 5,
-    },
-    placeholder: {
-        type: String,
-        required: false,
-        default: 'Search for an item',
-    },
-    resetAfter: {
-        type: Boolean,
-        required: false,
-        default: false,
+    }, modelValue: {
+        type: Object, required: false
+    }, item: {
+        type: Object, required: false
+    }, customMapper: {
+        type: Function as PropType<(item: any) => any>, required: false, default: (item: any) => item,
+    }, items: {
+        type: Array, required: true,
+    }, maxItems: {
+        type: Number, required: false, default: 5,
+    }, placeholder: {
+        type: String, required: false, default: 'Search for an item',
+    }, resetAfter: {
+        type: Boolean, required: false, default: false,
     },
 })
 const {modelValue, item, customMapper, items, maxItems, resetAfter} = toRefs(props)

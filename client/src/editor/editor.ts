@@ -3,17 +3,17 @@
  */
 
 // Ionic
-import {IonicVue} from '@ionic/vue';
+import { IonicVue } from '@ionic/vue';
 
 // Vue + App
-import {createApp} from 'vue'
+import { createApp } from 'vue'
 import App from '@/editor/App.vue'
 
 // Router
-import {createTasteBuddyRouter} from '@/editor/router';
+import { createTasteBuddyRouter } from '@/editor/router';
 
 // Store
-import {createPinia} from 'pinia';
+import { createPinia } from 'pinia';
 
 // Styles
 /* Core CSS required for Ionic components to work properly */
@@ -43,7 +43,7 @@ import '@/shared/theme/links.css';
 /* Icons */
 import 'ionicons/icons';
 /* Initialize internalisation */
-import {i18n} from '@/shared/locales/i18n';
+import { i18n } from '@/shared/locales/i18n';
 
 // Initializations
 

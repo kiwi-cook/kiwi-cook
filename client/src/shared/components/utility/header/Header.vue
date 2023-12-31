@@ -13,16 +13,13 @@
 </template>
 
 <script lang="ts" setup>
-import {PropType} from 'vue';
+import { PropType } from 'vue';
 
 defineProps({
     smallText: {
-        type: String,
-        required: false
-    },
-    bigText: {
-        type: Object as PropType<string[]>,
-        required: true
+        type: String, required: false
+    }, bigText: {
+        type: Object as PropType<string[]>, required: true
     }
 })
 </script>

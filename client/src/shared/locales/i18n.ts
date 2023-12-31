@@ -2,12 +2,12 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {createI18n} from 'vue-i18n';
-import {nextTick} from 'vue'
+import { createI18n } from 'vue-i18n';
+import { nextTick } from 'vue'
 import enUS from '@/shared/locales/en.json'
-import {RouteLocationNormalized} from 'vue-router';
-import {logDebug} from '@/shared/utils/logging';
-import {useSharedStore} from '@/shared/storage';
+import { RouteLocationNormalized } from 'vue-router';
+import { logDebug, logWarn } from '@/shared/utils/logging';
+import { useSharedStore } from '@/shared/storage';
 
 export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']
@@ -39,10 +39,7 @@ export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: D
     const locale = options.locale
 
     const i18n = createI18n<[MessageSchema], SUPPORT_LOCALES_TYPE>({
-        locale,
-        legacy: false,
-        fallbackWarn: false,
-        missingWarn: false,
+        locale, legacy: false, fallbackWarn: false, missingWarn: false,
     })
     setI18nLanguage(i18n, locale)
     return i18n
@@ -97,19 +94,18 @@ async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
  * @see https://phrase.com/blog/posts/ultimate-guide-to-vue-localization-with-vue-i18n/
  */
 export default function getBrowserLocale(): SUPPORT_LOCALES_TYPE | undefined {
-    const navigatorLocale =
-        navigator.languages !== undefined
-            ? navigator.languages[0]
-            : navigator.language
+    const navigatorLocale = navigator.languages !== undefined ? navigator.languages[0] : navigator.language
     logDebug('getBrowserLocale', 'navigatorLocale:', navigatorLocale)
 
     if (!navigatorLocale) {
+        logWarn('getBrowserLocale', 'no locale found')
         return undefined
     }
 
     const locale = navigatorLocale.trim().split(/[-_]/)[0]
     logDebug('getBrowserLocale', 'locale:', locale)
     if (!SUPPORT_LOCALES.includes(locale as SUPPORT_LOCALES_TYPE)) {
+        logWarn('getBrowserLocale', `locale '${locale}' is not supported.`)
         return undefined
     }
     return locale as SUPPORT_LOCALES_TYPE

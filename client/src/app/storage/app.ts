@@ -2,22 +2,18 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {defineStore} from 'pinia';
+import { defineStore } from 'pinia';
 
 interface TasteBuddyAppState {
     timer: {
-        recipeId?: string,
-        time: number,
-        remaining: number,
-        timerInterval: number | null
+        recipeId?: string, time: number, remaining: number, timerInterval: number | null
     } | null
 }
 
 export const useAppStore = defineStore('tastebuddy-app', {
     state: (): TasteBuddyAppState => ({
         timer: null
-    }),
-    actions: {
+    }), actions: {
         /**
          * Set step timer for a recipe
          * @param time in minutes
@@ -35,10 +31,7 @@ export const useAppStore = defineStore('tastebuddy-app', {
             }
 
             this.timer = {
-                recipeId: recipeId,
-                time: time * 60,
-                remaining: time * 60,
-                timerInterval: null
+                recipeId: recipeId, time: time * 60, remaining: time * 60, timerInterval: null
             }
 
             // Start the timer
@@ -51,14 +44,12 @@ export const useAppStore = defineStore('tastebuddy-app', {
                     this.stopTimer()
                 }
             }, 1000)
-        },
-        async resetTimer() {
+        }, async resetTimer() {
             if (this.timer === null) {
                 return
             }
             this.timer.remaining = this.timer.time
-        },
-        async stopTimer() {
+        }, async stopTimer() {
             if (this.timer === null) {
                 return
             }

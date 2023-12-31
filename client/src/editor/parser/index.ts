@@ -2,13 +2,12 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Recipe} from '@/shared';
-import {logError} from '@/shared/utils/logging';
-import {Ref} from 'vue';
+import { Recipe } from '@/shared';
+import { logError } from '@/shared/utils/logging';
+import { Ref } from 'vue';
 
 export enum RecipeParser {
-    Cookstr = 'cookstr',
-    AllRecipes = 'allrecipes',
+    Cookstr = 'cookstr', AllRecipes = 'allrecipes',
 }
 
 export const availableParsers: RecipeParser[] = Object.values(RecipeParser)

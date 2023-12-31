@@ -3,63 +3,56 @@
   -->
 
 <template>
-    <IonCard>
-        <IonImg :src="step?.imgUrl ?? ''"/>
-        <IonCardHeader>
-            <IonCardTitle v-if="step.type === STEP_TYPES.STEP">
-                <h3 v-if="stepIndex >= 0">
-                    <span class="recipe-step-index">{{ stepIndex + 1 }}</span>
-                    <span v-if="amountSteps > 0"
-                          class="recipe-step-index-max"> / {{ amountSteps }}</span>
-                </h3>
+    <div>
+        <template v-if="step.type === STEP_TYPES.STEP">
+            <h4 v-if="stepIndex >= 0" class="recipe-step-index">
+                <span class="recipe-step-index-step">{{ $t('Recipe.Step') }} {{ stepIndex + 1 }}</span>
+                <span v-if="amountSteps > 0"
+                      class="recipe-step-index-max"> / {{ amountSteps }}</span>
+            </h4>
+        </template>
+        <template v-else-if="step.type === STEP_TYPES.HEADER">
+            <h4>
+                <span v-html="step?.pPrintStepDescription('item-highlight')"/>
+            </h4>
+        </template>
+        <IonCard v-if="!noContent">
+            <IonImg :src="step?.imgUrl ?? ''"/>
+            <IonCardContent>
                 <Duration :duration="step?.duration" @click="startTimer"/>
                 <Temperature :temperature="step?.temperature"/>
-            </IonCardTitle>
-            <IonCardTitle v-else-if="step.type === STEP_TYPES.HEADER">
-                <h3>
-                    <span v-html="step?.pPrintStepDescription('item-highlight')"/>
-                </h3>
-            </IonCardTitle>
-        </IonCardHeader>
-        <IonCardContent>
-            <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
-                <ItemList :items="recipeItems" horizontal quantity-position="start"/>
-            </IonItem> -->
-            <!-- Show the description here of the step if it is not a header -->
-            <IonItem v-if="step.type !== STEP_TYPES.HEADER" lines="none">
-                <div v-html="step?.pPrintStepDescription('item-highlight')"/>
-            </IonItem>
-        </IonCardContent>
-    </IonCard>
+                <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
+                    <ItemList :items="recipeItems" horizontal quantity-position="start"/>
+                </IonItem> -->
+                <!-- Show the description here of the step if it is not a header -->
+                <IonItem v-if="step.type !== STEP_TYPES.HEADER" lines="none">
+                    <div v-html="step?.pPrintStepDescription('item-highlight')"/>
+                </IonItem>
+            </IonCardContent>
+        </IonCard>
+    </div>
 </template>
 
 <script lang="ts" setup>
-import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonImg, IonItem} from '@ionic/vue';
-import {PropType, toRefs} from 'vue';
-import {Step, STEP_TYPES} from '@/shared';
+import { IonCard, IonCardContent, IonImg, IonItem } from '@ionic/vue';
+import { PropType, toRefs } from 'vue';
+import { Step, STEP_TYPES } from '@/shared';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
-import {useAppStore} from '@/app/storage';
+import { useAppStore } from '@/app/storage';
 
 const props = defineProps({
     step: {
-        type: Object as PropType<Step>,
-        required: true
-    },
-    stepIndex: {
-        type: Number,
-        required: false,
-        default: -1
-    },
-    amountSteps: {
-        type: Number,
-        required: false,
-        default: -1
-    },
-    recipeId: {
-        type: String,
-        required: false
-    },
+        type: Object as PropType<Step>, required: true
+    }, stepIndex: {
+        type: Number, required: false, default: -1
+    }, amountSteps: {
+        type: Number, required: false, default: -1
+    }, recipeId: {
+        type: String, required: false
+    }, noContent: {
+        type: Boolean, required: false, default: false
+    }
 })
 
 const {step, recipeId} = toRefs(props)
@@ -78,8 +71,13 @@ const startTimer = () => {
 </style>
 
 <style scoped>
-.recipe-step-index-max {
+.recipe-step-index {
     font-size: var(--font-size-small);
+    font-weight: var(--font-weight-bold);
+}
+
+.recipe-step-index-max {
+    font-size: var(--font-size-smaller);
     font-weight: var(--font-weight-normal);
 }
 </style>

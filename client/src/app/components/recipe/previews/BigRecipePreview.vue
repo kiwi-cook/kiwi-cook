@@ -23,20 +23,17 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, PropType, toRefs} from 'vue';
-import {Recipe} from '@/shared';
-import {useIonRouter} from '@ionic/vue';
+import { computed, PropType, toRefs } from 'vue';
+import { Recipe } from '@/shared';
+import { useIonRouter } from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>,
-        required: true
-    },
-    title: {
-        type: String,
-        required: false
+        type: Object as PropType<Recipe>, required: true
+    }, title: {
+        type: String, required: false
     }
 })
 

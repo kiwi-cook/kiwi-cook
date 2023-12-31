@@ -2,13 +2,12 @@
  * Copyright (c) 2023 Josef Müller.
  */
 
-import {Drivers, Storage} from '@ionic/storage';
-import {logDebug, logError} from '@/shared/utils/logging.ts';
-import {compress, decompress} from 'lz-string';
+import { Drivers, Storage } from '@ionic/storage';
+import { logDebug, logError, logWarn } from '@/shared/utils/logging.ts';
+import { compress, decompress } from 'lz-string';
 
 const ionicStorage = new Storage({
-    name: 'tastebuddy_db',
-    driverOrder: [Drivers.LocalStorage]
+    name: 'tastebuddy_db', driverOrder: [Drivers.LocalStorage]
 });
 await ionicStorage.create();
 
@@ -32,6 +31,7 @@ export async function setCachedItem<T>(key: string, value: T) {
     const tsStart = performance.now()
     logDebug('setCachedItem', key, value)
     if (value === null || typeof value === 'undefined') {
+        logWarn('setCachedItem', 'value is null or undefined')
         return value
     }
 
@@ -59,13 +59,13 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
     const tsStart = performance.now()
     return ionicStorage.get(key)
         .then((cachedItem: {
-            date: number,
-            value: any
+            date: number, value: any
         }) => {
             /* Try to get the cached value */
 
             // If the value is not in the cache, return the default value
             if (!cachedItem || typeof cachedItem === 'undefined') {
+                logWarn(`getCachedItem.${key}`, `no ${key} in cache`)
                 return {value: null, isOld: true}
             }
 
@@ -91,10 +91,10 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
 
             logDebug(`getCachedItem.${key}`, `fetching ${key} because cache is invalid`)
             return fetch().then((fetchedItem: T | null) => {
-                logDebug(`getCachedItem.${key}`, `fetched ?= null: ${fetchedItem === null}, cached ?= null: ${cachedItem.value === null}, default: ${defaultValue}`)
+                logDebug(`getCachedItem.${key}`, `fetched ?= null: ${fetchedItem ===
+                null}, cached ?= null: ${cachedItem.value === null}, default: ${defaultValue}`)
                 return {
-                    value: fetchedItem ?? cachedItem.value ?? defaultValue,
-                    isOld: false
+                    value: fetchedItem ?? cachedItem.value ?? defaultValue, isOld: false
                 }
             })
         })

@@ -10,12 +10,16 @@
                 <RecipeTitle :recipe="recipe" disable-link title="Let's start cooking!"/>
                 <!-- Save and Share -->
                 <IonButtons>
-                    <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe" @click="shareRecipe()">
+                    <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe"
+                               @click="shareRecipe()">
                         <IonIcon :icon="shareSocial"/>
                     </IonButton>
-                    <IonButton aria-valuetext="Like Recipe" @click="toggleSave()">
+                    <IonButton aria-valuetext="Like Recipe" color="favorite" @click="toggleSave()">
                         <IonIcon :color="isSaved ?? false ? 'favorite' : undefined "
                                  :icon="isSaved ?? false ? heart: heartOutline"/>
+                    </IonButton>
+                    <IonButton aria-valuetext="Start Cooking" color="primary">
+                        <IonIcon :icon="play"/>
                     </IonButton>
                 </IonButtons>
                 <!-- Tags -->
@@ -45,19 +49,10 @@
                     </div>
                     <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
-                            <IonItem class="recipe-servings" lines="none">
-                                <IonLabel>{{ $t('Recipe.Serving', servings) }}</IonLabel>
-                                <!-- Increase or decrease the servings to adjust the amount of ingredients -->
-                                <div class="recipe-servings-button">
-                                    <IonButton :disabled="servings === 1" @click="servings--">
-                                        <IonIcon :icon="remove"/>
-                                    </IonButton>
-                                    {{ servings }}
-                                    <IonButton :disabled="servings === 100" @click="servings++">
-                                        <IonIcon :icon="add"/>
-                                    </IonButton>
-                                </div>
-                            </IonItem>
+                            <IonRange v-model="servings" :label="`${servings} ${$t('Recipe.Serving', servings)}`"
+                                      :max="10" :min="1"
+                                      :pin="true"
+                                      :step="0.5" color="secondary" label-placement="start"/>
                             <!-- Show the ingredients -->
                             <ItemList :items="ingredients"/>
                         </IonCardContent>
@@ -76,19 +71,21 @@
             <template #right>
                 <div class="header">
                     <!-- Show the amount of steps -->
-                    <h2>{{ steps.length }} {{ $t('Recipe.Direction', steps.length) }}
+                    <h2>{{ $t('Recipe.Preparation') }}
                     </h2>
                     <!-- ... and the duration -->
                     <Duration :duration="recipe?.getDuration()"/>
                 </div>
                 <!-- Steps -->
-                <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
-                    <StepComponent :amount-steps="steps.length" :recipe-id="recipe?.getId()" :step="step"
-                                   :step-index="stepIndex"/>
-                </template>
-                <!-- Good Appetite -->
-                <!-- If there are no steps, don't show the good appetite step -->
-                <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep"/>
+                <div class="steps-container">
+                    <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
+                        <StepComponent :amount-steps="steps.length" :recipe-id="recipe?.getId()" :step="step"
+                                       :step-index="stepIndex" class="step"/>
+                    </template>
+                    <!-- Good Appetite -->
+                    <!-- If there are no steps, don't show the good appetite step -->
+                    <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep" no-content/>
+                </div>
             </template>
         </TwoColumnLayout>
 
@@ -102,33 +99,22 @@
 </template>
 
 <script lang="ts" setup>
-import {computed, PropType, ref, toRefs, watch} from 'vue';
+import { computed, PropType, ref, toRefs, watch } from 'vue';
 import {
-    IonButton,
-    IonButtons,
-    IonCard,
-    IonCardContent,
-    IonChip,
-    IonIcon,
-    IonImg,
-    IonItem,
-    IonLabel,
-    IonNote,
-    IonText,
+    IonButton, IonButtons, IonCard, IonCardContent, IonChip, IonIcon, IonImg, IonItem, IonNote, IonRange, IonText,
 } from '@ionic/vue';
-import {ItemList, ReadMore, Recipe, recipeBy, RecipeItem, Step, STEP_TYPES} from '@/shared';
-import {add, heart, heartOutline, remove, shareSocial} from 'ionicons/icons';
-import {CanShareResult, Share} from '@capacitor/share';
-import {useI18n} from 'vue-i18n';
-import {useRecipeStore} from '@/app/storage';
+import { ItemList, ReadMore, Recipe, recipeBy, RecipeItem, Step, STEP_TYPES } from '@/shared';
+import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
+import { CanShareResult, Share } from '@capacitor/share';
+import { useI18n } from 'vue-i18n';
+import { useRecipeStore } from '@/app/storage';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
-import {RecipeTitle, StepComponent, TwoColumnLayout} from '@/app/components';
+import { RecipeTitle, StepComponent, TwoColumnLayout } from '@/app/components';
 
 /* Recipe */
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>,
-        required: true,
+        type: Object as PropType<Recipe>, required: true,
     },
 });
 const {recipe} = toRefs(props);
@@ -147,7 +133,7 @@ const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
 const source = computed(() => recipeBy(authors.value, recipe?.value?.src.url ?? ''))
 
 // Servings
-const servings = ref(1)
+const servings = ref(recipe?.value?.servings)
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
         recipe?.value?.setServings(newServings);
@@ -240,5 +226,9 @@ Share.canShare().then((canShareResult: CanShareResult) => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.step {
+    margin-bottom: var(--margin-large);
 }
 </style>

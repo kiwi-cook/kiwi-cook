@@ -55,23 +55,22 @@
 </template>
 
 <script lang="ts" setup>
-import {computed} from 'vue';
-import {IonButton, IonContent, IonItem, IonPage} from '@ionic/vue';
-import {useRecipeStore} from '@/app/storage';
-import {Recipe} from '@/shared';
+import { computed } from 'vue';
+import { IonButton, IonContent, IonItem, IonPage } from '@ionic/vue';
+import { useRecipeStore } from '@/app/storage';
+import { Recipe } from '@/shared';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import TasteBuddyLogo from '@/app/components/TasteBuddyLogo.vue';
 import List from '@/shared/components/utility/list/List.vue';
 import FabTimer from '@/shared/components/utility/FabTimer.vue';
-import {average} from '@/app/search/util';
+import { average } from '@/app/search/util';
 
 const recipeStore = useRecipeStore()
 const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes)
 
 const savedRecipesStats = computed<{
-    desc: string,
-    value: string | number
+    desc: string, value: string | number
 }[]>(() => {
     const stats = recipeStore.getSavedRecipesStats
     const formattedStats = []

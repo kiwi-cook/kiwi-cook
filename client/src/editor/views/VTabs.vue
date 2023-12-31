@@ -27,9 +27,9 @@
 </template>
 
 <script lang="ts" setup>
-import {computed} from 'vue';
-import {IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/vue';
-import {useRecipeEditorStore} from '@/editor/storage';
+import { computed } from 'vue';
+import { IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
+import { useRecipeEditorStore } from '@/editor/storage';
 
 const recipeStore = useRecipeEditorStore()
 const loadingState = computed<boolean>(() => recipeStore.isLoading ?? false)

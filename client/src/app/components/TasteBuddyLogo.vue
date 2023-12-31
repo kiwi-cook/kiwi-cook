@@ -8,14 +8,12 @@
 </template>
 
 <script lang="ts" setup>
-import {IonImg} from '@ionic/vue'
-import {computed, PropType, toRefs} from 'vue';
+import { IonImg } from '@ionic/vue'
+import { computed, PropType, toRefs } from 'vue';
 
 const props = defineProps({
     size: {
-        type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>,
-        default: 'medium',
-        required: false
+        type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>, default: 'medium', required: false
     }
 })
 const {size} = toRefs(props)
