@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { Item, Recipe, RecipeItem } from '@/shared';
@@ -126,7 +126,7 @@ export const useRecipeStore = defineStore('recipes-app', {
          */
         getSavedRecipes(state): Recipe[] {
             return [...state.savedRecipes.keys()].reduce((recipes: Recipe[], recipeId: string) => {
-                if (recipeId in this.getRecipesAsList) {
+                if (recipeId in this.getRecipesAsMap) {
                     recipes.push(this.getRecipesAsMap[recipeId])
                 }
                 return recipes
