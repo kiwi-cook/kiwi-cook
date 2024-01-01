@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -7,7 +7,7 @@
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
                 <!-- Title -->
-                <RecipeTitle :recipe="recipe" disable-link title="Let's start cooking!"/>
+                <RecipeTitle :recipe="recipe" :title="t('Recipe.LetsCook')" disable-link/>
                 <!-- Save and Share -->
                 <IonButtons>
                     <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe"
