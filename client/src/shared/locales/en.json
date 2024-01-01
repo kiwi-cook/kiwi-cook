@@ -48,7 +48,8 @@
       "ResetConfirmation": "Are you sure you want to reset all settings?",
       "ResetButton": "Reset settings",
       "ResetSuccess": "Settings have been reset",
-      "ResetError": "Could not reset settings"
+      "ResetError": "Could not reset settings",
+      "ResetCache": "Reset cache"
     }
   },
   "SignIn": {

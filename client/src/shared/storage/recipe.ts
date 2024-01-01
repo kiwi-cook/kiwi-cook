@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 // Vue
@@ -8,7 +8,7 @@ import { defineStore } from 'pinia'
 import { API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, sendToAPI } from '@/shared';
 import { logDebug } from '@/shared/utils/logging';
 import { useSharedStore } from '@/shared/storage/shared.ts';
-import { CachedItem, getCachedItem, setCachedItem } from '@/shared/storage/cache.ts';
+import { CachedItem, getCachedItem, removeCachedItem, setCachedItem } from '@/shared/storage/cache.ts';
 
 
 // Define typings for the store state
@@ -101,9 +101,6 @@ export const useSharedRecipeStore = defineStore('recipes-shared', {
          */
         async prepareStore() {
             const sharedStore = useSharedStore()
-            if (!sharedStore.isLoadingInitial) {
-                return Promise.resolve()
-            }
 
             /* Items */
             return getCachedItem<Item[]>('items', [], this.fetchItems)
@@ -123,6 +120,14 @@ export const useSharedRecipeStore = defineStore('recipes-shared', {
                 .then(() => {
                     sharedStore.finishLoading('initial')
                 })
+        }, /**
+         * Reset the store by removing all items and recipes
+         */
+        resetStore() {
+            this.recipes = {}
+            this.items = {}
+            return Promise.all([removeCachedItem('recipes'), removeCachedItem('items')])
+                .then(() => this.prepareStore())
         }, /**
          * Override all items
          * @param items

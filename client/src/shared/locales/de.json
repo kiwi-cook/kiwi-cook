@@ -48,7 +48,8 @@
       "ResetConfirmation": "Möchtest du wirklich alle Einstellungen zurücksetzen?",
       "ResetButton": "Zurücksetzen",
       "ResetSuccess": "Einstellungen wurden zurückgesetzt.",
-      "ResetError": "Einstellungen konnten nicht zurückgesetzt werden."
+      "ResetError": "Einstellungen konnten nicht zurückgesetzt werden.",
+      "ResetCache": "Cache leeren"
     }
   },
   "SignIn": {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { Drivers, Storage } from '@ionic/storage';
@@ -98,4 +98,13 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
                 }
             })
         })
+}
+
+/**
+ * Remove the cached item
+ * @param key
+ */
+export async function removeCachedItem(key: string) {
+    logDebug('removeCachedItem', `removing ${key} from cache`)
+    return ionicStorage.remove(key)
 }
