@@ -1,10 +1,10 @@
 from typing import Optional
 
-from bson import ObjectId
 from pydantic import BaseModel, Field
 
 from models.mongo import PyObjectId
 from models.shared import LocalizedString
+from util.parse import format_name
 
 
 class Item(BaseModel):
@@ -20,7 +20,7 @@ class Item(BaseModel):
                 "id": "507f1f77bcf86cd799439011",
                 "name": {"en": "Item Name in English", "es": "Nombre del artículo en español"},
                 "type": "ItemType",
-                "imgUrl": "http://example.com/image.jpg"
+                "imgUrl": "https://example.com/image.jpg"
             }
         }
 
@@ -33,4 +33,4 @@ class Item(BaseModel):
         :param imgUrl: URL to an image of the item
         :return: the created item
         """
-        return Item(name=LocalizedString.new('en', name), type=type, imgUrl=imgUrl)
+        return Item(name=LocalizedString.new('en', format_name(name)), type=type, imgUrl=imgUrl)

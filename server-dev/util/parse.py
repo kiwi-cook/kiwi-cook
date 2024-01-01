@@ -28,3 +28,15 @@ def extract_durations(instruction: str) -> list[int]:
         avg_duration = (from_duration + to_duration) / 2
         durations.append(avg_duration)
     return durations
+
+
+def format_name(name: str) -> str:
+    """Format the name of a recipe."""
+    formatted_name = name
+    # Remove special characters
+    formatted_name = formatted_name.replace(' ', '-')
+
+    # Capitalize the first letter
+    formatted_name = formatted_name[0].upper() + formatted_name[1:]
+
+    return formatted_name
