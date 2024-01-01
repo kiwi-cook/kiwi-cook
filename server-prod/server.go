@@ -36,7 +36,7 @@ func (server *TasteBuddyServer) SetFiber() *TasteBuddyServer {
 	f := fiber.New(config)
 
 	f.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:8080, https://taste-buddy.github.io",
+		AllowOrigins: "http://localhost:8080, http://localhost:8081, http://localhost:8082, https://taste-buddy.github.io",
 		AllowHeaders: "Origin, Content-Type, Accept",
 		AllowMethods: "GET",
 	}))
