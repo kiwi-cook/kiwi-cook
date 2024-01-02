@@ -1,9 +1,9 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <div>
+    <div class="recipe-step-wrapper">
         <template v-if="step.type === STEP_TYPES.STEP">
             <h4 v-if="stepIndex >= 0" class="recipe-step-index">
                 <span class="recipe-step-index-step">{{ $t('Recipe.Step') }} {{ stepIndex + 1 }}</span>

@@ -1,14 +1,15 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 :root {
     /* shadows */
     --shadow-color: var(--ion-color-medium-shade);
-    --shadow-color-strong: var(--ion-color-dark-shade);
+    --shadow-color-inner: rgba(var(--ion-color-medium-rgb), 0.15);
+    --shadow-color-strong: var(--ion-color-medium-shade);
     --box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
-    --box-shadow-inner: 0 4px 10px rgb(0 0 0 / 10%) inset;
-    --box-shadow-strong: var(--ion-color-medium) 0px 20px 30px -10px;
+    --box-shadow-inner: 0 4px 10px var(--shadow-color-inner) inset;
+    --box-shadow-strong: var(--shadow-color-strong) 0px 20px 30px -10px;
     --box-shadow-hover: var(--box-shadow-strong);
 
     /* transition */
@@ -23,6 +24,13 @@
     --border-radius-round: 100%;
     --border: thin solid var(--ion-color-light) !important;
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
+}
+
+body.dark {
+    :root {
+        --shadow-color: var(--ion-color-dark-shade);
+        --shadow-color-strong: var(--ion-color-dark-shade);
+    }
 }
 
 .shadow {

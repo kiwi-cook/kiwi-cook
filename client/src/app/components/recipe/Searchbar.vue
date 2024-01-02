@@ -1,24 +1,28 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
     <div class="searchbar-wrapper">
         <div class="searchbar-search-wrapper">
-            <IonSearchbar v-model="searchInput" :animated="true" :debounce="100" :placeholder="placeholder"
-                          class="searchbar-search" enterkeyhint="enter" inputmode="text"
-                          type="text" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
-            <IonButton shape="round" @click="selectPreferences()">
-                <IonIcon v-if="!showPreferences" :icon="optionsOutline"/>
-                <IonIcon v-else :icon="closeOutline"/>
-            </IonButton>
+            <IonSearchbar v-model="searchInput" :animated="true" :debounce="100"
+                          :placeholder="placeholder" class="searchbar-search" enterkeyhint="enter" inputmode="text"
+                          type="text"
+                          @click="openSearch()" @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
         </div>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
+                <!-- Suggest items -->
+                <IonItem v-if="items?.length > 0">
+                    <ItemChip v-for="(item, itemIndex) in items" :key="itemIndex"
+                              :item="item" @click="selectItem(item)"/>
+                </IonItem>
+
+                <!-- Show search results -->
                 <IonList class="ion-no-padding" lines="none">
-                    <IonItemGroup v-if="recipes?.length > 0">
+                    <IonItemGroup v-if="filteredRecipes?.length > 0">
                         <IonItemDivider>
-                            <IonLabel>{{ $t('General.Recipe', recipes?.length) }}</IonLabel>
+                            <IonLabel>{{ $t('General.Recipe', filteredRecipes?.length) }}</IonLabel>
                         </IonItemDivider>
                         <IonItem v-for="(recipe, recipeIndex) in filteredRecipes" :key="recipeIndex"
                                  button @click="selectRecipe(recipe)">
@@ -53,11 +57,11 @@
 <script lang="ts" setup>
 import { computed, PropType, ref, shallowRef, toRefs, watch } from 'vue';
 import {
-    IonButton, IonChip, IonIcon, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList, IonSearchbar, useIonRouter
+    IonChip, IonItem, IonItemDivider, IonItemGroup, IonLabel, IonList, IonSearchbar, useIonRouter
 } from '@ionic/vue';
 import { Item, Recipe } from '@/shared';
-import { closeOutline, optionsOutline } from 'ionicons/icons';
 import { searchRecipesByString } from '@/app/search/search.ts';
+import ItemChip from '@/shared/components/recipe/item/ItemChip.vue';
 
 // Props
 const props = defineProps({
@@ -120,6 +124,10 @@ const routeRecipe = (recipe?: Recipe) => {
     }
 }
 
+const openSearch = () => {
+    showPreferences.value = true
+}
+
 /**
  * Close list if mouse leaves searchbar and searchbar is not focussed
  * or on "esc" keydown
@@ -149,6 +157,12 @@ const selectItem = (item: Item) => {
     closeSearch()
 }
 </script>
+
+<style>
+.searchbar-search {
+    --box-shadow: var(--box-shadow-inner);
+}
+</style>
 
 <style scoped>
 .searchbar-wrapper {

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -234,8 +234,8 @@
                     </section>
 
                     <!-- Searched recipes -->
+                    <a id="recipe-search" ref="recipeSearchAnchor"/>
                     <section v-if="searchedRecipes.length > 0 && submitted">
-                        <a id="recipe-search" ref="recipeSearchAnchor"/>
                         <h3>
                             {{ $t('Suggestions.Search.Title', [searchedRecipes.length]) }}
                         </h3>
