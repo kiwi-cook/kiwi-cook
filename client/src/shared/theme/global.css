@@ -3,17 +3,20 @@
  */
 
 :root {
+    --background: var(--ion-color-light);
+
     /* shadows */
     --shadow-color: var(--ion-color-medium-shade);
     --shadow-color-inner: rgba(var(--ion-color-medium-rgb), 0.15);
     --shadow-color-strong: var(--ion-color-medium-shade);
-    --box-shadow: 0 4px 10px rgb(0 0 0 / 10%);
-    --box-shadow-inner: 0 4px 10px var(--shadow-color-inner) inset;
+    --box-shadow: 0px 0px 18px -9px rgba(0, 0, 0, 0.30);
+    --box-shadow-inner: inset 0px 0px 20px 1px var(--shadow-color-inner);
     --box-shadow-strong: var(--shadow-color-strong) 0px 20px 30px -10px;
-    --box-shadow-hover: var(--box-shadow-strong);
+    --box-shadow-hover: 0px 0px 18px 0px rgba(0, 0, 0, 0.33);
 
     /* transition */
-    --transition: all 0.3s ease-in-out;
+    --transition: all .3s cubic-bezier(0, 0, .5, 1);
+    --scale: scale3d(1.01, 1.01, 1.01);
 
     /* margin */
     --margin: 0;

@@ -1,24 +1,26 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <section class="recipe-of-the-day">
-        <TwoColumnLayout layout="rightBigger">
-            <template #left>
-                <div class="recipe-image">
-                    <img v-if="recipe" :alt="recipe?.getName()"
-                         :src="recipe?.props.imgUrl"
-                         class="link" @click="routeToRecipe()"/>
-                </div>
-            </template>
-            <template #right>
-                <div v-if="recipe" class="recipe-details">
-                    <RecipeTitle :recipe="recipe" :title="title"/>
-                    <p class="recipe-description desc">{{ recipe?.getShortDescription() }}</p>
-                </div>
-            </template>
-        </TwoColumnLayout>
+    <section>
+        <div class="big-recipe-wrapper">
+            <TwoColumnLayout layout="rightBigger">
+                <template #left>
+                    <div class="big-recipe-image">
+                        <img v-if="recipe" :alt="recipe?.getName()"
+                             :src="recipe?.props.imgUrl"
+                             class="link" @click="routeToRecipe()"/>
+                    </div>
+                </template>
+                <template #right>
+                    <div v-if="recipe" class="recipe-details">
+                        <RecipeTitle :recipe="recipe" :title="title"/>
+                        <p class="recipe-description desc">{{ recipe?.getShortDescription() }}</p>
+                    </div>
+                </template>
+            </TwoColumnLayout>
+        </div>
     </section>
 </template>
 
@@ -59,19 +61,23 @@ a:hover {
     color: var(--ion-color-primary);
 }
 
-/* Reset some default styles */
-/* (Your existing reset styles) */
-
 /* Basic styles for the recipe section */
-.recipe-of-the-day {
+.big-recipe-wrapper {
     margin-bottom: 20px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
 }
 
+/* .big-recipe-wrapper:hover {
+    box-shadow: var(--box-shadow-strong);
+    transform: var(--scale);
+} */
+
 /* Style for the recipe image */
-.recipe-image img {
+.big-recipe-image img {
     width: 100%;
     height: auto;
-    border-radius: 6px; /* Increased border radius */
+    border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-strong);
 }
 
@@ -90,11 +96,11 @@ a:hover {
 
 /* Mobile Screen Support */
 @media screen and (max-width: 736px) {
-    .recipe-of-the-day {
+    .big-recipe-wrapper {
         flex-direction: column; /* Stack items vertically */
     }
 
-    .recipe-image,
+    .big-recipe-image,
     .recipe-details {
         flex: none; /* Reset flex properties for mobile layout */
         width: 100%; /* Make both sections take full width */

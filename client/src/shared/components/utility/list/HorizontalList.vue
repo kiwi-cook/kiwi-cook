@@ -1,11 +1,11 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <div v-if="filteredElements.length > 0" class="element-list-wrapper horizontal">
+    <div v-if="list.length > 0" class="element-list-wrapper horizontal">
         <ul :tabindex="0" class="element-list horizontal">
-            <li v-for="(element, elementIndex) in filteredElements" :key="elementIndex"
+            <li v-for="(element, elementIndex) in list" :key="elementIndex"
                 class="element horizontal">
                 <slot :element="element" name="element">
                     {{ element }}
@@ -16,41 +16,19 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, toRefs, watch } from 'vue';
+import { toRefs } from 'vue';
 
 
 const props = defineProps({
-    filter: {
-        type: String, required: false, default: ''
-    }, list: {
+    list: {
         type: Array, required: false, default: null
     }, noWrap: {
         type: Boolean, required: false, default: false
     }, maxHeight: {
         type: String, required: false, default: '100%'
-    }, loadAll: {
-        type: Boolean, required: false, default: false
     }
 })
-const {filter, list} = toRefs(props)
-
-const elements = computed(() => (list.value ?? []));
-const filteredElements = ref<unknown[]>([]);
-
-/**
- * Filter the ingredients
- */
-const handleFilter = () => {
-    const query = filter.value?.toLowerCase() ?? '';
-    filteredElements.value = elements.value.filter((listItem: unknown) => {
-        return JSON.stringify(listItem)
-            .toLowerCase()
-            .includes(query)
-    })
-}
-watch([filter, list], () => {
-    handleFilter();
-}, {immediate: true})
+const {list} = toRefs(props)
 </script>
 
 <style scoped>

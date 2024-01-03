@@ -12,11 +12,51 @@
         </div>
         <div v-show="listIsOpen" class="searchbar-list-wrapper">
             <div class="searchbar-list">
-                <!-- Suggest items -->
-                <IonItem v-if="items?.length > 0">
-                    <ItemChip v-for="(item, itemIndex) in items" :key="itemIndex"
-                              :item="item" @click="selectItem(item)"/>
+                <!-- TODO:
+                    The behaviour of the searchbar should be that its almost fullscreen
+                    and the user can type in it.
+
+                    The behaviour should be that the user is shown some suggestions
+                    without having to type anything. The suggestions should be
+                    based on the user's preferences.
+
+                    The user should be able to select the suggestions and
+                    view them in the searchbar.
+
+                    The user should be able to see some recipe suggestions based on
+                    the user's preferences.
+
+                    The user should be able to see some item suggestions based on
+                    the user's preferences.
+
+                    The user should be able to see some tag suggestions based on
+                    the user's preferences.
+
+                    The user should be able to select time, temperature and other things
+                    in the searchbar.
+                 -->
+
+                <!--
+                <IonItem lines="none">
+                    <h3>Was darf's sein?</h3>
                 </IonItem>
+                <IonItem v-if="items?.length > 0" lines="none">
+                    <h4>Zutaten</h4>
+                    <HorizontalList :list="items" no-wrap>
+                        <template #element="{element}">
+                            <ItemChip :item="element" @click="selectItem(element)"/>
+                        </template>
+                    </HorizontalList>
+                </IonItem>
+
+                <IonItem v-if="items?.length > 0" lines="none">
+                    <h4>Zutaten</h4>
+                    <HorizontalList :list="items" no-wrap>
+                        <template #element="{element}">
+                            <ItemChip :item="element" @click="selectItem(element)"/>
+                        </template>
+                    </HorizontalList>
+                </IonItem> -->
 
                 <!-- Show search results -->
                 <IonList class="ion-no-padding" lines="none">
@@ -61,7 +101,6 @@ import {
 } from '@ionic/vue';
 import { Item, Recipe } from '@/shared';
 import { searchRecipesByString } from '@/app/search/search.ts';
-import ItemChip from '@/shared/components/recipe/item/ItemChip.vue';
 
 // Props
 const props = defineProps({

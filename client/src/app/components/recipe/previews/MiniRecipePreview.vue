@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -54,7 +54,7 @@ const routeToRecipe = () => router.push(link?.value)
 
 .mini-recipe-preview-container {
     width: var(--mini-recipe-width); /* Set a maximum width for the preview */
-    margin: 0 var(--margin) 0 auto;
+    margin: var(--margin) auto;
     cursor: pointer;
 }
 
@@ -63,13 +63,13 @@ const routeToRecipe = () => router.push(link?.value)
     height: var(--mini-recipe-height); /* Set a fixed height */
     object-fit: cover; /* Crop the image if necessary */
     border-radius: 8px; /* Optional: Add rounded corners */
-    border: var(--border);
     transition: var(--transition);
+    box-shadow: var(--box-shadow);
 }
 
 .mini-recipe-preview-image:hover {
     box-shadow: var(--box-shadow-hover) !important;
-    transform: scale(1.02, 1.02);
+    transform: var(--scale)
 }
 
 .mini-recipe-preview-title {
