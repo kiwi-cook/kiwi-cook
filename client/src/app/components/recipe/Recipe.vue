@@ -51,8 +51,8 @@
                         <IonCardContent>
                             <IonRange v-model="servings" :label="`${servings} ${$t('Recipe.Serving', servings)}`"
                                       :max="10" :min="1"
-                                      :pin="true"
-                                      :step="0.5" color="secondary" label-placement="start"/>
+                                      :step="1" color="secondary"
+                                      label-placement="start" pin snaps/>
                             <!-- Show the ingredients -->
                             <ItemList :items="ingredients"/>
                         </IonCardContent>

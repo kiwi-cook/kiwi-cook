@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -7,46 +7,54 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <Header :big-text="$t('Favorites.Title').split(';')"
-                            :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
+                    <div class="sticky-header">
+                        <div class="content-margin">
+                            <Header :big-text="$t('Favorites.Title').split(';')"
+                                    :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
+                        </div>
+                    </div>
 
-                    <template v-if="savedRecipes.length > 0">
-                        <IonItem>
-                            <IonButton @click="removeSavedRecipes">
-                                Remove all
-                            </IonButton>
-                        </IonItem>
 
-                        <IonItem>
+                    <div class="content-margin">
+
+                        <template v-if="savedRecipes.length > 0">
+                            <IonItem>
+                                <IonButton @click="removeSavedRecipes">
+                                    Remove all
+                                </IonButton>
+                            </IonItem>
+
+                            <IonItem>
+                                <h2 class="ion-text-center">
+                                    Stats of saved recipes
+                                </h2>
+                            </IonItem>
+                            <IonItem>
+                                <table>
+                                    <tr>
+                                        <th>Stats</th>
+                                        <th>Value</th>
+                                    </tr>
+                                    <tr v-for="stat in savedRecipesStats" :key="stat.desc">
+                                        <td>{{ stat.desc }}</td>
+                                        <td>{{ stat.value }}</td>
+                                    </tr>
+                                </table>
+                            </IonItem>
+
+                            <List :list="savedRecipes" list-key="id">
+                                <template #element="{ element }">
+                                    <RecipePreview :recipe="element as Recipe"/>
+                                </template>
+                            </List>
+                        </template>
+                        <template v-else>
+                            <TasteBuddyLogo size="small"/>
                             <h2 class="ion-text-center">
-                                Stats of saved recipes
+                                {{ $t('Favorites.NoRecipesSaved') }}
                             </h2>
-                        </IonItem>
-                        <IonItem>
-                            <table>
-                                <tr>
-                                    <th>Stats</th>
-                                    <th>Value</th>
-                                </tr>
-                                <tr v-for="stat in savedRecipesStats" :key="stat.desc">
-                                    <td>{{ stat.desc }}</td>
-                                    <td>{{ stat.value }}</td>
-                                </tr>
-                            </table>
-                        </IonItem>
-
-                        <List :list="savedRecipes" list-key="id">
-                            <template #element="{ element }">
-                                <RecipePreview :recipe="element as Recipe"/>
-                            </template>
-                        </List>
-                    </template>
-                    <template v-else>
-                        <TasteBuddyLogo size="small"/>
-                        <h2 class="ion-text-center">
-                            {{ $t('Favorites.NoRecipesSaved') }}
-                        </h2>
-                    </template>
+                        </template>
+                    </div>
                 </div>
             </div>
             <FabTimer/>

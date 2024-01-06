@@ -1,22 +1,35 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { ItemQuery, RecipeSuggestion, SearchQuery } from '@/app/search';
 import { useRecipeStore } from '@/app/storage';
-import { Recipe } from '@/shared';
+import { Item, Recipe } from '@/shared';
 import { logError } from '@/shared/utils/logging';
 import { mutateString } from '@/app/search/util';
 import { PrefixIdTree } from '@/app/search/radix';
 
 export class TasteBuddySearch {
     // Map of search terms to recipe ids
-    private readonly _tree: PrefixIdTree
+    private readonly _recipes: PrefixIdTree
+    private readonly _items: PrefixIdTree
 
-    constructor(recipes: Recipe[]) {
-        this._tree = new PrefixIdTree()
-        for (const recipe of recipes) {
-            this.addRecipe(recipe)
+    constructor(recipes?: Recipe[], items?: Item[]) {
+        this._recipes = new PrefixIdTree()
+        this._items = new PrefixIdTree()
+
+        // Add all recipes
+        if (recipes !== undefined) {
+            for (const recipe of recipes) {
+                this.addRecipe(recipe)
+            }
+        }
+
+        // Add all items
+        if (items !== undefined) {
+            for (const item of items) {
+                this.addItem(item)
+            }
         }
     }
 
@@ -31,7 +44,23 @@ export class TasteBuddySearch {
         // Add all possible mutations
         for (const field of fields) {
             for (const mutation of mutateString(field)) {
-                this._tree.insert(mutation, recipe.id)
+                this._recipes.insert(mutation, recipe.id)
+            }
+        }
+    }
+
+    /**
+     * Add an item to the search index
+     * @param item
+     */
+    addItem(item: Item) {
+        const fields = [// Name
+            ...Object.values(item.name),]
+
+        // Add all possible mutations
+        for (const field of fields) {
+            for (const mutation of mutateString(field)) {
+                this._items.insert(mutation, item.id)
             }
         }
     }
@@ -42,11 +71,11 @@ export class TasteBuddySearch {
      * @return {string[]} list of recipe ids
      */
     search(query: string): string[] {
-        return this._tree.search(query)
+        return this._recipes.search(query)
     }
 }
 
-export function searchRecipesByString(query: string): Recipe[] {
+export function searchRecipesByQuery(query: string): Recipe[] {
     const store = useRecipeStore()
     const recipesAsMap = store.getRecipesAsMap
     const recipeSearch = store.search

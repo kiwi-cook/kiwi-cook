@@ -1,15 +1,17 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <h2 class="subheader">
-        {{ smallText }}
-    </h2>
-    <h1 class="big-header">
-        {{ bigText[0] }}
-        <span v-if="bigText.length > 1" class="header-msg-highlight">{{ bigText[1] }}</span>
-    </h1>
+    <div class="header">
+        <h2 class="subheader">
+            {{ smallText }}
+        </h2>
+        <h1 class="big-header">
+            {{ bigText[0] }}
+            <span v-if="bigText.length > 1" class="header-msg-highlight">{{ bigText[1] }}</span>
+        </h1>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -22,7 +24,32 @@ defineProps({
         type: Object as PropType<string[]>, required: true
     }
 })
+
+/* Shrink the header on scroll */
+const shrinkHeader = () => {
+    const header = document.querySelector('.header');
+    const subheader = document.querySelector('.subheader');
+    const bigHeader = document.querySelector('.big-header');
+    const scrollPosition = window.scrollY;
+    if (scrollPosition > 0) {
+        header?.classList.add('shrink');
+        subheader?.classList.add('shrink');
+        bigHeader?.classList.add('shrink');
+    } else {
+        header?.classList.remove('shrink');
+        subheader?.classList.remove('shrink');
+        bigHeader?.classList.remove('shrink');
+    }
+};
+
+window.addEventListener('scroll', shrinkHeader);
 </script>
+
+<style>
+.header {
+    padding-top: var(--padding-t);
+}
+</style>
 
 <style scoped>
 .header-msg-highlight {
@@ -36,4 +63,9 @@ defineProps({
     margin: 0 0 10px;
 }
 
+.shrink {
+    font-size: var(--font-size-medium);
+    font-weight: var(--font-weight-normal);
+    margin: 0 0 5px;
+}
 </style>

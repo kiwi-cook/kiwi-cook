@@ -40,6 +40,7 @@
     "@ionic/storage": "^4.0.0",
     "@ionic/vue": "^7.5.4",
     "@ionic/vue-router": "^7.6.2",
+    "@vueuse/core": "^10.7.1",
     "core-js": "^3.34.0",
     "fastest-levenshtein": "^1.0.16",
     "lz-string": "^1.5.0",

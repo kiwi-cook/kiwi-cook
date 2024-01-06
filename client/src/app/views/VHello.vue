@@ -1,12 +1,12 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
     <IonPage>
         <IonContent :fullscreen="true">
-            <div class="content-wrapper h100">
-                <div class="content">
+            <div class="content-wrapper">
+                <div class="content h100">
                     <div class="vertical-center">
                         <HeaderTyped :big-text="welcomeText" :speed="30"
                                      @finish="finished = true"/>

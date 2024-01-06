@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 :root {
@@ -18,10 +18,15 @@
     --margin-s-large: 45px;
     --margin-s: var(--margin-s-large);
 
+
     /* Padding */
     --padding-small: 5px;
     --padding-medium: 10px;
-    --padding-large: 25px;
+    --padding-large: 30px;
+
+    /* Padding sections */
+    --padding-t: var(--padding-large);
+    --padding-b: var(--padding-small);
 }
 
 @media (width <= 414px) {
@@ -41,15 +46,29 @@ ion-content {
 
 .content-wrapper {
     margin: var(--margin-page);
+    height: 100%;
 }
 
 .content {
     inset: 0 !important;
+    height: unset;
+}
+
+.content-margin {
     margin: unset !important;
     max-width: var(--max-width) !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    height: 100%;
+}
+
+.sticky-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    /* background: var(--ion-background-color); */
+    background: rgba(var(--ion-background-color-rgb), 0.7);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
 }
 
 .h100 {
