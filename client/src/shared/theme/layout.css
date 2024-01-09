@@ -5,9 +5,12 @@
 :root {
     --max-width: 1280px;
 
+    /* Top */
+    --top: 25px;
+
     /* Margin */
     --margin-auto: 0 auto;
-    --margin-page: 25px 25px;
+    --margin-page: var(--top) 25px;
     --margin-small: 5px;
     --margin-medium: 15px;
     --margin: var(--margin-medium);
@@ -17,7 +20,6 @@
     --margin-s-medium: 20px;
     --margin-s-large: 45px;
     --margin-s: var(--margin-s-large);
-
 
     /* Padding */
     --padding-small: 5px;
@@ -31,7 +33,10 @@
 
 @media (width <= 414px) {
     :root {
-        --margin-page: 10px 10px;
+        --top: 10px;
+
+        /* Margin */
+        --margin-page: var(--top) 10px;
 
         /* Margin sections */
         --margin-s-medium: 10px;
@@ -65,10 +70,10 @@ ion-content {
     position: sticky;
     top: 0;
     z-index: 1;
-    /* background: var(--ion-background-color); */
-    background: rgba(var(--ion-background-color-rgb), 0.7);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
+    width: 100%;
+
+    /* Padding */
+    padding: var(--padding-medium);
 }
 
 .h100 {

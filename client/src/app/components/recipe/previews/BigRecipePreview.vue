@@ -104,6 +104,7 @@ a:hover {
     .recipe-details {
         flex: none; /* Reset flex properties for mobile layout */
         width: 100%; /* Make both sections take full width */
+        align-items: center; /* Center items horizontally */
     }
 
     .recipe-details {

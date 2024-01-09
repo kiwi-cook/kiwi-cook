@@ -27,6 +27,7 @@ defineProps({
 
 /* Shrink the header on scroll */
 const shrinkHeader = () => {
+    alert('shrinkHeader')
     const header = document.querySelector('.header');
     const subheader = document.querySelector('.subheader');
     const bigHeader = document.querySelector('.big-header');
@@ -41,8 +42,6 @@ const shrinkHeader = () => {
         bigHeader?.classList.remove('shrink');
     }
 };
-
-window.addEventListener('scroll', shrinkHeader);
 </script>
 
 <style>

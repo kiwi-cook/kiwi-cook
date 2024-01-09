@@ -23,6 +23,7 @@
 
     /* border */
     --border-radius: 15px;
+    --border-radius-strong: 50px;
     --border-radius-small: 10px;
     --border-radius-round: 100%;
     --border: thin solid var(--ion-color-light) !important;

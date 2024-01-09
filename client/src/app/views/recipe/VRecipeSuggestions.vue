@@ -7,11 +7,13 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
+                    <div class="content-margin">
+                        <Header :big-text="$t('Suggestions.Title').split(';')"
+                                :small-text="$t('Suggestions.Subtitle')"/>
+                    </div>
+
                     <div class="sticky-header">
                         <div class="content-margin">
-                            <Header :big-text="$t('Suggestions.Title').split(';')"
-                                    :small-text="$t('Suggestions.Subtitle')"/>
-
                             <!-- Searchbar for ingredients, tools, recipes and tags -->
                             <SmartSearchbar v-model="filterInput" :items="items"
                                             :placeholder="$t('Suggestions.SearchbarPrompt')" :recipes="recipes"
@@ -32,7 +34,7 @@
                     <div class="content-margin">
                         <!-- Preferences -->
                         <Transition name="fade-top">
-                            <section v-if="preferencesActive">
+                            <section v-if="false">
                                 <IonChip :outline="activePreference === 'ingredients'"
                                          @click="activePreference = 'ingredients'">
                                     <IonIcon :icon="list"/>
@@ -287,7 +289,7 @@ import { useI18n } from 'vue-i18n';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
 import { RecipeSuggestion, SearchQueryBuilder, searchRecipes } from '@/app/search';
-import { SmartSearchbar } from '@/app/components/recipe';
+import { SmartSearchbar } from '@/app/components/search';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()

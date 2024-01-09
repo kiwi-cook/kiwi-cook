@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -7,10 +7,10 @@
         <IonRow>
             <IonCol v-if="$slots.left" :size-lg="selectedLayout.left.lg"
                     :size-md="selectedLayout.left.md"
+                    :size-sm="$slots.right ? selectedLayout.left.sm : '12'"
                     :size-xl="selectedLayout.left.xl"
                     class="left"
                     size="12"
-                    size-sm="12"
                     v-bind="$props">
                 <slot name="left"/>
             </IonCol>
@@ -46,36 +46,36 @@ const hasRightSlot = computed(() => !!slots['right'])
 
 type Layout = {
     left: {
-        xl: string, lg: string, md: string
+        xl: string, lg: string, md: string, sm: string
     }, right: {
-        xl: string, lg: string, md: string
+        xl: string, lg: string, md: string, sm: string
     }
 }
 
 const layouts: { [key: string]: Layout } = {
     default: {
         left: {
-            xl: '6', lg: '6', md: '12'
+            xl: '6', lg: '6', md: '6', sm: '6'
         }, right: {
-            xl: '6', lg: '6', md: '12'
+            xl: '6', lg: '6', md: '6', sm: '6'
         }
     }, leftBigger: {
         left: {
-            xl: '8', lg: '8', md: '7'
+            xl: '8', lg: '8', md: '7', sm: '6'
         }, right: {
-            xl: '4', lg: '4', md: '5'
+            xl: '4', lg: '4', md: '5', sm: '6'
         }
     }, rightBigger: {
         left: {
-            xl: '4', lg: '4', md: '5'
+            xl: '4', lg: '4', md: '5', sm: '6'
         }, right: {
-            xl: '8', lg: '8', md: '7'
+            xl: '8', lg: '8', md: '7', sm: '6'
         }
     }, noRight: {
         left: {
-            xl: '12', lg: '12', md: '12'
+            xl: '12', lg: '12', md: '12', sm: '12'
         }, right: {
-            xl: '0', lg: '0', md: '0'
+            xl: '0', lg: '0', md: '0', sm: '0'
         }
     }
 }
