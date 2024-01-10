@@ -268,7 +268,7 @@ const search = () => {
     border-radius: var(--border-radius-strong);
     padding: 5px 10px;
     max-width: 100%;
-    margin: var(--margin);
+    margin: var(--margin) 0;
 
     /* Colors and shadows */
     box-shadow: var(--box-shadow-strong);
