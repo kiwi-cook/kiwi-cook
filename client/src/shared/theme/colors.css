@@ -68,6 +68,12 @@
     /* Background Colors */
     --ion-background-color: var(--ion-color-light);
     --ion-background-color-rgb: var(--ion-color-light-rgb);
+
+    /* Shadow colors */
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --shadow-color-inner: rgba(var(--ion-color-medium-rgb), 0.15);
+    --shadow-color-strong: rgba(0, 0, 0, 0.3);
+    --shadow-color-hover: rgba(0, 0, 0, 0.33);
 }
 
 .ion-color-favorite {
@@ -153,6 +159,13 @@
     --ion-toolbar-background: #1f1f1f;
     --ion-tab-bar-background: #1f1f1f;
     --ion-card-background: #1e1e1e;
+}
+
+body.dark {
+    --shadow-color: rgba(0, 0, 0, 0.8);
+    --shadow-color-inner: rgba(var(--ion-color-medium-rgb), 0.15);
+    --shadow-color-strong: rgba(0, 0, 0, 0.8);
+    --shadow-color-hover: rgba(0, 0, 0, 0.9);
 }
 
 .magic-gradient {

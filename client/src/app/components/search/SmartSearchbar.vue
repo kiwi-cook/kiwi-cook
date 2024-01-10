@@ -245,11 +245,10 @@ const search = () => {
 
     /* Background blur */
     backdrop-filter: blur(15px); /* Blur effect */
-    mask-image: linear-gradient(to bottom, white 50%, transparent 90%);
+    mask-image: linear-gradient(180deg, #fff 50%, #0000 90%);
 
     /* WebKit */
     -webkit-backdrop-filter: blur(15px); /* For WebKit/Safari */
-    -webkit-mask-image: -webkit-linear-gradient(to bottom, white 50%, transparent 90%);
 
     /* Padding to prevent the blur from being clipped */
     padding: 10px;
@@ -333,8 +332,9 @@ input::-webkit-inner-spin-button {
     color: #fff;
     text-shadow: 1px 1px 2px #fff;
     background-size: 200% 200%; /* Increase background size for the gradient animation */
-    box-shadow: 3px 3px 6px #bbb, -3px -3px 6px #fff;
-    /* box-shadow: 0 17px 10px -10px rgba(0, 0, 0, 0.4); */
+
+    /* Shadows */
+    box-shadow: var(--box-shadow2);
 
     /* Animations */
     transition: background 1s ease-in-out,
@@ -344,16 +344,11 @@ input::-webkit-inner-spin-button {
     animation: liquidGradient 5s infinite ease; /* Apply the liquid gradient animation */
 }
 
-.searchbar-search-button:active {
-    color: #222;
-    box-shadow: inset 3px 3px 6px #bbb, inset -3px -3px 6px #fff;
-    text-shadow: none;
-}
 
-
-.searchbar-search-button:hover {
+.searchbar-search-button:hover, .searchbar-search-button:active {
     /* Hover effects */
-    box-shadow: 0 37px 20px -15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 30px 20px -15px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
     scale: 1.05;
 }
 

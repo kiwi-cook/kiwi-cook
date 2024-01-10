@@ -7,16 +7,13 @@
         <IonContent :fullscreen="true">
             <div class="content-wrapper">
                 <div class="content">
-                    <div class="sticky-header">
-                        <div class="content-margin">
-                            <Header :big-text="$t('Favorites.Title').split(';')"
-                                    :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
-                        </div>
+                    <div class="content-margin">
+                        <Header :big-text="$t('Favorites.Title').split(';')"
+                                :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
                     </div>
 
 
                     <div class="content-margin">
-
                         <template v-if="savedRecipes.length > 0">
                             <IonItem>
                                 <IonButton @click="removeSavedRecipes">

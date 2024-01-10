@@ -32,14 +32,12 @@ defineProps({
 <style scoped>
 .smart-question-card {
     max-width: 100%;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     border-radius: 15px;
     border: solid 1px #e0e0e0;
-    background-color: #fff;
+    box-shadow: var(--box-shadow2);
 }
 
 ion-card-header {
-    background-color: #ffffff;
     border-bottom: solid 1px #e0e0e0;
 }
 
@@ -49,13 +47,11 @@ ion-card-title {
 }
 
 ion-card-content {
-    color: #484848;
     font-size: 1rem;
     line-height: 1.4;
 }
 
 ion-item {
-    --background: #ffffff;
     --padding-start: 0;
     --padding-end: 0;
     --inner-padding-end: 20px;

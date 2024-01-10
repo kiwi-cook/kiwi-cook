@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { useIonRouter } from '@ionic/vue';
@@ -136,7 +136,7 @@ export class Recipe {
      * @returns the duration of the recipe
      */
     public getDuration(): number {
-        return this.steps.reduce((acc, step) => acc + (step.duration ?? 0), 0)
+        return this.props.duration ?? 0
     }
 
     public getTags(): string[] {

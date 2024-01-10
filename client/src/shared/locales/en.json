@@ -30,7 +30,8 @@
     "GoodAppetite": "Good appetite!",
     "NotFound": {
       "Title": "Recipe not found",
-      "Description": "The recipe you are looking for does not exist."
+      "Description": "The recipe you are looking for does not exist.",
+      "Back": "Back to overview"
     }
   },
   "RecipeOfTheDay": {

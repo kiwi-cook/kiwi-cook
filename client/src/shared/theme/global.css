@@ -5,14 +5,12 @@
 :root {
     --background: var(--ion-color-light);
 
-    /* shadows */
-    --shadow-color: var(--ion-color-medium-shade);
-    --shadow-color-inner: rgba(var(--ion-color-medium-rgb), 0.15);
-    --shadow-color-strong: var(--ion-color-medium-shade);
-    --box-shadow: 0px 0px 18px -9px rgba(0, 0, 0, 0.30);
+    /* Box Shadow */
+    --box-shadow: 0px 0px 18px -9px var(--shadow-color);
+    --box-shadow2: 0px 0px 6px 1px var(--shadow-color);
     --box-shadow-inner: inset 0px 0px 20px 1px var(--shadow-color-inner);
-    --box-shadow-strong: var(--shadow-color-strong) 0px 20px 30px -10px;
-    --box-shadow-hover: 0px 0px 18px 0px rgba(0, 0, 0, 0.33);
+    --box-shadow-strong: 0px 20px 30px -10px var(--shadow-color-strong);
+    --box-shadow-hover: 0px 0px 18px 0px var(--shadow-color-hover);
 
     /* transition */
     --transition: all .3s cubic-bezier(0, 0, .5, 1);
@@ -28,13 +26,6 @@
     --border-radius-round: 100%;
     --border: thin solid var(--ion-color-light) !important;
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
-}
-
-body.dark {
-    :root {
-        --shadow-color: var(--ion-color-dark-shade);
-        --shadow-color-strong: var(--ion-color-dark-shade);
-    }
 }
 
 .shadow {

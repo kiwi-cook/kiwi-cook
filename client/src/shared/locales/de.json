@@ -30,7 +30,8 @@
     "GoodAppetite": "Guten Appetit!",
     "NotFound": {
       "Title": "Ups, da ist etwas schiefgelaufen.",
-      "Description": "Das Rezept konnte nicht gefunden werden."
+      "Description": "Das Rezept konnte nicht gefunden werden.",
+      "Back": "Zurück"
     }
   },
   "RecipeOfTheDay": {

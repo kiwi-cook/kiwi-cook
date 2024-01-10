@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -46,7 +46,7 @@ const readMore = computed<{ text: string, showButton: boolean }>(() => {
     }
 
     const index = nthIndex(text.value, '.', length?.value);
-    if (index === -1) {
+    if (index === -1 || text.value.length <= index + 1) {
         return {text: text.value, showButton: false};
     } else {
         return {text: isExpanded.value ? text.value : text.value.substring(0, index + 1), showButton: true};
