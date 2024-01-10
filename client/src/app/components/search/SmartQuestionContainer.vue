@@ -4,7 +4,7 @@
 
 <template>
     <h3>2 schnelle Fragen</h3>
-    <div class="smart-questions-container">
+    <div class="smart-questions-container x mandatory-scroll-snapping">
         <slot/> <!-- Default slot for question components -->
     </div>
 </template>
@@ -20,6 +20,12 @@
     overflow-y: hidden;
     padding: 10px;
     gap: var(--margin);
+}
+
+.smart-questions-container > .smart-question-card {
+    text-align: center;
+    scroll-snap-align: center;
+    flex: none;
 }
 
 .smart-questions-container > * {

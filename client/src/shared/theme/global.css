@@ -48,6 +48,8 @@
     overflow-y: auto;
 }
 
+/* Images */
+
 .img {
     position: absolute;
     height: 100%;
@@ -61,17 +63,6 @@ ion-img::part(image) {
     box-shadow: var(--box-shadow-strong);
 }
 
-.over-x-scroll {
-    overflow-x: scroll;
-    width: 100%;
-}
-
-.sticky {
-    position: sticky;
-    top: 15px;
-    z-index: 100;
-}
-
 /* Header */
 .ion-header {
     display: none;
@@ -81,4 +72,32 @@ ion-img::part(image) {
     .ion-header {
         display: inherit;
     }
+}
+
+/* Scrolling */
+.sticky {
+    position: sticky;
+    top: 15px;
+    z-index: 100;
+}
+
+.over-x-scroll {
+    overflow-x: scroll;
+    width: 100%;
+}
+
+.x.mandatory-scroll-snapping {
+    scroll-snap-type: x mandatory;
+}
+
+.x.proximity-scroll-snapping {
+    scroll-snap-type: x proximity;
+}
+
+.y.mandatory-scroll-snapping {
+    scroll-snap-type: y mandatory;
+}
+
+.y.proximity-scroll-snapping {
+    scroll-snap-type: y proximity;
 }
