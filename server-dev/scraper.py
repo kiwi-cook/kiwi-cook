@@ -27,6 +27,9 @@ def scrape_parse_convert(url: str, client) -> Recipe:
     items = parse_scraper_ingredients(scraper.ingredients(), client)
     steps = parse_scraper_steps(scraper.instructions(), lang)
 
+    # duration
+    duration = scraper.total_time()
+
     # props
     img_url = scraper.image()
 
@@ -40,7 +43,8 @@ def scrape_parse_convert(url: str, client) -> Recipe:
         items=items,
         steps=steps,
         props={
-            "imgUrl": img_url
+            "imgUrl": img_url,
+            "duration": duration
         },
         src={
             "url": url,
