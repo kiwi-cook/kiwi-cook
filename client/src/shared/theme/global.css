@@ -28,6 +28,7 @@
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
 }
 
+/* Shadows */
 .shadow {
     box-shadow: var(--box-shadow);
 }
@@ -40,16 +41,7 @@
     border: none !important;
 }
 
-.desc {
-    color: var(--ion-color-medium);
-    font-size: var(--font-size-smaller);
-    line-height: var(--desc-line-height);
-    white-space: pre-wrap;
-    overflow-y: auto;
-}
-
 /* Images */
-
 .img {
     position: absolute;
     height: 100%;

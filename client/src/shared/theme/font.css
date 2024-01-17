@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 :root {
@@ -118,4 +118,22 @@ h5.subheader {
     font-size: var(--font-size-smaller);
     font-weight: var(--font-weight-normal);
     color: var(--ion-color-medium);
+}
+
+/* Text */
+.desc {
+    color: var(--ion-color-medium);
+    font-size: var(--font-size-smaller);
+    line-height: var(--desc-line-height);
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.highlight {
+    color: var(--ion-color-primary);
+    font-weight: var(--font-weight-bold);
 }
