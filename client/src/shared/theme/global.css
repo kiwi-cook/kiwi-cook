@@ -7,6 +7,10 @@
 
     /* Box Shadow */
     --box-shadow: 0px 0px 18px -9px var(--shadow-color);
+    --box-shadow-neumorphism: 6px 6px 12px 0 rgba(0, 0, 0, 0.2),
+    -6px -6px 12px 0 rgba(255, 255, 255, 0.5);
+    --box-shadow-neumorphism-pressed: inset 3px 3px 5px 0 rgba(0, 0, 0, 0.2),
+    inset -3px -3px 5px 0 rgba(255, 255, 255, 0.5);
     --box-shadow2: 0px 0px 6px 1px var(--shadow-color);
     --box-shadow-inner: inset 0px 0px 20px 1px var(--shadow-color-inner);
     --box-shadow-strong: 0px 20px 30px -10px var(--shadow-color-strong);
@@ -20,11 +24,11 @@
     --margin: 0;
 
     /* border */
+    --border-radius-small: 10px;
     --border-radius: 15px;
     --border-radius-strong: 50px;
-    --border-radius-small: 10px;
     --border-radius-round: 100%;
-    --border: thin solid var(--ion-color-light) !important;
+    --border: thin solid var(--ion-color-light-shade) !important;
     --border-hover: 1px solid rgb(59 89 152 / 16%) !important;
 }
 
