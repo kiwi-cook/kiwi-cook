@@ -3,68 +3,79 @@
   -->
 
 <template>
-    <IonCard class="smart-question-card">
-        <IonCardHeader>
-            <IonCardTitle>{{ title }}</IonCardTitle>
-        </IonCardHeader>
-        <IonCardContent>
-            {{ question }}
-        </IonCardContent>
-        <IonItem lines="none">
-            <slot/>
-        </IonItem>
-    </IonCard>
+    <div :class="['smart-question-card', {'no-animation': noAnimation}]" @mouseenter="showContent()"
+         @mouseleave="hideContent()">
+        <h4 class="smart-question-header">{{ title }}</h4>
+        <div :class="['smart-question-subtitle', {'big': !visible || noAnimation}]">
+            <slot name="subtitle"/>
+        </div>
+        <Transition name="fade-top">
+            <div v-show="visible" class="item">
+                <slot name="default"/>
+            </div>
+        </Transition>
+    </div>
 </template>
 
 <script setup>
-import {IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonItem} from '@ionic/vue';
+import {ref} from 'vue';
 
 defineProps({
     title: {
         type: String, required: true
     },
-    question: {
-        type: String, required: true
+    noAnimation: {
+        type: Boolean, required: false, default: false
     }
 })
+
+const visible = ref(false)
+const showContent = () => visible.value = true
+const hideContent = () => visible.value = false
 </script>
 
 <style scoped>
 .smart-question-card {
     max-width: 100%;
-    border-radius: 15px;
-    border: solid 1px #e0e0e0;
+    border-radius: var(--border-radius);
+    border: var(--border);
     box-shadow: var(--box-shadow2);
+    transition: var(--transition);
+    cursor: pointer;
+    overflow: hidden;
 }
 
-ion-card-header {
-    border-bottom: solid 1px #e0e0e0;
+.smart-question-card.no-animation {
+    transition: none;
 }
 
-ion-card-title {
-    font-size: 1.2rem;
-    color: var(--ion-color-secondary)
+.smart-question-header {
+    padding: var(--padding);
+    margin-bottom: 0;
+    font-size: var(--font-size-medium);
 }
 
-ion-card-content {
-    font-size: 1rem;
+.smart-question-subtitle {
+    font-size: var(--font-size-smaller);
+    font-weight: var(--font-weight-normal);
+    margin-top: 5px;
+    margin-bottom: 0;
+    color: var(--ion-color-medium);
+    line-height: 1.4;
+    transition: var(--transition);
+}
+
+.smart-question-subtitle.big {
+    margin-top: 0;
+    font-size: var(--font-size-small);
     line-height: 1.4;
 }
 
-ion-item {
-    --padding-start: 0;
-    --padding-end: 0;
-    --inner-padding-end: 20px;
-    --inner-padding-start: 20px;
-    --border-width: 0;
+.item {
+    padding: 0 var(--margin);
+    border: none;
+    transition: var(--transition);
 }
 
-ion-input {
-    font-size: 1rem;
-    --padding-start: 10px;
-    --padding-end: 10px;
-    --placeholder-color: #757575;
-    --placeholder-font-style: italic;
-    --placeholder-opacity: 0.8;
-}
+/* Add additional styles as needed to match the Ionic look and feel */
 </style>

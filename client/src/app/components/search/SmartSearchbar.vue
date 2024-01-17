@@ -7,7 +7,7 @@
         <div ref="searchbar">
             <div class="searchbar-blur"/>
             <div class="searchbar-search-wrapper">
-                <input v-model="searchInput" :placeholder="placeholder"
+                <input v-model="searchInput" :placeholder="$t('Suggestions.SearchbarPrompt')"
                        class="searchbar-search"
                        @click="openSearch()"
                        @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
@@ -44,45 +44,83 @@
 
                         <!-- Quick-Questions -->
                         <SmartQuestionContainer>
-                            <SmartQuestion question="Wie viel Zeit hast du?" title="Kochzeit">
+                            <SmartQuestion title="Kochzeit">
+                                <template #subtitle>Du hast max. <span class="highlight">
+                                    {{
+                                        USER_PREFERENCES.timeAvailable >
+                                            60 ? 'viiiel' : `${USER_PREFERENCES.timeAvailable} Minuten`
+                                    }} </span>
+                                    Zeit
+                                </template>
                                 <!-- TODO: add logarithmic slider -->
-                                <IonRange v-model="USER_PREFERENCES.timeAvailable"
-                                          :label="USER_PREFERENCES.timeAvailable > 60 ? 'Vieeel Zeit' : `${USER_PREFERENCES.timeAvailable} Minuten`"
-                                          :max="65" :min="0"
-                                          :step="5" color="secondary"
-                                          label-placement="start" pin snaps/>
+                                <template #default>
+                                    <IonRange v-model="USER_PREFERENCES.timeAvailable"
+                                              :max="65" :min="5"
+                                              :step="5"
+                                              pin snaps/>
+                                </template>
                             </SmartQuestion>
 
                             <!-- TODO: add skip button -->
+                            <!-- Is this really necessary? -->
 
-                            <SmartQuestion question="Für wie viele kochst du?" title="Portionen">
-                                <IonRange v-model="USER_PREFERENCES.servings"
-                                          :label="`${USER_PREFERENCES.servings} Portionen`"
-                                          :max="10" :min="1"
-                                          :step="1" color="secondary"
-                                          label-placement="start" pin snaps/>
+                            <SmartQuestion title="Portionen">
+                                <template #subtitle>Du kochst <span class="highlight">{{
+                                    USER_PREFERENCES.servings
+                                }} Portionen</span>
+                                </template>
+                                <template #default>
+                                    <IonRange v-model="USER_PREFERENCES.servings"
+                                              :max="10" :min="1"
+                                              :step="1" pin snaps/>
+                                </template>
+                            </SmartQuestion>
+
+                            <SmartQuestion no-animation title="Zutaten">
+                                <template #subtitle>Du hast <span class="highlight">{{
+                                    USER_PREFERENCES.items.length
+                                }} Zutaten</span> ausgewählt
+                                </template>
+                                <template #default>
+                                    <HorizontalList :list="USER_PREFERENCES.items" no-wrap>
+                                        <template #element="{element}">
+                                            <ItemChip :item="element" @click="selectItem(element)"/>
+                                        </template>
+                                    </HorizontalList>
+                                </template>
                             </SmartQuestion>
                         </SmartQuestionContainer>
 
-                        <IonItem v-if="filteredRecipes?.length > 0" lines="none">
-                            <h4>Rezepte</h4>
-                            <HorizontalList :list="filteredRecipes" no-wrap>
+                        <h3>Wähle Zutaten aus</h3>
+                        <IonItem v-if="filteredItems?.length === 0" lines="none">
+                            <h4>Vorschläge</h4>
+                            <HorizontalList :list="itemSuggestions" no-wrap>
                                 <template #element="{element}">
-                                    <MiniRecipePreview :link="element.getRoute()" :name="element.getName()"
-                                                       :recipe="element"
-                                                       @click="selectRecipe(element)"/>
+                                    <ItemChip :item="element" @click="selectItem(element)"/>
                                 </template>
                             </HorizontalList>
                         </IonItem>
-
                         <IonItem v-if="filteredItems?.length > 0" lines="none">
-                            <h4>Wähle Zutaten aus oder suche weiter</h4>
+                            <h4>Deine Suche</h4>
                             <HorizontalList :list="[...filteredItems, /*...itemSuggestions */]" no-wrap>
                                 <template #element="{element}">
                                     <ItemChip :item="element" @click="selectItem(element)"/>
                                 </template>
                             </HorizontalList>
                         </IonItem>
+
+                        <template v-if="filteredRecipes?.length > 0">
+                            <h3>Finde Rezepte</h3>
+                            <IonItem lines="none">
+                                <HorizontalList :list="filteredRecipes" no-wrap>
+                                    <template #element="{element}">
+                                        <MiniRecipePreview :link="element.getRoute()" :name="element.getName()"
+                                                           :recipe="element"
+                                                           @click="selectRecipe(element)"/>
+                                    </template>
+                                </HorizontalList>
+                            </IonItem>
+                        </template>
                     </div>
                 </div>
             </Transition>
@@ -107,9 +145,7 @@ const recipeStore = useRecipeStore()
 
 // Props
 const props = defineProps({
-    placeholder: {
-        type: String, required: true
-    }, items: {
+    items: {
         type: Array as PropType<Item[]>, required: false, default: () => []
     }, recipes: {
         type: Array as PropType<Recipe[]>, required: false, default: () => []
@@ -178,6 +214,14 @@ const filteredRecipes = shallowRef<Recipe[]>([])
 const filteredItems = shallowRef<Item[]>([])
 
 watch(searchInput, () => {
+    // Reset filtered recipes and items if search input is empty
+    if (searchInput.value === '') {
+        filteredRecipes.value = []
+        filteredItems.value = []
+        return
+    }
+
+    // Filter recipes and items
     filteredRecipes.value = searchRecipesByQuery(searchInput.value ?? '')
         .slice(0, CONFIG.MAX_RECIPES)
     filteredItems.value = items.value
