@@ -24,24 +24,6 @@ defineProps({
         type: Object as PropType<string[]>, required: true
     }
 })
-
-/* Shrink the header on scroll */
-const shrinkHeader = () => {
-    alert('shrinkHeader')
-    const header = document.querySelector('.header');
-    const subheader = document.querySelector('.subheader');
-    const bigHeader = document.querySelector('.big-header');
-    const scrollPosition = window.scrollY;
-    if (scrollPosition > 0) {
-        header?.classList.add('shrink');
-        subheader?.classList.add('shrink');
-        bigHeader?.classList.add('shrink');
-    } else {
-        header?.classList.remove('shrink');
-        subheader?.classList.remove('shrink');
-        bigHeader?.classList.remove('shrink');
-    }
-};
 </script>
 
 <style>
