@@ -25,7 +25,7 @@
                     <ItemList :items="recipeItems" horizontal quantity-position="start"/>
                 </IonItem> -->
                 <!-- Show the description here of the step if it is not a header -->
-                <IonItem v-if="step.type !== STEP_TYPES.HEADER" lines="none">
+                <IonItem v-if="step.type !== STEP_TYPES.HEADER" class="recipe-step-desc" lines="none">
                     <div v-html="step?.pPrintStepDescription('item-highlight')"/>
                 </IonItem>
             </IonCardContent>
@@ -79,5 +79,9 @@ const startTimer = () => {
 .recipe-step-index-max {
     font-size: var(--font-size-smaller);
     font-weight: var(--font-weight-normal);
+}
+
+.recipe-step-desc {
+    --background: none;
 }
 </style>
