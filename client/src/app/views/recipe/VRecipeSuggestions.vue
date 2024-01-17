@@ -16,7 +16,7 @@
                         <div class="content-margin">
                             <!-- Searchbar for ingredients, tools, recipes and tags -->
                             <SmartSearchbar v-model="filterInput" :items="items"
-                                            :placeholder="$t('Suggestions.SearchbarPrompt')" :recipes="recipes"
+                                            :recipes="recipes"
                                             :tags="filteredTags"
                                             class="searchbar"
                                             @search="search"
@@ -35,33 +35,8 @@
                         <!-- Preferences -->
                         <Transition name="fade-top">
                             <section v-if="false">
-                                <IonChip :outline="activePreference === 'ingredients'"
-                                         @click="activePreference = 'ingredients'">
-                                    <IonIcon :icon="list"/>
-                                    <IonLabel>{{ selectedItems.length }}
-                                        {{ $t('Suggestions.Preferences.Ingredients', selectedItems.length) }}
-                                    </IonLabel>
-                                </IonChip>
-                                <Duration :always-show="true"
-                                          :class="`ion-chip-outline ${activePreference === 'duration' ? 'active' : ''}`"
-                                          :duration="maxCookingTime"
-                                          @click="activePreference = 'duration'">
-                                    {{ $t('Suggestions.Preferences.Duration') }}
-                                </Duration>
-                                <IonChip :outline="activePreference === 'tags'"
-                                         @click="activePreference = 'tags'">
-                                    <IonLabel># {{ selectedTags.length }}
-                                        {{ $t('Suggestions.Preferences.Tags', tags.length) }}
-                                    </IonLabel>
-                                </IonChip>
-                                <IonChip :outline="activePreference === 'servings'"
-                                         @click="activePreference = 'servings'">
-                                    <IonLabel>{{ servings }} {{ $t('Suggestions.Preferences.Servings', servings) }}
-                                    </IonLabel>
-                                </IonChip>
-
                                 <!-- Selected items -->
-                                <IonCard v-if="activePreference === 'ingredients'">
+                                <IonCard>
                                     <IonCardContent>
                                         <List :list="[...selectedItems]" load-all>
                                             <template #element="{ element }">
@@ -103,101 +78,6 @@
                                         </List>
                                     </IonCardContent>
                                 </IonCard>
-
-                                <!-- Duration -->
-                                <IonCard v-if="activePreference === 'duration'">
-                                    <IonCardContent>
-                                        <template v-for="time in cookingTimes" :key="time">
-                                            <Duration :duration="time" class="cooking-time" no-icon outline
-                                                      @click="maxCookingTime = time"/>
-                                        </template>
-                                        <IonChip class="recipe-price" outline
-                                                 @click="maxCookingTime = undefined">
-                                            Any duration
-                                        </IonChip>
-                                        <IonRange v-model="maxCookingTime"
-                                                  :label="`${maxCookingTime ? `${maxCookingTime} min.` : 'Any duration'}`"
-                                                  :max="60" :min="0" :pin="true"
-                                                  :pin-formatter="(value: number) => `${value} min.`"
-                                                  :snaps="true" :step="5" :ticks="false"
-                                                  label-placement="end"/>
-                                    </IonCardContent>
-                                </IonCard>
-
-                                <!-- Servings -->
-                                <IonCard v-if="activePreference === 'servings'">
-                                    <IonCardContent>
-                                        <IonItem lines="none">
-                                            <IonButtons slot="start">
-                                                <IonButton :disabled="servings === 1"
-                                                           @click="servings--">
-                                                    <IonIcon :icon="remove"/>
-                                                </IonButton>
-                                                <IonButton :disabled="servings === 100"
-                                                           @click="servings++">
-                                                    <IonIcon :icon="add"/>
-                                                </IonButton>
-                                            </IonButtons>
-                                            <IonLabel>
-                                                {{ servings }} {{ $t('Recipe.Serving', servings) }}
-                                            </IonLabel>
-                                        </IonItem>
-                                    </IonCardContent>
-                                </IonCard>
-
-                                <!-- Price -->
-                                <IonCard v-if="activePreference === 'price'">
-                                    <IonCardContent>
-                                        <template v-for="price in prices" :key="price">
-                                            <IonChip class="recipe-price" outline
-                                                     @click="maxPrice = price">
-                                                {{ price }} €
-                                            </IonChip>
-                                        </template>
-                                        <IonChip class="recipe-price" outline
-                                                 @click="maxPrice = undefined">
-                                            Any price
-                                        </IonChip>
-                                        <IonRange v-model="maxPrice"
-                                                  :label="`${maxPrice ? `${maxPrice} €` : 'Any price'}`"
-                                                  :max="20" :min="1" :pin="true"
-                                                  :pin-formatter="(value: number) => `${value} €`"
-                                                  :snaps="true"
-                                                  :step="1" :ticks="false" label-placement="end"/>
-                                    </IonCardContent>
-                                </IonCard>
-
-                                <!-- Tags -->
-                                <IonCard v-if="activePreference === 'tags'">
-                                    <IonCardContent>
-                                        <div class="over-x-scroll">
-                                            <!-- Selected tags -->
-                                            <IonChip v-for="(tag, tagIndex) in selectedTags"
-                                                     :key="`selected-tag-${tagIndex}`"
-                                                     class="tag" outline>
-                                                <IonLabel>{{ tag }}</IonLabel>
-                                                <IonIcon :icon="closeCircleOutline" color="danger"
-                                                         @click="(selectedTags ?? []).splice(tagIndex, 1)"/>
-                                            </IonChip>
-                                            <!-- Special tags -->
-                                            <IonChip v-for="(specialTag, tagIndex) in specialTags"
-                                                     :key="`special-tag-${tagIndex}`" class="tag" color="primary"
-                                                     outline
-                                                     @click="specialTag.click()">
-                                                <IonLabel>{{ specialTag.title }}</IonLabel>
-                                            </IonChip>
-                                            <!-- Suggested tags -->
-                                            <IonChip v-for="(tag, tagIndex) in suggestedTags"
-                                                     :key="`suggested-tag-${tagIndex}`"
-                                                     class="tag" outline @click="includeTag(tag)">
-                                                <IonLabel>{{ tag }}</IonLabel>
-                                                <IonIcon :icon="add"/>
-                                            </IonChip>
-                                        </div>
-                                    </IonCardContent>
-                                </IonCard>
-
-
                             </section>
                         </Transition>
 
@@ -275,14 +155,12 @@
 
 <script lang="ts" setup>
 import { computed, ref, Transition, watch } from 'vue';
-import {
-    IonButton, IonButtons, IonCard, IonCardContent, IonChip, IonContent, IonIcon, IonItem, IonLabel, IonPage, IonRange,
-} from '@ionic/vue';
+import { IonButton, IonCard, IonCardContent, IonContent, IonIcon, IonPage, } from '@ionic/vue';
 import { useRecipeStore } from '@/app/storage';
-import { Duration, FabTimer, Item, ItemComponent, Recipe } from '@/shared';
+import { FabTimer, Item, ItemComponent, Recipe } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
-import { add, close, closeCircleOutline, list, remove } from 'ionicons/icons';
+import { add, close, list, remove } from 'ionicons/icons';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import List from '@/shared/components/utility/list/List.vue';
 import { useI18n } from 'vue-i18n';
