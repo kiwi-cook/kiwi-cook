@@ -3,7 +3,8 @@
  */
 
 import SmartSearchbar from '@/app/components/search/SmartSearchbar.vue';
-import SmartQuestion from '@/app/components/search/SmartQuestion.vue';
-import SmartQuestionContainer from '@/app/components/search/SmartQuestionContainer.vue';
+import QuickPreference from '@/app/components/search/QuickPreference.vue';
+import QuickItemPreference from '@/app/components/search/QuickItemPreference.vue';
+import QuickPreferenceContainer from '@/app/components/search/QuickPreferenceContainer.vue';
 
-export { SmartQuestion, SmartSearchbar, SmartQuestionContainer };
+export { QuickPreference, QuickItemPreference, SmartSearchbar, QuickPreferenceContainer };

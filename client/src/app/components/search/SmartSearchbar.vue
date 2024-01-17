@@ -6,7 +6,7 @@
     <div class="searchbar-wrapper">
         <div ref="searchbar">
             <div class="searchbar-blur"/>
-            <div class="searchbar-search-wrapper">
+            <div :class="['searchbar-search-wrapper', {'active': searchbarIsOpen}]">
                 <input v-model="searchInput" :placeholder="$t('Suggestions.SearchbarPrompt')"
                        class="searchbar-search"
                        @click="openSearch()"
@@ -15,115 +15,122 @@
                     <IonIcon :icon="searchOutline"/>
                 </button>
             </div>
+
             <Transition name="fade-top">
-                <div v-show="searchbarIsOpen" class="searchbar-list-wrapper">
-                    <div class="searchbar-list">
-                        <!-- TODO:
-                                The behaviour of the searchbar should be that its almost fullscreen
-                                and the user can type in it.
+                <div v-show="searchbarIsOpen" class="searchbar-quick-preferences">
+                    <!-- Quick-Questions -->
+                    <QuickPreferenceContainer>
+                        <QuickPreference>
+                            <template #title><span class="highlight">
+                                {{
+                                    USER_PREFERENCES.timeAvailable >
+                                        60 ? 'viiiel' : `${USER_PREFERENCES.timeAvailable} Minuten`
+                                }} </span>
+                                Kochzeit
+                            </template>
+                            <!-- TODO: add logarithmic slider -->
+                            <template #default>
+                                <IonRange v-model="USER_PREFERENCES.timeAvailable"
+                                          :max="65" :min="10"
+                                          :step="5"
+                                          pin snaps/>
+                            </template>
+                        </QuickPreference>
 
-                                DONE The behaviour should be that the user is shown some suggestions
-                                without having to type anything. The suggestions should be
-                                based on the user's preferences.
+                        <!-- TODO: add skip button -->
+                        <!-- Is this really necessary? -->
 
-                                The user should be able to select the suggestions and
-                                view them in the searchbar.
+                        <QuickPreference>
+                            <template #title><span class="highlight">{{
+                                USER_PREFERENCES.servings
+                            }} Portionen</span>
+                            </template>
+                            <template #default>
+                                <IonRange v-model="USER_PREFERENCES.servings"
+                                          :max="10" :min="1"
+                                          :step="1" pin snaps/>
+                            </template>
+                        </QuickPreference>
 
-                                The user should be able to see some recipe suggestions based on
-                                the user's preferences.
+                        <!-- <QuickItemPreference/> -->
+                    </QuickPreferenceContainer>
+                </div>
+            </Transition>
 
-                                The user should be able to see some item suggestions based on
-                                the user's preferences.
+            <div v-if="searchInput !== '' && searchbarIsOpen" class="searchbar-list-wrapper">
+                <div class="searchbar-list">
+                    <Transition name="fade-top">
+                        <div v-show="searchInput !== ''" class="searchbar-list-results">
+                            <!-- TODO:
+                                    The behaviour of the searchbar should be that its almost fullscreen
+                                    and the user can type in it.
 
-                                The user should be able to see some tag suggestions based on
-                                the user's preferences.
+                                    DONE The behaviour should be that the user is shown some suggestions
+                                    without having to type anything. The suggestions should be
+                                    based on the user's preferences.
 
-                                The user should be able to select time, temperature and other things
-                                in the searchbar.
-                             -->
+                                    The user should be able to select the suggestions and
+                                    view them in the searchbar.
 
-                        <!-- Quick-Questions -->
-                        <SmartQuestionContainer>
-                            <SmartQuestion title="Kochzeit">
-                                <template #subtitle>Du hast max. <span class="highlight">
-                                    {{
-                                        USER_PREFERENCES.timeAvailable >
-                                            60 ? 'viiiel' : `${USER_PREFERENCES.timeAvailable} Minuten`
-                                    }} </span>
-                                    Zeit
-                                </template>
-                                <!-- TODO: add logarithmic slider -->
-                                <template #default>
-                                    <IonRange v-model="USER_PREFERENCES.timeAvailable"
-                                              :max="65" :min="5"
-                                              :step="5"
-                                              pin snaps/>
-                                </template>
-                            </SmartQuestion>
+                                    The user should be able to see some recipe suggestions based on
+                                    the user's preferences.
 
-                            <!-- TODO: add skip button -->
-                            <!-- Is this really necessary? -->
+                                    The user should be able to see some item suggestions based on
+                                    the user's preferences.
 
-                            <SmartQuestion title="Portionen">
-                                <template #subtitle>Du kochst <span class="highlight">{{
-                                    USER_PREFERENCES.servings
-                                }} Portionen</span>
-                                </template>
-                                <template #default>
-                                    <IonRange v-model="USER_PREFERENCES.servings"
-                                              :max="10" :min="1"
-                                              :step="1" pin snaps/>
-                                </template>
-                            </SmartQuestion>
+                                    The user should be able to see some tag suggestions based on
+                                    the user's preferences.
 
-                            <SmartQuestion no-animation title="Zutaten">
-                                <template #subtitle>Du hast <span class="highlight">{{
-                                    USER_PREFERENCES.items.length
-                                }} Zutaten</span> ausgewählt
-                                </template>
-                                <template #default>
-                                    <HorizontalList :list="USER_PREFERENCES.items" no-wrap>
-                                        <template #element="{element}">
-                                            <ItemChip :item="element" @click="selectItem(element)"/>
-                                        </template>
-                                    </HorizontalList>
-                                </template>
-                            </SmartQuestion>
-                        </SmartQuestionContainer>
+                                    The user should be able to select time, temperature and other things
+                                    in the searchbar.
+                                 -->
 
-                        <h3>Wähle Zutaten aus</h3>
-                        <IonItem v-if="filteredItems?.length === 0" lines="none">
-                            <h4>Vorschläge</h4>
-                            <HorizontalList :list="itemSuggestions" no-wrap>
-                                <template #element="{element}">
-                                    <ItemChip :item="element" @click="selectItem(element)"/>
-                                </template>
-                            </HorizontalList>
-                        </IonItem>
-                        <IonItem v-if="filteredItems?.length > 0" lines="none">
-                            <h4>Deine Suche</h4>
-                            <HorizontalList :list="[...filteredItems, /*...itemSuggestions */]" no-wrap>
-                                <template #element="{element}">
-                                    <ItemChip :item="element" @click="selectItem(element)"/>
-                                </template>
-                            </HorizontalList>
-                        </IonItem>
-
-                        <template v-if="filteredRecipes?.length > 0">
-                            <h3>Finde Rezepte</h3>
-                            <IonItem lines="none">
-                                <HorizontalList :list="filteredRecipes" no-wrap>
+                            <IonItem v-if="filteredRecipes?.length === 0 && filteredItems?.length === 0" lines="none">
+                                <h4>Vorschläge</h4>
+                            </IonItem>
+                            <IonItem v-else lines="none">
+                                <h4>Deine Suche</h4>
+                            </IonItem>
+                            <IonItem v-if="filteredItems?.length === 0" lines="none">
+                                <HorizontalList :list="itemSuggestions" no-wrap>
                                     <template #element="{element}">
-                                        <MiniRecipePreview :link="element.getRoute()" :name="element.getName()"
-                                                           :recipe="element"
+                                        <ItemChip :item="element" @click="selectItem(element)"/>
+                                    </template>
+                                </HorizontalList>
+                            </IonItem>
+                            <IonItem v-if="filteredRecipes?.length === 0" lines="none">
+                                <HorizontalList :list="recipeSuggestions" no-wrap>
+                                    <template #element="{element}">
+                                        <MiniRecipePreview :img-url="element?.props?.imgUrl"
+                                                           :link="element?.getRoute()"
+                                                           :name="element?.getName()" :recipe="element"
                                                            @click="selectRecipe(element)"/>
                                     </template>
                                 </HorizontalList>
                             </IonItem>
-                        </template>
-                    </div>
+
+
+                            <IonItem v-if="filteredItems?.length > 0" lines="none">
+                                <HorizontalList :list="[...filteredItems, /*...itemSuggestions */]" no-wrap>
+                                    <template #element="{element}">
+                                        <ItemChip :item="element" @click="selectItem(element)"/>
+                                    </template>
+                                </HorizontalList>
+                            </IonItem>
+                            <IonItem v-if="filteredRecipes?.length > 0" lines="none">
+                                <HorizontalList :list="filteredRecipes" no-wrap>
+                                    <template #element="{element}">
+                                        <MiniRecipePreview :img-url="element?.props?.imgUrl"
+                                                           :link="element?.getRoute()"
+                                                           :name="element?.getName()" :recipe="element"
+                                                           @click="selectRecipe(element)"/>
+                                    </template>
+                                </HorizontalList>
+                            </IonItem>
+                        </div>
+                    </Transition>
                 </div>
-            </Transition>
+            </div>
         </div>
     </div>
 </template>
@@ -139,7 +146,7 @@ import ItemChip from '@/shared/components/recipe/item/ItemChip.vue';
 import { onClickOutside } from '@vueuse/core'
 import { searchOutline } from 'ionicons/icons'
 import { MiniRecipePreview } from '@/app/components';
-import { SmartQuestion, SmartQuestionContainer } from '@/app/components/search';
+import { QuickPreference, QuickPreferenceContainer } from '@/app/components/search';
 
 const recipeStore = useRecipeStore()
 
@@ -309,18 +316,27 @@ const search = () => {
 
     /* Basic styling */
     border: var(--border);
+    border-color: var(--ion-color-primary);
     border-radius: var(--border-radius-strong);
     padding: 5px 10px;
     max-width: 100%;
     margin: var(--margin) 0;
 
     /* Colors and shadows */
-    box-shadow: var(--box-shadow-strong);
+    box-shadow: var(--box-shadow-neumorphism);
 
     /* Background blur */
     background-color: rgba(var(--ion-background-color-rgb), 0.9);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
+
+    /* Animations */
+    transition: var(--transition);
+}
+
+.searchbar-search-wrapper.active {
+    box-shadow: var(--box-shadow-neumorphism-pressed);
+    transform: none;
 }
 
 .searchbar-search {
@@ -331,7 +347,19 @@ const search = () => {
     padding: 10px;
     border-radius: var(--border-radius-strong);
     background: none;
+    cursor: pointer;
+    color: var(--ion-text-color);
 }
+
+@media (max-width: 768px) {
+    .searchbar-search::placeholder, .searchbar-search::-webkit-input-placeholder {
+        font-size: var(--font-size-smaller);
+    }
+}
+
+/* .searchbar-quick-preferences {
+    margin-bottom: 50px;
+} */
 
 /* Extra styling to remove spinner on number inputs in Firefox */
 input[type='number'] {
@@ -403,15 +431,20 @@ input::-webkit-inner-spin-button {
     width: 100%;
 }
 
+.searchbar-quick-preferences {
+    width: 100%;
+    max-width: var(--max-width);
+    margin: var(--margin-auto);
+}
+
 .searchbar-list {
-    width: 90%;
+    width: 100%;
     max-width: var(--max-width);
     margin: var(--margin-auto);
     max-height: 90vh;
     overflow-y: scroll;
-    padding: var(--padding-large);
+    padding: var(--padding-small);
     background: var(--background);
-    border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow-strong);
 }
