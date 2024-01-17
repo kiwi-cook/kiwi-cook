@@ -28,8 +28,8 @@
 
                         <IonNote>
                             Made in Germany with
-                            <IonIcon :icon="heart" color="danger"/>
-                            by Josef and Vasilij
+                            <IonIcon :icon="heart" color="favorite"/>
+                            by Josef
                         </IonNote>
                     </div>
                 </div>
