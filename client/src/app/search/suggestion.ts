@@ -1,11 +1,13 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { Recipe } from '@/shared/types'
 import { useRecipeStore } from '@/app/storage';
 import { median } from '@/app/search/util';
 import { logDebug } from '@/shared/utils/logging';
+
+const MODULE = 'app.search.suggestion.'
 
 /**
  * Very simple function to predict recipes
@@ -20,6 +22,8 @@ import { logDebug } from '@/shared/utils/logging';
  * @param maxRecipes maximum number of recipes to return
  */
 export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
+    const fName = MODULE + simpleRecipeSuggestion.name
+
     const store = useRecipeStore()
     const savedKeyValues = store.getSavedRecipesStats
     const recipes = store.getRecipesAsList
@@ -50,7 +54,7 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
             // Filter recipes by duration
             const durationOk: boolean = duration * (1 + percentages.duration) >= recipeDuration && recipeDuration >=
                 (duration * (1 - percentages.duration))
-            logDebug('simpleRecipeSuggestion', 'durationOk', durationOk)
+            logDebug(fName, 'durationOk', durationOk)
             // Filter recipes by number of steps
             // const numberOfStepsOk: boolean = recipeNumberOfSteps <= numberOfSteps * (1 + percentages.numberOfSteps) && recipeNumberOfSteps >= numberOfSteps * (1 - percentages.numberOfSteps)
             // Filter recipes by ingredients
@@ -78,7 +82,7 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
         suggestedRecipes = suggestRecipes(recipes, percentages)
     }
 
-    logDebug('simpleRecipeSuggestion', 'percentages', percentages)
-    logDebug('simpleRecipeSuggestion', 'suggestedRecipes', suggestedRecipes)
+    logDebug(fName, 'percentages', percentages)
+    logDebug(fName, 'suggestedRecipes', suggestedRecipes)
     return suggestedRecipes.slice(0, maxRecipes)
 }

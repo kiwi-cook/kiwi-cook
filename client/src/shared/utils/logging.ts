@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 /**
@@ -37,15 +37,20 @@ export const logWarn = (functionName: string, message?: any, ...messages: any[])
 }
 
 /**
- * Log an error to the console
+ * Log an error to the console and throw it
  * @param functionName the name of the function that threw the error
  * @param error the error to log
  * @param errors
  */
 export const logError = (functionName: string, error: any, ...errors: any[]) => {
+    let errorStr = []
     if (error instanceof Error) {
-        console.error(`[${functionName}]: ${error.message}`)
+        errorStr = [`[${functionName}]: ${error.message}`, ...errors]
     } else {
-        console.error(`[${functionName}]:`, error, ...errors)
+        errorStr = [`[${functionName}]:`, error, ...errors]
     }
+    if (process.env.NODE_ENV === 'development') {
+        console.error(...errorStr)
+    }
+    throw error
 }

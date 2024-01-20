@@ -8,6 +8,7 @@ import { Item, Recipe } from '@/shared';
 import { logError } from '@/shared/utils/logging';
 import { mutateString } from '@/app/search/util';
 import { PrefixIdTree } from '@/app/search/radix';
+import { ERROR_MSG } from '@/shared/utils/errors.ts';
 
 export class TasteBuddySearch {
     // Map of search terms to recipe ids
@@ -80,7 +81,7 @@ export function searchRecipesByQuery(query: string): Recipe[] {
     const recipesAsMap = store.getRecipesAsMap
     const recipeSearch = store.search
     if (recipeSearch === null) {
-        logError('searchRecipesByString', 'search is not initialized')
+        logError('searchRecipesByString', ERROR_MSG.isNull)
         return []
     }
     return recipeSearch.search(query).map((recipeId: string) => recipesAsMap[recipeId])
@@ -95,10 +96,19 @@ export function searchRecipes(query: SearchQuery): RecipeSuggestion[] {
     const store = useRecipeStore()
     const recipes: Recipe[] = store.getRecipesAsList
 
+    /* Filter recipes */
     const suggestedRecipes = recipes.filter((recipe: Recipe) => {
         return filterRecipeByItems(recipe, query.items) && filterRecipeByDuration(recipe, query.duration) &&
             filterRecipeByTag(recipe, query.tags) && filterByPrice(recipe, query.price)
     })
+
+    /* Set servings for each recipe */
+    if (typeof query.servings !== 'undefined') {
+        suggestedRecipes.forEach((recipe: Recipe) => {
+            recipe.setServings(query.servings)
+        })
+        console.log(suggestedRecipes)
+    }
 
     return suggestedRecipes.map((recipe: Recipe) => {
         const suggestion = new RecipeSuggestion(recipe)

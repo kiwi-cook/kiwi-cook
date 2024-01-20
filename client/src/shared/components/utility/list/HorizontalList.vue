@@ -5,7 +5,7 @@
 <template>
     <div v-if="list.length > 0" class="element-list-wrapper horizontal">
         <ul :tabindex="0" class="element-list horizontal">
-            <li v-for="(element, elementIndex) in list" :key="elementIndex"
+            <li v-for="(element, elementIndex) in list" :key="element.id ?? elementIndex"
                 class="element horizontal">
                 <slot :element="element" name="element">
                     {{ element }}

@@ -1,8 +1,10 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { logDebug } from '@/shared/utils/logging';
+
+const MODULE = 'shared.utils.radix.'
 
 class PrefixIdTreeNode {
     leaves: { [char: string]: PrefixIdTreeNode };
@@ -90,8 +92,9 @@ export class PrefixIdTree {
      * @return {string[]}
      */
     search(word: string): string[] {
+        const fName = MODULE + this.search.name
         if (!word || word.length === 0) {
-            logDebug('PrefixIdTree.search', 'empty string');
+            logDebug(fName, 'empty string');
             return [];
         }
 
@@ -102,7 +105,7 @@ export class PrefixIdTree {
             if (node.containsKey(currentChar)) {
                 node = node.getNode(currentChar);
             } else {
-                logDebug('PrefixIdTree.search', `could not find ${word} in tree`);
+                logDebug(fName, `could not find ${word} in tree`);
                 return [];
             }
         }

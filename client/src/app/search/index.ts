@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { Recipe, RecipeItem } from '@/shared';
@@ -29,22 +29,24 @@ export type ItemQuery = {
 }
 
 export type SearchQuery = {
-    items: ItemQuery[], tags: string[]
-    price?: number, duration?: number,
+    duration?: number, servings?: number, items: ItemQuery[], tags: string[]
+    price?: number, city?: string,
 }
 
 export class SearchQueryBuilder {
+    private duration: number | undefined
+    private servings: number | undefined
     private readonly items: ItemQuery[]
     private tags: string[]
     private price: number | undefined
-    private duration: number | undefined
     private city?: string
 
     constructor() {
+        this.duration = undefined
+        this.servings = undefined
         this.items = []
         this.tags = []
         this.price = undefined
-        this.duration = undefined
         this.city = undefined
     }
 
@@ -80,6 +82,11 @@ export class SearchQueryBuilder {
 
     public setDuration(duration?: number): this {
         this.duration = duration
+        return this
+    }
+
+    public setServings(servings?: number): this {
+        this.servings = servings
         return this
     }
 

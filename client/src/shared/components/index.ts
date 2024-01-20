@@ -13,8 +13,10 @@ import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 /* Item */
 import ItemComponent from '@/shared/components/recipe/item/Item.vue';
+import ItemChip from '@/shared/components/recipe/item/ItemChip.vue';
 import ItemList from '@/shared/components/utility/list/ItemList.vue';
 
 export {
-    DropDownSearch, FabTimer, ReadMore, HorizontalList, List, Header, HeaderTyped, ItemList, ItemComponent, Duration
+    DropDownSearch, FabTimer, ReadMore, HorizontalList, List, Header, HeaderTyped, ItemList, ItemComponent, Duration,
+    ItemChip
 };

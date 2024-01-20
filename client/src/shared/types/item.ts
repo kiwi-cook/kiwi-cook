@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { getLocaleStr, LocaleStr, newLocaleStr } from '@/shared/locales/i18n';
@@ -7,10 +7,13 @@ import { distance } from 'fastest-levenshtein';
 import { tmpId } from '@/shared';
 import { logError, logWarn } from '@/shared/utils/logging.ts';
 import { useSharedRecipeStore } from '@/shared/storage';
+import { ERROR_MSG } from '@/shared/utils/errors.ts';
 
 export enum ItemType {
     Ingredient = 'ingredient', Tool = 'tool'
 }
+
+const MODULE = 'shared.types.item.'
 
 /**
  * Item of a recipe
@@ -21,13 +24,35 @@ export class Item {
     name: LocaleStr;
     type: ItemType;
     imgUrl: string;
+    isTmp: boolean;
 
     constructor(item?: Item) {
         // create a temporary id to identify the item in the store before it is saved
         this.id = item?.id ?? tmpId()
+        this.isTmp = item?.id === undefined;
         this.name = item?.name ?? newLocaleStr()
         this.type = item?.type ?? ItemType.Ingredient
         this.imgUrl = item?.imgUrl ?? ''
+    }
+
+    /**
+     * Initialize an item from a json object
+     * This is done because the json object does not have the methods of the class
+     *
+     * @param json
+     * @returns a new item
+     */
+    public static fromJSON(json: any): Item {
+        const item = new Item()
+        item.id = json.id
+        if (item?.id === undefined) {
+            logWarn(MODULE + Item.fromJSON.name, ERROR_MSG.noId)
+            item.isTmp = true
+        }
+        item.name = json.name
+        item.type = json.type
+        item.imgUrl = json.imgUrl ?? ''
+        return item
     }
 
     /**
@@ -36,6 +61,11 @@ export class Item {
      */
     updateItem(item: Item): this {
         this.id = item.id
+        if (item?.id === undefined) {
+            logWarn(MODULE + this.updateItem.name, ERROR_MSG.noId)
+            this.isTmp = true
+        }
+
         this.name = item.name
         this.type = item.type
         this.imgUrl = item.imgUrl
@@ -101,23 +131,6 @@ export class Item {
     }
 }
 
-/**
- * Initialize an item from a json object
- * This is done because the json object does not have the methods of the class
- *
- * @param json
- * @returns a new item
- */
-export function itemFromJSON(json: any): Item {
-    const item = new Item()
-    item.id = json.id
-    item.name = json.name
-    item.type = json.type
-    item.imgUrl = json.imgUrl ?? ''
-
-    return item
-}
-
 
 /**
  * RecipeItem of a recipe
@@ -133,8 +146,8 @@ export class RecipeItem extends Item {
     constructor(recipeItem?: RecipeItem) {
         super(recipeItem)
         if (this.id === undefined) {
-            logError('RecipeItem.new', 'id is undefined.')
-            throw new Error('id is undefined.')
+            logError(MODULE + 'RecipeItem.new', ERROR_MSG.noId)
+            throw new Error(ERROR_MSG.noId)
         }
         this.quantity = recipeItem?.quantity ?? 1
         this.servings = 1
@@ -149,12 +162,22 @@ export class RecipeItem extends Item {
      * @param json the json object
      */
     static fromJSON(json: any): RecipeItem {
+        const fName = MODULE + 'RecipeItem.fromJSON'
+
         const sharedRecipeStore = useSharedRecipeStore()
         const itemsAsMap = sharedRecipeStore.getItemsAsMap
-        const item = itemsAsMap[json.id] ?? new Item()
-        if (item === undefined) {
-            logWarn('RecipeItem.fromJSON', 'item is undefined', json)
+        /* Check if map is empty */
+        if (Object.keys(itemsAsMap).length === 0) {
+            logWarn(fName, 'itemsAsMap is empty', json)
         }
+
+        /* Get item from map */
+        let item = itemsAsMap[json.id]
+        if (item === undefined) {
+            logWarn(fName, ERROR_MSG.isUndefined, json)
+            logWarn(fName, 'please reset cache')
+        }
+        item = item ?? new Item()
 
         const recipeItem = new RecipeItem()
         recipeItem.updateItem(item)

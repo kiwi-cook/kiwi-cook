@@ -1,15 +1,16 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 // Vue
 import { defineStore } from 'pinia'
 
-import { API_ROUTE, APIResponse, itemFromJSON, presentToast, Recipe, sendToAPI } from '@/shared';
+import { API_ROUTE, APIResponse, Item, presentToast, Recipe, sendToAPI } from '@/shared';
 import { logDebug } from '@/shared/utils/logging';
 import { MutableRecipe } from '@/editor/types/recipe';
 import { MutableItem } from '@/editor/types/item';
 
+const MODULE = 'editor.storage.recipe.'
 
 // Define typings for the store state
 
@@ -58,7 +59,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     recipesByItemId[recipeItem.id].push(recipe.getId())
                 }
             }
-            logDebug('getRecipesByItemIds', recipesByItemId)
+            logDebug(MODULE + 'getRecipesByItemIds', recipesByItemId)
 
             return recipesByItemId
         },
@@ -88,6 +89,8 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
         }
     }, actions: {
         async deleteItems(items: MutableItem[] | MutableItem) {
+            const fName = MODULE + '.deleteItems'
+
             // if the recipes is not defined, save all recipes
             if (typeof items === 'undefined') {
                 items = Object.values(this.getItemsAsMap)
@@ -142,7 +145,7 @@ export const useRecipeEditorStore = defineStore('recipes-editor', {
                     // this is because the JSON is not a valid MutableItem object,
                     // and we need to use the MutableItem class methods
                     if (!apiResponse.error) {
-                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => new MutableItem(itemFromJSON(item)))
+                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => new MutableItem(Item.fromJSON(item)))
                         this.setItems(items)
                     }
                     this.finishLoading('fetchItems')

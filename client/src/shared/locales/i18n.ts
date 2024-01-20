@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { createI18n } from 'vue-i18n';
@@ -94,18 +94,19 @@ async function loadLocaleMessages(i18n: any, locale: SUPPORT_LOCALES_TYPE) {
  * @see https://phrase.com/blog/posts/ultimate-guide-to-vue-localization-with-vue-i18n/
  */
 export default function getBrowserLocale(): SUPPORT_LOCALES_TYPE | undefined {
+    const fName = getBrowserLocale.name
     const navigatorLocale = navigator.languages !== undefined ? navigator.languages[0] : navigator.language
-    logDebug('getBrowserLocale', 'navigatorLocale:', navigatorLocale)
+    logDebug(fName, 'navigatorLocale:', navigatorLocale)
 
     if (!navigatorLocale) {
-        logWarn('getBrowserLocale', 'no locale found')
+        logWarn(fName, 'no locale found')
         return undefined
     }
 
     const locale = navigatorLocale.trim().split(/[-_]/)[0]
-    logDebug('getBrowserLocale', 'locale:', locale)
+    logDebug(fName, 'locale:', locale)
     if (!SUPPORT_LOCALES.includes(locale as SUPPORT_LOCALES_TYPE)) {
-        logWarn('getBrowserLocale', `locale '${locale}' is not supported.`)
+        logWarn(fName, `locale '${locale}' is not supported.`)
         return undefined
     }
     return locale as SUPPORT_LOCALES_TYPE

@@ -15,72 +15,12 @@
                     <div class="sticky-header">
                         <div class="content-margin">
                             <!-- Searchbar for ingredients, tools, recipes and tags -->
-                            <SmartSearchbar v-model="filterInput" :items="items"
-                                            :recipes="recipes"
-                                            :tags="filteredTags"
-                                            class="searchbar"
-                                            @search="search"
-                                            @select-item="includeItem($event);
-                                                          preferencesActive = true;
-                                                          activePreference = 'ingredients'"
-                                            @select-preferences="preferencesActive = $event"
-                                            @select-tag="includeTag($event);
-                                                         preferencesActive = true;
-                                                         activePreference = 'tags'"/>
+                            <SmartSearchbar v-model:state="searchbarOpen" class="searchbar" @search="search($event)"/>
                         </div>
                     </div>
 
 
                     <div class="content-margin">
-                        <!-- Preferences -->
-                        <Transition name="fade-top">
-                            <section v-if="false">
-                                <!-- Selected items -->
-                                <IonCard>
-                                    <IonCardContent>
-                                        <List :list="[...selectedItems]" load-all>
-                                            <template #element="{ element }">
-                                                <ItemComponent :include="itemQueries[(element as Item).getId()]"
-                                                               :item="element as Item">
-                                                    <template #end>
-                                                        <div class="item-buttons">
-                                                            <IonButton
-                                                                :color="itemQueries[(element as Item).getId()] === false ?
-                                                                    'danger' : 'light'"
-                                                                :disabled="itemQueries[(element as Item).getId()] === false"
-                                                                aria-description="Exclude item"
-                                                                class="item-button" shape="round"
-                                                                @click="excludeItem(element)">
-                                                                <IonIcon :icon="remove"/>
-                                                            </IonButton>
-                                                            <IonButton
-                                                                :color="itemQueries[(element as Item).getId()] ?
-                                                                    'success' : 'light'"
-                                                                :disabled="itemQueries[(element as Item).getId()]"
-                                                                aria-description="Include item"
-                                                                class="item-button" shape="round"
-                                                                @click="includeItem(element)">
-                                                                <IonIcon :icon="add"/>
-                                                            </IonButton>
-                                                            <IonButton
-                                                                v-if="((element as Item).getId() in itemQueries)"
-                                                                aria-description="Remove item"
-                                                                class="item-button"
-                                                                color="light"
-                                                                shape="round"
-                                                                @click="removeItem(element)">
-                                                                <IonIcon :icon="close"/>
-                                                            </IonButton>
-                                                        </div>
-                                                    </template>
-                                                </ItemComponent>
-                                            </template>
-                                        </List>
-                                    </IonCardContent>
-                                </IonCard>
-                            </section>
-                        </Transition>
-
                         <article>
                             <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay"
                                               :title="t('RecipeOfTheDay.Title')"/>
@@ -125,173 +65,98 @@
 
                         <!-- Searched recipes -->
                         <a id="recipe-search" ref="recipeSearchAnchor"/>
-                        <section v-if="searchedRecipes.length > 0 && submitted">
-                            <h3>
-                                {{ $t('Suggestions.Search.Title', [searchedRecipes.length]) }}
-                            </h3>
-                            <h4 class="subheader">
-                                {{ $t('Suggestions.Search.Subtitle') }}
-                            </h4>
-                            <List :list="searchedRecipes">
-                                <template #element="{ element }">
-                                    <RecipePreview :key="element.id" :recipe="element as RecipeSuggestion"/>
-                                </template>
-                            </List>
+                        <section v-if="submitted">
+                            <div v-if="searchedRecipes.length > 0">
+                                <h3>
+                                    {{ $t('Suggestions.Search.Title', [searchedRecipes.length]) }}
+                                </h3>
+                                <h4 class="subheader">
+                                    {{ $t('Suggestions.Search.Subtitle') }}
+                                </h4>
+                                <List :list="searchedRecipes">
+                                    <template #element="{ element }">
+                                        <RecipePreview :key="element.id" :recipe="element as RecipeSuggestion"/>
+                                    </template>
+                                </List>
+                            </div>
+                            <div v-else>
+                                <h3>
+                                    {{ $t('Suggestions.Search.NoRecipesFound') }}
+                                </h3>
+                            </div>
                         </section>
-                        <div v-else-if="submitted">
-                            <h3>
-                                {{ $t('Suggestions.Search.NoRecipesFound') }}
-                            </h3>
-                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Fab timer -->
             <FabTimer/>
+            <IonFab slot="fixed" horizontal="end" vertical="bottom">
+                <!-- Open and close search -->
+                <IonFabButton v-if="!searchbarOpen" class="search-button search" @click="openSearchbar()">
+                    <IonIcon :icon="searchOutline"/>
+                </IonFabButton>
+                <IonFabButton v-else class="search-button close" @click="searchbarOpen = false">
+                    <IonIcon :icon="closeOutline"/>
+                </IonFabButton>
+            </IonFab>
         </IonContent>
     </IonPage>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, Transition, watch } from 'vue';
-import { IonButton, IonCard, IonCardContent, IonContent, IonIcon, IonPage, } from '@ionic/vue';
+import { computed, ref } from 'vue';
+import { IonContent, IonFab, IonFabButton, IonIcon, IonPage } from '@ionic/vue';
 import { useRecipeStore } from '@/app/storage';
-import { FabTimer, Item, ItemComponent, Recipe } from '@/shared';
+import { FabTimer, Recipe } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
 import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
-import { add, close, list, remove } from 'ionicons/icons';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import List from '@/shared/components/utility/list/List.vue';
 import { useI18n } from 'vue-i18n';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
-import { RecipeSuggestion, SearchQueryBuilder, searchRecipes } from '@/app/search';
+import { RecipeSuggestion } from '@/app/search';
 import { SmartSearchbar } from '@/app/components/search';
+import { closeOutline, searchOutline } from 'ionicons/icons';
 
 const {t} = useI18n()
 const recipeStore = useRecipeStore()
 
 const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
-
-const itemsById = computed(() => recipeStore.getItemsAsMap)
-const items = computed<Item[]>(() => Object.values(itemsById.value ?? {}))
 const recipes = computed(() => recipeStore.getRecipesAsList)
-const tags = computed(() => recipeStore.getTags)
 
-/* Filtered tags, recipes & items */
-const filterInput = ref<string>('')
-const searchFilters = ref<Set<string>>(new Set(['items']))
-const preferencesActive = ref(false) /* Overridden by Searchbar */
-const activePreference = ref('ingredients')
-
-// Tags
-const filteredTags = ref<string[]>([])
-watch(filterInput, () => {
-    const _filteredTags: string[] = filterInput.value === '' ? [] : (tags.value ?? [])
-        .filter((tag: string) => tag.toLowerCase().includes((filterInput.value ?? '').toLowerCase()))
-    filteredTags.value = _filteredTags.slice(0, 3)
-})
-
-// Items
-const filteredItems = ref<Item[]>([])
-watch(filterInput, () => {
-    let _filteredItems: Item[]
-    if (filterInput.value === '') {
-        _filteredItems = []
-    } else {
-        _filteredItems = (items.value ?? [])
-            .filter((item: Item) => item.hasName(filterInput.value ?? ''))
-            .filter((item: Item) => typeof itemQueries.value[item.getId()] === 'undefined')
-    }
-    filteredItems.value = _filteredItems.slice(0, 5)
-})
-
-const itemQueries = ref<{ [id: string]: boolean }>({})
-const selectedItems = computed<Item[]>(() => Object.keys(itemQueries.value)
-    .map((id: string) => itemsById.value[id]))
-const includeItem = (item?: Item) => {
-    itemQueries.value[item?.getId() ?? ''] = true
-    searchFilters.value.add('items')
+const SUGGESTION_CONFIG = {
+    maxRandomRecipes: 15, maxPredictedRecipes: 15,
 }
-const excludeItem = (item?: Item) => itemQueries.value[item?.getId() ?? ''] = false
-const removeItem = (item?: Item) => delete itemQueries.value[item?.getId() ?? '']
-
-// Tags
-const selectedTags = ref<string[]>([])
-const suggestedTags = computed(() => recipeStore.getTags
-    .filter((tag: string) => !selectedTags.value.includes(tag))
-    .slice(0, 3))
-const specialTags = [{
-    title: 'fast & cheap', click: () => {
-        maxCookingTime.value = 8
-        maxPrice.value = 3
-    }
-}]
-const includeTag = (tag: string) => selectedTags.value.push(tag)
-
-// City
-// const city = ref('')
-const prices = [2, 3, 5, 10]
-const maxPrice = ref<number | undefined>(undefined)
-watch(maxPrice, () => searchFilters.value.add('price'))
-
-// Cooking time
-const cookingTimes = [5, 10, 20, 45, 60, 90, 120, 60 * 24]
-const maxCookingTime = ref<number | undefined>(undefined)
-watch(maxCookingTime, () => searchFilters.value.add('duration'))
-
-// Servings
-const servings = ref(1)
-watch(servings, () => searchFilters.value.add('servings'))
 
 // Recipe suggestions
 /* Random recipes */
-const randomRecipesLength = 15
 const randomRecipes = computed<Recipe[]>(() => {
     return [...recipes.value]
         .filter(() => Math.random() < 1 / (recipes.value.length * 0.1))
-        .slice(0, randomRecipesLength)
+        .slice(0, SUGGESTION_CONFIG.maxRandomRecipes)
         .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
 })
 
-/* Computed recipe suggestions */
+/* Recipe suggestions */
 const predictedRecipes = computed<Recipe[]>(() => recipeStore.getRecipePredictions)
-
-/* Recipe index */
-const searchedRecipes = ref<RecipeSuggestion[]>([])
-const suggest = () => {
-    const searchQueryBuilder = new SearchQueryBuilder()
-    searchQueryBuilder.setDuration(maxCookingTime.value)
-    searchQueryBuilder.setItemIds(itemQueries.value)
-    searchQueryBuilder.setTags(selectedTags.value)
-
-    // TODO: fix price calculation
-    // searchQueryBuilder.setPrice(maxPrice.value)
-
-    // TODO: enable city index
-    //searchQueryBuilder.setCity(city.value)
-
-    const query = searchQueryBuilder.build()
-    searchedRecipes.value = searchRecipes(query)
-}
 
 /* Submit button */
 const recipeSearchAnchor = ref<HTMLAnchorElement | null>(null)
 const submitted = ref(false)
-const search = () => {
-    if (searchedRecipes.value.length === 0) {
-        // suggest recipes
-        submitted.value = true
-        suggest()
-        setTimeout(() => {
-            recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: 'start'})
-        }, 50)
-    } else {
-        // reset
-        submitted.value = false
-        searchedRecipes.value = []
-    }
+const searchedRecipes = ref<RecipeSuggestion[]>([])
+const searchbarOpen = ref(false)
+const openSearchbar = () => {
+    searchbarOpen.value = true
+}
+const search = (result: RecipeSuggestion[]) => {
+    // suggest recipes
+    submitted.value = true
+    searchedRecipes.value = result
+    setTimeout(() => {
+        recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: 'start', inline: 'nearest'})
+    }, 50)
 }
 </script>
 
@@ -356,5 +221,73 @@ section {
 
 #recipe-search {
     scroll-margin-top: 500px;
+}
+
+@keyframes liquidGradient {
+    0% {
+        background-position: 0 50%
+    }
+    25% {
+        background-position: 50% 75%
+    }
+    50% {
+        background-position: 100% 100%
+    }
+    75% {
+        background-position: 50% 75%
+    }
+    100% {
+        background-position: 0 50%
+    }
+}
+
+.search-button::part(native) {
+    /* Basic styling */
+    display: inline-block;
+    font-size: 16px;
+    font-weight: var(--font-weight-bold);
+
+    text-align: center;
+    text-decoration: none;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+
+    /* Colors and shadows */
+    text-shadow: 1px 1px 2px #fff;
+    box-shadow: var(--box-shadow2);
+
+    color: #fff;
+    background-size: 400% 400%; /* Increase background size for the gradient animation */
+
+    /* Animations */
+    transition: background 3s ease-in-out,
+    transform ease-in-out 300ms,
+    box-shadow ease-in-out 300ms,
+    scale ease-in-out 300ms;
+}
+
+.search-button.search::part(native) {
+    background: radial-gradient(circle at top left, #ffc718, #c362b5, #6ab1e1),
+    linear-gradient(45deg, #62c370, #c362b5, #6ab1e1),
+    radial-gradient(circle at bottom right, #62c370, #c362b5, #ffc718),
+    linear-gradient(135deg, #ffc718, #62c370, #c362b5, #6ab1e1);
+
+    /* Animations */
+    animation: liquidGradient 5s infinite ease-in-out; /* Apply the liquid gradient animation */
+}
+
+.search-button.close::part(native) {
+    background: radial-gradient(circle at top left, #ff0000, #c362b5, #6ab1e1),
+    linear-gradient(45deg, #ff0000, #c362b5, #6ab1e1),
+    radial-gradient(circle at bottom right, #ff0000, #c362b5, #ffc718),
+    linear-gradient(135deg, #ffc718, #ff0000, #c362b5, #6ab1e1);
+}
+
+.search-button::part(native):hover, .search-button::part(native):active {
+    /* Hover effects */
+    box-shadow: 0 30px 20px -15px rgba(0, 0, 0, 0.2);
+    text-shadow: none;
+    scale: 1.05;
 }
 </style>

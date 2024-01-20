@@ -112,18 +112,22 @@ hr {
     padding: 0;
 }
 
+section {
+    margin-bottom: var(--margin-large);
+}
+
 /* Show horizontal line after each section */
 section::after, article::after {
     content: "";
     display: block;
     height: 1px;
     border: 0;
-    border-top: 2px solid var(--ion-color-light);
+    border-top: 2px solid var(--ion-color-tertiary);
     margin: 1em 1em;
     padding: 0;
 }
 
 /* Don't show horizontal line after last section */
-section:last-child::after {
+section:last-of-type::after {
     display: none;
 }

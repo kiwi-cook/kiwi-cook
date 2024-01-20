@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -224,6 +224,8 @@ import { findMostSimilarItem } from '@/editor/parser/utils.ts';
 import { logDebug } from '@/shared/utils/logging.ts';
 import { newItemFromName } from '@/editor/types/item.ts';
 
+const MODULE = 'editor.components.editor.RecipeEditor.'
+
 const props = defineProps({
     recipe: {
         type: Object as PropType<MutableRecipe>, required: true,
@@ -295,26 +297,27 @@ const editItem = (recipeItem: RecipeItem) => itemToEdit.value = recipeItem
 const allTags = computed<string[]>(() => recipeStore.getTags);
 
 const updateName = (name: string) => {
-    logDebug('updateName.input', name)
+    const fName = MODULE + 'updateName'
+    logDebug(fName, name)
 
     // check if there is an item to edit
     if (!itemToEdit.value) {
-        logDebug('updateName', 'no item to edit')
+        logDebug(fName, 'no item to edit')
         return
     }
 
     // find the most similar item
     const item = findMostSimilarItem(name)
     if (!item) {
-        logDebug('updateName', 'no similar item found')
+        logDebug(fName, 'no similar item found')
         return
     }
-    logDebug('updateName', `most similar item: ${item.getName()}`)
+    logDebug(fName, `most similar item: ${item.getName()}`)
 
-    logDebug('updateName', `updating item ${itemToEdit.value.getName()} to ${item.getName()}
+    logDebug(fName, `updating item ${itemToEdit.value.getName()} to ${item.getName()}
         and recipe ${mutableRecipe.value.getName()}`)
     itemToEdit.value = itemToEdit.value?.updateItem(item)
-    logDebug('updateName', itemToEdit.value)
+    logDebug(fName, itemToEdit.value)
     mutableRecipe.value.putRecipeItem(itemToEdit.value)
 }
 

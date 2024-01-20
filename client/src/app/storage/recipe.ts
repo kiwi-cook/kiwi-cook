@@ -14,14 +14,20 @@ interface RecipeState {
     recipePredictions: Recipe[]
     savedRecipes: Set<string>
     search: TasteBuddySearch | null
-
+    config: {
+        numberOfPredictions: number
+    }
 }
+
+const MODULE = 'app.storage.recipe.'
 
 // Create the store
 // called by main.ts
 export const useRecipeStore = defineStore('recipes-app', {
     state: (): RecipeState => ({
-        recipePredictions: [], savedRecipes: new Set(), search: null
+        recipePredictions: [], savedRecipes: new Set(), search: null, config: {
+            numberOfPredictions: 10
+        }
     }), getters: {
         getItemSuggestions(): Item[] {
             // Get all items from the recipes
@@ -194,8 +200,8 @@ export const useRecipeStore = defineStore('recipes-app', {
          * Update the recipe predictions
          */
         updateRecipePredictions() {
-            const predictedRecipes = simpleRecipeSuggestion(15)
-            logDebug('updateRecipePredictions', predictedRecipes)
+            const predictedRecipes = simpleRecipeSuggestion(this.config.numberOfPredictions)
+            logDebug(MODULE + this.updateRecipePredictions.name, predictedRecipes)
             // Get the 10 best predictions
             this.recipePredictions = predictedRecipes
         }

@@ -3,103 +3,144 @@
   -->
 
 <template>
-    <div class="searchbar-wrapper">
+    <div :class="['searchbar-wrapper', {'active': resultsOpen || preferencesOpen }]">
         <div ref="searchbar">
             <div class="searchbar-blur"/>
-            <div :class="['searchbar-search-wrapper', {'active': searchbarIsOpen}]">
-                <input v-model="searchInput" :placeholder="$t('Suggestions.SearchbarPrompt')"
-                       class="searchbar-search"
-                       @click="openSearch()"
-                       @ionClear="searchInput = ''" @keydown.esc="closeSearch()"/>
-                <button class="searchbar-search-button" @click="search">
-                    <IonIcon :icon="searchOutline"/>
+            <div :class="['searchbar-search-wrapper', {'active': preferencesOpen}]">
+                <input ref="searchbarInput" v-model="filterInput"
+                       :placeholder="$t('Suggestions.SearchbarPrompt')" class="searchbar-search"
+                       @focus="openPreferences()"
+                       @ionClear="filterInput = ''" @keydown.esc="closeAll()" @keydown.enter="search"/>
+                <button :class="['searchbar-button', 'search', {disabled: !preferencesOpen}]" @click="search">
+                    <IonIcon :icon="searchIcon"/>
                 </button>
             </div>
 
+            <!-- Preferences -->
             <Transition name="fade-top">
-                <div v-show="searchbarIsOpen" class="searchbar-quick-preferences">
-                    <!-- Quick-Questions -->
+                <div v-show="resultsOpen || preferencesOpen" class="searchbar-quick-preferences">
                     <QuickPreferenceContainer>
-                        <QuickPreference>
-                            <template #title><span class="highlight">
-                                {{
-                                    USER_PREFERENCES.timeAvailable >
-                                        60 ? 'viiiel' : `${USER_PREFERENCES.timeAvailable} Minuten`
-                                }} </span>
-                                Kochzeit
-                            </template>
-                            <!-- TODO: add logarithmic slider -->
-                            <template #default>
-                                <IonRange v-model="USER_PREFERENCES.timeAvailable"
-                                          :max="65" :min="10"
-                                          :step="5"
-                                          pin snaps/>
-                            </template>
-                        </QuickPreference>
+                        <template #preferences>
 
-                        <!-- TODO: add skip button -->
-                        <!-- Is this really necessary? -->
+                            <!-- Cooking time -->
+                            <QuickPreference name="cookingTime">
+                                <template #title><span class="highlight">
+                                    {{
+                                        USER_PREFERENCES_COMPUTED.timeAvailable > SEARCHBAR_CONFIGURATION.MAX_TIME -
+                                            SEARCHBAR_CONFIGURATION.STEP_TIME ? '> 60' : USER_PREFERENCES_COMPUTED.timeAvailable
+                                    }} Minuten</span> Kochzeit
+                                </template>
+                                <!-- TODO: add logarithmic slider -->
+                                <template #default>
+                                    <IonRange v-model="USER_PREFERENCES.timeAvailable"
+                                              :max="SEARCHBAR_CONFIGURATION.MAX_TIME"
+                                              :min="SEARCHBAR_CONFIGURATION.MIN_TIME"
+                                              :step="SEARCHBAR_CONFIGURATION.STEP_TIME"
+                                              pin snaps/>
+                                </template>
+                            </QuickPreference>
 
-                        <QuickPreference>
-                            <template #title><span class="highlight">{{
-                                USER_PREFERENCES.servings
-                            }} Portionen</span>
-                            </template>
-                            <template #default>
-                                <IonRange v-model="USER_PREFERENCES.servings"
-                                          :max="10" :min="1"
-                                          :step="1" pin snaps/>
-                            </template>
-                        </QuickPreference>
+                            <!-- Servings -->
+                            <QuickPreference name="servings">
+                                <template #title><span class="highlight">{{
+                                    USER_PREFERENCES_COMPUTED.servings
+                                }} Portionen</span>
+                                </template>
+                                <template #default>
+                                    <IonRange v-model="USER_PREFERENCES.servings"
+                                              :max="10" :min="1"
+                                              :step="1" pin snaps/>
+                                </template>
+                            </QuickPreference>
 
-                        <!-- <QuickItemPreference/> -->
+                            <QuickPreference is-button name="items" @visible="openAll">
+                                <template #title>
+                                    <span class="highlight">
+                                        {{
+                                            USER_PREFERENCES_COMPUTED.items.length >
+                                                0 ? USER_PREFERENCES_COMPUTED.items.length : 'Keine'
+                                        }}
+                                    </span> Zutaten
+                                </template>
+                            </QuickPreference>
+
+                            <QuickPreference name="tags">
+                                <template #title>
+                                    <span class="highlight">
+                                        {{
+                                            USER_PREFERENCES_COMPUTED.tags.length >
+                                                0 ? USER_PREFERENCES_COMPUTED.tags.length : 'Keine'
+                                        }}
+                                    </span> Tags
+                                </template>
+                                <template #default>
+                                    <HorizontalList :list="[...USER_PREFERENCES_COMPUTED.tags, ...suggestedTags]"
+                                                    no-wrap>
+                                        <template #element="{element}">
+                                            <template v-if="typeof element === 'string'">
+                                                <IonChip outline @click="includeTag(element)">
+                                                    <IonLabel>{{ element }}</IonLabel>
+                                                </IonChip>
+                                            </template>
+                                            <template v-else>
+                                                <IonChip :color="element?.color" outline
+                                                         @click="element?.func(); includeTag(element?.name)">
+                                                    <IonLabel>{{ element?.name }}</IonLabel>
+                                                </IonChip>
+                                            </template>
+                                        </template>
+                                    </HorizontalList>
+                                </template>
+                            </QuickPreference>
+                        </template>
+
+                        <template #full-width-content>
+                            <div class="content-margin"/>
+                        </template>
                     </QuickPreferenceContainer>
                 </div>
             </Transition>
 
-            <div v-if="searchInput !== '' && searchbarIsOpen" class="searchbar-list-wrapper">
-                <div class="searchbar-list">
-                    <Transition name="fade-top">
-                        <div v-show="searchInput !== ''" class="searchbar-list-results">
-                            <!-- TODO:
-                                    The behaviour of the searchbar should be that its almost fullscreen
-                                    and the user can type in it.
-
-                                    DONE The behaviour should be that the user is shown some suggestions
-                                    without having to type anything. The suggestions should be
-                                    based on the user's preferences.
-
-                                    The user should be able to select the suggestions and
-                                    view them in the searchbar.
-
-                                    The user should be able to see some recipe suggestions based on
-                                    the user's preferences.
-
-                                    The user should be able to see some item suggestions based on
-                                    the user's preferences.
-
-                                    The user should be able to see some tag suggestions based on
-                                    the user's preferences.
-
-                                    The user should be able to select time, temperature and other things
-                                    in the searchbar.
-                                 -->
-
-                            <IonItem v-if="filteredRecipes?.length === 0 && filteredItems?.length === 0" lines="none">
-                                <h4>Vorschläge</h4>
+            <Transition name="fade-top">
+                <div v-if="(filterInput !== '' && preferencesOpen) || resultsOpen" class="searchbar-list-wrapper">
+                    <div class="searchbar-list">
+                        <div class="searchbar-list-results">
+                            <IonItem lines="none">
+                                <h4>Zutaten</h4>
                             </IonItem>
-                            <IonItem v-else lines="none">
-                                <h4>Deine Suche</h4>
+
+                            <template v-if="selectedItems.length > 0">
+                                <IonItem lines="none">
+                                    <h5 class="subheader">Ausgewählte Zutaten</h5>
+                                </IonItem>
+                                <IonItem lines="none">
+                                    <HorizontalList :list="selectedItems" no-wrap>
+                                        <template #element="{element}">
+                                            <QuickItemChip
+                                                v-model:included="USER_PREFERENCES.items[element?.getId() ?? '']"
+                                                :item="element" only-remove
+                                                @removed="removeItem(element)"/>
+                                        </template>
+                                    </HorizontalList>
+                                </IonItem>
+                            </template>
+
+                            <IonItem lines="none">
+                                <h5 class="subheader">Schnelle Suche</h5>
                             </IonItem>
-                            <IonItem v-if="filteredItems?.length === 0" lines="none">
-                                <HorizontalList :list="itemSuggestions" no-wrap>
+                            <IonItem lines="none">
+                                <HorizontalList :list="[...filteredItems, ...itemSuggestions]" no-wrap>
                                     <template #element="{element}">
-                                        <ItemChip :item="element" @click="selectItem(element)"/>
+                                        <QuickItemChip v-model:included="USER_PREFERENCES.items[element?.getId() ?? '']"
+                                                       :item="element"
+                                                       @removed="removeItem(element)"/>
                                     </template>
                                 </HorizontalList>
                             </IonItem>
-                            <IonItem v-if="filteredRecipes?.length === 0" lines="none">
-                                <HorizontalList :list="recipeSuggestions" no-wrap>
+
+                            <!-- <IonItem lines="none">
+                                <h5>Rezepte</h5>
+                                <HorizontalList v-if="filteredRecipes?.length === 0" :list="recipeSuggestions" no-wrap>
                                     <template #element="{element}">
                                         <MiniRecipePreview :img-url="element?.props?.imgUrl"
                                                            :link="element?.getRoute()"
@@ -107,18 +148,7 @@
                                                            @click="selectRecipe(element)"/>
                                     </template>
                                 </HorizontalList>
-                            </IonItem>
-
-
-                            <IonItem v-if="filteredItems?.length > 0" lines="none">
-                                <HorizontalList :list="[...filteredItems, /*...itemSuggestions */]" no-wrap>
-                                    <template #element="{element}">
-                                        <ItemChip :item="element" @click="selectItem(element)"/>
-                                    </template>
-                                </HorizontalList>
-                            </IonItem>
-                            <IonItem v-if="filteredRecipes?.length > 0" lines="none">
-                                <HorizontalList :list="filteredRecipes" no-wrap>
+                                <HorizontalList v-else :list="filteredRecipes" no-wrap>
                                     <template #element="{element}">
                                         <MiniRecipePreview :img-url="element?.props?.imgUrl"
                                                            :link="element?.getRoute()"
@@ -126,164 +156,274 @@
                                                            @click="selectRecipe(element)"/>
                                     </template>
                                 </HorizontalList>
-                            </IonItem>
+                            </IonItem> -->
                         </div>
-                    </Transition>
+                    </div>
                 </div>
-            </div>
+            </Transition>
         </div>
     </div>
 </template>
 
 
 <script lang="ts" setup>
-import { computed, PropType, ref, shallowRef, toRefs, Transition, watch } from 'vue';
-import { IonIcon, IonItem, IonRange, useIonRouter } from '@ionic/vue';
+import { computed, ref, toRefs, Transition, watch } from 'vue';
+import { IonChip, IonIcon, IonItem, IonLabel, IonRange, useIonRouter } from '@ionic/vue';
 import { HorizontalList, Item, Recipe } from '@/shared';
-import { searchRecipesByQuery } from '@/app/search/search.ts';
+import { searchRecipes, searchRecipesByQuery } from '@/app/search/search.ts';
 import { useRecipeStore } from '@/app/storage';
-import ItemChip from '@/shared/components/recipe/item/ItemChip.vue';
 import { onClickOutside } from '@vueuse/core'
-import { searchOutline } from 'ionicons/icons'
-import { MiniRecipePreview } from '@/app/components';
-import { QuickPreference, QuickPreferenceContainer } from '@/app/components/search';
+import { searchOutline as searchIcon } from 'ionicons/icons'
+import { QuickItemChip, QuickPreference, QuickPreferenceContainer } from '@/app/components/search';
+import { RecipeSuggestion, SearchQueryBuilder } from '@/app/search';
 
+const router = useIonRouter()
 const recipeStore = useRecipeStore()
 
-// Props
-const props = defineProps({
-    items: {
-        type: Array as PropType<Item[]>, required: false, default: () => []
-    }, recipes: {
-        type: Array as PropType<Recipe[]>, required: false, default: () => []
-    }, tags: {
-        type: Array as PropType<string[]>, required: false, default: () => []
-    }
-})
-const {tags, recipes, items} = toRefs(props);
-const router = useIonRouter()
+const itemsById = computed(() => recipeStore.getItemsAsMap)
+const items = computed<Item[]>(() => Object.values(itemsById.value ?? {}))
+const recipes = computed(() => recipeStore.getRecipesAsList)
 
-// Emits
+const props = defineProps({
+    state: {
+        type: Boolean, required: true,
+    },
+})
+const {state} = toRefs(props)
+
+/* Emit events */
 const emit = defineEmits({
-    'update:modelValue': (value: string) => value,
+    'update:state': (value: boolean) => value,
     'selectTag': (tag: string) => tag,
     'selectItem': (item: Item) => item,
     'selectPreferences': (value: boolean) => value,
-    'search': () => true
+    'search': (value: RecipeSuggestion[]) => value,
 })
 
-const searchbar = ref(null)
-
-/* Configuration */
-const CONFIG = {
-    MAX_ITEMS: 3, MAX_TAGS: 6, MAX_RECIPES: 6, MIN_SAVED_RECIPES: 3
+///////// SEARCHBAR //////////
+/* Searchbar configuration */
+const SEARCHBAR_CONFIGURATION = {
+    MAX_ITEMS: 3, MAX_TAGS: 6, MAX_RECIPES: 6, MIN_SAVED_RECIPES: 3, MAX_TIME: 65, MIN_TIME: 5, STEP_TIME: 5,
 }
 
 /* Searchbar state */
-const searchInput = ref('')
-const searchbarIsOpen = ref(false)
-onClickOutside(searchbar, event => {
-    searchbarIsOpen.value = false
-})
-
-const showPreferences = ref(true)
-const USER_PREFERENCES = ref<{
-    timeAvailable: number, servings: number, items: Item[], tags: string[],
-}>({
-    timeAvailable: 5, servings: 2, items: [], tags: [],
-})
-
-const selectPreferences = () => {
-    closeSearch()
-    showPreferences.value = !showPreferences.value
+const searchbar = ref(null)
+const searchbarInput = ref(null)
+const preferencesOpen = ref(false)
+const resultsOpen = ref(false)
+const openPreferences = () => {
+    preferencesOpen.value = true
+    emit('update:state', true)
 }
-watch(showPreferences, (newShowPreferences) => {
-    emit('selectPreferences', newShowPreferences)
-}, {immediate: true})
-
-/* State whether list should be open */
-const listIsOpen = computed<boolean>(() => {
-    return ((items.value.length > 0 || tags.value.length > 0 || recipes.value.length > 0) && searchInput.value !== '')
+const closePreferences = () => preferencesOpen.value = false
+const openAll = () => {
+    preferencesOpen.value = true
+    resultsOpen.value = true
+    searchbarInput.value?.focus()
+}
+const closeAll = () => {
+    closePreferences()
+    resultsOpen.value = false
+    emit('update:state', false)
+}
+watch(state, (newValue, oldValue) => {
+    if (newValue !== oldValue) {
+        if (newValue) {
+            openAll()
+        } else {
+            closeAll()
+        }
+    }
+})
+onClickOutside(searchbar, event => {
+    closeAll()
 })
 
-watch(searchInput, (newFilterInput) => {
-    // Emit new filter input
-    emit('update:modelValue', newFilterInput)
+///////// SEARCH AND FILTER //////////
+const itemSuggestions = computed<Item[]>(() => recipeStore.getItemSuggestions.slice(0, SEARCHBAR_CONFIGURATION.MAX_ITEMS))
+const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes.slice(0, SEARCHBAR_CONFIGURATION.MAX_RECIPES))
+const recipeSuggestions = computed<Recipe[]>(() => recipeStore.getRecipePredictions.slice(0, SEARCHBAR_CONFIGURATION.MAX_RECIPES))
+const customTags: {
+    name: string, color?: string, func?: () => void,
+}[] = [{
+    name: 'fast & cheap', color: 'success', func: () => {
+        USER_PREFERENCES.value.timeAvailable = 20
+        USER_PREFERENCES.value.servings = 2
+    },
+}, {
+    name: 'healthy', color: 'warning',
+}, {
+    name: 'vegan', color: 'tertiary',
+}, {
+    name: 'vegetarian', color: 'tertiary',
+}, {
+    name: 'low carb', color: 'tertiary',
+}, {
+    name: 'low fat', color: 'tertiary',
+}, {
+    name: 'low sugar', color: 'tertiary',
+}, {
+    name: 'low salt', color: 'tertiary',
+}, {
+    name: 'low calorie', color: 'tertiary',
+}, {
+    name: 'low cholesterol', color: 'tertiary',
+}, {
+    name: 'low histamine', color: 'tertiary',
+}, {
+    name: 'low fodmap', color: 'tertiary',
+}, {
+    name: 'gluten free', color: 'tertiary',
+}, {
+    name: 'lactose free', color: 'tertiary',
+}, {
+    name: 'egg free', color: 'tertiary',
+}, {
+    name: 'nut free', color: 'tertiary',
+}, {
+    name: 'soy free', color: 'tertiary',
+}, {
+    name: 'fish free', color: 'tertiary',
+}, {
+    name: 'shellfish free', color: 'tertiary',
+}, {
+    name: 'pork free', color: 'tertiary',
+}, {
+    name: 'red meat free', color: 'tertiary',
+}, {
+    name: 'crustacean free', color: 'tertiary',
+}, {
+    name: 'celery free', color: 'tertiary',
+}, {
+    name: 'mustard free', color: 'tertiary',
+}, {
+    name: 'sesame free', color: 'tertiary',
+}, {
+    name: 'lupine free', color: 'tertiary',
+}, {
+    name: 'mollusk free', color: 'tertiary',
+}, {
+    name: 'alcohol free', color: 'tertiary',
+}, {
+    name: 'kosher',
+}]
+const suggestedTags = computed(() => [...recipeStore.getTags, ...customTags]
+    .filter((tag: string | { name: string }) => {
+        return !USER_PREFERENCES_COMPUTED.value.tags.includes(typeof tag === 'string' ? tag : tag.name)
+    })
+    .slice(0, 3))
+
+/* Search and filter */
+const USER_PREFERENCES = ref<{
+    timeAvailable: number, servings: number, items: { [id: string]: boolean }, tags: Set<string>,
+}>({
+    timeAvailable: SEARCHBAR_CONFIGURATION.MAX_TIME, servings: 2, items: {}, tags: new Set<string>(),
+})
+const USER_PREFERENCES_COMPUTED = computed(() => {
+    const _preferences = USER_PREFERENCES.value
+    return {
+        timeAvailable: _preferences.timeAvailable,
+        servings: _preferences.servings,
+        items: Object.keys(_preferences.items),
+        tags: [..._preferences.tags],
+    }
 })
 
-// Suggestions
-const itemSuggestions = computed<Item[]>(() => recipeStore.getItemSuggestions.slice(0, CONFIG.MAX_ITEMS))
-const savedRecipes = computed<Recipe[]>(() => recipeStore.getSavedRecipes.slice(0, CONFIG.MAX_RECIPES))
-const recipeSuggestions = computed<Recipe[]>(() => recipeStore.getRecipePredictions.slice(0, CONFIG.MAX_RECIPES))
-
-// Filter
-const filteredRecipes = shallowRef<Recipe[]>([])
-const filteredItems = shallowRef<Item[]>([])
-
-watch(searchInput, () => {
+/* Quick Filter */
+const filterInput = ref('')
+const filteredRecipes = ref<Recipe[]>([])
+const filteredItems = ref<Item[]>([])
+const filteredTags = ref<string[]>([])
+watch(filterInput, () => {
     // Reset filtered recipes and items if search input is empty
-    if (searchInput.value === '') {
+    if (filterInput.value === '') {
         filteredRecipes.value = []
         filteredItems.value = []
+        filteredTags.value = []
         return
     }
 
-    // Filter recipes and items
-    filteredRecipes.value = searchRecipesByQuery(searchInput.value ?? '')
-        .slice(0, CONFIG.MAX_RECIPES)
+    /* Filter recipes and items */
+    /* Recipes */
+    filteredRecipes.value = searchRecipesByQuery(filterInput.value ?? '')
+        .slice(0, SEARCHBAR_CONFIGURATION.MAX_RECIPES)
+
+    /* Items */
     filteredItems.value = items.value
-        .filter((item) => item.getName().toLowerCase().includes(searchInput.value.toLowerCase()))
-        .slice(0, CONFIG.MAX_ITEMS)
-})
+        .filter((item) => item.hasName(filterInput.value ?? ''))
+        .filter((item: Item) => typeof USER_PREFERENCES.value.items[item.getId()] === 'undefined')
+        .slice(0, SEARCHBAR_CONFIGURATION.MAX_ITEMS)
 
-const routeRecipe = (recipe?: Recipe) => {
-    if (recipe) {
-        router.push(recipe.getRoute())
-    }
-}
+    /* Tags */
+    filteredTags.value = recipeStore.getTags
+        .filter((tag: string) => tag.toLowerCase().includes(filterInput.value.toLowerCase()))
+        .slice(0, SEARCHBAR_CONFIGURATION.MAX_TAGS)
+}, {immediate: true})
 
-const openSearch = () => {
-    searchbarIsOpen.value = true
-}
 
-/**
- * Close list if mouse leaves searchbar and searchbar is not focussed
- * or on "esc" keydown
- */
-const closeSearch = () => {
-    searchInput.value = ''
-}
+const selectedItems = computed<Item[]>(() => Object.keys(USER_PREFERENCES.value.items)
+    .map((id: string) => itemsById?.value[id]))
+const includeItem = (item?: Item) => USER_PREFERENCES.value.items[item?.getId() ?? ''] = true
+const excludeItem = (item?: Item) => USER_PREFERENCES.value.items[item?.getId() ?? ''] = false
+const removeItem = (item?: Item) => delete USER_PREFERENCES.value.items[item?.getId() ?? '']
+const includeTag = (tag: string) => USER_PREFERENCES.value.tags.add(tag)
 
-const selectTag = (tag: string) => {
-    emit('selectTag', tag)
-    closeSearch()
+/* Search */
+const searchedRecipes = ref<RecipeSuggestion[]>([])
+const search = () => {
+    const searchQueryBuilder = new SearchQueryBuilder()
+    searchQueryBuilder.setDuration(USER_PREFERENCES.value.timeAvailable)
+    // searchQueryBuilder.setServings(USER_PREFERENCES.value.servings)
+    // searchQueryBuilder.setItemIds(itemQueries.value)
+    searchQueryBuilder.setTags(USER_PREFERENCES_COMPUTED.value.tags)
+
+    // TODO: fix price calculation
+    // searchQueryBuilder.setPrice(maxPrice.value)
+
+    // TODO: enable city index
+    //searchQueryBuilder.setCity(city.value)
+
+    const query = searchQueryBuilder.build()
+    searchedRecipes.value = searchRecipes(query)
+    closeAll()
+    emit('search', searchedRecipes.value)
 }
 
 /**
  * Select recipe and close list
  */
 const selectRecipe = (recipe: Recipe) => {
-    routeRecipe(recipe)
-    closeSearch()
-}
-
-/**
- * Select item and close list
- */
-const selectItem = (item: Item) => {
-    emit('selectItem', item)
-    closeSearch()
-}
-
-const submitted = ref(false)
-const search = () => {
-    emit('search')
+    closeAll()
+    if (recipe) {
+        router.push(recipe.getRoute())
+    }
 }
 </script>
 
 <style scoped>
 .searchbar-wrapper {
     width: 100%;
+    height: 100%;
+    transition: var(--transition);
+}
+
+.searchbar-wrapper.active {
+    background-color: rgba(var(--ion-background-color-rgb), 0.9);
+    z-index: 100;
+    top: 0;
+}
+
+@media (max-width: 768px) {
+    .searchbar-wrapper.active {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        padding: var(--margin-page);
+        background-color: var(--ion-background-color);
+    }
 }
 
 .searchbar-blur {
@@ -351,15 +491,15 @@ const search = () => {
     color: var(--ion-text-color);
 }
 
+.searchbar-search-wrapper.active .searchbar-search {
+    cursor: text;
+}
+
 @media (max-width: 768px) {
     .searchbar-search::placeholder, .searchbar-search::-webkit-input-placeholder {
         font-size: var(--font-size-smaller);
     }
 }
-
-/* .searchbar-quick-preferences {
-    margin-bottom: 50px;
-} */
 
 /* Extra styling to remove spinner on number inputs in Firefox */
 input[type='number'] {
@@ -372,24 +512,13 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
-@keyframes liquidGradient {
-    0% {
-        background-position: 0 50%
-    }
-    50% {
-        background-position: 100% 50%;
-    }
-    100% {
-        background-position: 0 50%;
-    }
-}
-
-.searchbar-search-button {
+.searchbar-button {
     /* Basic styling */
     display: inline-block;
     padding: 10px 20px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: var(--font-weight-bold);
+
     text-align: center;
     text-decoration: none;
     border: none;
@@ -397,30 +526,33 @@ input::-webkit-inner-spin-button {
     cursor: pointer;
 
     /* Colors and shadows */
-    background: radial-gradient(circle at top left, #62c370, #c362b5, #6ab1e1),
-    linear-gradient(45deg, #6ab1e1, #62c370, #c362b5, #6ab1e1),
-    radial-gradient(circle at bottom right, #62c370, #c362b5, #6ab1e1),
-    linear-gradient(135deg, #6ab1e1, #62c370, #c362b5, #6ab1e1);
     color: #fff;
-    text-shadow: 1px 1px 2px #fff;
     background-size: 200% 200%; /* Increase background size for the gradient animation */
 
     /* Shadows */
-    box-shadow: var(--box-shadow2);
+    box-shadow: var(--box-shadow);
 
     /* Animations */
     transition: background 1s ease-in-out,
     transform ease-in-out 300ms,
     box-shadow ease-in-out 300ms,
     scale ease-in-out 300ms;
-    animation: liquidGradient 5s infinite ease; /* Apply the liquid gradient animation */
 }
 
+.searchbar-button.search {
+    background: radial-gradient(circle at top left, #ffc718, #c362b5, #6ab1e1);
+}
 
-.searchbar-search-button:hover, .searchbar-search-button:active {
-    /* Hover effects */
-    box-shadow: 0 30px 20px -15px rgba(0, 0, 0, 0.2);
-    text-shadow: none;
+.searchbar-button.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background: none;
+    color: inherit;
+    border: none;
+    box-shadow: none;
+}
+
+.searchbar-button:hover, .searchbar-button:active {
     scale: 1.05;
 }
 
@@ -438,14 +570,27 @@ input::-webkit-inner-spin-button {
 }
 
 .searchbar-list {
+    /* Layout */
     width: 100%;
     max-width: var(--max-width);
     margin: var(--margin-auto);
     max-height: 90vh;
     overflow-y: scroll;
     padding: var(--padding-small);
-    background: var(--background);
+
+    /* Colors */
+    background: var(--ion-background-color);
+
+    /* Borders */
     border-radius: var(--border-radius);
+
+    /* Shadows */
     box-shadow: var(--box-shadow-strong);
+}
+
+@media (max-width: 768px) {
+    .searchbar-list {
+        box-shadow: none;
+    }
 }
 </style>

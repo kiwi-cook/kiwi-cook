@@ -5,7 +5,7 @@
 // Vue
 import { defineStore } from 'pinia'
 
-import { API_ROUTE, APIResponse, Item, itemFromJSON, Recipe, sendToAPI } from '@/shared';
+import { API_ROUTE, APIResponse, Item, Recipe, sendToAPI } from '@/shared';
 import { logDebug } from '@/shared/utils/logging';
 import { useSharedStore } from '@/shared/storage/shared.ts';
 import { CachedItem, getCachedItem, removeCachedItem, setCachedItem } from '@/shared/storage/cache.ts';
@@ -68,7 +68,7 @@ export const useSharedRecipeStore = defineStore('recipes-shared', {
                     // this is because the JSON is not a valid Item object,
                     // and we need to use the Item class methods
                     if (!apiResponse.error) {
-                        const items: Item[] = apiResponse.response.map((item: Item) => new Item(itemFromJSON(item)))
+                        const items: Item[] = apiResponse.response.map((item: Item) => Item.fromJSON(item))
                         this.setItems(items)
                     }
                     sharedStore.finishLoading('fetchItems')
@@ -105,7 +105,7 @@ export const useSharedRecipeStore = defineStore('recipes-shared', {
             /* Items */
             return getCachedItem<Item[]>('items', [], this.fetchItems)
                 .then((items: CachedItem<Item[]>) => {
-                    return this.setItems((items.value ?? []).map((item: Item) => itemFromJSON(item)))
+                    return this.setItems((items.value ?? []).map((item: Item) => Item.fromJSON(item)))
                 })
                 /* Recipes */
                 .then(() => {

@@ -6,6 +6,9 @@ import { useIonRouter } from '@ionic/vue';
 import { getLocaleStr, LocaleStr, newLocaleStr } from '@/shared/locales/i18n';
 import { APP_NAME, RecipeItem, share, Step, tmpId } from '@/shared';
 import { logDebug, logError, logWarn } from '@/shared/utils/logging';
+import { ERROR_MSG } from '@/shared/utils/errors.ts';
+
+const MODULE = 'shared.types.recipe.'
 
 /**
  * Recipe
@@ -60,21 +63,22 @@ export class Recipe {
      * @returns a new recipe
      */
     static fromJSON(json: any): Promise<Recipe> {
-        const funcName = 'Recipe.fromJSON'
+        const fName = MODULE + 'Recipe.' + this.fromJSON.name
         return new Promise<Recipe>((resolve, reject) => {
             const recipe = new Recipe()
 
             if (typeof json === 'undefined' || json === null) {
-                logError(funcName, 'json is undefined.')
-                return reject(new Error('json is undefined.'))
+                const errorMsg = json === null ? ERROR_MSG.isNull : ERROR_MSG.isUndefined
+                logError(fName, errorMsg)
+                return reject(new Error(errorMsg))
             }
 
-            logDebug(funcName, json)
+            logDebug(fName, json)
 
             // Id
-            recipe.id = json.id
-            if (recipe.id === undefined) {
-                logWarn(funcName, 'id is undefined.')
+            recipe.id = json.id ?? tmpId()
+            if (json.id === undefined) {
+                logError(fName, ERROR_MSG.noId)
             }
 
             recipe.name = json?.name
@@ -92,7 +96,7 @@ export class Recipe {
             recipe.src = json.src
             resolve(recipe)
         }).catch((error: Error) => {
-            logError('Recipe.fromJSON', error)
+            logError(fName, error, json)
             throw error
         })
     }
@@ -121,7 +125,7 @@ export class Recipe {
 
     public getShortDescription(): string {
         const desc = getLocaleStr(this.desc).split('.').slice(0, 2).join('.');
-        if (desc[desc.length - 1] === '.') {
+        if (desc.endsWith('.')) {
             return desc
         }
         return desc + '.'
@@ -152,8 +156,9 @@ export class Recipe {
     }
 
     public hasItem(id?: string): boolean {
+        const fName = MODULE + 'Recipe.' + this.hasItem.name
         if (typeof id === 'undefined') {
-            logWarn('Recipe.hasItem', 'id is undefined.')
+            logWarn(fName, ERROR_MSG.noId)
             return false
         }
         return this.items.some((item: RecipeItem) => item.getId() === id)
@@ -192,7 +197,11 @@ export class Recipe {
      * Update the servings of the recipe
      * @param servings
      */
-    public setServings(servings: number) {
+    public setServings(servings?: number) {
+        if (typeof servings === 'undefined') {
+            return
+        }
+
         this.servings = servings
         this.items.forEach((item) => {
             item.setServings(servings)

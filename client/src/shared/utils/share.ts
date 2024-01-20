@@ -1,11 +1,14 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { CanShareResult, Share } from '@capacitor/share';
-import { logError } from '@/shared/utils/logging';
+import { logError, logWarn } from '@/shared/utils/logging';
+
+const MODULE = 'shared.utils.share.'
 
 export function share(options: { title: string, text: string, url: string, dialogTitle: string }) {
+    const fName = MODULE + 'share'
     const {title, text, url, dialogTitle} = options || {}
 
     return Share.canShare().then((canShare: CanShareResult) => {
@@ -18,9 +21,9 @@ export function share(options: { title: string, text: string, url: string, dialo
                 title, text, url, dialogTitle,
             })
             .catch((error: Error) => {
-                logError('sharing failed', error)
+                logError(fName, error)
             })
     }).catch((error: Error) => {
-        logError('sharing failed', error)
+        logWarn(fName, error)
     })
 }

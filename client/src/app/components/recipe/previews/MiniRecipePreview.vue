@@ -76,7 +76,6 @@ const routeToRecipe = () => router.push(link?.value)
     /* font */
     font-size: var(--font-size-smaller);
     font-weight: var(--font-weight-light);
-    color: var(--ion-color-medium);
 
     /* sizing */
     margin-top: var(--margin-small);

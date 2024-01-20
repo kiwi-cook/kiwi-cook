@@ -6,6 +6,8 @@ import { Drivers, Storage } from '@ionic/storage';
 import { logDebug, logError, logWarn } from '@/shared/utils/logging.ts';
 import { compress, decompress } from 'lz-string';
 
+const MODULE = 'shared.storage.cache.'
+
 const ionicStorage = new Storage({
     name: 'tastebuddy_db', driverOrder: [Drivers.LocalStorage]
 });
@@ -28,22 +30,24 @@ export interface CachedItem<T> {
  * @param value
  */
 export async function setCachedItem<T>(key: string, value: T) {
+    const fName = MODULE + 'setCachedItem'
+
     const tsStart = performance.now()
-    logDebug('setCachedItem', key, value)
+    logDebug(fName, key, value)
     if (value === null || typeof value === 'undefined') {
-        logWarn('setCachedItem', 'value is null or undefined')
+        logWarn(fName, 'value is null or undefined')
         return value
     }
 
     const compressedValue = compress(JSON.stringify(value))
     return ionicStorage.set(key, {date: new Date().getTime(), value: compressedValue}).then(() => {
-        logDebug('setCachedItem', `saved ${key} to cache`)
+        logDebug(fName, `saved ${key} to cache`)
         const tsEnd = performance.now()
-        logDebug('setCachedItem', `Saved ${key} to cache in ${tsEnd - tsStart}ms`)
+        logDebug(fName, `Saved ${key} to cache in ${tsEnd - tsStart}ms`)
         return value
     }).catch((error) => {
-        logError('setCachedItem', `error saving ${key} to cache:`, error)
-        logDebug('setCachedItem', value)
+        logError(fName, `error saving ${key} to cache:`, error)
+        logDebug(fName, value)
         return value
     })
 }
@@ -55,7 +59,9 @@ export async function setCachedItem<T>(key: string, value: T) {
  * @param fetch function that is called to fetch the items, if the one in the cache is old
  */
 export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() => Promise<T | null>) | null = null): Promise<CachedItem<T>> {
-    logDebug('getCachedItem', `getting ${key} from cache`)
+    const fName = MODULE + 'getCachedItem.' + key
+
+    logDebug(fName, `getting ${key} from cache`)
     const tsStart = performance.now()
     return ionicStorage.get(key)
         .then((cachedItem: {
@@ -64,8 +70,9 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
             /* Try to get the cached value */
 
             // If the value is not in the cache, return the default value
-            if (!cachedItem || typeof cachedItem === 'undefined') {
-                logWarn(`getCachedItem.${key}`, `no ${key} in cache`)
+            if (!cachedItem || typeof cachedItem === 'undefined' ||
+                (Array.isArray(cachedItem) && cachedItem.length === 0)) {
+                logWarn(fName, `no ${key} in cache`)
                 return {value: null, isOld: true}
             }
 
@@ -74,10 +81,11 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
             const uncompressedString: string = decompress(cachedItem.value)
             const uncompressedValue: T = JSON.parse(uncompressedString) as T
             const tsEnd = performance.now()
-            logDebug(`getCachedItem.${key}`, `loaded ${key} from cache in ${tsEnd - tsStart}ms`)
+            logDebug(fName, `loaded ${key} from cache in ${tsEnd - tsStart}ms`)
 
             // Check if the cached value is old
             const isOld = (new Date().getTime() - cachedItem?.date) > MAX_CACHE_AGE
+            logDebug(fName, `isOld: ${isOld}`)
 
             return {value: uncompressedValue, isOld: isOld}
         })
@@ -85,14 +93,15 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
             /* Try to fetch the value */
 
             // If the value cannot call the fetch method, immediately return the cached value
-            if (fetch === null || (!cachedItem.isOld && cachedItem.value !== null)) {
+            if (fetch === null || (!cachedItem.isOld && cachedItem.value !== null && Array.isArray(cachedItem.value) &&
+                cachedItem.value.length > 0)) {
                 return cachedItem
             }
 
-            logDebug(`getCachedItem.${key}`, `fetching ${key} because cache is invalid`)
+            logDebug(fName, `fetching ${key} because cache is invalid`)
             return fetch().then((fetchedItem: T | null) => {
-                logDebug(`getCachedItem.${key}`, `fetched ?= null: ${fetchedItem ===
-                null}, cached ?= null: ${cachedItem.value === null}, default: ${defaultValue}`)
+                logDebug(fName, `fetched ?= null: ${fetchedItem === null}, cached ?= null: ${cachedItem.value ===
+                null}, default: ${defaultValue}`)
                 return {
                     value: fetchedItem ?? cachedItem.value ?? defaultValue, isOld: false
                 }
@@ -105,6 +114,6 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
  * @param key
  */
 export async function removeCachedItem(key: string) {
-    logDebug('removeCachedItem', `removing ${key} from cache`)
+    logDebug(MODULE + 'removeCachedItem.' + key, `removing ${key} from cache`)
     return ionicStorage.remove(key)
 }
