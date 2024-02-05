@@ -65,7 +65,7 @@
     "cypress": "^13.6.3",
     "eslint": "^8.56.0",
     "eslint-plugin-sonarjs": "^0.23.0",
-    "eslint-plugin-vue": "9.21.0",
+    "eslint-plugin-vue": "9.21.1",
     "postcss-html": "^1.6.0",
     "stylelint": "^16.2.0",
     "stylelint-config-recommended-vue": "^1.5.0",
