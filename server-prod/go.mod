@@ -3,7 +3,7 @@ module tastebuddy/main
 go 1.20
 
 require (
-	github.com/gofiber/fiber/v2 v2.52.0
+	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.18.2
 )
