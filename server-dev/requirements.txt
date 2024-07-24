@@ -7,6 +7,6 @@ pymongo==4.8.0
 pytest==8.0.0
 python-dotenv==1.0.1
 python_crfsuite==0.9.10
-scikit_learn==1.4.0
+scikit_learn==1.5.1
 starlette==0.38.1
 tqdm==4.66.4
