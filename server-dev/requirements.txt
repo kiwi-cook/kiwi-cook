@@ -1,6 +1,6 @@
-certifi==2023.11.17
+certifi==2024.2.2
 fastapi==0.109.2
-Flask==3.0.1
+Flask==3.0.2
 nltk==3.8.1
 pydantic==2.6.0
 pymongo==4.6.1
@@ -8,5 +8,5 @@ pytest==8.0.0
 python-dotenv==1.0.1
 python_crfsuite==0.9.10
 scikit_learn==1.4.0
-starlette==0.36.1
+starlette==0.36.2
 tqdm==4.66.1
