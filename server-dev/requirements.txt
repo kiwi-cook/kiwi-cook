@@ -9,4 +9,4 @@ python-dotenv==1.0.1
 python_crfsuite==0.9.10
 scikit_learn==1.4.0
 starlette==0.36.2
-tqdm==4.66.1
+tqdm==4.66.3
