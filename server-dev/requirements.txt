@@ -1,5 +1,5 @@
 certifi==2024.2.2
-fastapi==0.109.0
+fastapi==0.109.2
 Flask==3.0.2
 nltk==3.8.1
 pydantic==2.6.0
