@@ -3,7 +3,7 @@ fastapi==0.109.0
 Flask==3.0.2
 nltk==3.8.1
 pydantic==2.6.0
-pymongo==4.6.1
+pymongo==4.8.0
 pytest==8.0.0
 python-dotenv==1.0.1
 python_crfsuite==0.9.10
