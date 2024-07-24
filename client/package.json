@@ -64,7 +64,7 @@
     "compromise": "^14.11.2",
     "cypress": "^13.6.4",
     "eslint": "^8.56.0",
-    "eslint-plugin-sonarjs": "^0.23.0",
+    "eslint-plugin-sonarjs": "^1.0.4",
     "eslint-plugin-vue": "9.27.0",
     "postcss-html": "^1.7.0",
     "stylelint": "^16.7.0",
