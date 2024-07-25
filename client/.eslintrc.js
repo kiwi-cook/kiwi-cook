@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 module.exports = {
@@ -12,9 +12,7 @@ module.exports = {
 		'eslint:recommended',
 		/* Vue */
 		'plugin:vue/vue3-essential',
-		'@vue/typescript/recommended',
-		/* Detect bugs and suspicious patterns */
-		'plugin:sonarjs/recommended',
+		'@vue/typescript/recommended'
 	],
 	parserOptions: {
 		ecmaVersion: 2020,

@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Item, presentToast, Recipe } from '@/shared';
-import { RecipeSuggestion } from '@/app/search';
-import { logDebug, logError } from '@/shared/utils/logging';
+import {Item, presentToast, Recipe} from '@/shared';
+import {RecipeSuggestion} from '@/app/search';
+import {logDebug, logError} from '@/shared/utils/logging';
 
 // URLs for the API
 
@@ -142,5 +142,8 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
                 .then(() => ({
                     error: true, response: (errorMessage ?? 'An error occurred') as R
                 }))
+        }).finally(() => {
+            clearTimeout(id)
+            return controller.abort()
         })
 }

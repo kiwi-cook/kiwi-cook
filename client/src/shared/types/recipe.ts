@@ -2,11 +2,11 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { useIonRouter } from '@ionic/vue';
-import { getLocaleStr, LocaleStr, newLocaleStr } from '@/shared/locales/i18n';
-import { APP_NAME, RecipeItem, share, Step, tmpId } from '@/shared';
-import { logDebug, logError, logWarn } from '@/shared/utils/logging';
-import { ERROR_MSG } from '@/shared/utils/errors.ts';
+import {useIonRouter} from '@ionic/vue';
+import {getLocaleStr, LocaleStr, newLocaleStr} from '@/shared/locales/i18n';
+import {APP_NAME, RecipeItem, share, Step, tmpId} from '@/shared';
+import {logDebug, logError, logWarn} from '@/shared/utils/logging';
+import {ERROR_MSG} from '@/shared/utils/errors.ts';
 
 const MODULE = 'shared.types.recipe.'
 
@@ -62,7 +62,7 @@ export class Recipe {
      * @param json the json object
      * @returns a new recipe
      */
-    static fromJSON(json: any): Promise<Recipe> {
+    static async fromJSON(json: any): Promise<Recipe> {
         const fName = MODULE + 'Recipe.' + this.fromJSON.name
         return new Promise<Recipe>((resolve, reject) => {
             const recipe = new Recipe()

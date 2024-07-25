@@ -3,12 +3,12 @@
  */
 
 // Vue
-import { defineStore } from 'pinia'
+import {defineStore} from 'pinia'
 
-import { API_ROUTE, APIResponse, Item, Recipe, sendToAPI } from '@/shared';
-import { logDebug } from '@/shared/utils/logging';
-import { useSharedStore } from '@/shared/storage/shared.ts';
-import { CachedItem, getCachedItem, removeCachedItem, setCachedItem } from '@/shared/storage/cache.ts';
+import {API_ROUTE, APIResponse, Item, Recipe, sendToAPI} from '@/shared';
+import {logDebug} from '@/shared/utils/logging';
+import {useSharedStore} from '@/shared/storage/shared.ts';
+import {CachedItem, getCachedItem, removeCachedItem, setCachedItem} from '@/shared/storage/cache.ts';
 
 
 // Define typings for the store state
@@ -91,7 +91,8 @@ export const useSharedRecipeStore = defineStore('recipes-shared', {
                             .then((recipes: Recipe[]) => this.setRecipes(recipes.map((recipe: Recipe) => new Recipe(recipe))))
                     }
                     return null
-                }).then((recipes: Recipe[] | null) => {
+                })
+                .then((recipes: Recipe[] | null) => {
                     sharedStore.finishLoading('fetchRecipes')
                     return recipes
                 })

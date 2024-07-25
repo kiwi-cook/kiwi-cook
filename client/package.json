@@ -35,20 +35,21 @@
     "@capacitor/core": "5.6.0",
     "@capacitor/ios": "5.6.0",
     "@capacitor/keyboard": "5.0.9",
-    "@capacitor/share": "^5.0.7",
+    "@capacitor/share": "^5.0.8",
     "@capacitor/status-bar": "5.0.7",
+    "@ionic/core": "8",
     "@ionic/storage": "^4.0.0",
-    "@ionic/vue": "^7.7.0",
-    "@ionic/vue-router": "^8.2.5",
-    "@vueuse/core": "^10.7.2",
-    "core-js": "^3.35.1",
+    "@ionic/vue": "8",
+    "@ionic/vue-router": "8",
+    "@vueuse/core": "^10.11.0",
+    "core-js": "^3.37.1",
     "fastest-levenshtein": "^1.0.16",
     "lz-string": "^1.5.0",
     "pinia": "^2.1.7",
     "register-service-worker": "^1.7.2",
     "vue": "^3.4.34",
     "vue-i18n": "^9.13.1",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@capacitor/cli": "5.6.0",
@@ -61,15 +62,15 @@
     "@vue/cli-plugin-typescript": "~5.0.8",
     "@vue/cli-service": "~5.0.8",
     "@vue/eslint-config-typescript": "^12.0.0",
-    "compromise": "^14.11.2",
-    "cypress": "^13.6.4",
-    "eslint": "^8.56.0",
+    "compromise": "^14.13.0",
+    "cypress": "^13.13.1",
+    "eslint": "^8.57.0",
     "eslint-plugin-sonarjs": "^1.0.4",
     "eslint-plugin-vue": "9.27.0",
     "postcss-html": "^1.7.0",
     "stylelint": "^16.7.0",
     "stylelint-config-recommended-vue": "^1.5.0",
-    "stylelint-config-standard": "^36.0.0",
-    "typescript": "^5.3.3"
+    "stylelint-config-standard": "^36.0.1",
+    "typescript": "^5.5.4"
   }
 }
