@@ -1,6 +1,6 @@
 certifi==2024.7.4
 fastapi==0.111.1
-Flask==3.0.2
+Flask==3.0.3
 nltk==3.8.1
 pydantic==2.8.2
 pymongo==4.8.0
