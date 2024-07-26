@@ -24,6 +24,15 @@ crawler_pipeline.add_element(download)
 crawler_pipeline.add_element(scraper)
 
 
+async def run_pipeline():
+    """
+    Fills the pipeline with the necessary elements.
+    """
+    await crawler_pipeline.feed("https://cooking.nytimes.com/recipes/1025480-spaghetti-sauce")
+
+    await crawler_pipeline.run()
+
+
 def main():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description=f"Recipe pipeline")
@@ -60,7 +69,7 @@ def main():
         # Start the pipeline
         if args.online:
             # Crawl the websites and start the pipeline
-            asyncio.run(crawler_pipeline.run())
+            asyncio.run(run_pipeline())
         elif args.server:
             # Start the server
             start_server()

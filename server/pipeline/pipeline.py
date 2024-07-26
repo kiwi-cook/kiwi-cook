@@ -15,6 +15,8 @@ class Pipeline:
         await asyncio.gather(*tasks)
 
     async def feed(self, data):
+        if self.elements:
+            self.elements[-1].output_queue = asyncio.Queue()
         await self.elements[0].input_queue.put(data)
 
     async def stop(self):
