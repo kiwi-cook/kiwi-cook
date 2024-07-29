@@ -8,5 +8,5 @@ pytest==8.3.2
 python-dotenv==1.0.1
 python_crfsuite==0.9.10
 scikit_learn==1.5.1
-starlette==0.38.1
+starlette==0.38.2
 tqdm==4.66.4
