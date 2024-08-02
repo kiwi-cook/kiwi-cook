@@ -19,23 +19,52 @@ class LocalizedString(BaseModel):
     lang: str
     value: str
 
+    @classmethod
+    def new(cls, lang: str, value: str):
+        return cls(lang=lang, value=value)
+
+    def get_langs(self):
+        return [self.lang]
+
 
 class Ingredient(BaseModel):
-    id: PyObjectId
+    id: Optional[PyObjectId] = Field(default=None, alias="_id")
+    name: LocalizedString
+
+    class Config:
+        allow_population_by_field_name = True
+
+    @classmethod
+    def new(cls, name: str, id: Optional[PyObjectId] = None):
+        return cls(id=id, name=LocalizedString.new('en', name))
 
 
 class RecipeIngredient(BaseModel):
     item: Ingredient
-    quantity: float
-    unit: str
+    quantity: Optional[float] = None
+    unit: Optional[str] = None
+
+    @classmethod
+    def new(cls, item: Ingredient, quantity: Optional[float] = None, unit: Optional[str] = None):
+        return cls(item=item, quantity=quantity, unit=unit)
 
 
 class RecipeStep(BaseModel):
-    description: LocalizedString = Field(alias="desc")
-    items: List[PyObjectId]
-    imgUrl: Optional[HttpUrl] = None
+    description: LocalizedString
+    ingredients: Optional[List[RecipeIngredient]] = None
+    img_url: Optional[HttpUrl] = Field(default=None, alias="imgUrl")
     duration: Optional[int] = None
     temperature: Optional[int] = None
+
+    class Config:
+        allow_population_by_field_name = True
+
+    @classmethod
+    def new(cls, description: LocalizedString, ingredients: Optional[List[RecipeIngredient]] = None,
+            img_url: Optional[HttpUrl] = None, duration: Optional[int] = None,
+            temperature: Optional[int] = None):
+        print(f"Creating new RecipeStep with description: {description}")
+        return cls(description=description, ingredients=ingredients, img_url=img_url, duration=duration, temperature=temperature)
 
 
 class RecipeAuthor(BaseModel):
@@ -59,20 +88,21 @@ class Nutrition(BaseModel):
 
 class Recipe(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    name: LocalizedString = Field(alias="name")
-    description: LocalizedString = Field(alias="desc")
+    name: LocalizedString
+    description: LocalizedString
 
-    items: List[Ingredient] = Field(alias="items")
+    ingredients: Optional[List[RecipeIngredient]] = Field(alias="items")
     steps: List[RecipeStep] = Field(alias="steps")
     props: Dict[str, Any] = Field(alias="props")
     src: Optional[RecipeSource] = Field(alias="src", default=None)
     deleted: bool = Field(alias="deleted", default=False)
 
+    duration: int = Field(default=0)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     cuisine: Optional[str] = None
     difficulty: str = Field(default="medium")
-    rating: Optional[float] = Field(ge=0, le=5)
+    rating: Optional[float] = Field(ge=0, le=5, default=None)
     nutrition: Optional[Nutrition] = None
     image_url: Optional[HttpUrl] = None
     video_url: Optional[HttpUrl] = None

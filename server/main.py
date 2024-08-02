@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import sys
+import traceback
 
 from pipeline.crawl import RecipeCrawler
 from pipeline.download import HtmlRecipeSaver, HtmlRecipeLoader
@@ -10,14 +11,17 @@ from pipeline.pipeline import Pipeline
 from pipeline.scrape import RecipeScraper
 from server.app import start_server
 
-mongo_client = None  # Replace this with your own MongoDB client
+from pymongo import MongoClient
+
+# Connect to MongoDB
+mongo_client = MongoClient('mongodb://root:example@localhost:27017/')
 
 # Initialize the pipeline
 crawler_pipeline = Pipeline()
-crawler = RecipeCrawler("Crawler", max_size=100)
+crawler = RecipeCrawler(max_size=100)
 download = HtmlRecipeSaver(mongo_client)
 load = HtmlRecipeLoader(mongo_client)
-scraper = RecipeScraper("Scraper")
+scraper = RecipeScraper(mongo_client)
 
 crawler_pipeline.add_element(crawler)
 crawler_pipeline.add_element(download)
@@ -29,7 +33,6 @@ async def run_pipeline():
     Fills the pipeline with the necessary elements.
     """
     await crawler_pipeline.feed("https://cooking.nytimes.com/recipes/1025480-spaghetti-sauce")
-
     await crawler_pipeline.run()
 
 
@@ -50,14 +53,6 @@ def main():
     )
     parser.add_argument(
         "-s", "--server", help="Run the server", action="store_true", required=False
-    )
-    parser.add_argument(
-        "-f",
-        "--file",
-        help="Queries file",
-        default="queries.txt",
-        type=str,
-        required=False,
     )
     parser.add_argument(
         "-d", "--debug", help="Debug mode", action="store_true", required=False
@@ -82,7 +77,9 @@ def main():
             file=sys.stderr,
         )
     except Exception as e:
+        tb = traceback.format_exc()
         print(f"An error occurred: {str(e)}", file=sys.stderr)
+        print(tb, file=sys.stderr)
 
 
 if __name__ == "__main__":

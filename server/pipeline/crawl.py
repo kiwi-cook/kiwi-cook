@@ -1,4 +1,3 @@
-# Threading
 import asyncio
 from urllib.parse import urlparse, urljoin
 
@@ -8,18 +7,8 @@ from pipeline.pipeline import PipelineElement
 from util.robots import check_robots
 
 
-# Database
-
-def log_error(error_msg):
-    print(error_msg)
-
-
-def log_warning(warning_msg):
-    print(warning_msg)
-
-
 class RecipeCrawler(PipelineElement):
-    def __init__(self, base_url, max_size=1000, max_same_domain_concurrent=5,
+    def __init__(self, max_size=1000, max_same_domain_concurrent=5,
                  ignore_domains=None, langs=None, required_keywords=None):
         super().__init__("Crawler")
 
@@ -43,12 +32,9 @@ class RecipeCrawler(PipelineElement):
             "Cache-Control": "max-age=0",
         }
 
-        self.base_url = base_url
         self.max_size = max_size
         self.max_same_domain_concurrent = max_same_domain_concurrent
         self.ignore_domains = ignore_domains or []
-        self.langs = langs or ['en']
-        self.required_keywords = required_keywords or []
 
         self.urls_crawled = set()
         self.ignore_links = set()
@@ -62,45 +48,55 @@ class RecipeCrawler(PipelineElement):
         # Cycle through user agents
         return self.user_agents[self._page_count % len(self.user_agents)]
 
-    async def process_task(self, task):
-        url = task
-        async with httpx.AsyncClient() as client:
-            return await self.check_url(client, url)
+    async def process_task(self, url: str) -> (str, str):
+        """
+        Fetches a URL and returns its HTML content.
+        Args:
+            url: The URL to fetch.
 
-    async def check_url(self, client, url: str):
+        Returns:
+
+        """
+        async with httpx.AsyncClient() as client:
+            ret_val = await self.handle_url(client, url)
+            if ret_val is not None:
+                return ret_val
+            return None
+
+    async def handle_url(self, client, url: str) -> (str, str):
         if len(self.urls_crawled) >= self.max_size:
             print("Maximum size reached")
-            return
+            return None
 
         base_url = urlparse(url).netloc
 
         if url in self.currently_crawled:
             print(f"Ignoring {url} because it is already being crawled")
-            return
+            return None
 
         if self.currently_crawled_base_urls.count(base_url) >= self.max_same_domain_concurrent:
             print(
                 f"Ignoring {url} because the base URL is already being crawled {self.max_same_domain_concurrent} times")
-            return
+            return None
 
         if not url.startswith("http"):
             print(f"Invalid URL: {url}")
-            return
+            return None
 
         if any(domain in url for domain in self.ignore_domains):
             print(f"Ignoring {url} because it is in the ignore domains list")
             self.ignore_links.add(url)
-            return
+            return None
 
         if url in self.ignore_links or url in self.urls_crawled:
             print(f"Ignoring {url} because it is in the ignore or found list")
-            return
+            return False
 
         # Here you would implement the check_robots function
         if not await check_robots(url):
             print(f"Ignoring {url} because it is disallowed by robots.txt")
             self.ignore_links.add(url)
-            return
+            return None
 
         self.currently_crawled.add(url)
         self.currently_crawled_base_urls.append(base_url)
@@ -118,7 +114,7 @@ class RecipeCrawler(PipelineElement):
             self.ignore_links.add(url)
             self.currently_crawled.remove(url)
             self.currently_crawled_base_urls.remove(base_url)
-            return
+            return None
 
         self.urls_crawled.add(url)
         self.currently_crawled.remove(url)
@@ -127,4 +123,4 @@ class RecipeCrawler(PipelineElement):
         self._page_count += 1
 
         # Return the HTML content
-        return html_content
+        return url, html_content

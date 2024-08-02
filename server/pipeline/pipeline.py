@@ -1,4 +1,5 @@
 import asyncio
+import math
 
 
 class Pipeline:
@@ -14,7 +15,7 @@ class Pipeline:
         tasks = [asyncio.create_task(element.process()) for element in self.elements]
         await asyncio.gather(*tasks)
 
-    async def feed(self, data):
+    async def feed(self, *data):
         if self.elements:
             self.elements[-1].output_queue = asyncio.Queue()
         await self.elements[0].input_queue.put(data)
@@ -30,20 +31,37 @@ class PipelineElement:
         self.name = name
         self.input_queue = asyncio.Queue()
         self.output_queue = None
+        self.max_retries = 2
+        self.base_wait_time = 1  # Base waiting time in seconds
 
     async def process(self):
+        retry_count = 0
         while True:
-            task = await self.input_queue.get()
+            try:
+                task = await asyncio.wait_for(self.input_queue.get(), timeout=0.1)
+                retry_count = 0  # Reset retry count when a task is received
+            except asyncio.TimeoutError:
+                if retry_count >= self.max_retries:
+                    print(f"{self.name} exiting after {self.max_retries} retries")
+                    break
+
+                wait_time = self.base_wait_time * math.exp(retry_count)
+                print(f"{self.name} waiting for {wait_time:.2f} seconds...")
+                await asyncio.sleep(wait_time)
+                retry_count += 1
+                continue
+
             if task is None:
                 if self.output_queue:
                     await self.output_queue.put(None)
                 break
+
             print(f"{self.name} processing task")
-            result = await self.process_task(task)
+            result = await self.process_task(*task)
             if self.output_queue and result is not None:
                 await self.output_queue.put(result)
             print(f"{self.name} processed task")
             self.input_queue.task_done()
 
-    async def process_task(self, task):
+    async def process_task(self, *args):
         raise NotImplementedError("Subclasses must implement process_task method")
