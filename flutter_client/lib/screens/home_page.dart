@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:taste_buddy_client/widgets/navigation/bottom_nav.dart';
 import 'package:taste_buddy_client/widgets/recipe/recipe_grid.dart';
+import 'package:taste_buddy_client/widgets/recipe/recipe_of_the_day.dart';
 import 'package:taste_buddy_client/widgets/search_bar.dart';
 
 class RecipesHomePage extends StatelessWidget {
@@ -29,7 +30,7 @@ class RecipesHomePage extends StatelessWidget {
                     SizedBox(height: 16),
                     TasteBuddySearchBar(),
                     SizedBox(height: 24),
-                    // const RecipeOfTheDay(),
+                    RecipeOfTheDay(),
                     SizedBox(height: 24),
                     Text('Explore new recipes',
                         style: TextStyle(
