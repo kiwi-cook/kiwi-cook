@@ -1,17 +1,23 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-
+from dotenv import load_dotenv
 from mongodb import get_database
+import uvicorn
+
+from server.routers import recipes
 
 load_dotenv()
 
-app = FastAPI(title="Taste Buddy",
-              description="The Student-Friendly Recipe Suggestion App: Crafted by Students, for Students",
-              version="0.2.0",
-              redoc_url=None, debug=False)
+app = FastAPI(
+    title="Taste Buddy",
+    description="The Student-Friendly Recipe Suggestion App: Crafted by Students, for Students",
+    version="0.2.0",
+    redoc_url=None
+)
+
 origins = [
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "http://localhost:3000"  # Added in case you're using a React frontend
 ]
 
 app.add_middleware(
@@ -21,16 +27,20 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-def start_server():
-    print("Starting server...")
-    app.run(port=8000, debug=True)
-
+app.include_router(recipes.router)
 
 client = get_database()
 
 
 @app.get("/")
 def read_root():
-    return "Hello from Taste Buddy!"
+    return {"message": "Hello from Taste Buddy!"}
+
+
+def start_server():
+    print("Starting server...")
+    uvicorn.run("server:app", host="0.0.0.0", port=8000, reload=True)
+
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)

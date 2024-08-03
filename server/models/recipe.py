@@ -1,81 +1,127 @@
-from pydantic import BaseModel, Field, ConfigDict, HttpUrl
+from bson import ObjectId
+from pydantic import BaseModel, Field, ConfigDict, HttpUrl, field_serializer
 from typing import List, Optional, Dict, Any
 from datetime import datetime
+
+from pydantic_core import core_schema, Url
 
 
 class PyObjectId(str):
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(
+            cls, _source_type: Any, _handler: Any
+    ) -> core_schema.CoreSchema:
+        return core_schema.json_or_python_schema(
+            json_schema=core_schema.str_schema(),
+            python_schema=core_schema.union_schema([
+                core_schema.is_instance_schema(ObjectId),
+                core_schema.chain_schema([
+                    core_schema.str_schema(),
+                    core_schema.no_info_plain_validator_function(cls.validate),
+                ])
+            ]),
+            serialization=core_schema.plain_serializer_function_ser_schema(
+                lambda x: str(x)
+            ),
+        )
 
     @classmethod
-    def validate(cls, v):
-        if not isinstance(v, str):
-            raise ValueError("PyObjectId must be a string")
-        return v
+    def validate(cls, value) -> ObjectId:
+        if not ObjectId.is_valid(value):
+            raise ValueError("Invalid ObjectId")
+
+        return ObjectId(value)
 
 
-class LocalizedString(BaseModel):
-    lang: str
-    value: str
+class MultiLanguageField(BaseModel):
+    translations: Dict[str, str] = Field(default_factory=dict)
+
+    def __getitem__(self, lang: str) -> str:
+        return self.translations.get(lang, "")
+
+    def __setitem__(self, lang: str, value: str):
+        self.translations[lang] = value
 
     @classmethod
     def new(cls, lang: str, value: str):
-        return cls(lang=lang, value=value)
+        print(f"Creating new MultiLanguageField with value: {value}")
+        return cls(translations={lang: value})
 
     def get_langs(self):
-        return [self.lang]
+        return self.translations.keys()
 
 
 class Ingredient(BaseModel):
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
-    name: LocalizedString
+    name: MultiLanguageField
 
     class Config:
-        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
 
     @classmethod
-    def new(cls, name: str, id: Optional[PyObjectId] = None):
-        return cls(id=id, name=LocalizedString.new('en', name))
+    def new(cls, name: str, id: Optional[PyObjectId] = None, lang: str = 'en'):
+        print(f"Creating new Ingredient with name: {name}")
+        return cls(id=id, name=MultiLanguageField.new(lang, name))
 
 
 class RecipeIngredient(BaseModel):
-    item: Ingredient
+    ingredient: Ingredient
     quantity: Optional[float] = None
     unit: Optional[str] = None
 
     @classmethod
-    def new(cls, item: Ingredient, quantity: Optional[float] = None, unit: Optional[str] = None):
-        return cls(item=item, quantity=quantity, unit=unit)
+    def new(cls, ingredient: Ingredient, quantity: Optional[float] = None, unit: Optional[str] = None):
+        if ingredient is None:
+            raise ValueError("Ingredient cannot be None")
+        print(f"Creating new RecipeIngredient with ingredient: {ingredient}")
+        return cls(ingredient=ingredient, quantity=quantity, unit=unit)
 
 
 class RecipeStep(BaseModel):
-    description: LocalizedString
+    description: MultiLanguageField
     ingredients: Optional[List[RecipeIngredient]] = None
     img_url: Optional[HttpUrl] = Field(default=None, alias="imgUrl")
     duration: Optional[int] = None
     temperature: Optional[int] = None
 
     class Config:
-        allow_population_by_field_name = True
+        populate_by_name = True
 
     @classmethod
-    def new(cls, description: LocalizedString, ingredients: Optional[List[RecipeIngredient]] = None,
+    def new(cls, description: MultiLanguageField, ingredients: Optional[List[RecipeIngredient]] = None,
             img_url: Optional[HttpUrl] = None, duration: Optional[int] = None,
             temperature: Optional[int] = None):
         print(f"Creating new RecipeStep with description: {description}")
-        return cls(description=description, ingredients=ingredients, img_url=img_url, duration=duration, temperature=temperature)
+        return cls(description=description, ingredients=ingredients, img_url=img_url, duration=duration,
+                   temperature=temperature)
+
+    @field_serializer('img_url')
+    def url2str(self, val) -> str:
+        return str(val)
 
 
 class RecipeAuthor(BaseModel):
     name: str
     url: Optional[HttpUrl] = None
 
+    @field_serializer('url')
+    def url2str(self, val) -> str:
+        return str(val)
+
 
 class RecipeSource(BaseModel):
-    url: HttpUrl
-    authors: List[RecipeAuthor]
-    cookbooks: List[str] = []
+    url: Optional[HttpUrl] = None
+    authors: Optional[List[RecipeAuthor]] = None
+    cookbooks: Optional[List[str]] = None
+
+    @classmethod
+    def from_author(cls, authors: List[str]) -> 'RecipeSource':
+        return cls(url=None, authors=[RecipeAuthor(name=author) for author in authors])
+
+    @field_serializer('url')
+    def url2str(self, val) -> str:
+        return str(val)
 
 
 class Nutrition(BaseModel):
@@ -88,8 +134,8 @@ class Nutrition(BaseModel):
 
 class Recipe(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    name: LocalizedString
-    description: LocalizedString
+    name: MultiLanguageField
+    description: MultiLanguageField
 
     ingredients: Optional[List[RecipeIngredient]] = Field(alias="items")
     steps: List[RecipeStep] = Field(alias="steps")
@@ -107,77 +153,7 @@ class Recipe(BaseModel):
     image_url: Optional[HttpUrl] = None
     video_url: Optional[HttpUrl] = None
 
-    model_config = ConfigDict(
-        populate_by_name=True,
-        arbitrary_types_allowed=True,
-        json_schema_extra={
-            "example": {
-                "name": {
-                    "lang": "en",
-                    "value": "Spaghetti Carbonara"
-                },
-                "desc": {
-                    "lang": "en",
-                    "value": "A classic Italian pasta dish with eggs, cheese, and pancetta."
-                },
-                "items": [
-                    {
-                        "id": "507f1f77bcf86cd799439011",
-                        "quantity": 400,
-                        "unit": "g",
-                        "name": "spaghetti"
-                    },
-                    {
-                        "id": "507f1f77bcf86cd799439012",
-                        "quantity": 200,
-                        "unit": "g",
-                        "name": "pancetta"
-                    }
-                ],
-                "steps": [
-                    {
-                        "desc": {
-                            "lang": "en",
-                            "value": "Cook spaghetti in salted boiling water until al dente."
-                        },
-                        "items": [
-                            "507f1f77bcf86cd799439011"
-                        ],
-                        "duration": 10,
-                        "temperature": None
-                    }
-                ],
-                "props": {
-                    "prepTime": 15,
-                    "cookTime": 20,
-                    "servings": 4,
-                    "tags": [
-                        "italian",
-                        "pasta",
-                        "dinner"
-                    ]
-                },
-                "src": {
-                    "url": "https://example.com/spaghetti-carbonara.html",
-                    "authors": [
-                        {
-                            "name": "Chef Mario",
-                            "url": "https://example.com/chef-mario"
-                        }
-                    ]
-                },
-                "cuisine": "Italian",
-                "difficulty": "medium",
-                "rating": 4.5,
-                "nutrition": {
-                    "calories": 650,
-                    "protein": 25.5,
-                    "carbs": 80.2,
-                    "fat": 22.3,
-                    "fiber": 3.1
-                },
-                "image_url": "https://example.com/spaghetti-carbonara.jpg",
-                "video_url": "https://example.com/spaghetti-carbonara-video.mp4"
-            }
-        }
-    )
+    class Config:
+        populate_by_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str, Url: str, datetime: lambda x: x.isoformat()}

@@ -2,8 +2,9 @@ from fastapi import APIRouter
 
 from models.api import APIResponseList
 from models.recipe import Recipe
-from server.app import client
+from mongodb import get_database
 
+client = get_database()
 router = APIRouter()
 
 
@@ -14,7 +15,7 @@ router = APIRouter()
             response_model_exclude_none=True,
             )
 def read_recipes():
-    return {"error": False, "response": list(client['recipes'].find())}
+    return {"error": False, "response": list(client['recipes']['recipes'].find())}
 
 
 @router.get("/recipe/{recipe_id}",

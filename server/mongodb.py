@@ -7,12 +7,7 @@ from pymongo.database import Database
 from pymongo.server_api import ServerApi
 
 
-def get_database() -> Database[Mapping[str, Any] | Any]:
-    url = ('mongodb+srv://tastebuddyprod.xsyiamo.mongodb.net/?authSource=%24external&authMechanism=MONGODB-X509'
-           '&retryWrites=true&w=majority')
-    client = MongoClient(url,
-                         tls=True,
-                         tlsCertificateKeyFile='mongo-cert.pem',
-                         server_api=ServerApi('1'),
-                         tlsCAFile=certifi.where())
-    return client['tastebuddy']
+def get_database() -> MongoClient[Mapping[str, Any] | Any]:
+    url = 'mongodb://root:example@localhost:27017/'
+    client = MongoClient(url)
+    return client

@@ -2,10 +2,12 @@ from difflib import SequenceMatcher
 from typing import Union, List, Tuple
 
 import pint
+from bson import encode
 from ingredient_parser import parse_ingredient
+from ingredient_parser.dataclasses import ParsedIngredient
 from recipe_scrapers import scrape_html
 
-from models.recipe import Recipe, LocalizedString, Ingredient, RecipeStep, RecipeIngredient
+from models.recipe import Recipe, MultiLanguageField, Ingredient, RecipeStep, RecipeIngredient, RecipeSource
 from pipeline.pipeline import PipelineElement
 from util.parse import extract_temperature, extract_durations
 
@@ -17,6 +19,12 @@ class RecipeScraper(PipelineElement):
 
     async def process_task(self, url: str, html: str):
         recipe = self.scrape_html(url, html)
+        # Convert Pydantic model to dictionary
+        recipe_dict = recipe.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode='json')
+        # Encode the document to BSON to check if there are any issues
+        encoded_document = encode(recipe_dict)
+        print(f"Encoded document: {encoded_document}")
+        self.mongo_client['recipes']['recipes'].insert_one(recipe_dict)
         return recipe
 
     def scrape_html(self, url: str, html: str):
@@ -30,18 +38,19 @@ class RecipeScraper(PipelineElement):
         scraper = scrape_html(html=html, org_url=url)
 
         lang = scraper.language() or 'en'
-        name = LocalizedString.new(lang, scraper.title())
-        description = LocalizedString.new(lang, scraper.description())
+        name = MultiLanguageField.new(lang, scraper.title())
+        description = MultiLanguageField.new(lang, scraper.description())
         ingredients = scraper.ingredients()
-        ingredients = self.parse_ingredients(ingredients)
+        ingredients = self.parse_ingredients(ingredients, lang=lang)
 
         instructions = scraper.instructions()
         steps: List[RecipeStep] = self.parse_steps(instructions, lang)
         duration = scraper.total_time()
 
-        img_url = scraper.image()
+        image_url = scraper.image()
         author = scraper.author()
-        host = scraper.host()
+        source = RecipeSource.from_author([author])
+        source.url = url
 
         return Recipe(
             name=name,
@@ -49,40 +58,48 @@ class RecipeScraper(PipelineElement):
             ingredients=ingredients,
             steps=steps,
             duration=duration,
-            props={'img_url': img_url, 'author': author, 'host': host}
+            src=source,
+            image_url=image_url,
+            props={}
         )
 
-    def parse_ingredients(self, ingredients: Union[str, List[str]]) -> List[RecipeIngredient]:
+    def parse_ingredients(self, ingredients: Union[str, List[str]], lang: str = 'en') -> List[RecipeIngredient]:
         if isinstance(ingredients, str):
             ingredients = [ingredients]
 
-        return [self._process_single_ingredient(ingredient) for ingredient in ingredients]
+        return [self._process_single_ingredient(ingredient, lang=lang) for ingredient in ingredients]
 
-    def _process_single_ingredient(self, ingredient: str) -> RecipeIngredient:
-        parsed_ingredient = parse_ingredient(ingredient)
-        item = self._get_or_create_ingredient(parsed_ingredient.name.text)
-        return self._create_recipe_ingredient(item, parsed_ingredient)
+    def _process_single_ingredient(self, ingredient_name: str, lang: str = 'en') -> RecipeIngredient:
+        parsed_ingredient = parse_ingredient(ingredient_name)
+        ingredient = self._get_or_create_ingredient(ingredient_name=parsed_ingredient.name.text, lang=lang)
+        print(f'Parsed ingredient: {parsed_ingredient}, ingredient: {ingredient_name}')
+        return self._create_recipe_ingredient(ingredient, parsed_ingredient)
 
-    def _get_or_create_ingredient(self, item_name: str) -> Ingredient:
-        most_similar = self.find_most_similar_ingredient(item_name)
+    def _get_or_create_ingredient(self, ingredient_name: str, lang: str = 'en') -> Ingredient:
+        most_similar = self.find_most_similar_ingredient(ingredient_name)[0]
+        most_similar_score = most_similar[1] if most_similar else None
+        print(f"Most similar ingredients: {most_similar} with score: {most_similar_score}")
 
-        ingredient = None
-        if not most_similar or len(most_similar) == 0 or (len(most_similar) == 1 and most_similar[0][1] == 0):
-            ingredient = self._create_new_ingredient(item_name)
-        elif most_similar[0][1] < 0.8:
-            ingredient = most_similar[0][0]
+        if most_similar_score < 0.8:
+            ingredient = self._create_new_ingredient(ingredient_name, lang=lang)
+        else:
+            ingredient = most_similar[0]
 
+        if ingredient is None:
+            raise ValueError(f"Could not find or create ingredient: {ingredient_name}")
+        print(f"Found or created ingredient: {ingredient}")
         return ingredient
 
-    def _create_new_ingredient(self, item_name: str) -> Ingredient:
-        item = Ingredient.new(name=item_name, id=None)
-        item_id = self.mongo_client['recipes']['items'].insert_one(
+    def _create_new_ingredient(self, item_name: str, lang: str = 'en') -> Ingredient:
+        item = Ingredient.new(name=item_name, id=None, lang=lang)
+        item_id = self.mongo_client['recipes']['ingredients'].insert_one(
             item.model_dump(by_alias=True, exclude_none=True)
         ).inserted_id
         item.id = item_id
         return item
 
-    def _create_recipe_ingredient(self, ingredient: Ingredient, parsed_ingredient) -> RecipeIngredient:
+    def _create_recipe_ingredient(self, ingredient: Ingredient,
+                                  parsed_ingredient: ParsedIngredient) -> RecipeIngredient:
         quantity: float = self._get_quantity(parsed_ingredient)
         unit = str(self._get_unit(parsed_ingredient))
 
@@ -90,13 +107,13 @@ class RecipeScraper(PipelineElement):
         return recipe_ingredient
 
     @staticmethod
-    def _get_quantity(parsed_ingredient) -> Union[float, None]:
+    def _get_quantity(parsed_ingredient: ParsedIngredient) -> Union[float, None]:
         if parsed_ingredient.amount and parsed_ingredient.amount[0].quantity:
             return float(parsed_ingredient.amount[0].quantity)
         return None
 
     @staticmethod
-    def _get_unit(parsed_ingredient) -> Union[pint.Unit, None]:
+    def _get_unit(parsed_ingredient: ParsedIngredient) -> Union[pint.Unit, None]:
         if parsed_ingredient.amount and parsed_ingredient.amount[0].unit:
             return parsed_ingredient.amount[0].unit
         return None
@@ -108,7 +125,7 @@ class RecipeScraper(PipelineElement):
         recipe_steps = []
         for step_desc in split_steps:
             # Create the recipe step
-            description: LocalizedString = LocalizedString.new(lang, step_desc)
+            description: MultiLanguageField = MultiLanguageField.new(lang, step_desc)
             temperature: int = extract_temperature(step_desc)
             durations: list[float] = extract_durations(step_desc)
             summed_durations = sum(durations) if len(durations) > 0 else None
@@ -120,24 +137,12 @@ class RecipeScraper(PipelineElement):
         return recipe_steps
 
     def find_most_similar_ingredient(self, name: str) -> List[Tuple[Ingredient, float]]:
-        """
-        Finds the most similar ingredient to the given name.
-
-        Args:
-            name (str): Name to find the most similar ingredient to.
-
-        Returns:
-            List[Tuple[Ingredient, float]]: A list of tuples containing the ingredient and its similarity to the given name.
-        """
-        ingredients = list(self.mongo_client['recipes']['ingredients'].find())
-        print(f'Number of ingredients found: {len(ingredients)}')
+        ingredients: List[Ingredient] = [Ingredient(**doc) for doc in
+                                         self.mongo_client['recipes']['ingredients'].find()]
+        print(f'Number of ingredients found: {len(ingredients)}: {ingredients}')
 
         most_similar = []
-        for ing in ingredients:
-            ingredient = Ingredient(
-                id=ing['_id'],
-                name=LocalizedString(**ing['name'])
-            )
+        for ingredient in ingredients:
             max_similarity = max(
                 SequenceMatcher(None, name.lower(), ingredient.name[lang].lower()).ratio()
                 for lang in ingredient.name.get_langs()
