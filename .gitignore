@@ -31,3 +31,7 @@ frontend/public/assets/login.jpg
 # Editor
 .idea
 .vscode
+
+# Python
+__pycache__/
+*.pyc
