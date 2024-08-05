@@ -1,8 +1,12 @@
 #!/usr/bin/env sh
+#
+# Copyright (c) 2024 Josef Müller.
+#
+
 # This script is used to publish the PWA to the gh-pages branch
 
 # build the app
-bun run build:app
+bun run build
 
 # navigate into the build output directory
 cd dist || exit

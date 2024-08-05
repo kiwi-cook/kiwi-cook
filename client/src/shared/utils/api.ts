@@ -4,14 +4,22 @@
 
 import { Ingredient, presentToast, Recipe } from '@/shared';
 import { RecipeSuggestion } from '@/app/search';
-import { logDebug, logError } from '@/shared/utils/logging';
+import { logDebug, logError, logWarn } from '@/shared/utils/logging';
+import { config } from '@/config.ts';
 
-// URLs for the API
-
-// Possible URLs for the API
-const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://localhost:8000']
-
-export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS[1] : possibleAPI_URLS[0]
+const isDev = process.env.NODE_ENV === 'development';
+let API_URL = '';
+const findApiUrl = async () => {
+    logDebug('API_URL', 'Checking for reachable API URL ...');
+    for (const { url } of config.apiUrls.filter(api => isDev ? api.name === 'dev' : api.name === 'prod')) {
+        if ((await fetch(url, { method: 'HEAD' })).ok) {
+            logDebug('API_URL', 'Found reachable API URL: ' + url);
+            return url as string;
+        }
+    }
+    logWarn('API_URL', 'No reachable API URL found. We are offline.');
+    return 'http://localhost:8000';
+};
 
 export enum API_ROUTE {
     GET_RECIPES, ADD_RECIPES, PARSE_RECIPES, DELETE_RECIPES, GET_INGREDIENTS, ADD_INGREDIENTS, DELETE_INGREDIENTS
@@ -84,7 +92,11 @@ export type SendToApiOptions = {
  *   }
  * })
  */
-export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
+export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
+    if (!API_URL) {
+        API_URL = await findApiUrl();
+    }
+
     const url = API_URL + API_ROUTES[route].url;
 
     const { body, headers, errorMessage, successMessage, timeout } = options ?? {}
