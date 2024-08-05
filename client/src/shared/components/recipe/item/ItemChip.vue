@@ -17,16 +17,16 @@
 <script lang="ts" setup>
 import { IonChip, IonLabel, IonThumbnail } from '@ionic/vue';
 import { PropType, toRefs } from 'vue';
-import { Item } from '@/shared';
+import { Ingredient } from '@/shared';
 
 const props = defineProps({
-    item: {
-        type: Object as PropType<Item>, required: true,
+    ingredient: {
+        type: Object as PropType<Ingredient>, required: true,
     }, color: {
         type: String, required: false, default: 'primary'
     }
 })
-const {item} = toRefs(props);
+const { item } = toRefs(props);
 </script>
 
 <style scoped>

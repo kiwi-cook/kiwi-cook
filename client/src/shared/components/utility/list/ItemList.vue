@@ -1,26 +1,24 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <ul v-if="items.length > 0" :class="['item-list', {'horizontal': horizontal}]">
-        <li v-for="(item, itemIndex) in mappedItems" :key="itemIndex" class="item">
-            <ItemComponent :item="item" :quantity-position="quantityPosition"/>
+    <ul v-if="ingredients.length > 0" :class="['item-list', {'horizontal': horizontal}]">
+        <li v-for="(ingredient, itemIndex) in ingredients" :key="itemIndex" class="item">
+            <ItemComponent :ingredient="ingredient" :quantity-position="quantityPosition"/>
         </li>
     </ul>
 </template>
 
 <script lang="ts" setup>
-import { computed, PropType, toRefs } from 'vue';
-import { Item, ItemComponent, RecipeItem } from '@/shared';
+import { PropType, toRefs } from 'vue';
+import { Ingredient, ItemComponent, RecipeIngredient } from '@/shared';
 
 const props = defineProps({
-    items: {
-        type: Array as PropType<(RecipeItem[] | Item[])>, required: true,
+    ingredients: {
+        type: Array as PropType<(RecipeIngredient[] | Ingredient[])>, required: true,
     }, showLimit: {
         type: Number, required: false, default: 30
-    }, type: {
-        type: Array as PropType<string[]>, required: false
     }, horizontal: {
         type: Boolean, required: false, default: false
     }, quantityPosition: {
@@ -29,16 +27,7 @@ const props = defineProps({
         type: Boolean, required: false, default: false
     }
 })
-const {items, type, showLimit} = toRefs(props);
-
-const mappedItems = computed<Item[]>(() => {
-    const mappedItems = items.value
-        .slice(0, showLimit.value)
-    if (!type?.value) {
-        return mappedItems
-    }
-    return mappedItems.filter((item: Item) => type.value?.includes(item.type))
-})
+const { ingredients } = toRefs(props);
 </script>
 
 <style scoped>

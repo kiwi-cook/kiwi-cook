@@ -10,12 +10,12 @@
 
             <IonProgressBar v-show="showLoadingBar" type="indeterminate"/>
             <IonTabBar slot="bottom" :translucent="true" selected-tab="recipe-suggestions">
-                <IonTabButton :disabled="isLoadingInitialData" href="/recipe/saved" tab="saved-recipes">
+                <IonTabButton :disabled="isLoadingInitial" href="/recipe/saved" tab="saved-recipes">
                     <IonIcon :icon="heart"/>
                     {{ $t('Tabs.Favorites') }}
                 </IonTabButton>
 
-                <IonTabButton :disabled="isLoadingInitialData"
+                <IonTabButton :disabled="isLoadingInitial"
                               href="/recipe/suggestions"
                               tab="recipe-suggestions">
                     <IonIcon :icon="sparkles"/>
@@ -35,13 +35,13 @@
 import { computed } from 'vue';
 import { IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
 import { heart, settings, sparkles } from 'ionicons/icons';
-import { useRecipeStore } from '@/app/storage';
-import { Recipe } from '@/shared';
+import { useSharedStore } from '@/shared/storage';
+import { storeToRefs } from 'pinia';
 
-const recipeStore = useRecipeStore()
-const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
-const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
-const showLoadingBar = computed<boolean>(() => (recipeStore.isLoading && !isLoadingInitialData.value) ?? false)
+const shared = useSharedStore()
+const { isLoadingInitial } = storeToRefs(shared)
+
+const showLoadingBar = computed<boolean>(() => !isLoadingInitial ?? false)
 </script>
 
 <style scoped>

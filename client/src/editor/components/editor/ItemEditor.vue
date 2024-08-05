@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -83,8 +83,19 @@
 import { Item } from '@/shared';
 import { logDebug } from '@/shared/utils/logging';
 import {
-    IonAvatar, IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonIcon, IonInput, IonItem,
-    IonList, IonSelect, IonSelectOption
+    IonAvatar,
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonIcon,
+    IonInput,
+    IonItem,
+    IonList,
+    IonSelect,
+    IonSelectOption
 } from '@ionic/vue';
 import { computed, PropType, ref, toRefs } from 'vue';
 import { useRecipeEditorStore } from '@/editor/storage';
@@ -98,7 +109,7 @@ const props = defineProps({
     }
 })
 
-const {item} = toRefs(props)
+const { item } = toRefs(props)
 
 const recipeStore = useRecipeEditorStore()
 const showUsedInRecipes = ref<boolean>(false)

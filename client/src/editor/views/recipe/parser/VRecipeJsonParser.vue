@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -97,13 +97,25 @@ import { addOutline, chevronForwardCircle, saveOutline } from 'ionicons/icons';
 import { useRecipeEditorStore } from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import {
-    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonFab, IonFabButton,
-    IonFabList, IonIcon, IonItem, IonPage, useIonRouter
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonIcon,
+    IonItem,
+    IonPage,
+    useIonRouter
 } from '@ionic/vue';
 import { availableParsers, parseRecipes, RecipeParser } from '@/editor/parser';
 import { Recipe } from '@/shared';
 import { logError } from '@/shared/utils/logging';
-import { MutableRecipe } from '@/editor/types/recipe';
+import { MutableRecipe } from '@/editor/models/recipe';
 
 const router = useIonRouter()
 const recipeStore = useRecipeEditorStore()
@@ -132,7 +144,7 @@ const onFileChange = (event: any) => {
 
 const addRecipe = () => {
     const newRecipeId = MutableRecipe.newRecipe().update().getId()
-    router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+    router.push({ name: 'RecipeEditor', params: { id: newRecipeId } })
 }
 const saveRecipes = () => {
     recipeStore.saveRecipes(parsedRecipes.value)

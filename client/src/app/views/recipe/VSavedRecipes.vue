@@ -79,10 +79,10 @@ const savedRecipesStats = computed<{
 }[]>(() => {
     const stats = recipeStore.getSavedRecipesStats
     const formattedStats = []
-    formattedStats.push({desc: 'Average amount of ingredients', value: average(stats.numberOfIngredients)})
+    formattedStats.push({ desc: 'Average amount of ingredients', value: average(stats.numberOfIngredients) })
     // formattedStats.set('Amount Items', [...stats.itemsIds.values()].map((id: string) => items.value[id]))
-    formattedStats.push({desc: 'Average amount of steps', value: average(stats.numberOfSteps)})
-    formattedStats.push({desc: 'Average duration', value: `${average(stats.duration)} min.`})
+    formattedStats.push({ desc: 'Average amount of steps', value: average(stats.numberOfSteps) })
+    formattedStats.push({ desc: 'Average duration', value: `${average(stats.duration)} min.` })
     return formattedStats
 })
 

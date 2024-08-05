@@ -2,25 +2,24 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Recipe, RecipeItem } from '@/shared';
-import { searchRecipes } from '@/app/search/search';
+import { Recipe, RecipeIngredient } from '@/shared';
 
 export class RecipeSuggestion {
 
     recipe: Recipe;
     recipe_price?: number;
-    missing_items?: {
-        item: RecipeItem; price?: number;
+    missing_ingredients?: {
+        item: RecipeIngredient; price?: number;
     }[]
 
     constructor(recipe: Recipe) {
         this.recipe = recipe
         this.recipe_price = 0
-        this.missing_items = []
+        this.missing_ingredients = []
     }
 
-    public getMissingItems(): RecipeItem[] {
-        return this.missing_items?.map(missing_item => missing_item.item ?? new RecipeItem()) ?? []
+    public getMissingItems(): RecipeIngredient[] {
+        return this.missing_ingredients?.map(missing_item => missing_item.item ?? new RecipeIngredient()) ?? []
     }
 }
 
@@ -29,8 +28,12 @@ export type ItemQuery = {
 }
 
 export type SearchQuery = {
-    duration?: number, servings?: number, items: ItemQuery[], tags: string[]
-    price?: number, city?: string,
+    duration?: number,
+    servings?: number,
+    items: ItemQuery[],
+    tags: string[]
+    price?: number,
+    city?: string,
 }
 
 export class SearchQueryBuilder {
@@ -100,8 +103,4 @@ export class SearchQueryBuilder {
             items: this.items, tags: this.tags, price: this.price, duration: this.duration
         }
     }
-}
-
-export {
-    searchRecipes
 }

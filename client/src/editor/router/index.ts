@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { createRouter } from '@ionic/vue-router';
@@ -11,11 +11,11 @@ import VHome from '@/editor/views/VHome.vue';
 import VRecipe from '@/editor/views/recipe/VRecipe.vue';
 
 const routes: Array<RouteRecordRaw> = [{
-    name: 'Tabs', path: '/', component: TabsPage, redirect: () => ({name: 'Home'}), children: [{
+    name: 'Tabs', path: '/', component: TabsPage, redirect: () => ({ name: 'Home' }), children: [{
         name: 'Home', path: 'home', component: VHome
     }, // Recipe
         {
-            name: 'Recipe', path: 'recipe', component: VRecipe, redirect: () => ({name: 'RecipeList'}), children: [{
+            name: 'Recipe', path: 'recipe', component: VRecipe, redirect: () => ({ name: 'RecipeList' }), children: [{
                 name: 'RecipeList', path: 'list', component: () => import('@/editor/views/recipe/VRecipeList.vue'),
             }, {
                 name: 'RecipeEditor',
@@ -35,7 +35,7 @@ const routes: Array<RouteRecordRaw> = [{
             name: 'ItemEditor', path: 'item/editor', component: () => import('@/editor/views/item/VItemsEditor.vue'),
         }, // 404
         {
-            name: 'NotFound', path: '/:pathMatch(.*)*', redirect: () => ({name: 'Home'}),
+            name: 'NotFound', path: '/:pathMatch(.*)*', redirect: () => ({ name: 'Home' }),
         }]
 }]
 

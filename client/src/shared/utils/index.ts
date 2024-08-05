@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 export * from '@/shared/utils/api';
@@ -7,7 +7,5 @@ export * from '@/shared/utils/utils';
 export * from '@/shared/utils/share';
 export * from '@/shared/utils/parser';
 export * from '@/shared/utils/theme';
-export * from '@/shared/types';
-export * from '@/shared/locales';
 
 export const APP_NAME = 'Taste Buddy 🍳'

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -33,7 +33,7 @@ const props = defineProps({
     }
 })
 
-const {recipe} = toRefs(props)
+const { recipe } = toRefs(props)
 const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
 </script>
 

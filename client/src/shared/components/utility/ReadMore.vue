@@ -19,7 +19,7 @@ const props = defineProps({
         type: Number, required: false, default: 2,
     },
 })
-const {text, length} = toRefs(props);
+const { text, length } = toRefs(props);
 const isExpanded = ref(false);
 
 /**
@@ -35,21 +35,23 @@ const nthIndex = (str: string, pat: string, n: number) => {
     let i = -1
     while (n-- && i++ < L) {
         i = str.indexOf(pat, i);
-        if (i < 0) break;
+        if (i < 0) {
+            break;
+        }
     }
     return i;
 }
 
 const readMore = computed<{ text: string, showButton: boolean }>(() => {
     if (!text?.value) {
-        return {text: '', showButton: false};
+        return { text: '', showButton: false };
     }
 
     const index = nthIndex(text.value, '.', length?.value);
     if (index === -1 || text.value.length <= index + 1) {
-        return {text: text.value, showButton: false};
+        return { text: text.value, showButton: false };
     } else {
-        return {text: isExpanded.value ? text.value : text.value.substring(0, index + 1), showButton: true};
+        return { text: isExpanded.value ? text.value : text.value.substring(0, index + 1), showButton: true };
     }
 });
 

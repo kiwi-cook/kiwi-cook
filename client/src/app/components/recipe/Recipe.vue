@@ -34,18 +34,18 @@
                 </IonText>
             </div>
             <div class="recipe-image-wrapper">
-                <IonImg :src="recipe?.props?.imgUrl" alt="Header Image" class="recipe-image"/>
+                <IonImg :src="recipe?.imageUrl" alt="Header Image" class="recipe-image" loading="lazy" part="image"/>
             </div>
         </div>
 
         <TwoColumnLayout layout="rightBigger">
             <!-- Left -->
             <!-- Ingredients and tools that are needed -->
-            <template v-if="ingredients.length > 0 || tools.length > 0" #left>
+            <template v-if="ingredients.length > 0" #left>
                 <div class="sticky">
                     <div class="header">
                         <!-- Show the amount of ingredients -->
-                        <h2>{{ itemsFromRecipe.length }} {{ $t('Recipe.Ingredient', itemsFromRecipe.length) }}</h2>
+                        <h2>{{ ingredients.length }} {{ $t('Recipe.Ingredient', ingredients.length) }}</h2>
                     </div>
                     <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
@@ -54,13 +54,7 @@
                                       :step="1" color="secondary"
                                       label-placement="start" pin snaps/>
                             <!-- Show the ingredients -->
-                            <ItemList :items="ingredients"/>
-                        </IonCardContent>
-                    </IonCard>
-                    <IonCard v-if="tools.length > 0">
-                        <IonCardContent>
-                            <!-- ... and the tools -->
-                            <ItemList :items="tools"/>
+                            <ItemList :ingredients="ingredients"/>
                         </IonCardContent>
                     </IonCard>
                 </div>
@@ -101,15 +95,26 @@
 <script lang="ts" setup>
 import { computed, PropType, ref, toRefs, watch } from 'vue';
 import {
-    IonButton, IonButtons, IonCard, IonCardContent, IonChip, IonIcon, IonImg, IonItem, IonNote, IonRange, IonText,
+    IonButton,
+    IonButtons,
+    IonCard,
+    IonCardContent,
+    IonChip,
+    IonIcon,
+    IonImg,
+    IonItem,
+    IonNote,
+    IonRange,
+    IonText,
 } from '@ionic/vue';
-import { ItemList, ReadMore, Recipe, recipeBy, RecipeItem, Step, STEP_TYPES } from '@/shared';
+import { ItemList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES } from '@/shared';
 import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
 import { CanShareResult, Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { useRecipeStore } from '@/app/storage';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import { RecipeTitle, StepComponent, TwoColumnLayout } from '@/app/components';
+import { storeToRefs } from 'pinia';
 
 /* Recipe */
 const props = defineProps({
@@ -117,20 +122,18 @@ const props = defineProps({
         type: Object as PropType<Recipe>, required: true,
     },
 });
-const {recipe} = toRefs(props);
+const { recipe } = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
 const recipeStore = useRecipeStore();
-const isSaved = computed(() => recipeStore.getSavedRecipesIds.includes(recipe?.value?.getId()));
+const { savedRecipeIds } = storeToRefs(recipeStore);
+const isSaved = computed(() => savedRecipeIds.value.includes(recipe?.value?.getId()));
 const toggleSave = () => recipeStore.setSaved(recipe?.value);
 
-const itemsFromRecipe = computed<RecipeItem[]>(() => recipe?.value?.getRecipeItems() ?? []);
-const ingredients = computed<RecipeItem[]>(() => itemsFromRecipe.value
-    .filter((item: RecipeItem) => item.type === 'ingredient'))
-const tools = computed<RecipeItem[]>(() => itemsFromRecipe.value.filter((item: RecipeItem) => item.type === 'tool'))
-const steps = computed<Step[]>(() => recipe?.value?.steps ?? [])
+const ingredients = computed<RecipeIngredient[]>(() => recipe?.value?.ingredients ?? []);
+const steps = computed<RecipeStep[]>(() => recipe?.value?.steps ?? [])
 
 // Source
-const source = computed(() => recipeBy(authors.value, recipe?.value?.src.url ?? ''))
+const source = computed(() => recipeBy(authors.value, recipe?.value?.src?.url ?? ''))
 
 // Servings
 const servings = ref(recipe?.value?.servings)
@@ -141,10 +144,10 @@ watch(servings, (newServings, oldServings) => {
 });
 
 // i18n
-const {t} = useI18n()
+const { t } = useI18n()
 
 // Good Appetite Step
-const goodAppetiteStep = new Step()
+const goodAppetiteStep = RecipeStep.empty();
 goodAppetiteStep.type = STEP_TYPES.HEADER
 goodAppetiteStep.setDescription(t('Recipe.GoodAppetite'))
 

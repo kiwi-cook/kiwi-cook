@@ -9,8 +9,8 @@
                 <template #left>
                     <div class="big-recipe-image">
                         <img v-if="recipe" :alt="recipe?.getName()"
-                             :src="recipe?.props.imgUrl"
-                             class="link" @click="routeToRecipe()"/>
+                             :src="recipe?.imageUrl" class="link"
+                             loading="lazy" @click="routeToRecipe()"/>
                     </div>
                 </template>
                 <template #right>
@@ -39,7 +39,7 @@ const props = defineProps({
     }
 })
 
-const {recipe} = toRefs(props)
+const { recipe } = toRefs(props)
 const router = useIonRouter();
 const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
 const routeToRecipe = () => router.push(recipeRoute?.value)

@@ -27,20 +27,17 @@
                         </article>
 
                         <!-- Predicted/Recommended recipes -->
-                        <section v-if="predictedRecipes.length > 0">
+                        <section v-if="recipePredictions.length > 0">
                             <h3>
-                                {{ predictedRecipes.length }}
-                                {{ $t('Suggestions.Recommendations.Title', predictedRecipes.length) }}
+                                {{ recipePredictions.length }}
+                                {{ $t('Suggestions.Recommendations.Title', recipePredictions.length) }}
                             </h3>
                             <h4 class="subheader">
                                 {{ $t('Suggestions.Recommendations.Subtitle') }}
                             </h4>
-                            <HorizontalList :list="predictedRecipes">
+                            <HorizontalList :list="recipePredictions">
                                 <template #element="{ element }: { element: Recipe}">
-                                    <MiniRecipePreview :key="element.id" :duration="element.getDuration()"
-                                                       :img-url="element.props.imgUrl"
-                                                       :link="element.getRoute()"
-                                                       :name="element.getName()"/>
+                                    <MiniRecipePreview :key="element.id" :recipe="element"/>
                                 </template>
                             </HorizontalList>
                         </section>
@@ -55,10 +52,7 @@
                             </h4>
                             <HorizontalList :list="randomRecipes">
                                 <template #element="{ element }: { element: Recipe}">
-                                    <MiniRecipePreview :key="element.id" :duration="element.getDuration()"
-                                                       :img-url="element.props.imgUrl"
-                                                       :link="element.getRoute()"
-                                                       :name="element.getName()"/>
+                                    <MiniRecipePreview :key="element.id" :recipe="element"/>
                                 </template>
                             </HorizontalList>
                         </section>
@@ -73,11 +67,11 @@
                                 <h4 class="subheader">
                                     {{ $t('Suggestions.Search.Subtitle') }}
                                 </h4>
-                                <List :list="searchedRecipes">
+                                <HorizontalList :list="searchedRecipes">
                                     <template #element="{ element }">
                                         <RecipePreview :key="element.id" :recipe="element as RecipeSuggestion"/>
                                     </template>
-                                </List>
+                                </HorizontalList>
                             </div>
                             <div v-else>
                                 <h3>
@@ -110,27 +104,24 @@ import { IonContent, IonFab, IonFabButton, IonIcon, IonPage } from '@ionic/vue';
 import { useRecipeStore } from '@/app/storage';
 import { FabTimer, Recipe } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
-import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePreview.vue';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
-import List from '@/shared/components/utility/list/List.vue';
 import { useI18n } from 'vue-i18n';
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.vue';
 import { RecipeSuggestion } from '@/app/search';
 import { SmartSearchbar } from '@/app/components/search';
 import { closeOutline, searchOutline } from 'ionicons/icons';
+import { MiniRecipePreview } from '@/app/components';
+import { storeToRefs } from 'pinia';
 
-const {t} = useI18n()
+const { t } = useI18n()
 const recipeStore = useRecipeStore()
-
-const recipeOfTheDay = computed<Recipe>(() => recipeStore.getRecipeOfTheDay)
-const recipes = computed(() => recipeStore.getRecipesAsList)
+const { recipeOfTheDay, recipes, recipePredictions } = storeToRefs(recipeStore)
 
 const SUGGESTION_CONFIG = {
     maxRandomRecipes: 15, maxPredictedRecipes: 15,
 }
 
-// Recipe suggestions
 /* Random recipes */
 const randomRecipes = computed<Recipe[]>(() => {
     return [...recipes.value]
@@ -138,9 +129,6 @@ const randomRecipes = computed<Recipe[]>(() => {
         .slice(0, SUGGESTION_CONFIG.maxRandomRecipes)
         .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
 })
-
-/* Recipe suggestions */
-const predictedRecipes = computed<Recipe[]>(() => recipeStore.getRecipePredictions)
 
 /* Submit button */
 const recipeSearchAnchor = ref<HTMLAnchorElement | null>(null)
@@ -155,7 +143,7 @@ const search = (result: RecipeSuggestion[]) => {
     submitted.value = true
     searchedRecipes.value = result
     setTimeout(() => {
-        recipeSearchAnchor.value?.scrollIntoView({behavior: 'smooth', block: 'start', inline: 'nearest'})
+        recipeSearchAnchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
     }, 50)
 }
 </script>

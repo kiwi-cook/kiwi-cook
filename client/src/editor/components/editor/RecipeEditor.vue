@@ -72,7 +72,7 @@
             </IonChip>
             <IonInput v-model="mutableRecipe.src.url" label="Source URL"
                       label-placement="stacked" type="url"/>
-            <!-- <ItemList :horizontal="true" :items="mutableRecipe.getRecipeItems()"/> -->
+            <!-- <ItemList :horizontal="true" :items="mutableRecipe.getRecipeIngredients()"/> -->
         </IonCardContent>
     </IonCard>
 
@@ -101,9 +101,10 @@
             </template>
 
             <IonList>
-                <ItemComponent v-for="(recipeItem, itemIndex) in (Array.from<RecipeItem>(recipe?.items) ?? [])"
-                               :key="`${itemIndex} - ${recipeItem.getId()}` ?? ''" :item="recipeItem"
-                               quantity-position="start" @click="editItem(recipeItem)"/>
+                <ItemComponent
+                    v-for="(recipeItem, itemIndex) in (Array.from<RecipeIngredient>(recipe?.ingredients) ?? [])"
+                    :key="`${itemIndex} - ${recipeItem.getId()}` ?? ''" :ingredient="recipeItem"
+                    quantity-position="start" @click="editItem(recipeItem)"/>
             </IonList>
         </IonCardContent>
         <IonButton color="success" fill="outline" shape="round" size="small"
@@ -209,20 +210,34 @@
 </template>
 
 <script lang="ts" setup>
-import { ItemComponent, Recipe, RecipeItem } from '@/shared';
+import { ItemComponent, Recipe, RecipeIngredient } from '@/shared';
 import { useRecipeEditorStore } from '@/editor/storage';
 import {
-    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardTitle, IonChip, IonCol, IonGrid, IonIcon, IonImg,
-    IonInput, IonLabel, IonList, IonRow, IonTextarea, useIonRouter
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardTitle,
+    IonChip,
+    IonCol,
+    IonGrid,
+    IonIcon,
+    IonImg,
+    IonInput,
+    IonLabel,
+    IonList,
+    IonRow,
+    IonTextarea,
+    useIonRouter
 } from '@ionic/vue';
 import { computed, PropType, ref, toRefs, watch } from 'vue';
 import { add, closeCircleOutline, information, remove, save, trash } from 'ionicons/icons';
-import { MutableRecipe } from '@/editor/types/recipe';
+import { MutableRecipe } from '@/editor/models/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import { findMostSimilarItem } from '@/editor/parser/utils.ts';
 import { logDebug } from '@/shared/utils/logging.ts';
-import { newItemFromName } from '@/editor/types/item.ts';
+import { newIngredientFromName } from '@/editor/models/ingredient.ts';
 
 const MODULE = 'editor.components.editor.RecipeEditor.'
 
@@ -231,7 +246,7 @@ const props = defineProps({
         type: Object as PropType<MutableRecipe>, required: true,
     },
 });
-const {recipe} = toRefs(props)
+const { recipe } = toRefs(props)
 
 const router = useIonRouter();
 const recipeStore = useRecipeEditorStore();
@@ -240,7 +255,7 @@ const mutableRecipe = ref<MutableRecipe>(recipe.value)
 // update recipe and steps when prop changes
 watch(recipe, (newRecipe: MutableRecipe) => {
     mutableRecipe.value = newRecipe
-}, {immediate: true})
+}, { immediate: true })
 
 /**
  * Save recipe to the Backend API
@@ -252,7 +267,7 @@ const saveRecipe = () => mutableRecipe?.value?.save()
  * Redirect to SavedRecipes
  */
 const deleteRecipe = () => mutableRecipe?.value?.delete().then(() => {
-    router.push({name: 'Home'})
+    router.push({ name: 'Home' })
 })
 
 /**
@@ -269,14 +284,14 @@ const addStep = (stepIndex: number) => mutableRecipe.value?.addStep(undefined, s
 const removeStep = (stepIndex: number) => mutableRecipe.value?.removeStep(stepIndex)
 
 /* Select an item from the list to edit */
-const itemToEdit = ref<RecipeItem | undefined>(newItemFromName(''))
+const itemToEdit = ref<RecipeIngredient | undefined>(newIngredientFromName(''))
 
 /**
  * Add an item to a step
  */
 const addItemToRecipe = () => {
-    mutableRecipe?.value?.putRecipeItem(itemToEdit.value)
-    itemToEdit.value = newItemFromName('')
+    mutableRecipe?.value?.putRecipeIngredient(itemToEdit.value)
+    itemToEdit.value = newIngredientFromName('')
 }
 
 /**
@@ -289,7 +304,7 @@ const removeItem = (stepIndex: number, itemIndex: number) => mutableRecipe.value
 /**
  * Edit the item
  */
-const editItem = (recipeItem: RecipeItem) => itemToEdit.value = recipeItem
+const editItem = (recipeItem: RecipeIngredient) => itemToEdit.value = recipeItem
 
 /**
  * Get all tags from the store
@@ -318,7 +333,7 @@ const updateName = (name: string) => {
         and recipe ${mutableRecipe.value.getName()}`)
     itemToEdit.value = itemToEdit.value?.updateItem(item)
     logDebug(fName, itemToEdit.value)
-    mutableRecipe.value.putRecipeItem(itemToEdit.value)
+    mutableRecipe.value.putRecipeIngredient(itemToEdit.value)
 }
 
 /* JSON */
@@ -326,7 +341,7 @@ const recipeAsJSON = ref('')
 const showJSON = ref(false)
 watch(mutableRecipe, (newRecipe: MutableRecipe) => {
     recipeAsJSON.value = JSON.stringify(newRecipe, null, 2)
-}, {immediate: true})
+}, { immediate: true })
 
 const saveRecipeFromJSON = async () => {
     mutableRecipe.value = await Recipe.fromJSON(recipeAsJSON.value) as MutableRecipe

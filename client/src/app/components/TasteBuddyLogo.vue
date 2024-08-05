@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -16,7 +16,7 @@ const props = defineProps({
         type: String as PropType<'tiny' | 'small' | 'medium' | 'large'>, default: 'medium', required: false
     }
 })
-const {size} = toRefs(props)
+const { size } = toRefs(props)
 
 const pixelSize = computed(() => {
     switch (size?.value ?? 'medium') {

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -28,7 +28,16 @@
 
 <script lang="ts" setup>
 import {
-    IonButton, IonButtons, IonContent, IonHeader, IonItem, IonLabel, IonList, IonModal, IonTitle, IonToolbar
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonItem,
+    IonLabel,
+    IonList,
+    IonModal,
+    IonTitle,
+    IonToolbar
 } from '@ionic/vue';
 
 import { canBeInstalled, showInstallationPrompt } from '@/app/ts';

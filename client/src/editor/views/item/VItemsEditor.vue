@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -70,18 +70,29 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue';
 import {
-    IonAccordion, IonAccordionGroup, IonButton, IonButtons, IonContent, IonFab, IonFabButton, IonFabList, IonIcon,
-    IonItem, IonLabel, IonPage, IonSearchbar
+    IonAccordion,
+    IonAccordionGroup,
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonFab,
+    IonFabButton,
+    IonFabList,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonPage,
+    IonSearchbar
 } from '@ionic/vue';
 import { addOutline, chevronForwardCircle, colorWand, documents, save, saveOutline, trash } from 'ionicons/icons';
 import { useRecipeEditorStore } from '@/editor/storage';
 import ItemEditor from '@/editor/components/editor/ItemEditor.vue';
-import { Item } from '@/shared';
+import { Ingredient } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
-import { MutableItem } from '@/editor/types/item';
+import { MutableIngredient } from '@/editor/models/ingredient.ts';
 
 const recipeStore = useRecipeEditorStore();
-const items = computed<MutableItem[]>(() => {
+const items = computed<MutableIngredient[]>(() => {
     return recipeStore.getItemsAsList
         .filter(item => item.getName().toLowerCase().includes(filterInput.value.toLowerCase()))
         .toSorted((a, b) => a.getName().localeCompare(b.getName()))
@@ -92,10 +103,10 @@ const filterInput = ref('')
 
 const saveItems = () => recipeStore.saveItems()
 
-const addItem = () => new MutableItem().update();
+const addItem = () => new MutableIngredient().update();
 
 const formatItems = () => {
-    items.value.forEach((item: Item) => {
+    items.value.forEach((item: Ingredient) => {
         // Fix name
         let name = item.getName()
         // Capitalize first letter
@@ -114,7 +125,7 @@ const formatItems = () => {
 
 const removeDuplicates = () => {
     const itemNames: string[] = []
-    items.value.forEach((item: MutableItem) => {
+    items.value.forEach((item: MutableIngredient) => {
         const name = item.getName()
         if (itemNames.includes(name)) {
             item.delete()
@@ -125,7 +136,7 @@ const removeDuplicates = () => {
 }
 
 const removeUnusedItems = () => {
-    items.value.forEach((item: MutableItem) => {
+    items.value.forEach((item: MutableIngredient) => {
         if (!(item.getId() in recipesByItemIds.value)) {
             item.delete();
         }

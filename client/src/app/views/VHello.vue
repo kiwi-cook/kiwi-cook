@@ -26,8 +26,8 @@ import { useI18n } from 'vue-i18n';
 import { APP_NAME } from '@/shared';
 import { useSharedStore } from '@/shared/storage';
 
-const {t} = useI18n()
-const welcomeText = computed(() => t('General.WelcomeText', {appName: APP_NAME}).split(';'))
+const { t } = useI18n()
+const welcomeText = computed(() => t('General.WelcomeText', { appName: APP_NAME }).split(';'))
 
 
 const finished = ref(false)
@@ -44,7 +44,7 @@ watch([isLoadingInitialData, finished], () => {
             router.replace(redirect.value)
         }, 1000)
     }
-}, {immediate: true})
+}, { immediate: true })
 
 onUnmounted(() => {
     clearTimeout(timeout.value)

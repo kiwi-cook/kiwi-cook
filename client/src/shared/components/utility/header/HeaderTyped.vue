@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -26,7 +26,7 @@ const props = defineProps({
         type: Number, required: false, default: 150
     }
 })
-const {bigText, speed} = toRefs(props);
+const { bigText, speed } = toRefs(props);
 
 const emit = defineEmits(['finish'])
 
@@ -52,7 +52,7 @@ const startTyping = () => {
         }
     }, speed?.value)
 }
-watch(bigText, startTyping, {immediate: true})
+watch(bigText, startTyping, { immediate: true })
 </script>
 
 <style scoped>

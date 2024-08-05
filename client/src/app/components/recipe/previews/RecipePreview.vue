@@ -1,198 +1,169 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <article class="recipe-preview">
-        <div class="recipe-details">
-            <RecipeTitle :recipe="uRecipe"/>
-            <p class="recipe-description desc">{{ uRecipe.getShortDescription() }}</p>
-            <div class="pill-container">
-                <IonChip v-for="tag in tags" :key="tag">{{ tag }}</IonChip>
-                <Duration :duration="duration"/>
-                <IonChip>{{ uRecipe.servings }} {{ $t('Recipe.Serving', uRecipe.servings) }}</IonChip>
+    <IonCard v-if="decomposedRecipe" class="recipe-preview">
+        <div class="recipe-content">
+            <div class="image-container">
+                <img :alt="decomposedRecipe.getName()" :src="decomposedRecipe.imageUrl" @click="toRecipe"/>
             </div>
-            <div class="recipe-ingredients">
-                <h3>{{ uRecipe.getRecipeItems().length }}
-                    {{ $t('Recipe.Ingredient', uRecipe.getRecipeItems().length) }}</h3>
-                <ul>
-                    <li v-for="(item, index) in items" :key="index">{{ item.getQuantity() }} {{ item.unit }}
-                        {{ item.getName() }}
-                    </li>
-                </ul>
+            <div class="text-content">
+                <IonCardTitle>{{ decomposedRecipe.getName() }}</IonCardTitle>
+                <IonCardSubtitle>{{ decomposedRecipe.getShortDescription() }}</IonCardSubtitle>
+                <div class="recipe-meta">
+                    <IonChip>
+                        <IonIcon :icon="timeOutline"/>
+                        <IonLabel>{{ duration }}</IonLabel>
+                    </IonChip>
+                    <IonChip>
+                        <IonIcon :icon="peopleOutline"/>
+                        <IonLabel>{{ decomposedRecipe.servings }} {{
+                            $t('Recipe.Serving', decomposedRecipe.servings)
+                        }}
+                        </IonLabel>
+                    </IonChip>
+                </div>
             </div>
         </div>
-        <div class="recipe-image">
-            <img :alt="uRecipe.getName()"
-                 :src="uRecipe.props.imgUrl"
-                 class="link" @click="toRecipe"/>
-        </div>
-    </article>
+        <IonCardContent>
+            <IonButton expand="block" fill="clear" @click="toggleIngredients">
+                {{ showIngredients ? 'Hide' : 'Show' }} {{ decomposedRecipe.getRecipeIngredients().length }} Ingredients
+                <IonIcon slot="end" :icon="showIngredients ? chevronUpOutline : chevronDownOutline"/>
+            </IonButton>
+            <IonList v-if="showIngredients">
+                <IonItem v-for="(item, index) in items" :key="index">
+                    <IonLabel>{{ item.quantity }} {{ item.unit }} {{ item.ingredient.getName() }}</IonLabel>
+                </IonItem>
+            </IonList>
+        </IonCardContent>
+    </IonCard>
 </template>
 
 <script lang="ts" setup>
-import { computed, PropType, toRefs } from 'vue';
-import { Item, Recipe, RecipeItem } from '@/shared';
-import { IonChip, useIonRouter } from '@ionic/vue';
-import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
+import { computed, PropType, ref, toRefs } from 'vue';
+import {
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonChip,
+    IonIcon,
+    IonItem,
+    IonLabel,
+    IonList,
+    useIonRouter
+} from '@ionic/vue';
+import { chevronDownOutline, chevronUpOutline, peopleOutline, timeOutline } from 'ionicons/icons';
+import { Recipe, RecipeIngredient } from '@/shared';
 import { RecipeSuggestion } from '@/app/search';
-import Duration from '@/shared/components/recipe/chip/Duration.vue';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<RecipeSuggestion | Recipe>, required: true
+        type: Object as PropType<RecipeSuggestion | Recipe>,
+        required: true
     }
-})
-const {recipe} = toRefs(props)
+});
 
-// Unwrap recipe from suggestion if necessary
-const uRecipe = computed<Recipe>(() => {
-    if (recipe?.value instanceof RecipeSuggestion) {
-        return recipe?.value?.recipe
-    } else {
-        return recipe?.value
+const { recipe } = toRefs(props);
+
+const decomposedRecipe = computed<Recipe | null>(() => {
+    if (!recipe.value) {
+        return null;
     }
-})
+    return recipe.value instanceof RecipeSuggestion ? recipe.value.recipe : recipe.value;
+});
 
-// Unwrap suggestion from recipe if necessary
-const suggestion = computed(() => {
-    if (recipe?.value instanceof RecipeSuggestion) {
-        return recipe?.value
-    } else {
-        return undefined
-    }
-})
-
-const missingItems = computed<RecipeItem[]>(() => suggestion?.value?.getMissingItems() ?? [])
-
-const items = computed<RecipeItem[]>(() => {
-    const recipeItems = uRecipe?.value?.getRecipeItems()
-    if (missingItems.value.length === 0) {
-        return recipeItems
-    }
-
-    const missingItemIds = missingItems?.value?.map((item: Item) => item.getId())
-    return recipeItems.filter((item: Item) => missingItemIds?.includes(item.getId())) ?? []
-})
+const items = computed<RecipeIngredient[]>(() => decomposedRecipe.value?.ingredients ?? []);
 
 const router = useIonRouter();
-const toRecipe = () => router.push(uRecipe?.value?.getRoute())
+const toRecipe = () => router.push(decomposedRecipe.value?.getRoute());
 
-const duration = uRecipe?.value?.getDuration()
-const tags = uRecipe?.value?.getTags()?.slice(0, 3)
+const duration = computed(() => decomposedRecipe.value?.getDuration());
+
+const showIngredients = ref(false);
+const toggleIngredients = () => {
+    showIngredients.value = !showIngredients.value;
+};
 </script>
 
 <style scoped>
-a {
-    color: var(--ion-text-color);
-}
-
 .recipe-preview {
+    max-width: 414px;
+    margin: 0 auto 20px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.recipe-content {
     display: flex;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    align-items: center;
+    padding: 16px;
 }
 
-.recipe-details {
-    flex: 2;
-    padding: 20px;
+.image-container {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-right: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.recipe-title {
-    font-size: var(--font-size-medium);
-    font-family: var(--font-special);
-    margin-bottom: 10px;
-}
-
-.recipe-title a {
-    font-family: var(--font-special);
-    color: var(--ion-color-primary);
-    transition: color 0.3s ease;
-}
-
-.recipe-title a:hover {
-    color: var(--ion-color-primary-shade);
-}
-
-.recipe-author {
-    margin-top: 8px;
-    font-size: var(--font-size-small);
-}
-
-.recipe-description {
-    margin-top: 20px;
-    max-height: 250px;
-    overflow-y: auto;
-}
-
-.pill-container {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-}
-
-.pill {
-    background-color: #f0f0f0;
-    color: #333;
-    font-size: 14px;
-    padding: 5px 10px;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    border-radius: 20px;
-}
-
-.pill.static {
-    background-color: #e0e0e0;
-}
-
-.recipe-ingredients {
-    margin-top: 20px;
-}
-
-.recipe-ingredients h3 {
-    font-size: 20px;
-    margin-bottom: 10px;
-}
-
-.recipe-ingredients ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.recipe-ingredients li {
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-/* Style for the recipe image */
-.recipe-image {
-    flex: 1;
-    margin: 20px;
-}
-
-.recipe-image img {
+.image-container img {
     width: 100%;
-    height: auto;
-    border-radius: 6px; /* Increased border radius */
-
-    /* Shadow */
-    box-shadow: var(--box-shadow-strong);
+    height: 100%;
+    object-fit: cover;
 }
 
-/* Mobile Screen Support */
-@media screen and (max-width: 736px) {
-    .recipe-preview {
-        flex-direction: column-reverse; /* Stack items vertically */
-    }
+.text-content {
+    flex: 1;
+}
 
-    .recipe-image,
-    .recipe-details {
-        flex: none; /* Reset flex properties for mobile layout */
-    }
+ion-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
 
-    .recipe-details {
-        margin-top: 20px; /* Add margin between image and details */
-    }
+ion-card-subtitle {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--ion-color-medium);
+    margin-bottom: 8px;
+}
+
+.recipe-meta {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.recipe-meta ion-chip {
+    margin-right: 8px;
+    font-size: 12px;
+    height: 24px;
+}
+
+ion-card-content {
+    padding-top: 0;
+}
+
+ion-button {
+    margin-top: 8px;
+}
+
+ion-list {
+    margin-top: 8px;
+}
+
+ion-item {
+    --padding-start: 0;
+    --inner-padding-end: 0;
+}
+
+ion-label {
+    font-size: 14px;
 }
 </style>

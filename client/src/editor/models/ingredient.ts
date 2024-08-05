@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Item, RecipeItem, setLocaleStr } from '@/shared';
+import { Ingredient, RecipeIngredient } from '@/shared';
 import { useRecipeEditorStore } from '@/editor/storage';
 import { logDebug } from '@/shared/utils/logging';
 import { findMostSimilarItem } from '@/editor/parser/utils.ts';
 
-export class MutableItem extends Item {
+export class MutableIngredient extends Ingredient {
 
     /**
      * Get the localized name of the item
      */
     public getRawName(lang: string): string {
-        return this.name[lang]
+        return this.name.get(lang)
     }
 
     /**
@@ -22,7 +22,7 @@ export class MutableItem extends Item {
      * @param lang
      */
     public setName(name?: string, lang?: string): void {
-        setLocaleStr(this.name, name ?? '', lang)
+        this.name.set(name ?? '', lang)
     }
 
     /**
@@ -62,11 +62,11 @@ export class MutableItem extends Item {
  * @param name
  * @returns the item to allow chaining
  */
-export function newItemFromName(name?: string): RecipeItem {
-    const item = findMostSimilarItem(name)
-    const recipeItem = new RecipeItem()
-    if (item) {
-        recipeItem.id = item.getId()
+export function newIngredientFromName(name?: string): RecipeIngredient {
+    const ingredient = findMostSimilarItem(name)
+    const recipeIngredient = RecipeIngredient.empty()
+    if (ingredient) {
+        recipeIngredient.ingredient.updateItem(ingredient)
     }
-    return recipeItem
+    return recipeIngredient
 }

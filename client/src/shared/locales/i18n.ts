@@ -14,27 +14,62 @@ export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']
 
 export const DEFAULT_LOCALE: SUPPORT_LOCALES_TYPE = 'en'
 
-export type LocaleStr = {
-    [lang: string]: string
+export interface MultiLanguageFieldTranslations {
+    [lang: string]: string;
 }
 
-export function newLocaleStr(value?: string, lang?: string) {
-    const str: LocaleStr = {}
-    setLocaleStr(str, value ?? '', lang ?? DEFAULT_LOCALE)
-    return str
+export class MultiLanguageField {
+    translations: MultiLanguageFieldTranslations;
+
+    constructor(translations: MultiLanguageFieldTranslations = {}) {
+        this.translations = translations;
+    }
+
+    static new(value?: string, lang?: string): MultiLanguageField {
+        return new MultiLanguageField({ [lang ?? DEFAULT_LOCALE]: value ?? '' });
+    }
+
+    static fromJSON(json: any): MultiLanguageField {
+        return new MultiLanguageField(json.translations);
+    }
+
+    get(lang?: string) {
+        let str: string
+        if (!lang) {
+            str = this.translations[DEFAULT_LOCALE] || '';
+        } else {
+            str = this.translations[lang] || '';
+        }
+        if (!str) {
+            str = this.translations[this.getLangs()[0]]
+        }
+        return str;
+    }
+
+    set(value: string, lang?: string) {
+        if (!lang) {
+            this.translations[DEFAULT_LOCALE] = value;
+            return;
+        }
+        this.translations[lang] = value;
+    }
+
+    /**
+     * Get all languages
+     */
+    getLangs(): string[] {
+        return Object.keys(this.translations);
+    }
+
+    /**
+     * Get all translations
+     */
+    getAll(): string[] {
+        return Object.values(this.translations);
+    }
 }
 
-export function getLocaleStr(localeStr: LocaleStr, lang?: string): string {
-    const sharedStore = useSharedStore()
-    return localeStr[lang ?? sharedStore.language.lang ?? DEFAULT_LOCALE] ?? localeStr[DEFAULT_LOCALE] ?? ''
-}
-
-export function setLocaleStr(localeStr: LocaleStr, value: string, lang?: string) {
-    const sharedStore = useSharedStore()
-    localeStr[lang ?? sharedStore.language.lang] = value;
-}
-
-export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: DEFAULT_LOCALE}) {
+export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = { locale: DEFAULT_LOCALE }) {
     type MessageSchema = typeof enUS
     const locale = options.locale
 
@@ -45,7 +80,7 @@ export function setupI18n(options: { locale: SUPPORT_LOCALES_TYPE } = {locale: D
     return i18n
 }
 
-export const i18n = setupI18n({locale: 'de'})
+export const i18n = setupI18n({ locale: 'de' })
 
 /**
  * Change the language of the app

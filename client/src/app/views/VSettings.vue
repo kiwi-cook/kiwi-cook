@@ -40,7 +40,15 @@
 
 <script lang="ts" setup>
 import {
-    IonButton, IonContent, IonIcon, IonItem, IonList, IonNote, IonPage, IonSelect, IonSelectOption
+    IonButton,
+    IonContent,
+    IonIcon,
+    IonItem,
+    IonList,
+    IonNote,
+    IonPage,
+    IonSelect,
+    IonSelectOption
 } from '@ionic/vue';
 import { SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE } from '@/shared/locales/i18n';
 import { ref, watch } from 'vue';

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -49,7 +49,7 @@ const props = defineProps({
         type: Boolean, required: false, default: false,
     },
 })
-const {modelValue, item, customMapper, items, maxItems, resetAfter} = toRefs(props)
+const { modelValue, item, customMapper, items, maxItems, resetAfter } = toRefs(props)
 
 const emit = defineEmits(['update:modelValue', 'selectItem'])
 
@@ -60,12 +60,12 @@ watch(modelValue, () => {
     if (modelValue.value) {
         inputValue.value = customMapper.value?.(modelValue.value)
     }
-}, {immediate: true})
+}, { immediate: true })
 watch(item, () => {
     if (item.value) {
         inputValue.value = customMapper.value?.(item.value)
     }
-}, {immediate: true})
+}, { immediate: true })
 
 const filteredItems = ref<unknown[]>(items.value.slice(0, maxItems.value))
 

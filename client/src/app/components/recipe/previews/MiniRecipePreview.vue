@@ -3,35 +3,44 @@
   -->
 
 <template>
-    <div class="mini-recipe-preview-container" @click="routeToRecipe()">
-        <img :alt="`Preview Image of ${name}`" :src="imgUrl" class="mini-recipe-preview-image"/>
+    <div v-if="decomposedRecipe" class="mini-recipe-preview-container" @click="routeToRecipe()">
+        <img :alt="`Preview Image of ${decomposedRecipe?.getName()}`" :src="decomposedRecipe?.imageUrl"
+             class="mini-recipe-preview-image"/>
         <div class="mini-recipe-tags">
-            <Duration :duration="duration" class="mini-recipe-tag"/>
+            <Duration :duration="decomposedRecipe?.getDuration()" class="mini-recipe-tag"/>
         </div>
-        <h3 class="mini-recipe-preview-title">{{ name }}</h3>
+        <h3 class="mini-recipe-preview-title">{{ decomposedRecipe?.getName() }}</h3>
     </div>
 </template>
 
 <script lang="ts" setup>
-import { toRefs } from 'vue';
+import { computed, PropType, toRefs } from 'vue';
 import { useIonRouter } from '@ionic/vue';
-import Duration from '@/shared/components/recipe/chip/Duration.vue';
+import { RecipeSuggestion } from '@/app/search';
+import { Duration, Recipe } from '@/shared';
 
 const props = defineProps({
-    name: {
-        type: String, required: true
-    }, imgUrl: {
-        type: String, required: false, default: undefined
-    }, duration: {
-        type: Number, required: false, default: undefined
-    }, link: {
-        type: String, required: false, default: undefined
-    },
+    recipe: {
+        type: Object as PropType<RecipeSuggestion | Recipe>,
+        required: true
+    }
 })
 
-const {link} = toRefs(props)
+const { recipe } = toRefs(props);
+const decomposedRecipe = computed<Recipe | undefined>(() => {
+    if (!recipe.value) {
+        return undefined;
+    }
+
+    if (recipe.value instanceof RecipeSuggestion) {
+        return recipe.value.recipe;
+    } else {
+        return recipe.value;
+    }
+});
 const router = useIonRouter();
-const routeToRecipe = () => router.push(link?.value)
+const recipeRoute = computed<string>(() => decomposedRecipe?.value?.getRoute() ?? '')
+const routeToRecipe = () => router.push(recipeRoute?.value)
 </script>
 
 <style>

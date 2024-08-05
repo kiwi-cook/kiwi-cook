@@ -2,19 +2,19 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import {Item, presentToast, Recipe} from '@/shared';
-import {RecipeSuggestion} from '@/app/search';
-import {logDebug, logError} from '@/shared/utils/logging';
+import { Ingredient, presentToast, Recipe } from '@/shared';
+import { RecipeSuggestion } from '@/app/search';
+import { logDebug, logError } from '@/shared/utils/logging';
 
 // URLs for the API
 
 // Possible URLs for the API
-const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://localhost:8081']
+const possibleAPI_URLS = ['https://tastebuddy-1-k6629823.deta.app', 'http://localhost:8000']
 
 export const API_URL = process.env.NODE_ENV === 'development' ? possibleAPI_URLS[1] : possibleAPI_URLS[0]
 
 export enum API_ROUTE {
-    GET_RECIPES, ADD_RECIPES, PARSE_RECIPES, DELETE_RECIPES, GET_ITEMS, ADD_ITEMS, DELETE_ITEMS
+    GET_RECIPES, ADD_RECIPES, PARSE_RECIPES, DELETE_RECIPES, GET_INGREDIENTS, ADD_INGREDIENTS, DELETE_INGREDIENTS
 }
 
 const JSONTYPE = 'application/json'
@@ -28,16 +28,16 @@ type API_ROUTE_OPTIONS = {
 }
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
-    [API_ROUTE.GET_RECIPES]: {url: '/recipe', method: 'GET', contentType: JSONTYPE},
-    [API_ROUTE.ADD_RECIPES]: {url: '/recipe', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
-    [API_ROUTE.PARSE_RECIPES]: {url: '/recipe/parse', method: 'POST', contentType: JSONTYPE},
+    [API_ROUTE.GET_RECIPES]: { url: '/recipe/', method: 'GET', contentType: JSONTYPE },
+    [API_ROUTE.ADD_RECIPES]: { url: '/recipe/', method: 'POST', contentType: JSONTYPE, credentials: 'include' },
+    [API_ROUTE.PARSE_RECIPES]: { url: '/recipe/parse', method: 'POST', contentType: JSONTYPE },
     [API_ROUTE.DELETE_RECIPES]: {
-        url: '/recipe', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
+        url: '/recipe/', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
     },
-    [API_ROUTE.GET_ITEMS]: {url: '/item', method: 'GET', contentType: JSONTYPE},
-    [API_ROUTE.ADD_ITEMS]: {url: '/item', method: 'POST', contentType: JSONTYPE, credentials: 'include'},
-    [API_ROUTE.DELETE_ITEMS]: {
-        url: '/item', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
+    [API_ROUTE.GET_INGREDIENTS]: { url: '/ingredient/', method: 'GET', contentType: JSONTYPE },
+    [API_ROUTE.ADD_INGREDIENTS]: { url: '/ingredient/', method: 'POST', contentType: JSONTYPE, credentials: 'include' },
+    [API_ROUTE.DELETE_INGREDIENTS]: {
+        url: '/ingredient/', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
     }
 }
 
@@ -45,7 +45,7 @@ export const DURATIONS = {
     SHORT: 3000, MEDIUM: 4000, LONG: 5000,
 }
 
-type APIResponseBody = Recipe[] | Item[] | RecipeSuggestion[] | string
+type APIResponseBody = Recipe[] | Ingredient[] | RecipeSuggestion[] | string
 
 /**
  * This is the response interface from the API
@@ -55,9 +55,6 @@ export interface APIResponse<T extends APIResponseBody> {
     response: T,
     id?: string
 }
-
-// Abort Controller for the fetch function used in sendToAPI
-const controller = new AbortController()
 
 /**
  * Options Type for sendToAPI function that is used to
@@ -90,7 +87,7 @@ export type SendToApiOptions = {
 export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
     const url = API_URL + API_ROUTES[route].url;
 
-    const {body, headers, errorMessage, successMessage, timeout} = options ?? {}
+    const { body, headers, errorMessage, successMessage, timeout } = options ?? {}
 
     // headers
     const requestHeaders = new Headers();
@@ -99,15 +96,18 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
         requestHeaders.append(header.key, header.value);
     }
 
+    // Abort Controller for the fetch function used in sendToAPI
+    const abortController = new AbortController()
+
     const fetchOptions: RequestInit = {
         method: API_ROUTES[route].method,
         headers: requestHeaders,
         credentials: API_ROUTES[route].credentials,
         body: body ? JSON.stringify(body) : null,
-        signal: controller.signal
+        signal: abortController.signal
     }
 
-    const id = setTimeout(() => controller.abort(), timeout ?? 10000)
+    const id = setTimeout(() => abortController.abort(), timeout ?? 10000)
 
     // call fetch
     logDebug('sendToAPI ' + route, fetchOptions)
@@ -137,13 +137,13 @@ export function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?:
             // log the error
             logError('sendToAPI ' + route, error)
 
-            // present a toast to the user
+            // present toast to the user
             return presentToast(errorMessage, true, DURATIONS.LONG)
                 .then(() => ({
                     error: true, response: (errorMessage ?? 'An error occurred') as R
                 }))
         }).finally(() => {
             clearTimeout(id)
-            return controller.abort()
+            abortController.abort()
         })
 }

@@ -1,318 +1,305 @@
 /*
- * Copyright (c) 2023-2024 Josef Müller.
+ * Copyright (c) 2024 Josef Müller.
  */
 
-// Vue
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-
-import { API_ROUTE, APIResponse, Item, presentToast, Recipe, sendToAPI } from '@/shared';
-import { logDebug } from '@/shared/utils/logging';
-import { MutableRecipe } from '@/editor/types/recipe';
-import { MutableItem } from '@/editor/types/item';
+import { API_ROUTE, APIResponse, Ingredient, presentToast, Recipe, sendToAPI } from '@/shared'
+import { logDebug } from '@/shared/utils/logging'
+import { MutableRecipe } from '@/editor/models/recipe'
+import { MutableIngredient } from '@/editor/models/ingredient.ts'
 
 const MODULE = 'editor.storage.recipe.'
 
-// Define typings for the store state
+export const useRecipeEditorStore = defineStore('recipes-editor', () => {
+    // State
+    const loading = ref<{ [key: string]: boolean }>({ initial: true })
+    const recipes = ref<{ [id: string]: MutableRecipe }>({})
+    const ingredients = ref<{ [id: string]: MutableIngredient }>({})
 
-interface RecipeState {
-    loading: { [key: string]: boolean }
-    recipes: { [id: string]: MutableRecipe }
-    items: { [id: string]: MutableItem }
-}
+    // Getters
+    const isLoading = computed(() => Object.values(loading.value).some((isLoading: boolean) => isLoading))
+    const isLoadingInitial = computed(() => loading.value.initial)
 
-// Create the store
-// called by main.ts
-export const useRecipeEditorStore = defineStore('recipes-editor', {
-    state: (): RecipeState => ({
-        loading: {
-            initial: true,
-        }, recipes: {}, items: {}
-    }), getters: {
-        isLoading: (state): boolean => Object.values(state.loading).some((isLoading: boolean) => isLoading),
-        isLoadingInitial: (state): boolean => state.loading.initial,
-        /**
-         * Get the recipes as list
-         * @param state
-         */
-        getRecipesAsList: (state): MutableRecipe[] => {
-            const recipesAsList: MutableRecipe[] = Object.values(state.recipes ?? {})
-            if (recipesAsList.length === 0) {
-                return []
-            }
-            return recipesAsList
-        },
-        /**
-         * Get the recipes mapped by their id
-         * @param state
-         */
-        getRecipesAsMap: (state): { [id: string]: MutableRecipe } => state.recipes ?? {},
-        getRecipesByItemIds(): { [key: string]: string[] } {
-            const recipes = this.getRecipesAsList
-            const recipesByItemId: { [key: string]: string[] } = {}
+    const getRecipesAsList = computed(() => {
+        const recipesAsList = Object.values(recipes.value ?? {})
+        return recipesAsList.length === 0 ? [] : recipesAsList
+    })
 
-            for (const recipe of recipes) {
-                const items = recipe.getRecipeItems()
-                for (const recipeItem of items) {
-                    if (!(recipeItem.id in recipesByItemId)) {
-                        recipesByItemId[recipeItem.id] = []
-                    }
-                    recipesByItemId[recipeItem.id].push(recipe.getId())
+    const getRecipesAsMap = computed(() => recipes.value ?? {})
+
+    const getRecipesByItemIds = computed(() => {
+        const recipesByItemId: { [key: string]: string[] } = {}
+        for (const recipe of getRecipesAsList.value) {
+            const recipeItems = recipe.getRecipeIngredients()
+            for (const recipeItem of recipeItems) {
+                if (!(recipeItem.getId() in recipesByItemId)) {
+                    recipesByItemId[recipeItem.getId()] = []
                 }
-            }
-            logDebug(MODULE + 'getRecipesByItemIds', recipesByItemId)
-
-            return recipesByItemId
-        },
-        getItemsAsList: (state): MutableItem[] => {
-            return Object.values(state.items ?? {}) ?? []
-        },
-        getItemNamesAsList(): string[] {
-            return (this.getItemsAsList ?? []).flatMap((item: MutableItem) => item.getAllNames())
-        },
-        getItemIdsToName(): { [id: string]: string } {
-            return (this.getItemsAsList ?? []).reduce((map: { [id: string]: string }, item: MutableItem) => {
-                map[item.getId()] = item.getName()
-                return map
-            }, {})
-        },
-        getItemsSortedByName(): MutableItem[] {
-            return (this.getItemsAsList ?? [])
-                .toSorted((a: MutableItem, b: MutableItem) => a.getName().localeCompare(b.getName()))
-        },
-        getItemsAsMap: (state): { [id: string]: MutableItem } => {
-            return state.items ?? {}
-        },
-        getTags(): string[] {
-            return [...new Set(this.getRecipesAsList.reduce((tags: string[], recipe: MutableRecipe) => {
-                return [...tags, ...(recipe.props.tags ?? [])]
-            }, []))]
-        }
-    }, actions: {
-        async deleteItems(items: MutableItem[] | MutableItem) {
-            const fName = MODULE + '.deleteItems'
-
-            // if the recipes is not defined, save all recipes
-            if (typeof items === 'undefined') {
-                items = Object.values(this.getItemsAsMap)
-            }
-
-            // if the recipes is not an array, make it an array
-            if (!Array.isArray(items)) {
-                items = [items]
-            }
-
-            const itemIds = items.map((item: MutableItem) => item.getId())
-            itemIds.forEach((recipeId: string) => {
-                delete this.recipes[recipeId]
-            })
-            logDebug('deleteItems', itemIds)
-            this.setLoadingState('deleteItems')
-            return sendToAPI<string>(API_ROUTE.DELETE_ITEMS, {
-                errorMessage: 'Could not delete items from database. Please retry later!', body: itemIds
-            }).then((apiResponse: APIResponse<string>) => {
-                this.finishLoading('deleteItems')
-                return presentToast(apiResponse.response)
-            })
-        }, async deleteRecipes(recipes: MutableRecipe[] | MutableRecipe) {
-            // if the recipes is not defined, save all recipes
-            if (typeof recipes === 'undefined') {
-                recipes = Object.values(this.getRecipesAsMap)
-            }
-
-            // if the recipes is not an array, make it an array
-            if (!Array.isArray(recipes)) {
-                recipes = [recipes]
-            }
-
-            const recipeIds = recipes.map((recipe: MutableRecipe) => recipe.getId())
-            recipeIds.forEach((recipeId: string) => {
-                delete this.recipes[recipeId]
-            })
-            logDebug('deleteRecipes', recipeIds)
-            this.setLoadingState('deleteRecipes')
-            return sendToAPI<string>(API_ROUTE.DELETE_RECIPES, {
-                errorMessage: 'Could not delete recipes from database. Please retry later!', body: recipeIds
-            }).then((apiResponse: APIResponse<string>) => {
-                this.finishLoading('deleteRecipes')
-                return presentToast(apiResponse.response)
-            })
-        }, async fetchItems(): Promise<MutableItem[]> {
-            logDebug('fetchItems', 'fetching items')
-            this.setLoadingState('fetchItems')
-            return sendToAPI<MutableItem[]>(API_ROUTE.GET_ITEMS, {errorMessage: 'Could not fetch items'})
-                .then((apiResponse: APIResponse<MutableItem[]>) => {
-                    // map the items JSON to MutableItem objects
-                    // this is because the JSON is not a valid MutableItem object,
-                    // and we need to use the MutableItem class methods
-                    if (!apiResponse.error) {
-                        const items: MutableItem[] = apiResponse.response.map((item: MutableItem) => new MutableItem(Item.fromJSON(item)))
-                        this.setItems(items)
-                    }
-                    this.finishLoading('fetchItems')
-                    return apiResponse.response
-                });
-        }, /**
-         * Fetch the recipes from the API and store them in the store
-         */
-        async fetchRecipes(): Promise<MutableRecipe[]> {
-            logDebug('fetchRecipes', 'fetching recipes')
-            this.setLoadingState('fetchRecipes')
-            return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, {errorMessage: 'Could not fetch recipes'})
-                .then(async (apiResponse: APIResponse<MutableRecipe[]>) => {
-                    // map the recipes JSON to MutableRecipe objects
-                    // this is because the JSON is not a valid MutableRecipe object,
-                    // and we need to use the MutableRecipe class methods
-                    if (!apiResponse.error) {
-                        return await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => Recipe.fromJSON(recipe)))
-                            .then((recipes: Recipe[]) => this.replaceRecipes(recipes.map((recipe: Recipe) => new MutableRecipe(recipe))))
-                    }
-                    return apiResponse.response
-                }).then((recipes: MutableRecipe[]) => {
-                    this.finishLoading('fetchRecipes')
-                    return recipes
-                })
-        }, /**
-         * Finish the loading state
-         * @param key
-         */
-        finishLoading(key: string) {
-            logDebug('finishLoading', key)
-            this.loading[key] = false
-        }, /**
-         * Get the recipes by the item id
-         * @param itemId
-         */
-        getRecipesAsListByItemId(itemId?: string): string[] {
-            return this.getRecipesByItemIds[itemId ?? ''] ?? []
-        }, /**
-         * Prepare the Ionic Storage by fetching the items and recipes
-         */
-        async prepare() {
-            if (!this.isLoadingInitial) {
-                return Promise.resolve()
-            }
-            return this.fetchItems().then(() => this.fetchRecipes()).then(() => {
-                this.finishLoading('initial')
-            })
-        }, /**
-         * Remove a single item
-         * @param item
-         */
-        removeItem(item: MutableItem) {
-            delete this.items[item.getId()]
-        }, /**
-         * Override all items
-         * @param items
-         */
-        replaceItems(items: MutableItem[]) {
-            this.items = Object.assign({}, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
-            return items
-        }, /**
-         * Override all recipes
-         * @param recipes
-         */
-        replaceRecipes(recipes: MutableRecipe[]) {
-            this.recipes = Object.assign({}, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
-            return recipes
-        }, async saveItems(items?: MutableItem[] | MutableItem) {
-            // if the recipes is not defined, save all recipes
-            if (typeof items === 'undefined') {
-                items = Object.values(this.getItemsAsMap)
-            }
-
-            // if the recipes is not an array, make it an array
-            if (!Array.isArray(items)) {
-                items = [items]
-            }
-
-            logDebug('saveItem', items)
-            this.setLoadingState('saveItem')
-            return sendToAPI<string>(API_ROUTE.ADD_ITEMS, {
-                body: items, errorMessage: 'Could not save items in database. Please retry later!'
-            })
-                .then((apiResponse: APIResponse<string>) => {
-                    this.finishLoading('saveItem')
-                    return apiResponse
-                })
-                .then((apiResponse: APIResponse<string>) => {
-                    if (!apiResponse.error) {
-                        return this.fetchItems()
-                    }
-                    return []
-                })
-                .catch(() => this.setItems(items))
-        }, async saveRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
-            // if the recipes is not defined, save all recipes
-            if (typeof recipes === 'undefined') {
-                recipes = Object.values(this.getRecipesAsMap)
-            }
-
-            // if the recipes is not an array, make it an array
-            if (!Array.isArray(recipes)) {
-                recipes = [recipes]
-            }
-
-            logDebug('saveRecipe', recipes)
-            this.setLoadingState('saveRecipe')
-            return sendToAPI<string>(API_ROUTE.ADD_RECIPES, {
-                body: recipes,
-                errorMessage: 'Could not save recipe in database. Please retry later!',
-                successMessage: 'Updated recipe'
-            })
-                .then((apiResponse: APIResponse<string>) => {
-                    this.finishLoading('saveRecipe')
-                    return apiResponse
-                })
-                .then((apiResponse: APIResponse<string>) => {
-                    if (!apiResponse.error) {
-                        return this.fetchItems().then(() => this.fetchRecipes())
-                    }
-                    return []
-                })
-                .catch(() => this.setRecipes(recipes))
-        }, /**
-         * Update a single item
-         * @param item
-         */
-        setItem(item: MutableItem) {
-            this.items[item.getId()] = item
-        }, /**
-         * Override all items
-         * @param items
-         */
-        setItems(items?: MutableItem[] | MutableItem) {
-            if (typeof items === 'undefined') {
-                this.items = {}
-                return Promise.resolve([])
-            }
-
-            if (!Array.isArray(items)) {
-                this.items[items.getId()] = items
-            } else {
-                this.items = Object.assign(this.items, ...items.map((item: MutableItem) => ({[item.getId()]: item})))
-            }
-            return Promise.resolve(items)
-        }, /**
-         * Set the loading state
-         * @param key
-         */
-        setLoadingState(key: string) {
-            this.loading[key] = true
-        }, /**
-         * Update multiple recipes
-         * @param recipes
-         */
-        setRecipes(recipes?: MutableRecipe[] | MutableRecipe) {
-            if (typeof recipes === 'undefined') {
-                this.recipes = {}
-                return Promise.resolve([])
-            }
-
-            if (!Array.isArray(recipes)) {
-                this.recipes[recipes.getId()] = recipes
-            } else {
-                this.recipes = Object.assign(this.recipes, ...recipes.map((recipe: MutableRecipe) => ({[recipe.getId()]: recipe})))
+                recipesByItemId[recipeItem.getId()].push(recipe.getId())
             }
         }
-    },
+        logDebug(MODULE + 'getRecipesByItemIds', recipesByItemId)
+        return recipesByItemId
+    })
+
+    const getItemsAsList = computed(() => Object.values(ingredients.value ?? {}) ?? [])
+
+    const getItemNamesAsList = computed(() =>
+        getItemsAsList.value.flatMap((item: MutableIngredient) => item.name.getAll())
+    )
+
+    const getItemIdsToName = computed(() =>
+        getItemsAsList.value.reduce((map: { [id: string]: string }, item: MutableIngredient) => {
+            map[item.getId()] = item.getName()
+            return map
+        }, {})
+    )
+
+    const getItemsSortedByName = computed(() =>
+        [...getItemsAsList.value].sort((a: MutableIngredient, b: MutableIngredient) =>
+            a.getName().localeCompare(b.getName())
+        )
+    )
+
+    const getItemsAsMap = computed(() => ingredients.value ?? {})
+
+    const getTags = computed(() =>
+        [...new Set(getRecipesAsList.value.reduce((tags: string[], recipe: MutableRecipe) =>
+            [...tags, ...(recipe.props.tags ?? [])], []
+        ))]
+    )
+
+    // Actions
+    function deleteItems(itemsToDelete?: MutableIngredient[] | MutableIngredient) {
+        if (typeof itemsToDelete === 'undefined') {
+            itemsToDelete = Object.values(getItemsAsMap.value)
+        }
+        if (!Array.isArray(itemsToDelete)) {
+            itemsToDelete = [itemsToDelete]
+        }
+
+        const itemIds = itemsToDelete.map((item: MutableIngredient) => item.getId())
+        itemIds.forEach((itemId: string) => {
+            delete ingredients.value[itemId]
+        })
+        logDebug('deleteItems', itemIds)
+        setLoadingState('deleteItems')
+        return sendToAPI<string>(API_ROUTE.DELETE_INGREDIENTS, {
+            errorMessage: 'Could not delete ingredients from database. Please retry later!',
+            body: itemIds
+        }).then((apiResponse: APIResponse<string>) => {
+            finishLoading('deleteItems')
+            return presentToast(apiResponse.response)
+        })
+    }
+
+    function deleteRecipes(recipesToDelete?: MutableRecipe[] | MutableRecipe) {
+        if (typeof recipesToDelete === 'undefined') {
+            recipesToDelete = Object.values(getRecipesAsMap.value)
+        }
+        if (!Array.isArray(recipesToDelete)) {
+            recipesToDelete = [recipesToDelete]
+        }
+
+        const recipeIds = recipesToDelete.map((recipe: MutableRecipe) => recipe.getId())
+        recipeIds.forEach((recipeId: string) => {
+            delete recipes.value[recipeId]
+        })
+        logDebug('deleteRecipes', recipeIds)
+        setLoadingState('deleteRecipes')
+        return sendToAPI<string>(API_ROUTE.DELETE_RECIPES, {
+            errorMessage: 'Could not delete recipes from database. Please retry later!',
+            body: recipeIds
+        }).then((apiResponse: APIResponse<string>) => {
+            finishLoading('deleteRecipes')
+            return presentToast(apiResponse.response)
+        })
+    }
+
+    function fetchItems(): Promise<MutableIngredient[]> {
+        logDebug('fetchItems', 'fetching ingredients')
+        setLoadingState('fetchItems')
+        return sendToAPI<MutableIngredient[]>(API_ROUTE.GET_INGREDIENTS, { errorMessage: 'Could not fetch ingredients' })
+            .then((apiResponse: APIResponse<MutableIngredient[]>) => {
+                if (!apiResponse.error) {
+                    const fetchedItems: MutableIngredient[] = apiResponse.response.map((item: MutableIngredient) => new MutableIngredient(Ingredient.fromJSON(item)))
+                    setItems(fetchedItems)
+                }
+                finishLoading('fetchItems')
+                return apiResponse.response
+            })
+    }
+
+    function fetchRecipes(): Promise<MutableRecipe[]> {
+        logDebug('fetchRecipes', 'fetching recipes')
+        setLoadingState('fetchRecipes')
+        return sendToAPI<MutableRecipe[]>(API_ROUTE.GET_RECIPES, { errorMessage: 'Could not fetch recipes' })
+            .then(async (apiResponse: APIResponse<MutableRecipe[]>) => {
+                if (!apiResponse.error) {
+                    const fetchedRecipes = await Promise.all(apiResponse.response.map((recipe: MutableRecipe) => Recipe.fromJSON(recipe)))
+                    return replaceRecipes(fetchedRecipes.map((recipe: Recipe) => new MutableRecipe(recipe)))
+                }
+                return apiResponse.response
+            }).then((fetchedRecipes: MutableRecipe[]) => {
+                finishLoading('fetchRecipes')
+                return fetchedRecipes
+            })
+    }
+
+    function finishLoading(key: string) {
+        logDebug('finishLoading', key)
+        loading.value[key] = false
+    }
+
+    function getRecipesAsListByItemId(itemId?: string): string[] {
+        return getRecipesByItemIds.value[itemId ?? ''] ?? []
+    }
+
+    function prepare() {
+        if (!isLoadingInitial.value) {
+            return Promise.resolve()
+        }
+        return fetchItems().then(() => fetchRecipes()).then(() => {
+            finishLoading('initial')
+        })
+    }
+
+    function removeItem(item: MutableIngredient) {
+        delete ingredients.value[item.getId()]
+    }
+
+    function replaceItems(newItems: MutableIngredient[]) {
+        ingredients.value = Object.assign({}, ...newItems.map((item: MutableIngredient) => ({ [item.getId()]: item })))
+        return newItems
+    }
+
+    function replaceRecipes(newRecipes: MutableRecipe[]) {
+        recipes.value = Object.assign({}, ...newRecipes.map((recipe: MutableRecipe) => ({ [recipe.getId()]: recipe })))
+        return newRecipes
+    }
+
+    function saveItems(itemsToSave?: MutableIngredient[] | MutableIngredient) {
+        if (typeof itemsToSave === 'undefined') {
+            itemsToSave = Object.values(getItemsAsMap.value)
+        }
+        if (!Array.isArray(itemsToSave)) {
+            itemsToSave = [itemsToSave]
+        }
+
+        logDebug('saveItem', itemsToSave)
+        setLoadingState('saveItem')
+        return sendToAPI<string>(API_ROUTE.ADD_INGREDIENTS, {
+            body: itemsToSave,
+            errorMessage: 'Could not save ingredients in database. Please retry later!'
+        })
+            .then((apiResponse: APIResponse<string>) => {
+                finishLoading('saveItem')
+                return apiResponse
+            })
+            .then((apiResponse: APIResponse<string>) => {
+                if (!apiResponse.error) {
+                    return fetchItems()
+                }
+                return []
+            })
+            .catch(() => setItems(itemsToSave))
+    }
+
+    function saveRecipes(recipesToSave?: MutableRecipe[] | MutableRecipe) {
+        if (typeof recipesToSave === 'undefined') {
+            recipesToSave = Object.values(getRecipesAsMap.value)
+        }
+        if (!Array.isArray(recipesToSave)) {
+            recipesToSave = [recipesToSave]
+        }
+
+        logDebug('saveRecipe', recipesToSave)
+        setLoadingState('saveRecipe')
+        return sendToAPI<string>(API_ROUTE.ADD_RECIPES, {
+            body: recipesToSave,
+            errorMessage: 'Could not save recipe in database. Please retry later!',
+            successMessage: 'Updated recipe'
+        })
+            .then((apiResponse: APIResponse<string>) => {
+                finishLoading('saveRecipe')
+                return apiResponse
+            })
+            .then((apiResponse: APIResponse<string>) => {
+                if (!apiResponse.error) {
+                    return fetchItems().then(() => fetchRecipes())
+                }
+                return []
+            })
+            .catch(() => setRecipes(recipesToSave))
+    }
+
+    function setItem(item: MutableIngredient) {
+        ingredients.value[item.getId()] = item
+    }
+
+    function setItems(newItems?: MutableIngredient[] | MutableIngredient) {
+        if (typeof newItems === 'undefined') {
+            ingredients.value = {}
+            return Promise.resolve([])
+        }
+
+        if (!Array.isArray(newItems)) {
+            ingredients.value[newItems.getId()] = newItems
+        } else {
+            ingredients.value = Object.assign(ingredients.value, ...newItems.map((item: MutableIngredient) => ({ [item.getId()]: item })))
+        }
+        return Promise.resolve(newItems)
+    }
+
+    function setLoadingState(key: string) {
+        loading.value[key] = true
+    }
+
+    function setRecipes(newRecipes?: MutableRecipe[] | MutableRecipe) {
+        if (typeof newRecipes === 'undefined') {
+            recipes.value = {}
+            return Promise.resolve([])
+        }
+
+        if (!Array.isArray(newRecipes)) {
+            recipes.value[newRecipes.getId()] = newRecipes
+        } else {
+            recipes.value = Object.assign(recipes.value, ...newRecipes.map((recipe: MutableRecipe) => ({ [recipe.getId()]: recipe })))
+        }
+        return Promise.resolve(newRecipes)
+    }
+
+    return {
+        loading,
+        recipes,
+        ingredients,
+        isLoading,
+        isLoadingInitial,
+        getRecipesAsList,
+        getRecipesAsMap,
+        getRecipesByItemIds,
+        getItemsAsList,
+        getItemNamesAsList,
+        getItemIdsToName,
+        getItemsSortedByName,
+        getItemsAsMap,
+        getTags,
+        deleteItems,
+        deleteRecipes,
+        fetchItems,
+        fetchRecipes,
+        finishLoading,
+        getRecipesAsListByItemId,
+        prepare,
+        removeItem,
+        replaceItems,
+        replaceRecipes,
+        saveItems,
+        saveRecipes,
+        setItem,
+        setItems,
+        setLoadingState,
+        setRecipes
+    }
 })

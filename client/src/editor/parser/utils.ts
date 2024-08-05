@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { useRecipeEditorStore } from '@/editor/storage';
-import { Item } from '@/shared';
+import { Ingredient } from '@/shared';
 import { closest, distance } from 'fastest-levenshtein';
 import { logDebug } from '@/shared/utils/logging.ts';
 
@@ -34,7 +34,7 @@ export function extractDurationFromText(text: string): number {
  * Finds the most similar item in the list of items
  * @param itemName
  */
-export function findMostSimilarItem(itemName?: string): Item | undefined {
+export function findMostSimilarItem(itemName?: string): Ingredient | undefined {
     // Check if the item name is empty
     if (!itemName || itemName === '') {
         return undefined
@@ -52,5 +52,5 @@ export function findMostSimilarItem(itemName?: string): Item | undefined {
     if (computedDistance > 2) {
         return undefined
     }
-    return items.find((item: Item) => item.hasName(closestItemName))
+    return items.find((item: Ingredient) => item.hasName(closestItemName))
 }

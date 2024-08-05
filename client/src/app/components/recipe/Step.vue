@@ -13,7 +13,7 @@
         </template>
         <template v-else-if="step.type === STEP_TYPES.HEADER">
             <h4>
-                <span v-html="step?.pPrintStepDescription('item-highlight')"/>
+                <span v-html="step?.descriptionToHtml('item-highlight')"/>
             </h4>
         </template>
         <IonCard v-if="!noContent">
@@ -26,7 +26,7 @@
                 </IonItem> -->
                 <!-- Show the description here of the step if it is not a header -->
                 <IonItem v-if="step.type !== STEP_TYPES.HEADER" class="recipe-step-desc" lines="none">
-                    <div v-html="step?.pPrintStepDescription('item-highlight')"/>
+                    <div v-html="step?.descriptionToHtml('item-highlight')"/>
                 </IonItem>
             </IonCardContent>
         </IonCard>
@@ -36,14 +36,14 @@
 <script lang="ts" setup>
 import { IonCard, IonCardContent, IonImg, IonItem } from '@ionic/vue';
 import { PropType, toRefs } from 'vue';
-import { Step, STEP_TYPES } from '@/shared';
+import { RecipeStep, STEP_TYPES } from '@/shared';
 import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
 import { useAppStore } from '@/app/storage';
 
 const props = defineProps({
     step: {
-        type: Object as PropType<Step>, required: true
+        type: Object as PropType<RecipeStep>, required: true
     }, stepIndex: {
         type: Number, required: false, default: -1
     }, amountSteps: {
@@ -55,7 +55,7 @@ const props = defineProps({
     }
 })
 
-const {step, recipeId} = toRefs(props)
+const { step, recipeId } = toRefs(props)
 
 const store = useAppStore()
 const startTimer = () => {

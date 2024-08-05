@@ -39,7 +39,7 @@ const props = defineProps({
         default: 'default'
     }
 })
-const {layout} = toRefs(props)
+const { layout } = toRefs(props)
 
 const slots = useSlots()
 const hasRightSlot = computed(() => !!slots['right'])

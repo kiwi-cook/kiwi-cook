@@ -1,11 +1,10 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Recipe, RecipeItem, Step } from '@/shared';
-import { logDebug } from '@/shared/utils/logging';
+import { MultiLanguageField, Recipe, RecipeIngredient, RecipeStep } from '@/shared';
+import { logDebug, logWarn } from '@/shared/utils/logging';
 import { useRecipeEditorStore } from '@/editor/storage';
-import { setLocaleStr } from '@/shared/locales/i18n';
 
 export class MutableRecipe extends Recipe {
 
@@ -57,7 +56,7 @@ export class MutableRecipe extends Recipe {
      * Set the localized name of the recipe
      */
     public setName(name: string, lang?: string) {
-        setLocaleStr(this.name, name, lang)
+        this.name.set(name, lang)
     }
 
     public isSaved(): boolean {
@@ -70,8 +69,8 @@ export class MutableRecipe extends Recipe {
      * @param stepIndex
      * @returns the recipe to allow chaining
      */
-    public addStep(step?: Step, stepIndex?: number): this {
-        const _step: Step = step ?? new Step()
+    public addStep(step?: RecipeStep, stepIndex?: number): this {
+        const _step: RecipeStep = step ?? RecipeStep.empty()
 
         if (stepIndex !== undefined) {
             // insert the step at the given index
@@ -94,27 +93,27 @@ export class MutableRecipe extends Recipe {
     }
 
     /**
-     * Add an item to a step
-     * @param item the item to add
-     * @returns the recipe and the item
+     * Add an ingredient to a step
+     * @param ingredient the ingredient to add
+     * @returns the recipe and the ingredient
      */
-    public putRecipeItem(item?: RecipeItem): {
-        item: RecipeItem, recipe: MutableRecipe
+    public putRecipeIngredient(ingredient?: RecipeIngredient): {
+        ingredient: RecipeIngredient, recipe: MutableRecipe
     } {
-        item = item ?? new RecipeItem();
-        this.items.push(item)
-        return {item, recipe: this};
+        ingredient = ingredient ?? RecipeIngredient.empty()
+        this.ingredients.push(ingredient)
+        return { ingredient: ingredient, recipe: this };
     }
 
-    public removeRecipeItem(item: RecipeItem): void {
-        this.items = this.items.filter((i: RecipeItem) => i !== item)
+    public removeRecipeIngredient(ingredient: RecipeIngredient): void {
+        this.ingredients = this.ingredients.filter((i: RecipeIngredient) => i !== ingredient)
     }
 
     /**
      * Set the localized description of the recipe
      */
     public setDescription(description: string, lang?: string): void {
-        setLocaleStr(this.desc, description, lang)
+        this.description.set(description, lang)
     }
 
     /**
@@ -122,10 +121,11 @@ export class MutableRecipe extends Recipe {
      * @param author
      */
     public addAuthor(author: string): void {
-        if (this.src.authors === undefined) {
-            this.src.authors = []
+        if (this.src?.authors !== undefined) {
+            this.src?.authors.push({ name: author })
+        } else {
+            logWarn('MutableRecipe.addAuthor', 'No authors array found')
         }
-        this.src.authors.push({name: author})
     }
 
     /**
@@ -144,8 +144,8 @@ export class MutableRecipe extends Recipe {
 
     setSteps(steps: string[], lang?: string): void {
         this.steps = steps.map((description: string) => {
-            const step = new Step()
-            step.setDescription(description, lang)
+            const step = RecipeStep.empty()
+            step.description = new MultiLanguageField({ [lang ?? 'en']: description })
             return step
         })
     }

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -32,7 +32,7 @@ import { createOutline } from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
 
 const router = useIonRouter()
-const edit = (recipe: Recipe) => router.push({name: 'RecipeEditor', params: {id: recipe.getId()}})
+const edit = (recipe: Recipe) => router.push({ name: 'RecipeEditor', params: { id: recipe.getId() } })
 const recipeStore = useRecipeEditorStore()
 const recipes = computed(() => recipeStore.getRecipesAsList)
 </script>

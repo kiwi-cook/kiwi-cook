@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { useI18n } from 'vue-i18n';
 
 export function recipeBy(authors: string, url: string, noLink = false): string {
-    const {t} = useI18n()
+    const { t } = useI18n()
     const sourceTag = url ? `<a href="${url}" target="_blank">${url}</a>` : ''
 
     if (authors !== '' && url !== '' && !noLink) {

@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -39,7 +39,7 @@ import { useRecipeEditorStore } from '@/editor/storage';
 import RecipeEditor from '@/editor/components/editor/RecipeEditor.vue';
 import { addOutline, arrowBack, chevronForwardCircle, saveOutline } from 'ionicons/icons';
 import Header from '@/shared/components/utility/header/Header.vue';
-import { MutableRecipe } from '@/editor/types/recipe';
+import { MutableRecipe } from '@/editor/models/recipe';
 
 const route = useRoute();
 const recipeId = ref(route.params.id as string);
@@ -49,7 +49,7 @@ const recipe = computed<MutableRecipe>(() => store.getRecipesAsMap[recipeId.valu
 const router = useIonRouter()
 const addRecipe = () => {
     const newRecipeId = MutableRecipe.newRecipe().update().getId()
-    router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+    router.push({ name: 'RecipeEditor', params: { id: newRecipeId } })
 }
 const goBack = () => router.back()
 </script>

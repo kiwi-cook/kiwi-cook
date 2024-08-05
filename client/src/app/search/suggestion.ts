@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Recipe } from '@/shared/types'
+import { Recipe } from 'src/shared/models'
 import { useRecipeStore } from '@/app/storage';
 import { median } from '@/app/search/util';
 import { logDebug } from '@/shared/utils/logging';
@@ -26,7 +26,7 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
 
     const store = useRecipeStore()
     const savedKeyValues = store.getSavedRecipesStats
-    const recipes = store.getRecipesAsList
+    const recipes = store.recipes
 
     // Sorted by the number of times the item is used in recipes
     // const sortedItemIds: string[] = [...savedKeyValues.itemsIds.entries()].sort((a, b) => b[1] - a[1]).map((item) => item[0])
@@ -36,15 +36,15 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
 
     const percentages: {
         duration: number, numberOfSteps: number
-        items: number
+        ingredients: number
     } = {
-        duration: 0.05, numberOfSteps: 0.05, items: 0.05
+        duration: 0.05, numberOfSteps: 0.05, ingredients: 0.05
     }
 
     // Filter recipes by duration and number of steps
     const suggestRecipes = (recipes: Recipe[], percentages: {
         duration: number, numberOfSteps: number
-        items: number
+        ingredients: number
     }) => {
         return recipes.filter((recipe: Recipe) => {
             const recipeDuration = recipe.getDuration()
@@ -71,7 +71,7 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
         // Update percentages
         percentages.duration += learningRate
         percentages.numberOfSteps += learningRate
-        percentages.items += learningRate
+        percentages.ingredients += learningRate
     }
 
     // Train the model until we have enough recipes

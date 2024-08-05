@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -52,8 +52,18 @@
 
 <script lang="ts" setup>
 import {
-    IonButton, IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonContent, IonIcon, IonInput,
-    IonItem, IonList, IonPage
+    IonButton,
+    IonCard,
+    IonCardContent,
+    IonCardHeader,
+    IonCardSubtitle,
+    IonCardTitle,
+    IonContent,
+    IonIcon,
+    IonInput,
+    IonItem,
+    IonList,
+    IonPage
 } from '@ionic/vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import { ref } from 'vue';

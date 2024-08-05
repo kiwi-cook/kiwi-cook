@@ -1,23 +1,24 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
-    <IonItem v-if="mappedItem" class="item" lines="none">
+    <IonItem v-if="decomposedIngredient" class="item" lines="none">
         <IonThumbnail slot="start" class="item-thumbnail">
-            <img :key="mappedItem.name" :alt="mappedItem.name" :src="mappedItem.imgUrl ?? ''" loading="lazy"/>
+            <img :key="decomposedIngredient.name.get()" :alt="`Thumbnail of ${decomposedIngredient.name.get()}`"
+                 :src="decomposedIngredient.imgUrl ?? ''" loading="lazy"/>
         </IonThumbnail>
         <IonLabel :class="[{'item-excluded': include === false}, 'item-label']">
-            <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
-                {{ mappedItem.quantity }} {{ mappedItem.unit }}
+            <span v-if="decomposedIngredient.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
+                {{ decomposedIngredient.quantity }} {{ decomposedIngredient.unit }}
             </span>
-            {{ mappedItem.name }}
+            {{ decomposedIngredient.name.get() }}
             <span v-if="include" class="item-included">✓</span>
         </IonLabel>
         <div slot="end">
             <slot name="end">
-                <span v-if="mappedItem.quantity !== 0 && quantityPosition === 'end'" class="item-quantity">
-                    {{ mappedItem.quantity }} {{ mappedItem.unit }}
+                <span v-if="decomposedIngredient.quantity !== 0 && quantityPosition === 'end'" class="item-quantity">
+                    {{ decomposedIngredient.quantity }} {{ decomposedIngredient.unit }}
                 </span>
             </slot>
         </div>
@@ -27,41 +28,48 @@
 <script lang="ts" setup>
 import { IonItem, IonLabel, IonThumbnail } from '@ionic/vue';
 import { computed, PropType, toRefs } from 'vue';
-import { Item, ItemType, RecipeItem } from '@/shared';
+import { Ingredient, MultiLanguageField, RecipeIngredient } from '@/shared';
 
 const props = defineProps({
-    item: {
-        type: Object as PropType<(RecipeItem | Item)>, required: true,
+    ingredient: {
+        type: Object as PropType<(RecipeIngredient | Ingredient)>, required: true,
     }, include: {
         type: Boolean, required: false, default: undefined
     }, quantityPosition: {
         type: String as PropType<'start' | 'end'>, required: false, default: 'end'
     }
 })
-const {item} = toRefs(props);
+const { ingredient } = toRefs(props);
 
 type CustomItem = {
-    name: string, quantity: number, unit: string, imgUrl: string,
+    name: MultiLanguageField, quantity: number, unit: string, imgUrl: string,
 }
 
-const mappedItem = computed<CustomItem | undefined>(() => {
-    if (!item?.value) {
+const decomposedIngredient = computed<CustomItem | undefined>(() => {
+    if (!ingredient.value) {
         return undefined;
     }
-    let quantity: number | undefined;
-    if (item?.value instanceof RecipeItem && item?.value?.type === ItemType.Ingredient) {
-        quantity = item?.value?.getQuantity()
-    } else {
-        quantity = 1;
-    }
-    const name = item?.value?.getName(undefined, quantity)
-    const unit = item?.value instanceof RecipeItem && item?.value?.type ===
-    ItemType.Ingredient ? item?.value?.unit : '';
 
-    return {
-        name, imgUrl: item?.value?.imgUrl, quantity, unit,
+    const customItem: CustomItem = {
+        name: MultiLanguageField.new(),
+        quantity: 0,
+        unit: '',
+        imgUrl: '',
+    };
+
+    if (ingredient.value instanceof RecipeIngredient) {
+        const recipeIngredient = ingredient.value;
+        customItem.name = recipeIngredient.ingredient.name;
+        customItem.quantity = recipeIngredient.getQuantity();
+        customItem.imgUrl = recipeIngredient.ingredient.imgUrl ?? '';
+        customItem.unit = recipeIngredient.unit ?? '';
+    } else {
+        customItem.name = ingredient.value.name;
+        customItem.imgUrl = ingredient.value.imgUrl ?? '';
     }
-})
+
+    return customItem;
+});
 </script>
 
 <style scoped>

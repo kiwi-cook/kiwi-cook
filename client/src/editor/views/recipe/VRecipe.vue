@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -37,23 +37,31 @@
 
 <script lang="ts" setup>
 import {
-    IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonRouterOutlet, IonToolbar, useIonRouter
+    IonButton,
+    IonButtons,
+    IonContent,
+    IonHeader,
+    IonIcon,
+    IonPage,
+    IonRouterOutlet,
+    IonToolbar,
+    useIonRouter
 } from '@ionic/vue';
 import { addOutline, arrowBack, colorWand } from 'ionicons/icons';
-import { MutableRecipe } from '@/editor/types/recipe';
+import { MutableRecipe } from '@/editor/models/recipe';
 
 const router = useIonRouter()
 
 const goBack = () => router.back()
 const addRecipe = () => {
     const newRecipeId = MutableRecipe.newRecipe().update().getId()
-    router.push({name: 'RecipeEditor', params: {id: newRecipeId}})
+    router.push({ name: 'RecipeEditor', params: { id: newRecipeId } })
 }
 const parseJSON = () => {
-    router.push({name: 'RecipeJsonParser'})
+    router.push({ name: 'RecipeJsonParser' })
 }
 
 const parseURL = () => {
-    router.push({name: 'RecipeUrlParser'})
+    router.push({ name: 'RecipeUrlParser' })
 }
 </script>

@@ -9,7 +9,7 @@ const MODULE = 'shared.utils.share.'
 
 export function share(options: { title: string, text: string, url: string, dialogTitle: string }) {
     const fName = MODULE + 'share'
-    const {title, text, url, dialogTitle} = options || {}
+    const { title, text, url, dialogTitle } = options || {}
 
     return Share.canShare().then((canShare: CanShareResult) => {
         if (!canShare.value) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Josef Müller.
+ * Copyright (c) 2023-2024 Josef Müller.
  */
 
 import { toastController } from '@ionic/vue';
@@ -38,12 +38,13 @@ export const presentToast = async (message?: string, isError = false, duration =
 
 /**
  * Returns a hash code from a string
- * @param  {String} str The string to hash.
  * @return {Number}    A 32bit integer
  * @see https://stackoverflow.com/a/8831937
  * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ * @param obj the object to hash
  */
-export function hash(str: string): number {
+export function hash(obj: unknown): number {
+    const str = JSON.stringify(obj);
     let hash = 0;
     for (let i = 0, len = str.length; i < len; i++) {
         const chr: number = str.charCodeAt(i);

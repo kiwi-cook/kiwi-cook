@@ -1,5 +1,5 @@
 <!--
-  - Copyright (c) 2023 Josef Müller.
+  - Copyright (c) 2023-2024 Josef Müller.
   -->
 
 <template>
@@ -26,7 +26,7 @@ const props = defineProps({
     },
 });
 
-const {duration} = toRefs(props);
+const { duration } = toRefs(props);
 
 const normalDuration = computed<{ duration: number, unit: string }>(() => {
     if (!duration?.value) {

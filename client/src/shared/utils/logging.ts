@@ -3,16 +3,6 @@
  */
 
 /**
- * Log a message to the console
- * @param functionName the name of the function
- * @param message the message to log
- */
-export const log = (functionName: string, message?: any, ...messages: any[]) => {
-    if (process.env.NODE_ENV === 'development') {
-        console.log(`[${functionName}]:`, message, ...messages)
-    }
-}
-/**
  * Debug a message to the console
  * @param functionName the name of the function
  * @param message the message to log
@@ -52,5 +42,4 @@ export const logError = (functionName: string, error: any, ...errors: any[]) => 
     if (process.env.NODE_ENV === 'development') {
         console.error(...errorStr)
     }
-    throw error
 }

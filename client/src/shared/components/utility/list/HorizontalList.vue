@@ -5,7 +5,7 @@
 <template>
     <div v-if="list.length > 0" class="element-list-wrapper horizontal">
         <ul :tabindex="0" class="element-list horizontal">
-            <li v-for="(element, elementIndex) in list" :key="element.id ?? elementIndex"
+            <li v-for="(element, elementIndex) in list" :key="hash(element) + elementIndex"
                 class="element horizontal">
                 <slot :element="element" name="element">
                     {{ element }}
@@ -16,25 +16,31 @@
 </template>
 
 <script lang="ts" setup>
+// Define props
 import { toRefs } from 'vue';
-
+import { hash } from '@/shared';
 
 const props = defineProps({
     list: {
-        type: Array, required: false, default: null
-    }, noWrap: {
+        type: Array, required: true, default: [] as any[]
+    },
+    noWrap: {
         type: Boolean, required: false, default: false
-    }, maxHeight: {
+    },
+    maxHeight: {
         type: String, required: false, default: '100%'
     }
-})
-const {list} = toRefs(props)
+});
+
+const { list } = toRefs(props);
 </script>
+
 
 <style scoped>
 .element-list-wrapper {
     overflow-y: scroll;
     height: 100%;
+    width: 100%;
 }
 
 .element-list-wrapper.horizontal {

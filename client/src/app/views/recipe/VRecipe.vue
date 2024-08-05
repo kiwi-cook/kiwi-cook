@@ -50,7 +50,7 @@ const route = useRoute()
 const store = useRecipeStore()
 const recipe = computed<Recipe>(() => {
     const recipeId = (route.params.id ?? '') as string
-    return store.getRecipesAsMap[recipeId]
+    return store.recipeMap[recipeId]
 })
 
 const router = useIonRouter()

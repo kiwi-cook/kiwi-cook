@@ -140,3 +140,7 @@ h5.subheader {
     color: var(--ion-color-primary);
     font-weight: var(--font-weight-bold);
 }
+
+.highlight.secondary {
+    color: var(--ion-color-secondary);
+}

@@ -40,7 +40,7 @@ export async function setCachedItem<T>(key: string, value: T) {
     }
 
     const compressedValue = compress(JSON.stringify(value))
-    return ionicStorage.set(key, {date: new Date().getTime(), value: compressedValue}).then(() => {
+    return ionicStorage.set(key, { date: new Date().getTime(), value: compressedValue }).then(() => {
         logDebug(fName, `saved ${key} to cache`)
         const tsEnd = performance.now()
         logDebug(fName, `Saved ${key} to cache in ${tsEnd - tsStart}ms`)
@@ -73,7 +73,7 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
             if (!cachedItem || typeof cachedItem === 'undefined' ||
                 (Array.isArray(cachedItem) && cachedItem.length === 0)) {
                 logWarn(fName, `no ${key} in cache`)
-                return {value: null, isOld: true}
+                return { value: null, isOld: true }
             }
 
             // ... else, return the cached value
@@ -87,7 +87,7 @@ export async function getCachedItem<T>(key: string, defaultValue: T, fetch: (() 
             const isOld = (new Date().getTime() - cachedItem?.date) > MAX_CACHE_AGE
             logDebug(fName, `isOld: ${isOld}`)
 
-            return {value: uncompressedValue, isOld: isOld}
+            return { value: uncompressedValue, isOld: isOld }
         })
         .then(async (cachedItem: CachedItem<T>) => {
             /* Try to fetch the value */
