@@ -7,14 +7,15 @@ from pipeline.download import HtmlRecipeLoader, HtmlRecipeSaver
 from pipeline.pipeline import Pipeline
 from pipeline.scrape import RecipeScraper
 
-mongo_client = get_database()
+read_client = get_database("READ")
+write_client = get_database("WRITE")
 
 # Initialize the pipeline
 crawler_pipeline = Pipeline()
 crawler = RecipeCrawler(max_size=100)
-download = HtmlRecipeSaver(mongo_client)
-load = HtmlRecipeLoader(mongo_client)
-scraper = RecipeScraper(mongo_client)
+download = HtmlRecipeSaver(write_client)
+load = HtmlRecipeLoader(read_client)
+scraper = RecipeScraper(write_client)
 
 crawler_pipeline.add_element(crawler)
 crawler_pipeline.add_element(download)
