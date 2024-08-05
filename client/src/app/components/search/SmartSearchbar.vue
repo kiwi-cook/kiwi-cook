@@ -3,16 +3,16 @@
   -->
 
 <template>
-    <div :class="['searchbar-wrapper', { 'active': isResultsOpen || isPreferencesOpen }]">
+    <div :class="['searchbar-wrapper', { 'active': isResultsOpen || isSearchFocus }]">
         <div ref="searchbar">
             <div class="searchbar-blur"/>
             <SearchInput
-                v-model:input="query"
+                v-model:input="fullQuery"
                 @onClose="closeAll"
-                @onFocus="openPreferences"
+                @onFocus="openSearch"
                 @search="search"/>
             <Transition name="fade-top">
-                <div v-if="(query !== '' && isPreferencesOpen) || isResultsOpen" class="searchbar-list-wrapper">
+                <div v-if="(fullQuery !== '' && isSearchFocus) || isResultsOpen" class="searchbar-list-wrapper">
                     <div class="searchbar-list">
                         <div class="searchbar-list-results">
                             <List :list="[...filteredResults]" load-all no-wrap>
@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, toRefs, Transition, watch } from 'vue';
+import { ref, Transition, watch } from 'vue';
 import { IonIcon, IonItem, IonLabel, useIonRouter } from '@ionic/vue';
 import { searchOutline } from 'ionicons/icons';
 import { Ingredient, List, Recipe } from '@/shared';
@@ -55,27 +55,21 @@ import { storeToRefs } from 'pinia';
 import SearchInput from '@/app/components/search/SearchInput.vue';
 
 const recipeStore = useRecipeStore();
-const { recipes, ingredientMap, ingredients, tags } = storeToRefs(recipeStore);
+const { recipes, ingredients, tags } = storeToRefs(recipeStore);
 
-const props = defineProps({
-    state: {
-        type: Boolean,
-        required: true,
-    },
+const isSearchFocus = defineModel('focus', {
+    type: Boolean,
+    required: true,
 });
-const { state } = toRefs(props);
 
 const emit = defineEmits({
-    'selectTag': (tag: string) => tag,
-    'selectIngredient': (ingredient: Ingredient) => ingredient,
-    'selectPreferences': (value: boolean) => value,
     'search': (value: RecipeSuggestion[]) => value,
 });
 
 const SEARCHBAR_CONFIG = {
     MAX_ITEMS: 3,
-    MAX_TAGS: 6,
-    MAX_RECIPES: 6,
+    MAX_TAGS: 3,
+    MAX_RECIPES: 3,
     MIN_SAVED_RECIPES: 3,
     MAX_TIME: 60,
     MIN_TIME: 10,
@@ -84,16 +78,15 @@ const SEARCHBAR_CONFIG = {
 
 const searchbar = ref(null);
 const searchbarInput = ref(null);
-const isPreferencesOpen = ref(false);
 const isResultsOpen = ref(false);
 
-const openPreferences = () => {
-    isPreferencesOpen.value = true;
+const openSearch = () => {
+    isSearchFocus.value = true;
 };
 
-const closePreferences = () => isPreferencesOpen.value = false;
+const closePreferences = () => isSearchFocus.value = false;
 const openAll = () => {
-    isPreferencesOpen.value = true;
+    isSearchFocus.value = true;
     isResultsOpen.value = true;
     searchbarInput.value?.focus();
 };
@@ -103,7 +96,7 @@ const closeAll = () => {
     isResultsOpen.value = false;
 };
 
-watch(state, (newValue, oldValue) => {
+watch(isSearchFocus, (newValue, oldValue) => {
     if (newValue !== oldValue) {
         if (newValue) {
             openAll();
@@ -152,10 +145,11 @@ const filter = (query: string) => {
             })) as FilteredResult[],
     ]
 }
-const query = ref('');
-watch(query, () => {
-    filter(query.value);
-    isResultsOpen.value = query.value !== '';
+
+const fullQuery = ref('');
+watch(fullQuery, () => {
+    filter(fullQuery.value);
+    isResultsOpen.value = fullQuery.value !== '';
 }, { immediate: true });
 
 const router = useIonRouter()
@@ -164,15 +158,15 @@ const selectRecipe = (recipe: Recipe) => {
     closeAll();
 }
 const selectIngredient = (ingredient: Ingredient) => {
-    query.value += `, ${ingredient.getName()}`;
+    fullQuery.value += `, ${ingredient.getName()}`;
 };
 const selectTag = (tag: string) => {
-    query.value += `, ${tag}`;
+    fullQuery.value += `, ${tag}`;
 }
 
 const searchedRecipes = ref<RecipeSuggestion[]>([]);
 const search = () => {
-    searchedRecipes.value = searchRecipesByQuery(query.value);
+    searchedRecipes.value = searchRecipesByQuery(fullQuery.value);
     closeAll();
     emit('search', searchedRecipes.value);
 };

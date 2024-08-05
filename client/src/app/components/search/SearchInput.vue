@@ -4,7 +4,7 @@
 
 <template>
     <div :class="{ active: isActive }" class="searchbar-search-wrapper">
-        <input ref="searchbarInput" v-model="input"
+        <input ref="searchbarInput" v-model.trim="input"
                :placeholder="$t('Suggestions.SearchbarPrompt')" class="searchbar-search"
                @focus="onFocus" @keyup.enter="search"/>
         <button class="searchbar-button search" @click="search">
@@ -26,8 +26,6 @@ const search = () => emit('search');
 
 const searchbarInput = ref<HTMLInputElement | null>(null);
 const isActive = ref(false);
-
-
 </script>
 
 
@@ -48,7 +46,8 @@ const isActive = ref(false);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
     transition: var(--transition);
-    width: 400px;
+    max-width: 400px;
+    width: 100%;
 }
 
 .searchbar-search-wrapper.active {

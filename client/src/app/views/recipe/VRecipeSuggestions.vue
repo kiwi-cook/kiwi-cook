@@ -15,7 +15,7 @@
                     <div class="sticky-header">
                         <div class="content-margin">
                             <!-- Searchbar for ingredients, tools, recipes and tags -->
-                            <SmartSearchbar v-model:state="searchbarOpen" class="searchbar" @search="search($event)"/>
+                            <SmartSearchbar v-model:focus="searchbarOpen" class="searchbar" @search="search($event)"/>
                         </div>
                     </div>
 
@@ -27,35 +27,35 @@
                         </article>
 
                         <!-- Predicted/Recommended recipes -->
-                        <section v-if="recipePredictions.length > 0">
-                            <h3>
+                        <RecipeSuggestionSection :recipes="recipePredictions">
+                            <template #title>
                                 {{ recipePredictions.length }}
                                 {{ $t('Suggestions.Recommendations.Title', recipePredictions.length) }}
-                            </h3>
-                            <h4 class="subheader">
+                            </template>
+                            <template #subtitle>
                                 {{ $t('Suggestions.Recommendations.Subtitle') }}
-                            </h4>
-                            <HorizontalList :list="recipePredictions">
-                                <template #element="{ element }: { element: Recipe}">
-                                    <MiniRecipePreview :key="element.id" :recipe="element"/>
-                                </template>
-                            </HorizontalList>
-                        </section>
+                            </template>
+                        </RecipeSuggestionSection>
+
+                        <!-- Under 20 minutes recipes -->
+                        <RecipeSuggestionSection :recipes="recipes.filter(r => r.getDuration() <= 20)">
+                            <template #title>
+                                Got 20 minutes?
+                            </template>
+                            <template #subtitle>
+                                Let's cook something quick!
+                            </template>
+                        </RecipeSuggestionSection>
 
                         <!-- Random recipes -->
-                        <section v-if="randomRecipes.length > 0">
-                            <h3>
+                        <RecipeSuggestionSection :recipes="randomRecipes">
+                            <template #title>
                                 {{ $t('Suggestions.Random.Title') }}
-                            </h3>
-                            <h4 class="subheader">
+                            </template>
+                            <template #subtitle>
                                 {{ $t('Suggestions.Random.Subtitle') }}
-                            </h4>
-                            <HorizontalList :list="randomRecipes">
-                                <template #element="{ element }: { element: Recipe}">
-                                    <MiniRecipePreview :key="element.id" :recipe="element"/>
-                                </template>
-                            </HorizontalList>
-                        </section>
+                            </template>
+                        </RecipeSuggestionSection>
 
                         <!-- Searched recipes -->
                         <a id="recipe-search" ref="recipeSearchAnchor"/>
@@ -111,9 +111,9 @@ import BigRecipePreview from '@/app/components/recipe/previews/BigRecipePreview.
 import { RecipeSuggestion } from '@/app/search';
 import { SmartSearchbar } from '@/app/components/search';
 import { closeOutline, searchOutline } from 'ionicons/icons';
-import { MiniRecipePreview } from '@/app/components';
 import { storeToRefs } from 'pinia';
 import FabTimer from '@/shared/components/time/FabTimer.vue';
+import RecipeSuggestionSection from '@/app/components/recipe/RecipeSuggestionSection.vue';
 
 const { t } = useI18n()
 const recipeStore = useRecipeStore()

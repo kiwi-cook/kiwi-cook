@@ -12,7 +12,7 @@ let API_URL = '';
 const findApiUrl = async () => {
     logDebug('API_URL', 'Checking for reachable API URL ...');
     for (const { url } of config.apiUrls.filter(api => isDev ? api.name === 'dev' : api.name === 'prod')) {
-        if ((await fetch(url, { method: 'HEAD' })).ok) {
+        if ((await fetch(url, { method: 'GET' })).ok) {
             logDebug('API_URL', 'Found reachable API URL: ' + url);
             return url as string;
         }

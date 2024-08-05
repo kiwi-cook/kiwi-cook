@@ -16,7 +16,7 @@
                 </IonTabButton>
 
                 <IonTabButton :disabled="isLoadingInitial"
-                              href="/recipe/suggestions"
+                              href="/recipe/"
                               tab="recipe-suggestions">
                     <IonIcon :icon="sparkles"/>
                     {{ $t('Tabs.Explore') }}
