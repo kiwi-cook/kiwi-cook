@@ -5,50 +5,22 @@ import asyncio
 import sys
 import traceback
 
-from pipeline.crawl import RecipeCrawler
-from pipeline.download import HtmlRecipeSaver, HtmlRecipeLoader
-from pipeline.pipeline import Pipeline
-from pipeline.scrape import RecipeScraper
-from server.app import start_server
-
 from pymongo import MongoClient
 
+from pipeline.recipe_pipeline import run_pipeline_from_file
+from server.app import start_server
+
 # Connect to MongoDB
-mongo_client = MongoClient('mongodb://root:example@localhost:27017/')
-
-# Initialize the pipeline
-crawler_pipeline = Pipeline()
-crawler = RecipeCrawler(max_size=100)
-download = HtmlRecipeSaver(mongo_client)
-load = HtmlRecipeLoader(mongo_client)
-scraper = RecipeScraper(mongo_client)
-
-crawler_pipeline.add_element(crawler)
-crawler_pipeline.add_element(download)
-crawler_pipeline.add_element(scraper)
-
-
-async def run_pipeline():
-    """
-    Fills the pipeline with the necessary elements.
-    """
-    await crawler_pipeline.feed("https://cooking.nytimes.com/recipes/1025480-spaghetti-sauce")
-    await crawler_pipeline.run()
+mongo_client = MongoClient("mongodb://root:example@localhost:27017/")
 
 
 def main():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description=f"Recipe pipeline")
     parser.add_argument(
-        "--online",
-        help="Run pipeline from the web (online)",
-        action="store_true",
-        required=False,
-    )
-    parser.add_argument(
-        "--offline",
-        help="Run pipeline from the disk (offline)",
-        action="store_true",
+        "-f",
+        "--file",
+        help="Run the pipeline with the URLs in the specified file",
         required=False,
     )
     parser.add_argument(
@@ -61,13 +33,11 @@ def main():
     try:
         args = parser.parse_args()
 
-        # Start the pipeline
-        if args.online:
-            # Crawl the websites and start the pipeline
-            asyncio.run(run_pipeline())
-        elif args.server:
+        if args.server:
             # Start the server
             start_server()
+        elif args.file:
+            asyncio.run(run_pipeline_from_file(args.file))
         else:
             parser.print_help()
 

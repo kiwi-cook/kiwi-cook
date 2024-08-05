@@ -2,7 +2,7 @@ from typing import List, TypeVar, Generic
 
 from pydantic import Field, BaseModel
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
 
 
 class BaseAPIResponse(BaseModel):

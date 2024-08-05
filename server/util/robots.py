@@ -1,12 +1,15 @@
-import aiohttp
 import asyncio
 from urllib import robotparser
+
+import aiohttp
 import cachetools
 
 from util.url import get_base_url
 
 # Cache for storing robots.txt contents
-robots_cache = cachetools.TTLCache(maxsize=1000, ttl=3600)  # Cache up to 1000 entries, TTL of 1 hour
+robots_cache = cachetools.TTLCache(
+    maxsize=1000, ttl=3600
+)  # Cache up to 1000 entries, TTL of 1 hour
 
 
 async def fetch_robots_txt(session, robots_url):

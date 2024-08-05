@@ -14,9 +14,12 @@ class HtmlRecipeSaver(PipelineElement):
         Downloads the content of a page.
         """
 
-        # Save the raw HTML content to mongo
-        compressed_html = lzma.compress(pickle.dumps(html))
-        self.mongo_client["recipes"]["html"].insert_one({"html": compressed_html, "url": url})
+        if html and not self.mongo_client["recipes"]["html"].find_one({"url": url}):
+            # Save the raw HTML content to mongo
+            compressed_html = lzma.compress(pickle.dumps(html))
+            self.mongo_client["recipes"]["html"].insert_one(
+                {"html": compressed_html, "url": url}
+            )
 
         return url, html
 

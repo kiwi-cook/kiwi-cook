@@ -1,25 +1,29 @@
-from bson import ObjectId
-from pydantic import BaseModel, Field, ConfigDict, HttpUrl, field_serializer
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import List, Optional, Dict, Any
 
+from bson import ObjectId
+from pydantic import BaseModel, Field, HttpUrl, field_serializer
 from pydantic_core import core_schema, Url
 
 
 class PyObjectId(str):
     @classmethod
     def __get_pydantic_core_schema__(
-            cls, _source_type: Any, _handler: Any
+        cls, _source_type: Any, _handler: Any
     ) -> core_schema.CoreSchema:
         return core_schema.json_or_python_schema(
             json_schema=core_schema.str_schema(),
-            python_schema=core_schema.union_schema([
-                core_schema.is_instance_schema(ObjectId),
-                core_schema.chain_schema([
-                    core_schema.str_schema(),
-                    core_schema.no_info_plain_validator_function(cls.validate),
-                ])
-            ]),
+            python_schema=core_schema.union_schema(
+                [
+                    core_schema.is_instance_schema(ObjectId),
+                    core_schema.chain_schema(
+                        [
+                            core_schema.str_schema(),
+                            core_schema.no_info_plain_validator_function(cls.validate),
+                        ]
+                    ),
+                ]
+            ),
             serialization=core_schema.plain_serializer_function_ser_schema(
                 lambda x: str(x)
             ),
@@ -60,43 +64,60 @@ class Ingredient(BaseModel):
         json_encoders = {ObjectId: str}
 
     @classmethod
-    def new(cls, name: str, id: Optional[PyObjectId] = None, lang: str = 'en'):
+    def new(cls, name: str, id: Optional[PyObjectId] = None, lang: str = "en"):
         print(f"Creating new Ingredient with name: {name}")
         return cls(id=id, name=MultiLanguageField.new(lang, name))
 
 
 class RecipeIngredient(BaseModel):
     ingredient: Ingredient
+    comment: Optional[str] = None
     quantity: Optional[float] = None
     unit: Optional[str] = None
 
     @classmethod
-    def new(cls, ingredient: Ingredient, quantity: Optional[float] = None, unit: Optional[str] = None):
+    def new(
+        cls,
+        ingredient: Ingredient,
+        comment: Optional[str] = None,
+        quantity: Optional[float] = None,
+        unit: Optional[str] = None,
+    ):
         if ingredient is None:
             raise ValueError("Ingredient cannot be None")
         print(f"Creating new RecipeIngredient with ingredient: {ingredient}")
-        return cls(ingredient=ingredient, quantity=quantity, unit=unit)
+        return cls(ingredient=ingredient, quantity=quantity, unit=unit, comment=comment)
 
 
 class RecipeStep(BaseModel):
     description: MultiLanguageField
     ingredients: Optional[List[RecipeIngredient]] = None
     img_url: Optional[HttpUrl] = Field(default=None, alias="imgUrl")
-    duration: Optional[int] = None
-    temperature: Optional[int] = None
+    duration: Optional[float] = None
+    temperature: Optional[float] = None
 
     class Config:
         populate_by_name = True
 
     @classmethod
-    def new(cls, description: MultiLanguageField, ingredients: Optional[List[RecipeIngredient]] = None,
-            img_url: Optional[HttpUrl] = None, duration: Optional[int] = None,
-            temperature: Optional[int] = None):
+    def new(
+        cls,
+        description: MultiLanguageField,
+        ingredients: Optional[List[RecipeIngredient]] = None,
+        img_url: Optional[HttpUrl] = None,
+        duration: Optional[float] = None,
+        temperature: Optional[float] = None,
+    ):
         print(f"Creating new RecipeStep with description: {description}")
-        return cls(description=description, ingredients=ingredients, img_url=img_url, duration=duration,
-                   temperature=temperature)
+        return cls(
+            description=description,
+            ingredients=ingredients,
+            img_url=img_url,
+            duration=duration,
+            temperature=temperature,
+        )
 
-    @field_serializer('img_url')
+    @field_serializer("img_url")
     def url2str(self, val) -> str:
         return str(val)
 
@@ -105,7 +126,7 @@ class RecipeAuthor(BaseModel):
     name: str
     url: Optional[HttpUrl] = None
 
-    @field_serializer('url')
+    @field_serializer("url")
     def url2str(self, val) -> str:
         return str(val)
 
@@ -116,10 +137,10 @@ class RecipeSource(BaseModel):
     cookbooks: Optional[List[str]] = None
 
     @classmethod
-    def from_author(cls, authors: List[str]) -> 'RecipeSource':
+    def from_author(cls, authors: List[str]) -> "RecipeSource":
         return cls(url=None, authors=[RecipeAuthor(name=author) for author in authors])
 
-    @field_serializer('url')
+    @field_serializer("url")
     def url2str(self, val) -> str:
         return str(val)
 
@@ -142,6 +163,7 @@ class Recipe(BaseModel):
     props: Dict[str, Any] = Field(alias="props")
     src: Optional[RecipeSource] = Field(alias="src", default=None)
     deleted: bool = Field(alias="deleted", default=False)
+    servings: int = Field(default=1)
 
     duration: int = Field(default=0)
     created_at: datetime = Field(default_factory=datetime.utcnow)

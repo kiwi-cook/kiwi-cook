@@ -1,5 +1,5 @@
 import asyncio
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse
 
 import httpx
 
@@ -8,8 +8,14 @@ from util.robots import check_robots
 
 
 class RecipeCrawler(PipelineElement):
-    def __init__(self, max_size=1000, max_same_domain_concurrent=5,
-                 ignore_domains=None, langs=None, required_keywords=None):
+    def __init__(
+        self,
+        max_size=1000,
+        max_same_domain_concurrent=5,
+        ignore_domains=None,
+        langs=None,
+        required_keywords=None,
+    ):
         super().__init__("Crawler")
 
         self.user_agents = [
@@ -74,9 +80,13 @@ class RecipeCrawler(PipelineElement):
             print(f"Ignoring {url} because it is already being crawled")
             return None
 
-        if self.currently_crawled_base_urls.count(base_url) >= self.max_same_domain_concurrent:
+        if (
+            self.currently_crawled_base_urls.count(base_url)
+            >= self.max_same_domain_concurrent
+        ):
             print(
-                f"Ignoring {url} because the base URL is already being crawled {self.max_same_domain_concurrent} times")
+                f"Ignoring {url} because the base URL is already being crawled {self.max_same_domain_concurrent} times"
+            )
             return None
 
         if not url.startswith("http"):
@@ -102,6 +112,7 @@ class RecipeCrawler(PipelineElement):
         self.currently_crawled_base_urls.append(base_url)
 
         try:
+            print(f"Fetching {url} ...")
             response = await client.get(url, follow_redirects=True)
             response.raise_for_status()
             html_content = response.text
