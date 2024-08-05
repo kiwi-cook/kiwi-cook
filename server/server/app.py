@@ -17,6 +17,7 @@ app = FastAPI(
 
 origins = [
     "http://localhost:8080",
+    "https://taste-buddy.github.io",
 ]
 
 app.add_middleware(
