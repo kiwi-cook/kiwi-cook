@@ -28,7 +28,7 @@ const props = defineProps({
         type: undefined as unknown as PropType<boolean | undefined>, required: false, default: undefined,
     }
 })
-const { ingredient, onlyRemove, included } = toRefs(props);
+const { ingredient, included } = toRefs(props);
 
 const emit = defineEmits({
     'update:included': (included: boolean | undefined) => included, 'removed': () => true,

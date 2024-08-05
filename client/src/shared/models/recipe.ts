@@ -16,12 +16,14 @@ export class RecipeIngredient {
     quantity: number;
     unit?: string;
     servings: number;
+    comment?: string;
 
     constructor(recipeIngredient?: Partial<RecipeIngredient>) {
         this.ingredient = Ingredient.fromJSON(recipeIngredient?.ingredient) ?? Ingredient.empty();
         this.quantity = recipeIngredient?.quantity ?? 0
         this.unit = recipeIngredient?.unit ?? '';
         this.servings = recipeIngredient?.servings ?? 1;
+        this.comment = recipeIngredient?.comment;
     }
 
     static empty() {
@@ -310,7 +312,7 @@ export class Recipe {
 
     getPrice(): number {
         let price = 0;
-        for (const item of this.getRecipeIngredients()) {
+        for (const item of this.ingredients) {
             // TODO: get price from item
             price += item.servings;
         }

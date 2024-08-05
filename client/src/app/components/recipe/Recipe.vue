@@ -33,7 +33,7 @@
                     <ReadMore :text="recipe?.getDescription()"/>
                 </IonText>
             </div>
-            <div class="recipe-image-wrapper">
+            <div v-if="recipe?.imageUrl" class="recipe-image-wrapper">
                 <IonImg :src="recipe?.imageUrl" alt="Header Image" class="recipe-image" loading="lazy" part="image"/>
             </div>
         </div>
@@ -54,7 +54,7 @@
                                       :step="1" color="secondary"
                                       label-placement="start" pin snaps/>
                             <!-- Show the ingredients -->
-                            <ItemList :ingredients="ingredients"/>
+                            <IngredientList :ingredients="ingredients"/>
                         </IonCardContent>
                     </IonCard>
                 </div>
@@ -107,14 +107,14 @@ import {
     IonRange,
     IonText,
 } from '@ionic/vue';
-import { ItemList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES } from '@/shared';
+import { IngredientList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES } from '@/shared';
 import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
 import { CanShareResult, Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { useRecipeStore } from '@/app/storage';
-import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import { RecipeTitle, StepComponent, TwoColumnLayout } from '@/app/components';
 import { storeToRefs } from 'pinia';
+import Duration from '@/shared/components/time/Duration.vue';
 
 /* Recipe */
 const props = defineProps({

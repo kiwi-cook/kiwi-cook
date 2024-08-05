@@ -85,7 +85,7 @@
             <template v-if="itemToEdit">
                 <IonChip color="medium">{{ itemToEdit.getId() }}</IonChip>
                 <div class="item-edit">
-                    <IonInput :value="itemToEdit.getName()" class="item-attribute"
+                    <IonInput :value="itemToEdit.ingredient.getName()" class="item-attribute"
                               label="Item Name" label-placement="stacked" placeholder="e.g., Tomatoes" type="text"
                               @focusin="updateName($event.target.value)"
                               @focusout="updateName($event.target.value)"
@@ -101,7 +101,7 @@
             </template>
 
             <IonList>
-                <ItemComponent
+                <IngredientComponent
                     v-for="(recipeItem, itemIndex) in (Array.from<RecipeIngredient>(recipe?.ingredients) ?? [])"
                     :key="`${itemIndex} - ${recipeItem.getId()}` ?? ''" :ingredient="recipeItem"
                     quantity-position="start" @click="editItem(recipeItem)"/>
@@ -210,7 +210,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ItemComponent, Recipe, RecipeIngredient } from '@/shared';
+import { IngredientComponent, Recipe, RecipeIngredient } from '@/shared';
 import { useRecipeEditorStore } from '@/editor/storage';
 import {
     IonButton,
@@ -234,10 +234,10 @@ import { computed, PropType, ref, toRefs, watch } from 'vue';
 import { add, closeCircleOutline, information, remove, save, trash } from 'ionicons/icons';
 import { MutableRecipe } from '@/editor/models/recipe';
 import DropDownSearch from '@/shared/components/utility/DropDownSearch.vue';
-import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import { findMostSimilarItem } from '@/editor/parser/utils.ts';
 import { logDebug } from '@/shared/utils/logging.ts';
 import { newIngredientFromName } from '@/editor/models/ingredient.ts';
+import Duration from '@/shared/components/time/Duration.vue';
 
 const MODULE = 'editor.components.editor.RecipeEditor.'
 

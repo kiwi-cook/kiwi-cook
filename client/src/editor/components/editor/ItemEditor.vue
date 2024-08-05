@@ -80,7 +80,6 @@
 </template>
 
 <script lang="ts" setup>
-import { Item } from '@/shared';
 import { logDebug } from '@/shared/utils/logging';
 import {
     IonAvatar,
@@ -100,12 +99,13 @@ import {
 import { computed, PropType, ref, toRefs } from 'vue';
 import { useRecipeEditorStore } from '@/editor/storage';
 import { chevronDown, chevronUp, save, trash } from 'ionicons/icons';
-import { MutableItem } from '@/editor/types/item';
 import { SUPPORT_LOCALES } from '@/shared/locales/i18n';
+import { MutableIngredient } from '@/editor/models/ingredient.ts';
+import { Ingredient } from '@/shared';
 
 const props = defineProps({
     item: {
-        type: Object as PropType<MutableItem>, required: true
+        type: Object as PropType<MutableIngredient>, required: true
     }
 })
 
@@ -125,7 +125,7 @@ const mergeItems = () => {
     if (!itemMergerInput.value) {
         return
     }
-    const isValidId = recipeStore.getItemsAsList.some((item: Item) => item.getId() === itemMergerInput.value)
+    const isValidId = recipeStore.getItemsAsList.some((item: Ingredient) => item.getId() === itemMergerInput.value)
     if (!isValidId) {
         return
     }
@@ -135,7 +135,8 @@ const mergeItems = () => {
         const recipe = recipeStore.getRecipesAsMap[recipeId]
         if (recipe) {
             logDebug('ItemEditor.mergeItems', `Merging recipe ${recipeId}`)
-            recipe.replaceItem(itemMergerInput.value, item.value)
+            // TODO: Implement recipe merging
+            // recipe.replaceItem(itemMergerInput.value, item.value)
             recipe.save()
         }
     }

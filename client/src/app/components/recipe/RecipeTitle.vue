@@ -60,7 +60,7 @@ a {
 }
 
 .recipe-title a {
-    font-family: var(--font-special);
+    font-family: var(--font-special), serif;
     color: var(--ion-color-primary);
 }
 

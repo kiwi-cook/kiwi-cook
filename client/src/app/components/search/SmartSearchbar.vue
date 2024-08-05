@@ -66,7 +66,6 @@ const props = defineProps({
 const { state } = toRefs(props);
 
 const emit = defineEmits({
-    'update:state': (value: boolean) => value,
     'selectTag': (tag: string) => tag,
     'selectIngredient': (ingredient: Ingredient) => ingredient,
     'selectPreferences': (value: boolean) => value,
@@ -90,7 +89,6 @@ const isResultsOpen = ref(false);
 
 const openPreferences = () => {
     isPreferencesOpen.value = true;
-    emit('update:state', true);
 };
 
 const closePreferences = () => isPreferencesOpen.value = false;
@@ -103,7 +101,6 @@ const openAll = () => {
 const closeAll = () => {
     closePreferences();
     isResultsOpen.value = false;
-    emit('update:state', false);
 };
 
 watch(state, (newValue, oldValue) => {
@@ -189,7 +186,6 @@ const search = () => {
 }
 
 .searchbar-wrapper.active {
-    background-color: rgba(var(--ion-background-color-rgb), 0.9);
     z-index: 100;
     top: 0;
 }
@@ -245,12 +241,6 @@ input::-webkit-inner-spin-button {
     left: 0;
     z-index: 110;
     width: 100%;
-}
-
-.searchbar-quick-preferences {
-    width: 100%;
-    max-width: var(--max-width);
-    margin: var(--margin-auto);
 }
 
 .searchbar-list {

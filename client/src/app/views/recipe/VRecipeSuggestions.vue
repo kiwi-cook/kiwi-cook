@@ -68,8 +68,8 @@
                                     {{ $t('Suggestions.Search.Subtitle') }}
                                 </h4>
                                 <HorizontalList :list="searchedRecipes">
-                                    <template #element="{ element }">
-                                        <RecipePreview :key="element.id" :recipe="element as RecipeSuggestion"/>
+                                    <template #element="{ element }: { element: RecipeSuggestion}">
+                                        <RecipePreview :key="element.recipe.getId()" :recipe="element"/>
                                     </template>
                                 </HorizontalList>
                             </div>
@@ -102,7 +102,7 @@
 import { computed, ref } from 'vue';
 import { IonContent, IonFab, IonFabButton, IonIcon, IonPage } from '@ionic/vue';
 import { useRecipeStore } from '@/app/storage';
-import { FabTimer, Recipe } from '@/shared';
+import { Recipe } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
 import HorizontalList from '@/shared/components/utility/list/HorizontalList.vue';
 import { useI18n } from 'vue-i18n';
@@ -113,6 +113,7 @@ import { SmartSearchbar } from '@/app/components/search';
 import { closeOutline, searchOutline } from 'ionicons/icons';
 import { MiniRecipePreview } from '@/app/components';
 import { storeToRefs } from 'pinia';
+import FabTimer from '@/shared/components/time/FabTimer.vue';
 
 const { t } = useI18n()
 const recipeStore = useRecipeStore()

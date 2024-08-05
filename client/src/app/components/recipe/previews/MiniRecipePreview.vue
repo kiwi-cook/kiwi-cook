@@ -17,7 +17,8 @@
 import { computed, PropType, toRefs } from 'vue';
 import { useIonRouter } from '@ionic/vue';
 import { RecipeSuggestion } from '@/app/search';
-import { Duration, Recipe } from '@/shared';
+import { Recipe } from '@/shared';
+import Duration from '@/shared/components/time/Duration.vue';
 
 const props = defineProps({
     recipe: {

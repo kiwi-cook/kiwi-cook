@@ -52,7 +52,7 @@ const toggleContent = () => {
 .quick-preference-card {
     /* Layout */
     padding: var(--padding-small);
-    border-radius: var(--border-radius-chip);
+    border-radius: var(--border-radius);
     max-width: 100%;
     min-width: 100px;
 

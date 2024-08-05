@@ -17,9 +17,9 @@
             </h4>
         </template>
         <IonCard v-if="!noContent">
-            <IonImg :src="step?.imgUrl ?? ''"/>
+            <IonImg v-if="step?.imgUrl" :src="step.imgUrl"/>
             <IonCardContent>
-                <Duration :duration="step?.duration" @click="startTimer"/>
+                <Duration :duration="step?.duration" :timer-key="recipeId" @click="startTimer"/>
                 <Temperature :temperature="step?.temperature"/>
                 <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
                     <ItemList :items="recipeItems" horizontal quantity-position="start"/>
@@ -37,9 +37,9 @@
 import { IonCard, IonCardContent, IonImg, IonItem } from '@ionic/vue';
 import { PropType, toRefs } from 'vue';
 import { RecipeStep, STEP_TYPES } from '@/shared';
-import Duration from '@/shared/components/recipe/chip/Duration.vue';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
-import { useAppStore } from '@/app/storage';
+import useTimer from '@/composables/useTimer.ts';
+import Duration from '@/shared/components/time/Duration.vue';
 
 const props = defineProps({
     step: {
@@ -57,10 +57,7 @@ const props = defineProps({
 
 const { step, recipeId } = toRefs(props)
 
-const store = useAppStore()
-const startTimer = () => {
-    store.setTimer(step?.value?.duration, recipeId?.value)
-}
+const { startTimer } = useTimer()
 </script>
 
 <style>

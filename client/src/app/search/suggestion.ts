@@ -25,7 +25,7 @@ export function simpleRecipeSuggestion(maxRecipes = 10): Recipe[] {
     const fName = MODULE + simpleRecipeSuggestion.name
 
     const store = useRecipeStore()
-    const savedKeyValues = store.getSavedRecipesStats
+    const savedKeyValues = store.savedRecipeStats
     const recipes = store.recipes
 
     // Sorted by the number of times the item is used in recipes

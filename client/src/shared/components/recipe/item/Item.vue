@@ -4,16 +4,18 @@
 
 <template>
     <IonItem v-if="decomposedIngredient" class="item" lines="none">
-        <IonThumbnail slot="start" class="item-thumbnail">
+        <IonThumbnail v-if="decomposedIngredient.imgUrl" slot="start" class="item-thumbnail">
             <img :key="decomposedIngredient.name.get()" :alt="`Thumbnail of ${decomposedIngredient.name.get()}`"
-                 :src="decomposedIngredient.imgUrl ?? ''" loading="lazy"/>
+                 :src="decomposedIngredient.imgUrl" loading="lazy"/>
         </IonThumbnail>
-        <IonLabel :class="[{'item-excluded': include === false}, 'item-label']">
+        <IonLabel class="item-label">
             <span v-if="decomposedIngredient.quantity !== 0 && quantityPosition === 'start'" class="item-quantity">
                 {{ decomposedIngredient.quantity }} {{ decomposedIngredient.unit }}
             </span>
             {{ decomposedIngredient.name.get() }}
-            <span v-if="include" class="item-included">✓</span>
+            <span v-if="decomposedIngredient.comment" class="item-comment">
+                ({{ decomposedIngredient.comment }})
+            </span>
         </IonLabel>
         <div slot="end">
             <slot name="end">
@@ -33,8 +35,6 @@ import { Ingredient, MultiLanguageField, RecipeIngredient } from '@/shared';
 const props = defineProps({
     ingredient: {
         type: Object as PropType<(RecipeIngredient | Ingredient)>, required: true,
-    }, include: {
-        type: Boolean, required: false, default: undefined
     }, quantityPosition: {
         type: String as PropType<'start' | 'end'>, required: false, default: 'end'
     }
@@ -42,7 +42,7 @@ const props = defineProps({
 const { ingredient } = toRefs(props);
 
 type CustomItem = {
-    name: MultiLanguageField, quantity: number, unit: string, imgUrl: string,
+    name: MultiLanguageField, quantity: number, unit: string, imgUrl: string, comment?: string
 }
 
 const decomposedIngredient = computed<CustomItem | undefined>(() => {
@@ -55,6 +55,7 @@ const decomposedIngredient = computed<CustomItem | undefined>(() => {
         quantity: 0,
         unit: '',
         imgUrl: '',
+        comment: '',
     };
 
     if (ingredient.value instanceof RecipeIngredient) {
@@ -63,6 +64,7 @@ const decomposedIngredient = computed<CustomItem | undefined>(() => {
         customItem.quantity = recipeIngredient.getQuantity();
         customItem.imgUrl = recipeIngredient.ingredient.imgUrl ?? '';
         customItem.unit = recipeIngredient.unit ?? '';
+        customItem.comment = recipeIngredient.comment ?? '';
     } else {
         customItem.name = ingredient.value.name;
         customItem.imgUrl = ingredient.value.imgUrl ?? '';
@@ -90,19 +92,13 @@ ion-thumbnail {
     background-color: var(--ion-color-dark);
 }
 
-.item-excluded {
-    text-decoration: line-through;
-    text-decoration-thickness: 0.15rem;
-    text-decoration-color: var(--ion-color-danger);
-}
-
-.item-included {
-    color: var(--ion-color-success);
-    margin-left: 0.5rem;
-}
-
 .item-quantity {
     font-weight: bold;
     color: var(--ion-color-secondary);
+}
+
+.item-comment {
+    font-size: var(--font-size-smaller);
+    color: var(--ion-color-medium);
 }
 </style>

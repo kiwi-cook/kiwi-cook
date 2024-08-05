@@ -5,14 +5,14 @@
 <template>
     <ul v-if="ingredients.length > 0" :class="['item-list', {'horizontal': horizontal}]">
         <li v-for="(ingredient, itemIndex) in ingredients" :key="itemIndex" class="item">
-            <ItemComponent :ingredient="ingredient" :quantity-position="quantityPosition"/>
+            <IngredientComponent :ingredient="ingredient" :quantity-position="quantityPosition"/>
         </li>
     </ul>
 </template>
 
 <script lang="ts" setup>
 import { PropType, toRefs } from 'vue';
-import { Ingredient, ItemComponent, RecipeIngredient } from '@/shared';
+import { Ingredient, IngredientComponent, RecipeIngredient } from '@/shared';
 
 const props = defineProps({
     ingredients: {

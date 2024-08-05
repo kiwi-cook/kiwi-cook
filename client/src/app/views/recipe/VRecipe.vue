@@ -44,7 +44,7 @@ import { useRoute } from 'vue-router';
 import { Recipe } from '@/shared';
 import { arrowBack } from 'ionicons/icons';
 import RecipeComponent from '@/app/components/recipe/Recipe.vue';
-import FabTimer from '@/shared/components/utility/FabTimer.vue';
+import FabTimer from '@/shared/components/time/FabTimer.vue';
 
 const route = useRoute()
 const store = useRecipeStore()

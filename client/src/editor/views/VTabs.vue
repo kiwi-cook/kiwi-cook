@@ -11,15 +11,16 @@
             <IonProgressBar v-show="loadingState" type="indeterminate"/>
             <IonTabBar slot="bottom">
                 <IonTabButton href="/home" tab="home">
+                    <IonIcon :icon="homeOutline"/>
                     Home
                 </IonTabButton>
 
                 <IonTabButton href="/recipe" tab="recipe">
-                    Recipe
+                    Recipes
                 </IonTabButton>
 
-                <IonTabButton href="/item/editor" tab="item-editor">
-                    Item Editor
+                <IonTabButton href="/ingredient/editor" tab="item-editor">
+                    Ingredients
                 </IonTabButton>
             </IonTabBar>
         </IonTabs>
@@ -28,7 +29,7 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue';
-import { IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
+import { IonIcon, IonPage, IonProgressBar, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs } from '@ionic/vue';
 import { useRecipeEditorStore } from '@/editor/storage';
 
 const recipeStore = useRecipeEditorStore()

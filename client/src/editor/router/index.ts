@@ -32,7 +32,9 @@ const routes: Array<RouteRecordRaw> = [{
             },]
         }, // Item
         {
-            name: 'ItemEditor', path: 'item/editor', component: () => import('@/editor/views/item/VItemsEditor.vue'),
+            name: 'ItemEditor',
+            path: 'ingredient/editor',
+            component: () => import('@/editor/views/item/VItemsEditor.vue'),
         }, // 404
         {
             name: 'NotFound', path: '/:pathMatch(.*)*', redirect: () => ({ name: 'Home' }),

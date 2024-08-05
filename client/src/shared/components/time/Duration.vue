@@ -3,8 +3,7 @@
   -->
 
 <template>
-    <IonChip v-if="(duration ?? 0 > 0) || alwaysShow">
-        <IonIcon v-if="!noIcon" :icon="time"/>
+    <IonChip v-if="(duration ?? 0 > 0) || alwaysShow" :icon="time" outline @click="startTimer">
         <IonLabel>{{ normalDuration.duration }} {{ normalDuration.unit }}
             <slot/>
         </IonLabel>
@@ -13,20 +12,36 @@
 
 <script lang="ts" setup>
 import { time } from 'ionicons/icons';
-import { IonChip, IonIcon, IonLabel } from '@ionic/vue';
+import { IonChip, IonLabel } from '@ionic/vue';
 import { computed, toRefs } from 'vue';
+import useTimer from '@/composables/useTimer.ts';
 
 const props = defineProps({
     duration: {
         type: Number, required: false,
-    }, alwaysShow: {
+    },
+    alwaysShow: {
         type: Boolean, required: false, default: false,
-    }, noIcon: {
+    },
+    noIcon: {
+        type: Boolean, required: false, default: false,
+    },
+    timerKey: {
+        type: String, required: false,
+    },
+    noTimer: {
         type: Boolean, required: false, default: false,
     },
 });
 
-const { duration } = toRefs(props);
+const { duration, timerKey, noTimer } = toRefs(props);
+
+const timer = useTimer();
+const startTimer = () => {
+    if (duration?.value && !noTimer.value && timerKey?.value) {
+        timer.startTimer(duration.value, timerKey?.value);
+    }
+};
 
 const normalDuration = computed<{ duration: number, unit: string }>(() => {
     if (!duration?.value) {
