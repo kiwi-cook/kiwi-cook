@@ -17,4 +17,4 @@ jobs:
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
     - run: cd ./client && bun install
-    - run: cd ./client && bun run build:app --if-present
+    - run: cd ./client && bun run build --if-present
