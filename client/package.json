@@ -36,7 +36,7 @@
     "@capacitor/ios": "6.1.1",
     "@capacitor/keyboard": "6.0.1",
     "@capacitor/share": "^6.0.1",
-    "@capacitor/status-bar": "5.0.7",
+    "@capacitor/status-bar": "6.0.0",
     "@ionic/core": "^8.2.6",
     "@ionic/storage": "^4.0.0",
     "@ionic/vue": "^8.2.6",
