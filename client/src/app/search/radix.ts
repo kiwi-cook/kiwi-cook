@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { logDebug } from '@/shared/utils/logging';
+import { logDebug, logWarn } from '@/shared/utils/logging';
 
 const MODULE = 'shared.utils.radix.'
 
@@ -85,27 +85,27 @@ export class PrefixIdTree {
     }
 
     /**
-     * Searches for a word in the tree and returns an array of ids
-     * related to the word
+     * Searches for a query in the tree and returns an array of ids
+     * related to the query
      *
-     * @param {string} word
+     * @param {string} query
      * @return {string[]}
      */
-    search(word: string): string[] {
+    search(query: string): string[] {
         const fName = MODULE + this.search.name
-        if (!word || word.length === 0) {
-            logDebug(fName, 'empty string');
+        if (!query || query.length === 0) {
+            logWarn(fName, 'query is empty');
             return [];
         }
 
         let node = this.rootNode;
-        const normalizedWord = word.toLowerCase().trim();
+        const normalizedWord = query.toLowerCase().trim();
         for (let i = 0; i < normalizedWord.length; i++) {
             const currentChar = normalizedWord.charAt(i);
             if (node.containsKey(currentChar)) {
                 node = node.getNode(currentChar);
             } else {
-                logDebug(fName, `could not find ${word} in tree`);
+                logDebug(fName, `could not find ${query} in tree`);
                 return [];
             }
         }

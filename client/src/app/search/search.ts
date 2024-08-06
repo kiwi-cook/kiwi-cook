@@ -46,6 +46,8 @@ export class TasteBuddySearch {
             ...recipe.description.getAll(),
             // Ingredients
             ...recipe.ingredients.flatMap((ingredient: RecipeIngredient) => ingredient.ingredient.name.getAll()),
+            // Tags
+            ...recipe.getTags(),
         ]
 
         // Add all possible mutations

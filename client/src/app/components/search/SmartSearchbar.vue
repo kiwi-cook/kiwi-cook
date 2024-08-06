@@ -158,10 +158,10 @@ const selectRecipe = (recipe: Recipe) => {
     closeAll();
 }
 const selectIngredient = (ingredient: Ingredient) => {
-    fullQuery.value += `, ${ingredient.getName()}`;
+    fullQuery.value = `${ingredient.getName()}`;
 };
 const selectTag = (tag: string) => {
-    fullQuery.value += `, ${tag}`;
+    fullQuery.value = `${tag}`;
 }
 
 const searchedRecipes = ref<RecipeSuggestion[]>([]);
