@@ -21,9 +21,10 @@
 
 <script lang="ts" setup>
 import { IonIcon } from '@ionic/vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { cameraOutline, searchOutline } from 'ionicons/icons';
 
+const focus = defineModel('focus', { type: Boolean, default: false });
 const input = defineModel('input', { type: String, required: true });
 const emit = defineEmits(['onFocus', 'onClose', 'search']);
 
@@ -33,6 +34,13 @@ const camera = () => console.log('Camera button clicked');
 
 const searchbarInput = ref<HTMLInputElement | null>(null);
 const isActive = ref(false);
+
+watch(focus, (value) => {
+    if (value) {
+        searchbarInput.value?.focus();
+    }
+    isActive.value = value;
+});
 </script>
 
 <style scoped>

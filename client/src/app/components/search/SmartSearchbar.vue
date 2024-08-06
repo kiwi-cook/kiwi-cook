@@ -7,6 +7,7 @@
         <div ref="searchbar">
             <div class="searchbar-blur"/>
             <SearchInput
+                v-model:focus="isSearchFocus"
                 v-model:input="fullQuery"
                 @onClose="closeAll"
                 @onFocus="openSearch"
