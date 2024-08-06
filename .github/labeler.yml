@@ -2,8 +2,7 @@
 
 Server:
 - all:
-  - 'server-prod/**/*'
-  - 'server-dev/**/*'
+  - 'server/**/*'
 
 Client:
 - all:
