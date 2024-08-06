@@ -96,7 +96,7 @@
                     <!-- Show the amount of steps -->
                     <h2>{{ $t("Recipe.Preparation") }}</h2>
                     <!-- ... and the duration -->
-                    <Duration :duration="recipe?.getDuration()"/>
+                    <Duration :duration="recipe?.getDuration()" :timer-key="recipe?.getId()"/>
                 </div>
                 <!-- Steps -->
                 <div class="steps-container">

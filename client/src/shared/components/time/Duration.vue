@@ -14,16 +14,13 @@
 import { time } from 'ionicons/icons';
 import { IonChip, IonLabel } from '@ionic/vue';
 import { computed, toRefs } from 'vue';
-import useTimer from '@/composables/useTimer.ts';
+import { useTimerStore } from '@/app/storage/timer.ts';
 
 const props = defineProps({
     duration: {
         type: Number, required: false,
     },
     alwaysShow: {
-        type: Boolean, required: false, default: false,
-    },
-    noIcon: {
         type: Boolean, required: false, default: false,
     },
     timerKey: {
@@ -36,10 +33,10 @@ const props = defineProps({
 
 const { duration, timerKey, noTimer } = toRefs(props);
 
-const timer = useTimer();
-const startTimer = () => {
+const timer = useTimerStore();
+const startTimer = async () => {
     if (duration?.value && !noTimer.value && timerKey?.value) {
-        timer.startTimer(duration.value, timerKey?.value);
+        await timer.startTimer(duration.value * 60, timerKey?.value);
     }
 };
 

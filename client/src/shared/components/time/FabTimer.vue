@@ -5,15 +5,14 @@
 <!-- A simple timer that can be used to show the remaining time for a recipe -->
 <template>
     <IonFab slot="fixed" :horizontal="horizontal" vertical="bottom">
-        <IonFabButton v-if="numberOfTimers > 0" color="primary" translucent>
-            {{ numberOfTimers }} timers
+        <IonFabButton color="primary" translucent>
+            {{ timers.length }}
             <IonIcon :icon="timeOutline"/>
         </IonFabButton>
         <IonFabList side="top">
-            <template v-for="(timer, timerKey) in timers" :key="timerKey">
-                <IonFabButton color="primary" @click="resetTimer(timer.key)">
+            <template v-for="timer in timers" :key="timer.key">
+                <IonFabButton color="primary" translucent @click="timerStore.resetTimer(timer.key)">
                     {{ timer.timeAsString }}
-                    <IonIcon :icon="timeOutline"/>
                 </IonFabButton>
             </template>
         </IonFabList>
@@ -24,7 +23,8 @@
 import { IonFab, IonFabButton, IonFabList, IonIcon } from '@ionic/vue';
 import { PropType } from 'vue';
 import { timeOutline } from 'ionicons/icons';
-import useTimer from '@/composables/useTimer.ts';
+import { useTimerStore } from '@/app/storage/timer.ts';
+import { storeToRefs } from 'pinia';
 
 defineProps({
     horizontal: {
@@ -34,7 +34,8 @@ defineProps({
     }
 })
 
-const { timers, resetTimer, numberOfTimers } = useTimer()
+const timerStore = useTimerStore()
+const { timers } = storeToRefs(timerStore)
 </script>
 
 <style scoped>

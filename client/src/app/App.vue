@@ -12,11 +12,10 @@
 import { useRecipeStore } from '@/app/storage';
 import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { prepareThemeColor } from '@/shared';
-import { useSharedStore } from '@/shared/storage';
+import { useLanguage } from '@/composables/useLanguage.ts';
 
-// Initialize the app store
-const store = useSharedStore();
-store.setLanguage();
+// Initialize the language store
+useLanguage();
 
 // Initialize the recipe store
 const recipeStore = useRecipeStore();

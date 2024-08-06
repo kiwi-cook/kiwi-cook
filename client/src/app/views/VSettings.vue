@@ -34,11 +34,13 @@
                             </IonItem>
                         </IonList>
 
-                        <IonNote>
-                            Made in Germany with
-                            <IonIcon :icon="heart" color="favorite"/>
-                            by Josef
-                        </IonNote>
+                        <IonItem lines="none">
+                            <a href="https://github.com/taste-buddy/taste-buddy" rel="noopener noreferrer"
+                               target="_blank">
+                                Made in Germany with
+                                <IonIcon :icon="heart" color="favorite"/>
+                                by Josef</a>
+                        </IonItem>
                     </div>
                 </div>
             </div>
@@ -47,32 +49,23 @@
 </template>
 
 <script lang="ts" setup>
-import {
-    IonButton,
-    IonContent,
-    IonIcon,
-    IonItem,
-    IonList,
-    IonNote,
-    IonPage,
-    IonSelect,
-    IonSelectOption,
-} from '@ionic/vue';
+import { IonButton, IonContent, IonIcon, IonItem, IonList, IonPage, IonSelect, IonSelectOption, } from '@ionic/vue';
 import { SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE } from '@/shared/locales/i18n';
 import { ref, watch } from 'vue';
 import Header from '@/shared/components/utility/header/Header.vue';
 import { heart } from 'ionicons/icons';
-import { useSharedRecipeStore, useSharedStore } from '@/shared/storage';
+import { useSharedRecipeStore } from '@/shared/storage';
+import { useLanguage } from '@/composables/useLanguage.ts';
 
-const sharedStore = useSharedStore();
 const sharedRecipeStore = useSharedRecipeStore();
 
 const resetCache = () => {
     sharedRecipeStore.resetStore();
 };
 
-const locale = ref<SUPPORT_LOCALES_TYPE>(sharedStore.language.lang);
+const language = useLanguage();
+const locale = ref<SUPPORT_LOCALES_TYPE>(language.lang.value);
 watch(locale, (newLocale) => {
-    sharedStore.setLanguage(newLocale);
+    language.setLanguage(newLocale);
 });
 </script>

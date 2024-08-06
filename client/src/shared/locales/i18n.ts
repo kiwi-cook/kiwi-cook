@@ -5,9 +5,7 @@
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue'
 import enUS from '@/shared/locales/en-US.json'
-import { RouteLocationNormalized } from 'vue-router';
 import { logDebug, logWarn } from '@/shared/utils/logging';
-import { useSharedStore } from '@/shared/storage';
 
 export type SUPPORT_LOCALES_TYPE = 'en-US' | 'de' | 'it'
 export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en-US', 'de', 'it']
@@ -145,30 +143,4 @@ export default function getBrowserLocale(): SUPPORT_LOCALES_TYPE | undefined {
         return undefined
     }
     return locale as SUPPORT_LOCALES_TYPE
-}
-
-/**
- * Vue Router middleware to set the language.
- * This middleware is called before each route change.
- *
- * @param to the route to change to. It contains the language in the query parameter "lang"
- */
-export const beforeEachSetLang = async (to: RouteLocationNormalized) => {
-    const paramsLocationQueryValue = to.query.lang
-    const lang: SUPPORT_LOCALES_TYPE = (Array.isArray(paramsLocationQueryValue) ? paramsLocationQueryValue[0] : paramsLocationQueryValue) as SUPPORT_LOCALES_TYPE
-    logDebug("setI18nLangMiddleware', 'set lang:", lang)
-
-    // use locale if paramsLocale is not in SUPPORT_LOCALES
-    if (!SUPPORT_LOCALES.includes(lang)) {
-        return
-    }
-
-    // load locale messages
-    if (!i18n.global.availableLocales.includes(lang)) {
-        await loadLocaleMessages(i18n, lang)
-    }
-
-    // set i18n language via the store
-    const sharedStore = useSharedStore()
-    sharedStore.setLanguage(lang)
 }
