@@ -64,7 +64,6 @@ const decomposedIngredient = computed<CustomItem | undefined>(() => {
     if (ingredient.value instanceof RecipeIngredient) {
         const recipeIngredient = ingredient.value;
         customItem.name = recipeIngredient.ingredient.name;
-        console.log(recipeIngredient.getQuantity());
         customItem.quantity = roundQuantity(recipeIngredient.getQuantity());
         customItem.imgUrl = recipeIngredient.ingredient.imgUrl ?? '';
         customItem.unit = recipeIngredient.unit ?? '';
