@@ -44,6 +44,9 @@ const { ingredient } = toRefs(props);
 type CustomItem = {
     name: MultiLanguageField, quantity: number, unit: string, imgUrl: string, comment?: string
 }
+const roundQuantity = (num: number) => {
+    return Math.round(num * 40) / 40;
+};
 
 const decomposedIngredient = computed<CustomItem | undefined>(() => {
     if (!ingredient.value) {
@@ -61,7 +64,8 @@ const decomposedIngredient = computed<CustomItem | undefined>(() => {
     if (ingredient.value instanceof RecipeIngredient) {
         const recipeIngredient = ingredient.value;
         customItem.name = recipeIngredient.ingredient.name;
-        customItem.quantity = recipeIngredient.getQuantity();
+        console.log(recipeIngredient.getQuantity());
+        customItem.quantity = roundQuantity(recipeIngredient.getQuantity());
         customItem.imgUrl = recipeIngredient.ingredient.imgUrl ?? '';
         customItem.unit = recipeIngredient.unit ?? '';
         customItem.comment = recipeIngredient.comment ?? '';

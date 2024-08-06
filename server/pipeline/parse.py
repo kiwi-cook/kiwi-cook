@@ -20,9 +20,9 @@ from pipeline.pipeline import PipelineElement
 from util.parse import extract_temperature, extract_durations
 
 
-class RecipeScraper(PipelineElement):
+class RecipeParser(PipelineElement):
     def __init__(self, mongo_client):
-        super().__init__("Scraper")
+        super().__init__("Parser")
         self.mongo_client = mongo_client
 
     async def process_task(self, url: str, html: str):
@@ -65,9 +65,11 @@ class RecipeScraper(PipelineElement):
         lang = scraper.language() or "en-US"
         name = MultiLanguageField.new(lang, scraper.title())
         description = MultiLanguageField.new(lang, scraper.description())
-        ingredients = scraper.ingredients()
-        ingredients = self.parse_ingredients(ingredients, lang=lang)
         servings = [int(s) for s in re.findall(r"\b\d+\b", scraper.yields())]
+        ingredients = scraper.ingredients()
+        ingredients = self.parse_ingredients(
+            ingredients, lang=lang, recipe_servings=servings[0]
+        )
 
         instructions = scraper.instructions()
         steps: List[RecipeStep] = self.parse_steps(instructions, lang)
@@ -102,18 +104,20 @@ class RecipeScraper(PipelineElement):
         )
 
     def parse_ingredients(
-        self, ingredients: Union[str, List[str]], lang: str = "en"
+        self, ingredients: Union[str, List[str]], lang: str = "en", recipe_servings=1
     ) -> List[RecipeIngredient]:
         if isinstance(ingredients, str):
             ingredients = [ingredients]
 
         return [
-            self._process_single_ingredient(ingredient, lang=lang)
+            self._process_single_ingredient(
+                ingredient, lang=lang, recipe_servings=recipe_servings
+            )
             for ingredient in ingredients
         ]
 
     def _process_single_ingredient(
-        self, ingredient_name: str, lang: str = "en"
+        self, ingredient_name: str, lang: str = "en", recipe_servings=1
     ) -> RecipeIngredient | None:
         parsed_ingredient = parse_ingredient(ingredient_name)
         if not parsed_ingredient:
@@ -134,7 +138,9 @@ class RecipeScraper(PipelineElement):
         ingredient = self._get_or_create_ingredient(
             ingredient_name=ingredient_name, lang=lang
         )
-        return self._create_recipe_ingredient(ingredient, parsed_ingredient)
+        return self._create_recipe_ingredient(
+            ingredient, parsed_ingredient, recipe_servings=recipe_servings
+        )
 
     def _get_or_create_ingredient(
         self, ingredient_name: str, lang: str = "en"
@@ -166,9 +172,14 @@ class RecipeScraper(PipelineElement):
         return item
 
     def _create_recipe_ingredient(
-        self, ingredient: Ingredient, parsed_ingredient: ParsedIngredient
+        self,
+        ingredient: Ingredient,
+        parsed_ingredient: ParsedIngredient,
+        recipe_servings=1,
     ) -> RecipeIngredient:
-        quantity: float = self._get_quantity(parsed_ingredient)
+        quantity: float = float(
+            (self._get_quantity(parsed_ingredient) or 1) / recipe_servings
+        )
         unit = self._get_unit(parsed_ingredient)
         comment = self._get_comment(parsed_ingredient)
 

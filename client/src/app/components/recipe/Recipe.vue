@@ -183,7 +183,7 @@ const source = computed(() =>
 const servings = ref(recipe?.value?.servings);
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
-        recipe?.value?.setServings(newServings);
+        recipe?.value?.updateServings(newServings);
     }
 });
 

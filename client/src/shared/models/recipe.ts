@@ -20,9 +20,9 @@ export class RecipeIngredient {
 
     constructor(recipeIngredient?: Partial<RecipeIngredient>) {
         this.ingredient = Ingredient.fromJSON(recipeIngredient?.ingredient) ?? Ingredient.empty();
-        this.quantity = recipeIngredient?.quantity ?? 0
+        this.quantity = recipeIngredient?.quantity ?? 1
         this.unit = recipeIngredient?.unit ?? '';
-        this.servings = recipeIngredient?.servings ?? 1;
+        this.servings = 1;
         this.comment = recipeIngredient?.comment;
     }
 
@@ -178,6 +178,7 @@ export class Recipe {
     imageUrl?: string;
     videoUrl?: string;
     servings: number;
+    userServings: number;
     notes?: MultiLanguageField;
 
     constructor(recipe?: Partial<Recipe>) {
@@ -186,7 +187,7 @@ export class Recipe {
         this.description = MultiLanguageField.fromJSON(recipe?.description) ?? MultiLanguageField.new();
         this.ingredients = recipe?.ingredients?.map(RecipeIngredient.fromJSON) ?? [];
         this.steps = recipe?.steps?.map(RecipeStep.fromJSON) ?? [];
-        this.props = recipe?.props ?? { imgUrl: '', duration: 0, date: new Date(), tags: [] };
+        this.props = recipe?.props ?? { tags: [] };
         this.src = recipe?.src ?? { url: '', authors: [] };
         this.deleted = recipe?.deleted ?? false;
         this.duration = recipe?.duration ?? 0;
@@ -199,6 +200,9 @@ export class Recipe {
         this.imageUrl = recipe?.imageUrl;
         this.videoUrl = recipe?.videoUrl;
         this.servings = recipe?.servings ?? 1;
+        this.updateServings(recipe?.servings);
+        this.userServings = recipe?.servings ?? 1;
+        logDebug(MODULE + 'Recipe', recipe?.servings)
         this.notes = recipe?.notes ?? MultiLanguageField.new();
     }
 
@@ -235,6 +239,7 @@ export class Recipe {
             nutrition: json.nutrition,
             imageUrl: json.image_url ?? json.imageUrl,
             videoUrl: json.video_url ?? json.videoUrl,
+            servings: json.servings ?? 1,
         });
     }
 
@@ -299,12 +304,12 @@ export class Recipe {
         return `/recipe/show/${this.getId()}`;
     }
 
-    setServings(servings?: number) {
+    updateServings(servings?: number) {
         if (typeof servings === 'undefined') {
             return;
         }
 
-        this.servings = servings;
+        this.userServings = servings;
         this.ingredients.forEach((item) => {
             item.setServings(servings);
         });
