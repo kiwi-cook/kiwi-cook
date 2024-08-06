@@ -37,13 +37,13 @@ import {
     IonList,
     IonModal,
     IonTitle,
-    IonToolbar
+    IonToolbar,
 } from '@ionic/vue';
 
 import { canBeInstalled, showInstallationPrompt } from '@/app/ts';
 import { APP_NAME } from '@/shared';
 
 const install = () => {
-    showInstallationPrompt()
-}
+    showInstallationPrompt();
+};
 </script>

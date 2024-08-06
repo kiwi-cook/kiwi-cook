@@ -10,7 +10,8 @@
                 v-model:input="fullQuery"
                 @onClose="closeAll"
                 @onFocus="openSearch"
-                @search="search"/>
+                @search="search"
+                @keydown.down="down"/>
             <Transition name="fade-top">
                 <div v-if="(fullQuery !== '' && isSearchFocus) || isResultsOpen" class="searchbar-list-wrapper">
                     <div v-if="filteredResults.length > 0" class="searchbar-list">
@@ -62,7 +63,10 @@ const isSearchFocus = defineModel('focus', {
 
 const emit = defineEmits({
     'search': (value: RecipeSuggestion[]) => value,
+    'down': () => true,
 });
+
+const down = () => emit('down');
 
 const SEARCHBAR_CONFIG = {
     MAX_ITEMS: 3,

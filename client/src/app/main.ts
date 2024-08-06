@@ -6,8 +6,8 @@
 import { IonicVue } from '@ionic/vue';
 
 // Vue + App
-import { createApp } from 'vue'
-import App from '@/app/App.vue'
+import { createApp } from 'vue';
+import App from '@/app/App.vue';
 import { logDebug } from '@/shared/utils/logging';
 
 // Router
@@ -39,10 +39,10 @@ import '@ionic/vue/css/display.css';
 /* Custom variables */
 import '@/shared/theme/colors.css';
 import '@/shared/theme/global.css';
-import '@/shared/theme/ionic.css'
+import '@/shared/theme/ionic.css';
 import '@/shared/theme/layout.css';
 import '@/shared/theme/font.css';
-import '@/shared/theme/transitions.css'
+import '@/shared/theme/transitions.css';
 import '@/shared/theme/links.css';
 
 /* Icons */
@@ -53,21 +53,17 @@ import { i18n } from '@/shared/locales/i18n';
 // Initializations
 
 /* Initialize store */
-const pinia = createPinia()
+const pinia = createPinia();
 
 /* Initialize router */
 const router = createTasteBuddyRouter();
 
 /* Initialize app */
-const app = createApp(App)
-    .use(IonicVue)
-    .use(pinia)
-    .use(router)
-    .use(i18n)
+const app = createApp(App).use(IonicVue).use(pinia).use(router).use(i18n);
 
 /* Configure app */
-app.config.performance = true
-logDebug('main.config', app.config)
+app.config.performance = true;
+logDebug('main.config', app.config);
 
 router.isReady().then(() => {
     app.mount('#tastebuddy');

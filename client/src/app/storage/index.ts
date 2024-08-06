@@ -4,6 +4,4 @@
 
 import { useRecipeStore } from './recipe.ts';
 
-export {
-    useRecipeStore
-}
+export { useRecipeStore };

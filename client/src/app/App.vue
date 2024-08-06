@@ -15,15 +15,15 @@ import { prepareThemeColor } from '@/shared';
 import { useSharedStore } from '@/shared/storage';
 
 // Initialize the app store
-const store = useSharedStore()
-store.setLanguage()
+const store = useSharedStore();
+store.setLanguage();
 
 // Initialize the recipe store
 const recipeStore = useRecipeStore();
 setTimeout(() => {
-    recipeStore.prepareStore()
-}, 0)
+    recipeStore.prepareStore();
+}, 0);
 
 // Initialize the dark theme
-prepareThemeColor()
+prepareThemeColor();
 </script>

@@ -6,9 +6,12 @@
     <div class="recipe-step-wrapper">
         <template v-if="step.type === STEP_TYPES.STEP">
             <h4 v-if="stepIndex >= 0" class="recipe-step-index">
-                <span class="recipe-step-index-step">{{ $t('Recipe.Step') }} {{ stepIndex + 1 }}</span>
-                <span v-if="amountSteps > 0"
-                      class="recipe-step-index-max"> / {{ amountSteps }}</span>
+                <span class="recipe-step-index-step"
+                >{{ $t("Recipe.Step") }} {{ stepIndex + 1 }}</span
+                >
+                <span v-if="amountSteps > 0" class="recipe-step-index-max">
+                    / {{ amountSteps }}</span
+                >
             </h4>
         </template>
         <template v-else-if="step.type === STEP_TYPES.HEADER">
@@ -19,13 +22,21 @@
         <IonCard v-if="!noContent">
             <IonImg v-if="step?.imgUrl" :src="step.imgUrl"/>
             <IonCardContent>
-                <Duration :duration="step?.duration" :timer-key="recipeId" @click="startTimer"/>
+                <Duration
+                    :duration="step?.duration"
+                    :timer-key="recipeId"
+                    @click="startTimer"
+                />
                 <Temperature :temperature="step?.temperature"/>
                 <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
-                    <ItemList :items="recipeItems" horizontal quantity-position="start"/>
-                </IonItem> -->
+                            <ItemList :items="recipeItems" horizontal quantity-position="start"/>
+                        </IonItem> -->
                 <!-- Show the description here of the step if it is not a header -->
-                <IonItem v-if="step.type !== STEP_TYPES.HEADER" class="recipe-step-desc" lines="none">
+                <IonItem
+                    v-if="step.type !== STEP_TYPES.HEADER"
+                    class="recipe-step-desc"
+                    lines="none"
+                >
                     <div v-html="step?.descriptionToHtml('item-highlight')"/>
                 </IonItem>
             </IonCardContent>
@@ -43,21 +54,33 @@ import Duration from '@/shared/components/time/Duration.vue';
 
 const props = defineProps({
     step: {
-        type: Object as PropType<RecipeStep>, required: true
-    }, stepIndex: {
-        type: Number, required: false, default: -1
-    }, amountSteps: {
-        type: Number, required: false, default: -1
-    }, recipeId: {
-        type: String, required: false
-    }, noContent: {
-        type: Boolean, required: false, default: false
-    }
-})
+        type: Object as PropType<RecipeStep>,
+        required: true,
+    },
+    stepIndex: {
+        type: Number,
+        required: false,
+        default: -1,
+    },
+    amountSteps: {
+        type: Number,
+        required: false,
+        default: -1,
+    },
+    recipeId: {
+        type: String,
+        required: false,
+    },
+    noContent: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+});
 
-const { step, recipeId } = toRefs(props)
+const { step, recipeId } = toRefs(props);
 
-const { startTimer } = useTimer()
+const { startTimer } = useTimer();
 </script>
 
 <style>

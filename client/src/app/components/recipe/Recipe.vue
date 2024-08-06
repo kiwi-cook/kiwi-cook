@@ -7,16 +7,29 @@
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
                 <!-- Title -->
-                <RecipeTitle :recipe="recipe" :title="t('Recipe.LetsCook')" disable-link/>
+                <RecipeTitle
+                    :recipe="recipe"
+                    :title="t('Recipe.LetsCook')"
+                    disable-link
+                />
                 <!-- Save and Share -->
                 <IonButtons>
-                    <IonButton v-if="canShareRecipe" aria-valuetext="Share Recipe"
-                               @click="shareRecipe()">
+                    <IonButton
+                        v-if="canShareRecipe"
+                        aria-valuetext="Share Recipe"
+                        @click="shareRecipe()"
+                    >
                         <IonIcon :icon="shareSocial"/>
                     </IonButton>
-                    <IonButton aria-valuetext="Like Recipe" color="favorite" @click="toggleSave()">
-                        <IonIcon :color="isSaved ?? false ? 'favorite' : undefined "
-                                 :icon="isSaved ?? false ? heart: heartOutline"/>
+                    <IonButton
+                        aria-valuetext="Like Recipe"
+                        color="favorite"
+                        @click="toggleSave()"
+                    >
+                        <IonIcon
+                            :color="isSaved ?? false ? 'favorite' : undefined"
+                            :icon="isSaved ?? false ? heart : heartOutline"
+                        />
                     </IonButton>
                     <IonButton aria-valuetext="Start Cooking" color="primary">
                         <IonIcon :icon="play"/>
@@ -34,7 +47,13 @@
                 </IonText>
             </div>
             <div v-if="recipe?.imageUrl" class="recipe-image-wrapper">
-                <IonImg :src="recipe?.imageUrl" alt="Header Image" class="recipe-image" loading="lazy" part="image"/>
+                <IonImg
+                    :src="recipe?.imageUrl"
+                    alt="Header Image"
+                    class="recipe-image"
+                    loading="lazy"
+                    part="image"
+                />
             </div>
         </div>
 
@@ -45,14 +64,24 @@
                 <div class="sticky">
                     <div class="header">
                         <!-- Show the amount of ingredients -->
-                        <h2>{{ ingredients.length }} {{ $t('Recipe.Ingredient', ingredients.length) }}</h2>
+                        <h2>
+                            {{ ingredients.length }}
+                            {{ $t("Recipe.Ingredient", ingredients.length) }}
+                        </h2>
                     </div>
                     <IonCard v-if="ingredients.length > 0">
                         <IonCardContent>
-                            <IonRange v-model="servings" :label="`${servings} ${$t('Recipe.Serving', servings)}`"
-                                      :max="10" :min="1"
-                                      :step="1" color="secondary"
-                                      label-placement="start" pin snaps/>
+                            <IonRange
+                                v-model="servings"
+                                :label="`${servings} ${$t('Recipe.Serving', servings)}`"
+                                :max="10"
+                                :min="1"
+                                :step="1"
+                                color="secondary"
+                                label-placement="start"
+                                pin
+                                snaps
+                            />
                             <!-- Show the ingredients -->
                             <IngredientList :ingredients="ingredients"/>
                         </IonCardContent>
@@ -65,20 +94,28 @@
             <template #right>
                 <div class="header">
                     <!-- Show the amount of steps -->
-                    <h2>{{ $t('Recipe.Preparation') }}
-                    </h2>
+                    <h2>{{ $t("Recipe.Preparation") }}</h2>
                     <!-- ... and the duration -->
                     <Duration :duration="recipe?.getDuration()"/>
                 </div>
                 <!-- Steps -->
                 <div class="steps-container">
                     <template v-for="(step, stepIndex) in [...steps]" :key="stepIndex">
-                        <StepComponent :amount-steps="steps.length" :recipe-id="recipe?.getId()" :step="step"
-                                       :step-index="stepIndex" class="step"/>
+                        <StepComponent
+                            :amount-steps="steps.length"
+                            :recipe-id="recipe?.getId()"
+                            :step="step"
+                            :step-index="stepIndex"
+                            class="step"
+                        />
                     </template>
                     <!-- Good Appetite -->
                     <!-- If there are no steps, don't show the good appetite step -->
-                    <StepComponent v-if="steps.length > 0" :step="goodAppetiteStep" no-content/>
+                    <StepComponent
+                        v-if="steps.length > 0"
+                        :step="goodAppetiteStep"
+                        no-content
+                    />
                 </div>
             </template>
         </TwoColumnLayout>
@@ -107,7 +144,7 @@ import {
     IonRange,
     IonText,
 } from '@ionic/vue';
-import { IngredientList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES } from '@/shared';
+import { IngredientList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES, } from '@/shared';
 import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
 import { CanShareResult, Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
@@ -119,24 +156,31 @@ import Duration from '@/shared/components/time/Duration.vue';
 /* Recipe */
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>, required: true,
+        type: Object as PropType<Recipe>,
+        required: true,
     },
 });
 const { recipe } = toRefs(props);
 const authors = computed(() => recipe?.value?.getAuthors() ?? '');
 const recipeStore = useRecipeStore();
 const { savedRecipeIds } = storeToRefs(recipeStore);
-const isSaved = computed(() => savedRecipeIds.value.includes(recipe?.value?.getId()));
+const isSaved = computed(() =>
+    savedRecipeIds.value.includes(recipe?.value?.getId())
+);
 const toggleSave = () => recipeStore.setSaved(recipe?.value);
 
-const ingredients = computed<RecipeIngredient[]>(() => recipe?.value?.ingredients ?? []);
-const steps = computed<RecipeStep[]>(() => recipe?.value?.steps ?? [])
+const ingredients = computed<RecipeIngredient[]>(
+    () => recipe?.value?.ingredients ?? []
+);
+const steps = computed<RecipeStep[]>(() => recipe?.value?.steps ?? []);
 
 // Source
-const source = computed(() => recipeBy(authors.value, recipe?.value?.src?.url ?? ''))
+const source = computed(() =>
+    recipeBy(authors.value, recipe?.value?.src?.url ?? '')
+);
 
 // Servings
-const servings = ref(recipe?.value?.servings)
+const servings = ref(recipe?.value?.servings);
 watch(servings, (newServings, oldServings) => {
     if (newServings !== oldServings) {
         recipe?.value?.setServings(newServings);
@@ -144,12 +188,12 @@ watch(servings, (newServings, oldServings) => {
 });
 
 // i18n
-const { t } = useI18n()
+const { t } = useI18n();
 
 // Good Appetite Step
 const goodAppetiteStep = RecipeStep.empty();
-goodAppetiteStep.type = STEP_TYPES.HEADER
-goodAppetiteStep.setDescription(t('Recipe.GoodAppetite'))
+goodAppetiteStep.type = STEP_TYPES.HEADER;
+goodAppetiteStep.setDescription(t('Recipe.GoodAppetite'));
 
 /* Share */
 const shareRecipe = () => recipe?.value?.share();
@@ -157,9 +201,8 @@ const shareRecipe = () => recipe?.value?.share();
 const canShareRecipe = ref(false);
 Share.canShare().then((canShareResult: CanShareResult) => {
     canShareRecipe.value = canShareResult.value;
-})
+});
 </script>
-
 
 <style scoped>
 .recipe-wrapper {

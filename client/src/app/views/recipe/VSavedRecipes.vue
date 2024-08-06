@@ -8,23 +8,24 @@
             <div class="content-wrapper">
                 <div class="content">
                     <div class="content-margin">
-                        <Header :big-text="$t('Favorites.Title').split(';')"
-                                :small-text="savedRecipes.length + ' ' + $t('General.Recipe', savedRecipes.length)"/>
+                        <Header
+                            :big-text="$t('Favorites.Title').split(';')"
+                            :small-text="
+                                savedRecipes.length +
+                                    ' ' +
+                                    $t('General.Recipe', savedRecipes.length)
+                            "
+                        />
                     </div>
-
 
                     <div class="content-margin">
                         <template v-if="savedRecipes.length > 0">
                             <IonItem>
-                                <IonButton @click="removeSavedRecipes">
-                                    Remove all
-                                </IonButton>
+                                <IonButton @click="removeSavedRecipes"> Remove all</IonButton>
                             </IonItem>
 
                             <IonItem>
-                                <h2 class="ion-text-center">
-                                    Stats of saved recipes
-                                </h2>
+                                <h2 class="ion-text-center">Stats of saved recipes</h2>
                             </IonItem>
                             <IonItem>
                                 <table>
@@ -48,7 +49,7 @@
                         <template v-else>
                             <TasteBuddyLogo size="small"/>
                             <h2 class="ion-text-center">
-                                {{ $t('Favorites.NoRecipesSaved') }}
+                                {{ $t("Favorites.NoRecipesSaved") }}
                             </h2>
                         </template>
                     </div>
@@ -71,24 +72,33 @@ import List from '@/shared/components/utility/list/List.vue';
 import { average } from '@/app/search/util';
 import { storeToRefs } from 'pinia';
 
-const recipeStore = useRecipeStore()
-const { savedRecipes, savedRecipeStats } = storeToRefs(recipeStore)
+const recipeStore = useRecipeStore();
+const { savedRecipes, savedRecipeStats } = storeToRefs(recipeStore);
 
-const stats = computed<{
-    desc: string, value: string | number
-}[]>(() => {
-    const formattedStats = []
+const stats = computed<
+    {
+        desc: string;
+        value: string | number;
+    }[]
+>(() => {
+    const formattedStats = [];
     formattedStats.push({
         desc: 'Average amount of ingredients',
-        value: average(savedRecipeStats.value.numberOfIngredients)
-    })
+        value: average(savedRecipeStats.value.numberOfIngredients),
+    });
     // formattedStats.set('Amount Items', [...stats.itemsIds.values()].map((id: string) => items.value[id]))
-    formattedStats.push({ desc: 'Average amount of steps', value: average(savedRecipeStats.value.numberOfSteps) })
-    formattedStats.push({ desc: 'Average duration', value: `${average(savedRecipeStats.value.duration)} min.` })
-    return formattedStats
-})
+    formattedStats.push({
+        desc: 'Average amount of steps',
+        value: average(savedRecipeStats.value.numberOfSteps),
+    });
+    formattedStats.push({
+        desc: 'Average duration',
+        value: `${average(savedRecipeStats.value.duration)} min.`,
+    });
+    return formattedStats;
+});
 
-const removeSavedRecipes = () => recipeStore.setSavedRecipes([])
+const removeSavedRecipes = () => recipeStore.setSavedRecipes([]);
 </script>
 
 <style scoped>
@@ -104,7 +114,8 @@ table {
 }
 
 /* Add some padding and styling to the table headers */
-th, td {
+th,
+td {
     padding: 12px 15px;
     text-align: left;
 }
@@ -116,7 +127,7 @@ th {
 }
 
 tr {
-    transition: all .2s ease-in-out;
+    transition: all 0.2s ease-in-out;
 }
 
 /* Add some hover effect for better interactivity */
@@ -148,9 +159,9 @@ td {
         white-space: nowrap;
     }
 
-    th, td {
+    th,
+    td {
         min-width: 150px;
     }
 }
-
 </style>

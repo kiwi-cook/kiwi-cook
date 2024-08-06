@@ -8,8 +8,11 @@
             <div class="content-wrapper">
                 <div class="content h100">
                     <div class="vertical-center">
-                        <HeaderTyped :big-text="welcomeText" :speed="30"
-                                     @finish="finished = true"/>
+                        <HeaderTyped
+                            :big-text="welcomeText"
+                            :speed="30"
+                            @finish="finished = true"
+                        />
                     </div>
                 </div>
             </div>
@@ -26,27 +29,32 @@ import { useI18n } from 'vue-i18n';
 import { APP_NAME } from '@/shared';
 import { useSharedStore } from '@/shared/storage';
 
-const { t } = useI18n()
-const welcomeText = computed(() => t('General.WelcomeText', { appName: APP_NAME }).split(';'))
+const { t } = useI18n();
+const welcomeText = computed(() =>
+    t('General.WelcomeText', { appName: APP_NAME }).split(';')
+);
 
+const finished = ref(false);
+const route = useRoute();
+const redirect = computed(() => (route.query.redirect ?? '') as string);
 
-const finished = ref(false)
-const route = useRoute()
-const redirect = computed(() => (route.query.redirect ?? '') as string)
-
-const recipeStore = useSharedStore()
-const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial)
-const timeout = ref(0)
-const router = useIonRouter()
-watch([isLoadingInitialData, finished], () => {
-    if (!isLoadingInitialData.value && finished.value) {
-        timeout.value = setTimeout(() => {
-            router.replace(redirect.value)
-        }, 1000)
-    }
-}, { immediate: true })
+const recipeStore = useSharedStore();
+const isLoadingInitialData = computed(() => recipeStore.isLoadingInitial);
+const timeout = ref(0);
+const router = useIonRouter();
+watch(
+    [isLoadingInitialData, finished],
+    () => {
+        if (!isLoadingInitialData.value && finished.value) {
+            timeout.value = setTimeout(() => {
+                router.replace(redirect.value);
+            }, 1000);
+        }
+    },
+    { immediate: true }
+);
 
 onUnmounted(() => {
-    clearTimeout(timeout.value)
-})
+    clearTimeout(timeout.value);
+});
 </script>

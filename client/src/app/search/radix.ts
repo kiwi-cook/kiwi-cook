@@ -4,7 +4,7 @@
 
 import { logDebug, logWarn } from '@/shared/utils/logging';
 
-const MODULE = 'shared.utils.radix.'
+const MODULE = 'shared.utils.radix.';
 
 class PrefixIdTreeNode {
     leaves: { [char: string]: PrefixIdTreeNode };
@@ -56,7 +56,6 @@ class PrefixIdTreeNode {
 }
 
 export class PrefixIdTree {
-
     rootNode: PrefixIdTreeNode;
 
     constructor() {
@@ -71,7 +70,10 @@ export class PrefixIdTree {
      */
     insert(word: string, id: string) {
         let node = this.rootNode;
-        const normalizedWord = word.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '')
+        const normalizedWord = word
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s]/g, '');
         for (let i = 0; i < normalizedWord.length; i++) {
             const currentChar = normalizedWord.charAt(i);
             if (!node.containsKey(currentChar)) {
@@ -92,7 +94,7 @@ export class PrefixIdTree {
      * @return {string[]}
      */
     search(query: string): string[] {
-        const fName = MODULE + this.search.name
+        const fName = MODULE + this.search.name;
         if (!query || query.length === 0) {
             logWarn(fName, 'query is empty');
             return [];

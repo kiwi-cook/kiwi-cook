@@ -16,7 +16,7 @@
         </h4>
         <slot name="content">
             <HorizontalList :list="recipes">
-                <template #element="{ element }: { element: Recipe}">
+                <template #element="{ element }: { element: Recipe }">
                     <MiniRecipePreview :key="element.id" :recipe="element"/>
                 </template>
             </HorizontalList>
@@ -33,6 +33,6 @@ import { PropType } from 'vue';
 const props = defineProps({
     title: { type: String, required: false },
     subtitle: { type: String, required: false },
-    recipes: { type: Array as PropType<Recipe[]>, required: false }
+    recipes: { type: Array as PropType<Recipe[]>, required: false },
 });
 </script>

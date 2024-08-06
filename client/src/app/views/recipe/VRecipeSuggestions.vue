@@ -8,52 +8,63 @@
             <div class="content-wrapper">
                 <div class="content">
                     <div class="content-margin">
-                        <Header :big-text="$t('Suggestions.Title').split(';')"
-                                :small-text="$t('Suggestions.Subtitle')"/>
+                        <Header
+                            :big-text="$t('Suggestions.Title').split(';')"
+                            :small-text="$t('Suggestions.Subtitle')"
+                        />
                     </div>
 
                     <div class="sticky-header">
                         <div class="content-margin">
                             <!-- Searchbar for ingredients, tools, recipes and tags -->
-                            <SmartSearchbar v-model:focus="searchbarOpen" class="searchbar" @search="search($event)"/>
+                            <SmartSearchbar
+                                v-model:focus="searchbarOpen"
+                                class="searchbar"
+                                @search="search($event)"
+                            />
                         </div>
                     </div>
 
-
                     <div class="content-margin">
                         <article>
-                            <BigRecipePreview v-if="recipeOfTheDay" :recipe="recipeOfTheDay"
-                                              :title="t('RecipeOfTheDay.Title')"/>
+                            <BigRecipePreview
+                                v-if="recipeOfTheDay"
+                                :recipe="recipeOfTheDay"
+                                :title="t('RecipeOfTheDay.Title')"
+                            />
                         </article>
 
                         <!-- Predicted/Recommended recipes -->
                         <RecipeSuggestionSection :recipes="recipePredictions">
                             <template #title>
                                 {{ recipePredictions.length }}
-                                {{ $t('Suggestions.Recommendations.Title', recipePredictions.length) }}
+                                {{
+                                    $t(
+                                        "Suggestions.Recommendations.Title",
+                                        recipePredictions.length
+                                    )
+                                }}
                             </template>
                             <template #subtitle>
-                                {{ $t('Suggestions.Recommendations.Subtitle') }}
+                                {{ $t("Suggestions.Recommendations.Subtitle") }}
                             </template>
                         </RecipeSuggestionSection>
 
                         <!-- Under 20 minutes recipes -->
-                        <RecipeSuggestionSection :recipes="recipes.filter(r => r.getDuration() <= 20)">
-                            <template #title>
-                                Got 20 minutes?
-                            </template>
-                            <template #subtitle>
-                                Let's cook something quick!
-                            </template>
+                        <RecipeSuggestionSection
+                            :recipes="recipes.filter((r) => r.getDuration() <= 20)"
+                        >
+                            <template #title> Got 20 minutes?</template>
+                            <template #subtitle> Let's cook something quick!</template>
                         </RecipeSuggestionSection>
 
                         <!-- Random recipes -->
                         <RecipeSuggestionSection :recipes="randomRecipes">
                             <template #title>
-                                {{ $t('Suggestions.Random.Title') }}
+                                {{ $t("Suggestions.Random.Title") }}
                             </template>
                             <template #subtitle>
-                                {{ $t('Suggestions.Random.Subtitle') }}
+                                {{ $t("Suggestions.Random.Subtitle") }}
                             </template>
                         </RecipeSuggestionSection>
 
@@ -62,20 +73,25 @@
                         <section v-if="submitted">
                             <div v-if="searchedRecipes.length > 0">
                                 <h3>
-                                    {{ $t('Suggestions.Search.Title', [searchedRecipes.length]) }}
+                                    {{ $t("Suggestions.Search.Title", [searchedRecipes.length]) }}
                                 </h3>
                                 <h4 class="subheader">
-                                    {{ $t('Suggestions.Search.Subtitle') }}
+                                    {{ $t("Suggestions.Search.Subtitle") }}
                                 </h4>
                                 <HorizontalList :list="searchedRecipes">
-                                    <template #element="{ element }: { element: RecipeSuggestion}">
-                                        <RecipePreview :key="element.recipe.getId()" :recipe="element"/>
+                                    <template
+                                        #element="{ element }: { element: RecipeSuggestion }"
+                                    >
+                                        <RecipePreview
+                                            :key="element.recipe.getId()"
+                                            :recipe="element"
+                                        />
                                     </template>
                                 </HorizontalList>
                             </div>
                             <div v-else>
                                 <h3>
-                                    {{ $t('Suggestions.Search.NoRecipesFound') }}
+                                    {{ $t("Suggestions.Search.NoRecipesFound") }}
                                 </h3>
                             </div>
                         </section>
@@ -87,10 +103,18 @@
             <FabTimer/>
             <IonFab slot="fixed" horizontal="end" vertical="bottom">
                 <!-- Open and close search -->
-                <IonFabButton v-if="!searchbarOpen" class="search-button search" @click="openSearchbar()">
+                <IonFabButton
+                    v-if="!searchbarOpen"
+                    class="search-button search"
+                    @click="openSearchbar()"
+                >
                     <IonIcon :icon="searchOutline"/>
                 </IonFabButton>
-                <IonFabButton v-else class="search-button close" @click="searchbarOpen = false">
+                <IonFabButton
+                    v-else
+                    class="search-button close"
+                    @click="searchbarOpen = false"
+                >
                     <IonIcon :icon="closeOutline"/>
                 </IonFabButton>
             </IonFab>
@@ -115,38 +139,43 @@ import { storeToRefs } from 'pinia';
 import FabTimer from '@/shared/components/time/FabTimer.vue';
 import RecipeSuggestionSection from '@/app/components/recipe/RecipeSuggestionSection.vue';
 
-const { t } = useI18n()
-const recipeStore = useRecipeStore()
-const { recipeOfTheDay, recipes, recipePredictions } = storeToRefs(recipeStore)
+const { t } = useI18n();
+const recipeStore = useRecipeStore();
+const { recipeOfTheDay, recipes, recipePredictions } = storeToRefs(recipeStore);
 
 const SUGGESTION_CONFIG = {
-    maxRandomRecipes: 15, maxPredictedRecipes: 15,
-}
+    maxRandomRecipes: 15,
+    maxPredictedRecipes: 15,
+};
 
 /* Random recipes */
 const randomRecipes = computed<Recipe[]>(() => {
     return [...recipes.value]
         .filter(() => Math.random() < 1 / (recipes.value.length * 0.1))
         .slice(0, SUGGESTION_CONFIG.maxRandomRecipes)
-        .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration())
-})
+        .toSorted((a: Recipe, b: Recipe) => a.getDuration() - b.getDuration());
+});
 
 /* Submit button */
-const recipeSearchAnchor = ref<HTMLAnchorElement | null>(null)
-const submitted = ref(false)
-const searchedRecipes = ref<RecipeSuggestion[]>([])
-const searchbarOpen = ref(false)
+const recipeSearchAnchor = ref<HTMLAnchorElement | null>(null);
+const submitted = ref(false);
+const searchedRecipes = ref<RecipeSuggestion[]>([]);
+const searchbarOpen = ref(false);
 const openSearchbar = () => {
-    searchbarOpen.value = true
-}
+    searchbarOpen.value = true;
+};
 const search = (result: RecipeSuggestion[]) => {
     // suggest recipes
-    submitted.value = true
-    searchedRecipes.value = result
+    submitted.value = true;
+    searchedRecipes.value = result;
     setTimeout(() => {
-        recipeSearchAnchor.value?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
-    }, 50)
-}
+        recipeSearchAnchor.value?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'nearest',
+        });
+    }, 50);
+};
 </script>
 
 <style scoped>
@@ -214,19 +243,19 @@ section {
 
 @keyframes liquidGradient {
     0% {
-        background-position: 0 50%
+        background-position: 0 50%;
     }
     25% {
-        background-position: 50% 75%
+        background-position: 50% 75%;
     }
     50% {
-        background-position: 100% 100%
+        background-position: 100% 100%;
     }
     75% {
-        background-position: 50% 75%
+        background-position: 50% 75%;
     }
     100% {
-        background-position: 0 50%
+        background-position: 0 50%;
     }
 }
 
@@ -250,10 +279,8 @@ section {
     background-size: 400% 400%; /* Increase background size for the gradient animation */
 
     /* Animations */
-    transition: background 3s ease-in-out,
-    transform ease-in-out 300ms,
-    box-shadow ease-in-out 300ms,
-    scale ease-in-out 300ms;
+    transition: background 3s ease-in-out, transform ease-in-out 300ms,
+    box-shadow ease-in-out 300ms, scale ease-in-out 300ms;
 }
 
 .search-button.search::part(native) {
@@ -273,7 +300,8 @@ section {
     linear-gradient(135deg, #ffc718, #ff0000, #c362b5, #6ab1e1);
 }
 
-.search-button::part(native):hover, .search-button::part(native):active {
+.search-button::part(native):hover,
+.search-button::part(native):active {
     /* Hover effects */
     box-shadow: 0 30px 20px -15px rgba(0, 0, 0, 0.2);
     text-shadow: none;

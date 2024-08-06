@@ -12,8 +12,16 @@
 
                         <IonList class="ion-no-padding" lines="none">
                             <IonItem>
-                                <IonSelect v-model="locale" label="Set Language" label-placement="floating">
-                                    <IonSelectOption v-for="locale in SUPPORT_LOCALES" :key="locale" :value="locale">
+                                <IonSelect
+                                    v-model="locale"
+                                    label="Set Language"
+                                    label-placement="floating"
+                                >
+                                    <IonSelectOption
+                                        v-for="locale in SUPPORT_LOCALES"
+                                        :key="locale"
+                                        :value="locale"
+                                    >
                                         {{ $t(`Locale.${locale}`) }}
                                     </IonSelectOption>
                                 </IonSelect>
@@ -21,7 +29,7 @@
 
                             <IonItem>
                                 <IonButton color="danger" @click="resetCache">
-                                    {{ $t('Settings.Reset.ResetCache') }}
+                                    {{ $t("Settings.Reset.ResetCache") }}
                                 </IonButton>
                             </IonItem>
                         </IonList>
@@ -48,7 +56,7 @@ import {
     IonNote,
     IonPage,
     IonSelect,
-    IonSelectOption
+    IonSelectOption,
 } from '@ionic/vue';
 import { SUPPORT_LOCALES, SUPPORT_LOCALES_TYPE } from '@/shared/locales/i18n';
 import { ref, watch } from 'vue';

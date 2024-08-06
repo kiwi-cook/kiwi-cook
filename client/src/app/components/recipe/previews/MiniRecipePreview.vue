@@ -3,11 +3,21 @@
   -->
 
 <template>
-    <div v-if="decomposedRecipe" class="mini-recipe-preview-container" @click="routeToRecipe()">
-        <img :alt="`Preview Image of ${decomposedRecipe?.getName()}`" :src="decomposedRecipe?.imageUrl"
-             class="mini-recipe-preview-image"/>
+    <div
+        v-if="decomposedRecipe"
+        class="mini-recipe-preview-container"
+        @click="routeToRecipe()"
+    >
+        <img
+            :alt="`Preview Image of ${decomposedRecipe?.getName()}`"
+            :src="decomposedRecipe?.imageUrl"
+            class="mini-recipe-preview-image"
+        />
         <div class="mini-recipe-tags">
-            <Duration :duration="decomposedRecipe?.getDuration()" class="mini-recipe-tag"/>
+            <Duration
+                :duration="decomposedRecipe?.getDuration()"
+                class="mini-recipe-tag"
+            />
         </div>
         <h3 class="mini-recipe-preview-title">{{ decomposedRecipe?.getName() }}</h3>
     </div>
@@ -23,9 +33,9 @@ import Duration from '@/shared/components/time/Duration.vue';
 const props = defineProps({
     recipe: {
         type: Object as PropType<RecipeSuggestion | Recipe>,
-        required: true
-    }
-})
+        required: true,
+    },
+});
 
 const { recipe } = toRefs(props);
 const decomposedRecipe = computed<Recipe | undefined>(() => {
@@ -40,8 +50,10 @@ const decomposedRecipe = computed<Recipe | undefined>(() => {
     }
 });
 const router = useIonRouter();
-const recipeRoute = computed<string>(() => decomposedRecipe?.value?.getRoute() ?? '')
-const routeToRecipe = () => router.push(recipeRoute?.value)
+const recipeRoute = computed<string>(
+    () => decomposedRecipe?.value?.getRoute() ?? ''
+);
+const routeToRecipe = () => router.push(recipeRoute?.value);
 </script>
 
 <style>
@@ -79,7 +91,7 @@ const routeToRecipe = () => router.push(recipeRoute?.value)
 
 .mini-recipe-preview-image:hover {
     box-shadow: var(--box-shadow-hover) !important;
-    transform: var(--scale)
+    transform: var(--scale);
 }
 
 .mini-recipe-preview-title {

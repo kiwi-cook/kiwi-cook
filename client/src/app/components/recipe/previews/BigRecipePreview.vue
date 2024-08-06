@@ -8,15 +8,22 @@
             <TwoColumnLayout layout="rightBigger">
                 <template #left>
                     <div class="big-recipe-image">
-                        <img v-if="recipe" :alt="recipe?.getName()"
-                             :src="recipe?.imageUrl" class="link"
-                             loading="lazy" @click="routeToRecipe()"/>
+                        <img
+                            v-if="recipe"
+                            :alt="recipe?.getName()"
+                            :src="recipe?.imageUrl"
+                            class="link"
+                            loading="lazy"
+                            @click="routeToRecipe()"
+                        />
                     </div>
                 </template>
                 <template #right>
                     <div v-if="recipe" class="recipe-details">
                         <RecipeTitle :recipe="recipe" :title="title"/>
-                        <p class="recipe-description desc">{{ recipe?.getShortDescription() }}</p>
+                        <p class="recipe-description desc">
+                            {{ recipe?.getShortDescription() }}
+                        </p>
                     </div>
                 </template>
             </TwoColumnLayout>
@@ -33,16 +40,19 @@ import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>, required: true
-    }, title: {
-        type: String, required: false
-    }
-})
+        type: Object as PropType<Recipe>,
+        required: true,
+    },
+    title: {
+        type: String,
+        required: false,
+    },
+});
 
-const { recipe } = toRefs(props)
+const { recipe } = toRefs(props);
 const router = useIonRouter();
-const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
-const routeToRecipe = () => router.push(recipeRoute?.value)
+const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '');
+const routeToRecipe = () => router.push(recipeRoute?.value);
 </script>
 
 <style scoped>

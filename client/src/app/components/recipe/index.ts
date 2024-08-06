@@ -9,5 +9,9 @@ import MiniRecipePreview from '@/app/components/recipe/previews/MiniRecipePrevie
 import RecipePreview from '@/app/components/recipe/previews/RecipePreview.vue';
 
 export {
-    Step as StepComponent, RecipeTitle, BigRecipePreview, MiniRecipePreview, RecipePreview
+    Step as StepComponent,
+    RecipeTitle,
+    BigRecipePreview,
+    MiniRecipePreview,
+    RecipePreview,
 };

@@ -8,13 +8,21 @@
             {{ title }}
         </h3>
         <h2 class="recipe-title">
-            <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute">{{ recipe?.getName() }}</RouterLink>
+            <RouterLink :class="{ disabled: disableLink }" :to="recipeRoute"
+            >{{ recipe?.getName() }}
+            </RouterLink>
         </h2>
         <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-            <strong>{{ $t('Recipe.Src.By') }} <a :href="recipe?.src?.url" class="recipe-author-link" rel="nofollow"
-                                                 target="_blank">{{
-                                                     recipe?.getAuthors()
-                                                 }}</a></strong>
+            <strong
+            >{{ $t("Recipe.Src.By") }}
+                <a
+                    :href="recipe?.src?.url"
+                    class="recipe-author-link"
+                    rel="nofollow"
+                    target="_blank"
+                >{{ recipe?.getAuthors() }}</a
+                ></strong
+            >
         </div>
     </div>
 </template>
@@ -25,16 +33,22 @@ import { Recipe } from '@/shared';
 
 const props = defineProps({
     recipe: {
-        type: Object as PropType<Recipe>, required: true
-    }, title: {
-        type: String, required: false
-    }, disableLink: {
-        type: Boolean, required: false, default: false
-    }
-})
+        type: Object as PropType<Recipe>,
+        required: true,
+    },
+    title: {
+        type: String,
+        required: false,
+    },
+    disableLink: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+});
 
-const { recipe } = toRefs(props)
-const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
+const { recipe } = toRefs(props);
+const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '');
 </script>
 
 <style scoped>
@@ -44,7 +58,6 @@ const recipeRoute = computed<string>(() => recipe?.value?.getRoute() ?? '')
     padding: 0;
     box-sizing: border-box;
 }
-
 
 a {
     color: var(--ion-text-color);
