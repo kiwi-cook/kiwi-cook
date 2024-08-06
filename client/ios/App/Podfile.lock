@@ -1,23 +1,20 @@
 PODS:
-  - Capacitor (5.0.4):
+  - Capacitor (6.1.1):
     - CapacitorCordova
-  - CapacitorApp (5.0.2):
+  - CapacitorApp (6.0.0):
     - Capacitor
-  - CapacitorCordova (5.0.4)
-  - CapacitorHaptics (5.0.2):
+  - CapacitorCordova (6.1.1)
+  - CapacitorKeyboard (6.0.1):
     - Capacitor
-  - CapacitorKeyboard (5.0.2):
+  - CapacitorShare (6.0.1):
     - Capacitor
-  - CapacitorShare (5.0.2):
-    - Capacitor
-  - CapacitorStatusBar (5.0.2):
+  - CapacitorStatusBar (6.0.0):
     - Capacitor
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
-  - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CapacitorKeyboard (from `../../node_modules/@capacitor/keyboard`)"
   - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
   - "CapacitorStatusBar (from `../../node_modules/@capacitor/status-bar`)"
@@ -29,8 +26,6 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/app"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
-  CapacitorHaptics:
-    :path: "../../node_modules/@capacitor/haptics"
   CapacitorKeyboard:
     :path: "../../node_modules/@capacitor/keyboard"
   CapacitorShare:
@@ -39,14 +34,13 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/@capacitor/status-bar"
 
 SPEC CHECKSUMS:
-  Capacitor: d3d4463573438b9fa65326d1f3549da6f4c21634
-  CapacitorApp: 28fef1fd75b2b3686e875216806fb8416d421097
-  CapacitorCordova: b1fe6bf1f36974a8e4a9044b342d22d49c0996d6
-  CapacitorHaptics: 864585542a435bd41eaabf7f30d9ff5ec03024d3
-  CapacitorKeyboard: e628d4e66d621c69e449945ebabded17c5b9c2e8
-  CapacitorShare: 931224a0e17615e799d35b26286ab1d05f37d8fb
-  CapacitorStatusBar: 48f2899f6846cc7d8431b251ebfc58e1c10e3d58
+  Capacitor: 8941aba4364ba9d1b22188569001f2ce45cc2b00
+  CapacitorApp: 9d53aec7101f7b030a950c5bdc4df8612576b279
+  CapacitorCordova: 8f2cc8d8d3619c566e9418fe8772064a94266106
+  CapacitorKeyboard: 5f32a712adf41e07a61caafb82cf29fb6d8ba123
+  CapacitorShare: 02222f2457ff003e642370a9c1ecd101baaa27c8
+  CapacitorStatusBar: 2e4369f99166125435641b1908d05f561eaba6f6
 
-PODFILE CHECKSUM: 4c1b9d98dfd56e6deafe7d3b4f80bd6d742b5615
+PODFILE CHECKSUM: 0304fb8761669a7cbc41908039abdee4c375364d
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.15.2
