@@ -100,7 +100,7 @@ class RecipeCrawler(PipelineElement):
 
         if url in self.ignore_links or url in self.urls_crawled:
             print(f"Ignoring {url} because it is in the ignore or found list")
-            return False
+            return None
 
         # Here you would implement the check_robots function
         if not await check_robots(url):

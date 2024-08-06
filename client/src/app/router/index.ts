@@ -9,6 +9,7 @@ import VRecipe from '@/app/views/recipe/VRecipe.vue';
 import VRecipeSuggestions from '@/app/views/recipe/VRecipeSuggestions.vue';
 import { useRecipeStore } from '@/app/storage';
 import { useSharedStore } from '@/shared/storage';
+import { logDebug } from '@/shared/utils/logging.ts';
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -46,6 +47,11 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/app/views/recipe/VSavedRecipes.vue'),
             },
             {
+                name: 'AddRecipe',
+                path: 'recipe/add/',
+                component: () => import('@/app/views/recipe/VAddRecipe.vue'),
+            },
+            {
                 name: 'Settings',
                 path: 'settings',
                 component: () => import('@/app/views/VSettings.vue'),
@@ -78,6 +84,7 @@ export function createTasteBuddyRouter(): Router {
         const sharedStore = useSharedStore();
         const isLoadingInitialData = sharedStore.isLoadingInitial;
         if (isLoadingInitialData && to.name !== 'Hello') {
+            logDebug('Router', 'Waiting for initial data to load ...');
             next({ name: 'Hello', query: { redirect: to.path } });
         } else {
             return next();

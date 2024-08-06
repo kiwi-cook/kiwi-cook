@@ -21,6 +21,16 @@ router = APIRouter()
 def read_recipes():
     return {"error": False, "response": list(client["recipes"]["recipes"].find())}
 
+@router.get(
+    "/recipe/add",
+    response_description="Add a recipe",
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+)
+async def add_recipe(url: str):
+    await run_pipeline([url])
+    return {"error": False, "response": "Recipe added to the database."}
+
 
 @router.get(
     "/recipe/{recipe_id}",
@@ -32,20 +42,8 @@ def read_recipes():
 def read_recipe(recipe_id: str):
     return {
         "error": False,
-        "response": list(client["recipes"].find({"_id": recipe_id})),
+        "response": list(client["recipes"]["recipes"].find({"_id": recipe_id})),
     }
-
-
-@router.get(
-    "/recipe/add",
-    response_description="Add a recipe",
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-)
-async def add_recipe(url: str):
-    await run_pipeline([url])
-    return {"error": False, "response": "Recipe added to the pipeline."}
-
 
 @router.post(
     "/recipe/add/",
@@ -55,7 +53,7 @@ async def add_recipe(url: str):
 )
 async def add_recipe_list(urls: List[str]):
     await run_pipeline(urls)
-    return {"error": False, "response": "Recipes added to the pipeline."}
+    return {"error": False, "response": f"{len(urls)} recipes added to the database."}
 
 
 @router.get(

@@ -22,7 +22,14 @@ const findApiUrl = async () => {
 };
 
 export enum API_ROUTE {
-    GET_RECIPES, ADD_RECIPES, PARSE_RECIPES, DELETE_RECIPES, GET_INGREDIENTS, ADD_INGREDIENTS, DELETE_INGREDIENTS
+    GET_RECIPES,
+    ADD_RECIPES,
+    ADD_RECIPE_VIA_URL,
+    PARSE_RECIPES,
+    DELETE_RECIPES,
+    GET_INGREDIENTS,
+    ADD_INGREDIENTS,
+    DELETE_INGREDIENTS
 }
 
 const JSONTYPE = 'application/json'
@@ -37,6 +44,11 @@ type API_ROUTE_OPTIONS = {
 
 export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.GET_RECIPES]: { url: '/recipe/', method: 'GET', contentType: JSONTYPE },
+    [API_ROUTE.ADD_RECIPE_VIA_URL]: {
+        url: '/recipe/add',
+        method: 'GET',
+        contentType: JSONTYPE,
+    },
     [API_ROUTE.ADD_RECIPES]: { url: '/recipe/', method: 'POST', contentType: JSONTYPE, credentials: 'include' },
     [API_ROUTE.PARSE_RECIPES]: { url: '/recipe/parse', method: 'POST', contentType: JSONTYPE },
     [API_ROUTE.DELETE_RECIPES]: {
@@ -97,9 +109,17 @@ export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, opt
         API_URL = await findApiUrl();
     }
 
-    const url = API_URL + API_ROUTES[route].url;
+    let url = API_URL + API_ROUTES[route].url;
 
     const { body, headers, errorMessage, successMessage, timeout } = options ?? {}
+
+    // format the object to a query string
+    if (options?.formatObject) {
+        const queryString = Object.keys(options.formatObject)
+            .map(key => `${key}=${options.formatObject![key]}`)
+            .join('&')
+        url += '?' + queryString
+    }
 
     // headers
     const requestHeaders = new Headers();
