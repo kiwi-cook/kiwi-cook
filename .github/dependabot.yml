@@ -5,13 +5,6 @@ version: 2
 
 
 updates:
-  # Updates for Go modules
-  - package-ecosystem: "gomod"
-    directory: "/server-prod"
-    schedule:
-      interval: "weekly"
-    assignees: ["am9zZWY"]
-
   # Updates for Python modules
   - package-ecosystem: "pip"
     directory: "/server-dev"
