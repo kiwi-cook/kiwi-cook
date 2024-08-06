@@ -13,28 +13,26 @@
                 @search="search"/>
             <Transition name="fade-top">
                 <div v-if="(fullQuery !== '' && isSearchFocus) || isResultsOpen" class="searchbar-list-wrapper">
-                    <div class="searchbar-list">
-                        <div class="searchbar-list-results">
-                            <List :list="[...filteredResults]" load-all no-wrap>
-                                <template #element="{ element }: { element: FilteredResult}">
-                                    <IonItem v-if="element.type === 'recipe'" button
-                                             @click="selectRecipe(element.value as Recipe)">
-                                        <IonIcon slot="start" :icon="searchOutline"/>
-                                        <IonLabel>{{ (element.value as Recipe).getName() }}</IonLabel>
-                                    </IonItem>
-                                    <IonItem v-else-if="element.type === 'ingredient'"
-                                             button @click="selectIngredient(element.value as Ingredient)">
-                                        <IonIcon slot="start" :icon="searchOutline"/>
-                                        <IonLabel>{{ (element.value as Ingredient).getName() }}</IonLabel>
-                                    </IonItem>
-                                    <IonItem v-else-if="element.type === 'tag'" button
-                                             @click="selectTag(element.value as string)">
-                                        <IonIcon slot="start" :icon="searchOutline"/>
-                                        <IonLabel>{{ element.value }}</IonLabel>
-                                    </IonItem>
-                                </template>
-                            </List>
-                        </div>
+                    <div v-if="filteredResults.length > 0" class="searchbar-list">
+                        <List :list="[...filteredResults]" load-all no-wrap>
+                            <template #element="{ element }: { element: FilteredResult}">
+                                <IonItem v-if="element.type === 'recipe'" button
+                                         @click="selectRecipe(element.value as Recipe)">
+                                    <IonIcon slot="start" :icon="searchOutline"/>
+                                    <IonLabel>{{ (element.value as Recipe).getName() }}</IonLabel>
+                                </IonItem>
+                                <IonItem v-else-if="element.type === 'ingredient'"
+                                         button @click="selectIngredient(element.value as Ingredient)">
+                                    <IonIcon slot="start" :icon="searchOutline"/>
+                                    <IonLabel>{{ (element.value as Ingredient).getName() }}</IonLabel>
+                                </IonItem>
+                                <IonItem v-else-if="element.type === 'tag'" button
+                                         @click="selectTag(element.value as string)">
+                                    <IonIcon slot="start" :icon="searchOutline"/>
+                                    <IonLabel>{{ element.value }}</IonLabel>
+                                </IonItem>
+                            </template>
+                        </List>
                     </div>
                 </div>
             </Transition>
