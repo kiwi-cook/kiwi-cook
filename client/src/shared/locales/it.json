@@ -1,0 +1,109 @@
+{
+  "Favorites": {
+    "Title": "Le tue ricette preferite",
+    "NoRecipesSaved": "Non hai ancora salvato nessuna ricetta."
+  },
+  "General": {
+    "WelcomeText": "Cuciniamo qualcosa di;delizioso ♥️!",
+    "Recipe": "Ricetta | Ricette",
+    "Item": "Elemento | Elementi",
+    "Tag": "Etichetta | Etichette",
+    "ReadMore": "Leggi di più",
+    "ReadLess": "Leggi di meno"
+  },
+  "Locales": {
+    "en-US": "Inglese",
+    "de": "Tedesco",
+    "it": "Italiano"
+  },
+  "Recipe": {
+    "Src": {
+      "By": "Di",
+      "RecipeBy": "Ricetta di {0}",
+      "RecipeByWithUrl": "Ricetta di {0} ({1})"
+    },
+    "LetsCook": "Cuciniamo!",
+    "Serving": "Porzione | Porzioni",
+    "Direction": "Istruzione | Istruzioni",
+    "Preparation": "Preparazione",
+    "Step": "Passo",
+    "Ingredient": "Ingrediente | Ingredienti",
+    "GoodAppetite": "Buon appetito!",
+    "NotFound": {
+      "Title": "Ricetta non trovata",
+      "Description": "La ricetta che stai cercando non esiste.",
+      "Back": "Torna alla panoramica"
+    }
+  },
+  "RecipeOfTheDay": {
+    "Title": "Ricetta del giorno",
+    "NotFound": "Nessuna ricetta del giorno disponibile"
+  },
+  "Settings": {
+    "Title": "Impostazioni",
+    "Language": "Lingua",
+    "Theme": "Tema",
+    "Light": "Chiaro",
+    "Dark": "Scuro",
+    "System": "Sistema",
+    "Reset": {
+      "Button": "Ripristina impostazioni",
+      "ResetConfirmation": "Sei sicuro di voler ripristinare tutte le impostazioni?",
+      "ResetButton": "Ripristina impostazioni",
+      "ResetSuccess": "Le impostazioni sono state ripristinate",
+      "ResetError": "Impossibile ripristinare le impostazioni",
+      "ResetCache": "Ripristina cache"
+    }
+  },
+  "SignIn": {
+    "SignIn": "Accedi",
+    "ShowPassword": "Mostra password"
+  },
+  "Suggestions": {
+    "Title": "Cuciniamo qualcosa;di delizioso!",
+    "Subtitle": "Ehi Amico!",
+    "SearchbarPrompt": "Cerca Ricette e Ingredienti",
+    "Preferences": {
+      "Title": "Imposta le tue preferenze di ricerca",
+      "Subtitle": "Filtra per ingredienti, tempo di cottura, prezzo e altro.",
+      "Ingredients": "Ingrediente | Ingredienti",
+      "Duration": "Durata",
+      "Budget": "Budget",
+      "Servings": "Porzione | Porzioni",
+      "Tags": "Etichetta | Etichette"
+    },
+    "20Minutes": {
+      "Title": "Pronto in 20 minuti",
+      "Subtitle": "Per quando hai poco tempo"
+    },
+    "Recommendations": {
+      "Title": "Consiglio per te | Consigli per te",
+      "Subtitle": "In base alle tue preferenze"
+    },
+    "Random": {
+      "Title": "Esplora nuove ricette",
+      "Subtitle": "Sorpresa!"
+    },
+    "Search": {
+      "Title": "Trovate {0} ricette",
+      "Subtitle": "Queste ricette corrispondono alla tua ricerca",
+      "Submit": "Cerca",
+      "Clear": "Cancella",
+      "NoRecipesFound": "Nessuna ricetta trovata"
+    }
+  },
+  "Tabs": {
+    "Explore": "Esplora",
+    "RecipeOfTheDay": "Oggi",
+    "AddOwn": "Aggiungi la tua",
+    "Favorites": "Preferiti",
+    "InstallPWA": "Installa app",
+    "SignIn": "Accedi",
+    "Settings": "Impostazioni"
+  },
+  "Tag": {
+    "Special": {
+      "FastAndCheap": "veloce & economico"
+    }
+  }
+}

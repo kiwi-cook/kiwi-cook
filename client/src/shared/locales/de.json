@@ -12,8 +12,9 @@
     "ReadLess": "Weniger lesen"
   },
   "Locale": {
-    "en": "Englisch",
-    "de": "Deutsch"
+    "en-US": "Englisch",
+    "de": "Deutsch",
+    "it": "Italienisch"
   },
   "Recipe": {
     "Src": {
@@ -70,6 +71,10 @@
       "Budget": "Budget",
       "Servings": "Portion | Portionen",
       "Tags": "Tag | Tags"
+    },
+    "20Minutes": {
+      "Title": "Schnelle Rezepte",
+      "Subtitle": "In 20 Minuten fertig"
     },
     "Recommendations": {
       "Title": "Vorschlag für dich | Vorschläge für dich",

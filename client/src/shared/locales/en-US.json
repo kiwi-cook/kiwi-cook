@@ -12,8 +12,9 @@
     "ReadLess": "Read less"
   },
   "Locales": {
-    "en": "English",
-    "de": "German"
+    "en-US": "English",
+    "de": "German",
+    "it": "Italian"
   },
   "Recipe": {
     "Src": {
@@ -70,6 +71,10 @@
       "Budget": "Budget",
       "Servings": "Serving | Servings",
       "Tags": "Tag | Tags"
+    },
+    "20Minutes": {
+      "Title": "Quick recipes",
+      "Subtitle": "Ready in 20 minutes or less"
     },
     "Recommendations": {
       "Title": "Recommendation for you | Recommendations for you",

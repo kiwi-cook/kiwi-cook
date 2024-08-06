@@ -4,15 +4,15 @@
 
 import { createI18n } from 'vue-i18n';
 import { nextTick } from 'vue'
-import enUS from '@/shared/locales/en.json'
+import enUS from '@/shared/locales/en-US.json'
 import { RouteLocationNormalized } from 'vue-router';
 import { logDebug, logWarn } from '@/shared/utils/logging';
 import { useSharedStore } from '@/shared/storage';
 
-export type SUPPORT_LOCALES_TYPE = 'en' | 'de'
-export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en', 'de']
+export type SUPPORT_LOCALES_TYPE = 'en-US' | 'de' | 'it'
+export const SUPPORT_LOCALES: SUPPORT_LOCALES_TYPE[] = ['en-US', 'de', 'it']
 
-export const DEFAULT_LOCALE: SUPPORT_LOCALES_TYPE = 'en'
+export const DEFAULT_LOCALE: SUPPORT_LOCALES_TYPE = SUPPORT_LOCALES[0]
 
 export interface MultiLanguageFieldTranslations {
     [lang: string]: string;

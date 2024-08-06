@@ -54,8 +54,12 @@
                         <RecipeSuggestionSection
                             :recipes="recipes.filter((r) => r.getDuration() <= 20)"
                         >
-                            <template #title> Got 20 minutes?</template>
-                            <template #subtitle> Let's cook something quick!</template>
+                            <template #title>
+                                {{ $t("Suggestions.20Minutes.Title") }}
+                            </template>
+                            <template #subtitle>
+                                {{ $t("Suggestions.20Minutes.Subtitle") }}
+                            </template>
                         </RecipeSuggestionSection>
 
                         <!-- Random recipes -->
