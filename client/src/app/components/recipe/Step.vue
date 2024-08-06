@@ -25,7 +25,6 @@
                 <Duration
                     :duration="step?.duration"
                     :timer-key="recipeId"
-                    @click="startTimer"
                 />
                 <Temperature :temperature="step?.temperature"/>
                 <!-- <IonItem v-if="recipeItems.length > 0" lines="none">
@@ -49,7 +48,6 @@ import { IonCard, IonCardContent, IonImg, IonItem } from '@ionic/vue';
 import { PropType, toRefs } from 'vue';
 import { RecipeStep, STEP_TYPES } from '@/shared';
 import Temperature from '@/shared/components/recipe/chip/Temperature.vue';
-import useTimer from '@/composables/useTimer.ts';
 import Duration from '@/shared/components/time/Duration.vue';
 
 const props = defineProps({
@@ -79,8 +77,6 @@ const props = defineProps({
 });
 
 const { step, recipeId } = toRefs(props);
-
-const { startTimer } = useTimer();
 </script>
 
 <style>

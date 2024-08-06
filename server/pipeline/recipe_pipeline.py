@@ -4,8 +4,8 @@ from typing import List
 from database.mongodb import get_database
 from pipeline.crawl import RecipeCrawler
 from pipeline.download import HtmlRecipeLoader, HtmlRecipeSaver
+from pipeline.parse import RecipeParser
 from pipeline.pipeline import Pipeline
-from pipeline.scrape import RecipeScraper
 
 read_client = get_database("READ")
 write_client = get_database("WRITE")
@@ -15,7 +15,7 @@ crawler_pipeline = Pipeline()
 crawler = RecipeCrawler(max_size=100)
 download = HtmlRecipeSaver(write_client)
 load = HtmlRecipeLoader(read_client)
-scraper = RecipeScraper(write_client)
+scraper = RecipeParser(write_client)
 
 crawler_pipeline.add_element(crawler)
 crawler_pipeline.add_element(download)
