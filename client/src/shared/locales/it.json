@@ -53,7 +53,8 @@
       "ResetSuccess": "Le impostazioni sono state ripristinate",
       "ResetError": "Impossibile ripristinare le impostazioni",
       "ResetCache": "Ripristina cache"
-    }
+    },
+    "Feedback": "Dacci un feedback"
   },
   "SignIn": {
     "SignIn": "Accedi",

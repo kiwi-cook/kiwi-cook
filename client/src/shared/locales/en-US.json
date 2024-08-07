@@ -53,7 +53,8 @@
       "ResetSuccess": "Settings have been reset",
       "ResetError": "Could not reset settings",
       "ResetCache": "Reset cache"
-    }
+    },
+    "Feedback": "Give feedback"
   },
   "SignIn": {
     "SignIn": "Sign in",

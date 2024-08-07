@@ -154,6 +154,8 @@ import { RecipeTitle, StepComponent, TwoColumnLayout } from '@/app/components';
 import { storeToRefs } from 'pinia';
 import Duration from '@/shared/components/time/Duration.vue';
 
+import './recipe.css'
+
 /* Recipe */
 const props = defineProps({
     recipe: {
@@ -242,10 +244,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
     margin: 0 var(--margin) 0 0;
 }
 
-.recipe-tags {
-    margin-top: var(--margin);
-}
-
 @media (max-width: 736px) {
     .recipe-header {
         flex-direction: column;
@@ -260,17 +258,6 @@ Share.canShare().then((canShareResult: CanShareResult) => {
     .recipe-image-wrapper {
         justify-content: center;
     }
-}
-
-.recipe-servings {
-    --border-radius: 15px;
-    margin-bottom: var(--margin);
-}
-
-.recipe-servings-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
 }
 
 .header {

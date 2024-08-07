@@ -168,8 +168,8 @@ const selectTag = (tag: string) => {
 }
 
 const searchedRecipes = ref<RecipeSuggestion[]>([]);
-const search = () => {
-    searchedRecipes.value = searchRecipesByQuery(fullQuery.value);
+const search = async () => {
+    searchedRecipes.value = await searchRecipesByQuery(fullQuery.value);
     closeAll();
     emit('search', searchedRecipes.value);
 };

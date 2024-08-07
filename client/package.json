@@ -45,9 +45,11 @@
     "core-js": "^3.38.0",
     "eslint-config-prettier": "^9.1.0",
     "fastest-levenshtein": "^1.0.16",
+    "fuse.js": "^7.0.0",
     "lz-string": "^1.5.0",
     "pinia": "^2.2.0",
     "register-service-worker": "^1.7.2",
+    "stemmer": "^2.0.1",
     "vue": "^3.4.35",
     "vue-i18n": "^9.13.1",
     "vue-router": "^4.4.2"

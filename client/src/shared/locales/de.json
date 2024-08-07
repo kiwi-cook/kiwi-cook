@@ -53,7 +53,8 @@
       "ResetSuccess": "Einstellungen wurden zurückgesetzt.",
       "ResetError": "Einstellungen konnten nicht zurückgesetzt werden.",
       "ResetCache": "Cache leeren"
-    }
+    },
+    "Feedback": "Feedback geben"
   },
   "SignIn": {
     "SignIn": "Anmelden",

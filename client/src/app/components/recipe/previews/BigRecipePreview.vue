@@ -7,15 +7,22 @@
         <div class="big-recipe-wrapper">
             <TwoColumnLayout layout="rightBigger">
                 <template #left>
-                    <div class="big-recipe-image">
+                    <div class="big-recipe-image-wrapper">
                         <img
                             v-if="recipe"
                             :alt="recipe?.getName()"
                             :src="recipe?.imageUrl"
-                            class="link"
+                            class="link big-recipe-image"
                             loading="lazy"
-                            @click="routeToRecipe()"
+                            @click="routeToRecipe"
                         />
+                        <div class="button-container">
+                            <button class="action-button play-button" @click.stop="routeToRecipe">
+                                <span class="button-icon">▶</span>
+                            </button>
+                            <Duration :duration="recipe?.getDuration()" :timer-key="recipe?.getId()"/>
+                            <!-- Add more buttons as needed -->
+                        </div>
                     </div>
                 </template>
                 <template #right>
@@ -24,6 +31,11 @@
                         <p class="recipe-description desc">
                             {{ recipe?.getShortDescription() }}
                         </p>
+                        <div class="recipe-tags ion-margin-bottom">
+                            <IonChip v-for="tag in recipe?.getTags()" :key="tag" outline>
+                                {{ tag }}
+                            </IonChip>
+                        </div>
                     </div>
                 </template>
             </TwoColumnLayout>
@@ -34,9 +46,12 @@
 <script lang="ts" setup>
 import { computed, PropType, toRefs } from 'vue';
 import { Recipe } from '@/shared';
-import { useIonRouter } from '@ionic/vue';
+import { IonChip, useIonRouter } from '@ionic/vue';
 import RecipeTitle from '@/app/components/recipe/RecipeTitle.vue';
 import TwoColumnLayout from '@/app/components/layout/TwoColumnLayout.vue';
+import Duration from '@/shared/components/time/Duration.vue';
+
+import '../recipe.css'
 
 const props = defineProps({
     recipe: {
@@ -56,13 +71,6 @@ const routeToRecipe = () => router.push(recipeRoute?.value);
 </script>
 
 <style scoped>
-/* Reset some default styles */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 a {
     color: var(--ion-text-color);
 }
@@ -84,11 +92,77 @@ a:hover {
 } */
 
 /* Style for the recipe image */
-.big-recipe-image img {
+.big-recipe-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--border-radius);
+}
+
+.button-container {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2; /* Ensure buttons are above the image */
+}
+
+.action-button {
+    width: 40px;
+    height: 40px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.action-button:hover {
+    background-color: rgba(0, 0, 0, 0.9);
+}
+
+.button-icon {
+    color: white;
+    font-size: 18px;
+}
+
+.big-recipe-image-wrapper:hover .button-container {
+    opacity: 1;
+}
+
+.big-recipe-image-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-bottom-left-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+    z-index: 1; /* Ensure gradient is above the image but below buttons */
+}
+
+.big-recipe-image-wrapper:hover::after {
+    opacity: 1;
+}
+
+.big-recipe-image-wrapper img {
     width: 100%;
     height: auto;
     border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow-strong);
+    transition: transform 0.3s ease;
+}
+
+.big-recipe-image-wrapper:hover img {
+    transform: scale(1.05);
 }
 
 /* Style for the recipe details */
@@ -110,7 +184,7 @@ a:hover {
         flex-direction: column; /* Stack items vertically */
     }
 
-    .big-recipe-image,
+    .big-recipe-image-wrapper,
     .recipe-details {
         flex: none; /* Reset flex properties for mobile layout */
         width: 100%; /* Make both sections take full width */
