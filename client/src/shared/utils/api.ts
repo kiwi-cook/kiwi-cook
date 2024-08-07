@@ -7,19 +7,34 @@ import { RecipeSuggestion } from '@/app/search';
 import { logDebug, logError, logWarn } from '@/shared/utils/logging';
 import { config } from '@/config.ts';
 
+const MODULE = 'shared.utils.api.';
+
 const isDev = process.env.NODE_ENV === 'development';
-let API_URL = '';
+let API_URL: string | null = '';
+
 const findApiUrl = async () => {
     logDebug('API_URL', 'Checking for reachable API URL ...');
+    const funcName = MODULE + 'findApiUrl';
+
     for (const { url } of config.apiUrls.filter(api => isDev ? api.name === 'dev' : api.name === 'prod')) {
-        if ((await fetch(url, { method: 'GET' })).ok) {
-            logDebug('API_URL', 'Found reachable API URL: ' + url);
-            return url as string;
+        try {
+            const response = await fetch(url, { method: 'GET' });
+
+            if (response.ok) {
+                logDebug(funcName, 'Found reachable API URL: ' + url);
+                return url as string;
+            } else {
+                logDebug(funcName, 'API URL is not reachable: ' + url);
+            }
+        } catch (error) {
+            logError(funcName, `Failed to fetch URL ${url}`, error);
         }
     }
-    logWarn('API_URL', 'No reachable API URL found. We are offline.');
-    return 'http://localhost:8000';
+
+    logWarn(funcName, 'No reachable API URL found. We are offline.');
+    return null
 };
+
 
 export enum API_ROUTE {
     GET_RECIPES,
@@ -105,8 +120,12 @@ export type SendToApiOptions = {
  * })
  */
 export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, options?: SendToApiOptions): Promise<APIResponse<R>> {
-    if (!API_URL) {
+    if (API_URL === '') {
         API_URL = await findApiUrl();
+    }
+
+    if (!API_URL) {
+        return { error: true, response: 'Could not connect to the server.' as R }
     }
 
     let url = API_URL + API_ROUTES[route].url;
