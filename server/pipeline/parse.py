@@ -87,6 +87,7 @@ class RecipeParser(PipelineElement):
 
         return Recipe(
             name=name,
+            lang=lang,
             description=description,
             ingredients=ingredients,
             steps=steps,

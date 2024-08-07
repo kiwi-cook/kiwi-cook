@@ -157,6 +157,7 @@ class Recipe(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: MultiLanguageField
     description: MultiLanguageField
+    lang: str = Field(default="en-US")
 
     ingredients: Optional[List[RecipeIngredient]] = Field(alias="items")
     steps: List[RecipeStep] = Field(alias="steps")
