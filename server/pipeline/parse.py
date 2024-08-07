@@ -80,7 +80,10 @@ class RecipeParser(PipelineElement):
         source = RecipeSource.from_author([author])
         source.url = url
 
-        tags = scraper.keywords()
+        try:
+            tags = scraper.keywords()
+        except Exception as e:
+            tags = []
 
         return Recipe(
             name=name,
