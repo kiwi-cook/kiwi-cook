@@ -3,8 +3,8 @@
   -->
 
 <template>
-    <div v-if="recipe" class="recipe-title-wrapper">
-        <h3 class="subheader">
+    <div v-if="recipe" :class="{ 'recipe-title-wrapper': !noMargin }">
+        <h3 v-if="title" class="subheader">
             {{ title }}
         </h3>
         <h2 class="recipe-title">
@@ -12,24 +12,15 @@
             >{{ recipe?.getName() }}
             </RouterLink>
         </h2>
-        <div v-if="recipe?.getAuthors() !== ''" class="recipe-author">
-            <strong
-            >{{ $t("Recipe.Src.By") }}
-                <a
-                    :href="recipe?.src?.url"
-                    class="recipe-author-link"
-                    rel="nofollow"
-                    target="_blank"
-                >{{ recipe?.getAuthors() }}</a
-                ></strong
-            >
-        </div>
+        <RecipeAuthor v-if="!noAuthor" :recipe="recipe"/>
     </div>
 </template>
+
 <script lang="ts" setup>
 import { RouterLink } from 'vue-router';
 import { computed, PropType, toRefs } from 'vue';
 import { Recipe } from '@/shared';
+import RecipeAuthor from '@/app/components/recipe/RecipeAuthor.vue';
 
 const props = defineProps({
     recipe: {
@@ -41,6 +32,16 @@ const props = defineProps({
         required: false,
     },
     disableLink: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    noAuthor: {
+        type: Boolean,
+        required: false,
+        default: false,
+    },
+    noMargin: {
         type: Boolean,
         required: false,
         default: false,
@@ -69,7 +70,7 @@ a {
 
 .recipe-title {
     font-size: var(--font-size-larger);
-    margin-bottom: 10px;
+    word-break: break-word; /* Allows line breaks within words */
 }
 
 .recipe-title a {
@@ -79,13 +80,5 @@ a {
 
 .recipe-title a:hover {
     color: var(--ion-color-primary-shade);
-}
-
-.recipe-author {
-    font-size: 20px; /* Increased font size */
-}
-
-.recipe-author-link {
-    cursor: pointer;
 }
 </style>

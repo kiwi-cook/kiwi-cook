@@ -8,6 +8,7 @@
             <div class="recipe-header-text-wrapper">
                 <!-- Title -->
                 <RecipeTitle
+                    v-if="!noTitle"
                     :recipe="recipe"
                     :title="t('Recipe.LetsCook')"
                     disable-link
@@ -142,7 +143,7 @@ import {
     IonItem,
     IonNote,
     IonRange,
-    IonText,
+    IonText
 } from '@ionic/vue';
 import { IngredientList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES, } from '@/shared';
 import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
@@ -158,6 +159,11 @@ const props = defineProps({
     recipe: {
         type: Object as PropType<Recipe>,
         required: true,
+    },
+    noTitle: {
+        type: Boolean,
+        required: false,
+        default: false,
     },
 });
 const { recipe } = toRefs(props);
