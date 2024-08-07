@@ -1,16 +1,24 @@
+<!--
+  ~ Copyright (c) 2024 Josef Müller.
+  -->
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8"/>
-    <title>Taste Buddy 🍻</title>
+    <title>Taste Buddy 🍻 | Elevate Your Meals & Reduce Waste</title>
 
     <base href="/"/>
 
-    <meta content="viewport-fit=cover, width=device-width,
-        initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+          name="viewport"/>
     <meta content="no" name="msapplication-tap-highlight"/>
-    <meta content="noarchive, noimageindex" name="robots">
+    <meta content="index, follow" name="robots"/>
+    <meta content="Elevate your meals affordably while reducing waste with Taste Buddy, the ultimate cooking companion."
+          name="description"/>
+    <meta content="cooking, recipes, meal planning, food waste, Taste Buddy" name="keywords"/>
+    <meta content="Taste Buddy Team" name="author"/>
 
     <link href="<%= BASE_URL %>img/favicon.ico" rel="shortcut icon" type="image/png"/>
 
@@ -30,16 +38,15 @@
     <link href="<%= BASE_URL %>img/ios/512.png" rel="apple-touch-icon" sizes="512x512"/>
 
     <!-- Feature detection -->
-    <meta content="telephone=no" name="format-detection">
-    <meta content="address=no" name="format-detection">
+    <meta content="telephone=no" name="format-detection"/>
+    <meta content="address=no" name="format-detection"/>
 
     <!-- Open Graph -->
-    <meta content="Taste Buddy 🍻" property="og:title"/>
+    <meta content="Taste Buddy 🍻 | Your cooking companion" property="og:title"/>
     <meta content="website" property="og:type"/>
     <meta content="https://taste-buddy.github.io" property="og:url"/>
-    <!-- TODO: Use a better image -->
     <meta content="<%= BASE_URL %>img/og.jpg" property="og:image"/>
-    <meta content="Elevate your meals affordably while reducing waste with Taste Buddy, the ultimate cooking companion.."
+    <meta content="Elevate your meals affordably while reducing waste with Taste Buddy, the ultimate cooking companion."
           property="og:description"/>
     <meta content="Taste Buddy 🍻" property="og:site_name"/>
     <meta content="de" property="og:locale"/>
@@ -47,6 +54,10 @@
 
     <!-- Twitter -->
     <meta content="summary_large_image" name="twitter:card"/>
+    <meta content="Taste Buddy 🍻 | Elevate Your Meals & Reduce Waste" name="twitter:title"/>
+    <meta content="Elevate your meals affordably while reducing waste with Taste Buddy, the ultimate cooking companion."
+          name="twitter:description"/>
+    <meta content="<%= BASE_URL %>img/og.jpg" name="twitter:image"/>
 
     <!-- Google -->
     <meta content="" name="google-site-verification"/>
@@ -58,6 +69,24 @@
     <!-- Fonts -->
     <link href="https://fonts.bunny.net" rel="preconnect">
     <link href="https://fonts.bunny.net/css" rel="stylesheet"/>
+
+    <!-- Schema.org markup for Google+ -->
+    <meta content="Taste Buddy 🍻" itemprop="name">
+    <meta content="Elevate your meals affordably while reducing waste with Taste Buddy, the ultimate cooking companion."
+          itemprop="description">
+    <meta content="<%= BASE_URL %>img/og.jpg" itemprop="image">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Taste Buddy",
+            "url": "https://taste-buddy.github.io",
+            "logo": "<%= BASE_URL %>img/og.jpg",
+            "sameAs": []
+        }
+    </script>
 </head>
 
 <body>
