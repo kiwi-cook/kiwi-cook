@@ -15,44 +15,62 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType, Ref, ref, toRefs, watch } from 'vue';
+import { Ref, ref, toRefs, watch } from 'vue';
 
 const props = defineProps({
     smallText: {
-        type: String, required: false
-    }, bigText: {
-        type: Object as PropType<string[]>, required: true
-    }, speed: {
-        type: Number, required: false, default: 150
+        type: String,
+        required: false
+    },
+    bigText: {
+        type: Array as () => string[],
+        required: true
+    },
+    speed: {
+        type: Number,
+        required: false,
+        default: 150
     }
-})
+});
+
 const { bigText, speed } = toRefs(props);
 
-const emit = defineEmits(['finish'])
+const emit = defineEmits(['finish']);
 
-let interval = -1
-const typedText = ref('')
-const typedTextIndex = ref(0)
+const interval = ref<number>(-1);
+const typedText = ref('');
+const typedTextIndex = ref(0);
+
 const typeText = (text: string, typedText: Ref<string>, typedTextIndex: Ref<number>): boolean => {
     if (text.length <= typedTextIndex.value) {
-        return false
+        return false;
     }
-    typedText.value += text.charAt(typedTextIndex.value++)
-    return true
-}
+    typedText.value += text.charAt(typedTextIndex.value++);
+    return true;
+};
 
 const startTyping = () => {
-    if (interval !== -1) {
-        clearInterval(interval)
+    if (interval.value !== -1) {
+        clearInterval(interval.value);
     }
-    interval = setInterval(() => {
-        if (!typeText(bigText?.value[1] ?? '', typedText, typedTextIndex)) {
-            emit('finish')
-            clearInterval(interval)
+    typedText.value = '';
+    typedTextIndex.value = 0;
+    interval.value = setInterval(() => {
+        if (!typeText(bigText.value[1] ?? '', typedText, typedTextIndex)) {
+            emit('finish');
+            clearInterval(interval.value);
         }
-    }, speed?.value)
-}
-watch(bigText, startTyping, { immediate: true })
+    }, speed.value);
+};
+
+watch(bigText, () => {
+    startTyping();
+    return () => {
+        if (interval.value !== -1) {
+            clearInterval(interval.value);
+        }
+    };
+}, { immediate: true });
 </script>
 
 <style scoped>
@@ -66,5 +84,4 @@ watch(bigText, startTyping, { immediate: true })
     font-weight: var(--font-weight-bold);
     margin: 0 0 10px;
 }
-
 </style>

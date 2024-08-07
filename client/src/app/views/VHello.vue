@@ -10,7 +10,8 @@
                     <div class="vertical-center">
                         <HeaderTyped
                             :big-text="welcomeText"
-                            :speed="30"
+                            :speed="20"
+                            small-text="Loading ..."
                             @finish="finished = true"
                         />
                     </div>
@@ -48,7 +49,7 @@ watch(
         if (!isLoadingInitialData.value && finished.value) {
             timeout.value = setTimeout(() => {
                 router.replace(redirect.value);
-            }, 1000);
+            }, 600);
         }
     },
     { immediate: true }
