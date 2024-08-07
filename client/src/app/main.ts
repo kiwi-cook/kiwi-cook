@@ -49,6 +49,8 @@ import '@/shared/theme/links.css';
 import 'ionicons/icons';
 /* Initialize internalisation */
 import { i18n } from '@/shared/locales/i18n';
+/* Directives */
+import { DisableSwipeBackDirective } from '@/gesture/swipeBack.ts';
 
 // Initializations
 
@@ -60,6 +62,7 @@ const router = createTasteBuddyRouter();
 
 /* Initialize app */
 const app = createApp(App).use(IonicVue).use(pinia).use(router).use(i18n);
+app.directive('disable-swipe-back', DisableSwipeBackDirective);
 
 /* Configure app */
 app.config.performance = true;
