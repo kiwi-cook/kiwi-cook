@@ -163,6 +163,7 @@ export class Recipe {
     id: string;
     name: MultiLanguageField;
     description: MultiLanguageField;
+    lang: string;
     ingredients: RecipeIngredient[];
     steps: RecipeStep[];
     props: { [key: string]: any };
@@ -185,6 +186,7 @@ export class Recipe {
         this.id = recipe?.id ?? tmpId();
         this.name = MultiLanguageField.fromJSON(recipe?.name) ?? MultiLanguageField.new();
         this.description = MultiLanguageField.fromJSON(recipe?.description) ?? MultiLanguageField.new();
+        this.lang = recipe?.lang ?? 'en-US';
         this.ingredients = recipe?.ingredients?.map(RecipeIngredient.fromJSON) ?? [];
         this.steps = recipe?.steps?.map(RecipeStep.fromJSON) ?? [];
         this.props = recipe?.props ?? { tags: [] };
@@ -220,6 +222,7 @@ export class Recipe {
             id: json._id ?? json.id ?? tmpId(),
             name: MultiLanguageField.fromJSON(json.name),
             description: MultiLanguageField.fromJSON(json.description),
+            lang: json.lang ?? 'en-US',
             ingredients: json.ingredients?.map(RecipeIngredient.fromJSON) ?? [],
             steps: json.steps?.map(RecipeStep.fromJSON) ?? [],
             props: {

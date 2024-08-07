@@ -4,25 +4,30 @@
 
 <template>
     <IonPage v-disable-swipe-back>
-        <IonHeader :translucent="true">
+        <IonHeader v-if="recipe" :translucent="true" class="ion-no-border" collapse="fade">
             <IonToolbar>
-                <IonTitle v-if="recipe" class="content-margin ion-no-padding">
+                <IonTitle class="content-margin">
                     <!-- Title -->
                     {{ recipe.getName() }}
                 </IonTitle>
             </IonToolbar>
         </IonHeader>
         <IonContent :fullscreen="true">
-            <IonHeader collapse="condense">
-                <IonToolbar>
-                    <RecipeTitle :recipe="recipe"/>
-                </IonToolbar>
-            </IonHeader>
             <div class="content-wrapper">
                 <div class="content">
                     <div class="content-margin">
                         <template v-if="recipe">
-                            <RecipeComponent :no-title="true" :recipe="recipe"/>
+                            <RecipeComponent :no-title="true" :recipe="recipe">
+                                <template #title>
+                                    <IonHeader class="ion-no-border">
+                                        <IonToolbar class="ion-no-padding">
+                                            <div class="content-margin ion-no-padding">
+                                                <RecipeTitle :recipe="recipe"/>
+                                            </div>
+                                        </IonToolbar>
+                                    </IonHeader>
+                                </template>
+                            </RecipeComponent>
                         </template>
                         <template v-else>
                             <IonText>

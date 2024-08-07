@@ -86,11 +86,6 @@ a:hover {
     transition: var(--transition);
 }
 
-/* .big-recipe-wrapper:hover {
-    box-shadow: var(--box-shadow-strong);
-    transform: var(--scale);
-} */
-
 /* Style for the recipe image */
 .big-recipe-image-wrapper {
     position: relative;

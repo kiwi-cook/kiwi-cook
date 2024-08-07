@@ -4,11 +4,10 @@
 
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { stemmer } from 'stemmer';
-import { RecipeSuggestion } from '@/app/search';
 import { useRecipeStore } from '@/app/storage';
 import { logError } from '@/shared/utils/logging';
 import { ERROR_MSG } from '@/shared/utils/errors.ts';
-import { Ingredient, Recipe } from '@/shared';
+import { Ingredient, Recipe, RecipeSuggestion } from '@/models';
 
 interface SearchableRecipe {
     id: string;
@@ -42,9 +41,23 @@ export class TasteBuddySearch {
     }
 
     search(query: string): string[] {
-        const processedQuery = this.processQuery(query);
-        const results = this.fuse.search(processedQuery);
-        return results.map(result => result.item.id);
+        const processedTerms = this.processQuery(query);
+
+        if (processedTerms.length === 0) {
+            return [];
+        }
+
+        // Perform individual searches for each term
+        const termResults = processedTerms.map(term =>
+            new Set(this.fuse.search(term).map(result => result.item.id))
+        );
+
+        // Find the intersection of all term results
+        const intersectionResults = termResults.reduce((acc, curr) =>
+            new Set([...acc].filter(x => curr.has(x)))
+        );
+
+        return Array.from(intersectionResults);
     }
 
     private prepareSearchableRecipes(recipes?: Recipe[], ingredients?: Ingredient[]): SearchableRecipe[] {
@@ -81,17 +94,18 @@ export class TasteBuddySearch {
         );
     }
 
-    private processQuery(query: string): string {
+    private processQuery(query: string): string[] {
         // Split by any combination of spaces, commas, dots, semicolons, or other common separators
         const words = query.toLowerCase().split(/[\s,.;:!?]+/);
 
+        if (words.length === 0) {
+            return [];
+        }
+
         // Remove empty strings and stem each word
-        const processedWords = words
+        return words
             .filter(word => word.length > 0)
             .map(word => stemmer(word));
-
-        // Create a Fuse.js extended search query
-        return processedWords.map(word => `'${word}`).join(' ');
     }
 }
 

@@ -69,8 +69,7 @@ import {
     useIonRouter,
 } from '@ionic/vue';
 import { chevronDownOutline, chevronUpOutline, peopleOutline, timeOutline, } from 'ionicons/icons';
-import { Recipe, RecipeIngredient } from '@/shared';
-import { RecipeSuggestion } from '@/app/search';
+import { Recipe, RecipeIngredient, RecipeSuggestion } from '@/models';
 
 const props = defineProps({
     recipe: {

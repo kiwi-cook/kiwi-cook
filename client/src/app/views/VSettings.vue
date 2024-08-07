@@ -23,7 +23,7 @@
                                         :key="locale"
                                         :value="locale"
                                     >
-                                        {{ $t(`Locale.${locale}`) }}
+                                        {{ $t(`Locales.${locale}`) }}
                                     </IonSelectOption>
                                 </IonSelect>
                             </IonItem>

@@ -7,12 +7,14 @@
         <div class="recipe-header ion-margin-bottom">
             <div class="recipe-header-text-wrapper">
                 <!-- Title -->
-                <RecipeTitle
-                    v-if="!noTitle"
-                    :recipe="recipe"
-                    :title="t('Recipe.LetsCook')"
-                    disable-link
-                />
+                <slot name="title">
+                    <RecipeTitle
+                        v-if="!noTitle"
+                        :recipe="recipe"
+                        :title="t('Recipe.LetsCook')"
+                        disable-link
+                    />
+                </slot>
                 <!-- Save and Share -->
                 <IonButtons>
                     <IonButton
@@ -32,14 +34,14 @@
                             :icon="isSaved ?? false ? heart : heartOutline"
                         />
                     </IonButton>
-                    <IonButton aria-valuetext="Start Cooking" color="primary">
-                        <IonIcon :icon="play"/>
-                    </IonButton>
                 </IonButtons>
                 <!-- Tags -->
                 <div class="recipe-tags ion-margin-bottom">
                     <IonChip v-for="tag in recipe?.getTags()" :key="tag" outline>
                         {{ tag }}
+                    </IonChip>
+                    <IonChip color="secondary" outline>
+                        {{ $t(`Locales.${recipe.lang}`) }}
                     </IonChip>
                 </div>
                 <!-- Description -->
@@ -146,7 +148,7 @@ import {
     IonText
 } from '@ionic/vue';
 import { IngredientList, ReadMore, Recipe, recipeBy, RecipeIngredient, RecipeStep, STEP_TYPES, } from '@/shared';
-import { heart, heartOutline, play, shareSocial } from 'ionicons/icons';
+import { heart, heartOutline, shareSocial } from 'ionicons/icons';
 import { CanShareResult, Share } from '@capacitor/share';
 import { useI18n } from 'vue-i18n';
 import { useRecipeStore } from '@/app/storage';

@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
             },
             {
                 name: 'RecipeSuggestions',
-                path: 'recipe/suggestions',
+                path: 'recipe/home',
                 component: VRecipeSuggestions,
             },
             {

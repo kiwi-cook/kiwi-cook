@@ -4,24 +4,34 @@
 
 <template>
     <IonPage>
+        <IonHeader :translucent="true">
+            <IonToolbar>
+                <IonTitle class="content-margin ion-no-padding">
+                    <!-- Title -->
+                    Add a Recipe
+                </IonTitle>
+            </IonToolbar>
+        </IonHeader>
         <IonContent :fullscreen="true">
+            <IonHeader collapse="condense">
+                <IonToolbar>
+                    <Header
+                        :big-text="['Add a', 'Recipe']"
+                    />
+                </IonToolbar>
+            </IonHeader>
             <div class="content-wrapper">
                 <div class="content">
                     <div class="content-margin">
-                        <Header
-                            :big-text="['Add a', 'Recipe']"
-                            :small-text="subtitle"
-                        />
-                    </div>
-
-                    <div class="content-margin">
-                        <IonItem lines="none">
-                            <IonInput v-model="url" placeholder="URL of the recipe"/>
+                        <IonItem class="ion-margin-top">
+                            <IonInput v-model="url" label="URL of the recipe" label-placement="floating"
+                                      placeholder="URL of the recipe"
+                                      type="url"/>
                         </IonItem>
                         <IonText>
                             <h2>{{ message }}</h2>
                         </IonText>
-                        <IonButton :disabled="sentRequest" @click="addRecipe">
+                        <IonButton :disabled="sentRequest || !url" @click="addRecipe">
                             Add recipe
                         </IonButton>
                     </div>
@@ -32,18 +42,25 @@
 </template>
 
 <script lang="ts" setup>
-import { IonButton, IonContent, IonInput, IonItem, IonPage, IonText } from '@ionic/vue';
+import {
+    IonButton,
+    IonContent,
+    IonHeader,
+    IonInput,
+    IonItem,
+    IonPage,
+    IonText,
+    IonTitle,
+    IonToolbar
+} from '@ionic/vue';
 import { API_ROUTE, sendToAPI } from '@/shared';
 import Header from '@/shared/components/utility/header/Header.vue';
-import { useRoute } from 'vue-router';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { logDebug } from '@/shared/utils/logging.ts';
 
-const route = useRoute();
-const url = ref(route.query.url as string || '');
+const url = ref('');
 
 const sentRequest = ref(false);
-const subtitle = computed(() => `Add a recipe from ${url.value}`);
 const message = ref('');
 
 const addRecipe = async () => {

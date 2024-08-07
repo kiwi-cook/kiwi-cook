@@ -25,7 +25,7 @@
 
                 <IonTabButton
                     :disabled="isLoadingInitial"
-                    href="/recipe/"
+                    href="/recipe/home"
                     tab="recipe-suggestions"
                 >
                     <IonIcon :icon="sparkles"/>

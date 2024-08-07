@@ -2,7 +2,7 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Recipe } from 'src/shared/models';
+import { Recipe } from '@/models';
 import { useRecipeStore } from '@/app/storage';
 import { median } from '@/app/search/util';
 import { logDebug } from '@/shared/utils/logging';

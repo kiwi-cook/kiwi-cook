@@ -2,10 +2,10 @@
  * Copyright (c) 2023-2024 Josef Müller.
  */
 
-import { Ingredient, presentToast, Recipe } from '@/shared';
-import { RecipeSuggestion } from '@/app/search';
+import { Ingredient, Recipe, RecipeSuggestion } from '@/models';
 import { logDebug, logError, logWarn } from '@/shared/utils/logging';
 import { config } from '@/config.ts';
+import { presentToast } from '@/shared';
 
 const MODULE = 'shared.utils.api.';
 
