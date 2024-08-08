@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from database.mongodb import get_database
 from server.routers import recipes
+from server.routers import ingredients
 
 load_dotenv()
 
@@ -25,10 +26,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "HEAD"],
     allow_headers=["*"],
 )
 app.include_router(recipes.router)
+app.include_router(ingredients.router)
 
 client = get_database()
 
