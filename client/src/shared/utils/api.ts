@@ -10,7 +10,7 @@ import { presentToast } from '@/shared';
 const MODULE = 'shared.utils.api.';
 
 const isDev = process.env.NODE_ENV === 'development';
-let API_URL: string | null = '';
+export let API_URL: string | null = '';
 
 const findApiUrl = async () => {
     logDebug('API_URL', 'Checking for reachable API URL ...');
@@ -44,7 +44,8 @@ export enum API_ROUTE {
     DELETE_RECIPES,
     GET_INGREDIENTS,
     ADD_INGREDIENTS,
-    DELETE_INGREDIENTS
+    DELETE_INGREDIENTS,
+    IMAGE_TO_INGREDIENTS,
 }
 
 const JSONTYPE = 'application/json'
@@ -53,7 +54,7 @@ const JSONTYPE = 'application/json'
 type API_ROUTE_OPTIONS = {
     url: string;
     method: string;
-    contentType: 'application/json' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
+    contentType?: 'application/json' | 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
     credentials?: 'include' | 'omit' | 'same-origin';
 }
 
@@ -73,14 +74,15 @@ export const API_ROUTES: { [key in API_ROUTE]: API_ROUTE_OPTIONS } = {
     [API_ROUTE.ADD_INGREDIENTS]: { url: '/ingredient/', method: 'POST', contentType: JSONTYPE, credentials: 'include' },
     [API_ROUTE.DELETE_INGREDIENTS]: {
         url: '/ingredient/', method: 'DELETE', contentType: JSONTYPE, credentials: 'include'
-    }
+    },
+    [API_ROUTE.IMAGE_TO_INGREDIENTS]: { url: '/ingredient/image', method: 'POST' },
 }
 
 export const DURATIONS = {
     SHORT: 3000, MEDIUM: 4000, LONG: 5000,
 }
 
-type APIResponseBody = Recipe[] | Ingredient[] | RecipeSuggestion[] | string
+type APIResponseBody = Recipe[] | Ingredient[] | RecipeSuggestion[] | string | string[]
 
 /**
  * This is the response interface from the API
@@ -130,7 +132,8 @@ export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, opt
 
     let url = API_URL + API_ROUTES[route].url;
 
-    const { body, headers, errorMessage, successMessage, timeout } = options ?? {}
+    let { body } = options ?? {}
+    const { headers, errorMessage, successMessage, timeout } = options ?? {}
 
     // format the object to a query string
     if (options?.formatObject) {
@@ -142,7 +145,9 @@ export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, opt
 
     // headers
     const requestHeaders = new Headers();
-    requestHeaders.append('Content-Type', API_ROUTES[route].contentType);
+    if (API_ROUTES[route].contentType) {
+        requestHeaders.append('Content-Type', API_ROUTES[route].contentType);
+    }
     for (const header of headers ?? []) {
         requestHeaders.append(header.key, header.value);
     }
@@ -150,11 +155,16 @@ export async function sendToAPI<R extends APIResponseBody>(route: API_ROUTE, opt
     // Abort Controller for the fetch function used in sendToAPI
     const abortController = new AbortController()
 
+    // if the body is not null and the content type is application/json
+    if (body !== null && API_ROUTES[route].contentType === 'application/json') {
+        body = JSON.stringify(body)
+    }
+
     const fetchOptions: RequestInit = {
         method: API_ROUTES[route].method,
         headers: requestHeaders,
         credentials: API_ROUTES[route].credentials,
-        body: body ? JSON.stringify(body) : null,
+        body: body as BodyInit,
         signal: abortController.signal
     }
 

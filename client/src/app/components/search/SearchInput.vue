@@ -11,8 +11,8 @@
             <button :class="{ disabled: !input }" class="searchbar-button search" @click="search()">
                 <IonIcon :icon="searchOutline"/>
             </button>
-            <button :class="{ disabled: true }" class="searchbar-button camera" title="Not implemented yet"
-                    @click="camera()">
+            <button v-if="cameraEnabled" :class="{ uploading: imageUploading }" class="searchbar-button camera"
+                    @click="takePhoto()">
                 <IonIcon :icon="cameraOutline"/>
             </button>
         </div>
@@ -21,17 +21,20 @@
 
 <script lang="ts" setup>
 import { IonIcon } from '@ionic/vue';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { cameraOutline, searchOutline } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { logDebug, logError, logWarn } from '@/shared/utils/logging.ts';
+import { API_ROUTE, sendToAPI } from '@/shared';
 
 const focus = defineModel('focus', { type: Boolean, default: false });
 const input = defineModel('input', { type: String, required: true });
 const emit = defineEmits(['onFocus', 'onClose', 'search']);
 
-const onFocus = () => emit('onFocus');
 const search = () => emit('search');
-const camera = () => console.log('Camera button clicked');
+const onFocus = () => emit('onFocus');
 
+/* Search input */
 const searchbarInput = ref<HTMLInputElement | null>(null);
 const isActive = ref(false);
 
@@ -40,6 +43,58 @@ watch(focus, (value) => {
         searchbarInput.value?.focus();
     }
     isActive.value = value;
+});
+
+/* Camera */
+const cameraEnabled = ref(true);
+const imageUploading = ref(false);
+const checkCameraPermission = async () => Camera.checkPermissions()
+    .then((result) => cameraEnabled.value = result.camera !== 'denied')
+const askCameraPermission = async () => {
+    try {
+        await Camera.requestPermissions()
+        await checkCameraPermission();
+    } catch (e) {
+        logError('askCameraPermission', e);
+    }
+}
+const takePhoto = async () => {
+    try {
+        const capturedPhoto = await Camera.getPhoto({
+            resultType: CameraResultType.Base64,
+            source: CameraSource.Camera,
+            quality: 100,
+        });
+
+        if (!capturedPhoto.base64String) {
+            logWarn('takePhoto', 'No photo captured');
+            return;
+        }
+
+        // Convert base64 to Blob
+        const base64Response = await fetch(`data:image/jpeg;base64,${capturedPhoto.base64String}`);
+        const blob = await base64Response.blob();
+
+        // Create FormData and append the blob
+        const formData = new FormData();
+        formData.append('image', blob, 'image.jpg');
+        imageUploading.value = true;
+
+        const response = await sendToAPI<string[]>(API_ROUTE.IMAGE_TO_INGREDIENTS, { body: formData });
+        if (Array.isArray(response.response)) {
+            logDebug('takePhoto', 'Ingredients found in image')
+            input.value = response.response.join(' ');
+        } else {
+            logWarn('takePhoto', 'No ingredients found in image')
+        }
+    } catch (e) {
+        logError('takePhoto', e);
+    }
+    imageUploading.value = false;
+}
+
+onMounted(() => {
+    askCameraPermission();
 });
 </script>
 
@@ -124,6 +179,28 @@ watch(focus, (value) => {
 
 .searchbar-button.camera {
     background: radial-gradient(circle at top left, #ff7e5f, #feb47b, #ffcb80);
+}
+
+.searchbar-button.camera.uploading {
+    animation: color-flow 3s ease-in-out infinite;
+    background-size: 300% 300%;
+    /* Disable button while uploading */
+    pointer-events: none;
+}
+
+@keyframes color-flow {
+    0%, 100% {
+        background-position: 0% 0%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    75% {
+        background-position: 0% 100%;
+    }
 }
 
 .searchbar-button.disabled {

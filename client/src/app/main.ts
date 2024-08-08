@@ -51,6 +51,8 @@ import 'ionicons/icons';
 import { i18n } from '@/shared/locales/i18n';
 /* Directives */
 import { DisableSwipeBackDirective } from '@/gesture/swipeBack.ts';
+/* PWA Elements */
+import { defineCustomElements } from '@ionic/pwa-elements/loader';
 
 // Initializations
 
@@ -59,6 +61,10 @@ const pinia = createPinia();
 
 /* Initialize router */
 const router = createTasteBuddyRouter();
+
+/* Initialize PWA elements */
+// https://capacitorjs.com/docs/web/pwa-elements
+await defineCustomElements(window);
 
 /* Initialize app */
 const app = createApp(App).use(IonicVue).use(pinia).use(router).use(i18n);
