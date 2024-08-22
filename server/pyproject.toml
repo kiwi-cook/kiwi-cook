@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "taste-buddy-server"
+version = "0.1.0"
+description = ""
+authors = ["am9zZWY <46693545+am9zZWY@users.noreply.github.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+aiohttp = "^3.10.5"
+black = "^24.8.0"
+cachetools = "^5.5.0"
+fastapi = "^0.112.1"
+httptools = "^0.6.1"
+ingredient-parser-nlp = "^1.1.1"
+openai = "^1.42.0"
+pip-chill = "^1.0.3"
+pydantic = "^2.8.2"
+pymongo = "^4.8.0"
+python-dotenv = "^1.0.1"
+pyyaml = "^6.0.2"
+recipe-scrapers = "^15.0.0"
+starlette = "^0.38.2"
+uvloop = "^0.20.0"
+uvicorn = "^0.30.6"
+pint = "^0.24.3"
+python-multipart = "^0.0.9"
+
+[tool.poetry.group.dev.dependencies]
+fastapi = "^0.112.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
