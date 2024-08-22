@@ -1,12 +1,13 @@
 from fastapi import APIRouter, UploadFile
 from fastapi.responses import HTMLResponse
 
-from models.api import APIResponseList
-from database.mongodb import get_database
 from chatgpt.ingredients import analyze_image
+from database.mongodb import get_database
+from models.api import APIResponseList
 
 client = get_database()
 router = APIRouter()
+
 
 @router.post("/ingredient/image")
 async def analyze_ingredient_image(image: UploadFile | None = None):

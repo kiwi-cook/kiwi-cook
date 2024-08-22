@@ -4,7 +4,7 @@ import re
 def extract_temperature(instruction: str) -> int | None:
     """Extract the temperature from a string."""
     print(f"Extracting temperature from instruction: {instruction}")
-    match = re.search(r"\b(\d{1,3})\s*°?\s*(C|F)\b", instruction)
+    match = re.search(r"\b(\d{1,3})\s*°?\s*[CF]\b", instruction)
     if not match:
         return None
     temperature = int(match.group(1))

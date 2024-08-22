@@ -1,7 +1,8 @@
-import os
 import base64
-from openai import OpenAI
+import os
+
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -23,7 +24,9 @@ def analyze_image(contents: bytes):
                     "content": [
                         {
                             "type": "text",
-                            "text": "List the ingredients you see in this image. Respond with only a python list of strings, each string being an ingredient. Do not format the list as markdown or any other format."
+                            "text": "List the ingredients you see in this image. Respond with only a python list of "
+                                    "strings, each string being an ingredient. Do not format the list as markdown or "
+                                    "any other format."
                         },
                         {
                             "type": "image_url",

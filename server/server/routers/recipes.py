@@ -21,6 +21,7 @@ router = APIRouter()
 def read_recipes():
     return {"error": False, "response": list(client["recipes"]["recipes"].find())}
 
+
 @router.get(
     "/recipe/add",
     response_description="Add a recipe",
@@ -44,6 +45,7 @@ def read_recipe(recipe_id: str):
         "error": False,
         "response": list(client["recipes"]["recipes"].find({"_id": recipe_id})),
     }
+
 
 @router.post(
     "/recipe/add/",
