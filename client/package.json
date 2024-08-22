@@ -30,7 +30,7 @@
     "publish": "sh ./scripts/publish-pwa.sh"
   },
   "dependencies": {
-    "@capacitor/android": "6.1.1",
+    "@capacitor/android": "6.1.2",
     "@capacitor/app": "6.0.1",
     "@capacitor/camera": "^6.0.1",
     "@capacitor/core": "6.1.2",
