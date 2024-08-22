@@ -11,9 +11,11 @@
             <button :class="{ disabled: !input }" class="searchbar-button search" @click="search()">
                 <IonIcon :icon="searchOutline"/>
             </button>
-            <button v-if="cameraEnabled" :class="{ uploading: imageUploading }" class="searchbar-button camera"
+            <button v-if="cameraEnabled" :class="{ uploading: imageUploading }"
+                    class="searchbar-button camera uploading"
                     @click="takePhoto()">
-                <IonIcon :icon="cameraOutline"/>
+                <IonIcon v-if="!imageUploading" :icon="cameraOutline"/>
+                <IonIcon v-else :icon="sparklesOutline"/>
             </button>
         </div>
     </div>
@@ -22,7 +24,7 @@
 <script lang="ts" setup>
 import { IonIcon } from '@ionic/vue';
 import { onMounted, ref, watch } from 'vue';
-import { cameraOutline, searchOutline } from 'ionicons/icons';
+import { cameraOutline, searchOutline, sparklesOutline } from 'ionicons/icons';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { logDebug, logError, logWarn } from '@/shared/utils/logging.ts';
 import { API_ROUTE, sendToAPI } from '@/shared';
@@ -177,16 +179,52 @@ onMounted(() => {
     background: radial-gradient(circle at top left, #ffc718, #c362b5, #6ab1e1);
 }
 
+@keyframes border-flow {
+    0% {
+        border-color: #ff7e5f;
+    }
+    25% {
+        border-color: #feb47b;
+    }
+    50% {
+        border-color: #ffcb80;
+    }
+    75% {
+        border-color: #feb47b;
+    }
+    100% {
+        border-color: #ff7e5f;
+    }
+}
+
 .searchbar-button.camera {
     background: radial-gradient(circle at top left, #ff7e5f, #feb47b, #ffcb80);
+    position: relative;
+}
+
+.searchbar-button.camera::before {
+    content: "";
+    position: absolute;
+    top: -0.5px;
+    left: -0.5px;
+    right: -0.5px;
+    bottom: -0.5px;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    transition: border 0.3s ease-in-out;
+}
+
+.searchbar-button.camera.uploading::before {
+    animation: border-flow 2s linear infinite; /* Animated border */
 }
 
 .searchbar-button.camera.uploading {
-    animation: color-flow 3s ease-in-out infinite;
-    background-size: 300% 300%;
-    /* Disable button while uploading */
     pointer-events: none;
+    background: none;
+    color: inherit;
+    box-shadow: none;
 }
+
 
 @keyframes color-flow {
     0%, 100% {
@@ -204,7 +242,6 @@ onMounted(() => {
 }
 
 .searchbar-button.disabled {
-    opacity: 0.5;
     pointer-events: none;
     background: none;
     color: inherit;
