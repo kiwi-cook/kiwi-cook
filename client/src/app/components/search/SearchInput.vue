@@ -12,7 +12,7 @@
                 <IonIcon :icon="searchOutline"/>
             </button>
             <button v-if="cameraEnabled" :class="{ uploading: imageUploading }"
-                    class="searchbar-button camera uploading"
+                    class="searchbar-button camera"
                     @click="takePhoto()">
                 <IonIcon v-if="!imageUploading" :icon="cameraOutline"/>
                 <IonIcon v-else :icon="sparklesOutline"/>
