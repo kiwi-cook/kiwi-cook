@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from database.mongodb import get_database
-from server.routers import recipes
 from server.routers import ingredients
+from server.routers import recipes
 
 load_dotenv()
 
@@ -40,10 +40,10 @@ def read_root():
     return {"message": "Hello from Taste Buddy!"}
 
 
-def start_server():
+def start_server(reload=False):
     print("Starting server...")
-    uvicorn.run("server.app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server.app:app", host="0.0.0.0", port=8000, reload=reload)
 
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=False)
