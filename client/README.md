@@ -13,7 +13,7 @@
    ```sh
    git clone
     ```
-   
+
 2. Install NPM packages
 
     ```sh
@@ -24,7 +24,7 @@
    ```sh
    bun run serve:app
    ```
-   
+
 ## Usage
 
 ### Development
@@ -33,12 +33,12 @@
    ```sh
    bun run serve:app
    ```
-   
+
 2. Open the main in your [browser](http://localhost:8080) or use the command below
    ```sh
     open http://localhost:8080
     ```
-   
+
 3. Make changes to the code and the main will automatically reload
 
 ### Publish to Production
@@ -47,3 +47,7 @@
    ```sh
    bun run publish
    ```
+
+## Thanks
+
+Thanks to @krakelo ♥️

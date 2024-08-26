@@ -7,9 +7,6 @@
     {
       "name": "Josef Müller",
       "email": "46693545+am9zZWY@users.noreply.github.com"
-    },
-    {
-      "name": "Vasilij Slabinski"
     }
   ],
   "keywords": [
@@ -24,9 +21,8 @@
     "food"
   ],
   "scripts": {
-    "dev": "vue-cli-service serve src/app/main.ts",
-    "edit": "vue-cli-service serve src/editor/editor.ts",
-    "build": "vue-cli-service build src/app/main.ts",
+    "dev": "vue-cli-service serve src/main.ts",
+    "build": "vue-cli-service build src/main.ts",
     "publish": "sh ./scripts/publish-pwa.sh"
   },
   "dependencies": {
