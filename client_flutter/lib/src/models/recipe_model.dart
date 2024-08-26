@@ -8,6 +8,12 @@ class MultiLanguageField {
   void operator []=(String lang, String value) {
     translations[lang] = value;
   }
+
+  get keys => translations.keys;
+
+  getFirst () {
+    return translations.values.first;
+  }
 }
 
 class Ingredient {
