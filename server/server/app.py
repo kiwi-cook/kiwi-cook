@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from database.mongodb import get_database
-from server.routers import ingredients
-from server.routers import recipes
+from models.api import APIResponse
+from server.routers import ingredient, chatgpt, recipe, user
 
 load_dotenv()
 
@@ -29,15 +29,23 @@ app.add_middleware(
     allow_methods=["GET", "POST", "HEAD"],
     allow_headers=["*"],
 )
-app.include_router(recipes.router)
-app.include_router(ingredients.router)
+app.include_router(recipe.router)
+app.include_router(ingredient.router)
+app.include_router(chatgpt.router)
+app.include_router(user.router)
 
 client = get_database()
 
 
-@app.get("/")
+@app.get("/",
+         response_description="Root endpoint",
+         response_model=APIResponse[str],
+         response_model_by_alias=False,
+         response_model_exclude_none=True,
+         summary="Root endpoint",
+         )
 def read_root():
-    return {"message": "Hello from Taste Buddy!"}
+    return {"error": False, "response": "Welcome to Taste Buddy!"}
 
 
 def start_server(reload=False):

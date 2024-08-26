@@ -14,4 +14,4 @@ class APIResponse(BaseAPIResponse, Generic[T]):
 
 
 class APIResponseList(BaseAPIResponse, Generic[T]):
-    response: List[T] = Field(alias="response", default=[])
+    response: List[T] | str = Field(alias="response", default=[])
