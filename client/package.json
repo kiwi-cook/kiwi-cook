@@ -43,7 +43,7 @@
     "@ionic/storage": "^4.0.0",
     "@ionic/vue": "^8.2.6",
     "@ionic/vue-router": "^8.2.6",
-    "@vueuse/core": "^10.11.0",
+    "@vueuse/core": "^11.0.3",
     "core-js": "^3.38.0",
     "eslint-config-prettier": "^9.1.0",
     "fastest-levenshtein": "^1.0.16",
