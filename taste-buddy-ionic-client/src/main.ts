@@ -11,7 +11,7 @@ import App from '@/app/App.vue';
 import { logDebug } from '@/shared/utils/logging';
 
 // Router
-import { createTasteBuddyRouter } from '@/app/router';
+import { createTasteBuddyRouter } from '@/router';
 
 // Store
 import { createPinia } from 'pinia';

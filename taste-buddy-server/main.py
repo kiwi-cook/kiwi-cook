@@ -1,4 +1,4 @@
-#!.venv/bin/python
+#!/usr/bin/env poetry run python
 # -*- coding: utf-8 -*-
 import argparse
 import asyncio
