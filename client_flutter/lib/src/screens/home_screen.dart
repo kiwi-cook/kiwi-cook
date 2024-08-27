@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:taste_buddy/src/widgets/layout/home_screen_section_widget.dart';
 import '../providers/recipe_provider.dart';
+import '../widgets/layout/bottom_nav_bar_widget.dart';
+import '../widgets/recipe/recipe_of_the_day_widget.dart';
 import '../widgets/searchbar_widget.dart';
 import '../widgets/recipe/recipe_list_widget.dart';
 
@@ -46,21 +49,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-          // Quick Recipes Section
-          SliverPadding(
-            padding: const EdgeInsets.all(16.0),
+          // Recipe of the Day Section (Based on randomRecipes)
+          const SliverPadding(
+            padding: EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
-              child: Text(
-                'Quick Recipes (20 min or less)',
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+              child: RecipeOfTheDay(),
             ),
           ),
+
+          // Quick Recipes Section
+          const HomeScreenSection(title: 'Quick recipes', subtitle: 'Ready in 20 minutes or less'),
           RecipeList(recipes: shortRecipes, inSliver: true),
+
+          // Random Recipes Section
+          const HomeScreenSection(title: 'Surprise me'),
+          RecipeList(recipes: randomRecipes, inSliver: true),
 
           // TODO: Implement Friends' Recipes Section
         ],
       ),
+      // TODO: Implement Bottom Navigation Bar
+      // bottomNavigationBar: const BottomNavBar(),
     );
   }
 }
