@@ -16,7 +16,7 @@ class RecipeProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    final response = await http.get(Uri.parse(kDebugMode ? 'http://127.0.0.1:8000/recipe/' : 'https://taste-buddy.onrender.com//recipe/'));
+    final response = await http.get(Uri.parse(kDebugMode ? 'http://127.0.0.1:8000/recipe/' : 'https://taste-buddy.onrender.com/recipe/'));
     if (response.statusCode == 200) {
       // Parse the JSON response into a List
       List<dynamic> jsonList = jsonDecode(response.body)['response'];
