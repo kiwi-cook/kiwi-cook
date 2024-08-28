@@ -17,12 +17,12 @@ Ready to get cooking with Taste Buddy's backend? Follow these simple steps:
 
 2. **Navigate to Server Directory:**
    ```bash
-   cd taste-buddy/server-prod
+   cd taste-buddy/server
    ```
 
 3. **Run the Server:**
    ```bash
-   go run . serve -m dev
+   python main.py -s
    ```
 
    Your development server is now sizzling, ready to serve up some delicious recipes!
