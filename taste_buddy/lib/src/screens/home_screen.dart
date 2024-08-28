@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:taste_buddy/src/widgets/layout/home_screen_section_widget.dart';
 import '../providers/recipe_provider.dart';
@@ -40,6 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('Hey Buddy!'),
         centerTitle: false,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.favorite_border),
+            onPressed: () => context.goNamed('favorites'),
+          ),
+        ]
       ),
       body: CustomScrollView(
         slivers: [
@@ -93,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
           // TODO: Implement Friends' Recipes Section
         ],
       ),
-      // TODO: Implement Bottom Navigation Bar
       bottomNavigationBar: const BottomNavBar(),
     );
   }
