@@ -9,7 +9,7 @@ import '../widgets/recipe/recipe_steps_widget.dart';
 class RecipeScreen extends StatefulWidget {
   final String? recipeId;
 
-  RecipeScreen({required this.recipeId, Key? key}) : super(key: key);
+  const RecipeScreen({required this.recipeId, super.key});
 
   @override
   _RecipeScreenState createState() => _RecipeScreenState();

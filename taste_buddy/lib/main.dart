@@ -11,7 +11,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => RecipeProvider()),
-        // TODO: UserProvider(),
       ],
       child: const TasteBuddyApp(),
     ),
