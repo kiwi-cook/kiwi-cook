@@ -25,6 +25,8 @@ uvloop = "^0.20.0"
 uvicorn = "^0.30.6"
 pint = "^0.24.3"
 python-multipart = "^0.0.9"
+argon2-cffi = "^23.1.0"
+pyjwt = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 fastapi = "^0.112.1"

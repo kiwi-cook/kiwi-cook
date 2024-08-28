@@ -17,7 +17,7 @@ from models.recipe import (
     RecipeSource,
 )
 from pipeline.pipeline import PipelineElement
-from util.parse import extract_temperature, extract_durations
+from utils.parse import extract_temperature, extract_durations
 
 
 class RecipeParser(PipelineElement):

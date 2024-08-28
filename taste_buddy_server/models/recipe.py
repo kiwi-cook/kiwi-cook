@@ -171,10 +171,14 @@ class Recipe(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     cuisine: Optional[str] = None
     difficulty: str = Field(default="medium")
-    rating: Optional[float] = Field(ge=0, le=5, default=None)
     nutrition: Optional[Nutrition] = None
     image_url: Optional[HttpUrl] = None
     video_url: Optional[HttpUrl] = None
+
+    rating: Optional[float] = Field(ge=0, le=5, default=None)
+    fav_count: int = Field(default=0)
+    view_count: int = Field(default=0)
+    comment_count: int = Field(default=0)
 
     class Config:
         populate_by_name = True

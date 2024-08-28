@@ -13,7 +13,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 open_ai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 
-def analyze_image(contents: bytes):
+def find_ingredients_in_image(contents: bytes) -> list[str] | None:
     try:
         # Call the OpenAI API
         response = open_ai_client.chat.completions.create(
@@ -24,9 +24,9 @@ def analyze_image(contents: bytes):
                     "content": [
                         {
                             "type": "text",
-                            "text": "List the ingredients you see in this image. Respond with only a python list of "
-                                    "strings, each string being an ingredient. Do not format the list as markdown or "
-                                    "any other format."
+                            "text": "List the ingredients and products you see in this image. Respond with only a "
+                                    "python list of strings, each string being an ingredient. Do not format the list "
+                                    "as markdown or any other format."
                         },
                         {
                             "type": "image_url",
@@ -42,7 +42,6 @@ def analyze_image(contents: bytes):
 
         # Extract and process the model's response
         ingredients_text = response.choices[0].message.content
-        print(ingredients_text)
         # Convert the string representation of a list to an actual list
         ingredients_list = eval(ingredients_text)
         return ingredients_list

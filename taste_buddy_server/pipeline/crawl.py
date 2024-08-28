@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 import httpx
 
 from pipeline.pipeline import PipelineElement
-from util.robots import check_robots
+from utils.robots import check_robots
 
 
 class RecipeCrawler(PipelineElement):

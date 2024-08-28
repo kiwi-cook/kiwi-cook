@@ -5,22 +5,17 @@ import asyncio
 import sys
 import traceback
 
-from pymongo import MongoClient
-
 from pipeline.recipe_pipeline import run_pipeline_from_file
 from server.app import start_server
-
-# Connect to MongoDB
-mongo_client = MongoClient("mongodb://root:example@localhost:27017/")
 
 
 def main():
     # Parse the command line arguments
-    parser = argparse.ArgumentParser(description=f"Recipe pipeline")
+    parser = argparse.ArgumentParser(description=f"Taste Buddy CLI")
     parser.add_argument(
         "-f",
         "--file",
-        help="Run the pipeline with the URLs in the specified file",
+        help="Run the recipe pipeline with the URLs in the specified file",
         required=False,
     )
     parser.add_argument(
@@ -35,7 +30,7 @@ def main():
 
         if args.server:
             # Start the server
-            start_server()
+            start_server(reload=args.debug)
         elif args.file:
             asyncio.run(run_pipeline_from_file(args.file))
         else:
