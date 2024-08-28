@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class Searchbar extends StatelessWidget {
-  final Function(String)? onChangedCallback;
-  final Function(String)? onSubmittedCallback;
+  final Function()? onTap;
+  final Function(String)? onSearch;
 
   const Searchbar({
     super.key,
-    this.onChangedCallback,
-    this.onSubmittedCallback,
+    this.onTap,
+    this.onSearch,
   });
 
   @override
@@ -23,13 +23,13 @@ class Searchbar extends StatelessWidget {
           ),
         ),
         onChanged: (value) {
-          if (onChangedCallback != null) {
-            onChangedCallback!(value);
+          if (onSearch != null) {
+            onSearch!(value);
           }
         },
-        onSubmitted: (value) {
-          if (onSubmittedCallback != null) {
-            onSubmittedCallback!(value);
+        onTap: () {
+          if (onTap != null) {
+            onTap!();
           }
         },
       ),

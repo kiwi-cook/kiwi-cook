@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:taste_buddy/src/screens/search_screen.dart';
 import 'package:taste_buddy/src/widgets/layout/home_screen_section_widget.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/layout/bottom_nav_bar_widget.dart';
@@ -24,16 +25,53 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+void _showSearchModal(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.9,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          builder: (_, controller) {
+            return Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).canvasColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 5,
+                    width: 40,
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
+                  ),
+                  Expanded(
+                    child: SearchScreen(scrollController: controller),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final recipeProvider = Provider.of<RecipeProvider>(context);
 
-    // Filter recipes that take 20 minutes or less
     final shortRecipes = recipeProvider.recipes
         .where((recipe) => recipe.duration <= 20)
         .toList();
 
-    // Randomly select 4 recipes
     final randomRecipes = (recipeProvider.recipes..shuffle()).take(4).toList();
 
     return Scaffold(
@@ -46,58 +84,41 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.favorite_border),
             onPressed: () => context.goNamed('favorites'),
           ),
-        ]
+        ],
       ),
       body: CustomScrollView(
         slivers: [
-          // Search bar
-          const SliverPadding(
-            padding: EdgeInsets.all(16.0),
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
-              child: Searchbar(),
+              child: Searchbar(
+                onTap: () => _showSearchModal(context),
+              ),
             ),
           ),
-
-          // Recipe of the Day Section (Based on randomRecipes)
           const SliverPadding(
             padding: EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
               child: RecipeOfTheDay(),
             ),
           ),
-
-          // Quick Recipes Section
           const HomeScreenSection(
-              title: 'Quick Recipes', subtitle: '20 minutes or less'),
+            title: 'Quick Recipes',
+            subtitle: '20 minutes or less',
+          ),
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RecipeList(recipes: shortRecipes),
-                ],
-              ),
+              child: RecipeList(recipes: shortRecipes),
             ),
           ),
-
-          // Quick Recipes Section
-          const HomeScreenSection(
-              title: 'Surprise Me'),
+          const HomeScreenSection(title: 'Surprise Me'),
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  RecipeList(recipes: randomRecipes),
-                ],
-              ),
+              child: RecipeList(recipes: randomRecipes),
             ),
           ),
-
-
-          // TODO: Implement Friends' Recipes Section
         ],
       ),
       bottomNavigationBar: const BottomNavBar(),
