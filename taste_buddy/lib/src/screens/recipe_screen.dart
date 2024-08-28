@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/recipe_model.dart';
 import '../providers/recipe_provider.dart';
+import '../widgets/layout/bottom_nav_bar_widget.dart';
 import '../widgets/recipe/recipe_steps_widget.dart';
 
 class RecipeScreen extends StatefulWidget {
@@ -94,6 +95,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
           ),
         ),
       ),
+      bottomNavigationBar: const BottomNavBar(),
     );
   }
 

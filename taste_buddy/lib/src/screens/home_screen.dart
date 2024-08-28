@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       // TODO: Implement Bottom Navigation Bar
-      // bottomNavigationBar: const BottomNavBar(),
+      bottomNavigationBar: const BottomNavBar(),
     );
   }
 }
