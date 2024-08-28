@@ -19,5 +19,10 @@ final tasteBuddyRouter = GoRouter(
         return RecipeScreen(recipeId: id);
       },
     ),
+    GoRoute(
+      name: 'plan',
+      path: '/plan',
+      builder: (context, state) => const HomeScreen(),
+    )
   ],
 );
