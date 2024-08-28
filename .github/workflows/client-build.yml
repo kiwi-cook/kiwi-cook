@@ -3,10 +3,10 @@ name: Client Test Build
 on:
   push:
     paths:
-      - client/**
+      - taste_buddy_ionic/**
   pull_request:
     paths:
-      - client/**
+      - taste_buddy_ionic/**
 
 jobs:
   build:
