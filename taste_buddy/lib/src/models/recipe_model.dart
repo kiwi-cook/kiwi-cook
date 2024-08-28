@@ -34,13 +34,15 @@ class Ingredient {
 class RecipeIngredient {
   final Ingredient ingredient;
   final String? comment;
-  double? quantity;
+  final double quantity;
+  double? userQuantity;
   final String? unit;
 
   RecipeIngredient({
     required this.ingredient,
     this.comment,
-    this.quantity,
+    required this.quantity,
+    this.userQuantity,
     this.unit,
   });
 
@@ -48,7 +50,8 @@ class RecipeIngredient {
     return RecipeIngredient(
       ingredient: Ingredient.fromJson(json['ingredient']),
       comment: json['comment'],
-      quantity: json['quantity']?.toDouble(),
+      quantity: json['quantity'].toDouble(),
+      userQuantity: json['quantity']?.toDouble(),
       unit: json['unit'],
     );
   }
@@ -93,10 +96,7 @@ class RecipeAuthor {
   RecipeAuthor({required this.name, this.url});
 
   factory RecipeAuthor.fromJson(Map<String, dynamic> json) {
-    return RecipeAuthor(
-      name: json['name'],
-      url: json['url']
-    );
+    return RecipeAuthor(name: json['name'], url: json['url']);
   }
 }
 
@@ -194,7 +194,7 @@ class Recipe {
         assert(rating == null || (rating >= 0 && rating <= 5));
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
-    return Recipe(
+    Recipe recipe = Recipe(
       id: json['id'],
       name: MultiLanguageField(
           translations: Map<String, String>.from(json['name']['translations'])),
@@ -202,8 +202,8 @@ class Recipe {
           translations:
               Map<String, String>.from(json['description']['translations'])),
       lang: json['lang'] ?? 'en-US',
-      ingredients: json['items'] != null
-          ? (json['items'] as List)
+      ingredients: json['ingredients'] != null
+          ? (json['ingredients'] as List)
               .map((i) => RecipeIngredient.fromJson(i))
               .toList()
           : null,
@@ -225,11 +225,17 @@ class Recipe {
       imageUrl: json['image_url'],
       videoUrl: json['video_url'],
     );
+
+    // Call setServings method after creating the Recipe instance
+    recipe.setServings(recipe.servings);
+
+    return recipe;
   }
 
-  void setServings(int servings) {
+  void setServings(int? servings) {
     ingredients?.forEach((ingredient) {
-      ingredient.quantity = ingredient.quantity! * servings;
+      ingredient.userQuantity =
+          ingredient.quantity * (servings ?? this.servings);
     });
   }
 }
