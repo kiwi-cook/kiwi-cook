@@ -35,13 +35,13 @@ class BottomNavBar extends StatelessWidget {
         // Navigate to the corresponding route
         switch (index) {
           case 0:
-            context.pushNamed('home');
+            context.goNamed('home');
             break;
           case 1:
-            context.pushNamed('favorites');
+            context.goNamed('favorites');
             break;
           default:
-            context.go('/');
+            context.goNamed('home');
         }
       },
     );
