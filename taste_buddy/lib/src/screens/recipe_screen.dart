@@ -61,7 +61,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(recipe?.name.getFirst()),
+        title: Text(recipe!.name.getFirst()),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -104,7 +104,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          recipe?.name.getFirst(),
+          recipe!.name.getFirst(),
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const SizedBox(height: 8),

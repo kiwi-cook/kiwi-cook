@@ -1,0 +1,8 @@
+app_identifier("com.am9zzwy.tastebuddy") # The bundle identifier of your app
+apple_id("66c28bfe@protonmail.com") # Your Apple Developer Portal username
+
+itc_team_id("127257673") # App Store Connect Team ID
+team_id("4FNSA83GB2") # Developer Portal Team ID
+
+# For more information about the Appfile, see:
+#     https://docs.fastlane.tools/advanced/#appfile

@@ -11,7 +11,7 @@ class MultiLanguageField {
 
   get keys => translations.keys;
 
-  getFirst() {
+  String getFirst() {
     return translations.values.first;
   }
 }
