@@ -1,8 +1,8 @@
-# Taste Buddy 🍻
+# Taste Buddy 🍳
 
-Welcome to Taste Buddy, your culinary companion for crafting tasty and budget-friendly meals! Whether you're a kitchen beginner or a seasoned chef, Taste Buddy is here to guide you through the world of flavorful and economical recipes.
+Welcome to Taste Buddy, your personal culinary companion for discovering and preparing delicious, budget-friendly meals! Whether you're a kitchen novice or a seasoned home chef, Taste Buddy is here to help you find affordable recipes and cook like a pro.
 
-![Taste Buddy App](<taste_buddy/assets/screenshots/AppMockUp Screenshots/Apple iPhone 11 Pro Max (1242x2688)/Apple iPhone 11 Pro Max Screenshot 0.png>)
+![Taste Buddy App](taste_buddy/assets/screenshots/AppMockUp Screenshots/Apple iPhone 11 Pro Max (1242x2688)/Apple iPhone 11 Pro Max Screenshot 0.png)
 
 ## Getting Started
 
@@ -10,7 +10,7 @@ Welcome to Taste Buddy, your culinary companion for crafting tasty and budget-fr
 
 #### Start Development Server
 
-Ready to get cooking with Taste Buddy's backend? Follow these simple steps:
+To get cooking with Taste Buddy's backend, follow these simple steps:
 
 1. **Clone this Repository:**
    ```bash
@@ -27,13 +27,13 @@ Ready to get cooking with Taste Buddy's backend? Follow these simple steps:
    python main.py -s -d
    ```
 
-   Your development server is now sizzling, ready to serve up some delicious recipes!
+   Your development server is now ready to serve up some tasty recipes!
 
 ### Client
 
 #### Start the Ionic App
 
-Let's bring the Taste Buddy experience to your kitchen:
+Bring Taste Buddy to life on your device:
 
 1. **Clone this Repository:**
    ```bash
@@ -55,15 +55,16 @@ Let's bring the Taste Buddy experience to your kitchen:
    npm run serve:app
    ```
 
-   The Taste Buddy client app is now live! Open your browser and get ready to embark on a culinary journey at [http://localhost:8080](http://localhost:8080).
+   Taste Buddy is now live! Open your browser and start your culinary journey at [http://localhost:8080](http://localhost:8080).
 
 ## Features
 
-Taste Buddy offers a delightful array of features to spice up your cooking routine:
+Taste Buddy offers a delightful array of features to enhance your cooking experience:
 
-- **Recipe Galore:** Explore a diverse range of mouthwatering and budget-friendly recipes.
-- **Smart Shopping List:** Effortlessly create a shopping list based on your chosen recipes for convenient grocery shopping.
-- **Chef's Tips & Tricks:** Learn handy kitchen hacks and tips from experienced chefs to enhance your culinary skills.
-- **Meal Planning Magic:** Plan your weekly meals effortlessly, ensuring a delicious and well-balanced menu.
+- **Recipe Finder:** Discover a diverse range of affordable, delicious recipes tailored to your preferences.
+- **Smart Shopping List:** Create budget-friendly shopping lists based on your chosen recipes.
+- **Step-by-Step Cooking Instructions:** Follow easy, detailed instructions to cook each meal perfectly.
+- **Personalized Recommendations:** Get recipe suggestions based on your tastes and budget.
+- **Meal Planning Made Easy:** Plan your weekly meals effortlessly, ensuring a delicious and cost-effective menu.
 
-Get ready to turn every meal into a culinary masterpiece with Taste Buddy! 🍲👨‍🍳
+Get ready to transform your kitchen into a haven of affordable culinary delights with Taste Buddy! 🍽️👨‍🍳
