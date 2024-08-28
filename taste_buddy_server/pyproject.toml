@@ -10,7 +10,7 @@ python = ">=3.10,<3.13"
 aiohttp = "^3.10.5"
 black = "^24.8.0"
 cachetools = "^5.5.0"
-fastapi = "^0.112.1"
+fastapi = "^0.112.2"
 httptools = "^0.6.1"
 ingredient-parser-nlp = "^1.1.1"
 openai = "^1.42.0"
@@ -27,7 +27,7 @@ pint = "^0.24.3"
 python-multipart = "^0.0.9"
 
 [tool.poetry.group.dev.dependencies]
-fastapi = "^0.112.1"
+fastapi = "^0.112.2"
 
 [build-system]
 requires = ["poetry-core"]
