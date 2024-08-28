@@ -1,0 +1,35 @@
+name: Test-Build Flutter Client
+
+on:
+  push:
+    paths:
+      - taste_buddy/**
+  pull_request:
+    paths:
+      - taste_buddy/**
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Set up Flutter
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 'stable'
+
+    # Install dependencies
+    - name: Install dependencies
+      run: flutter pub get
+
+    # Run the Flutter build
+    - name: Build Flutter app
+      run: flutter build apk --debug
+
+    # Optionally, you can run tests
+    - name: Run tests
+      run: flutter test
