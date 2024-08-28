@@ -32,7 +32,7 @@ class TasteBuddyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      routerConfig: taste_buddy_router,
+      routerConfig: tasteBuddyRouter,
     );
   }
 }

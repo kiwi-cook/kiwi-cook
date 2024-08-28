@@ -3,7 +3,7 @@ import 'package:taste_buddy/src/screens/home_screen.dart';
 import 'package:taste_buddy/src/screens/recipe_screen.dart';
 
 // GoRouter configuration
-final taste_buddy_router = GoRouter(
+final tasteBuddyRouter = GoRouter(
   initialLocation: '/',
   routes: [
     GoRoute(
