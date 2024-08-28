@@ -10,7 +10,7 @@ class BottomNavBar extends StatelessWidget {
     int selectedIndex;
     if (location == '/') {
       selectedIndex = 0;
-    } else if (location == '/favorites') {
+    } else if (location == '/plan') {
       selectedIndex = 1;
     } else {
       selectedIndex = 0;
@@ -26,10 +26,10 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.home),
           label: 'Home',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite),
-          label: 'Favorites',
-        ),
+        BottomNavigationBarItem(icon: 
+          Icon(Icons.auto_awesome),
+          label: 'Plan',
+        )
       ],
       onTap: (index) {
         // Navigate to the corresponding route
@@ -38,7 +38,7 @@ class BottomNavBar extends StatelessWidget {
             context.goNamed('home');
             break;
           case 1:
-            context.goNamed('favorites');
+            context.goNamed('plan');
             break;
           default:
             context.goNamed('home');
