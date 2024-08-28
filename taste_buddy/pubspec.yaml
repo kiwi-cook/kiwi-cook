@@ -16,6 +16,8 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   provider: ^6.1.2
+  go_router: ^7.1.1
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:

@@ -4,13 +4,12 @@ import 'recipe_preview_widget.dart';
 
 class RecipeList extends StatelessWidget {
   final List<Recipe> recipes;
-  final bool inSliver;
 
-  const RecipeList({super.key, required this.recipes, this.inSliver = false});
+  const RecipeList({super.key, required this.recipes});
 
   @override
   Widget build(BuildContext context) {
-    final content = SizedBox(
+    return SizedBox(
       height: 250, // Set a fixed height for the horizontal list
       child: ListView.builder(
         scrollDirection: Axis.horizontal, // Horizontal scrolling
@@ -28,11 +27,5 @@ class RecipeList extends StatelessWidget {
         },
       ),
     );
-
-    if (inSliver) {
-      return SliverToBoxAdapter(child: content);
-    } else {
-      return content;
-    }
   }
 }

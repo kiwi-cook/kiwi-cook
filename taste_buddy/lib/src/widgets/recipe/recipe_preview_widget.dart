@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../models/recipe_model.dart';
 import '../../screens/recipe_screen.dart';
-import '../../screens/search_screen.dart';
 
 class RecipePreview extends StatelessWidget {
   final Recipe recipe;
@@ -19,14 +19,7 @@ class RecipePreview extends StatelessWidget {
         maxHeight: 250, // Set the maximum height
       ),
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => RecipeScreen(recipe: recipe),
-            ),
-          );
-        },
+        onTap: () => context.push('/recipe/${recipe.id}'),
         child: Card(
           elevation: 4,
           shape:

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:collection/collection.dart';
 
 import '../models/recipe_model.dart';
 
@@ -12,16 +13,24 @@ class RecipeProvider with ChangeNotifier {
   List<Recipe> get recipes => _recipes;
   bool get isLoading => _isLoading;
 
-  Future<List<Recipe>> fetchRecipes() async {
+  Future<List<Recipe>> fetchRecipes({bool forceRefresh = false}) async {
+    if (_recipes.isNotEmpty && !forceRefresh) {
+      return _recipes;
+    }
+
     _isLoading = true;
     notifyListeners();
 
-    final response = await http.get(Uri.parse(kDebugMode
-        ? 'http://127.0.0.1:8000/recipe/'
-        : 'https://taste-buddy.onrender.com/recipe/'));
+    final response = await http.get(Uri.parse(
+      kDebugMode
+          ? 'http://127.0.0.1:8000/recipe/'
+          : 'https://taste-buddy.onrender.com/recipe/',
+    ));
+
     if (response.statusCode == 200) {
-      // Parse the JSON response into a List
-      List<dynamic> jsonList = jsonDecode(response.body)['response'];
+      // Ensure response body is in UTF-8
+      final decodedResponse = utf8.decode(response.bodyBytes);
+      final jsonList = jsonDecode(decodedResponse)['response'];
 
       _recipes =
           jsonList.map<Recipe>((recipe) => Recipe.fromJson(recipe)).toList();
@@ -34,8 +43,8 @@ class RecipeProvider with ChangeNotifier {
     return _recipes;
   }
 
-  Recipe findById(String id) {
-    return _recipes.firstWhere((recipe) => recipe.id == id);
+  Recipe? findById(String id) {
+    return _recipes.firstWhereOrNull((recipe) => recipe.id == id);
   }
 
   Recipe? recipeOfTheDay() {

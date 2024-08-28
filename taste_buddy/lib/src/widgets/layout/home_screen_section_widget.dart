@@ -21,7 +21,7 @@ class HomeScreenSection extends StatelessWidget {
             Text(
               title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Colors.greenAccent,
+                    color: Colors.orangeAccent,
                     fontWeight: FontWeight.bold,
                   ),
             ),

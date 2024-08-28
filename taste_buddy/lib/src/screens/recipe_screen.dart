@@ -1,39 +1,79 @@
 import 'package:flutter/material.dart';
-import 'package:taste_buddy/src/widgets/recipe/recipe_steps_widget.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../models/recipe_model.dart';
+import '../providers/recipe_provider.dart';
+import '../widgets/recipe/recipe_steps_widget.dart';
 
 class RecipeScreen extends StatefulWidget {
-  final Recipe recipe;
+  final String? recipeId;
 
-  RecipeScreen({required this.recipe});
+  RecipeScreen({required this.recipeId, Key? key}) : super(key: key);
 
   @override
-  _RecipeScreenState createState() => _RecipeScreenState(recipe: recipe);
+  _RecipeScreenState createState() => _RecipeScreenState();
 }
 
 class _RecipeScreenState extends State<RecipeScreen> {
-  final Recipe recipe;
+  late Recipe recipe;
+  late int servings;
 
-  _RecipeScreenState({required this.recipe});
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.recipeId == null) {
+        return;
+      }
+      final recipeProvider =
+          Provider.of<RecipeProvider>(context, listen: false);
+      recipeProvider.fetchRecipes();
+      final fetchedRecipe = recipeProvider.findById(widget.recipeId!);
+      if (fetchedRecipe != null) {
+        setState(() {
+          recipe = fetchedRecipe;
+          servings = recipe.servings;
+        });
+      }
+    });
+  }
+
+  void setServings(int newServings) {
+    setState(() {
+      servings = newServings;
+      recipe.setServings(newServings);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.recipeId == null || recipe == null) {
+      return Scaffold(
+        appBar: AppBar(
+          leading: BackButton(color: Colors.greenAccent),
+          title: const Text("Recipe not found"),
+        ),
+        body: const Center(child: Text("Recipe could not be loaded.")),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: recipe.name.getFirst(),
+        title: Text(recipe.name.getFirst()),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.greenAccent),
-          onPressed: () {},
+          icon: const Icon(Icons.arrow_back, color: Colors.greenAccent),
+          onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.favorite_border, color: Colors.greenAccent),
+            icon: const Icon(Icons.favorite_border, color: Colors.greenAccent),
             onPressed: () {},
           ),
           IconButton(
-            icon: Icon(Icons.share, color: Colors.greenAccent),
+            icon: const Icon(Icons.share, color: Colors.greenAccent),
             onPressed: () {},
           ),
         ],
@@ -44,121 +84,119 @@ class _RecipeScreenState extends State<RecipeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Title Section
-              Text(
-                recipe.name.getFirst(),
-                style: Theme.of(context).textTheme.headlineLarge
-              ),
-              SizedBox(height: 8),
-              Text(
-                // TODO: Replace with the actual author
-                'by nobody',
-                style: Theme.of(context).textTheme.bodySmall
-              ),
-              SizedBox(height: 8),
-              recipe.tags == null ? Container() :
-              Row(
-                children: recipe.tags!.map((tag) {
-                  return Container(
-                    margin: EdgeInsets.only(right: 8),
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.greenAccent,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Text(
-                      tag,
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 16),
-
-              // Image Section
-              Row(
-                children: [
-                  Expanded(
-                    child: Image.network(
-                      recipe.imageUrl ?? 'assets/placeholder.jpg',
-                      fit: BoxFit.cover,
-                      height: 200,
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Column(
-                    children: [
-                      Icon(Icons.access_time,
-                              size: 16, color: Colors.grey[600]),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${recipe.duration} min',
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                    ],
-                  ),
-                ],
-              ),
-              SizedBox(height: 16),
-
-              // Ingredients Section
-              Text(
-                '${recipe.ingredients?.length} Ingredients',
-                style: Theme.of(context).textTheme.bodyMedium
-              ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      '${recipe.servings} Servings',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                  Slider(
-                    value: 14,
-                    min: 1,
-                    max: 20,
-                    divisions: 19,
-                    label: '14',
-                    onChanged: (value) {},
-                  ),
-                ],
-              ),
-              SizedBox(height: 8),
-              // List of Ingredients
-              //IngredientsList(),
-
-              SizedBox(height: 16),
-
-              // Preparation Section
-              Text(
-                'Preparation',
-                style: Theme.of(context).textTheme.bodyMedium
-              ),
-              SizedBox(height: 8),
-              RecipeSteps(steps: recipe.steps)
+              _buildTitleSection(context),
+              const SizedBox(height: 16),
+              _buildImageSection(),
+              const SizedBox(height: 16),
+              _buildIngredientsSection(context),
+              const SizedBox(height: 16),
+              _buildPreparationSection(context),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favorites',
+    );
+  }
+
+  Widget _buildTitleSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          recipe.name.getFirst(),
+          style: Theme.of(context).textTheme.headlineLarge,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'by nobody', // Replace with the actual author
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 8),
+        if (recipe.tags != null)
+          Wrap(
+            spacing: 8.0,
+            children: recipe.tags!.map((tag) {
+              return Chip(
+                label: Text(tag),
+                backgroundColor: Colors.greenAccent,
+                labelStyle: const TextStyle(color: Colors.white),
+              );
+            }).toList(),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
+      ],
+    );
+  }
+
+  Widget _buildImageSection() {
+    return Row(
+      children: [
+        Expanded(
+          child: Image.network(
+            recipe.imageUrl ?? 'assets/placeholder.jpg',
+            fit: BoxFit.cover,
+            height: 200,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
-        selectedItemColor: Colors.greenAccent,
-      ),
+        ),
+        const SizedBox(width: 16),
+        Column(
+          children: [
+            Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
+            const SizedBox(width: 4),
+            Text(
+              '${recipe.duration} min',
+              style: Theme.of(context).textTheme.labelMedium,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildIngredientsSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '${recipe.ingredients?.length ?? 0} Ingredients',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                '$servings Servings',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+            Slider(
+              value: servings.toDouble(),
+              min: 1,
+              max: 20,
+              divisions: 19,
+              label: '$servings Servings',
+              onChanged: (value) => setServings(value.toInt()),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Uncomment and implement IngredientsList widget
+        // IngredientsList(ingredients: recipe.ingredients),
+      ],
+    );
+  }
+
+  Widget _buildPreparationSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Preparation',
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 8),
+        RecipeSteps(steps: recipe.steps),
+      ],
     );
   }
 }

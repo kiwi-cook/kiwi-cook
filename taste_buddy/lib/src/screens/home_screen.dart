@@ -60,12 +60,35 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
           // Quick Recipes Section
-          const HomeScreenSection(title: 'Quick recipes', subtitle: 'Ready in 20 minutes or less'),
-          RecipeList(recipes: shortRecipes, inSliver: true),
+          const HomeScreenSection(
+              title: 'Quick Recipes', subtitle: '20 minutes or less'),
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RecipeList(recipes: shortRecipes),
+                ],
+              ),
+            ),
+          ),
 
-          // Random Recipes Section
-          const HomeScreenSection(title: 'Surprise me'),
-          RecipeList(recipes: randomRecipes, inSliver: true),
+          // Quick Recipes Section
+          const HomeScreenSection(
+              title: 'Surprise Me'),
+          SliverPadding(
+            padding: const EdgeInsets.all(16.0),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  RecipeList(recipes: randomRecipes),
+                ],
+              ),
+            ),
+          ),
+
 
           // TODO: Implement Friends' Recipes Section
         ],

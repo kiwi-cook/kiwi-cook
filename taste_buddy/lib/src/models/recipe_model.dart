@@ -124,7 +124,7 @@ class Recipe {
     var stepList = json['steps'] as List<dynamic>;
     
     return Recipe(
-      id: json['_id'],
+      id: json['id'],
       name: MultiLanguageField(translations: Map<String, String>.from(json['name']['translations'])),
       description: MultiLanguageField(translations: Map<String, String>.from(json['description']['translations'])),
       ingredients: ingredientList?.map((e) => RecipeIngredient.fromJson(e)).toList(),
@@ -142,5 +142,11 @@ class Recipe {
       videoUrl: json['video_url'],
       tags: json['tags']?.cast<List<String>>(),
     );
+  }
+
+  void setServings(int servings) {
+    ingredients?.forEach((ingredient) {
+      ingredient.quantity = ingredient.quantity! * servings;
+    });
   }
 }
