@@ -7,21 +7,28 @@ version: 2
 updates:
   # Updates for Python modules
   - package-ecosystem: "pip"
-    directory: "/server-dev"
+    directory: "/taste_buddy_server"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    assignees: ["am9zZWY"]
+
+  # Updates for dart packages
+  - package-ecosystem: "pub"
+    directory: "/taste_buddy"
+    schedule:
+      interval: "daily"
     assignees: ["am9zZWY"]
 
   # Updates for npm packages
   - package-ecosystem: "npm"
-    directory: "/client"
+    directory: "/taste_buddy_ionic"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     assignees: ["am9zZWY"]
 
   # Updates for GitHub Actions workflows
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     assignees: ["am9zZWY"]
