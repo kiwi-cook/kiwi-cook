@@ -156,7 +156,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       children: [
         Text(
           '${recipe.ingredients?.length ?? 0} Ingredients',
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
         Row(
@@ -190,7 +190,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       children: [
         Text(
           'Preparation',
-          style: Theme.of(context).textTheme.bodyMedium,
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
         RecipeSteps(steps: recipe.steps),

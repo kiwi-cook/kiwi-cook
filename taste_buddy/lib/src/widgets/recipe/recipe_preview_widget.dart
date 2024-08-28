@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../models/recipe_model.dart';
-import '../../screens/recipe_screen.dart';
 
 class RecipePreview extends StatelessWidget {
   final Recipe recipe;
