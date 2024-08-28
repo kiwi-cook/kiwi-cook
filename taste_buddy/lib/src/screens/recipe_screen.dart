@@ -16,40 +16,40 @@ class RecipeScreen extends StatefulWidget {
 }
 
 class _RecipeScreenState extends State<RecipeScreen> {
-  late Recipe recipe;
+  Recipe? recipe;
   late int servings;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.recipeId == null) {
-        return;
-      }
-      final recipeProvider =
-          Provider.of<RecipeProvider>(context, listen: false);
-      recipeProvider.fetchRecipes();
-      final fetchedRecipe = recipeProvider.findById(widget.recipeId!);
-      if (fetchedRecipe != null) {
-        setState(() {
-          recipe = fetchedRecipe;
-          servings = recipe.servings;
-        });
-      }
-    });
+    _loadRecipe();
   }
 
-  void setServings(int newServings) {
+  Future<void> _loadRecipe() async {
+    if (widget.recipeId == null) {
+      setState(() => isLoading = false);
+      return;
+    }
+    final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+    await recipeProvider.fetchRecipes();
+    final fetchedRecipe = recipeProvider.findById(widget.recipeId!);
     setState(() {
-      servings = newServings;
-      recipe.setServings(newServings);
+      recipe = fetchedRecipe;
+      servings = recipe?.servings ?? 1;
+      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.recipeId == null || recipe == null) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (recipe == null) {
       return Scaffold(
         appBar: AppBar(
           leading: const BackButton(),
@@ -61,7 +61,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(recipe.name.getFirst()),
+        title: Text(recipe?.name.getFirst()),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -104,22 +104,34 @@ class _RecipeScreenState extends State<RecipeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          recipe.name.getFirst(),
+          recipe?.name.getFirst(),
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const SizedBox(height: 8),
         Text(
-          'by nobody', // Replace with the actual author
+          'by ${recipe?.src?.authors?.map((author) => author.name).join(', ')}',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 8),
-        if (recipe.tags != null)
+        if (recipe != null && recipe?.props['tags'] != null)
           Wrap(
-            spacing: 8.0,
-            children: recipe.tags!.map((tag) {
-              return Chip(
-                label: Text(tag),
-                labelStyle: const TextStyle(color: Colors.white),
+            spacing: 6.0,
+            runSpacing: 6.0,
+            children: recipe!.props['tags'].map<Widget>((tag) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                decoration: BoxDecoration(
+                  color: Colors.orange[50],
+                  borderRadius: BorderRadius.circular(16.0),
+                  border: Border.all(color: Colors.orange[200]!),
+                ),
+                child: Text(
+                  tag,
+                  style: TextStyle(
+                    color: Colors.orange[800],
+                    fontSize: 12.0,
+                  ),
+                ),
               );
             }).toList(),
           ),
@@ -132,7 +144,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       children: [
         Expanded(
           child: Image.network(
-            recipe.imageUrl ?? 'assets/placeholder.jpg',
+            recipe?.imageUrl ?? 'assets/placeholder.jpg',
             fit: BoxFit.cover,
             height: 200,
           ),
@@ -143,7 +155,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             Icon(Icons.access_time, size: 16, color: Colors.grey[600]),
             const SizedBox(width: 4),
             Text(
-              '${recipe.duration} min',
+              '${recipe?.duration} min',
               style: Theme.of(context).textTheme.labelMedium,
             ),
           ],
@@ -157,7 +169,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${recipe.ingredients?.length ?? 0} Ingredients',
+          '${recipe?.ingredients?.length ?? 0} Ingredients',
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
@@ -175,7 +187,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
               max: 20,
               divisions: 19,
               label: '$servings Servings',
-              onChanged: (value) => setServings(value.toInt()),
+              onChanged: (value) => recipe?.setServings(value.toInt()),
             ),
           ],
         ),
@@ -195,7 +207,9 @@ class _RecipeScreenState extends State<RecipeScreen> {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
-        RecipeSteps(steps: recipe.steps),
+        recipe?.steps != null
+            ? RecipeSteps(steps: recipe!.steps)
+            : const Center(child: Text('No steps found')),
       ],
     );
   }
