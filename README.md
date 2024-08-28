@@ -17,19 +17,19 @@ Ready to get cooking with Taste Buddy's backend? Follow these simple steps:
 
 2. **Navigate to Server Directory:**
    ```bash
-   cd taste-buddy/server
+   cd taste-buddy/taste_buddy_server
    ```
 
 3. **Run the Server:**
    ```bash
-   python main.py -s
+   python main.py -s -d
    ```
 
    Your development server is now sizzling, ready to serve up some delicious recipes!
 
 ### Client
 
-#### Start the Client App
+#### Start the Ionic App
 
 Let's bring the Taste Buddy experience to your kitchen:
 
@@ -40,7 +40,7 @@ Let's bring the Taste Buddy experience to your kitchen:
 
 2. **Navigate to Client Directory:**
    ```bash
-   cd taste-buddy/client
+   cd taste-buddy/taste_buddy_ionic
    ```
 
 3. **Install Dependencies:**
