@@ -51,7 +51,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
     if (widget.recipeId == null || recipe == null) {
       return Scaffold(
         appBar: AppBar(
-          leading: BackButton(color: Colors.greenAccent),
+          leading: const BackButton(),
           title: const Text("Recipe not found"),
         ),
         body: const Center(child: Text("Recipe could not be loaded.")),
@@ -61,19 +61,18 @@ class _RecipeScreenState extends State<RecipeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(recipe.name.getFirst()),
-        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.greenAccent),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.greenAccent),
+            icon: const Icon(Icons.favorite_border),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.share, color: Colors.greenAccent),
+            icon: const Icon(Icons.share),
             onPressed: () {},
           ),
         ],
@@ -118,7 +117,6 @@ class _RecipeScreenState extends State<RecipeScreen> {
             children: recipe.tags!.map((tag) {
               return Chip(
                 label: Text(tag),
-                backgroundColor: Colors.greenAccent,
                 labelStyle: const TextStyle(color: Colors.white),
               );
             }).toList(),

@@ -28,9 +28,7 @@ class HomeScreenSection extends StatelessWidget {
             const SizedBox(height: 4), // Small spacing between the title and subtitle
             subtitle != null ? Text(
               subtitle!,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.white70,
-                  ),
+              style: Theme.of(context).textTheme.titleSmall
             ) : 
             const SizedBox(height: 0), // No spacing if there is no subtitle
           ],

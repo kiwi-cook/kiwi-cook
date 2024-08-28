@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'router/taste_buddy_router.dart';
 
 class TasteBuddyApp extends StatelessWidget {
@@ -10,26 +9,30 @@ class TasteBuddyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Taste Buddy',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: Colors.black,
-        primaryColor: Colors.greenAccent,
-        textTheme: const TextTheme(
-          headlineSmall: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-          headlineMedium: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-          headlineLarge: TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: const ColorScheme.light(
+          primary: Colors.orange,
+          onPrimary: Colors.white,
+          secondary: Colors.orangeAccent,
+          onSecondary: Colors.black,
+          surface: Colors.white,
+          onSurface: Colors.black,
         ),
-        brightness: Brightness.dark,
       ),
-      routerConfig: taste_buddy_router, // Use the router configuration here
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.dark(
+          primary: Colors.orange,
+          onPrimary: Colors.black,
+          secondary: Colors.orangeAccent,
+          onSecondary: Colors.white,
+          surface: Colors.grey[900]!,
+          onSurface: Colors.white,
+        ),
+      ),
+      themeMode: ThemeMode.system,
+      routerConfig: taste_buddy_router,
     );
   }
 }
