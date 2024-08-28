@@ -2,11 +2,12 @@
 
 Server:
 - all:
-  - 'server/**/*'
+  - 'taste_buddy_server/**/*'
 
 Client:
 - all:
-  - 'client/**/*'
+  - 'taste_buddy/**/*'
+  - 'taste_buddy_ionic/**/*'
 
 Infra:
 - all:
