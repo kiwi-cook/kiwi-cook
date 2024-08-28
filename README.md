@@ -2,7 +2,7 @@
 
 Welcome to Taste Buddy, your personal culinary companion for discovering and preparing delicious, budget-friendly meals! Whether you're a kitchen novice or a seasoned home chef, Taste Buddy is here to help you find affordable recipes and cook like a pro.
 
-![Taste Buddy App](taste_buddy/assets/screenshots/AppMockUp Screenshots/Apple iPhone 11 Pro Max (1242x2688)/Apple iPhone 11 Pro Max Screenshot 0.png)
+![Taste Buddy App](<taste_buddy/assets/screenshots/AppMockUp Screenshots/Apple iPhone 11 Pro Max (1242x2688)/Apple iPhone 11 Pro Max Screenshot 0.png>)
 
 ## Getting Started
 
