@@ -5,7 +5,7 @@ from models.api import APIResponseList
 
 read_client = get_database()
 router = APIRouter(
-    prefix="/ingredients",
+    prefix="/ingredient",
     tags=["recipes"],
 )
 

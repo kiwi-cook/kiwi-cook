@@ -9,7 +9,7 @@ from pipeline.recipe_pipeline import run_pipeline
 
 client = get_database()
 router = APIRouter(
-    prefix="/recipes",
+    prefix="/recipe",
     tags=["recipes"],
 )
 
