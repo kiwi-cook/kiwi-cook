@@ -6,7 +6,7 @@
 # This script is used to publish the PWA to the gh-pages branch
 
 # build the app
-flutter build web --web-renderer html --release
+flutter build web --release
 
 # navigate into the build output directory
 cd build/web || exit
