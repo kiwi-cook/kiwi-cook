@@ -2414,8 +2414,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-<<<<<<< HEAD
-content-hash = "fe5299b77184e6208e2df771d5d7ff882dc6a1a0a3992cfd0c2cf2855bea1f3a"
-=======
-content-hash = "3c5e79049cae9ba334d2577063a2876c7eee6f29a95c93fce94c8f0b82c01d5b"
->>>>>>> refs/remotes/origin/main
+content-hash = "febec242b8c6272384c0189aa73035b72d2437bba5fb7f5e053dbfc2ff45d1d6"

@@ -21,7 +21,9 @@ router = APIRouter(
 def read_ingredients():
     return {
         "error": False,
-        "response": list(read_client["recipes"]["ingredients"].find({"type": "ingredient"})),
+        "response": list(
+            read_client["recipes"]["ingredients"].find({"type": "ingredient"})
+        ),
     }
 
 
@@ -36,5 +38,7 @@ def read_ingredients():
 def read_ingredient(ingredient_id: str):
     return {
         "error": False,
-        "response": list(read_client["recipes"]["ingredients"].find({"_id": ingredient_id})),
+        "response": list(
+            read_client["recipes"]["ingredients"].find({"_id": ingredient_id})
+        ),
     }

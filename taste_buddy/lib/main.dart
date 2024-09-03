@@ -6,7 +6,7 @@ import 'src/taste_buddy_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   runApp(
     MultiProvider(
       providers: [

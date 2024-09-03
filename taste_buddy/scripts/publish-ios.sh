@@ -12,4 +12,3 @@ cd ios || exit
 
 # Initialize fastlane
 fastlane init
-

@@ -13,6 +13,3 @@ npx husky add .husky/commit-msg "npx --no-install commitlint --edit $1"
 
 # install and configure lint-staged
 npx husky add .husky/pre-commit "npx --no-install lint-staged"
-
-
-

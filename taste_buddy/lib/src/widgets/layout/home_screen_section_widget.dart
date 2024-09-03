@@ -29,7 +29,7 @@ class HomeScreenSection extends StatelessWidget {
             subtitle != null ? Text(
               subtitle!,
               style: Theme.of(context).textTheme.titleSmall
-            ) : 
+            ) :
             const SizedBox(height: 0), // No spacing if there is no subtitle
           ],
         ),

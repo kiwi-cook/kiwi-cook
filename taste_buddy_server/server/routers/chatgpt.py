@@ -17,14 +17,17 @@ router = APIRouter(
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-@router.post("/ingredient/image",
-             response_description="Find ingredients in the image",
-             response_model=APIResponseList[str],
-             response_model_by_alias=False,
-             response_model_exclude_none=True)
+@router.post(
+    "/ingredient/image",
+    response_description="Find ingredients in the image",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+)
 async def analyze_ingredient_image(
-        current_user: Annotated[User, Depends(get_current_active_user)],
-        image: UploadFile | None = None):
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    image: UploadFile | None = None,
+):
 
     if not current_user.paying_customer:
         return {"error": True, "response": "User is not a paying customer"}
@@ -41,14 +44,18 @@ async def analyze_ingredient_image(
     return {"error": False, "response": ingredients_list}
 
 
-@router.post("/weekplan",
-             response_description="Generate a week plan based on the ingredients list and image",
-             response_model=APIResponseList[str],
-             response_model_by_alias=False,
-             response_model_exclude_none=True)
+@router.post(
+    "/weekplan",
+    response_description="Generate a week plan based on the ingredients list and image",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+)
 async def generate_weekplan(
-        current_user: Annotated[User, Depends(get_current_active_user)],
-        ingredients_list=None, image: UploadFile | None = None):
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    ingredients_list=None,
+    image: UploadFile | None = None,
+):
 
     if not current_user.paying_customer:
         return {"error": True, "response": "User is not a paying customer"}

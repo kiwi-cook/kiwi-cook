@@ -21,4 +21,3 @@ export const prepareThemeColor = () => {
 
     toggleDarkTheme(prefersDark.matches)
 };
-

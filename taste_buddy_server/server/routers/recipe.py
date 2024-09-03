@@ -46,8 +46,8 @@ def read_recipe(recipe_id: str):
     response_model_exclude_none=True,
 )
 async def add_recipes(
-        current_user: Annotated[User, Depends(get_current_active_user)],
-        urls: list[str]):
+    current_user: Annotated[User, Depends(get_current_active_user)], urls: list[str]
+):
     if current_user.disabled:
         return {"error": True, "response": "User is not active"}
 

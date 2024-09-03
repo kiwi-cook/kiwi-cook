@@ -37,13 +37,14 @@ app.include_router(user.router)
 client = get_database()
 
 
-@app.get("/",
-         response_description="Root endpoint",
-         response_model=APIResponse[str],
-         response_model_by_alias=False,
-         response_model_exclude_none=True,
-         summary="Root endpoint",
-         )
+@app.get(
+    "/",
+    response_description="Root endpoint",
+    response_model=APIResponse[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+    summary="Root endpoint",
+)
 def read_root():
     return {"error": False, "response": "Welcome to Taste Buddy!"}
 

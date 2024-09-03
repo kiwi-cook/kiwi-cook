@@ -26,7 +26,7 @@ class BottomNavBar extends StatelessWidget {
           icon: Icon(Icons.home),
           label: 'Home',
         ),
-        BottomNavigationBarItem(icon: 
+        BottomNavigationBarItem(icon:
           Icon(Icons.auto_awesome),
           label: 'Plan',
         )
