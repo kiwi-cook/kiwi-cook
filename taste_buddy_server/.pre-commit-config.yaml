@@ -18,4 +18,6 @@ repos:
     -   id: poetry-check
     -   id: poetry-lock
     -   id: poetry-export
+        args: ["-f", "requirements.txt"]
+        verbose: true
     -   id: poetry-install
