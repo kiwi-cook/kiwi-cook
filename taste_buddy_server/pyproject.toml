@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "taste-buddy-server"
+name = "taste_buddy_server"
 version = "0.1.0"
 description = ""
 authors = ["am9zZWY <46693545+am9zZWY@users.noreply.github.com>"]
@@ -30,6 +30,7 @@ pyjwt = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
 fastapi = "^0.112.1"
+pre-commit = "^3.8.0"
 
 [build-system]
 requires = ["poetry-core"]
