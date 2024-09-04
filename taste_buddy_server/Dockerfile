@@ -38,7 +38,7 @@ COPY / /code
 
 # Install only the absolutely necessary runtime dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates \
+    apt-get install -y --no-install-recommends ca-certificates netcat-openbsd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
