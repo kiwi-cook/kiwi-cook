@@ -1,33 +1,56 @@
-# Use the official slim Python image as a base image
-FROM python:slim-bullseye
+# Use Python 3.11 slim image as the base for the builder stage
+FROM python:3.11-slim-bullseye AS builder
 
 # Set the working directory in the container
 WORKDIR /code
 
-# Install necessary dependencies including build tools
-RUN apt-get update && apt-get install -y \
+# Install necessary dependencies and Poetry
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     gcc \
     libffi-dev \
-    build-essential
+    build-essential \
+    && curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
 
-# Install Poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-# Ensure Poetry is available in the shell by linking it globally
-RUN ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
-# Copy the pyproject.toml and poetry.lock files to the container
+# Copy only the files needed for installation
 COPY pyproject.toml poetry.lock* /code/
 
-# Install dependencies using Poetry
-RUN poetry install --no-root --no-dev
+# Install dependencies using Poetry, then clean up
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-root --no-dev --no-interaction --no-ansi \
+    && apt-get purge -y --auto-remove gcc libffi-dev build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /root/.cache/pip/*
 
-# Copy the entire project to the container
-COPY . /code/
+# Start a new stage for the final image
+FROM python:3.11-slim-bullseye
 
-# Expose port 80
-EXPOSE 80
+# Set the working directory in the container
+WORKDIR /code
+
+# Copy installed packages and necessary files from the builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
+COPY / /code
+
+# Install only the absolutely necessary runtime dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python unbuffered environment variable
+ENV PYTHONUNBUFFERED=1
+
+# Create a non-root user and switch to it
+RUN useradd -m myuser
+USER myuser
+
+# Expose port 8000
+EXPOSE 8000
 
 # Run the FastAPI app
-CMD ["poetry", "run", "uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "server.app:app", "--host", "0.0.0.0", "--port", "8000"]
