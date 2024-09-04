@@ -27,7 +27,7 @@ class RecipeProvider with ChangeNotifier {
       final response = await http.get(Uri.parse(
         kDebugMode
             ? 'http://127.0.0.1:8000/recipe/'
-            : 'https://taste-buddy.onrender.com/recipe/',
+            : 'https://taste-buddy.uk/recipe/',
       ));
 
       if (response.statusCode == 200) {
