@@ -1,39 +1,26 @@
 services:
-  app:
+  taste-buddy:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "${APP_PORT:-8000}:8000"
+    image: taste-buddy:latest
+    container_name: taste-buddy
+    restart: unless-stopped
     env_file:
       - .env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8000"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    restart: unless-stopped
     networks:
-      - app_network
-
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    command: tunnel run
-    environment:
-      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
-    env_file:
-      - .env
-    depends_on:
-      app:
-        condition: service_healthy
-    restart: unless-stopped
-    networks:
-      - app_network
+      - taste-buddy-network
 
 networks:
-  app_network:
+  taste-buddy-network:
     driver: bridge
-
-volumes:
-  app_data:
