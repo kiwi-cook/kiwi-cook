@@ -157,3 +157,61 @@ async def read_user_recipes(
         return {"error": True, "response": "User is not active"}
 
     return {"error": False, "response": current_user.recipes or []}
+
+
+@router.post(
+    "/me/recipes/add/",
+    response_description="Add a recipe to the current user",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+)
+async def add_user_recipe(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    recipe_id: Annotated[str, Form()],
+):
+    if current_user.disabled:
+        return {"error": True, "response": "User is not active"}
+
+    # If the user has no recipes, set it to an empty list
+    if current_user.recipes is None:
+        current_user.recipes = []
+
+    if recipe_id in current_user.recipes:
+        return {"error": True, "response": "Recipe already added"}
+
+    current_user.recipes.append(recipe_id)
+    write_client["users"]["users"].update_one(
+        {"username": current_user.username}, {"$set": {"recipes": current_user.recipes}}
+    )
+
+    return {"error": False, "response": current_user.recipes}
+
+
+@router.post(
+    "/me/recipes/remove/",
+    response_description="Remove a recipe from the current user",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+)
+async def remove_user_recipe(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    recipe_id: Annotated[str, Form()],
+):
+    if current_user.disabled:
+        return {"error": True, "response": "User is not active"}
+
+    # If the user has no recipes, set it to an empty list
+    if current_user.recipes is None:
+        current_user.recipes = []
+
+    if recipe_id not in current_user.recipes:
+        return {"error": True, "response": "Recipe not found"}
+
+    current_user.recipes.remove(recipe_id)
+    write_client["users"]["users"].update_one(
+        {"username": current_user.username}, {"$set": {"recipes": current_user.recipes}}
+    )
+
+    return {"error": False, "response": current_user.recipes}
