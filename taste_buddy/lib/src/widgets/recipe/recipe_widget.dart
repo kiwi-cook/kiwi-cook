@@ -20,8 +20,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildTitleSection(context),
@@ -32,7 +31,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
         const SizedBox(height: 16),
         _buildPreparationSection(context),
       ],
-    ));
+    );
   }
 
   Widget buildTitleSection(BuildContext context) {
@@ -257,12 +256,14 @@ class _RecipeWidgetState extends State<RecipeWidget> {
       children: [
         Text(
           'Preparation',
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
         ),
         const SizedBox(height: 8),
-        recipe!.steps != null
-            ? buildSteps(context)
-            : const Center(child: Text('No steps found')),
+        recipe.steps.isEmpty
+            ? const Center(child: Text('No steps found'))
+            : buildSteps(context)
       ],
     );
   }

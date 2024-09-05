@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:taste_buddy/src/screens/search_screen.dart';
 import 'package:taste_buddy/src/widgets/layout/home_screen_section_widget.dart';
 import '../providers/recipe_provider.dart';
+import '../providers/user_provider.dart';
 import '../widgets/layout/bottom_nav_bar_widget.dart';
 import '../widgets/recipe/recipe_of_the_day_widget.dart';
 import '../widgets/searchbar_widget.dart';
@@ -25,48 +26,10 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-void _showSearchModal(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.9,
-          minChildSize: 0.5,
-          maxChildSize: 0.95,
-          builder: (_, controller) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).canvasColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    height: 5,
-                    width: 40,
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2.5),
-                    ),
-                  ),
-                  Expanded(
-                    child: SearchScreen(scrollController: controller),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final recipeProvider = Provider.of<RecipeProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context);
 
     final shortRecipes = recipeProvider.recipes
         .where((recipe) => recipe.duration <= 20)
@@ -74,16 +37,31 @@ void _showSearchModal(BuildContext context) {
 
     final randomRecipes = (recipeProvider.recipes..shuffle()).take(4).toList();
 
+    final favoriteRecipes = recipeProvider.recipes
+        .where((recipe) => userProvider.user.recipes.contains(recipe.id))
+        .toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Hey Buddy!'),
+        title: userProvider.isLoggedIn
+            ? Text('Welcome ${userProvider.user.username}')
+            : const Text('Hey Buddy'),
         centerTitle: false,
         elevation: 0,
         actions: [
-          IconButton(
+          // TODO: Implement favorites screen
+          /* IconButton(
             icon: const Icon(Icons.favorite_border),
             onPressed: () => context.goNamed('favorites'),
-          ),
+          ),*/
+          IconButton(
+              icon: Icon(userProvider.isLoggedIn ? Icons.logout : Icons.login),
+              onPressed: () => {
+                    if (userProvider.isLoggedIn)
+                      userProvider.logout()
+                    else
+                      context.goNamed('login'),
+                  })
         ],
       ),
       body: CustomScrollView(
@@ -92,7 +70,10 @@ void _showSearchModal(BuildContext context) {
             padding: const EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(
               child: Searchbar(
-                onTap: () => _showSearchModal(context),
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SearchScreen()),
+                ),
               ),
             ),
           ),
@@ -112,6 +93,18 @@ void _showSearchModal(BuildContext context) {
               child: RecipeList(recipes: shortRecipes),
             ),
           ),
+          favoriteRecipes.isNotEmpty
+              ? const HomeScreenSection(
+                  title: 'Favorites', subtitle: 'Your saved recipes')
+              : const SliverToBoxAdapter(child: SizedBox(height: 0)),
+          favoriteRecipes.isNotEmpty
+              ? SliverPadding(
+                  padding: const EdgeInsets.all(16.0),
+                  sliver: SliverToBoxAdapter(
+                    child: RecipeList(recipes: favoriteRecipes),
+                  ),
+                )
+              : const SliverToBoxAdapter(child: SizedBox(height: 0)),
           const HomeScreenSection(title: 'Surprise Me'),
           SliverPadding(
             padding: const EdgeInsets.all(16.0),
@@ -121,7 +114,7 @@ void _showSearchModal(BuildContext context) {
           ),
         ],
       ),
-      bottomNavigationBar: const BottomNavBar(),
+      //bottomNavigationBar: const BottomNavBar(),
     );
   }
 }

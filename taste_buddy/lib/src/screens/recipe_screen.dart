@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../models/recipe_model.dart';
 import '../providers/recipe_provider.dart';
+import '../providers/user_provider.dart';
 import '../widgets/layout/bottom_nav_bar_widget.dart';
 import '../widgets/recipe/recipe_widget.dart';
 
@@ -41,6 +42,8 @@ class _RecipeScreenState extends State<RecipeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     if (isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -67,8 +70,12 @@ class _RecipeScreenState extends State<RecipeScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () {},
+            icon: Icon(
+              userProvider.isFavoriteRecipe(recipe!.id)
+                  ? Icons.favorite
+                  : Icons.favorite_border,
+            ),
+            onPressed: () => userProvider.toggleRecipeFavorite(recipe!.id),
           ),
           IconButton(
             icon: const Icon(Icons.share),
@@ -82,7 +89,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
           child: RecipeWidget(recipe: recipe!),
         ),
       ),
-      bottomNavigationBar: const BottomNavBar(),
+      //bottomNavigationBar: const BottomNavBar(),
     );
   }
 }

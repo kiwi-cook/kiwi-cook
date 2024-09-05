@@ -9,7 +9,7 @@ import 'package:fuzzywuzzy/fuzzywuzzy.dart';
 class SearchScreen extends StatefulWidget {
   final ScrollController? scrollController;
 
-  const SearchScreen({Key? key, this.scrollController}) : super(key: key);
+  const SearchScreen({super.key, this.scrollController});
 
   @override
   _SearchScreenState createState() => _SearchScreenState();
@@ -55,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
         return;
       }
 
-      const int FUZZY_RATIO_THRESHOLD = 70;
+      const int fuzzyRatioThreshold = 70;
       List<String> queryWords = query.toLowerCase().split(' ');
 
       for (var recipe in recipeProvider.recipes) {
@@ -65,14 +65,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 recipe.ingredients!.any((ingredient) => isSimpleMatch(
                     ingredient.ingredient.name.getFirst(), queryWords))) ||
             isFuzzyMatch(
-                recipe.name.getFirst(), queryWords, FUZZY_RATIO_THRESHOLD) ||
+                recipe.name.getFirst(), queryWords, fuzzyRatioThreshold) ||
             isFuzzyMatch(recipe.description.getFirst(), queryWords,
-                FUZZY_RATIO_THRESHOLD) ||
+                fuzzyRatioThreshold) ||
             (recipe.ingredients != null &&
                 recipe.ingredients!.any((ingredient) => isFuzzyMatch(
                     ingredient.ingredient.name.getFirst(),
                     queryWords,
-                    FUZZY_RATIO_THRESHOLD)))) {
+                    fuzzyRatioThreshold)))) {
           filteredRecipes.add(recipe);
         }
       }
@@ -98,6 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Searchbar(
               onSearch: (query) => search(query),
+              autofocus: true,
             ),
           ),
           Expanded(

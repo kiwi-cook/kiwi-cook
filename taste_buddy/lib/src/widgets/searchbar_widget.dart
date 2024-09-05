@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class Searchbar extends StatelessWidget {
   final Function()? onTap;
   final Function(String)? onSearch;
+  final bool autofocus;
 
   const Searchbar({
     super.key,
     this.onTap,
     this.onSearch,
+    this.autofocus = false,
   });
 
   @override
@@ -22,6 +24,7 @@ class Searchbar extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
+        autofocus: this.autofocus,
         onChanged: (value) {
           if (onSearch != null) {
             onSearch!(value);
