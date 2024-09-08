@@ -47,3 +47,5 @@ void popOrHome(BuildContext context) {
     context.goNamed('home');
   }
 }
+
+const webBaseUrl = 'https://taste-buddy.github.io';

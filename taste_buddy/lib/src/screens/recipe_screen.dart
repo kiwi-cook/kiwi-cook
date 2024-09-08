@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:taste_buddy/src/widgets/recipe/recipe_share_button_widget.dart';
 import '../models/recipe_model.dart';
 import '../providers/recipe_provider.dart';
 import '../providers/user_provider.dart';
@@ -83,21 +84,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
             icon: const Icon(Icons.search),
             onPressed: () => context.goNamed('search'),
           ),
-          IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: () async {
-                final box = context.findRenderObject() as RenderBox?;
-                final link = context.namedLocation(
-                  'recipe',
-                  pathParameters: {'id': recipe!.id.toString()},
-                  queryParameters: {'utm_source': 'share'},
-                );
-                await Share.share(
-                  'Check out this recipe: ${recipe!.name.getFirst()}\n\nLink: $link',
-                  subject: 'Amazing Recipe: ${recipe!.name.getFirst()}',
-                  sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
-                );
-              })
+          ShareButton(recipe: recipe!, baseUrl: webBaseUrl),
         ],
       ),
       body: Padding(
