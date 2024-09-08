@@ -50,10 +50,10 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0,
         actions: [
           // TODO: Implement favorites screen
-          /* IconButton(
-            icon: const Icon(Icons.favorite_border),
-            onPressed: () => context.goNamed('favorites'),
-          ),*/
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () => context.goNamed('search'),
+          ),
           IconButton(
               icon: Icon(userProvider.isLoggedIn ? Icons.logout : Icons.login),
               onPressed: () => {
@@ -66,17 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.all(16.0),
-            sliver: SliverToBoxAdapter(
-              child: Searchbar(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SearchScreen()),
-                ),
-              ),
-            ),
-          ),
           const SliverPadding(
             padding: EdgeInsets.all(16.0),
             sliver: SliverToBoxAdapter(

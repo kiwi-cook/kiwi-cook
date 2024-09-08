@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:taste_buddy/src/router/taste_buddy_router.dart';
 import '../models/recipe_model.dart';
 import '../providers/recipe_provider.dart';
 import '../widgets/searchbar_widget.dart';
@@ -91,6 +92,10 @@ class _SearchScreenState extends State<SearchScreen> {
         title: const Text('Search Recipes'),
         // Remove the back button when shown in a modal
         automaticallyImplyLeading: widget.scrollController == null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => popOrHome(context),
+        ),
       ),
       body: Column(
         children: [

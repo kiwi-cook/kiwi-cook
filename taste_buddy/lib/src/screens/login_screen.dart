@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:taste_buddy/src/providers/user_provider.dart';
 
+import '../router/taste_buddy_router.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -26,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => context.goNamed('home'),
+              onPressed: () => popOrHome(context),
             ),
           ),
           body: SingleChildScrollView(

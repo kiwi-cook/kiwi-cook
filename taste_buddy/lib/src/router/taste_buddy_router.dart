@@ -1,7 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taste_buddy/src/screens/home_screen.dart';
 import 'package:taste_buddy/src/screens/login_screen.dart';
 import 'package:taste_buddy/src/screens/recipe_screen.dart';
+import 'package:taste_buddy/src/screens/search_screen.dart';
 
 // GoRouter configuration
 final tasteBuddyRouter = GoRouter(
@@ -21,6 +23,11 @@ final tasteBuddyRouter = GoRouter(
       },
     ),
     GoRoute(
+      name: 'search',
+      path: '/search',
+      builder: (context, state) => const SearchScreen(),
+    ),
+    GoRoute(
       name: 'login',
       path: '/login',
       builder: (context, state) => const LoginScreen(),
@@ -32,3 +39,11 @@ final tasteBuddyRouter = GoRouter(
     )
   ],
 );
+
+void popOrHome(BuildContext context) {
+  if (Navigator.canPop(context)) {
+    Navigator.pop(context);
+  } else {
+    context.goNamed('home');
+  }
+}

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
 
@@ -10,19 +11,31 @@ class UserProvider with ChangeNotifier {
   String get accessToken => _accessToken;
   bool get isLoggedIn => _accessToken.isNotEmpty;
 
-  Future<Map<String, dynamic>> _sendAuthenticatedRequest(
-    String endpoint,
-    {
-      required String method,
-      Map<String, dynamic>? body,
-      bool isFormData = false,
+  // Constructor
+  UserProvider() {
+    _initializeUser();
+  }
+
+  // Initialize user data
+  Future<void> _initializeUser() async {
+    await loadToken();
+    if (_accessToken.isNotEmpty) {
+      await fetchUser();
     }
-  ) async {
+  }
+
+  Future<Map<String, dynamic>> _sendAuthenticatedRequest(
+    String endpoint, {
+    required String method,
+    Map<String, dynamic>? body,
+    bool isFormData = false,
+  }) async {
     if (_accessToken.isEmpty) {
       throw Exception('No access token available. Please authenticate first.');
     }
 
-    const baseUrl = kDebugMode ? 'http://127.0.0.1:8000' : 'https://taste-buddy.uk';
+    const baseUrl =
+        kDebugMode ? 'http://127.0.0.1:8000' : 'https://taste-buddy.uk';
     final uri = Uri.parse('$baseUrl$endpoint');
 
     final headers = {
@@ -43,11 +56,13 @@ class UserProvider with ChangeNotifier {
         if (isFormData) {
           response = await http.post(uri, headers: headers, body: body);
         } else {
-          response = await http.post(uri, headers: headers, body: jsonEncode(body));
+          response =
+              await http.post(uri, headers: headers, body: jsonEncode(body));
         }
         break;
       case 'PUT':
-        response = await http.put(uri, headers: headers, body: jsonEncode(body));
+        response =
+            await http.put(uri, headers: headers, body: jsonEncode(body));
         break;
       case 'DELETE':
         response = await http.delete(uri, headers: headers);
@@ -86,14 +101,29 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  Future<void> loadToken() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'jwt');
+    if (token != null) {
+      _accessToken = token;
+      notifyListeners();
+    }
+  }
+
   Future<void> fetchUser() async {
+    if (_accessToken.isEmpty) {
+      return; // Don't fetch if there's no token
+    }
     try {
-      final jsonResponse = await _sendAuthenticatedRequest('/users/me', method: 'GET', body: {});
+      final jsonResponse =
+          await _sendAuthenticatedRequest('/users/me', method: 'GET', body: {});
       _user = User.fromJson(jsonResponse);
       print('User: ${_user.username}');
       notifyListeners();
     } catch (e) {
-      throw Exception('Failed to load user: $e');
+      print('Failed to load user: $e');
+      // Optionally, you can clear the token if it's invalid
+      // await logout();
     }
   }
 
@@ -108,11 +138,13 @@ class UserProvider with ChangeNotifier {
       if (_user.recipes.contains(recipeId)) {
         print('Removing recipe $recipeId');
         _user.recipes.remove(recipeId);
-        await _sendAuthenticatedRequest('/users/me/recipes/remove/', method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
+        await _sendAuthenticatedRequest('/users/me/recipes/remove/',
+            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
       } else {
         print('Adding recipe $recipeId');
         _user.recipes.add(recipeId);
-        await _sendAuthenticatedRequest('/users/me/recipes/add/', method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
+        await _sendAuthenticatedRequest('/users/me/recipes/add/',
+            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
       }
       notifyListeners();
     } catch (e) {

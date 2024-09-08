@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/recipe_model.dart';
 import '../providers/recipe_provider.dart';
 import '../providers/user_provider.dart';
+import '../router/taste_buddy_router.dart';
 import '../widgets/layout/bottom_nav_bar_widget.dart';
 import '../widgets/recipe/recipe_widget.dart';
 
@@ -66,7 +68,7 @@ class _RecipeScreenState extends State<RecipeScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => popOrHome(context),
         ),
         actions: [
           IconButton(
@@ -78,9 +80,24 @@ class _RecipeScreenState extends State<RecipeScreen> {
             onPressed: () => userProvider.toggleRecipeFavorite(recipe!.id),
           ),
           IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: () {},
+            icon: const Icon(Icons.search),
+            onPressed: () => context.goNamed('search'),
           ),
+          IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () async {
+                final box = context.findRenderObject() as RenderBox?;
+                final link = context.namedLocation(
+                  'recipe',
+                  pathParameters: {'id': recipe!.id.toString()},
+                  queryParameters: {'utm_source': 'share'},
+                );
+                await Share.share(
+                  'Check out this recipe: ${recipe!.name.getFirst()}\n\nLink: $link',
+                  subject: 'Amazing Recipe: ${recipe!.name.getFirst()}',
+                  sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                );
+              })
         ],
       ),
       body: Padding(
