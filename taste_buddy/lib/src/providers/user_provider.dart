@@ -88,7 +88,7 @@ class UserProvider with ChangeNotifier {
 
   Future<void> fetchUser() async {
     try {
-      final jsonResponse = await _sendAuthenticatedRequest('/users/me/', method: 'GET', body: null);
+      final jsonResponse = await _sendAuthenticatedRequest('/users/me', method: 'GET', body: {});
       _user = User.fromJson(jsonResponse);
       print('User: ${_user.username}');
       notifyListeners();
