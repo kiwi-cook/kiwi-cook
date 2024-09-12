@@ -10,7 +10,7 @@ python = ">=3.10,<3.13"
 aiohttp = "^3.10.5"
 black = "^24.8.0"
 cachetools = "^5.5.0"
-fastapi = "^0.113.0"
+fastapi = "^0.114.1"
 httptools = "^0.6.1"
 ingredient-parser-nlp = "^1.1.1"
 openai = "^1.43.0"
@@ -29,7 +29,7 @@ argon2-cffi = "^23.1.0"
 pyjwt = "^2.9.0"
 
 [tool.poetry.group.dev.dependencies]
-fastapi = "^0.113.0"
+fastapi = "^0.114.1"
 pre-commit = "^3.8.0"
 
 [build-system]
