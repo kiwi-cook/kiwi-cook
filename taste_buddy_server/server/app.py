@@ -51,6 +51,13 @@ def read_root():
     return {"error": False, "response": "Welcome to Taste Buddy!"}
 
 
+@app.get(
+    "/health", response_description="Health check", response_model=APIResponse[str]
+)
+def health_check():
+    return {"error": False, "response": "OK"}
+
+
 def start_server(reload=False):
     print("Starting server...")
     uvicorn.run("server.app:app", host="0.0.0.0", port=8000, reload=reload)

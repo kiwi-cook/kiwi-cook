@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from database.mongodb import get_database
-from models.api import APIResponseList
+from models.api import APIResponse, APIResponseList
 from models.user import (
     User,
     get_current_active_user,
@@ -81,7 +81,7 @@ async def login_user(
 @router.get(
     "/me",
     response_description="Get current user",
-    response_model=User,
+    response_model=APIResponse[User],
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
