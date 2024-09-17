@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:taste_buddy/src/utils/fetch.dart';
 import '../models/user_model.dart';
 
 class UserProvider with ChangeNotifier {
@@ -21,60 +22,6 @@ class UserProvider with ChangeNotifier {
     await loadToken();
     if (_accessToken.isNotEmpty) {
       await fetchUser();
-    }
-  }
-
-  Future<Map<String, dynamic>> _sendAuthenticatedRequest(
-    String endpoint, {
-    required String method,
-    Map<String, dynamic>? body,
-    bool isFormData = false,
-  }) async {
-    if (_accessToken.isEmpty) {
-      throw Exception('No access token available. Please authenticate first.');
-    }
-
-    const baseUrl =
-        kDebugMode ? 'http://127.0.0.1:8000' : 'https://taste-buddy.uk';
-    final uri = Uri.parse('$baseUrl$endpoint');
-
-    final headers = {
-      'Authorization': 'Bearer $_accessToken',
-    };
-
-    if (!isFormData) {
-      headers['Content-Type'] = 'application/json';
-    }
-
-    http.Response response;
-
-    switch (method.toUpperCase()) {
-      case 'GET':
-        response = await http.get(uri, headers: headers);
-        break;
-      case 'POST':
-        if (isFormData) {
-          response = await http.post(uri, headers: headers, body: body);
-        } else {
-          response =
-              await http.post(uri, headers: headers, body: jsonEncode(body));
-        }
-        break;
-      case 'PUT':
-        response =
-            await http.put(uri, headers: headers, body: jsonEncode(body));
-        break;
-      case 'DELETE':
-        response = await http.delete(uri, headers: headers);
-        break;
-      default:
-        throw Exception('Unsupported HTTP method: $method');
-    }
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception('Request failed: ${response.statusCode}');
     }
   }
 
@@ -116,7 +63,7 @@ class UserProvider with ChangeNotifier {
     }
     try {
       final jsonResponse =
-          await _sendAuthenticatedRequest('/users/me', method: 'GET', body: {});
+          await sendRequest('/users/me', method: 'GET', body: {}, accessToken: _accessToken);
       _user = User.fromJson(jsonResponse);
       print('User: ${_user.username}');
       notifyListeners();
@@ -138,13 +85,13 @@ class UserProvider with ChangeNotifier {
       if (_user.recipes.contains(recipeId)) {
         print('Removing recipe $recipeId');
         _user.recipes.remove(recipeId);
-        await _sendAuthenticatedRequest('/users/me/recipes/remove/',
-            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
+        await sendRequest('/users/me/recipes/remove/',
+            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true, accessToken: _accessToken);
       } else {
         print('Adding recipe $recipeId');
         _user.recipes.add(recipeId);
-        await _sendAuthenticatedRequest('/users/me/recipes/add/',
-            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true);
+        await sendRequest('/users/me/recipes/add/',
+            method: 'POST', body: {'recipe_id': recipeId}, isFormData: true, accessToken: _accessToken);
       }
       notifyListeners();
     } catch (e) {

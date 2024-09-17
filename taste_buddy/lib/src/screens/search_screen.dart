@@ -19,6 +19,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   // List of recipes to display
   final List<Recipe> filteredRecipes = [];
+  String _query = '';
 
   @override
   Widget build(BuildContext context) {
@@ -55,9 +56,13 @@ class _SearchScreenState extends State<SearchScreen> {
         setState(() {});
         return;
       }
+      query = query.toLowerCase();
+
+      // Update the query state
+      _query = query;
 
       const int fuzzyRatioThreshold = 70;
-      List<String> queryWords = query.toLowerCase().split(' ');
+      List<String> queryWords = query.split(' ');
 
       for (var recipe in recipeProvider.recipes) {
         if (isSimpleMatch(recipe.name.getFirst(), queryWords) ||
@@ -106,19 +111,24 @@ class _SearchScreenState extends State<SearchScreen> {
               autofocus: true,
             ),
           ),
-          Expanded(
-            child: ListView.builder(
-              controller: widget.scrollController,
-              itemCount: filteredRecipes.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(filteredRecipes[index].name.getFirst()),
-                  onTap: () =>
-                      context.push('/recipe/${filteredRecipes[index].id}'),
-                );
-              },
-            ),
-          ),
+          filteredRecipes.isEmpty && _query.isNotEmpty
+              ? const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('No Recipes found'),
+                )
+              : Expanded(
+                  child: ListView.builder(
+                    controller: widget.scrollController,
+                    itemCount: filteredRecipes.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(filteredRecipes[index].name.getFirst()),
+                        onTap: () => context
+                            .push('/recipe/${filteredRecipes[index].id}'),
+                      );
+                    },
+                  ),
+                ),
         ],
       ),
     );

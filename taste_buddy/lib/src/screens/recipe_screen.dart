@@ -35,7 +35,11 @@ class _RecipeScreenState extends State<RecipeScreen> {
       return;
     }
     final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
-    await recipeProvider.fetchRecipes();
+    final success = await recipeProvider.fetchRecipes();
+    if (!success) {
+      setState(() => isLoading = false);
+      return;
+    }
     final fetchedRecipe = recipeProvider.findById(widget.recipeId!);
     setState(() {
       recipe = fetchedRecipe;
