@@ -9,27 +9,28 @@ class RecipeWidget extends StatefulWidget {
   const RecipeWidget({required this.recipe, super.key});
 
   @override
-  _RecipeWidgetState createState() => _RecipeWidgetState(recipe: recipe);
+  RecipeWidgetState createState() => RecipeWidgetState(recipe: recipe);
 }
 
-class _RecipeWidgetState extends State<RecipeWidget> {
+class RecipeWidgetState extends State<RecipeWidget> {
   final Recipe recipe;
   late int servings = recipe.servings;
 
-  _RecipeWidgetState({required this.recipe});
+  RecipeWidgetState({required this.recipe});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+
         buildTitleSection(context),
         const SizedBox(height: 16),
         buildImageSection(context),
         const SizedBox(height: 16),
         buildIngredientSection(context),
         const SizedBox(height: 16),
-        _buildPreparationSection(context),
+        buildPreparationSection(context),
       ],
     );
   }
@@ -38,18 +39,9 @@ class _RecipeWidgetState extends State<RecipeWidget> {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              recipe.name.getFirst(),
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
             Row(
               children: [
                 Icon(Icons.person, size: 16, color: Colors.grey[600]),
@@ -84,26 +76,19 @@ class _RecipeWidgetState extends State<RecipeWidget> {
               ),
           ],
         ),
-      ),
     );
   }
 
   Widget buildIngredients(BuildContext context) {
-    return Container(
-      child: const Text('Ingredients'),
-    );
+    return const Text('Ingredients');
   }
 
   Widget buildNutrition(BuildContext context) {
-    return Container(
-      child: const Text('Nutrition'),
-    );
+    return const Text('Nutrition');
   }
 
   Widget buildTags(BuildContext context) {
-    return Container(
-      child: const Text('Tags'),
-    );
+    return const Text('Tags');
   }
 
   Widget buildSteps(BuildContext context) {
@@ -215,7 +200,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                 onChanged: (value) {
                   setState(() {
                     servings = value.toInt();
-                    recipe?.setServings(servings);
+                    recipe.setServings(servings);
                   });
                 },
               ),
@@ -224,33 +209,67 @@ class _RecipeWidgetState extends State<RecipeWidget> {
         ),
         const SizedBox(height: 16),
         if (recipe.ingredients != null)
-          ...recipe.ingredients!.map((ingredient) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
+          Table(
+            columnWidths: const {
+              0: FixedColumnWidth(24),
+              1: FlexColumnWidth(5),
+              2: FlexColumnWidth(2),
+              3: FlexColumnWidth(2),
+            },
+            children: [
+              for (var ingredient in recipe.ingredients!)
+                TableRow(
                   children: [
-                    const Icon(Icons.check_circle_outline,
-                        size: 16, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        ingredient.ingredient.name.getFirst(),
-                        style: Theme.of(context).textTheme.bodyMedium,
+                    TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.top,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Icon(Icons.check_circle_outline,
+                            size: 16, color: Colors.green),
                       ),
                     ),
-                    Text(
-                      '${(ingredient.userQuantity! * 40).round() / 40} ${ingredient.unit ?? ''}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                    TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.top,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          ingredient.ingredient.name.getFirst(),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          softWrap: true,
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.top,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          '${(ingredient.userQuantity! * 40).round() / 40}',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      verticalAlignment: TableCellVerticalAlignment.top,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 8, horizontal: 4),
+                        child: Text(
+                          ingredient.unit ?? '',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              )),
+            ],
+          ),
       ],
     );
   }
 
-  Widget _buildPreparationSection(BuildContext context) {
+  Widget buildPreparationSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
