@@ -21,6 +21,7 @@ dependencies:
   fuzzywuzzy: ^1.2.0
   share_plus: ^10.0.2
   flutter_secure_storage: ^9.2.2
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_lints: ^4.0.0
