@@ -71,6 +71,9 @@ def authenticate_user(username: str, password: str):
 
 
 def create_access_token(data: dict, expires_minutes: int = None):
+    if SECRET_KEY is None:
+        raise ValueError("No secret key set for JWT")
+
     to_encode = data.copy()
     if expires_minutes:
         expire = datetime.now(timezone.utc) + timedelta(minutes=expires_minutes)

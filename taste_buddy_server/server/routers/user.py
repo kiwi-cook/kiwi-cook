@@ -58,7 +58,7 @@ async def create_user(
 @router.post(
     "/token",
     response_description="Login user",
-    response_model=Token,
+    response_model=APIResponse[Token],
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
@@ -72,10 +72,15 @@ async def login_user(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-    return Token(access_token=access_token, token_type="bearer")
+    try:
+        access_token = create_access_token(
+            data={"sub": user.username}, expires_minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+    except ValueError as e:
+        return {"error": True, "response": "Could not create access token"}
+
+    token = Token(access_token=access_token, token_type="bearer")
+    return {"error": False, "response": token}
 
 
 @router.get(
@@ -88,7 +93,7 @@ async def login_user(
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_active_user)],
 ):
-    return current_user
+    return {"error": False, "response": current_user}
 
 
 @router.get(
