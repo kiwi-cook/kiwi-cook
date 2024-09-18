@@ -14,8 +14,6 @@ from utils.auth import verify_password
 
 load_dotenv()
 
-read_client = get_database()
-
 # to get a string like this run:
 # openssl rand -hex 32
 SECRET_KEY = os.getenv("SECRET_JWT_KEY")
@@ -55,6 +53,7 @@ class UserInDB(User):
 
 
 def get_user(username: str):
+    read_client = get_database()
     user = read_client["users"]["users"].find_one({"username": username})
     if user is None:
         return None

@@ -7,7 +7,6 @@ from models.recipe import Recipe
 from models.user import User, get_current_active_user
 from pipeline.recipe_pipeline import run_pipeline
 
-client = get_database()
 router = APIRouter(
     prefix="/recipe",
     tags=["recipes"],
@@ -15,14 +14,15 @@ router = APIRouter(
 
 
 @router.get(
-    "/",
+    "",
     response_description="Get all recipes",
     response_model=APIResponseList[Recipe],
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
 def read_recipes():
-    return {"error": False, "response": list(client["recipes"]["recipes"].find())}
+    read_client = get_database()
+    return {"error": False, "response": list(read_client["recipes"]["recipes"].find())}
 
 
 @router.get(
@@ -33,14 +33,15 @@ def read_recipes():
     response_model_exclude_none=True,
 )
 def read_recipe(recipe_id: str):
+    read_client = get_database()
     return {
         "error": False,
-        "response": list(client["recipes"]["recipes"].find({"_id": recipe_id})),
+        "response": list(read_client["recipes"]["recipes"].find({"_id": recipe_id})),
     }
 
 
 @router.post(
-    "/url/",
+    "/url",
     response_description="Add a list of recipes from URLs",
     response_model_by_alias=False,
     response_model_exclude_none=True,

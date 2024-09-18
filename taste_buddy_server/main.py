@@ -5,9 +5,6 @@ import asyncio
 import sys
 import traceback
 
-from pipeline.recipe_pipeline import run_pipeline_from_file
-from server.app import start_server
-
 
 def main():
     # Parse the command line arguments
@@ -29,9 +26,12 @@ def main():
         args = parser.parse_args()
 
         if args.server:
-            # Start the server
+            from server.app import start_server
+
             start_server(reload=args.debug)
         elif args.file:
+            from pipeline.recipe_pipeline import run_pipeline_from_file
+
             asyncio.run(run_pipeline_from_file(args.file))
         else:
             parser.print_help()
