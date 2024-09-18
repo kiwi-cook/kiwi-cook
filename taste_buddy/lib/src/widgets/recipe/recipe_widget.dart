@@ -220,10 +220,10 @@ class RecipeWidgetState extends State<RecipeWidget> {
               for (var ingredient in recipe.ingredients!)
                 TableRow(
                   children: [
-                    TableCell(
+                    const TableCell(
                       verticalAlignment: TableCellVerticalAlignment.top,
                       child: Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: EdgeInsets.only(top: 8),
                         child: Icon(Icons.check_circle_outline,
                             size: 16, color: Colors.green),
                       ),

@@ -66,7 +66,7 @@ class _ErrorScreen extends StatelessWidget {
 class _RecipeContent extends StatefulWidget {
   final Recipe recipe;
 
-  const _RecipeContent({Key? key, required this.recipe}) : super(key: key);
+  const _RecipeContent({required this.recipe});
 
   @override
   _RecipeContentState createState() => _RecipeContentState();

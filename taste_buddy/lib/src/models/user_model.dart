@@ -1,5 +1,3 @@
-import 'recipe_model.dart';
-
 class User {
   String username;
   bool disabled;

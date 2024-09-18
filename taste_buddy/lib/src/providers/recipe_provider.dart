@@ -1,7 +1,5 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:collection/collection.dart';
 import 'package:taste_buddy/src/utils/fetch.dart';
 import '../models/recipe_model.dart';

@@ -48,7 +48,7 @@ Future<dynamic> sendRequest(
       throw Exception('Unsupported HTTP method: $method');
   }
 
-  if (response.statusCode == 200) {
+  if (response.statusCode == 200 || response.statusCode == 307) {
     final jsonResponse = jsonDecode(response.body);
     if (jsonResponse.containsKey('response')) {
       return jsonResponse['response'];

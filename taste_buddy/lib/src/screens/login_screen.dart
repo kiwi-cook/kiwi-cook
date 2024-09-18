@@ -6,7 +6,7 @@ import 'package:taste_buddy/src/providers/user_provider.dart';
 import '../router/taste_buddy_router.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();

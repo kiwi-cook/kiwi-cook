@@ -13,10 +13,10 @@ class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key, this.scrollController});
 
   @override
-  _SearchScreenState createState() => _SearchScreenState();
+  SearchScreenState createState() => SearchScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class SearchScreenState extends State<SearchScreen> {
   // List of recipes to display
   final List<Recipe> filteredRecipes = [];
   String _query = '';

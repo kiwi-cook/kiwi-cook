@@ -9,11 +9,11 @@ class DynamicTitleRecipeAppBar extends StatelessWidget {
   final double titleThreshold;
 
   const DynamicTitleRecipeAppBar({
-    Key? key,
+    super.key,
     required this.recipe,
     required this.scrollController,
     required this.titleThreshold,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

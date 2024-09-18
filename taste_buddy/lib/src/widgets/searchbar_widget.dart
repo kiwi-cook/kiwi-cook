@@ -24,7 +24,7 @@ class Searchbar extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        autofocus: this.autofocus,
+        autofocus: autofocus,
         onChanged: (value) {
           if (onSearch != null) {
             onSearch!(value);
