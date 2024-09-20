@@ -17,7 +17,11 @@ void main() async {
           update: (context, healthProvider, previousRecipeProvider) =>
             previousRecipeProvider ?? RecipeProvider(healthProvider),
         ),
-        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProxyProvider<RecipeProvider, UserProvider>(
+          create: (context) => UserProvider(context.read<RecipeProvider>()),
+          update: (context, recipeProvider, previousUserProvider) =>
+            previousUserProvider ?? UserProvider(recipeProvider),
+        ),
       ],
       child: const TasteBuddyApp(),
     ),

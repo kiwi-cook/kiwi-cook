@@ -1,5 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:taste_buddy/src/models/recipe_model.dart';
+import 'package:taste_buddy/src/providers/recipe_provider.dart';
 import 'package:taste_buddy/src/utils/fetch.dart';
 import '../models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,12 +12,13 @@ class UserProvider with ChangeNotifier {
   User get user => _user;
   String get accessToken => _accessToken;
   bool get isLoggedIn => _accessToken.isNotEmpty;
+  final RecipeProvider _recipeProvider;
 
   String _accessToken = '';
   final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   // Constructor
-  UserProvider() {
+  UserProvider(this._recipeProvider) {
     _initializeUser();
   }
 
@@ -149,5 +153,11 @@ class UserProvider with ChangeNotifier {
 
   bool isFavoriteRecipe(String recipeId) {
     return _user.recipes.contains(recipeId);
+  }
+
+  List<Recipe> getFavoriteRecipes() {
+    return _recipeProvider.recipes
+        .where((recipe) => user.recipes.contains(recipe.id))
+        .toList();
   }
 }

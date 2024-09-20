@@ -42,8 +42,10 @@ class RecipeProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final jsonList = await sendRequest('/recipe', method: 'GET') as List<dynamic>;
-      _recipes = jsonList.map<Recipe>((recipe) => Recipe.fromJson(recipe)).toList();
+      final jsonList =
+          await sendRequest('/recipe', method: 'GET') as List<dynamic>;
+      _recipes =
+          jsonList.map<Recipe>((recipe) => Recipe.fromJson(recipe)).toList();
     } catch (e) {
       rethrow;
     } finally {
@@ -72,6 +74,14 @@ class RecipeProvider with ChangeNotifier {
   void dispose() {
     _healthProvider.removeListener(_onHealthStatusChanged);
     super.dispose();
+  }
+
+  List<Recipe> getShortRecipes() {
+    return recipes.where((recipe) => recipe.duration <= 20).toList();
+  }
+
+  List<Recipe> getRandomRecipes({int max = 4}) {
+    return (recipes..shuffle()).take(max).toList();
   }
 }
 

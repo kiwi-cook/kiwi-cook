@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taste_buddy/src/screens/home_screen.dart';
 import 'package:taste_buddy/src/screens/login_screen.dart';
+import 'package:taste_buddy/src/screens/plan_screen.dart';
 import 'package:taste_buddy/src/screens/recipe_screen.dart';
 import 'package:taste_buddy/src/screens/search_screen.dart';
 
@@ -35,7 +36,7 @@ final tasteBuddyRouter = GoRouter(
     GoRoute(
       name: 'plan',
       path: '/plan',
-      builder: (context, state) => const HomeScreen(),
+      builder: (context, state) => const PlanScreen(),
     )
   ],
 );

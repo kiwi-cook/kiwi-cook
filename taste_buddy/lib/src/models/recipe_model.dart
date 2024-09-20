@@ -14,6 +14,11 @@ class MultiLanguageField {
   String getFirst() {
     return translations.values.first;
   }
+
+  @override
+  String toString() {
+    return translations.toString();
+  }
 }
 
 class Ingredient {
@@ -28,6 +33,11 @@ class Ingredient {
       name: MultiLanguageField(
           translations: Map<String, String>.from(json['name']['translations'])),
     );
+  }
+
+  @override
+  String toString() {
+    return name.toString();
   }
 }
 
@@ -54,6 +64,11 @@ class RecipeIngredient {
       userQuantity: json['quantity']?.toDouble(),
       unit: json['unit'],
     );
+  }
+
+  @override
+  String toString() {
+    return ingredient.toString();
   }
 }
 
@@ -237,5 +252,10 @@ class Recipe {
       ingredient.userQuantity =
           ingredient.quantity * (servings ?? this.servings);
     });
+  }
+
+  @override
+  String toString() {
+    return 'Recipe{id: $id, name: $name';
   }
 }
