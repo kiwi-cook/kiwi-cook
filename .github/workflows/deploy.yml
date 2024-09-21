@@ -3,7 +3,7 @@ name: Flutter Web Deploy
 on:
   push:
     branches:
-      - main  # Change this to your main branch name if different
+      - main
 
 jobs:
   build-and-deploy:
@@ -18,18 +18,23 @@ jobs:
         flutter-version: '3.x'  # Specify your Flutter version
         channel: 'stable'
 
+    - name: Navigate to project directory
+      run: cd taste_buddy
+
     - name: Get dependencies
       run: flutter pub get
+      working-directory: ./taste_buddy
 
     - name: Build web
       run: flutter build web --release
+      working-directory: ./taste_buddy
 
     - name: Deploy to External Repository
       uses: peaceiris/actions-gh-pages@v3
       with:
         deploy_key: ${{ secrets.DEPLOY_KEY }}
         external_repository: taste-buddy/taste-buddy.github.io
-        publish_dir: ./build/web
-        publish_branch: main
+        publish_dir: ./taste_buddy/build/web
+        publish_branch: main  # Usually, GitHub Pages repositories use 'main' as the default branch
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
