@@ -29,11 +29,6 @@ jobs:
       run: flutter build web --release
       working-directory: ./taste_buddy
 
-    - name: Debug - List Secrets
-      run: |
-        echo "Available secrets:"
-        echo "${{ toJson(secrets) }}" | jq 'keys'
-
     - name: Deploy to External Repository
       uses: peaceiris/actions-gh-pages@v3
       with:
