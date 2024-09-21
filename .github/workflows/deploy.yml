@@ -15,34 +15,30 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.x'  # Specify your Flutter version
+        flutter-version: '3.x'
         channel: 'stable'
 
-    - name: Navigate to project directory
-      run: cd taste_buddy
-
-    - name: Get dependencies
-      run: flutter pub get
-      working-directory: ./taste_buddy
-
-    - name: Build web
-      run: flutter build web --release
-      working-directory: ./taste_buddy
-
-    - name: Deploy to External Repository
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        deploy_key: ${{ secrets.DEPLOY_KEY }}
-        external_repository: taste-buddy/taste-buddy.github.io
-        publish_dir: ./taste_buddy/build/web
-        publish_branch: main
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
-
-    - name: Debug - Deployment Step
-      if: failure()
+    - name: Clean and Build Web
       run: |
-        echo "Deployment step failed"
-        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
-        echo "Listing contents of build directory:"
-        ls -R ./taste_buddy/build/web
+        rm -rf build/web
+        flutter build web --release
+
+    - name: Deploy to GitHub Pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd build/web
+        git init
+        git add -A
+        git config user.name "taste-buddy"
+        git config user.email ""
+        git config --local commit.gpgsign false
+        git commit -m 'deploy'
+        git branch -M master
+        git push -f https://x-access-token:${GITHUB_TOKEN}@github.com/taste-buddy/taste-buddy.github.io.git master
+
+    - name: Clean up
+      if: always()
+      run: |
+        cd $GITHUB_WORKSPACE
+        rm -rf build/web
