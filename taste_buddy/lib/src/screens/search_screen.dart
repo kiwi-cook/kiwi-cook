@@ -9,37 +9,54 @@ import '../widgets/searchbar_widget.dart';
 
 class SearchScreen extends StatefulWidget {
   final ScrollController? scrollController;
+  final String? initialQuery;
 
-  const SearchScreen({super.key, this.scrollController});
+  const SearchScreen({super.key, this.scrollController, this.initialQuery});
 
   @override
   SearchScreenState createState() => SearchScreenState();
 }
 
 class SearchScreenState extends State<SearchScreen> {
-  // List of recipes to display
   final List<Recipe> filteredRecipes = [];
-  String _query = '';
+  late String _query;
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _query = widget.initialQuery ?? '';
+    _searchController = TextEditingController(text: _query);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_query.isNotEmpty) {
+        search(_query);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void search(String query) {
+    final recipeProvider = Provider.of<RecipeProvider>(context, listen: false);
+    setState(() {
+      _query = query;
+      filteredRecipes.clear();
+      if (query.isNotEmpty) {
+        final results = fuzzySearch(recipeProvider.recipes, query);
+        filteredRecipes.addAll(results);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final recipeProvider = Provider.of<RecipeProvider>(context);
-
-    void search(String query) {
-      setState(() {
-        _query = query;
-        filteredRecipes.clear();
-        if (query.isNotEmpty) {
-          final results = fuzzySearch(recipeProvider.recipes, query);
-          filteredRecipes.addAll(results);
-        }
-      });
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Recipes'),
-        // Remove the back button when shown in a modal
         automaticallyImplyLeading: widget.scrollController == null,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -67,8 +84,7 @@ class SearchScreenState extends State<SearchScreen> {
                     itemBuilder: (context, index) {
                       return ListTile(
                         title: Text(filteredRecipes[index].name.getFirst()),
-                        onTap: () => context
-                            .push('/recipe/${filteredRecipes[index].id}'),
+                        onTap: () => context.push('/recipe/${filteredRecipes[index].id}'),
                       );
                     },
                   ),

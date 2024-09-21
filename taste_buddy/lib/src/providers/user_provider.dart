@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:provider/provider.dart';
 import 'package:taste_buddy/src/models/recipe_model.dart';
 import 'package:taste_buddy/src/providers/recipe_provider.dart';
 import 'package:taste_buddy/src/utils/fetch.dart';

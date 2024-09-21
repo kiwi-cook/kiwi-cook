@@ -18,7 +18,7 @@ class RecipePreview extends StatelessWidget {
         maxHeight: 250, // Set the maximum height
       ),
       child: GestureDetector(
-        onTap: () => context.push('/recipe/${recipe.id}'),
+        onTap: () => context.go('/recipe/${recipe.id}'),
         child: Card(
           elevation: 4,
           shape:
