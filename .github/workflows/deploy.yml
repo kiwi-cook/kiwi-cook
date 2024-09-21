@@ -29,12 +29,25 @@ jobs:
       run: flutter build web --release
       working-directory: ./taste_buddy
 
+    - name: Debug - List Secrets
+      run: |
+        echo "Available secrets:"
+        echo "${{ toJson(secrets) }}" | jq 'keys'
+
     - name: Deploy to External Repository
       uses: peaceiris/actions-gh-pages@v3
       with:
         deploy_key: ${{ secrets.DEPLOY_KEY }}
         external_repository: taste-buddy/taste-buddy.github.io
         publish_dir: ./taste_buddy/build/web
-        publish_branch: main  # Usually, GitHub Pages repositories use 'main' as the default branch
+        publish_branch: main
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
+
+    - name: Debug - Deployment Step
+      if: failure()
+      run: |
+        echo "Deployment step failed"
+        echo "GITHUB_WORKSPACE: $GITHUB_WORKSPACE"
+        echo "Listing contents of build directory:"
+        ls -R ./taste_buddy/build/web
