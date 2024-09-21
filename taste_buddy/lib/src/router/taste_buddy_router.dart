@@ -10,7 +10,7 @@ import 'package:taste_buddy/src/screens/search_screen.dart';
 
 void configureApp() {
   if (kIsWeb) {
-    setUrlStrategy(const PathUrlStrategy());
+    setUrlStrategy(PathUrlStrategy());
   }
 }
 
