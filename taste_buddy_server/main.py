@@ -18,9 +18,6 @@ def main():
     parser.add_argument(
         "-s", "--server", help="Run the server", action="store_true", required=False
     )
-    parser.add_argument(
-        "-d", "--debug", help="Debug mode", action="store_true", required=False
-    )
 
     try:
         args = parser.parse_args()
@@ -28,7 +25,7 @@ def main():
         if args.server:
             from server.app import start_server
 
-            start_server(reload=args.debug)
+            start_server()
         elif args.file:
             from pipeline.recipe_pipeline import run_pipeline_from_file
 
