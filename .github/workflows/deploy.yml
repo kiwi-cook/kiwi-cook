@@ -20,6 +20,7 @@ jobs:
 
     - name: Clean and Build Web
       run: |
+        cd taste_buddy
         rm -rf build/web
         flutter build web --release
 
@@ -27,7 +28,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd build/web
+        cd taste_buddy/build/web
         git init
         git add -A
         git config user.name "taste-buddy"
@@ -40,5 +41,5 @@ jobs:
     - name: Clean up
       if: always()
       run: |
-        cd $GITHUB_WORKSPACE
+        cd $GITHUB_WORKSPACE/taste_buddy
         rm -rf build/web
