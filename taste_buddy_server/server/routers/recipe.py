@@ -1,4 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+import logging
+from urllib.parse import urlparse
+
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import JSONResponse
+from pymongo.errors import PyMongoError
 from starlette import status
 from typing_extensions import Annotated
 
@@ -8,10 +14,21 @@ from models.recipe import Recipe
 from models.user import User, get_current_active_user
 from pipeline.recipe_pipeline import run_pipeline
 
-router = APIRouter(
-    prefix="/recipe",
-    tags=["recipes"],
-)
+router = APIRouter(prefix="/recipe", tags=["recipes"])
+
+logger = logging.getLogger(__name__)
+
+
+def validate_object_id(id: str) -> bool:
+    return ObjectId.is_valid(id)
+
+
+def validate_url(url: str) -> bool:
+    try:
+        result = urlparse(url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
 
 
 @router.get(
@@ -22,15 +39,22 @@ router = APIRouter(
     response_model_exclude_none=True,
     status_code=status.HTTP_200_OK,
 )
-def read_recipes():
-    read_client = get_database()
-    recipes = list(read_client["recipes"]["recipes"].find())
-    if not recipes:
+async def read_recipes(limit: int = Query(50, ge=1, le=100)):
+    try:
+        read_client = get_database()
+        recipes = list(read_client["recipes"]["recipes"].find().limit(limit))
+        if not recipes:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": True, "detail": "No recipes found"},
+            )
+        return {"error": False, "response": recipes}
+    except PyMongoError as e:
+        logger.error(f"Database error: {str(e)}")
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No recipes found",
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
         )
-    return {"error": False, "response": recipes}
 
 
 @router.get(
@@ -41,18 +65,29 @@ def read_recipes():
     response_model_exclude_none=True,
     status_code=status.HTTP_200_OK,
 )
-def read_recipe(recipe_id: str):
-    read_client = get_database()
-    recipe = list(read_client["recipes"]["recipes"].find({"_id": recipe_id}))
-    if not recipe:
+async def read_recipe(recipe_id: str):
+    if not validate_object_id(recipe_id):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Recipe not found",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid recipe ID"
         )
-    return {
-        "error": False,
-        "response": recipe,
-    }
+
+    try:
+        read_client = get_database()
+        recipe = list(
+            read_client["recipes"]["recipes"].find({"_id": ObjectId(recipe_id)})
+        )
+        if not recipe:
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": True, "detail": "Recipe not found"},
+            )
+        return {"error": False, "response": recipe}
+    except PyMongoError as e:
+        logger.error(f"Database error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.post(
@@ -63,26 +98,39 @@ def read_recipe(recipe_id: str):
     status_code=status.HTTP_201_CREATED,
 )
 async def add_recipes(
-    current_user: Annotated[User, Depends(get_current_active_user)], urls: list[str]
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    urls: list[str] = Query(..., max_length=10),
 ):
     if current_user.disabled:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="User is not active",
+            status_code=status.HTTP_403_FORBIDDEN, detail="User is not active"
         )
 
     if not urls:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No URLs provided",
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No URLs provided"
+        )
+
+    valid_urls = [url for url in urls if validate_url(url)]
+    if not valid_urls:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="No valid URLs provided"
         )
 
     try:
-        await run_pipeline(urls)
+        processed_urls = await run_pipeline(valid_urls)
+        return {
+            "error": False,
+            "response": f"{len(processed_urls)} recipes added to the database.",
+        }
+    except ValueError as e:
+        logger.error(f"Value error in pipeline: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid input data"
+        )
     except Exception as e:
+        logger.error(f"Unexpected error in pipeline: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error processing recipes: {str(e)}",
+            detail="Internal server error",
         )
-
-    return {"error": False, "response": f"{len(urls)} recipes added to the database."}

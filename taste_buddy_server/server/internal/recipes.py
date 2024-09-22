@@ -1,13 +1,16 @@
+import logging
+
 from fastapi import APIRouter
 from starlette import status
 
 from models.api import APIResponseList
 from models.recipe import Recipe
-from pipeline.parse import RecipeParser
 from pipeline.recipe_pipeline import run_pipeline
 from server.app import client
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 @router.post(
@@ -43,4 +46,4 @@ async def parse_recipes(recipe_urls: list[str]):
         await run_pipeline(recipe_urls)
     except Exception as e:
         error = True
-    return {"error": error, "response": "Recipes parsed successfully"}
+    return {"error": error, "response": f"Recipes parsed from {len(recipe_urls)} URLs"}

@@ -1,13 +1,15 @@
+import logging
 from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, Depends, Response
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, UploadFile, Depends, HTTPException, File
+from pydantic import BaseModel, conlist
 from starlette import status
 
 from chatgpt.ingredients import find_ingredients_in_image
 from chatgpt.weekplan import generate_weekplan_from_ingredients_image
 from models.api import APIResponseList
 from models.user import User, get_current_active_user
+from server.limit import limiter
 
 router = APIRouter(
     prefix="/chatgpt",
@@ -15,7 +17,24 @@ router = APIRouter(
     include_in_schema=False,
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+logger = logging.getLogger(__name__)
+
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
+
+
+class IngredientsRequest(BaseModel):
+    ingredients: conlist(str, max_items=100)  # Limit the number of ingredients
+
+
+def validate_image(file: UploadFile) -> None:
+    if file.content_type not in [f"image/{ext}" for ext in ALLOWED_EXTENSIONS]:
+        raise HTTPException(status_code=400, detail="Invalid file type")
+
+    file.file.seek(0, 2)
+    if file.file.tell() > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large")
+    file.file.seek(0)
 
 
 @router.post(
@@ -25,24 +44,28 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
+@limiter.limit("5/minute")
 async def analyze_ingredient_image(
-    response: Response,
     current_user: Annotated[User, Depends(get_current_active_user)],
-    image: UploadFile | None = None,
+    image: UploadFile = File(...),
 ):
     if not current_user.paying_customer:
-        response.status_code = status.HTTP_402_PAYMENT_REQUIRED
-        return {"error": True, "response": "User is not a paying customer"}
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="User is not a paying customer",
+        )
 
-    if image is None:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {"error": True, "response": "No image provided"}
+    validate_image(image)
 
-    contents = await image.read()
-    ingredients_list = find_ingredients_in_image(contents)
+    try:
+        contents = await image.read()
+        ingredients_list = find_ingredients_in_image(contents)
+    except Exception as e:
+        logger.error(f"Error processing image: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error processing the image")
 
     if ingredients_list is None:
-        return {"error": True, "response": "Error processing the image"}
+        raise HTTPException(status_code=500, detail="Error processing the image")
 
     return {"error": False, "response": ingredients_list}
 
@@ -54,25 +77,32 @@ async def analyze_ingredient_image(
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
+@limiter.limit("2/minute")
 async def generate_weekplan(
     current_user: Annotated[User, Depends(get_current_active_user)],
-    response: Response,
-    ingredients_list=None,
-    image: UploadFile | None = None,
+    ingredients: IngredientsRequest = None,
+    image: UploadFile = File(None),
 ):
     if not current_user.paying_customer:
-        response.status_code = status.HTTP_402_PAYMENT_REQUIRED
-        return {"error": True, "response": "User is not a paying customer"}
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="User is not a paying customer",
+        )
 
-    if ingredients_list is None:
-        ingredients_list = []
-    if not ingredients_list and not image:
-        response.status_code = status.HTTP_400_BAD_REQUEST
-        return {"error": True, "response": "No ingredients or image provided"}
+    if ingredients is None and image is None:
+        raise HTTPException(status_code=400, detail="No ingredients or image provided")
 
-    response = generate_weekplan_from_ingredients_image(ingredients_list, image)
+    if image:
+        validate_image(image)
+
+    try:
+        ingredients_list = ingredients.ingredients if ingredients else []
+        response = generate_weekplan_from_ingredients_image(ingredients_list, image)
+    except Exception as e:
+        logger.error(f"Error generating weekplan: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error generating the weekplan")
 
     if not response:
-        return {"error": True, "response": "Error generating the weekplan"}
+        raise HTTPException(status_code=500, detail="Error generating the weekplan")
 
     return {"error": False, "response": response}

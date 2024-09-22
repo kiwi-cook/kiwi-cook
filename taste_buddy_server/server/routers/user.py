@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated
 
 from dotenv import load_dotenv
@@ -6,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from database.mongodb import get_database
-from lib.auth import hash_password
+from lib.auth import hash_password, is_secure_password
 from models.api import APIResponse, APIResponseList
 from models.user import (
     User,
@@ -28,6 +29,8 @@ load_dotenv()
 write_client = get_database(rights="WRITE")
 read_client = get_database(rights="READ")
 
+logger = logging.getLogger(__name__)
+
 
 @router.post(
     "/add",
@@ -41,20 +44,20 @@ async def create_user(
     password: Annotated[str, Form()],
     response: Response,
 ):
-    if read_client["users"]["users"].find_one({"username": username}):
+    if not is_secure_password(password):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already exists",
+            status_code=400,
+            detail="Password is not secure enough",
         )
 
+    if read_client["users"]["users"].find_one({"username": username}):
+        raise HTTPException(status_code=400, detail="Username not available")
+
     hashed_password = hash_password(password)
-    print(f"Hashed password: {username}[{hashed_password}]")
     user = UserInDB(username=username, hashed_password=hashed_password)
 
-    return {
-        "error": False,
-        "response": write_client["users"]["users"].insert_one(user.model_dump()),
-    }
+    result = write_client["users"]["users"].insert_one(user.model_dump())
+    return {"error": False, "response": str(result.inserted_id)}
 
 
 @router.post(
