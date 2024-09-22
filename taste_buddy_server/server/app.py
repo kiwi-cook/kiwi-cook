@@ -8,7 +8,7 @@ from models.api import APIResponse
 from server.routers import ingredient, chatgpt, recipe, user
 
 load_dotenv()
-ENV = os.getenv("ENV") or "prod"
+ENV = os.getenv("ENV") or "production"
 
 
 def setup_fastapi():

@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, UploadFile, Depends, Response
 from fastapi.security import OAuth2PasswordBearer
+from starlette import status
 
 from chatgpt.ingredients import find_ingredients_in_image
 from chatgpt.weekplan import generate_weekplan_from_ingredients_image
@@ -25,14 +26,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
     response_model_exclude_none=True,
 )
 async def analyze_ingredient_image(
+    response: Response,
     current_user: Annotated[User, Depends(get_current_active_user)],
     image: UploadFile | None = None,
 ):
 
     if not current_user.paying_customer:
+        response.status_code = status.HTTP_402_PAYMENT_REQUIRED
         return {"error": True, "response": "User is not a paying customer"}
 
     if image is None:
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return {"error": True, "response": "No image provided"}
 
     contents = await image.read()
@@ -53,16 +57,19 @@ async def analyze_ingredient_image(
 )
 async def generate_weekplan(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
     ingredients_list=None,
     image: UploadFile | None = None,
 ):
 
     if not current_user.paying_customer:
+        response.status_code = status.HTTP_402_PAYMENT_REQUIRED
         return {"error": True, "response": "User is not a paying customer"}
 
     if ingredients_list is None:
         ingredients_list = []
     if not ingredients_list and not image:
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return {"error": True, "response": "No ingredients or image provided"}
 
     response = generate_weekplan_from_ingredients_image(ingredients_list, image)

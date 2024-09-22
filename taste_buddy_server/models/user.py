@@ -41,6 +41,7 @@ class User(BaseModel):
 
     friends: list[str] | None = None
     recipes: list[str] | None = None
+    weekplan: list[str] | None = None
 
     def disable(self):
         self.disabled = True

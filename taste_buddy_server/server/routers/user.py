@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, APIRouter, Form
+from fastapi import Depends, HTTPException, APIRouter, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
@@ -34,10 +34,12 @@ read_client = get_database(rights="READ")
     response_description="Create a new user",
     response_model_by_alias=False,
     response_model_exclude_none=True,
-    include_in_schema=False,
+    status_code=status.HTTP_201_CREATED,
 )
 async def create_user(
-    username: Annotated[str, Form()], password: Annotated[str, Form()]
+    username: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+    response: Response,
 ):
     if read_client["users"]["users"].find_one({"username": username}):
         raise HTTPException(
@@ -58,12 +60,14 @@ async def create_user(
 @router.post(
     "/token",
     response_description="Login user",
-    response_model=APIResponse[Token],
+    response_model=Token,
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def login_user(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    response: Response,
 ) -> Token:
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -77,10 +81,13 @@ async def login_user(
             data={"sub": user.username}, expires_minutes=ACCESS_TOKEN_EXPIRE_MINUTES
         )
     except ValueError as e:
-        return {"error": True, "response": "Could not create access token"}
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not create access token",
+        )
 
     token = Token(access_token=access_token, token_type="bearer")
-    return {"error": False, "response": token}
+    return token
 
 
 @router.get(
@@ -89,9 +96,11 @@ async def login_user(
     response_model=APIResponse[User],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
 ):
     return {"error": False, "response": current_user}
 
@@ -102,12 +111,17 @@ async def read_users_me(
     response_model=APIResponseList[str],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def read_user_friends(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
 ):
     if current_user.disabled:
-        return {"error": True, "response": "User is not active"}
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
 
     return {"error": False, "response": current_user.friends or []}
 
@@ -118,27 +132,41 @@ async def read_user_friends(
     response_model=APIResponseList[str],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def add_user_friend(
     current_user: Annotated[User, Depends(get_current_active_user)],
     friend_username: Annotated[str, Form()],
+    response: Response,
 ):
     if current_user.disabled:
-        return {"error": True, "response": "User is not active"}
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
 
     # If the user has no friends, set it to an empty list
     if current_user.friends is None:
         current_user.friends = []
 
     if friend_username in current_user.friends:
-        return {"error": True, "response": "Friend already added"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Friend already added",
+        )
 
     if friend_username == current_user.username:
-        return {"error": True, "response": "Sadly, you can't be friends with yourself"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Sadly, you can't be friends with yourself",
+        )
 
     friend = read_client["users"]["users"].find_one({"username": friend_username})
     if not friend:
-        return {"error": True, "response": "Friend not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Friend not found",
+        )
 
     current_user.friends.append(friend_username)
     write_client["users"]["users"].update_one(
@@ -154,12 +182,17 @@ async def add_user_friend(
     response_model=APIResponseList[str],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def read_user_recipes(
     current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
 ):
     if current_user.disabled:
-        return {"error": True, "response": "User is not active"}
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
 
     return {"error": False, "response": current_user.recipes or []}
 
@@ -170,20 +203,28 @@ async def read_user_recipes(
     response_model=APIResponseList[str],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def add_user_recipe(
     current_user: Annotated[User, Depends(get_current_active_user)],
     recipe_id: Annotated[str, Form()],
+    response: Response,
 ):
     if current_user.disabled:
-        return {"error": True, "response": "User is not active"}
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
 
     # If the user has no recipes, set it to an empty list
     if current_user.recipes is None:
         current_user.recipes = []
 
     if recipe_id in current_user.recipes:
-        return {"error": True, "response": "Recipe already added"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Recipe already added",
+        )
 
     current_user.recipes.append(recipe_id)
     write_client["users"]["users"].update_one(
@@ -199,20 +240,28 @@ async def add_user_recipe(
     response_model=APIResponseList[str],
     response_model_by_alias=False,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
 )
 async def remove_user_recipe(
     current_user: Annotated[User, Depends(get_current_active_user)],
     recipe_id: Annotated[str, Form()],
+    response: Response,
 ):
     if current_user.disabled:
-        return {"error": True, "response": "User is not active"}
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
 
     # If the user has no recipes, set it to an empty list
     if current_user.recipes is None:
         current_user.recipes = []
 
     if recipe_id not in current_user.recipes:
-        return {"error": True, "response": "Recipe not found"}
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Recipe not found",
+        )
 
     current_user.recipes.remove(recipe_id)
     write_client["users"]["users"].update_one(
@@ -220,3 +269,52 @@ async def remove_user_recipe(
     )
 
     return {"error": False, "response": current_user.recipes}
+
+
+@router.post(
+    "/me/weekplan/generate",
+    response_description="Generate a week plan for the current user",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
+)
+async def generate_user_weekplan(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
+):
+    if current_user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
+
+    if not current_user.paying_customer:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="User is not a paying customer",
+        )
+
+    # TODO: Implement the week plan generation logic
+    return {"error": False, "response": []}
+
+
+@router.get(
+    "/me/weekplan",
+    response_description="Get the week plan of the current user",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
+)
+async def read_user_weekplan(
+    current_user: Annotated[User, Depends(get_current_active_user)],
+    response: Response,
+):
+    if current_user.disabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
+        )
+
+    return {"error": False, "response": current_user.weekplan or []}
