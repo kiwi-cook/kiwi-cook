@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 
 from database.mongodb import get_database
-from utils.auth import verify_password
+from lib.auth import verify_password
 
 load_dotenv()
 

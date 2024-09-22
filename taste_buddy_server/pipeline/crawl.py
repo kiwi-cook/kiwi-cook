@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 import httpx
 
 from pipeline.pipeline import PipelineElement
-from utils.robots import check_robots
+from lib.robots import check_robots
 
 
 class RecipeCrawler(PipelineElement):
@@ -13,8 +13,6 @@ class RecipeCrawler(PipelineElement):
         max_size=1000,
         max_same_domain_concurrent=5,
         ignore_domains=None,
-        langs=None,
-        required_keywords=None,
     ):
         super().__init__("Crawler")
 

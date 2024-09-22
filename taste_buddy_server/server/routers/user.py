@@ -16,7 +16,7 @@ from models.user import (
     create_access_token,
     UserInDB,
 )
-from utils.auth import hash_password
+from lib.auth import hash_password
 
 router = APIRouter(
     prefix="/users",

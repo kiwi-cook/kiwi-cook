@@ -4,6 +4,9 @@ from typing import List, Optional, Dict, Any
 from bson import ObjectId
 from pydantic import BaseModel, Field, HttpUrl, field_serializer
 from pydantic_core import core_schema, Url
+from rapidfuzz import fuzz
+
+from database.mongodb import get_database
 
 
 class PyObjectId(str):
@@ -51,8 +54,11 @@ class MultiLanguageField(BaseModel):
         print(f"Creating new MultiLanguageField with value: {value}")
         return cls(translations={lang: value})
 
-    def get_langs(self):
-        return self.translations.keys()
+    def get_langs(self) -> list[str]:
+        return list(self.translations.keys())
+
+    def get_first(self) -> str:
+        return next(iter(self.translations.values()), "")
 
 
 class Ingredient(BaseModel):
@@ -184,7 +190,3 @@ class Recipe(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str, Url: str, datetime: lambda x: x.isoformat()}
-
-
-def generate_weekplan(ingredients: list[str]):
-    pass
