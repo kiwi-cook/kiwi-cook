@@ -1,9 +1,10 @@
 from fastapi import APIRouter
-from pipeline.scraper import RecipeScraper
 from starlette import status
 
 from models.api import APIResponseList
 from models.recipe import Recipe
+from pipeline.parse import RecipeParser
+from pipeline.recipe_pipeline import run_pipeline
 from server.app import client
 
 router = APIRouter()
@@ -36,19 +37,10 @@ def create_recipes(recipes: list[Recipe]):
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
-def parse_recipes(recipe_urls: list[str]):
+async def parse_recipes(recipe_urls: list[str]):
     error = False
-    parsed_recipes = []
-    for url in recipe_urls:
-        recipe = RecipeScraper.scrape_html(url, client)
-        parsed_recipes.append(recipe)
-    inserted_recipes = client["recipes"].insert_many(
-        [
-            recipe.model_dump(by_alias=True, exclude_none=True)
-            for recipe in parsed_recipes
-        ]
-    )
-    if len(inserted_recipes.inserted_ids) != len(recipe_urls):
+    try:
+        await run_pipeline(recipe_urls)
+    except Exception as e:
         error = True
-    inserted_ids = [str(recipeId) for recipeId in inserted_recipes.inserted_ids]
-    return {"error": error, "response": inserted_ids}
+    return {"error": error, "response": "Recipes parsed successfully"}

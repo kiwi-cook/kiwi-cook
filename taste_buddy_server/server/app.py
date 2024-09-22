@@ -1,11 +1,13 @@
 import os
+
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+
 from database.mongodb import get_database
 from models.api import APIResponse
-from server.routers import ingredient, chatgpt, recipe, user
+from server.routers import chatgpt, recipe, user
 
 load_dotenv()
 ENV = os.getenv("ENV") or "production"
@@ -52,7 +54,6 @@ def setup_cors(app: FastAPI):
 
 def setup_routes(app: FastAPI):
     app.include_router(recipe.router)
-    app.include_router(ingredient.router)
     app.include_router(chatgpt.router)
     app.include_router(user.router)
 

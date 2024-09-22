@@ -8,6 +8,7 @@ from ingredient_parser import parse_ingredient
 from ingredient_parser.dataclasses import ParsedIngredient
 from recipe_scrapers import scrape_html
 
+from lib.parse import extract_temperature, extract_durations
 from models.recipe import (
     Recipe,
     MultiLanguageField,
@@ -17,7 +18,6 @@ from models.recipe import (
     RecipeSource,
 )
 from pipeline.pipeline import PipelineElement
-from lib.parse import extract_temperature, extract_durations
 
 
 class RecipeParser(PipelineElement):

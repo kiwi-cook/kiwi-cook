@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from typing_extensions import Annotated
 from starlette import status
+from typing_extensions import Annotated
+
 from database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe

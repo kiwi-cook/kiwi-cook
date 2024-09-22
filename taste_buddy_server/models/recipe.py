@@ -4,9 +4,6 @@ from typing import List, Optional, Dict, Any
 from bson import ObjectId
 from pydantic import BaseModel, Field, HttpUrl, field_serializer
 from pydantic_core import core_schema, Url
-from rapidfuzz import fuzz
-
-from database.mongodb import get_database
 
 
 class PyObjectId(str):

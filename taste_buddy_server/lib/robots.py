@@ -4,7 +4,7 @@ from urllib import robotparser
 import aiohttp
 import cachetools
 
-from utils.url import get_base_url
+from lib.url import get_base_url
 
 # Cache for storing robots.txt contents
 robots_cache = cachetools.TTLCache(

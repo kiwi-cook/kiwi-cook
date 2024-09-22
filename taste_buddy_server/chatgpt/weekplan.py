@@ -14,8 +14,10 @@ open_ai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 def generate_weekplan_from_ingredients_image(
-    ingredients_list: list[str] = [], image: bytes = None
+    ingredients_list=None, image: bytes = None
 ) -> list[str]:
+    if ingredients_list is None:
+        ingredients_list = []
     try:
         if not ingredients_list and not image:
             return []

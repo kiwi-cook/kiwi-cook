@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 
 import httpx
 
-from pipeline.pipeline import PipelineElement
 from lib.robots import check_robots
+from pipeline.pipeline import PipelineElement
 
 
 class RecipeCrawler(PipelineElement):

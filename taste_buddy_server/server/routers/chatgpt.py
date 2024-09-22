@@ -30,7 +30,6 @@ async def analyze_ingredient_image(
     current_user: Annotated[User, Depends(get_current_active_user)],
     image: UploadFile | None = None,
 ):
-
     if not current_user.paying_customer:
         response.status_code = status.HTTP_402_PAYMENT_REQUIRED
         return {"error": True, "response": "User is not a paying customer"}
@@ -61,7 +60,6 @@ async def generate_weekplan(
     ingredients_list=None,
     image: UploadFile | None = None,
 ):
-
     if not current_user.paying_customer:
         response.status_code = status.HTTP_402_PAYMENT_REQUIRED
         return {"error": True, "response": "User is not a paying customer"}
