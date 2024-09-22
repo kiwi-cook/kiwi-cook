@@ -15,26 +15,31 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.x'  # Specify your Flutter version
+        flutter-version: '3.x'
         channel: 'stable'
 
-    - name: Navigate to project directory
-      run: cd taste_buddy
+    - name: Clean and Build Web
+      run: |
+        cd taste_buddy
+        rm -rf build/web
+        flutter build web --release
 
-    - name: Get dependencies
-      run: flutter pub get
-      working-directory: ./taste_buddy
+    - name: Deploy to GitHub Pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd taste_buddy/build/web
+        git init
+        git add -A
+        git config user.name "taste-buddy"
+        git config user.email ""
+        git config --local commit.gpgsign false
+        git commit -m 'deploy'
+        git branch -M master
+        git push -f https://x-access-token:${GITHUB_TOKEN}@github.com/taste-buddy/taste-buddy.github.io.git master
 
-    - name: Build web
-      run: flutter build web --release
-      working-directory: ./taste_buddy
-
-    - name: Deploy to External Repository
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        deploy_key: ${{ secrets.DEPLOY_KEY }}
-        external_repository: taste-buddy/taste-buddy.github.io
-        publish_dir: ./taste_buddy/build/web
-        publish_branch: main  # Usually, GitHub Pages repositories use 'main' as the default branch
-        user_name: 'github-actions[bot]'
-        user_email: 'github-actions[bot]@users.noreply.github.com'
+    - name: Clean up
+      if: always()
+      run: |
+        cd $GITHUB_WORKSPACE/taste_buddy
+        rm -rf build/web
