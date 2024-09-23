@@ -92,7 +92,7 @@ def setup_routes(app: FastAPI) -> None:
     app.include_router(user.router)
 
     @app.get(
-        "/",
+        "",
         response_description="Root endpoint",
         response_model=APIResponse[str],
         response_model_by_alias=False,

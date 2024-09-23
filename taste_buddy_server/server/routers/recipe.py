@@ -32,7 +32,7 @@ def validate_url(_url: str) -> bool:
 
 
 @router.get(
-    "",
+    "/",
     response_description="Get all recipes",
     response_model=APIResponseList[Recipe],
     response_model_by_alias=False,
@@ -58,7 +58,7 @@ async def read_recipes(limit: int = Query(50, ge=1, le=100)):
 
 
 @router.post(
-    "/url",
+    "/add/url",
     response_description="Add a list of recipes from URLs",
     response_model_by_alias=False,
     response_model_exclude_none=True,

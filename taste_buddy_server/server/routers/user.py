@@ -6,8 +6,8 @@ from fastapi import Depends, HTTPException, APIRouter, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from lib.database.mongodb import get_database
 from lib.auth import hash_password, is_secure_password
+from lib.database.mongodb import get_database
 from models.api import APIResponse, APIResponseList
 from models.user import (
     User,
@@ -95,7 +95,7 @@ async def login_user(
 
 
 @router.get(
-    "/me",
+    "/me/",
     response_description="Get current user",
     response_model=APIResponse[User],
     response_model_by_alias=False,
@@ -110,7 +110,7 @@ async def read_users_me(
 
 
 @router.get(
-    "/me/friends/",
+    "/me/friends",
     response_description="Get all friends of the current user",
     response_model=APIResponseList[str],
     response_model_by_alias=False,
@@ -125,7 +125,7 @@ async def read_user_friends(
 
 
 @router.post(
-    "/me/friends/add/",
+    "/me/friends/add",
     response_description="Add a friend to the current user",
     response_model=APIResponseList[str],
     response_model_by_alias=False,
@@ -184,7 +184,7 @@ async def read_user_recipes(
 
 
 @router.post(
-    "/me/recipes/add/",
+    "/me/recipes/add",
     response_description="Add a recipe to the current user",
     response_model=APIResponseList[str],
     response_model_by_alias=False,
@@ -215,7 +215,7 @@ async def add_user_recipe(
 
 
 @router.post(
-    "/me/recipes/remove/",
+    "/me/recipes/remove",
     response_description="Remove a recipe from the current user",
     response_model=APIResponseList[str],
     response_model_by_alias=False,
@@ -246,7 +246,7 @@ async def remove_user_recipe(
 
 
 @router.post(
-    "/me/recipes/suggest/",
+    "/me/recipes/suggest",
     response_description="Get recipe suggestions for the current user",
     response_model=APIResponseList[str],
     response_model_by_alias=False,
@@ -260,6 +260,21 @@ async def suggest_user_recipes(
     pass
 
 
+@router.get(
+    "/me/weekplan/",
+    response_description="Get the week plan of the current user",
+    response_model=APIResponseList[str],
+    response_model_by_alias=False,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
+)
+async def read_user_weekplan(
+    current_user: Annotated[User, Depends(get_active_user)],
+    response: Response,
+):
+    return {"error": False, "response": current_user.weekplan or []}
+
+
 @router.post(
     "/me/weekplan/generate",
     response_description="Generate a weekplan for the current user",
@@ -270,21 +285,6 @@ async def suggest_user_recipes(
 )
 async def read_user_weekplan(
     current_user: Annotated[User, Depends(get_paying_user)],
-    response: Response,
-):
-    return {"error": False, "response": current_user.weekplan or []}
-
-
-@router.get(
-    "/me/weekplan",
-    response_description="Get the week plan of the current user",
-    response_model=APIResponseList[str],
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-    status_code=status.HTTP_200_OK,
-)
-async def read_user_weekplan(
-    current_user: Annotated[User, Depends(get_active_user)],
     response: Response,
 ):
     return {"error": False, "response": current_user.weekplan or []}
