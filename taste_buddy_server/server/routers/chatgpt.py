@@ -3,13 +3,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, UploadFile, Depends, HTTPException, File
 from pydantic import BaseModel, conlist
-from starlette import status
 
 from chatgpt.ingredients import find_ingredients_in_image
 from chatgpt.weekplan import generate_weekplan_from_ingredients_image
 from models.api import APIResponseList
-from models.user import User, get_current_active_user
-from server.limit import limiter
+from models.user import User, get_paying_user, get_active_user
 
 router = APIRouter(
     prefix="/chatgpt",
@@ -24,7 +22,7 @@ ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 
 
 class IngredientsRequest(BaseModel):
-    ingredients: conlist(str, max_items=100)  # Limit the number of ingredients
+    ingredients: conlist(str, max_length=100, min_length=1)
 
 
 def validate_image(file: UploadFile) -> None:
@@ -44,17 +42,10 @@ def validate_image(file: UploadFile) -> None:
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
-@limiter.limit("5/minute")
 async def analyze_ingredient_image(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_paying_user)],
     image: UploadFile = File(...),
 ):
-    if not current_user.paying_customer:
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED,
-            detail="User is not a paying customer",
-        )
-
     validate_image(image)
 
     try:
@@ -77,18 +68,11 @@ async def analyze_ingredient_image(
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
-@limiter.limit("2/minute")
 async def generate_weekplan(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_paying_user)],
     ingredients: IngredientsRequest = None,
     image: UploadFile = File(None),
 ):
-    if not current_user.paying_customer:
-        raise HTTPException(
-            status_code=status.HTTP_402_PAYMENT_REQUIRED,
-            detail="User is not a paying customer",
-        )
-
     if ingredients is None and image is None:
         raise HTTPException(status_code=400, detail="No ingredients or image provided")
 

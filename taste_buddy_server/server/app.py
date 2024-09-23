@@ -1,22 +1,15 @@
 import logging
 import os
 from logging.config import dictConfig
-from typing import Literal
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from slowapi import Limiter
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
-from starlette.responses import JSONResponse
 
-from database.mongodb import get_database
+from lib.utils import calculate_directory_hash
 from models.api import APIResponse
-from server.limit import limiter, rate_limit_exceeded_handler
-from server.routers import chatgpt, recipe, user
 
 # Configure logging
 logging_config = {
@@ -46,7 +39,7 @@ logger = logging.getLogger("tastebuddy")
 load_dotenv()
 
 
-def get_environment() -> Literal["development", "production"]:
+def get_environment() -> str:
     env = os.getenv("ENV", "production").lower()
     if env not in ("development", "production"):
         raise ValueError(f"Invalid environment: {env}")
@@ -92,6 +85,8 @@ def setup_cors(app: FastAPI) -> None:
 
 
 def setup_routes(app: FastAPI) -> None:
+    from server.routers import user, chatgpt, recipe
+
     app.include_router(recipe.router)
     app.include_router(chatgpt.router)
     app.include_router(user.router)
@@ -113,25 +108,36 @@ def setup_routes(app: FastAPI) -> None:
     def health_check():
         return {"error": False, "response": "OK"}
 
+    @app.get("/hash", response_description="Last commit hash")
+    async def get_last_commit():
+        try:
+            hash_value = calculate_directory_hash()
+            return {"directory_hash": hash_value}
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to calculate directory hash: {str(e)}"
+            )
+
+
+def setup_trusted_host(app: FastAPI) -> None:
+    app.add_middleware(
+        TrustedHostMiddleware,
+        allowed_hosts=["taste-buddy.uk", "localhost", "127.0.0.1"],
+    )
+
 
 app = setup_fastapi()
+setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
 
 try:
-    client = get_database()
+    from database.mongodb import get_database
+
+    get_database()
 except Exception as e:
     logger.error(f"Failed to connect to database: {str(e)}")
     raise
-
-# Rate limiting
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
-
-# Trusted Host Middleware
-app.add_middleware(
-    TrustedHostMiddleware, allowed_hosts=["taste-buddy.uk", "localhost", "127.0.0.1"]
-)
 
 
 def start_server() -> None:

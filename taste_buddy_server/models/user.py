@@ -105,11 +105,23 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
     return user
 
 
-async def get_current_active_user(
+async def get_active_user(
     current_user: Annotated[UserInDB, Depends(get_current_user)]
 ) -> UserInDB:
     if current_user.disabled:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not active",
         )
     return current_user
+
+
+async def get_paying_user(
+    active_user: Annotated[User, Depends(get_active_user)]
+) -> User:
+    if not active_user.paying_customer:
+        raise HTTPException(
+            status_code=status.HTTP_402_PAYMENT_REQUIRED,
+            detail="User is not a paying customer",
+        )
+    return active_user

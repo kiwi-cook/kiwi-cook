@@ -3,10 +3,10 @@ import logging
 from fastapi import APIRouter
 from starlette import status
 
+from database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
 from pipeline.recipe_pipeline import run_pipeline
-from server.app import client
 
 router = APIRouter()
 
@@ -22,8 +22,9 @@ logger = logging.getLogger(__name__)
     response_model_exclude_none=True,
 )
 def create_recipes(recipes: list[Recipe]):
+    write_client = get_database(rights="WRITE")
     error = False
-    inserted_recipes = client["recipes"].insert_many(
+    inserted_recipes = write_client["recipes"].insert_many(
         [recipe.model_dump(by_alias=True, exclude_none=True) for recipe in recipes]
     )
     if len(inserted_recipes.inserted_ids) != len(recipes):

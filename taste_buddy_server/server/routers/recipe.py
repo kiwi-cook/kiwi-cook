@@ -11,7 +11,7 @@ from typing_extensions import Annotated
 from database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
-from models.user import User, get_current_active_user
+from models.user import User, get_active_user
 from pipeline.recipe_pipeline import run_pipeline
 
 router = APIRouter(prefix="/recipe", tags=["recipes"])
@@ -57,39 +57,6 @@ async def read_recipes(limit: int = Query(50, ge=1, le=100)):
         )
 
 
-@router.get(
-    "/{recipe_id}",
-    response_description="Get recipe information",
-    response_model=APIResponseList[Recipe],
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-    status_code=status.HTTP_200_OK,
-)
-async def read_recipe(recipe_id: str):
-    if not validate_object_id(recipe_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid recipe ID"
-        )
-
-    try:
-        read_client = get_database()
-        recipe = list(
-            read_client["recipes"]["recipes"].find({"_id": ObjectId(recipe_id)})
-        )
-        if not recipe:
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": True, "detail": "Recipe not found"},
-            )
-        return {"error": False, "response": recipe}
-    except PyMongoError as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
-        )
-
-
 @router.post(
     "/url",
     response_description="Add a list of recipes from URLs",
@@ -98,14 +65,9 @@ async def read_recipe(recipe_id: str):
     status_code=status.HTTP_201_CREATED,
 )
 async def add_recipes(
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[User, Depends(get_active_user)],
     urls: list[str] = Query(..., max_length=10),
 ):
-    if current_user.disabled:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="User is not active"
-        )
-
     if not urls:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="No URLs provided"
