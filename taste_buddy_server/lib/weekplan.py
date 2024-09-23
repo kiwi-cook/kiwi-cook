@@ -1,6 +1,6 @@
 from rapidfuzz import fuzz
 
-from database.mongodb import get_database
+from lib.database import get_database
 from models.recipe import Recipe
 
 

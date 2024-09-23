@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, APIRouter, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from database.mongodb import get_database
+from lib.database import get_database
 from lib.auth import hash_password, is_secure_password
 from models.api import APIResponse, APIResponseList
 from models.user import (
