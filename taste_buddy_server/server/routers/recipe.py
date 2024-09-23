@@ -8,7 +8,7 @@ from pymongo.errors import PyMongoError
 from starlette import status
 from typing_extensions import Annotated
 
-from database.mongodb import get_database
+from lib.database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
 from models.user import User, get_active_user
@@ -19,13 +19,13 @@ router = APIRouter(prefix="/recipe", tags=["recipes"])
 logger = logging.getLogger(__name__)
 
 
-def validate_object_id(id: str) -> bool:
-    return ObjectId.is_valid(id)
+def validate_object_id(_id: str) -> bool:
+    return ObjectId.is_valid(_id)
 
 
-def validate_url(url: str) -> bool:
+def validate_url(_url: str) -> bool:
     try:
-        result = urlparse(url)
+        result = urlparse(_url)
         return all([result.scheme, result.netloc])
     except ValueError:
         return False

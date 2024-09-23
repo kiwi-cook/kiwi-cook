@@ -3,7 +3,7 @@ import logging
 from fastapi import APIRouter
 from starlette import status
 
-from database.mongodb import get_database
+from lib.database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
 from pipeline.recipe_pipeline import run_pipeline

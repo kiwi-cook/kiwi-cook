@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from pydantic import BaseModel, Field
 from pymongo.collection import Collection
 
-from database.mongodb import get_database
+from lib.database.mongodb import get_database
 from lib.auth import verify_password
 
 load_dotenv()

@@ -1,7 +1,7 @@
 # Connect to MongoDB
 from typing import List
 
-from database.mongodb import get_database
+from lib.database.mongodb import get_database
 from pipeline.crawl import RecipeCrawler
 from pipeline.download import HtmlRecipeLoader, HtmlRecipeSaver
 from pipeline.parse import RecipeParser

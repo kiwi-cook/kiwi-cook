@@ -132,7 +132,7 @@ setup_cors(app)
 setup_routes(app)
 
 try:
-    from database.mongodb import get_database
+    from lib.database.mongodb import get_database
 
     get_database()
 except Exception as e:
