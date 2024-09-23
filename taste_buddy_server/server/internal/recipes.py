@@ -6,7 +6,7 @@ from starlette import status
 from lib.database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
-from pipeline.recipe_pipeline import run_pipeline
+from pipeline.recipe.__init__ import run_pipeline
 
 router = APIRouter()
 

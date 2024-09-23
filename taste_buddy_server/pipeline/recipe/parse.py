@@ -17,7 +17,7 @@ from models.recipe import (
     RecipeIngredient,
     RecipeSource,
 )
-from pipeline.pipeline import PipelineElement
+from pipeline.recipe.pipeline import PipelineElement
 
 
 class RecipeParser(PipelineElement):
