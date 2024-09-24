@@ -2,10 +2,10 @@
 from typing import List
 
 from lib.database.mongodb import get_database
-from pipeline.recipe.crawl import RecipeCrawler
-from pipeline.recipe.download import HtmlRecipeLoader, HtmlRecipeSaver
-from pipeline.recipe.parse import RecipeParser
-from pipeline.recipe.pipeline import Pipeline
+from lib.pipeline.recipe.crawl import RecipeCrawler
+from lib.pipeline.recipe.download import HtmlRecipeLoader, HtmlRecipeSaver
+from lib.pipeline.recipe.parse import RecipeParser
+from lib.pipeline.recipe.pipeline import Pipeline
 
 read_client = get_database("READ")
 write_client = get_database("WRITE")

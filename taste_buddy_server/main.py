@@ -27,7 +27,7 @@ def main():
 
             start_server()
         elif args.file:
-            from pipeline.recipe import run_pipeline_from_file
+            from lib.pipeline.recipe import run_pipeline_from_file
 
             asyncio.run(run_pipeline_from_file(args.file))
         else:

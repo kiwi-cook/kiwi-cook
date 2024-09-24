@@ -1,7 +1,7 @@
 import lzma
 import pickle
 
-from pipeline.recipe.pipeline import PipelineElement
+from lib.pipeline.recipe.pipeline import PipelineElement
 
 
 class HtmlRecipeSaver(PipelineElement):

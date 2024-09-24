@@ -12,7 +12,7 @@ from lib.database.mongodb import get_database
 from models.api import APIResponseList
 from models.recipe import Recipe
 from models.user import User, get_active_user
-from pipeline.recipe.__init__ import run_pipeline
+from lib.pipeline.recipe import run_pipeline
 
 router = APIRouter(prefix="/recipe", tags=["recipes"])
 
