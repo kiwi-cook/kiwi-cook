@@ -39,6 +39,7 @@ class User(BaseModel):
     disabled: bool = Field(default=False, description="User account status")
     paying_customer: bool = Field(default=False, description="Payment status")
     is_student: bool = Field(default=False, description="Student status")
+    is_admin: bool = Field(default=False, description="Admin status")
     friends: list[str] = Field(default_factory=list)
     recipes: list[str] = Field(default_factory=list)
     weekplan: list[str] = Field(default_factory=list)
@@ -123,5 +124,16 @@ async def get_paying_user(
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail="User is not a paying customer",
+        )
+    return active_user
+
+
+async def get_admin_user(
+    active_user: Annotated[User, Depends(get_active_user)]
+) -> User:
+    if not active_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User is not an admin",
         )
     return active_user

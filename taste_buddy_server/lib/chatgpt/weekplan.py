@@ -33,8 +33,7 @@ def generate_weekplan_from_ingredients_image(
                         "each string being a meal for a day of the week. Do not add numbers, separate the "
                         "list by comma."
                         "Do not format the list as markdown or any other format. Do not hallucinate "
-                        "ingredients. If you see"
-                        "an ingredient in the image, you must include it in the weekplan.\n\n"
+                        "ingredients. If you see an ingredient in the image, you must include it in the weekplan.\n\n"
                         "Here is the list of ingredients:\n"
                         + ", ".join(ingredients_list),
                     }
