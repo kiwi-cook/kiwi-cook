@@ -1,27 +1,31 @@
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
 from lib.database.mongodb import get_database
+from lib.pipeline.recipe import run_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
-from lib.pipeline.recipe import run_pipeline
+from models.user import get_admin_user, User
 
-router = APIRouter()
+router = APIRouter(prefix="/recipe", tags=["recipes"])
 
 logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/recipe/",
+    "/",
     response_description="Add new recipes",
     response_model=APIResponseList[str],
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
-def create_recipes(recipes: list[Recipe]):
+def create_recipes(
+    current_user: Annotated[User, Depends(get_admin_user)], recipes: list[Recipe]
+):
     write_client = get_database(rights="WRITE")
     error = False
     inserted_recipes = write_client["recipes"].insert_many(
@@ -34,14 +38,16 @@ def create_recipes(recipes: list[Recipe]):
 
 
 @router.post(
-    "/recipe/parse",
+    "/parse",
     response_description="Parse recipes from URLs",
     response_model=APIResponseList[str],
     status_code=status.HTTP_201_CREATED,
     response_model_by_alias=False,
     response_model_exclude_none=True,
 )
-async def parse_recipes(recipe_urls: list[str]):
+async def parse_recipes(
+    current_user: Annotated[User, Depends(get_admin_user)], recipe_urls: list[str]
+):
     error = False
     try:
         await run_pipeline(recipe_urls)
