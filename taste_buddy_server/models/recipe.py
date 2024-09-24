@@ -36,6 +36,9 @@ class PyObjectId(str):
 
         return ObjectId(value)
 
+    def __str__(self):
+        return f"ObjId({str(self)[:8]}...)"
+
 
 class MultiLanguageField(BaseModel):
     translations: Dict[str, str] = Field(default_factory=dict)
@@ -57,6 +60,10 @@ class MultiLanguageField(BaseModel):
     def get_first(self) -> str:
         return next(iter(self.translations.values()), "")
 
+    def __str__(self):
+        first = self.get_first()
+        return f"{first[:17]}..." if len(first) > 20 else first
+
 
 class Ingredient(BaseModel):
     id: Optional[PyObjectId] = Field(default=None, alias="_id")
@@ -70,6 +77,13 @@ class Ingredient(BaseModel):
     def new(cls, name: str, id: Optional[PyObjectId] = None, lang: str = "en"):
         print(f"Creating new Ingredient with name: {name}")
         return cls(id=id, name=MultiLanguageField.new(lang, name))
+
+    def __str__(self):
+        return (
+            f"Ing({str(self.name)[:17]}...)"
+            if len(str(self.name)) > 20
+            else f"Ing({self.name})"
+        )
 
 
 class RecipeIngredient(BaseModel):
@@ -90,6 +104,12 @@ class RecipeIngredient(BaseModel):
             raise ValueError("Ingredient cannot be None")
         print(f"Creating new RecipeIngredient with ingredient: {ingredient}")
         return cls(ingredient=ingredient, quantity=quantity, unit=unit, comment=comment)
+
+    def __str__(self):
+        ing_str = str(self.ingredient)
+        return (
+            f"RecIng({ing_str[:14]}...)" if len(ing_str) > 17 else f"RecIng({ing_str})"
+        )
 
 
 class RecipeStep(BaseModel):
@@ -124,6 +144,10 @@ class RecipeStep(BaseModel):
     def url2str(self, val) -> str:
         return str(val)
 
+    def __str__(self):
+        desc = str(self.description)
+        return f"Step({desc[:15]}...)" if len(desc) > 18 else f"Step({desc})"
+
 
 class RecipeAuthor(BaseModel):
     name: str
@@ -132,6 +156,13 @@ class RecipeAuthor(BaseModel):
     @field_serializer("url")
     def url2str(self, val) -> str:
         return str(val)
+
+    def __str__(self):
+        return (
+            f"Author({self.name[:14]}...)"
+            if len(self.name) > 17
+            else f"Author({self.name})"
+        )
 
 
 class RecipeSource(BaseModel):
@@ -147,6 +178,13 @@ class RecipeSource(BaseModel):
     def url2str(self, val) -> str:
         return str(val)
 
+    def __str__(self):
+        return (
+            f"Source({self.url[:14]}...)"
+            if self.url and len(str(self.url)) > 17
+            else "Source(...)"
+        )
+
 
 class Nutrition(BaseModel):
     calories: int
@@ -155,6 +193,9 @@ class Nutrition(BaseModel):
     fat: float
     fiber: float
 
+    def __str__(self):
+        return f"Nutr(cal:{self.calories},p:{self.protein:.1f})"
+
 
 class Recipe(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
@@ -162,9 +203,9 @@ class Recipe(BaseModel):
     description: MultiLanguageField
     lang: str = Field(default="en-US")
 
-    ingredients: Optional[List[RecipeIngredient]] = Field(alias="items")
-    steps: List[RecipeStep] = Field(alias="steps")
-    props: Dict[str, Any] = Field(alias="props")
+    ingredients: Optional[List[RecipeIngredient]]
+    steps: List[RecipeStep]
+    props: Dict[str, Any]
     src: Optional[RecipeSource] = Field(alias="src", default=None)
     deleted: bool = Field(alias="deleted", default=False)
     servings: int = Field(default=1)
@@ -187,3 +228,7 @@ class Recipe(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str, Url: str, datetime: lambda x: x.isoformat()}
+
+    def __str__(self):
+        name = str(self.name)
+        return f"Recipe({name[:13]}...)" if len(name) > 16 else f"Recipe({name})"

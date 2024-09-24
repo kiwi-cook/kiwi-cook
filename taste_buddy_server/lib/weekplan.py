@@ -5,7 +5,7 @@ from models.recipe import Recipe
 
 
 def map_recipe(user_items: list[str], recipe: Recipe):
-    ingredients = recipe.ingredients or []
+    ingredients = recipe.ingredients
     matched_ingredients = [
         ingredient
         for ingredient in ingredients
@@ -29,7 +29,7 @@ def map_recipe(user_items: list[str], recipe: Recipe):
 
 def generate_weekplan(user_items: list[str]):
     read_client = get_database()
-    recipes = list(read_client["recipes"]["recipes"].find())
+    recipes: list[Recipe] = list(read_client["recipes"]["recipes"].find())
 
     sorted_recipes = sorted(
         (map_recipe(user_items, recipe) for recipe in recipes),
@@ -66,3 +66,8 @@ def generate_weekplan(user_items: list[str]):
             break
 
     return selected_recipes
+
+
+# Test the code
+
+generate_weekplan(["salt"])

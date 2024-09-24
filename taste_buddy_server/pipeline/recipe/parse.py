@@ -230,12 +230,15 @@ class RecipeParser(PipelineElement):
             # Create the recipe step
             description: MultiLanguageField = MultiLanguageField.new(lang, step_desc)
             temperature: int = extract_temperature(step_desc)
-            durations: list[float] = extract_durations(step_desc)
+            durations = extract_durations(step_desc)
             summed_durations = sum(durations) if len(durations) > 0 else None
             # TODO: add more fields to the recipe step
 
             recipe_step = RecipeStep.new(
-                description, None, summed_durations, temperature
+                description=description,
+                ingredients=None,
+                duration=summed_durations,
+                temperature=temperature,
             )
             recipe_steps.append(recipe_step)
 

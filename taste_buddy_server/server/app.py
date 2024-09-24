@@ -92,7 +92,7 @@ def setup_routes(app: FastAPI) -> None:
     app.include_router(user.router)
 
     @app.get(
-        "",
+        "/",
         response_description="Root endpoint",
         response_model=APIResponse[str],
         response_model_by_alias=False,
@@ -122,7 +122,7 @@ def setup_routes(app: FastAPI) -> None:
 def setup_trusted_host(app: FastAPI) -> None:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["taste-buddy.uk", "localhost", "127.0.0.1"],
+        allowed_hosts=["taste-buddy.uk", "localhost", "127.0.0.1", "0.0.0.0"],
     )
 
 
