@@ -1,18 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:taste_buddy/src/screens/home_screen.dart';
 import 'package:taste_buddy/src/screens/login_screen.dart';
 import 'package:taste_buddy/src/screens/plan_screen.dart';
 import 'package:taste_buddy/src/screens/recipe_screen.dart';
 import 'package:taste_buddy/src/screens/search_screen.dart';
-
-void configureApp() {
-  if (kIsWeb) {
-    setUrlStrategy(PathUrlStrategy());
-  }
-}
 
 // GoRouter configuration
 final tasteBuddyRouter = GoRouter(

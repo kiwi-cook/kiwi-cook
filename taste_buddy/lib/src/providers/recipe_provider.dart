@@ -43,7 +43,7 @@ class RecipeProvider with ChangeNotifier {
 
     try {
       final jsonList =
-          await sendRequest('/recipe', method: 'GET') as List<dynamic>;
+          await sendRequest('/recipe/', method: 'GET') as List<dynamic>;
       _recipes =
           jsonList.map<Recipe>((recipe) => Recipe.fromJson(recipe)).toList();
     } catch (e) {
