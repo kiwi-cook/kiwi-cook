@@ -9,7 +9,7 @@ export const useRecipeStore = defineStore('recipe', () => {
   const getRandomRecipe = () => recipes.value[Math.floor(Math.random() * recipes.value.length)];
 
   // Fetch using axios
-  api.get('/recipe').then((r) => {
+  api.get('/recipe/').then((r) => {
     recipes.value = r.data.response;
   });
 
