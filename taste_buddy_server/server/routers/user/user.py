@@ -2,7 +2,7 @@ import logging
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, APIRouter, Form, Response
+from fastapi import Depends, HTTPException, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
@@ -17,13 +17,8 @@ from models.user import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
     UserInDB,
-    get_paying_user,
 )
-
-router = APIRouter(
-    prefix="/users",
-    tags=["users"],
-)
+from server.routers.user import router
 
 load_dotenv()
 
@@ -244,48 +239,3 @@ async def remove_user_recipe(
     )
 
     return {"error": False, "response": current_user.recipes}
-
-
-@router.post(
-    "/me/recipes/suggest",
-    response_description="Get recipe suggestions for the current user",
-    response_model=APIResponseList[str],
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-    status_code=status.HTTP_200_OK,
-)
-async def suggest_user_recipes(
-    current_user: Annotated[User, Depends(get_active_user)],
-    response: Response,
-):
-    pass
-
-
-@router.get(
-    "/me/weekplan/",
-    response_description="Get the week plan of the current user",
-    response_model=APIResponseList[str],
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-    status_code=status.HTTP_200_OK,
-)
-async def read_user_weekplan(
-    current_user: Annotated[User, Depends(get_active_user)],
-    response: Response,
-):
-    return {"error": False, "response": current_user.weekplan or []}
-
-
-@router.post(
-    "/me/weekplan/generate",
-    response_description="Generate a weekplan for the current user",
-    response_model=APIResponseList[str],
-    response_model_by_alias=False,
-    response_model_exclude_none=True,
-    status_code=status.HTTP_200_OK,
-)
-async def read_user_weekplan(
-    current_user: Annotated[User, Depends(get_paying_user)],
-    response: Response,
-):
-    return {"error": False, "response": current_user.weekplan or []}

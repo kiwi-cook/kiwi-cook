@@ -10,8 +10,9 @@ from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from pydantic import BaseModel, Field
 from pymongo.collection import Collection
 
-from lib.database.mongodb import get_database
 from lib.auth import verify_password
+from lib.database.mongodb import get_database
+from models.chat import ChatStateEnum
 
 load_dotenv()
 
@@ -43,6 +44,18 @@ class User(BaseModel):
     friends: list[str] = Field(default_factory=list)
     recipes: list[str] = Field(default_factory=list)
     weekplan: list[str] = Field(default_factory=list)
+    chat_state: str = Field(default=ChatStateEnum.not_started)
+
+    def get_next_state(self):
+        return ChatStateEnum.get_next_of(self.chat_state)
+
+    def set_next_state(self):
+        self.chat_state = ChatStateEnum.get_next_of(self.chat_state)
+        return self.chat_state
+
+    def set_previous_state(self):
+        self.chat_state = ChatStateEnum.get_previous_of(self.chat_state)
+        return self.chat_state
 
 
 class UserInDB(User):
