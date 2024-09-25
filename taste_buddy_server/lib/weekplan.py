@@ -11,9 +11,9 @@ def map_recipe(user_items: list[str], recipe: Recipe):
         for ingredient in ingredients
         if any(
             fuzz.token_set_ratio(
-                ingredient.ingredient.name.get_first(),
-                item.lower(),
-                70,
+                s1=ingredient.ingredient.name.get_first(),
+                s2=item.lower(),
+                score_cutoff=70,
             )
             for item in user_items
         )
@@ -47,9 +47,9 @@ def generate_weekplan(user_items: list[str]):
         if any(
             not any(
                 fuzz.token_set_ratio(
-                    ingredient.ingredient.name.get_first().lower(),
-                    used.lower().split(),
-                    70,
+                    s1=ingredient.ingredient.name.get_first().lower(),
+                    s2=used.lower().split(),
+                    score_cutoff=70,
                 )
                 for used in used_ingredients
             )

@@ -82,9 +82,10 @@ async def login_user(
         )
     try:
         access_token = create_access_token(
-            data={"sub": user.username}, expires_minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+            data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
         )
     except ValueError as e:
+        logger.error(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not create access token",
