@@ -95,6 +95,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRecipeStore } from 'stores/recipe-store.ts';
 
 interface Message {
   id: number;
@@ -143,6 +144,8 @@ const messages = ref<(OptionMessage|RecipeMessage|TextMessage|ImageMessage)[]>([
 ]);
 const newMessage = ref('');
 
+const recipeStore = useRecipeStore();
+
 function sendMessage(text = newMessage.value) {
   if (text.trim()) {
     messages.value.push({
@@ -154,14 +157,15 @@ function sendMessage(text = newMessage.value) {
     });
     // Simulated response
     setTimeout(() => {
+      const recipe = recipeStore.getRandomRecipe();
       messages.value.push({
         id: messages.value.length + 1,
         sender: 'Kiwi',
         type: 'recipe',
         content: {
-          name: 'Kiwi Smoothie Bowl',
-          image: '/api/placeholder/200/150',
-          cookingTime: '10 minutes',
+          name: recipe.name.translations['en-US'],
+          image: recipe.image_url || 'https://via.placeholder.com/200',
+          cookingTime: `${recipe.duration} min`,
           difficulty: 'Easy',
         },
         sent: false,

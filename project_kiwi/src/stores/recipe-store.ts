@@ -1,15 +1,20 @@
 import { defineStore } from 'pinia';
+import { Recipe } from 'src/models/recipe.ts';
+import { ref } from 'vue';
+import { api } from 'boot/axios.ts';
 
-export const useCounterStore = defineStore('counter', {
-  state: () => ({
-    counter: 0,
-  }),
-  getters: {
-    doubleCount: (state) => state.counter * 2,
-  },
-  actions: {
-    increment() {
-      this.counter++;
-    },
-  },
+export const useRecipeStore = defineStore('recipe', () => {
+  const recipes = ref<Recipe[]>([]);
+
+  const getRandomRecipe = () => recipes.value[Math.floor(Math.random() * recipes.value.length)];
+
+  // Fetch using axios
+  api.get('/recipe').then((r) => {
+    recipes.value = r.data.response;
+  });
+
+  return {
+    recipes,
+    getRandomRecipe,
+  };
 });
