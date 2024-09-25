@@ -69,7 +69,7 @@ dynamic _handleResponse(http.Response response) {
       if (jsonResponse.containsKey('response')) {
         return jsonResponse['response'];
       } else {
-        throw FormatException('Unexpected response format: ${response.body}');
+        throw jsonResponse;
       }
     } on FormatException {
       throw FormatException('Failed to parse JSON: ${response.body}');
