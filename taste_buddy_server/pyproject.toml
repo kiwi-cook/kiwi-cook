@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-aiohttp = "^3.10.5"
+aiohttp = "^3.10.6"
 black = "^24.8.0"
 cachetools = "^5.5.0"
 fastapi = "^0.115.0"
