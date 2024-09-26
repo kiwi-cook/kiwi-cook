@@ -2,7 +2,7 @@
 
 Server:
 - all:
-  - 'taste_buddy_server/**/*'
+  - 'kiwi_cook_server/**/*'
 
 Client:
 - all:

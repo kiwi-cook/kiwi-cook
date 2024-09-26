@@ -19,7 +19,7 @@ To get cooking with Taste Buddy's backend, follow these simple steps:
 
 2. **Navigate to Server Directory:**
    ```bash
-   cd taste-buddy/taste_buddy_server
+   cd taste-buddy/kiwi_cook_server
    ```
 
 3. **Run the Server:**

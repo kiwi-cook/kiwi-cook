@@ -7,7 +7,7 @@ version: 2
 updates:
   # Updates for Python modules
   - package-ecosystem: "pip"
-    directory: "/taste_buddy_server"
+    directory: "/kiwi_cook_server"
     schedule:
       interval: "daily"
     assignees: ["am9zZWY"]

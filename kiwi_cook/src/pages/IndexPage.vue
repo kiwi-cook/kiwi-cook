@@ -49,7 +49,7 @@
                          :label="option"
                          class="q-ma-xs"
                          color="green-5"
-                         @click="sendMessage(option)"/>
+                         @click="sendUserMessage(option)"/>
                 </div>
               </template>
             </q-chat-message>
@@ -72,7 +72,7 @@
           type="textarea"
         >
           <template v-slot:after>
-            <q-btn color="green" dense flat icon="send" round @click="$event => sendMessage()"/>
+            <q-btn color="green" dense flat icon="send" round @click="$event => sendUserMessage()"/>
           </template>
         </q-input>
       </div>
@@ -104,6 +104,23 @@ interface Message {
   sent: boolean;
 }
 
+type MessageContent = {
+  content: string;
+  type: 'text';
+} | {
+  content: string;
+  type: 'image';
+} | {
+  content: string[];
+  type: 'options';
+} | {
+  content: {
+    name: string; image: string;
+    cookingTime: string; difficulty: string
+  };
+  type: 'recipe';
+};
+
 interface OptionMessage extends Message {
   type: 'options';
   content: string[];
@@ -127,42 +144,60 @@ interface ImageMessage extends Message {
   content: string;
 }
 
-const messages = ref<(OptionMessage | RecipeMessage | TextMessage | ImageMessage)[]>([
+type ChatMessage = OptionMessage | RecipeMessage | TextMessage | ImageMessage;
+
+const messages = ref<ChatMessage[]>([]);
+const startMessages = ref<MessageContent[]>([
   {
-    id: 1,
-    sender: 'Kiwi',
+    content: 'Hey there! 👋 Welcome to KiwiCook, your personal cooking assistant! Ready to make something delicious today?',
     type: 'text',
-    content: 'Ready to revolutionize your cooking? For how many people would you like to cook today?',
-    sent: false,
   },
   {
-    id: 2,
-    sender: 'Kiwi',
-    type: 'options',
-    content: ['Quick & Easy', 'Vegetarian', 'Desserts', 'Gourmet'],
-    sent: false,
+    content: 'I can help you find the perfect recipe, whether you’re short on time or craving something special.',
+    type: 'text',
   },
 ]);
 const newMessage = ref('');
 
 const recipeStore = useRecipeStore();
 
-const kiwiSendRecipe = (recipe: Recipe) => {
+function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
+  if (!content) {
+    console.log('No content to send');
+    return;
+  }
+
+  let message: MessageContent;
+
+  if (typeof content === 'string') {
+    message = { type: 'text', content };
+  } else if (Array.isArray(content)) {
+    message = { type: 'options', content };
+  } else if ('name' in content && 'image_url' in content) {
+    message = {
+      type: 'recipe',
+      content: {
+        name: content.name.translations['en-US'],
+        image: content.image_url || 'https://via.placeholder.com/200',
+        cookingTime: `${content.duration} min`,
+        difficulty: 'Easy',
+      },
+    };
+  } else {
+    message = content as MessageContent;
+  }
+
   messages.value.push({
     id: messages.value.length + 1,
     sender: 'Kiwi',
-    type: 'recipe',
-    content: {
-      name: recipe.name.translations['en-US'],
-      image: recipe.image_url || 'https://via.placeholder.com/200',
-      cookingTime: `${recipe.duration} min`,
-      difficulty: 'Easy',
-    },
     sent: false,
+    ...message,
   });
-};
+}
 
-async function sendMessage(text = newMessage.value) {
+startMessages.value.forEach((message) => sendKiwiMessage(message));
+
+async function sendUserMessage(text = newMessage.value) {
   if (!text.trim()) {
     return;
   }
@@ -174,10 +209,12 @@ async function sendMessage(text = newMessage.value) {
     content: text,
     sent: true,
   });
+
   // Try to search for a recipe
   let recipe = recipeStore.getRandomRecipe();
 
   try {
+    console.log('Searching for recipe:', text);
     const [searchedRecipe] = await recipeStore.searchRecipe(text) as Recipe[];
     if (searchedRecipe) {
       recipe = searchedRecipe;
@@ -186,9 +223,11 @@ async function sendMessage(text = newMessage.value) {
     console.error(error);
   }
 
+  console.log('Recipe:', recipe);
+
   // Simulated response
   setTimeout(() => {
-    kiwiSendRecipe(recipe);
+    sendKiwiMessage(recipe);
   }, 1000);
   newMessage.value = '';
 }
