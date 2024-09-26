@@ -7,16 +7,6 @@
         <div class="text-h4 text-green-14">Reclaim your kitchen</div>
       </div>
 
-      <!-- Color bar -->
-      <div class="col-12 q-mb-md color-bar">
-        <div class="color-segment bg-white" style="width: 35%"></div>
-        <div class="color-segment bg-black" style="width: 35%"></div>
-        <div class="color-segment bg-green-3" style="width: 10%"></div>
-        <div class="color-segment bg-green-7" style="width: 5%"></div>
-        <div class="color-segment bg-green-9" style="width: 5%"></div>
-        <div class="color-segment bg-green" style="width: 10%"></div>
-      </div>
-
       <!-- Chat area -->
       <div class="col-12 q-mb-md chat-container">
         <q-scroll-area style="height: 60vh;">
@@ -69,7 +59,8 @@
           label="What would you like to cook?"
           label-color="green-14"
           text-color="white"
-          type="textarea"
+          :disable="disableChatbox"
+          @keyup.enter.prevent="() => sendUserMessage()"
         >
           <template v-slot:after>
             <q-btn color="green" dense flat icon="send" round @click="$event => sendUserMessage()"/>
@@ -102,9 +93,12 @@ interface Message {
   id: number;
   sender: string;
   sent: boolean;
+  disableSender?: boolean;
+  waitForResponse?: boolean;
+  actionAfterResponse?: () => void;
 }
 
-type MessageContent = {
+type MessageContent = ({
   content: string;
   type: 'text';
 } | {
@@ -119,7 +113,11 @@ type MessageContent = {
     cookingTime: string; difficulty: string
   };
   type: 'recipe';
-};
+}) & {
+  disableChatbox?: boolean;
+  waitForResponse?: boolean;
+  actionAfterResponse?: () => void;
+}
 
 interface OptionMessage extends Message {
   type: 'options';
@@ -151,19 +149,42 @@ const startMessages = ref<MessageContent[]>([
   {
     content: 'Hey there! 👋 Welcome to KiwiCook, your personal cooking assistant! Ready to make something delicious today?',
     type: 'text',
+    disableChatbox: true,
   },
   {
-    content: 'I can help you find the perfect recipe, whether you’re short on time or craving something special.',
+    content: 'How many people are you cooking for today?',
     type: 'text',
+    disableChatbox: true,
+  },
+  {
+    content: ['1', '2', '3', '4+'],
+    type: 'options',
+    disableChatbox: true,
+    waitForResponse: true,
+  },
+  {
+    content: 'Awesome! Now, let’s narrow it down. What kind of recipe are you in the mood for?',
+    type: 'text',
+    disableChatbox: true,
+  },
+  {
+    content: ['Quick & Easy', 'Vegetarian', 'Desserts', 'Gourmet'],
+    type: 'options',
+    disableChatbox: true,
+  },
+  {
+    content: 'Great choice! 🍽️ One more thing—any specific ingredients you want to use or avoid?',
+    type: 'text',
+    disableChatbox: false,
   },
 ]);
+const disableChatbox = ref(false);
 const newMessage = ref('');
 
 const recipeStore = useRecipeStore();
 
 function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
   if (!content) {
-    console.log('No content to send');
     return;
   }
 
@@ -193,6 +214,7 @@ function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
     sent: false,
     ...message,
   });
+  disableChatbox.value = message.disableChatbox || false;
 }
 
 startMessages.value.forEach((message) => sendKiwiMessage(message));
@@ -211,7 +233,10 @@ async function sendUserMessage(text = newMessage.value) {
   });
 
   // Try to search for a recipe
-  let recipe = recipeStore.getRandomRecipe();
+  let recipe = recipeStore.getRandomRecipe() ?? {
+    type: 'text',
+    content: 'Sorry, I couldn\'t find any recipes for you. Please try again.',
+  };
 
   try {
     console.log('Searching for recipe:', text);
@@ -234,16 +259,6 @@ async function sendUserMessage(text = newMessage.value) {
 </script>
 
 <style lang="scss">
-.color-bar {
-  display: flex;
-  height: 20px;
-  margin-bottom: 20px;
-}
-
-.color-segment {
-  height: 100%;
-}
-
 .chat-container {
   border: 2px solid $green-14;
 }
