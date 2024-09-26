@@ -46,10 +46,6 @@ export class TasteBuddySearch {
         .search(term)
         .map((result) => result.item.id)));
 
-    console.log(processedTerms
-      .map((term) => new Set(this.fuse
-        .search(term))));
-
     // Find the intersection of all term results
     const intersectionResults = termResults
       .reduce((acc, curr) => new Set([...acc]
@@ -101,7 +97,6 @@ export function searchRecipesByQuery(recipeMap: Map<string, Recipe>, query: stri
     const recipeSearch = new TasteBuddySearch(Array.from(recipeMap.values()));
 
     if (recipeSearch === null) {
-      console.error('Recipe search is null');
       reject(new Error('Recipe search is null'));
       return;
     }
