@@ -10,7 +10,7 @@
       <!-- Chat area -->
       <div class="col-12 q-mb-md chat-container">
         <q-scroll-area style="height: 60vh;">
-          <div v-for="message in messages" :key="message.id" class="q-pa-md">
+          <div v-for="message in messages" :key="message.id" class="q-pl-md q-py-sm">
             <q-chat-message
               :bg-color="message.sent ? 'green-7' : 'grey-9'"
               :name="message.sender"
@@ -18,7 +18,7 @@
               text-color="white"
             >
               <template v-if="message.type === 'text'">
-                <div>{{ message.content }}</div>
+                <div v-html="message.content"/>
               </template>
               <template v-else-if="message.type === 'image'">
                 <q-img :src="message.content" style="max-width: 200px;"/>
@@ -85,7 +85,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRecipeStore } from 'stores/recipe-store.ts';
 import { Recipe } from 'src/models/recipe.ts';
 
@@ -93,9 +93,9 @@ interface Message {
   id: number;
   sender: string;
   sent: boolean;
-  disableSender?: boolean;
+  disableChatbox?: boolean;
   waitForResponse?: boolean;
-  actionAfterResponse?: () => void;
+  actionAfterResponse?: (message: string) => void;
 }
 
 type MessageContent = ({
@@ -116,7 +116,7 @@ type MessageContent = ({
 }) & {
   disableChatbox?: boolean;
   waitForResponse?: boolean;
-  actionAfterResponse?: () => void;
+  actionAfterResponse?: (message: string) => void;
 }
 
 interface OptionMessage extends Message {
@@ -144,46 +144,68 @@ interface ImageMessage extends Message {
 
 type ChatMessage = OptionMessage | RecipeMessage | TextMessage | ImageMessage;
 
+const userOptionsFromChat = {
+  servings: 1,
+  recipeType: 'Quick & Easy',
+  ingredients: [] as string[],
+};
+
 const messages = ref<ChatMessage[]>([]);
-const startMessages = ref<MessageContent[]>([
+
+enum kiwiMessageStates { START, SERVINGS, RECIPE_TYPE, INGREDIENTS, SEARCHING }
+
+const kiwiMessageState = ref(kiwiMessageStates.START);
+const kiwiStartMessages = ref<MessageContent[]>([
   {
-    content: 'Hey there! 👋 Welcome to KiwiCook, your personal cooking assistant! Ready to make something delicious today?',
+    content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant! Ready to make something delicious today?',
     type: 'text',
-    disableChatbox: true,
   },
   {
-    content: 'How many people are you cooking for today?',
+    content: 'For how many kiwis are you cooking for today?',
     type: 'text',
-    disableChatbox: true,
   },
   {
     content: ['1', '2', '3', '4+'],
     type: 'options',
-    disableChatbox: true,
     waitForResponse: true,
+    actionAfterResponse: (message: string) => {
+      userOptionsFromChat.servings = parseInt(message, 10);
+      kiwiMessageState.value = kiwiMessageStates.RECIPE_TYPE;
+    },
   },
   {
     content: 'Awesome! Now, let’s narrow it down. What kind of recipe are you in the mood for?',
     type: 'text',
-    disableChatbox: true,
   },
   {
     content: ['Quick & Easy', 'Vegetarian', 'Desserts', 'Gourmet'],
     type: 'options',
+    waitForResponse: true,
+    actionAfterResponse: (message: string) => {
+      userOptionsFromChat.recipeType = message;
+      kiwiMessageState.value = kiwiMessageStates.INGREDIENTS;
+    },
     disableChatbox: true,
   },
   {
-    content: 'Great choice! 🍽️ One more thing—any specific ingredients you want to use or avoid?',
+    content: 'Great choice! 🍽️ One more thing—any specific ingredients you want to use?',
     type: 'text',
-    disableChatbox: false,
+    waitForResponse: true,
+    actionAfterResponse: (message: string) => {
+      userOptionsFromChat.ingredients = message.split(',').map((ingredient) => ingredient.trim());
+      kiwiMessageState.value = kiwiMessageStates.SEARCHING;
+      // TODO: Search for recipes
+    },
   },
 ]);
 const disableChatbox = ref(false);
+const actionAfterResponse = ref<((message: string) => void) | undefined>(undefined);
 const newMessage = ref('');
 
 const recipeStore = useRecipeStore();
 
 function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
+  disableChatbox.value = false;
   if (!content) {
     return;
   }
@@ -206,6 +228,8 @@ function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
     };
   } else {
     message = content as MessageContent;
+    actionAfterResponse.value = message.actionAfterResponse;
+    disableChatbox.value = message.disableChatbox || false;
   }
 
   messages.value.push({
@@ -214,10 +238,34 @@ function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
     sent: false,
     ...message,
   });
-  disableChatbox.value = message.disableChatbox || false;
 }
 
-startMessages.value.forEach((message) => sendKiwiMessage(message));
+async function searchRecipe(recipeName: string) {
+  const recipes = await recipeStore.searchRecipe(recipeName);
+  if (recipes.length === 0) {
+    sendKiwiMessage('Sorry, I couldn’t find any recipes matching your criteria. Let’s try something else!');
+    kiwiMessageState.value = kiwiMessageStates.START;
+    return;
+  }
+
+  sendKiwiMessage('Here are some recipes I found for you:');
+  recipes.forEach((recipe) => {
+    sendKiwiMessage(recipe);
+  });
+}
+
+function kiwiChat() {
+  const message = kiwiStartMessages.value.shift();
+  if (!message) {
+    return;
+  }
+
+  sendKiwiMessage(message);
+  if (message.waitForResponse) {
+    return;
+  }
+  kiwiChat();
+}
 
 async function sendUserMessage(text = newMessage.value) {
   if (!text.trim()) {
@@ -231,31 +279,32 @@ async function sendUserMessage(text = newMessage.value) {
     content: text,
     sent: true,
   });
+  newMessage.value = '';
 
-  // Try to search for a recipe
-  let recipe = recipeStore.getRandomRecipe() ?? {
-    type: 'text',
-    content: 'Sorry, I couldn\'t find any recipes for you. Please try again.',
-  };
-
-  try {
-    console.log('Searching for recipe:', text);
-    const [searchedRecipe] = await recipeStore.searchRecipe(text) as Recipe[];
-    if (searchedRecipe) {
-      recipe = searchedRecipe;
+  if (actionAfterResponse.value) {
+    // Call action after response
+    console.log('Calling action after response:', text);
+    actionAfterResponse.value(text);
+    actionAfterResponse.value = undefined;
+  } else {
+    try {
+      console.log('Searching for recipe:', text);
+      await searchRecipe(text);
+      return;
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
   }
-
-  console.log('Recipe:', recipe);
 
   // Simulated response
   setTimeout(() => {
-    sendKiwiMessage(recipe);
+    kiwiChat();
   }, 1000);
-  newMessage.value = '';
 }
+
+onMounted(() => {
+  kiwiChat();
+});
 </script>
 
 <style lang="scss">
