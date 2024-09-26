@@ -17,15 +17,15 @@ class RecipeCrawler(PipelineElement):
         super().__init__("Crawler")
 
         self.user_agents = [
-            "Taste Buddy Web Crawler Project (https://github.com/taste-buddy/taste-buddy",
-            "Mozilla/5.0 (compatible; TasteBuddyBot/1.0; +https://github.com/taste-buddy/taste-buddy)",
-            "Taste Buddy Research Crawler/1.0 (+https://github.com/taste-buddy/taste-buddy; Academic purposes only)",
+            "KiwiCook Web Crawler Project (https://github.com/kiwi-cook/kiwi-cook",
+            "Mozilla/5.0 (compatible; TasteBuddyBot/1.0; +https://github.com/kiwi-cook/kiwi-cook)",
+            "KiwiCook Research Crawler/1.0 (+https://github.com/kiwi-cook/kiwi-cook; Academic purposes only)",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 "
-            "Safari/537.36 (Taste Buddy Web Crawling Project)",
+            "Safari/537.36 (KiwiCook Web Crawling Project)",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 "
-            "Safari/537.36 (Taste Buddy Web Crawler)",
+            "Safari/537.36 (KiwiCook Web Crawler)",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 "
-            "Safari/537.36 (Taste Buddy Research Crawler)",
+            "Safari/537.36 (KiwiCook Research Crawler)",
         ]
 
         self._page_count = 0

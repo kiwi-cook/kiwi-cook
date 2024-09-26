@@ -30,11 +30,11 @@ logging_config = {
         },
     },
     "loggers": {
-        "tastebuddy": {"handlers": ["default"], "level": "INFO"},
+        "kiwicook": {"handlers": ["default"], "level": "INFO"},
     },
 }
 dictConfig(logging_config)
-logger = logging.getLogger("tastebuddy")
+logger = logging.getLogger("kiwicook")
 
 load_dotenv()
 
@@ -52,7 +52,7 @@ ENV = get_environment()
 def setup_fastapi() -> FastAPI:
     logger.info(f"Setting up FastAPI for {ENV} mode...")
     return FastAPI(
-        title="Taste Buddy",
+        title="KiwiCook",
         description="The Student-Friendly Recipe Suggestion App: Crafted by Students, for Students",
         version="0.2.0",
         docs_url="/docs" if ENV == "development" else None,
@@ -71,8 +71,8 @@ def setup_cors(app: FastAPI) -> None:
         ]
         allow_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
     else:
-        origins = ["https://taste-buddy.github.io"]
-        allow_origin_regex = r"https://.*\.taste-buddy\.uk"
+        origins = ["https://kiwi-cook.github.io"]
+        allow_origin_regex = r"https://.*\.kiwi-cook\.uk"
 
     app.add_middleware(
         CORSMiddleware,
@@ -100,7 +100,7 @@ def setup_routes(app: FastAPI) -> None:
         summary="Root endpoint",
     )
     def read_root():
-        return {"error": False, "response": "Welcome to Taste Buddy!"}
+        return {"error": False, "response": "Welcome to KiwiCook!"}
 
     @app.get(
         "/health", response_description="Health check", response_model=APIResponse[str]
@@ -122,7 +122,7 @@ def setup_routes(app: FastAPI) -> None:
 def setup_trusted_host(app: FastAPI) -> None:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["taste-buddy.uk", "localhost", "127.0.0.1", "0.0.0.0"],
+        allowed_hosts=["kiwi-cook.uk", "localhost", "127.0.0.1", "0.0.0.0"],
     )
 
 

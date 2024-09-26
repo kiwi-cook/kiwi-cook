@@ -5,14 +5,14 @@ repos:
     rev: '1.8.3'
     hooks:
       - id: poetry-check
-        args: [ "-C", "./taste_buddy_server" ]
+        args: [ "-C", "./kiwi_cook_server" ]
       - id: poetry-lock
-        args: [ "-C", "./taste_buddy_server" ]
+        args: [ "-C", "./kiwi_cook_server" ]
       - id: poetry-export
-        args: [ "-f", "requirements.txt", "-C", "./taste_buddy_server", "--without-hashes", "-o", "./taste_buddy_server/requirements.txt" ]
+        args: [ "-f", "requirements.txt", "-C", "./kiwi_cook_server", "--without-hashes", "-o", "./kiwi_cook_server/requirements.txt" ]
         verbose: true
       - id: poetry-install
-        args: [ "-C", "./taste_buddy_server" ]
+        args: [ "-C", "./kiwi_cook_server" ]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v3.2.0
     hooks:

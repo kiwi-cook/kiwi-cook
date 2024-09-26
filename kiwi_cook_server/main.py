@@ -8,7 +8,7 @@ import traceback
 
 def main():
     # Parse the command line arguments
-    parser = argparse.ArgumentParser(description=f"Taste Buddy CLI")
+    parser = argparse.ArgumentParser(description=f"KiwiCook CLI")
     parser.add_argument(
         "-f",
         "--file",
