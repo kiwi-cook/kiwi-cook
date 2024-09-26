@@ -9,7 +9,7 @@ module.exports = {
   // `parser: 'vue-eslint-parser'` is already included with any 'plugin:vue/**' config and should be omitted
   parserOptions: {
     parser: require.resolve('@typescript-eslint/parser'),
-    extraFileExtensions: [ '.vue' ]
+    extraFileExtensions: ['.vue']
   },
 
   env: {
@@ -70,6 +70,9 @@ module.exports = {
     'no-nested-ternary': 'off',
     'max-classes-per-file': 'off',
 
+    'max-len': ["error", {"code": 150}],
+    "no-console": 'off',
+
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': 'error',
 
@@ -85,7 +88,7 @@ module.exports = {
 
     'prefer-promise-reject-errors': 'off',
 
-    quotes: ['warn', 'single', { avoidEscape: true }],
+    quotes: ['warn', 'single', {avoidEscape: true}],
 
     // this rule, if on, would require explicit return type on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',

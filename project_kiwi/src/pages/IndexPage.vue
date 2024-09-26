@@ -96,6 +96,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRecipeStore } from 'stores/recipe-store.ts';
+import { Recipe } from 'src/models/recipe.ts';
 
 interface Message {
   id: number;
@@ -126,7 +127,7 @@ interface ImageMessage extends Message {
   content: string;
 }
 
-const messages = ref<(OptionMessage|RecipeMessage|TextMessage|ImageMessage)[]>([
+const messages = ref<(OptionMessage | RecipeMessage | TextMessage | ImageMessage)[]>([
   {
     id: 1,
     sender: 'Kiwi',
@@ -146,33 +147,50 @@ const newMessage = ref('');
 
 const recipeStore = useRecipeStore();
 
-function sendMessage(text = newMessage.value) {
-  if (text.trim()) {
-    messages.value.push({
-      id: messages.value.length + 1,
-      sender: 'You',
-      type: 'text',
-      content: text,
-      sent: true,
-    });
-    // Simulated response
-    setTimeout(() => {
-      const recipe = recipeStore.getRandomRecipe();
-      messages.value.push({
-        id: messages.value.length + 1,
-        sender: 'Kiwi',
-        type: 'recipe',
-        content: {
-          name: recipe.name.translations['en-US'],
-          image: recipe.image_url || 'https://via.placeholder.com/200',
-          cookingTime: `${recipe.duration} min`,
-          difficulty: 'Easy',
-        },
-        sent: false,
-      });
-    }, 1000);
-    newMessage.value = '';
+const kiwiSendRecipe = (recipe: Recipe) => {
+  messages.value.push({
+    id: messages.value.length + 1,
+    sender: 'Kiwi',
+    type: 'recipe',
+    content: {
+      name: recipe.name.translations['en-US'],
+      image: recipe.image_url || 'https://via.placeholder.com/200',
+      cookingTime: `${recipe.duration} min`,
+      difficulty: 'Easy',
+    },
+    sent: false,
+  });
+};
+
+async function sendMessage(text = newMessage.value) {
+  if (!text.trim()) {
+    return;
   }
+
+  messages.value.push({
+    id: messages.value.length + 1,
+    sender: 'You',
+    type: 'text',
+    content: text,
+    sent: true,
+  });
+  // Try to search for a recipe
+  let recipe = recipeStore.getRandomRecipe();
+
+  try {
+    const [searchedRecipe] = await recipeStore.searchRecipe(text) as Recipe[];
+    if (searchedRecipe) {
+      recipe = searchedRecipe;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  // Simulated response
+  setTimeout(() => {
+    kiwiSendRecipe(recipe);
+  }, 1000);
+  newMessage.value = '';
 }
 </script>
 
@@ -195,6 +213,7 @@ function sendMessage(text = newMessage.value) {
   border-radius: 0;
   padding: 12px 16px;
   margin: 4px 0;
+  font-size: 16px;
 }
 
 .q-message-text--sent {
