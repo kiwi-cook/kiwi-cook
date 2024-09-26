@@ -22,9 +22,9 @@
         <q-scroll-area style="height: 60vh;">
           <div v-for="message in messages" :key="message.id" class="q-pa-md">
             <q-chat-message
+              :bg-color="message.sent ? 'green-7' : 'grey-9'"
               :name="message.sender"
               :sent="message.sent"
-              :bg-color="message.sent ? 'green-7' : 'grey-9'"
               text-color="white"
             >
               <template v-if="message.type === 'text'">
@@ -36,19 +36,19 @@
               <template v-else-if="message.type === 'recipe'">
                 <div class="recipe-card q-pa-md">
                   <div class="text-h6">{{ message.content.name }}</div>
-                  <q-img :src="message.content.image" style="max-width: 200px;" class="q-my-md"/>
+                  <q-img :src="message.content.image" class="q-my-md" style="max-width: 200px;"/>
                   <div>Cooking Time: {{ message.content.cookingTime }}</div>
                   <div>Difficulty: {{ message.content.difficulty }}</div>
-                  <q-btn color="green-5" class="q-mt-sm" label="View Recipe"/>
+                  <q-btn class="q-mt-sm" color="green-5" label="View Recipe"/>
                 </div>
               </template>
               <template v-else-if="message.type === 'options'">
                 <div class="options-list">
                   <q-btn v-for="option in message.content"
                          :key="option"
-                         color="green-5"
-                         class="q-ma-xs"
                          :label="option"
+                         class="q-ma-xs"
+                         color="green-5"
                          @click="sendMessage(option)"/>
                 </div>
               </template>
@@ -61,18 +61,18 @@
       <div class="col-12">
         <q-input
           v-model="newMessage"
-          filled
-          type="textarea"
-          bottom-slots
-          label="What would you like to cook?"
           bg-color="grey-9"
-          text-color="white"
-          label-color="green-14"
+          bottom-slots
           color="green-14"
           dark
+          filled
+          label="What would you like to cook?"
+          label-color="green-14"
+          text-color="white"
+          type="textarea"
         >
           <template v-slot:after>
-            <q-btn round dense flat icon="send" color="green" @click="$event => sendMessage()"/>
+            <q-btn color="green" dense flat icon="send" round @click="$event => sendMessage()"/>
           </template>
         </q-input>
       </div>
@@ -81,11 +81,11 @@
       <div class="col-12 q-mt-md">
         <div class="row justify-between items-center">
           <div class="col-auto">
-            <q-btn flat color="green-5" label="Learn More"/>
+            <q-btn color="green-5" flat label="Learn More"/>
           </div>
           <div class="col-auto">
-            <q-icon name="arrow_upward" color="green-5" size="24px"/>
-            <q-icon name="science" color="green-5" size="24px" class="q-ml-sm"/>
+            <q-icon color="green-5" name="arrow_upward" size="24px"/>
+            <q-icon class="q-ml-sm" color="green-5" name="science" size="24px"/>
           </div>
         </div>
       </div>
@@ -93,7 +93,7 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from 'vue';
 import { useRecipeStore } from 'stores/recipe-store.ts';
 import { Recipe } from 'src/models/recipe.ts';

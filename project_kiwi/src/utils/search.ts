@@ -33,27 +33,6 @@ export class TasteBuddySearch {
     this.fuse = new Fuse(searchableRecipes, options);
   }
 
-  search(query: string): string[] {
-    const processedTerms = TasteBuddySearch.processQuery(query);
-
-    if (processedTerms.length === 0) {
-      return [];
-    }
-
-    // Perform individual searches for each term
-    const termResults = processedTerms
-      .map((term) => new Set(this.fuse
-        .search(term)
-        .map((result) => result.item.id)));
-
-    // Find the intersection of all term results
-    const intersectionResults = termResults
-      .reduce((acc, curr) => new Set([...acc]
-        .filter((x) => curr.has(x))));
-
-    return Array.from(intersectionResults);
-  }
-
   private static prepareSearchableRecipes(recipes?: Recipe[]): SearchableRecipe[] {
     const searchableRecipes: SearchableRecipe[] = [];
 
@@ -89,6 +68,27 @@ export class TasteBuddySearch {
     return words
       .filter((word) => word.length > 0)
       .map((word) => stemmer(word));
+  }
+
+  search(query: string): string[] {
+    const processedTerms = TasteBuddySearch.processQuery(query);
+
+    if (processedTerms.length === 0) {
+      return [];
+    }
+
+    // Perform individual searches for each term
+    const termResults = processedTerms
+      .map((term) => new Set(this.fuse
+        .search(term)
+        .map((result) => result.item.id)));
+
+    // Find the intersection of all term results
+    const intersectionResults = termResults
+      .reduce((acc, curr) => new Set([...acc]
+        .filter((x) => curr.has(x))));
+
+    return Array.from(intersectionResults);
   }
 }
 

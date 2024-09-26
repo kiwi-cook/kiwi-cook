@@ -8,7 +8,7 @@
   </q-layout>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({
   name: 'MainLayout',
 });
