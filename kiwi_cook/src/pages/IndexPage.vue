@@ -3,7 +3,7 @@
     <div class="row q-pa-md">
       <!-- Header -->
       <div class="col-12 q-mb-md">
-        <div class="text-h2 text-weight-bold">Kiwi 🥝</div>
+        <div class="text-h2 text-weight-bold">KiwiCook 🥝</div>
         <div class="text-h4 text-green-14">Reclaim your kitchen</div>
       </div>
 

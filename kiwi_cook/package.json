@@ -1,8 +1,8 @@
 {
-  "name": "project_kiwi",
+  "name": "kiwi_cook",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Project Kiwi",
+  "productName": "KiwiCook",
   "author": "am9zZWY <46693545+am9zZWY@users.noreply.github.com>",
   "type": "module",
   "private": true,
