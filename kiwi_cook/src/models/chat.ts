@@ -1,29 +1,61 @@
-export enum ChatStateEnum {
-  NotStarted = 'not_started',
-  Servings = 'servings',
-  Ingredients = 'ingredients',
-  RecipeSuggestions = 'recipe_suggestions',
-  Finished = 'finished',
+import { Recipe } from 'src/models/recipe.ts';
+
+export interface UserPreferences {
+  servings: number;
+  recipeType: string;
+  dietaryRestrictions: string[];
+  cookingTime: number;
+  skillLevel: string;
+  cuisine: string;
 }
 
-const stateOrder: ChatStateEnum[] = [
-  ChatStateEnum.NotStarted,
-  ChatStateEnum.Servings,
-  ChatStateEnum.Ingredients,
-  ChatStateEnum.RecipeSuggestions,
-  ChatStateEnum.Finished,
-];
+export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
 
-export function getNextOf(state: ChatStateEnum): ChatStateEnum {
-  const currentIndex = stateOrder.indexOf(state);
-  return stateOrder[(currentIndex + 1) % stateOrder.length];
+export interface BaseMessage {
+  id: number;
+  sender: string;
+  sent: boolean;
+  type: MessageType;
 }
 
-export function getPreviousOf(state: ChatStateEnum): ChatStateEnum {
-  const currentIndex = stateOrder.indexOf(state);
-  return stateOrder[(currentIndex - 1 + stateOrder.length) % stateOrder.length];
+export interface TextMessage extends BaseMessage {
+  type: 'text';
+  content: string;
 }
 
-export function isChatStateEnum(value: string): value is ChatStateEnum {
-  return Object.values(ChatStateEnum).includes(value as ChatStateEnum);
+export interface ImageMessage extends BaseMessage {
+  type: 'image';
+  content: string;
 }
+
+export interface RecipeMessage extends BaseMessage {
+  type: 'recipe';
+  content: Recipe;
+}
+
+export interface OptionsMessage extends BaseMessage {
+  type: 'options' | 'multiOptions';
+  content: string[];
+}
+
+export interface SliderMessage extends BaseMessage {
+  type: 'slider';
+  content: {
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+  };
+}
+
+export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage;
+
+export type KiwiMessageState =
+  'start'
+  | 'recipeType'
+  | 'dietaryRestrictions'
+  | 'cookingTime'
+  | 'cuisine'
+  | 'searching'
+  | 'displayingResults';

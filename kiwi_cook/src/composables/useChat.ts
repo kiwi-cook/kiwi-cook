@@ -5,7 +5,7 @@ import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store.ts';
 import {
   UserPreferences, Message, KiwiMessageState, MessageType,
-} from 'src/models/kiwiChat.ts';
+} from 'src/models/chat.ts';
 
 export function useChat() {
   const KIWI_DELAY = ref(500);
