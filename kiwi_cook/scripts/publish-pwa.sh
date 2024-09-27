@@ -23,7 +23,7 @@ git config --local commit.gpgsign false
 # deploy
 git commit -m 'deploy'
 git branch -M master
-git remote add origin git@github.com:taste-buddy/taste-buddy.github.io.git
+git remote add origin git@github.com:kiwi-cook/kiwi-cook.github.io.git
 git push -u -f origin master
 
 # remove the build directory
