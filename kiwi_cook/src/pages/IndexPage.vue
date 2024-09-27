@@ -91,6 +91,12 @@
         <div class="row justify-between items-center">
           <div class="col-auto">
             <q-btn color="green-5" flat label="Learn More"/>
+            <q-btn
+              color="green-5"
+              flat
+              icon="mdi-github"
+              @click="openGithub"
+            />
           </div>
           <div class="col-auto">
             <q-icon color="green-5" name="arrow_upward" size="24px"/>
@@ -116,6 +122,8 @@ const {
   handleOptionClick,
   handleSliderChange,
 } = chat;
+
+const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
 </script>
 
 <style lang="scss">
