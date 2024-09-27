@@ -9,7 +9,7 @@
 
       <!-- Chat area -->
       <div class="col-12 q-mb-md chat-container">
-        <q-scroll-area style="height: 60vh;">
+        <q-scroll-area style="height: 60vh;" ref="scrollArea">
           <div v-for="message in messages" :key="message.id" class="q-pl-md q-py-sm">
             <q-chat-message
               :bg-color="message.sent ? 'green-7' : 'grey-9'"
@@ -103,9 +103,10 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { useRecipeStore } from 'stores/recipe-store';
 import { Recipe } from 'src/models/recipe';
+import { QScrollArea } from 'quasar';
 
 interface UserPreferences {
   servings: number;
@@ -176,6 +177,17 @@ const kiwiMessageState = ref<'start' | 'recipeType' | 'dietaryRestrictions' | 'c
 const disableChatbox = ref(false);
 const newMessage = ref('');
 
+const scrollArea = useTemplateRef('scrollArea');
+
+function scrollToBottom() {
+  console.log('scrollArea:', scrollArea.value);
+  if (!scrollArea.value) {
+    return;
+  }
+  const scrollTarget = scrollArea.value.getScrollTarget();
+  scrollArea.value.setScrollPosition('vertical', scrollTarget.scrollHeight, 550);
+}
+
 const recipeStore = useRecipeStore();
 
 function sendKiwiMessage(message: Omit<Message, 'id' | 'sender' | 'sent'>) {
@@ -186,7 +198,10 @@ function sendKiwiMessage(message: Omit<Message, 'id' | 'sender' | 'sent'>) {
     ...message,
   } as Message;
 
-  messages.value.push(kiwiMessage);
+  setTimeout(() => {
+    messages.value.push(kiwiMessage);
+    scrollToBottom();
+  }, 500);
 }
 
 function askForServings() {
