@@ -26,20 +26,38 @@
               <template v-else-if="message.type === 'recipe'">
                 <div class="recipe-card q-pa-md">
                   <div class="text-h6">{{ message.content.name }}</div>
-                  <q-img :src="message.content.image" class="q-my-md" style="max-width: 200px;"/>
-                  <div>Cooking Time: {{ message.content.cookingTime }}</div>
+                  <q-img :src="message.content.image_url" class="q-my-md" style="max-width: 200px;"/>
+                  <div>Cooking Time: {{ message.content.duration }}</div>
                   <div>Difficulty: {{ message.content.difficulty }}</div>
-                  <q-btn class="q-mt-sm" color="green-5" label="View Recipe"/>
+                  <q-btn class="q-mt-sm" color="green-5" label="View Recipe" @click="viewRecipe(message.content)"/>
                 </div>
               </template>
-              <template v-else-if="message.type === 'options'">
+              <template v-else-if="message.type === 'options' || message.type === 'multiOptions'">
                 <div class="options-list">
                   <q-btn v-for="option in message.content"
                          :key="option"
                          :label="option"
                          class="q-ma-xs"
                          color="green-5"
-                         @click="sendUserMessage(option)"/>
+                         @click="handleOptionClick(option, message.type)"/>
+                  <template v-if="message.type === 'multiOptions'">
+                    <div class="text-caption text-weight-bold q-mt-sm">Select all that apply</div>
+                    <q-btn color="green" dense flat icon="send" round @click="$event => sendUserMessage()"/>
+                  </template>
+                </div>
+              </template>
+              <template v-else-if="message.type === 'slider'">
+                <div class="slider-container q-pa-md">
+                  <div class="text-subtitle1">{{ message.content.label }}</div>
+                  <q-slider
+                    v-model="message.content.value"
+                    :min="message.content.min"
+                    :max="message.content.max"
+                    :step="message.content.step"
+                    label
+                    color="green-5"
+                    @change="handleSliderChange(message.content.value)"
+                  />
                 </div>
               </template>
             </q-chat-message>
@@ -60,7 +78,7 @@
           label-color="green-14"
           text-color="white"
           :disable="disableChatbox"
-          @keyup.enter.prevent="() => sendUserMessage()"
+          @keyup.enter.prevent="sendUserMessage"
         >
           <template v-slot:after>
             <q-btn color="green" dense flat icon="send" round @click="$event => sendUserMessage()"/>
@@ -86,188 +104,204 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
-import { useRecipeStore } from 'stores/recipe-store.ts';
-import { Recipe } from 'src/models/recipe.ts';
+import { useRecipeStore } from 'stores/recipe-store';
+import { Recipe } from 'src/models/recipe';
 
-interface Message {
+interface UserPreferences {
+  servings: number;
+  recipeType: string;
+  dietaryRestrictions: string[];
+  cookingTime: number;
+  skillLevel: string;
+  cuisine: string;
+}
+
+interface MessageInterface {
   id: number;
   sender: string;
   sent: boolean;
-  disableChatbox?: boolean;
-  waitForResponse?: boolean;
-  actionAfterResponse?: (message: string) => void;
+  type: 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
+  content: unknown;
 }
 
-type MessageContent = ({
-  content: string;
-  type: 'text';
-} | {
-  content: string;
-  type: 'image';
-} | {
-  content: string[];
-  type: 'options';
-} | {
-  content: {
-    name: string; image: string;
-    cookingTime: string; difficulty: string
-  };
-  type: 'recipe';
-}) & {
-  disableChatbox?: boolean;
-  waitForResponse?: boolean;
-  actionAfterResponse?: (message: string) => void;
-}
-
-interface OptionMessage extends Message {
-  type: 'options';
-  content: string[];
-}
-
-interface RecipeMessage extends Message {
-  type: 'recipe';
-  content: {
-    name: string; image: string;
-    cookingTime: string; difficulty: string
-  };
-}
-
-interface TextMessage extends Message {
+interface TextMessage extends MessageInterface {
   type: 'text';
   content: string;
 }
 
-interface ImageMessage extends Message {
+interface ImageMessage extends MessageInterface {
   type: 'image';
   content: string;
 }
 
-type ChatMessage = OptionMessage | RecipeMessage | TextMessage | ImageMessage;
+interface RecipeMessage extends MessageInterface {
+  type: 'recipe';
+  content: Recipe;
+}
 
-const userOptionsFromChat = {
-  servings: 1,
-  recipeType: 'Quick & Easy',
-  ingredients: [] as string[],
-};
+interface OptionsMessage extends MessageInterface {
+  type: 'options';
+  content: string[];
+}
 
-const messages = ref<ChatMessage[]>([]);
+interface MultiOptionsMessage extends MessageInterface {
+  type: 'multiOptions';
+  content: string[];
+}
 
-enum kiwiMessageStates { START, SERVINGS, RECIPE_TYPE, INGREDIENTS, SEARCHING }
+interface SliderMessage extends MessageInterface {
+  type: 'slider';
+  content: {
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+  };
+}
 
-const kiwiMessageState = ref(kiwiMessageStates.START);
-const kiwiStartMessages = ref<MessageContent[]>([
-  {
-    content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant! Ready to make something delicious today?',
-    type: 'text',
-  },
-  {
-    content: 'For how many kiwis are you cooking for today?',
-    type: 'text',
-  },
-  {
-    content: ['1', '2', '3', '4+'],
-    type: 'options',
-    waitForResponse: true,
-    actionAfterResponse: (message: string) => {
-      userOptionsFromChat.servings = parseInt(message, 10);
-      kiwiMessageState.value = kiwiMessageStates.RECIPE_TYPE;
-    },
-  },
-  {
-    content: 'Awesome! Now, let’s narrow it down. What kind of recipe are you in the mood for?',
-    type: 'text',
-  },
-  {
-    content: ['Quick & Easy', 'Vegetarian', 'Desserts', 'Gourmet'],
-    type: 'options',
-    waitForResponse: true,
-    actionAfterResponse: (message: string) => {
-      userOptionsFromChat.recipeType = message;
-      kiwiMessageState.value = kiwiMessageStates.INGREDIENTS;
-    },
-    disableChatbox: true,
-  },
-  {
-    content: 'Great choice! 🍽️ One more thing—any specific ingredients you want to use?',
-    type: 'text',
-    waitForResponse: true,
-    actionAfterResponse: (message: string) => {
-      userOptionsFromChat.ingredients = message.split(',').map((ingredient) => ingredient.trim());
-      kiwiMessageState.value = kiwiMessageStates.SEARCHING;
-      // TODO: Search for recipes
-    },
-  },
-]);
+type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | MultiOptionsMessage | SliderMessage;
+
+const messages = ref<Message[]>([]);
+const userPreferences = ref<UserPreferences>({
+  servings: 2,
+  recipeType: '',
+  dietaryRestrictions: [],
+  cookingTime: 30,
+  skillLevel: 'Beginner',
+  cuisine: '',
+});
+
+const kiwiMessageState = ref<'start' | 'recipeType' | 'dietaryRestrictions' | 'cookingTime' | 'cuisine'>('start');
 const disableChatbox = ref(false);
-const actionAfterResponse = ref<((message: string) => void) | undefined>(undefined);
 const newMessage = ref('');
 
 const recipeStore = useRecipeStore();
 
-function sendKiwiMessage(content: string | string[] | Recipe | MessageContent) {
-  disableChatbox.value = false;
-  if (!content) {
-    return;
-  }
-
-  let message: MessageContent;
-
-  if (typeof content === 'string') {
-    message = { type: 'text', content };
-  } else if (Array.isArray(content)) {
-    message = { type: 'options', content };
-  } else if ('name' in content && 'image_url' in content) {
-    message = {
-      type: 'recipe',
-      content: {
-        name: content.name.translations['en-US'],
-        image: content.image_url || 'https://via.placeholder.com/200',
-        cookingTime: `${content.duration} min`,
-        difficulty: 'Easy',
-      },
-    };
-  } else {
-    message = content as MessageContent;
-    actionAfterResponse.value = message.actionAfterResponse;
-    disableChatbox.value = message.disableChatbox || false;
-  }
-
-  messages.value.push({
+function sendKiwiMessage(message: Omit<Message, 'id' | 'sender' | 'sent'>) {
+  const kiwiMessage = {
     id: messages.value.length + 1,
     sender: 'Kiwi',
     sent: false,
     ...message,
+  } as Message;
+
+  messages.value.push(kiwiMessage);
+}
+
+function askForServings() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'How many people are you cooking for today?',
+  });
+  sendKiwiMessage({
+    type: 'options',
+    content: ['1', '2', '3', '4', '5+'],
   });
 }
 
-async function searchRecipe(recipeName: string) {
-  const recipes = await recipeStore.searchRecipe(recipeName);
-  if (recipes.length === 0) {
-    sendKiwiMessage('Sorry, I couldn’t find any recipes matching your criteria. Let’s try something else!');
-    kiwiMessageState.value = kiwiMessageStates.START;
-    return;
-  }
-
-  sendKiwiMessage('Here are some recipes I found for you:');
-  recipes.forEach((recipe) => {
-    sendKiwiMessage(recipe);
+function askForRecipeType() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'What type of recipe are you in the mood for?',
+  });
+  sendKiwiMessage({
+    type: 'options',
+    content: ['Quick & Easy', 'Healthy', 'Comfort Food', 'Gourmet', 'Budget-friendly'],
   });
 }
 
-function kiwiChat() {
-  const message = kiwiStartMessages.value.shift();
-  if (!message) {
-    return;
-  }
-
-  sendKiwiMessage(message);
-  if (message.waitForResponse) {
-    return;
-  }
-  kiwiChat();
+function askForDietaryRestrictions() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'Do you have any dietary restrictions or preferences? (Select all that apply)',
+  });
+  sendKiwiMessage({
+    type: 'multiOptions',
+    content: ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free', 'Low-carb', 'None'],
+  });
 }
 
-async function sendUserMessage(text = newMessage.value) {
+function askForCookingTime() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'How much time do you have for cooking today?',
+  });
+  sendKiwiMessage({
+    type: 'slider',
+    content: {
+      label: 'Cooking time (in minutes)',
+      value: 30,
+      min: 15,
+      max: 120,
+      step: 15,
+    },
+  });
+}
+
+function askForCuisine() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'Any particular cuisine you\'re craving?',
+  });
+  sendKiwiMessage({
+    type: 'options',
+    content: ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Surprise me!'],
+  });
+}
+
+async function searchRecipes() {
+  sendKiwiMessage({
+    type: 'text',
+    content: 'Great! Let me find some recipes that match your preferences...',
+  });
+
+  try {
+    const recipes = await recipeStore.searchRecipe(userPreferences.value.dietaryRestrictions.join(','));
+    if (recipes.length === 0) {
+      sendKiwiMessage({
+        type: 'text',
+        content: 'I couldn\'t find any recipes matching your exact criteria. Would you like me to broaden the search?',
+      });
+      sendKiwiMessage({
+        type: 'options',
+        content: ['Yes, please', 'No, let\'s start over'],
+      });
+    } else {
+      sendKiwiMessage({
+        type: 'text',
+        content: 'Here are some recipes I found for you:',
+      });
+      recipes.forEach((recipe) => {
+        sendKiwiMessage({
+          type: 'recipe',
+          content: recipe,
+        });
+      });
+      sendKiwiMessage({
+        type: 'text',
+        content: 'Would you like to see more recipes or start cooking one of these?',
+      });
+      sendKiwiMessage({
+        type: 'options',
+        content: ['See more recipes', 'Start cooking', 'New search'],
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    sendKiwiMessage({
+      type: 'text',
+      content: 'I\'m sorry, but I encountered an error while searching for recipes. Shall we try again?',
+    });
+  }
+}
+
+function viewRecipe(recipe: Recipe) {
+  // Implement the logic to view the full recipe details
+  console.log('Viewing recipe:', recipe);
+}
+
+function sendUserMessage(text: string = newMessage.value) {
   if (!text.trim()) {
     return;
   }
@@ -281,29 +315,59 @@ async function sendUserMessage(text = newMessage.value) {
   });
   newMessage.value = '';
 
-  if (actionAfterResponse.value) {
-    // Call action after response
-    console.log('Calling action after response:', text);
-    actionAfterResponse.value(text);
-    actionAfterResponse.value = undefined;
-  } else {
-    try {
-      console.log('Searching for recipe:', text);
-      await searchRecipe(text);
-      return;
-    } catch (error) {
-      console.error(error);
-    }
+  switch (kiwiMessageState.value) {
+    case 'start':
+      userPreferences.value.servings = parseInt(text, 10);
+      kiwiMessageState.value = 'recipeType';
+      askForRecipeType();
+      break;
+    case 'recipeType':
+      userPreferences.value.recipeType = text;
+      kiwiMessageState.value = 'dietaryRestrictions';
+      askForDietaryRestrictions();
+      break;
+    case 'dietaryRestrictions':
+      kiwiMessageState.value = 'cookingTime';
+      askForCookingTime();
+      break;
+    case 'cuisine':
+      userPreferences.value.cuisine = text;
+      searchRecipes();
+      break;
+    default:
+      // Handle other cases or user input
+      break;
   }
+}
 
-  // Simulated response
-  setTimeout(() => {
-    kiwiChat();
-  }, 1000);
+function handleOptionClick(option: string, type: string) {
+  if (type === 'multiOptions') {
+    if (newMessage.value.includes(option)) {
+      newMessage.value = newMessage.value.replace(option, '').trim();
+    } else {
+      newMessage.value += ` ${option}`;
+    }
+  } else {
+    sendUserMessage(option);
+  }
+}
+
+function handleSliderChange(value: number) {
+  userPreferences.value.cookingTime = value;
+  sendKiwiMessage({
+    type: 'text',
+    content: `Great! I'll look for recipes that take about ${value} minutes to prepare.`,
+  });
+  kiwiMessageState.value = 'cuisine';
+  askForCuisine();
 }
 
 onMounted(() => {
-  kiwiChat();
+  sendKiwiMessage({
+    type: 'text',
+    content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant! Ready to whip up something delicious?',
+  });
+  askForServings();
 });
 </script>
 
@@ -326,5 +390,10 @@ onMounted(() => {
 .q-message-name {
   font-weight: bold;
   color: $green-5;
+}
+
+.slider-container {
+  width: 100%;
+  max-width: 300px;
 }
 </style>
