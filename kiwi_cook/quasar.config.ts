@@ -59,7 +59,7 @@ export default configure((ctx) => ({
     // env: {},
     // rawDefine: {}
     // ignorePublicFolder: true,
-    // minify: false,
+    minify: true,
     // polyfillModulePreload: true,
     // distDir
 
@@ -212,7 +212,7 @@ export default configure((ctx) => ({
     builder: {
       // https://www.electron.build/configuration/configuration
 
-      appId: 'project_kiwi',
+      appId: 'kiwi_cook',
     },
   },
 
