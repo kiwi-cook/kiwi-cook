@@ -4,240 +4,192 @@ import {
 import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store.ts';
 import {
-  UserPreferences, Message, KiwiMessageState, MessageType,
+  KiwiMessageState, Message, MessageType, UserPreferences,
 } from 'src/models/chat.ts';
 
 export function useChat() {
-  const KIWI_DELAY = ref(500);
-
-  const messages = ref<Message[]>([]);
-  const userPreferences = ref<UserPreferences>({
+  // Constants
+  const KIWI_DELAY_MS = 500;
+  const DEFAULT_PREFERENCES: UserPreferences = {
     servings: 2,
     recipeType: '',
     dietaryRestrictions: [],
     cookingTime: 30,
     skillLevel: 'Beginner',
     cuisine: '',
-  });
+  };
 
+  // Reactive state
+  const messages = ref<Message[]>([]);
+  const userPreferences = ref<UserPreferences>({ ...DEFAULT_PREFERENCES });
   const kiwiMessageState = ref<KiwiMessageState>('start');
-  const disableChatbox = computed(() => kiwiMessageState.value === 'searching');
+  const isChatDisabled = computed(() => kiwiMessageState.value === 'searching');
   const newMessage = ref('');
   const scrollArea = ref<QScrollArea | null>(null);
 
   const recipeStore = useRecipeStore();
 
-  function scrollToBottom() {
+  // Utility: Scroll chat to bottom
+  const scrollToBottom = () => {
     nextTick(() => {
       if (scrollArea.value) {
         const scrollTarget = scrollArea.value.getScrollTarget();
         scrollArea.value.setScrollPosition('vertical', scrollTarget.scrollHeight, 550);
       }
     });
-  }
-
-  function sendKiwiMessage(message: Omit<Message, 'id' | 'sender' | 'sent'>) {
-    const kiwiMessage: Message = {
-      id: messages.value.length + 1,
-      sender: 'Kiwi',
-      sent: false,
-      ...message,
-    } as Message;
-
-    setTimeout(() => {
-      messages.value.push(kiwiMessage);
-      scrollToBottom();
-    }, KIWI_DELAY.value);
-  }
-
-  const askQuestions = {
-    askForServings: () => {
-      sendKiwiMessage({
-        type: 'text',
-        content: 'How many people are you cooking for today?',
-      });
-      sendKiwiMessage({
-        type: 'options',
-        content: ['1', '2', '3', '4', '5+'],
-      });
-    },
-    askForRecipeType: () => {
-      sendKiwiMessage({
-        type: 'text',
-        content: 'What type of recipe are you in the mood for?',
-      });
-      sendKiwiMessage({
-        type: 'options',
-        content: ['Quick & Easy', 'Healthy', 'Comfort Food', 'Gourmet', 'Budget-friendly'],
-      });
-    },
-    askForDietaryRestrictions: () => {
-      sendKiwiMessage({
-        type: 'text',
-        content: 'Do you have any dietary restrictions or preferences? (Select all that apply)',
-      });
-      sendKiwiMessage({
-        type: 'multiOptions',
-        content: ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free', 'Low-carb', 'None'],
-      });
-    },
-    askForCookingTime: () => {
-      sendKiwiMessage({
-        type: 'text',
-        content: 'How much time do you have for cooking today?',
-      });
-      sendKiwiMessage({
-        type: 'slider',
-        content: {
-          label: 'Cooking time (in minutes)',
-          value: 30,
-          min: 15,
-          max: 120,
-          step: 15,
-        },
-      });
-    },
-    askForCuisine: () => {
-      sendKiwiMessage({
-        type: 'text',
-        content: 'Any particular cuisine you\'re craving?',
-      });
-      sendKiwiMessage({
-        type: 'options',
-        content: ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Surprise me!'],
-      });
-    },
   };
 
-  async function searchRecipes() {
+  // Utility: Add message with delay
+  const addMessage = (message: Omit<Message, 'id' | 'sender' | 'sent'>, sender = 'Kiwi') => {
+    setTimeout(() => {
+      messages.value.push({
+        id: messages.value.length + 1,
+        sender,
+        sent: sender === 'You',
+        ...message,
+      } as Message);
+      scrollToBottom();
+    }, KIWI_DELAY_MS);
+  };
+
+  // Encapsulated question asking logic
+  const questions = {
+    ask: (text: string, options: string[] | null = null) => {
+      addMessage({ type: 'text', content: text });
+      if (options) {
+        addMessage({ type: 'options', content: options });
+      }
+    },
+    servings: () => questions.ask(
+      'How many people are you cooking for today?',
+      ['1', '2', '3', '4', '5+'],
+    ),
+    recipeType: () => questions.ask(
+      'What type of recipe are you in the mood for?',
+      ['Quick & Easy', 'Healthy', 'Comfort Food', 'Gourmet', 'Budget-friendly'],
+    ),
+    dietaryRestrictions: () => questions.ask(
+      'Do you have any dietary restrictions?',
+      ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free', 'Low-carb', 'None'],
+    ),
+    cookingTime: () => addMessage({
+      type: 'slider',
+      content: {
+        label: 'Cooking time (in minutes)',
+        value: 30,
+        min: 15,
+        max: 120,
+        step: 15,
+      },
+    }),
+    cuisine: () => questions.ask(
+      'Any particular cuisine you\'re craving?',
+      ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Surprise me!'],
+    ),
+  };
+
+  // Recipe search logic
+  const searchRecipes = async () => {
     kiwiMessageState.value = 'searching';
-    sendKiwiMessage({
-      type: 'text',
-      content: 'Great! Let me find some recipes that match your preferences...',
-    });
+    addMessage({ type: 'text', content: 'Searching for recipes...' });
 
     try {
       const recipes = await recipeStore.searchRecipe(newMessage.value);
       kiwiMessageState.value = 'displayingResults';
 
       if (recipes.length === 0) {
-        sendKiwiMessage({
-          type: 'text',
-          content: 'I couldn\'t find any recipes matching your exact criteria. Would you like me to broaden the search?',
-        });
-        sendKiwiMessage({
-          type: 'options',
-          content: ['Yes, please', 'No, let\'s start over'],
-        });
+        addMessage({ type: 'text', content: 'No matching recipes found. Try broadening your criteria.' });
+        addMessage({ type: 'options', content: ['Yes, broaden search', 'No, start over'] });
       } else {
-        sendKiwiMessage({
-          type: 'text',
-          content: 'Here are some recipes I found for you:',
-        });
-        recipes.forEach((recipe) => {
-          sendKiwiMessage({
-            type: 'recipe',
-            content: recipe,
-          });
-        });
-        sendKiwiMessage({
-          type: 'text',
-          content: 'Would you like to see more recipes or start cooking one of these?',
-        });
-        sendKiwiMessage({
-          type: 'options',
-          content: ['See more recipes', 'Start cooking', 'New search'],
-        });
+        addMessage({ type: 'text', content: 'Here are some recipes for you:' });
+        recipes.forEach((recipe) => addMessage({ type: 'recipe', content: recipe }));
+        addMessage({ type: 'options', content: ['See more recipes', 'Start cooking', 'New search'] });
       }
     } catch (error) {
-      console.error(error);
-      sendKiwiMessage({
-        type: 'text',
-        content: 'I\'m sorry, but I encountered an error while searching for recipes. Shall we try again?',
-      });
+      console.error('Error searching recipes:', error);
+      addMessage({ type: 'text', content: 'An error occurred while searching. Try again?' });
       kiwiMessageState.value = 'start';
     }
-  }
+  };
 
-  function resetChat() {
+  // Reset the chat and preferences
+  const resetChat = () => {
     messages.value = [];
-    userPreferences.value = {
-      servings: 2,
-      recipeType: '',
-      dietaryRestrictions: [],
-      cookingTime: 30,
-      skillLevel: 'Beginner',
-      cuisine: '',
-    };
+    userPreferences.value = { ...DEFAULT_PREFERENCES };
     kiwiMessageState.value = 'start';
-    sendKiwiMessage({
-      type: 'text',
-      content: 'Let\'s start over! What would you like to cook today?',
-    });
-    askQuestions.askForServings();
-  }
+    addMessage({ type: 'text', content: 'Let\'s start over. What would you like to cook today?' });
+    questions.servings();
+  };
 
-  function handleUserInput(input: string) {
-    const stateHandlers: Record<KiwiMessageState, (input: string) => void> = {
-      start: (_input) => {
-        userPreferences.value.servings = parseInt(_input, 10);
+  // Handle each phase of the conversation
+  const handleState = (input: string) => {
+    const transitions: Record<KiwiMessageState, () => void> = {
+      start: () => {
+        userPreferences.value.servings = parseInt(input, 10);
         kiwiMessageState.value = 'recipeType';
-        askQuestions.askForRecipeType();
+        questions.recipeType();
       },
-      recipeType: (_input) => {
-        userPreferences.value.recipeType = _input;
+      recipeType: () => {
+        userPreferences.value.recipeType = input;
         kiwiMessageState.value = 'dietaryRestrictions';
-        askQuestions.askForDietaryRestrictions();
+        questions.dietaryRestrictions();
       },
       dietaryRestrictions: () => {
+        // Update dietary restrictions, move on to cooking time
         kiwiMessageState.value = 'cookingTime';
-        askQuestions.askForCookingTime();
+        questions.cookingTime();
       },
       cookingTime: () => {
-        // This state is handled by the slider change event
+        // Cooking time handled in slider callback, move on to cuisine
       },
-      cuisine: (_input) => {
-        userPreferences.value.cuisine = _input;
+      cuisine: () => {
+        userPreferences.value.cuisine = input;
         searchRecipes();
       },
       searching: () => {
-        // Do nothing while searching
+        // No user input handled during searching
       },
-      displayingResults: (_input) => {
-        if (_input === 'See more recipes') {
+      displayingResults: () => {
+        if (input === 'See more recipes') {
           searchRecipes();
-        } else if (_input === 'Start cooking') {
-          // Implement logic to start cooking selected recipe
-        } else if (_input === 'New search') {
+        }
+        if (input === 'New search') {
           resetChat();
         }
       },
     };
 
-    const handler = stateHandlers[kiwiMessageState.value];
-    if (handler) {
-      handler(input);
-    }
-  }
+    transitions[kiwiMessageState.value]?.();
+  };
 
-  function sendUserMessage(text: string = newMessage.value) {
+  // Handle slider input (asynchronous)
+  const handleSliderInput = (value: number) => {
+    userPreferences.value.cookingTime = value;
+    addMessage({ type: 'text', content: `Looking for recipes that take about ${value} minutes to prepare.` });
+    kiwiMessageState.value = 'cuisine';
+    questions.cuisine();
+  };
+
+  // Process user input
+  const handleUserInput = (input: string) => {
+    if (!input.trim()) {
+      return;
+    }
+    addMessage({ type: 'text', content: input }, 'You');
+    handleState(input);
+  };
+
+  // Handle user sending a message
+  const sendUserMessage = (text: string = newMessage.value) => {
     if (!text.trim()) {
       return;
     }
-
-    messages.value.push({
-      id: messages.value.length + 1,
-      sender: 'You',
-      type: 'text',
-      content: text,
-      sent: true,
-    });
     newMessage.value = '';
-
     handleUserInput(text);
-  }
+  };
 
-  function handleOptionClick(option: string, type: MessageType) {
+  // Handle multi-option click
+  const handleOptionClick = (option: string, type: MessageType) => {
     if (type === 'multiOptions') {
       if (newMessage.value.includes(option)) {
         newMessage.value = newMessage.value.replace(option, '').trim();
@@ -247,37 +199,24 @@ export function useChat() {
     } else {
       sendUserMessage(option);
     }
-  }
+  };
 
-  function handleSliderChange(value: number) {
-    userPreferences.value.cookingTime = value;
-    sendKiwiMessage({
-      type: 'text',
-      content: `Great! I'll look for recipes that take about ${value} minutes to prepare.`,
-    });
-    kiwiMessageState.value = 'cuisine';
-    askQuestions.askForCuisine();
-  }
-
+  // On component mount, initialize the chat
   onMounted(() => {
-    sendKiwiMessage({
-      type: 'text',
-      content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant! Ready to whip up something delicious?',
-    });
-    askQuestions.askForServings();
+    addMessage({ type: 'text', content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant!' });
+    questions.servings();
   });
 
   return {
-    KIWI_DELAY,
     messages,
     userPreferences,
     kiwiMessageState,
-    disableChatbox,
+    isChatDisabled,
     newMessage,
     scrollArea,
     sendUserMessage,
     handleOptionClick,
-    handleSliderChange,
+    handleSliderInput,
     resetChat,
   };
 }

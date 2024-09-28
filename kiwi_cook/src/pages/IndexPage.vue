@@ -56,7 +56,7 @@
                     :step="message.content.step"
                     label
                     color="green-5"
-                    @change="handleSliderChange(message.content.value)"
+                    @change="handleSliderInput(message.content.value)"
                   />
                 </div>
               </template>
@@ -77,7 +77,6 @@
           label="What would you like to cook?"
           label-color="green-14"
           text-color="white"
-          :disable="disableChatbox"
           @keyup.enter.prevent="sendUserMessage"
         >
           <template v-slot:after>
@@ -115,12 +114,11 @@ import { useChat } from 'src/composables/useChat.ts';
 const chat = useChat();
 const {
   messages,
-  disableChatbox,
   newMessage,
   scrollArea,
   sendUserMessage,
+  handleSliderInput,
   handleOptionClick,
-  handleSliderChange,
 } = chat;
 
 const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
