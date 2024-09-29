@@ -5,8 +5,11 @@ import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store.ts';
 import { KiwiMessageState, Message, MessageType } from 'src/models/chat.ts';
 import { createUserPreference, createUserPreferenceArray, UserPreferences } from 'src/models/search.ts';
+import { useI18n } from 'vue-i18n';
 
 export function useChat() {
+  const { t } = useI18n(); // Add this line to use i18n
+
   // Constants
   const KIWI_DELAY_MS = 500;
   const DEFAULT_PREFERENCES: UserPreferences = {
@@ -61,21 +64,21 @@ export function useChat() {
       }
     },
     servings: () => questions.ask(
-      'How many people are you cooking for today?',
-      ['1', '2', '3', '4', '5+'],
+      t('chat.servings'),
+      [t('servings.1'), t('servings.2'), t('servings.3'), t('servings.4'), t('servings.5plus')],
     ),
     recipeType: () => questions.ask(
-      'What type of recipe are you in the mood for?',
-      ['Quick & Easy', 'Healthy', 'Comfort Food', 'Gourmet', 'Budget-friendly'],
+      t('chat.recipeType'),
+      [t('recipeType.quick'), t('recipeType.healthy'), t('recipeType.comfort'), t('recipeType.gourmet'), t('recipeType.budget')],
     ),
     dietaryRestrictions: () => questions.ask(
-      'Do you have any dietary restrictions?',
-      ['Vegetarian', 'Vegan', 'Gluten-free', 'Dairy-free', 'Low-carb', 'None'],
+      t('chat.dietaryRestrictions'),
+      [t('dietary.vegetarian'), t('dietary.vegan'), t('dietary.glutenFree'), t('dietary.dairyFree'), t('dietary.lowCarb'), t('dietary.none')],
     ),
     cookingTime: () => addMessage({
       type: 'slider',
       content: {
-        label: 'Cooking time (in minutes)',
+        label: t('chat.cookingTime'),
         value: 30,
         min: 15,
         max: 120,
@@ -83,8 +86,8 @@ export function useChat() {
       },
     }),
     cuisine: () => questions.ask(
-      'Any particular cuisine you\'re craving?',
-      ['Italian', 'Mexican', 'Asian', 'Mediterranean', 'American', 'Surprise me!'],
+      t('chat.cuisine'),
+      [t('cuisine.italian'), t('cuisine.mexican'), t('cuisine.asian'), t('cuisine.mediterranean'), t('cuisine.american'), t('cuisine.surprise')],
     ),
   };
 
@@ -92,16 +95,16 @@ export function useChat() {
   const searchRecipes = async () => {
     kiwiMessageState.value = 'searching';
     const content = [
-      `${userPreferences.value.servings.property} servings`,
-      `${userPreferences.value.recipeType.property.toLowerCase()} type`,
-      `${userPreferences.value.cookingTime.property} minutes cooking time`,
-      `${userPreferences.value.cuisine.property} cuisine.`,
+      t('search.servings', { count: userPreferences.value.servings.property }),
+      t('search.recipeType', { type: userPreferences.value.recipeType.property.toLowerCase() }),
+      t('search.cookingTime', { time: userPreferences.value.cookingTime.property }),
+      t('search.cuisine', { cuisine: userPreferences.value.cuisine.property }),
     ];
-    const contentString = `${content.slice(0, -1).join(', ')} and ${content.slice(-1)}`;
+    const contentString = t('search.summary', { content: content.join(', ') });
 
     addMessage({
       type: 'text',
-      content: `Searching for recipes with ${contentString}`,
+      content: t('search.searching', { preferences: contentString }),
     });
 
     try {
@@ -109,16 +112,16 @@ export function useChat() {
       kiwiMessageState.value = 'displayingResults';
 
       if (recipes.length === 0) {
-        addMessage({ type: 'text', content: 'No matching recipes found. Try broadening your criteria.' });
-        addMessage({ type: 'options', content: ['Yes, broaden search', 'No, start over'] });
+        addMessage({ type: 'text', content: t('search.noResults') });
+        addMessage({ type: 'options', content: [t('search.broaden'), t('search.startOver')] });
       } else {
-        addMessage({ type: 'text', content: 'Here are some recipes for you:' });
+        addMessage({ type: 'text', content: t('search.results') });
         addMessage({ type: 'recipe', content: recipes });
-        addMessage({ type: 'options', content: ['See more recipes', 'Start cooking', 'New search'] });
+        addMessage({ type: 'options', content: [t('search.moreOptions'), t('search.startCooking'), t('search.newSearch')] });
       }
     } catch (error) {
       console.error('Error searching recipes:', error);
-      addMessage({ type: 'text', content: 'An error occurred while searching. Try again?' });
+      addMessage({ type: 'text', content: t('search.error') });
       kiwiMessageState.value = 'start';
     }
   };
@@ -128,7 +131,7 @@ export function useChat() {
     messages.value = [];
     userPreferences.value = { ...DEFAULT_PREFERENCES };
     kiwiMessageState.value = 'start';
-    addMessage({ type: 'text', content: 'Let\'s start over. What would you like to cook today?' });
+    addMessage({ type: 'text', content: t('chat.reset') });
     questions.servings();
   };
 
@@ -214,7 +217,7 @@ export function useChat() {
 
   // On component mount, initialize the chat
   onMounted(() => {
-    addMessage({ type: 'text', content: 'Hey there! 🥝 Welcome to KiwiCook, your personal cooking assistant!' });
+    addMessage({ type: 'text', content: t('chat.welcome') });
     questions.servings();
   });
 

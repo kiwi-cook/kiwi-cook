@@ -1,7 +1,58 @@
-// This is just an example,
-// so you can safely delete all default props below
-
 export default {
-  failed: 'Action failed',
-  success: 'Action was successful',
+  chat: {
+    welcome: "Hey there, foodie friend! 🥝 I'm Kiwi, your personal sous-chef in the digital kitchen. Ready to cook up a storm?",
+    // eslint-disable-next-line
+    servings: "Hi there! 🥝 I'm Kiwi, your personal cooking buddy! Let's whip up something delicious today. First off, how many hungry folks are we cooking for?",
+    recipeType: 'Awesome! Now, what kind of yummy goodness are you in the mood for? 😋',
+    dietaryRestrictions: "Got it! 👍 Any dietary needs we should keep in mind? Don't worry, I've got options for everyone!",
+    cookingTime: "How much time do you want to spend in the kitchen? Let's find the perfect recipe for your schedule! ⏰",
+    cuisine: "Last but not least, any particular cuisine that's calling your name? 🌎🍽️",
+    reset: "No worries! Let's start fresh. What delicious dish shall we cook up today? 😊",
+  },
+  servings: {
+    1: '1',
+    2: '2',
+    3: '3',
+    4: '4',
+    '5plus': '5+',
+  },
+  recipeType: {
+    quick: 'Quick & Easy',
+    healthy: 'Healthy',
+    comfort: 'Comfort Food',
+    gourmet: 'Gourmet',
+    budget: 'Budget-friendly',
+  },
+  dietary: {
+    vegetarian: 'Vegetarian',
+    vegan: 'Vegan',
+    glutenFree: 'Gluten-free',
+    dairyFree: 'Dairy-free',
+    lowCarb: 'Low-carb',
+    none: 'None',
+  },
+  cuisine: {
+    italian: 'Italian',
+    mexican: 'Mexican',
+    asian: 'Asian',
+    mediterranean: 'Mediterranean',
+    american: 'American',
+    surprise: 'Surprise me!',
+  },
+  search: {
+    servings: '{count} servings',
+    recipeType: '{type} type',
+    cookingTime: '{time} minutes cooking time',
+    cuisine: '{cuisine} cuisine',
+    summary: '{content}',
+    searching: "Alright, chef! 👨‍🍳👩‍🍳 I'm on a mission to find the perfect recipes for you. Let's see what we can cook up with {preferences}",
+    noResults: "Oops! 😅 Looks like we couldn't find any recipes that match exactly. Want to broaden our search a bit?",
+    broaden: "Yes, let's explore more",
+    startOver: "Nah, let's start over",
+    results: 'Ta-da! 🎉 Check out these mouth-watering recipes I found for you:',
+    moreOptions: 'Show me more yummy options',
+    startCooking: "Let's start cooking!",
+    newSearch: 'New kitchen adventure?',
+    error: 'Uh-oh! 😳 Something went wrong in my recipe book. Shall we give it another shot?',
+  },
 };
