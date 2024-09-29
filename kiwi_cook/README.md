@@ -13,7 +13,7 @@ Bring KiwiCook to life on your device:
 
 2. **Navigate to Client Directory:**
    ```bash
-   cd taste-buddy/kiwi_cook
+   cd kiwi-cook/kiwi_cook
    ```
 
 3. **Install Dependencies:**
