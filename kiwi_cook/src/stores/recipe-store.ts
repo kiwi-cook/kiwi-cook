@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 import { Recipe } from 'src/models/recipe.ts';
 import { computed, ref } from 'vue';
 import { api } from 'boot/axios.ts';
-import { searchRecipesByQuery } from 'src/utils/search.ts';
+import { useRecipeSearch } from 'src/composables/useSearch.ts';
+import { UserPreferences } from 'src/models/search.ts';
 
 export const useRecipeStore = defineStore('recipe', () => {
   const recipes = ref<Recipe[]>([]);
@@ -15,9 +16,11 @@ export const useRecipeStore = defineStore('recipe', () => {
     });
     return map;
   });
+  const recipeSearch = useRecipeSearch();
 
   const getRandomRecipe = () => recipes.value[Math.floor(Math.random() * recipes.value.length)];
-  const searchRecipe = (query: string) => searchRecipesByQuery(recipeMap.value, query);
+  const searchByQuery = (query: string) => recipeSearch.searchRecipesByQuery(recipeMap.value, query);
+  const searchByPreferences = (preferences: UserPreferences) => recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences);
 
   // Fetch using axios
   api.get('/recipe/').then((r) => {
@@ -27,7 +30,8 @@ export const useRecipeStore = defineStore('recipe', () => {
   return {
     recipes,
     recipeMap,
-    searchRecipe,
+    searchByQuery,
+    searchByPreferences,
     getRandomRecipe,
   };
 });

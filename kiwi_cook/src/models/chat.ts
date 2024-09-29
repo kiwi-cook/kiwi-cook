@@ -1,14 +1,5 @@
 import { Recipe } from 'src/models/recipe.ts';
 
-export interface UserPreferences {
-  servings: number;
-  recipeType: string;
-  dietaryRestrictions: string[];
-  cookingTime: number;
-  skillLevel: string;
-  cuisine: string;
-}
-
 export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
 
 export interface BaseMessage {
@@ -30,7 +21,7 @@ export interface ImageMessage extends BaseMessage {
 
 export interface RecipeMessage extends BaseMessage {
   type: 'recipe';
-  content: Recipe;
+  content: Recipe[];
 }
 
 export interface OptionsMessage extends BaseMessage {

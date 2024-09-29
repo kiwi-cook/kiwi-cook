@@ -3,20 +3,20 @@ import {
 } from 'vue';
 import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store.ts';
-import {
-  KiwiMessageState, Message, MessageType, UserPreferences,
-} from 'src/models/chat.ts';
+import { KiwiMessageState, Message, MessageType } from 'src/models/chat.ts';
+import { createUserPreference, createUserPreferenceArray, UserPreferences } from 'src/models/search.ts';
 
 export function useChat() {
   // Constants
   const KIWI_DELAY_MS = 500;
   const DEFAULT_PREFERENCES: UserPreferences = {
-    servings: 2,
-    recipeType: '',
-    dietaryRestrictions: [],
-    cookingTime: 30,
-    skillLevel: 'Beginner',
-    cuisine: '',
+    servings: createUserPreference(2),
+    recipeType: createUserPreference(''),
+    dietaryRestrictions: createUserPreferenceArray([], 'all'),
+    cookingTime: createUserPreference(30),
+    skillLevel: createUserPreference('Beginner'),
+    cuisine: createUserPreference(''),
+    tags: createUserPreferenceArray([], 'all'),
   };
 
   // Reactive state
@@ -39,7 +39,7 @@ export function useChat() {
     });
   };
 
-  // Utility: Add message with delay
+  // Utility: Add a message with delay
   const addMessage = (message: Omit<Message, 'id' | 'sender' | 'sent'>, sender = 'Kiwi') => {
     setTimeout(() => {
       messages.value.push({
@@ -91,10 +91,21 @@ export function useChat() {
   // Recipe search logic
   const searchRecipes = async () => {
     kiwiMessageState.value = 'searching';
-    addMessage({ type: 'text', content: 'Searching for recipes...' });
+    const content = [
+      `${userPreferences.value.servings.property} servings`,
+      `${userPreferences.value.recipeType.property.toLowerCase()} type`,
+      `${userPreferences.value.cookingTime.property} minutes cooking time`,
+      `${userPreferences.value.cuisine.property} cuisine.`,
+    ];
+    const contentString = `${content.slice(0, -1).join(', ')} and ${content.slice(-1)}`;
+
+    addMessage({
+      type: 'text',
+      content: `Searching for recipes with ${contentString}`,
+    });
 
     try {
-      const recipes = await recipeStore.searchRecipe(newMessage.value);
+      const recipes = await recipeStore.searchByPreferences(userPreferences.value);
       kiwiMessageState.value = 'displayingResults';
 
       if (recipes.length === 0) {
@@ -102,7 +113,7 @@ export function useChat() {
         addMessage({ type: 'options', content: ['Yes, broaden search', 'No, start over'] });
       } else {
         addMessage({ type: 'text', content: 'Here are some recipes for you:' });
-        recipes.forEach((recipe) => addMessage({ type: 'recipe', content: recipe }));
+        addMessage({ type: 'recipe', content: recipes });
         addMessage({ type: 'options', content: ['See more recipes', 'Start cooking', 'New search'] });
       }
     } catch (error) {
@@ -125,12 +136,12 @@ export function useChat() {
   const handleState = (input: string) => {
     const transitions: Record<KiwiMessageState, () => void> = {
       start: () => {
-        userPreferences.value.servings = parseInt(input, 10);
+        userPreferences.value.servings.property = parseInt(input, 10);
         kiwiMessageState.value = 'recipeType';
         questions.recipeType();
       },
       recipeType: () => {
-        userPreferences.value.recipeType = input;
+        userPreferences.value.recipeType.property = input;
         kiwiMessageState.value = 'dietaryRestrictions';
         questions.dietaryRestrictions();
       },
@@ -143,7 +154,7 @@ export function useChat() {
         // Cooking time handled in slider callback, move on to cuisine
       },
       cuisine: () => {
-        userPreferences.value.cuisine = input;
+        userPreferences.value.cuisine.property = input;
         searchRecipes();
       },
       searching: () => {
@@ -164,7 +175,7 @@ export function useChat() {
 
   // Handle slider input (asynchronous)
   const handleSliderInput = (value: number) => {
-    userPreferences.value.cookingTime = value;
+    userPreferences.value.cookingTime.property = value;
     addMessage({ type: 'text', content: `Looking for recipes that take about ${value} minutes to prepare.` });
     kiwiMessageState.value = 'cuisine';
     questions.cuisine();
