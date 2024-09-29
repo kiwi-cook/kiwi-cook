@@ -1,35 +1,29 @@
-# Project Kiwi (project_kiwi)
+# KiwiCook Quasar Client 🥝
 
-A Quasar Project
+## Getting Started
 
-## Install the dependencies
+#### Start the Server
 
-```bash
-yarn
-# or
-npm install
-```
+Bring KiwiCook to life on your device:
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+1. **Clone this Repository:**
+   ```bash
+   git clone https://github.com/kiwi-cook/kiwi-cook.git
+   ```
 
-```bash
-quasar dev
-```
+2. **Navigate to Client Directory:**
+   ```bash
+   cd taste-buddy/kiwi_cook
+   ```
 
-### Lint the files
+3. **Install Dependencies:**
+   ```bash
+   bun install
+   ```
 
-```bash
-yarn lint
-# or
-npm run lint
-```
+4. **Run the App:**
+   ```bash
+   bun dev
+   ```
 
-### Build the app for production
-
-```bash
-quasar build
-```
-
-### Customize the configuration
-
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+   KiwiCook is now live! Open your browser and start your culinary journey at <http://localhost:9000>.
