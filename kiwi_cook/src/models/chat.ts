@@ -7,6 +7,7 @@ export interface BaseMessage {
   sender: string;
   sent: boolean;
   type: MessageType;
+  disableChat?: boolean;
 }
 
 export interface TextMessage extends BaseMessage {
@@ -24,9 +25,18 @@ export interface RecipeMessage extends BaseMessage {
   content: Recipe[];
 }
 
+export interface MessageOption {
+  label: string;
+  callback: () => void;
+}
+
+export function isMessageOption(option: MessageOption | string): option is MessageOption {
+  return (option as MessageOption).callback !== undefined;
+}
+
 export interface OptionsMessage extends BaseMessage {
   type: 'options' | 'multiOptions';
-  content: string[];
+  content: MessageOption[] | string[];
 }
 
 export interface SliderMessage extends BaseMessage {
@@ -49,4 +59,6 @@ export type KiwiMessageState =
   | 'cookingTime'
   | 'cuisine'
   | 'searching'
-  | 'displayingResults';
+  | 'displayingResults'
+  | 'displayMoreResults'
+  | 'startingOver';

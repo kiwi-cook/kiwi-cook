@@ -39,9 +39,9 @@
             </template>
             <template v-else-if="message.type === 'options' || message.type === 'multiOptions'">
               <div class="options-list q-gutter-xs">
-                <q-btn v-for="option in message.content"
-                       :key="option"
-                       :label="option"
+                <q-btn v-for="(option, optionIndex) in message.content"
+                       :key="optionIndex"
+                       :label="isMessageOption(option) ? option.label : option"
                        color="green-5"
                        @click="handleOptionClick(option, message.type)"/>
                 <template v-if="message.type === 'multiOptions'">
@@ -93,6 +93,7 @@ import KiwiChatBox from 'components/KiwiChatBox.vue';
 import { useChatStore } from 'stores/chat-store.ts';
 import { storeToRefs } from 'pinia';
 import { getTranslation } from 'src/models/recipe.ts';
+import { isMessageOption } from 'src/models/chat.ts';
 
 const chat = useChatStore();
 const { messages, scrollArea } = storeToRefs(chat);

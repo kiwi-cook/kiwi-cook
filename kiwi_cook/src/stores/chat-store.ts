@@ -3,7 +3,9 @@ import {
 } from 'vue';
 import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store.ts';
-import { KiwiMessageState, Message, MessageType } from 'src/models/chat.ts';
+import {
+  KiwiMessageState, Message, MessageType, MessageOption, isMessageOption,
+} from 'src/models/chat.ts';
 import { createUserPreference, createUserPreferenceArray, UserPreferences } from 'src/models/search.ts';
 import { useI18n } from 'vue-i18n';
 import { defineStore } from 'pinia';
@@ -38,7 +40,7 @@ export const useChatStore = defineStore('chat', () => {
     nextTick(() => {
       if (scrollArea.value) {
         const scrollTarget = scrollArea.value.getScrollTarget();
-        scrollArea.value.setScrollPosition('vertical', scrollTarget.scrollHeight, 550);
+        scrollArea.value.setScrollPosition('vertical', scrollTarget.scrollHeight, KIWI_DELAY_MS - 100);
       }
     });
   };
@@ -58,7 +60,7 @@ export const useChatStore = defineStore('chat', () => {
 
   // Encapsulated question asking logic
   const questions = {
-    ask: (text: string, options: string[] | null = null) => {
+    ask: (text: string, options: MessageOption[] | string[] | null = null) => {
       addMessage({ type: 'text', content: text });
       if (options) {
         addMessage({ type: 'options', content: options });
@@ -92,6 +94,15 @@ export const useChatStore = defineStore('chat', () => {
     ),
   };
 
+  // Reset the chat and preferences
+  const resetChat = () => {
+    messages.value = [];
+    userPreferences.value = { ...DEFAULT_PREFERENCES };
+    kiwiMessageState.value = 'start';
+    addMessage({ type: 'text', content: t('chat.reset') });
+    questions.servings();
+  };
+
   // Recipe search logic
   const searchRecipes = async () => {
     kiwiMessageState.value = 'searching';
@@ -114,7 +125,15 @@ export const useChatStore = defineStore('chat', () => {
 
       if (recipes.length === 0) {
         addMessage({ type: 'text', content: t('search.noResults') });
-        addMessage({ type: 'options', content: [t('search.broaden'), t('search.startOver')] });
+        addMessage({
+          type: 'options',
+          content: [
+            {
+              label: t('search.startOver'),
+              callback: () => resetChat(),
+            },
+          ],
+        });
       } else {
         addMessage({ type: 'text', content: t('search.results') });
         addMessage({ type: 'recipe', content: recipes });
@@ -128,15 +147,6 @@ export const useChatStore = defineStore('chat', () => {
       addMessage({ type: 'text', content: t('search.error') });
       kiwiMessageState.value = 'start';
     }
-  };
-
-  // Reset the chat and preferences
-  const resetChat = () => {
-    messages.value = [];
-    userPreferences.value = { ...DEFAULT_PREFERENCES };
-    kiwiMessageState.value = 'start';
-    addMessage({ type: 'text', content: t('chat.reset') });
-    questions.servings();
   };
 
   // Handle each phase of the conversation
@@ -168,12 +178,13 @@ export const useChatStore = defineStore('chat', () => {
         // No user input handled during searching
       },
       displayingResults: () => {
-        if (input === 'See more recipes') {
-          searchRecipes();
-        }
-        if (input === 'New search') {
-          resetChat();
-        }
+        searchRecipes();
+      },
+      displayMoreResults: () => {
+        searchRecipes();
+      },
+      startingOver: () => {
+        resetChat();
       },
     };
 
@@ -207,7 +218,12 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   // Handle multi-option click
-  const handleOptionClick = (option: string, type: MessageType) => {
+  const handleOptionClick = (option: MessageOption | string, type: MessageType) => {
+    if (isMessageOption(option)) {
+      option.callback();
+      return;
+    }
+
     if (type === 'multiOptions') {
       if (newMessage.value.includes(option)) {
         newMessage.value = newMessage.value.replace(option, '').trim();
