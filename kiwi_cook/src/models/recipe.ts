@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { useI18n } from 'vue-i18n';
 
 // MultiLanguageField
 const MultiLanguageFieldSchema = z.object({
@@ -9,6 +10,12 @@ type MultiLanguageField = z.infer<typeof MultiLanguageFieldSchema>;
 
 function getAllTranslations(field: MultiLanguageField): string[] {
   return Object.values(field.translations);
+}
+
+export function getTranslation(field: MultiLanguageField): string {
+  const i18n = useI18n();
+  const lang = i18n.locale.value;
+  return field.translations[lang] || Object.values(field.translations)[0];
 }
 
 // Ingredient
