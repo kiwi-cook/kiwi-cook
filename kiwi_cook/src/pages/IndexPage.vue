@@ -110,13 +110,13 @@
 
 <script setup lang="ts">
 import { QScrollArea } from 'quasar';
-import { useChat } from 'src/composables/useChat.ts';
+import KiwiChatBox from 'components/KiwiChatBox.vue';
+import { useChatStore } from 'stores/chat-store.ts';
+import { storeToRefs } from 'pinia';
 
-const chat = useChat();
+const chat = useChatStore();
+const { messages, scrollArea } = storeToRefs(chat);
 const {
-  messages,
-  newMessage,
-  scrollArea,
   sendUserMessage,
   handleSliderInput,
   handleOptionClick,

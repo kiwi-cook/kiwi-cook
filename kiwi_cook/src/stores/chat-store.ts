@@ -6,8 +6,9 @@ import { useRecipeStore } from 'stores/recipe-store.ts';
 import { KiwiMessageState, Message, MessageType } from 'src/models/chat.ts';
 import { createUserPreference, createUserPreferenceArray, UserPreferences } from 'src/models/search.ts';
 import { useI18n } from 'vue-i18n';
+import { defineStore } from 'pinia';
 
-export function useChat() {
+export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n(); // Add this line to use i18n
 
   // Constants
@@ -52,7 +53,7 @@ export function useChat() {
         ...message,
       } as Message);
       scrollToBottom();
-    }, KIWI_DELAY_MS);
+    }, sender === 'You' ? 0 : KIWI_DELAY_MS);
   };
 
   // Encapsulated question asking logic
@@ -117,7 +118,10 @@ export function useChat() {
       } else {
         addMessage({ type: 'text', content: t('search.results') });
         addMessage({ type: 'recipe', content: recipes });
-        addMessage({ type: 'options', content: [t('search.moreOptions'), t('search.startCooking'), t('search.newSearch')] });
+        addMessage({
+          type: 'options',
+          content: [t('search.moreOptions'), t('search.startCooking'), t('search.newSearch')],
+        });
       }
     } catch (error) {
       console.error('Error searching recipes:', error);
@@ -233,4 +237,4 @@ export function useChat() {
     handleSliderInput,
     resetChat,
   };
-}
+});
