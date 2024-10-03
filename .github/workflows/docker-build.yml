@@ -2,7 +2,7 @@ name: KiwiCook Docker Image
 on:
   push:
     branches:
-      - "master"
+      - "main"
     paths:
       - kiwi_cook_server/**
 jobs:
