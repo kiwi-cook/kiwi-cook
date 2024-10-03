@@ -1,25 +1,21 @@
 <template>
-  <div class="q-pa-md">
-    <div class="q-gutter-y-md column" style="max-width: 300px">
-      <q-input
-        v-model="modelValue"
-        dark
-        filled
-        color="green-14"
-        bg-color="grey-9"
-        label-color="green-14"
-        text-color="white"
-        :label="$t('chatbox.label')"
-        :shadow-text="inputShadowText"
-        @keydown="processInputFill"
-        @focus="processInputFill"
-      >
-        <template v-slot:append>
-          <q-btn round dense flat icon="send" color="green-14" @click="() => sendUserMessage"/>
-        </template>
-      </q-input>
-    </div>
-  </div>
+  <q-input
+    v-model="modelValue"
+    dark
+    filled
+    color="green-14"
+    bg-color="grey-9"
+    label-color="green-14"
+    text-color="white"
+    :label="$t('chatbox.label')"
+    :shadow-text="inputShadowText"
+    @keydown="processInputFill"
+    @focus="processInputFill"
+  >
+    <template v-slot:append>
+      <q-btn round dense flat icon="send" color="green-14" @click="() => sendUserMessage"/>
+    </template>
+  </q-input>
 </template>
 
 <script lang="ts" setup>
