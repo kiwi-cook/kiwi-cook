@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, defineModel, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useChatStore } from 'stores/chat-store.ts';
 import { storeToRefs } from 'pinia';
 

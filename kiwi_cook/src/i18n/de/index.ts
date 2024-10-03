@@ -60,4 +60,8 @@ export default {
     newSearch: 'Neues Küchenabenteuer?',
     error: 'Uh-oh! 😳 Irgendwas ist in meinem Rezeptbuch schiefgelaufen. Sollen wir es noch einmal versuchen?',
   },
+  recipe: {
+    ingredients: 'Zutaten',
+    steps: 'Schritte',
+  },
 };

@@ -58,4 +58,8 @@ export default {
     newSearch: 'New kitchen adventure?',
     error: 'Uh-oh! 😳 Something went wrong in my recipe book. Shall we give it another shot?',
   },
+  recipe: {
+    ingredients: 'Ingredients',
+    steps: 'Steps',
+  },
 };

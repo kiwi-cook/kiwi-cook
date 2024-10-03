@@ -23,13 +23,15 @@ export const useRecipeStore = defineStore('recipe', () => {
   const searchByPreferences = (preferences: UserPreferences) => recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences);
 
   // Fetch using axios
-  api.get('/recipe/').then((r) => {
+  const fetchRecipes = () => api.get('/recipe/').then((r) => {
     recipes.value = r.data.response;
   });
+  fetchRecipes();
 
   return {
     recipes,
     recipeMap,
+    fetchRecipes,
     searchByQuery,
     searchByPreferences,
     getRandomRecipe,
