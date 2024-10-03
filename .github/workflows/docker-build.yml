@@ -31,4 +31,4 @@ jobs:
           context: ./kiwi_cook_server
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: jpkmiller/kiwi-cook:latest
+          tags: jpkmiller/kiwi-cook:latest, jpkmiller/kiwi-cook:v1.0.0
