@@ -77,21 +77,7 @@
 
     <!-- Input area -->
     <div class="input-area q-pa-md">
-      <q-input
-        v-model="newMessage"
-        dark
-        filled
-        color="green-14"
-        bg-color="grey-9"
-        label-color="green-14"
-        text-color="white"
-        label="What would you like to cook?"
-        @keyup.enter.prevent="sendUserMessage"
-      >
-        <template v-slot:append>
-          <q-btn round dense flat icon="send" color="green-14" @click="sendUserMessage()"/>
-        </template>
-      </q-input>
+      <KiwiChatBox/>
     </div>
 
     <!-- Footer -->
