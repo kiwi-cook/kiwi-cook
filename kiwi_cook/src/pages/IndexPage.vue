@@ -1,12 +1,6 @@
 <template>
   <q-page class="bg-black text-white">
-    <!-- Header -->
-    <div class="q-pa-md">
-      <div class="text-h4 text-weight-bold">KiwiCook 🥝</div>
-      <div class="text-subtitle1 text-green-14">Reclaim your kitchen</div>
-    </div>
-
-    <!-- Chat area (initially hidden) -->
+    <!-- Chat area -->
     <div class="chat-container q-pa-md">
       <q-scroll-area class="chat-scroll" ref="scrollArea">
         <div v-for="message in messages" :key="message.id" class="q-py-sm">
@@ -24,9 +18,9 @@
             </template>
             <template v-else-if="message.type === 'recipe'">
               <div v-for="recipe in message.content" :key="recipe.id" class="recipe-card q-pa-md">
-                <div class="text-h6 text-bold text-green-14 q-mb-sm">
-                  {{ recipe.name.translations['en-US'] }}
-                </div>
+                <router-link :to="`/recipe/${ recipe.id }`" class="text-h6 text-bold text-green-14 q-mb-sm q-mr-sm">
+                  {{ getTranslation(recipe.name) }}
+                </router-link>
                 <div class="row q-col-gutter-md items-start">
                   <div class="col-auto">
                     <q-img :src="recipe.image_url" class="recipe-image"/>
@@ -95,10 +89,10 @@
 </template>
 
 <script setup lang="ts">
-import { QScrollArea } from 'quasar';
 import KiwiChatBox from 'components/KiwiChatBox.vue';
 import { useChatStore } from 'stores/chat-store.ts';
 import { storeToRefs } from 'pinia';
+import { getTranslation } from 'src/models/recipe.ts';
 
 const chat = useChatStore();
 const { messages, scrollArea } = storeToRefs(chat);
@@ -125,7 +119,7 @@ const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
 }
 
 .chat-scroll {
-  height: 100%;
+  height: 90%;
 }
 
 .input-area {
