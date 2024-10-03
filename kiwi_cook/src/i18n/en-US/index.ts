@@ -9,6 +9,9 @@ export default {
     cuisine: "Last but not least, any particular cuisine that's calling your name? 🌎🍽️",
     reset: "No worries! Let's start fresh. What delicious dish shall we cook up today? 😊",
   },
+  chatbox: {
+    label: 'What would you like to cook?',
+  },
   servings: {
     1: '1',
     2: '2',

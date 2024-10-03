@@ -10,6 +10,9 @@ export default {
     cuisine: 'Zu guter Letzt, gibt es eine bestimmte Küche, die dich ruft? 🌎🍽️',
     reset: 'Kein Problem! Fangen wir von vorne an. Welches leckere Gericht sollen wir heute kochen? 😊',
   },
+  chatbox: {
+    label: 'Was möchtest du kochen?',
+  },
   servings: {
     1: '1',
     2: '2',
