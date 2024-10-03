@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - "main"
-    paths:
-      - kiwi_cook_server/**
 jobs:
   docker:
     runs-on: ubuntu-latest
