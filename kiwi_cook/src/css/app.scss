@@ -1,1 +1,35 @@
 // app global css in SCSS form
+
+// Define Kiwi-inspired color palette
+:root {
+  --kiwi-green: #7CB342;
+  --kiwi-dark: #33691E;
+  --kiwi-light: #DCEDC8;
+  --kiwi-brown: #795548;
+  --kiwi-yellow: #FFF176;
+}
+
+
+.text-kiwi-green {
+  color: var(--kiwi-green);
+}
+
+.bg-kiwi-green {
+  background: var(--kiwi-green);
+}
+
+.bg-kiwi-light {
+  background: var(--kiwi-light);
+}
+
+.bg-kiwi-dark {
+  background: var(--kiwi-dark);
+}
+
+.bg-kiwi-light-accent {
+  background: #C5E1A5;
+}
+
+.bg-kiwi-dark-accent {
+  background: #558B2F;
+}

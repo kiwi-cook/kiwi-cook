@@ -47,6 +47,7 @@ export interface SliderMessage extends BaseMessage {
     min: number;
     max: number;
     step: number;
+    unit: string;
   };
 }
 

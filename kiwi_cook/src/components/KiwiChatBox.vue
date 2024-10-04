@@ -1,19 +1,27 @@
 <template>
   <q-input
     v-model="modelValue"
-    dark
+    :dark="isDark"
     filled
-    color="green-14"
-    bg-color="grey-9"
-    label-color="green-14"
-    text-color="white"
+    :color="isDark ? 'kiwi-light' : 'kiwi-dark'"
+    :bg-color="isDark ? 'kiwi-dark-accent' : 'kiwi-light-accent'"
+    :label-color="isDark ? 'kiwi-light' : 'kiwi-dark'"
+    :text-color="isDark ? 'white' : 'black'"
     :label="$t('chatbox.label')"
     :shadow-text="inputShadowText"
     @keydown="processInputFill"
     @focus="processInputFill"
+    class="kiwi-chat-input"
   >
     <template v-slot:append>
-      <q-btn round dense flat icon="send" color="green-14" @click="() => sendUserMessage"/>
+      <q-btn
+        round
+        dense
+        flat
+        icon="send"
+        :color="isDark ? 'kiwi-light' : 'kiwi-dark'"
+        @click="() => sendUserMessage"
+      />
     </template>
   </q-input>
 </template>
@@ -22,6 +30,10 @@
 import { computed, ref } from 'vue';
 import { useChatStore } from 'stores/chat-store.ts';
 import { storeToRefs } from 'pinia';
+import { useQuasar } from 'quasar';
+
+const $q = useQuasar();
+const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
 const { newMessage } = storeToRefs(chat);
@@ -81,3 +93,15 @@ function processInputFill(e: Event) {
   }
 }
 </script>
+
+<style lang="scss">
+.kiwi-chat-input {
+  .q-field__control {
+    border-radius: 24px;
+  }
+
+  .q-field__marginal {
+    height: 56px;
+  }
+}
+</style>

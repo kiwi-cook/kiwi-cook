@@ -99,7 +99,13 @@ export default configure((ctx) => ({
 
   // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
   framework: {
-    config: {},
+    config: {
+      brand: {
+        primary: '#7CB342',
+        secondary: '#33691E',
+        accent: '#795548',
+      },
+    },
 
     iconSet: 'mdi-v7', // Quasar icon set
     // lang: 'en-US', // Quasar language pack

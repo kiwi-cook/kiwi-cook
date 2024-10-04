@@ -86,6 +86,7 @@ export const useChatStore = defineStore('chat', () => {
         min: 15,
         max: 120,
         step: 15,
+        unit: t('chat.minutes'),
       },
     }),
     cuisine: () => questions.ask(
