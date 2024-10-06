@@ -57,6 +57,7 @@ export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessag
 
 export type KiwiMessageState =
   | 'start'
+  | 'generateWeekplan'
   | 'recipeType'
   | 'dietaryRestrictions'
   | 'cookingTime'

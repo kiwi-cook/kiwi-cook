@@ -1,14 +1,15 @@
 // app global css in SCSS form
 
-// Define Kiwi-inspired color palette
+// Define Kiwi-inspired color palette with black and green
 :root {
-  --kiwi-green: #7CB342;
-  --kiwi-dark: #33691E;
-  --kiwi-light: #DCEDC8;
-  --kiwi-brown: #795548;
-  --kiwi-yellow: #FFF176;
+  --kiwi-green: #4CAF50;     // Primary color, use sparingly
+  --kiwi-dark: #212121;      // For text and dark elements
+  --kiwi-light: #F5F5F5;     // Main background color
+  --kiwi-gray: #9E9E9E;      // For secondary elements
+  --kiwi-yellow: #FDD835;    // Accent color, use sparingly
+  --kiwi-white: #FFFFFF;     // For chat bubbles and cards
+  --kiwi-user-bubble: #43A047;
 }
-
 
 .text-kiwi-green {
   color: var(--kiwi-green);
@@ -19,17 +20,42 @@
 }
 
 .bg-kiwi-light {
-  background: var(--kiwi-light);
+  background: var(--kiwi-light-green);
 }
 
 .bg-kiwi-dark {
-  background: var(--kiwi-dark);
+  background: var(--kiwi-black);
 }
 
 .bg-kiwi-light-accent {
-  background: #C5E1A5;
+  background: var(--kiwi-light-grey);
 }
 
 .bg-kiwi-dark-accent {
-  background: #558B2F;
+  background: var(--kiwi-dark-green);
+}
+
+// Additional utility classes
+.text-kiwi-black {
+  color: var(--kiwi-black);
+}
+
+.text-kiwi-white {
+  color: var(--kiwi-white);
+}
+
+.bg-kiwi-white {
+  background: var(--kiwi-white);
+}
+
+.border-kiwi-green {
+  border-color: var(--kiwi-green);
+}
+
+.border-kiwi-black {
+  border-color: var(--kiwi-black);
+}
+
+.bg-kiwi-user-bubble {
+  background: $green-10;
 }

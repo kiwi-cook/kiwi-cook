@@ -101,9 +101,9 @@ export default configure((ctx) => ({
   framework: {
     config: {
       brand: {
-        primary: '#7CB342',
-        secondary: '#33691E',
-        accent: '#795548',
+        primary: '#4CAF50',
+        secondary: '#43A047',
+        accent: '#FDD835',
       },
     },
 

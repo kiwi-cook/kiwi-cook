@@ -3,8 +3,8 @@
   "short_name": "KiwiCook",
   "description": "KiwiCook: Your friendly personal cooking assistant!",
   "orientation": "portrait",
-  "background_color": "#7CB342",
-  "theme_color": "#7CB342",
+  "background_color": "#4CAF50",
+  "theme_color": "#4CAF50",
   "icons": [
     {
       "src": "icons/icon-128x128.png",

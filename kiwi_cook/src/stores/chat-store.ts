@@ -200,6 +200,9 @@ export const useChatStore = defineStore('chat', () => {
       kiwiMessageState.value = 'recipeType';
       await questions.recipeType();
     },
+    generateWeekplan: async () => {
+      // Not implemented
+    },
     recipeType: async (input) => {
       userPreferences.value.recipeType.property = input;
       kiwiMessageState.value = 'dietaryRestrictions';
