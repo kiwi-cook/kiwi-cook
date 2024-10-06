@@ -2,7 +2,7 @@
 
 Welcome to **KiwiCook**, your personal culinary companion for discovering and preparing delicious, budget-friendly meals! Whether you're a kitchen novice or a seasoned home chef, KiwiCook is here to help you find affordable recipes and cook like a pro.
 
-![KiwiCook App](<taste_buddy/assets/screenshots/AppMockUp Screenshots/Apple iPhone 11 Pro Max (1242x2688)/Apple iPhone 11 Pro Max Screenshot 0.png>)
+![Image](https://github.com/user-attachments/assets/778c5901-167c-43e1-a561-52a397eadcde)
 
 ## Getting Started
 
