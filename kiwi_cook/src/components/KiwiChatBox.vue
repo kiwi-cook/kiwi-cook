@@ -36,7 +36,7 @@ const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
-const { newMessage } = storeToRefs(chat);
+const { newInput, shadowInput } = storeToRefs(chat);
 const {
   sendUserMessage,
 } = chat;
@@ -49,7 +49,7 @@ const inputShadowText = computed(() => {
     return '';
   }
 
-  const t = 'Text filled when you press TAB';
+  const t = shadowInput.value;
   if (modelValue.value.length === 0) {
     return t;
   }
@@ -68,7 +68,7 @@ function processInputFill(e: Event) {
     return;
   }
 
-  newMessage.value = modelValue.value;
+  newInput.value = modelValue.value;
 
   switch (e.key) {
     case 'Escape':

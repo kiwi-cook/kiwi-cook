@@ -1,3 +1,4 @@
+import { UserPreferences } from 'src/models/search.ts';
 import { Recipe } from 'src/models/recipe.ts';
 
 export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
@@ -7,6 +8,7 @@ export interface BaseMessage {
   sender: string;
   sent: boolean;
   type: MessageType;
+  timestamp: string;
   disableChat?: boolean;
 }
 
@@ -54,7 +56,7 @@ export interface SliderMessage extends BaseMessage {
 export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage;
 
 export type KiwiMessageState =
-  'start'
+  | 'start'
   | 'recipeType'
   | 'dietaryRestrictions'
   | 'cookingTime'
@@ -63,3 +65,17 @@ export type KiwiMessageState =
   | 'displayingResults'
   | 'displayMoreResults'
   | 'startingOver';
+
+export class ChatHistory {
+  timestamp: string;
+
+  messages: Message[];
+
+  preferences: UserPreferences;
+
+  constructor(messages: Message[], preferences: UserPreferences) {
+    this.timestamp = new Date().toISOString();
+    this.messages = messages;
+    this.preferences = preferences;
+  }
+}

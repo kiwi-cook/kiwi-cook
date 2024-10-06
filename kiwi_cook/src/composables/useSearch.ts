@@ -79,7 +79,7 @@ export function useRecipeSearch(): UseRecipeSearch {
     const recipeDietaryRestrictions: Set<string> = new Set(...recipe.props.tags ?? [], ...recipe.props.dietaryRestrictions ?? []);
     console.log('recipeDietaryRestrictions:', recipeDietaryRestrictions);
 
-    if (dietaryRestrictions.validation === 'all') {
+    if (dietaryRestrictions.type === 'all') {
       return dietaryRestrictions.property.every((restriction: string) => recipeDietaryRestrictions.has(restriction));
     }
     return dietaryRestrictions.property.some((restriction: string) => recipeDietaryRestrictions.has(restriction));
@@ -97,7 +97,7 @@ export function useRecipeSearch(): UseRecipeSearch {
     const tags = userPreferences.tags ?? [];
 
     const recipeTags = recipe.props.tags ?? [];
-    if (tags.validation === 'all') {
+    if (tags.type === 'all') {
       return tags.property.every((tag: string) => recipeTags.includes(tag));
     }
     return tags.property.some((tag: string) => recipeTags.includes(tag));

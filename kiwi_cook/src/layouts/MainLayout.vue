@@ -1,11 +1,11 @@
 <template>
   <q-layout view="hHh lpR fFf">
 
-    <q-header reveal class="bg-black text-white">
+    <q-header reveal class="bg-kiwi-green text-white">
       <q-toolbar>
         <div class="q-pa-md text-white" @click="$router.push('/')">
           <div class="text-h4 text-weight-bold">KiwiCook 🥝</div>
-          <div class="text-subtitle1 text-kiwi-green">Reclaim your kitchen</div>
+          <div class="text-subtitle1 text-black">Reclaim your kitchen</div>
         </div>
       </q-toolbar>
     </q-header>
