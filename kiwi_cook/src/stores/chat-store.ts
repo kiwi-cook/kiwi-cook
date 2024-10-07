@@ -39,7 +39,7 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref<Message[]>([]);
   const userPreferences = ref<UserPreferences>({ ...DEFAULT_PREFERENCES });
   const kiwiMessageState = ref<KiwiMessageState>('start');
-  const isChatDisabled = computed(() => kiwiMessageState.value === 'searching');
+  const isChatDisabled = ref(false);
   const newInput = ref<string>('');
   const shadowInput = ref<string>('');
   const scrollArea = ref<QScrollArea | null>(null);
@@ -95,6 +95,7 @@ export const useChatStore = defineStore('chat', () => {
   });
 
   const addMessage = async (message: Omit<Message, 'id' | 'sender' | 'sent' | 'timestamp'>, sender = 'Kiwi') => new Promise<void>((resolve) => {
+    isChatDisabled.value = message.disableChat || false;
     setTimeout(() => {
       const newMessage: Message = {
         id: messages.value.length + 1,
@@ -123,21 +124,51 @@ export const useChatStore = defineStore('chat', () => {
     isTyping.value = false;
   };
 
-  // Questions
-  const questions = {
-    ask: async (text: string, options: MessageOption[] | string[] | null = null) => {
-      await simulateTyping();
-      await addMessage({ type: 'text', content: text });
+  const actions = {
+    ask: async (text: string, options: MessageOption[] | string[] | null = null, askOptions: Partial<{
+      disableChat: boolean,
+      multiOption: boolean,
+    }> = {}) => {
+      const { disableChat, multiOption } = askOptions;
+
+      await addMessage({ type: 'text', content: text, disableChat: (disableChat ?? false) });
       if (options) {
-        await addMessage({ type: 'options', content: options });
+        const optionsType = multiOption ? 'multiOptions' : 'options';
+        await addMessage({
+          type: optionsType, content: options, disableChat: (disableChat ?? false),
+        });
       }
     },
-    servings: () => questions.ask(t('chat.servings'), [t('servings.1'), t('servings.2'), t('servings.3'), t('servings.4'), t('servings.5plus')]),
+
+    // Get recipe suggestions
+    askOptions: () => actions.ask('Was möchtest du tun?', [{
+      label: 'Rezeptvorschläge anzeigen',
+      mapping: 'searchRecipes',
+    }]),
+    askServings: () => actions.ask(t('chat.servings'), [{
+      label: t('servings.1'),
+      mapping: 1,
+    }, {
+      label: t('servings.2'),
+      mapping: 2,
+    }, {
+      label: t('servings.3'),
+      mapping: 3,
+    }, {
+      label: t('servings.4'),
+      mapping: 4,
+    }, {
+      label: t('servings.5plus'),
+      mapping: '5plus',
+    }]),
     // eslint-disable-next-line max-len
-    recipeType: () => questions.ask(t('chat.recipeType'), [t('recipeType.quick'), t('recipeType.healthy'), t('recipeType.comfort'), t('recipeType.gourmet'), t('recipeType.budget')]),
+    askRecipeType: () => actions.ask(t('chat.recipeType'), [t('recipeType.quick'), t('recipeType.healthy'), t('recipeType.comfort'), t('recipeType.gourmet'), t('recipeType.budget')]),
     // eslint-disable-next-line max-len
-    dietaryRestrictions: () => questions.ask(t('chat.dietaryRestrictions'), [t('dietary.vegetarian'), t('dietary.vegan'), t('dietary.glutenFree'), t('dietary.dairyFree'), t('dietary.lowCarb'), t('dietary.none')]),
-    cookingTime: () => addMessage({
+    askDietaryRestrictions: () => actions.ask(t('chat.dietaryRestrictions'), [t('dietary.vegetarian'), t('dietary.vegan'), t('dietary.glutenFree'), t('dietary.dairyFree'), t('dietary.lowCarb'), t('dietary.none')], {
+      // TODO: Set multiOption to true and fix the problem with the chatBox
+      multiOption: false,
+    }),
+    askCookingTime: () => addMessage({
       type: 'slider',
       content: {
         label: t('chat.cookingTime'),
@@ -149,96 +180,99 @@ export const useChatStore = defineStore('chat', () => {
       },
     }),
     // eslint-disable-next-line max-len
-    cuisine: () => questions.ask(t('chat.cuisine'), [t('cuisine.italian'), t('cuisine.mexican'), t('cuisine.asian'), t('cuisine.mediterranean'), t('cuisine.american'), t('cuisine.surprise')]),
-  };
+    askCuisine: () => actions.ask(t('chat.cuisine'), [t('cuisine.italian'), t('cuisine.mexican'), t('cuisine.asian'), t('cuisine.mediterranean'), t('cuisine.american'), t('cuisine.surprise')]),
 
-  // Chat actions
-  const resetChat = async () => {
-    messages.value = [];
-    userPreferences.value = { ...DEFAULT_PREFERENCES };
-    kiwiMessageState.value = 'start';
-    currentRecipes.value = [];
-    await addMessage({ type: 'text', content: t('chat.reset') });
-    await questions.servings();
-    trackEvent('chat_reset');
-  };
-
-  const searchRecipes = async () => {
-    kiwiMessageState.value = 'searching';
-    await addMessage({ type: 'text', content: t('search.searching', { preferences: preferencesSummary.value }) });
-
-    try {
-      await simulateTyping();
-      const recipes = await recipeStore.searchByPreferences(userPreferences.value);
-      currentRecipes.value = recipes;
-      recipeNames.value = recipes.map((recipe) => getTranslation(recipe.name));
-      kiwiMessageState.value = 'displayingResults';
-
-      if (recipes.length === 0) {
-        await addMessage({ type: 'text', content: t('search.noResults') });
-        await addMessage({ type: 'options', content: [{ label: t('search.startOver'), callback: resetChat }] });
-      } else {
-        await addMessage({ type: 'text', content: t('search.results') });
-        await addMessage({ type: 'recipe', content: recipes });
-        await addMessage({
-          type: 'options',
-          content: [t('search.moreOptions'), t('search.startCooking'), t('search.newSearch')],
-        });
-      }
-      trackEvent('recipes_searched', { count: recipes.length });
-    } catch (error) {
-      console.error('Error searching recipes:', error);
-      await addMessage({ type: 'text', content: t('search.error') });
-      showNotification('error', t('search.errorNotification'));
+    // Generate weekplan
+    generateWeekplan: () => actions.ask('Wie viele Rezepte möchtest du für die Woche planen?', ['3', '5', '7']),
+    resetChat: async () => {
+      messages.value = [];
+      userPreferences.value = { ...DEFAULT_PREFERENCES };
       kiwiMessageState.value = 'start';
-    }
+      currentRecipes.value = [];
+      await addMessage({ type: 'text', content: t('chat.reset') });
+      await actions.askServings();
+      trackEvent('chat_reset');
+    },
+    searchRecipes: async () => {
+      kiwiMessageState.value = 'searching';
+      await addMessage({ type: 'text', content: t('search.searching', { preferences: preferencesSummary.value }) });
+
+      try {
+        await simulateTyping();
+        const recipes = await recipeStore.searchByPreferences(userPreferences.value);
+        currentRecipes.value = recipes;
+        recipeNames.value = recipes.map((recipe) => getTranslation(recipe.name));
+        kiwiMessageState.value = 'displayingResults';
+
+        if (recipes.length === 0) {
+          await addMessage({ type: 'text', content: t('search.noResults') });
+          await addMessage({
+            type: 'options',
+            content: [{ label: t('search.startOver'), mapping: () => actions.resetChat() }],
+          });
+        } else {
+          await addMessage({ type: 'text', content: t('search.results') });
+          await addMessage({ type: 'recipe', content: recipes });
+          await addMessage({
+            type: 'options',
+            content: [t('search.moreOptions'), t('search.startCooking'), t('search.newSearch')],
+          });
+        }
+        trackEvent('recipes_searched', { count: recipes.length });
+      } catch (error) {
+        console.error('Error searching recipes:', error);
+        await addMessage({ type: 'text', content: t('search.error') });
+        showNotification('error', t('search.errorNotification'));
+        kiwiMessageState.value = 'start';
+      }
+    },
   };
 
   // State handlers
   const stateHandlers: Record<KiwiMessageState, (input: string) => Promise<void>> = {
     start: async (input) => {
       userPreferences.value.servings.property = parseInt(input, 10);
-      kiwiMessageState.value = 'recipeType';
-      await questions.recipeType();
+      kiwiMessageState.value = 'askRecipeType';
+      await actions.askRecipeType();
     },
     generateWeekplan: async () => {
       // Not implemented
     },
-    recipeType: async (input) => {
+    askRecipeType: async (input) => {
       userPreferences.value.recipeType.property = input;
-      kiwiMessageState.value = 'dietaryRestrictions';
-      await questions.dietaryRestrictions();
+      kiwiMessageState.value = 'askDietaryRestrictions';
+      await actions.askDietaryRestrictions();
     },
-    dietaryRestrictions: async (input) => {
+    askDietaryRestrictions: async (input) => {
       userPreferences.value.dietaryRestrictions.property = input.split(',').map((item) => item.trim());
-      kiwiMessageState.value = 'cookingTime';
-      await questions.cookingTime();
+      kiwiMessageState.value = 'askCookingTime';
+      await actions.askCookingTime();
     },
-    cookingTime: async () => {
+    askCookingTime: async () => {
       // Handled by slider newInput
     },
     cuisine: async (input) => {
       userPreferences.value.cuisine.property = input;
-      await searchRecipes();
+      await actions.searchRecipes();
     },
     searching: async () => {
       // No user newInput handled during searching
     },
     displayingResults: async (input) => {
       if (input.toLowerCase() === t('search.moreOptions').toLowerCase()) {
-        await questions.cuisine();
+        await actions.askCuisine();
       } else if (input.toLowerCase() === t('search.startCooking').toLowerCase()) {
         await addMessage({ type: 'text', content: t('search.enjoyYourMeal') });
         kiwiMessageState.value = 'start';
       } else if (input.toLowerCase() === t('search.newSearch').toLowerCase()) {
-        await resetChat();
+        await actions.resetChat();
       }
     },
     displayMoreResults: async () => {
-      await searchRecipes();
+      await actions.searchRecipes();
     },
     startingOver: async () => {
-      await resetChat();
+      await actions.resetChat();
     },
   };
 
@@ -254,7 +288,7 @@ export const useChatStore = defineStore('chat', () => {
   const handleSliderInput = async (value: number) => {
     userPreferences.value.cookingTime.property = value;
     kiwiMessageState.value = 'cuisine';
-    await questions.cuisine();
+    await actions.askCuisine();
   };
 
   const handleUserInput = async (userInput: string) => {
@@ -293,16 +327,22 @@ export const useChatStore = defineStore('chat', () => {
 
   const handleOptionClick = async (option: MessageOption | string, type: MessageType) => {
     if (isMessageOption(option)) {
-      option.callback();
-      return;
+      // If the option is a callback, call it
+      if (typeof option.mapping === 'function') {
+        option.mapping();
+        return;
+      }
     }
 
+    const optionMapping = isMessageOption(option) ? option.mapping.toString() : option;
+    const optionLabel = isMessageOption(option) ? option.label : option;
+
     if (type === 'multiOptions') {
-      newInput.value = newInput.value.includes(option)
-        ? newInput.value.replace(option, '').trim()
-        : `${newInput.value} ${option}`.trim();
+      newInput.value = newInput.value.includes(optionLabel)
+        ? newInput.value.replace(optionLabel, '').trim()
+        : `${newInput.value} ${optionLabel}`.trim();
     } else {
-      await sendUserMessage(option);
+      await sendUserMessage(optionMapping);
     }
   };
 
@@ -374,7 +414,7 @@ export const useChatStore = defineStore('chat', () => {
     recipeNames.value = recipeStore.recipes.slice(0, 5).map((recipe: Recipe) => getTranslation(recipe.name));
 
     await addMessage({ type: 'text', content: t('chat.welcome') });
-    await questions.servings();
+    await actions.askOptions();
   });
 
   return {
@@ -392,7 +432,6 @@ export const useChatStore = defineStore('chat', () => {
     sendUserMessage,
     handleOptionClick,
     handleSliderInput,
-    resetChat,
     saveChat,
     loadChat,
     exportChat,

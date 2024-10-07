@@ -29,11 +29,11 @@ export interface RecipeMessage extends BaseMessage {
 
 export interface MessageOption {
   label: string;
-  callback: () => void;
+  mapping: string | number | (() => void);
 }
 
 export function isMessageOption(option: MessageOption | string): option is MessageOption {
-  return (option as MessageOption).callback !== undefined;
+  return (option as MessageOption).mapping !== undefined;
 }
 
 export interface OptionsMessage extends BaseMessage {
@@ -58,9 +58,9 @@ export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessag
 export type KiwiMessageState =
   | 'start'
   | 'generateWeekplan'
-  | 'recipeType'
-  | 'dietaryRestrictions'
-  | 'cookingTime'
+  | 'askRecipeType'
+  | 'askDietaryRestrictions'
+  | 'askCookingTime'
   | 'cuisine'
   | 'searching'
   | 'displayingResults'

@@ -17,7 +17,7 @@
     <div class="chat-container q-pa-md">
       <q-scroll-area class="chat-scroll" ref="scrollArea">
         <div class="chat-messages-wrapper">
-          <div v-for="message in messages" :key="message.id" class="q-py-sm">
+          <div v-for="message in messages" :key="message.id">
             <q-chat-message
               :bg-color="message.sent ? 'secondary' : 'transparent'"
               :name="message.sender"
@@ -25,7 +25,7 @@
               :stamp="message.timestamp"
               :text-color="message.sent ? 'white' : (isDark ? 'grey-3' : 'grey-9')"
               class="chat-bubble"
-              :class="{ 'kiwi-bubble': !message.sent }"
+              :class="{ 'kiwi-bubble': !message.sent, 'user-bubble': message.sent }"
             >
               <template v-if="message.type === 'text'">
                 <div v-html="message.content" class="chat-text"/>
@@ -121,7 +121,7 @@
     </div>
 
     <!-- Input area -->
-    <div class="input-area q-pa-md">
+    <div class="input-area q-pa-md" v-if="!isChatDisabled">
       <KiwiChatBox/>
     </div>
 
@@ -149,7 +149,7 @@ const $q = useQuasar();
 const isDark = ref($q.dark.isActive);
 
 const chat = useChatStore();
-const { messages, scrollArea } = storeToRefs(chat);
+const { messages, scrollArea, isChatDisabled } = storeToRefs(chat);
 const {
   handleSliderInput,
   handleOptionClick,
@@ -208,6 +208,14 @@ const toggleDarkMode = () => {
   .q-message-text {
     background-color: transparent !important;
     border: 2px solid var(--kiwi-green);
+    border-bottom-left-radius: 0;
+  }
+}
+
+.user-bubble {
+  .q-message-text {
+    background-color: var(--kiwi-green) !important;
+    border-bottom-right-radius: 0;
   }
 }
 
