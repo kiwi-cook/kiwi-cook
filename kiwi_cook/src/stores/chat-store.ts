@@ -14,6 +14,7 @@ import { defineStore } from 'pinia';
 import { getTranslation, Recipe } from 'src/models/recipe';
 import { useNotification } from 'src/composables/useNotification';
 import { useAnalytics } from 'src/composables/useAnalytics';
+import { toTime } from 'src/utils/time.ts';
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n();
@@ -99,7 +100,7 @@ export const useChatStore = defineStore('chat', () => {
         id: messages.value.length + 1,
         sender,
         sent: sender === 'You',
-        timestamp: new Date().toISOString(),
+        timestamp: toTime(new Date()),
         ...message,
       } as Message;
       messages.value.push(newMessage);
@@ -167,7 +168,7 @@ export const useChatStore = defineStore('chat', () => {
     await addMessage({ type: 'text', content: t('search.searching', { preferences: preferencesSummary.value }) });
 
     try {
-      await simulateTyping(2000);
+      await simulateTyping();
       const recipes = await recipeStore.searchByPreferences(userPreferences.value);
       currentRecipes.value = recipes;
       recipeNames.value = recipes.map((recipe) => getTranslation(recipe.name));

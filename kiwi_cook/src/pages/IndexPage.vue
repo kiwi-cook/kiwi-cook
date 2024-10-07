@@ -22,6 +22,7 @@
               :bg-color="message.sent ? 'secondary' : 'transparent'"
               :name="message.sender"
               :sent="message.sent"
+              :stamp="message.timestamp"
               :text-color="message.sent ? 'white' : (isDark ? 'grey-3' : 'grey-9')"
               class="chat-bubble"
               :class="{ 'kiwi-bubble': !message.sent }"
