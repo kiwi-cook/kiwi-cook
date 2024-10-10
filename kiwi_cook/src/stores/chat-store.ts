@@ -4,7 +4,13 @@ import {
 import { QScrollArea } from 'quasar';
 import { useRecipeStore } from 'stores/recipe-store';
 import {
-  ChatHistory, isMessageOption, KiwiMessageState, Message, MessageOption, MessageType,
+  ChatHistory,
+  isMessageOption,
+  KiwiMessageState,
+  Message,
+  messageFromOptions,
+  MessageOption,
+  MessageType,
 } from 'src/models/chat';
 import {
   createUserPreference, createUserPreferenceArray, PreferenceValue, UserPreferences,
@@ -125,27 +131,29 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   const actions = {
-    ask: async (text: string, options: MessageOption[] | string[] | null = null, askOptions: Partial<{
-      disableChat: boolean,
-      multiOption: boolean,
-    }> = {}) => {
-      const { disableChat, multiOption } = askOptions;
-
-      await addMessage({ type: 'text', content: text, disableChat: (disableChat ?? false) });
-      if (options) {
-        const optionsType = multiOption ? 'multiOptions' : 'options';
-        await addMessage({
-          type: optionsType, content: options, disableChat: (disableChat ?? false),
-        });
-      }
+    ask: async (text: string, message: Omit<Message, 'id' | 'sender' | 'sent' | 'timestamp'>) => {
+      await addMessage({ type: 'text', content: text });
+      await addMessage(message);
     },
 
     // Get recipe suggestions
-    askOptions: () => actions.ask('Was möchtest du tun?', [{
-      label: 'Rezeptvorschläge anzeigen',
-      mapping: 'searchRecipes',
-    }]),
-    askServings: () => actions.ask(t('chat.servings'), [{
+    askStartOptions: () => actions.ask('Was möchtest du tun?', messageFromOptions([
+      {
+        label: t('chat.optionFindRecipe'),
+        mapping: () => {
+          kiwiMessageState.value = 'askServings';
+          actions.askServings();
+        },
+      },
+      {
+        label: t('chat.optionGenerateWeeklyPlan'),
+        mapping: () => {
+          kiwiMessageState.value = 'generateWeeklyPlan';
+          actions.generateWeekplan();
+        },
+      },
+    ], false, true)),
+    askServings: () => actions.ask(t('chat.servings'), messageFromOptions([{
       label: t('servings.1'),
       mapping: 1,
     }, {
@@ -160,14 +168,17 @@ export const useChatStore = defineStore('chat', () => {
     }, {
       label: t('servings.5plus'),
       mapping: '5plus',
-    }]),
+    }])),
     // eslint-disable-next-line max-len
-    askRecipeType: () => actions.ask(t('chat.recipeType'), [t('recipeType.quick'), t('recipeType.healthy'), t('recipeType.comfort'), t('recipeType.gourmet'), t('recipeType.budget')]),
+    askRecipeType: () => actions.ask(t('chat.recipeType'), messageFromOptions(
+      [t('recipeType.quick'), t('recipeType.healthy'), t('recipeType.comfort'), t('recipeType.gourmet'), t('recipeType.budget')],
+      true,
+      false,
+    )),
     // eslint-disable-next-line max-len
-    askDietaryRestrictions: () => actions.ask(t('chat.dietaryRestrictions'), [t('dietary.vegetarian'), t('dietary.vegan'), t('dietary.glutenFree'), t('dietary.dairyFree'), t('dietary.lowCarb'), t('dietary.none')], {
-      // TODO: Set multiOption to true and fix the problem with the chatBox
-      multiOption: false,
-    }),
+    askDietaryRestrictions: () => actions.ask(t('chat.dietaryRestrictions'), messageFromOptions(
+      [t('dietary.vegetarian'), t('dietary.vegan'), t('dietary.glutenFree'), t('dietary.dairyFree'), t('dietary.lowCarb'), t('dietary.none')],
+    )),
     askCookingTime: () => addMessage({
       type: 'slider',
       content: {
@@ -178,19 +189,20 @@ export const useChatStore = defineStore('chat', () => {
         step: 15,
         unit: t('chat.minutes'),
       },
+      disableChat: true,
     }),
     // eslint-disable-next-line max-len
-    askCuisine: () => actions.ask(t('chat.cuisine'), [t('cuisine.italian'), t('cuisine.mexican'), t('cuisine.asian'), t('cuisine.mediterranean'), t('cuisine.american'), t('cuisine.surprise')]),
+    askCuisine: () => actions.ask(t('chat.cuisine'), messageFromOptions([t('cuisine.italian'), t('cuisine.mexican'), t('cuisine.asian'), t('cuisine.mediterranean'), t('cuisine.american'), t('cuisine.surprise')])),
 
     // Generate weekplan
-    generateWeekplan: () => actions.ask('Wie viele Rezepte möchtest du für die Woche planen?', ['3', '5', '7']),
+    generateWeekplan: () => actions.ask('Wie viele Rezepte möchtest du für die Woche planen?', messageFromOptions(['3', '5', '7'])),
     resetChat: async () => {
       messages.value = [];
       userPreferences.value = { ...DEFAULT_PREFERENCES };
       kiwiMessageState.value = 'start';
       currentRecipes.value = [];
       await addMessage({ type: 'text', content: t('chat.reset') });
-      await actions.askServings();
+      await actions.askStartOptions();
       trackEvent('chat_reset');
     },
     searchRecipes: async () => {
@@ -230,13 +242,14 @@ export const useChatStore = defineStore('chat', () => {
 
   // State handlers
   const stateHandlers: Record<KiwiMessageState, (input: string) => Promise<void>> = {
-    start: async (input) => {
+    start: async () => {
+    },
+    generateWeeklyPlan: async () => {
+    },
+    askServings: async (input) => {
       userPreferences.value.servings.property = parseInt(input, 10);
       kiwiMessageState.value = 'askRecipeType';
       await actions.askRecipeType();
-    },
-    generateWeekplan: async () => {
-      // Not implemented
     },
     askRecipeType: async (input) => {
       userPreferences.value.recipeType.property = input;
@@ -278,6 +291,7 @@ export const useChatStore = defineStore('chat', () => {
 
   const handleState = async (input: string) => {
     const handler = stateHandlers[kiwiMessageState.value];
+    console.log('kiwiMessageState:', kiwiMessageState.value);
     if (handler) {
       await handler(input);
     } else {
@@ -310,17 +324,7 @@ export const useChatStore = defineStore('chat', () => {
     shadowInput.value = '';
   };
 
-  const sendUserMessage = async (text: string = newInput.value) => {
-    if (!text.trim()) {
-      return;
-    }
-
-    // If there's a shadow message and the user pressed Tab, use the autocompleted value
-    if (shadowInput.value && text.endsWith('\t')) {
-      newInput.value = shadowInput.value;
-      return;
-    }
-
+  const handleTextInput = async (text: string = newInput.value) => {
     newInput.value = '';
     await handleUserInput(text);
   };
@@ -329,6 +333,7 @@ export const useChatStore = defineStore('chat', () => {
     if (isMessageOption(option)) {
       // If the option is a callback, call it
       if (typeof option.mapping === 'function') {
+        await handleUserInput(option.label);
         option.mapping();
         return;
       }
@@ -339,10 +344,14 @@ export const useChatStore = defineStore('chat', () => {
 
     if (type === 'multiOptions') {
       newInput.value = newInput.value.includes(optionLabel)
-        ? newInput.value.replace(optionLabel, '').trim()
+        ? newInput.value
+          .replace(optionLabel, '') // Remove the option
+          // .replace(`, ${optionLabel}`, '') // Remove the option with a comma
+          .trim()
         : `${newInput.value} ${optionLabel}`.trim();
+      console.log('newInput.value:', newInput.value);
     } else {
-      await sendUserMessage(optionMapping);
+      await handleUserInput(optionMapping);
     }
   };
 
@@ -405,16 +414,11 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   onMounted(async () => {
-    /* const storedHistory = localStorage.getItem('chatHistory');
-    if (storedHistory) {
-      chatHistory.value = JSON.parse(storedHistory);
-    } */
-
     // Initialize recipeNames with some popular recipes
     recipeNames.value = recipeStore.recipes.slice(0, 5).map((recipe: Recipe) => getTranslation(recipe.name));
 
     await addMessage({ type: 'text', content: t('chat.welcome') });
-    await actions.askOptions();
+    await actions.askStartOptions();
   });
 
   return {
@@ -429,7 +433,7 @@ export const useChatStore = defineStore('chat', () => {
     currentRecipes,
     chatHistory,
     preferencesSummary,
-    sendUserMessage,
+    handleTextInput,
     handleOptionClick,
     handleSliderInput,
     saveChat,

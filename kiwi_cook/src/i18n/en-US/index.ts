@@ -1,6 +1,8 @@
 export default {
   chat: {
     welcome: "Welcome to the Kiwi Kitchen! 🥝 I'm your cooking buddy. Ready for some tasty discoveries?",
+    optionFindRecipe: 'Find recipes',
+    optionGenerateWeeklyPlan: 'Generate weekly plan',
     servings: 'How many people are we cooking for today?',
     recipeType: 'Great! What kind of dish are you in the mood for?',
     dietaryRestrictions: "Got it. Any dietary preferences to keep in mind? We'll find something suitable for everyone.",

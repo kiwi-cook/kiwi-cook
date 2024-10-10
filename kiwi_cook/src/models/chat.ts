@@ -3,6 +3,19 @@ import { Recipe } from 'src/models/recipe.ts';
 
 export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
 
+export type KiwiMessageState =
+  | 'start'
+  | 'generateWeeklyPlan'
+  | 'askServings'
+  | 'askRecipeType'
+  | 'askDietaryRestrictions'
+  | 'askCookingTime'
+  | 'cuisine'
+  | 'searching'
+  | 'displayingResults'
+  | 'displayMoreResults'
+  | 'startingOver';
+
 export interface BaseMessage {
   id: number;
   sender: string;
@@ -41,6 +54,13 @@ export interface OptionsMessage extends BaseMessage {
   content: MessageOption[] | string[];
 }
 
+// eslint-disable-next-line max-len
+export const messageFromOptions = (options: MessageOption[] | string[], multiple = false, disableChat = false): Omit<OptionsMessage, 'id' | 'sender' | 'sent' | 'timestamp'> => ({
+  type: multiple ? 'multiOptions' : 'options',
+  content: options,
+  disableChat,
+});
+
 export interface SliderMessage extends BaseMessage {
   type: 'slider';
   content: {
@@ -54,18 +74,6 @@ export interface SliderMessage extends BaseMessage {
 }
 
 export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage;
-
-export type KiwiMessageState =
-  | 'start'
-  | 'generateWeekplan'
-  | 'askRecipeType'
-  | 'askDietaryRestrictions'
-  | 'askCookingTime'
-  | 'cuisine'
-  | 'searching'
-  | 'displayingResults'
-  | 'displayMoreResults'
-  | 'startingOver';
 
 export class ChatHistory {
   timestamp: string;

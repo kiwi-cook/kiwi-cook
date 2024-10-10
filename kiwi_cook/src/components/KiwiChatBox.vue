@@ -19,15 +19,16 @@
         dense
         flat
         icon="send"
-        :color="isDark ? 'kiwi-light' : 'kiwi-dark'"
-        @click="() => sendUserMessage"
+        :disable="modelValue.length === 0"
+        :color="modelValue.length === 0 ? 'kiwi-light' : (isDark ? 'kiwi-light' : 'kiwi-green')"
+        @click="() => handleTextInput()"
       />
     </template>
   </q-input>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useChatStore } from 'stores/chat-store.ts';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
@@ -38,7 +39,7 @@ const isDark = computed(() => $q.dark.isActive);
 const chat = useChatStore();
 const { newInput, shadowInput } = storeToRefs(chat);
 const {
-  sendUserMessage,
+  handleTextInput,
 } = chat;
 
 const modelValue = defineModel<string>('modelValue', { default: '' });
@@ -63,6 +64,10 @@ const inputShadowText = computed(() => {
     .join(modelValue.value);
 });
 
+watch(newInput, () => {
+  modelValue.value = newInput.value;
+});
+
 function processInputFill(e: Event) {
   if (!(e instanceof KeyboardEvent)) {
     return;
@@ -77,7 +82,7 @@ function processInputFill(e: Event) {
       }
       break;
     case 'Enter':
-      sendUserMessage();
+      handleTextInput();
       modelValue.value = '';
       break;
     case 'Tab':
