@@ -9,7 +9,7 @@
           </div>
           <div class="col-auto q-ml-md">
             <q-avatar size="48px" class="bg-white rounded-borders">
-              <q-img src="/icons/icon-no_bg.png" width="36px" height="36px" />
+              <q-img src="/icons/icon-500x500.png" width="36px" height="36px" />
             </q-avatar>
           </div>
         </div>

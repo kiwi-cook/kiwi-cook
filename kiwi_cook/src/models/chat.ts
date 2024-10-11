@@ -1,20 +1,39 @@
-import { UserPreferences } from 'src/models/search.ts';
 import { Recipe } from 'src/models/recipe.ts';
 
 export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
 
-export type KiwiMessageState =
+export type ChatState =
   | 'start'
-  | 'generateWeeklyPlan'
+  | 'generatePlan'
   | 'askServings'
   | 'askRecipeType'
   | 'askDietaryRestrictions'
   | 'askCookingTime'
-  | 'cuisine'
+  | 'askCuisine'
   | 'searching'
   | 'displayingResults'
   | 'displayMoreResults'
+  | 'resetChat'
   | 'startingOver';
+
+interface SliderOptions {
+  min: number;
+  max: number;
+  step: number;
+  unit: string;
+}
+
+export interface ChatConfig {
+  [key: string]: {
+    message?: string;
+    options?: string[];
+    type?: 'slider';
+    sliderOptions?: SliderOptions;
+    nextState: ChatState | ((input: string) => ChatState);
+    updatePreference?: (input: string | number) => void;
+    action?: () => Promise<void>;
+  };
+}
 
 export interface BaseMessage {
   id: number;
@@ -40,51 +59,17 @@ export interface RecipeMessage extends BaseMessage {
   content: Recipe[];
 }
 
-export interface MessageOption {
-  label: string;
-  mapping: string | number | (() => void);
-}
-
-export function isMessageOption(option: MessageOption | string): option is MessageOption {
-  return (option as MessageOption).mapping !== undefined;
-}
-
 export interface OptionsMessage extends BaseMessage {
   type: 'options' | 'multiOptions';
-  content: MessageOption[] | string[];
+  content: string[];
 }
-
-// eslint-disable-next-line max-len
-export const messageFromOptions = (options: MessageOption[] | string[], multiple = false, disableChat = false): Omit<OptionsMessage, 'id' | 'sender' | 'sent' | 'timestamp'> => ({
-  type: multiple ? 'multiOptions' : 'options',
-  content: options,
-  disableChat,
-});
 
 export interface SliderMessage extends BaseMessage {
   type: 'slider';
   content: {
     label: string;
     value: number;
-    min: number;
-    max: number;
-    step: number;
-    unit: string;
-  };
+  } & SliderOptions;
 }
 
 export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage;
-
-export class ChatHistory {
-  timestamp: string;
-
-  messages: Message[];
-
-  preferences: UserPreferences;
-
-  constructor(messages: Message[], preferences: UserPreferences) {
-    this.timestamp = new Date().toISOString();
-    this.messages = messages;
-    this.preferences = preferences;
-  }
-}

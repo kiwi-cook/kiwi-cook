@@ -75,6 +75,7 @@ module.exports = {
 
     'no-shadow': 'off',
     '@typescript-eslint/no-shadow': 'error',
+    'no-use-before-define': 'off',
 
     'import/first': 'off',
     'import/named': 'error',

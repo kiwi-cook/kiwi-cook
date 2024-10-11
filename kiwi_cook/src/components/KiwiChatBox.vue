@@ -21,7 +21,7 @@
         icon="send"
         :disable="modelValue.length === 0"
         :color="modelValue.length === 0 ? 'kiwi-light' : (isDark ? 'kiwi-light' : 'kiwi-green')"
-        @click="() => handleTextInput()"
+        @click="() => handleMessage(modelValue)"
       />
     </template>
   </q-input>
@@ -39,7 +39,7 @@ const isDark = computed(() => $q.dark.isActive);
 const chat = useChatStore();
 const { newInput, shadowInput } = storeToRefs(chat);
 const {
-  handleTextInput,
+  handleMessage,
 } = chat;
 
 const modelValue = defineModel<string>('modelValue', { default: '' });
@@ -82,19 +82,11 @@ function processInputFill(e: Event) {
       }
       break;
     case 'Enter':
-      handleTextInput();
+      handleMessage(modelValue.value);
       modelValue.value = '';
       break;
-    case 'Tab':
-      if (!inputFillCancelled.value && inputShadowText.value.length > 0) {
-        e.preventDefault();
-        modelValue.value += inputShadowText.value;
-      }
-      break;
     default:
-      if (inputFillCancelled.value) {
-        inputFillCancelled.value = false;
-      }
+      inputFillCancelled.value = false;
   }
 }
 </script>

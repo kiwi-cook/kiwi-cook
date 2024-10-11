@@ -6,7 +6,7 @@ import { ref } from 'vue';
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { stemmer } from 'stemmer';
 import { getAllTranslations, Recipe } from 'src/models/recipe.ts';
-import { UserPreferences } from 'src/models/search.ts';
+import { UserPreferences } from 'src/models/user.ts';
 
 interface SearchableRecipe {
   id: string,
@@ -79,10 +79,7 @@ export function useRecipeSearch(): UseRecipeSearch {
     const recipeDietaryRestrictions: Set<string> = new Set(...recipe.props.tags ?? [], ...recipe.props.dietaryRestrictions ?? []);
     console.log('recipeDietaryRestrictions:', recipeDietaryRestrictions);
 
-    if (dietaryRestrictions.type === 'all') {
-      return dietaryRestrictions.property.every((restriction: string) => recipeDietaryRestrictions.has(restriction));
-    }
-    return dietaryRestrictions.property.some((restriction: string) => recipeDietaryRestrictions.has(restriction));
+    return dietaryRestrictions.every((restriction: string) => recipeDietaryRestrictions.has(restriction));
   };
 
   const filterRecipeByDuration = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
@@ -90,17 +87,14 @@ export function useRecipeSearch(): UseRecipeSearch {
     if (maxDuration === undefined) {
       return true;
     }
-    return recipe.duration <= maxDuration.property;
+    return recipe.duration <= maxDuration;
   };
 
   const filterRecipeByTag = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
     const tags = userPreferences.tags ?? [];
 
     const recipeTags = recipe.props.tags ?? [];
-    if (tags.type === 'all') {
-      return tags.property.every((tag: string) => recipeTags.includes(tag));
-    }
-    return tags.property.some((tag: string) => recipeTags.includes(tag));
+    return tags.some((tag: string) => recipeTags.includes(tag));
   };
 
   const search = (query: string): string[] => {
