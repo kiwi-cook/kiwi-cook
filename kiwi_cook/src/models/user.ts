@@ -13,7 +13,7 @@ const UserSchema = z.object({
 // Define the UserPreferences interface
 export interface UserPreferences {
   tags: string[],
-  servings: number,
+  servings?: number,
   recipeType: string,
   dietaryRestrictions: string[],
   cookingTime: number,

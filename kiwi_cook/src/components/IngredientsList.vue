@@ -1,10 +1,10 @@
 <!-- IngredientsList.vue -->
 <template>
-  <q-list dark bordered separator>
+  <q-list bordered separator class="ingredient-list">
     <q-item v-for="(ingredient, index) in customRecipe.ingredients" :key="index" clickable v-ripple>
       <q-item-section avatar>
-        <q-avatar color="green-5" text-color="black">
-          {{ index + 1 }}
+        <q-avatar color="green-5">
+          <q-icon name="local_dining" />
         </q-avatar>
       </q-item-section>
       <q-item-section>
@@ -14,7 +14,7 @@
         <q-item-label caption>{{ roundQuantity(ingredient.quantity) }} {{ ingredient.unit }}</q-item-label>
       </q-item-section>
       <q-item-section side>
-        <q-checkbox v-model="(ingredient as any).checked" color="green-5"/>
+        <q-checkbox v-model="(ingredient as any).checked" color="green-5" />
       </q-item-section>
     </q-item>
   </q-list>
@@ -54,3 +54,13 @@ function isIngredientHighlighted(ingredient: RecipeIngredient): boolean {
   return recipe.value.steps.some((step) => getTranslation(step.description).toLowerCase().includes(name));
 }
 </script>
+
+<style lang="scss">
+.ingredient-list {
+  padding: 14px 18px;
+  background-color: rgba(255, 255, 255, 0.3) !important;
+  border: 2px solid var(--q-primary);
+  border-radius: 16px 16px 16px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+</style>

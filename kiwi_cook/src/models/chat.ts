@@ -25,7 +25,7 @@ interface SliderOptions {
 
 export interface ChatConfig {
   [key: string]: {
-    message?: string;
+    message?: string | (() => string);
     options?: string[];
     type?: 'slider';
     sliderOptions?: SliderOptions;

@@ -7,6 +7,7 @@ import Fuse, { IFuseOptions } from 'fuse.js';
 import { stemmer } from 'stemmer';
 import { getAllTranslations, Recipe } from 'src/models/recipe.ts';
 import { UserPreferences } from 'src/models/user.ts';
+import { useAnalytics } from 'src/composables/useAnalytics.ts';
 
 interface SearchableRecipe {
   id: string,
@@ -20,6 +21,8 @@ interface UseRecipeSearch {
 }
 
 export function useRecipeSearch(): UseRecipeSearch {
+  const { trackEvent } = useAnalytics();
+
   const fuse = ref<Fuse<SearchableRecipe> | null>(null);
 
   const processField = (field: string[]): string[] => field.flatMap((item) => item
@@ -72,30 +75,36 @@ export function useRecipeSearch(): UseRecipeSearch {
     fuse.value = new Fuse(searchableRecipes, options);
   };
 
-  const filterRecipeByDietaryRestrictions = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
-    const dietaryRestrictions = userPreferences.dietaryRestrictions ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const filterRecipeByDietaryRestrictions = (recipe: Recipe, userPreferences: UserPreferences): boolean => true;
+
+  /* const dietaryRestrictions = userPreferences.dietaryRestrictions ?? [];
 
     // Combine tags and dietary restrictions
     const recipeDietaryRestrictions: Set<string> = new Set(...recipe.props.tags ?? [], ...recipe.props.dietaryRestrictions ?? []);
     console.log('recipeDietaryRestrictions:', recipeDietaryRestrictions);
 
-    return dietaryRestrictions.every((restriction: string) => recipeDietaryRestrictions.has(restriction));
-  };
+    return dietaryRestrictions.every((restriction: string) => recipeDietaryRestrictions.has(restriction)); */
 
   const filterRecipeByDuration = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
     const maxDuration = userPreferences.cookingTime;
     if (maxDuration === undefined) {
       return true;
     }
+    trackEvent('filterRecipeByDuration', { recipeDuration: recipe.duration, maxDuration });
     return recipe.duration <= maxDuration;
   };
 
-  const filterRecipeByTag = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
+  function filterRecipeByTag(recipe: Recipe, userPreferences: UserPreferences): boolean {
     const tags = userPreferences.tags ?? [];
 
     const recipeTags = recipe.props.tags ?? [];
+    if (recipeTags.length === 0 || tags.length === 0) {
+      return true;
+    }
+    trackEvent('filterRecipeByDuration', { recipeTags, tags });
     return tags.some((tag: string) => recipeTags.includes(tag));
-  };
+  }
 
   const search = (query: string): string[] => {
     if (!fuse.value) {
@@ -132,14 +141,18 @@ export function useRecipeSearch(): UseRecipeSearch {
     recipeMap: Map<string, Recipe>,
     userPreferences: UserPreferences,
   ): Promise<Recipe[]> => new Promise((resolve, reject) => {
+    trackEvent('searchRecipesByPreferences', { userPreferences });
+
     const recipes = Array.from(recipeMap.values());
     if (!recipes || userPreferences === undefined) {
       reject(new Error('No recipes found.'));
     }
 
     const filters = [
-      filterRecipeByDietaryRestrictions,
       filterRecipeByDuration,
+      filterRecipeByDietaryRestrictions,
+      // filterRecipeBySkillLevel,
+      // filterRecipeByCuisine,
       filterRecipeByTag,
     ];
 

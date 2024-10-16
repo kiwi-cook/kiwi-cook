@@ -1,11 +1,11 @@
 <template>
-  <q-layout view="hHh lpR fFf" :class="{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }">
-    <q-header reveal :class="isDark ? 'bg-kiwi-dark' : 'bg-kiwi-green'">
+  <q-layout view="hHh lpR fFf" :class="[{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }]">
+    <q-header reveal :class="isDark ? 'bg-dark' : 'bg-primary'">
       <q-toolbar class="q-py-sm">
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
           <div class="col">
-            <div class="text-h4 text-weight-bold" :class="isDark ? 'text-accent' : 'text-white'">KiwiCook</div>
-            <div class="text-subtitle2" :class="isDark ? 'text-grey-4' : 'text-black'">Reclaim your kitchen</div>
+            <div class="text-h4 text-weight-bold text-white">KiwiCook</div>
+            <div class="text-subtitle2" :class="isDark ? 'text-secondary' : 'text-black'">Reclaim your kitchen</div>
           </div>
           <div class="col-auto q-ml-md">
             <q-avatar size="48px" class="bg-white rounded-borders">
@@ -17,8 +17,8 @@
         <q-btn
           round
           size="md"
-          :color="isDark ? 'accent' : 'white'"
-          :text-color="isDark ? 'kiwi-dark' : 'kiwi-green'"
+          :color="isDark ? 'secondary' : 'white'"
+          :text-color="isDark ? 'dark' : 'primary'"
           :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
           class="q-ml-md mode-toggle"
           @click="toggleDarkMode"
@@ -28,17 +28,17 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container>
+    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
-          <component :is="Component" />
+          <component :is="Component"/>
         </transition>
       </router-view>
     </q-page-container>
 
-    <q-footer :class="{ 'bg-primary': !isDark, 'bg-kiwi-dark': isDark }" class="footer">
+    <q-footer :class="{ 'bg-primary': !isDark, 'bg-dark': isDark }" class="footer">
       <q-toolbar>
-        <q-btn flat :text-color="isDark ? 'white' : 'kiwi-dark'" icon="mdi-github" @click="openGithub">
+        <q-btn flat :text-color="isDark ? 'white' : 'dark'" icon="mdi-github" @click="openGithub">
           <q-tooltip>Visit our GitHub</q-tooltip>
         </q-btn>
       </q-toolbar>
@@ -70,14 +70,6 @@ const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
 
 body {
   font-family: 'Nunito', sans-serif;
-}
-
-.bg-gradient-light {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-.bg-gradient-dark {
-  background: linear-gradient(135deg, #1a1c20 0%, #0c0e12 100%);
 }
 
 .rounded-borders {

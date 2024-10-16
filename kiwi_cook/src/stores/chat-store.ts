@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
-import {
-  computed, nextTick, ref, watch,
-} from 'vue';
+import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRecipeStore } from 'stores/recipe-store';
 import { useNotification } from 'src/composables/useNotification';
@@ -35,23 +33,24 @@ export const useChatStore = defineStore('chat', () => {
   const isTyping = ref(false);
   const currentRecipes = ref<Recipe[]>([]);
   const newInput = ref<string>('');
-  const shadowInput = ref<string>('');
+  const currentId = computed(() => messages.value.length + 1);
 
   // Computed properties
-  const preferencesSummary = computed(() => {
-    const prefs = userPreferences.value;
+  const preferencesToSummary = (preferences: UserPreferences) => {
+    trackEvent('preferences_selected', { preferences });
+
     return [
-      t('search.servings', { count: prefs.servings }),
-      t('search.recipeType', { type: prefs.recipeType.toLowerCase() }),
-      t('search.cookingTime', { time: prefs.cookingTime }),
-      t('search.cuisine', { cuisine: prefs.cuisine }),
+      t('search.servings', { count: preferences.servings }),
+      t('search.recipeType', { type: preferences.recipeType.toLowerCase() }),
+      t('search.cookingTime', { time: preferences.cookingTime }),
+      t('search.cuisine', { cuisine: preferences.cuisine }),
     ].join(', ');
-  });
+  };
 
   // Methods
   const addMessage = async (message: Partial<Message>, sender = 'Kiwi') => {
     const newMessage: Message = {
-      id: messages.value.length + 1,
+      id: currentId.value,
       sender,
       sent: sender === 'You',
       timestamp: toTime(new Date()),
@@ -63,7 +62,6 @@ export const useChatStore = defineStore('chat', () => {
 
   const searchRecipes = async () => {
     isTyping.value = true;
-    await addMessage({ type: 'text', content: t('search.searching', { preferences: preferencesSummary.value }) });
 
     try {
       const recipes = await recipeStore.searchByPreferences(userPreferences.value);
@@ -86,13 +84,6 @@ export const useChatStore = defineStore('chat', () => {
       isTyping.value = false;
     }
   };
-
-  // Watchers
-  watch(newInput, (value) => {
-    if (value.trim() === '') {
-      shadowInput.value = '';
-    }
-  });
 
   const generateWeekPlan = async () => {
     // Implementation for generating a weekly plan
@@ -127,15 +118,12 @@ export const useChatStore = defineStore('chat', () => {
           [t('servings.2')]: 2,
           [t('servings.3')]: 3,
           [t('servings.4')]: 4,
-          [t('servings.5plus')]: 5,
+          [t('servings.5plus')]: undefined,
         });
 
         const mapOptionToServings = getServingsMapping();
-        if (typeof input === 'string') {
-          userPreferences.value.servings = mapOptionToServings[t(input)] || 2; // Default to 2 servings
-        } else {
-          userPreferences.value.servings = input;
-        }
+        userPreferences.value.servings = mapOptionToServings[input];
+        trackEvent('servings_selected', { servings: userPreferences.value.servings });
       },
     },
     askRecipeType: {
@@ -177,7 +165,7 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     searching: {
-      message: t('search.searching'),
+      message: () => t('search.searching', { preferences: preferencesToSummary(userPreferences.value) }),
       nextState: 'displayingResults',
       action: searchRecipes,
     },
@@ -210,11 +198,14 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   async function processCurrentState() {
+    trackEvent('chat_state_changed', { state: currentState.value });
     const currentConfig = chatConfig[currentState.value];
-    console.log('Processing state:', currentState.value);
 
     if (currentConfig.message) {
-      await addMessage({ type: 'text', content: currentConfig.message });
+      // message can be a function, especially for dynamic messages
+
+      const message = typeof currentConfig.message === 'function' ? currentConfig.message() : currentConfig.message;
+      await addMessage({ type: 'text', content: message });
     }
 
     if (currentConfig.options) {
@@ -245,8 +236,8 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   async function handleMessage(input: string | number) {
+    trackEvent('chat_message_received', { message: input });
     const currentConfig = chatConfig[currentState.value];
-    console.log('Current state:', currentState.value);
 
     if (currentConfig.updatePreference) {
       currentConfig.updatePreference(input);
@@ -298,7 +289,7 @@ export const useChatStore = defineStore('chat', () => {
     isTyping,
     currentRecipes,
     newInput,
-    shadowInput,
+    currentId,
     handleMessage,
     handleSliderInput,
     resetChat,

@@ -1,49 +1,58 @@
 <template>
   <q-page class="recipe-experience" v-if="recipe">
-    <div class="bg-dark text-white">
-      <q-parallax
-        :height="300"
-        :src="recipe.image_url"
-      >
-        <h2 class="custom-caption">
-          {{ getTranslation(recipe.name) }}
-        </h2>
-      </q-parallax>
-
-      <div class="recipe-content">
-        <q-splitter
-          v-model="splitterModel"
-          v-if="!$q.screen.lt.sm && !$q.screen.lt.md"
-          class="full-height"
-        >
-          <template v-slot:before>
-            <h2 class="text-h4 text-green-5">
-              {{ $t('recipe.ingredients') }}
-            </h2>
-            <IngredientsList :recipe="recipe"/>
-          </template>
-
-          <template v-slot:after>
-            <h2 class="text-h4 text-green-5">
-              {{ $t('recipe.steps') }}
-            </h2>
-            <StepsList :recipe="recipe"/>
-          </template>
-        </q-splitter>
-
-        <div v-else>
-          <h2 class="text-h4 text-green-5">
-            {{ $t('recipe.ingredients') }}
-          </h2>
-          <IngredientsList :recipe="recipe"/>
-
-          <h2 class="text-h4 text-green-5">
-            {{ $t('recipe.steps') }}
-          </h2>
-          <StepsList :recipe="recipe"/>
+    <div class="recipe-header" :style="{ backgroundImage: `url(${recipe.image_url})` }">
+      <div class="header-content">
+        <h1 class="text-h3">{{ getTranslation(recipe.name) }}</h1>
+        <div class="recipe-meta">
+          <q-icon name="access_time"/>
+          {{ recipe.duration }} {{ $t('recipe.minutes') }}
+          <q-icon name="restaurant"/>
+          {{ recipe.servings }} {{ $t('recipe.servings') }}
+          <q-icon name="whatshot"/>
+          {{ recipe.difficulty }}
         </div>
       </div>
     </div>
+
+    <div class="recipe-body">
+      <div class="recipe-sidebar">
+        <h2 class="text-h5 q-mb-md">{{recipe.ingredients?.length }} {{ $t('recipe.ingredients') }}</h2>
+        <IngredientsList :recipe="recipe"/>
+
+        <q-btn
+          class="full-width q-mt-md"
+          color="primary"
+          icon="shopping_cart"
+          :label="$t('shopping.addToList')"
+          @click="addToShoppingList"
+        />
+      </div>
+
+      <div class="recipe-main">
+        <h2 class="text-h5 q-mb-md">{{ $t('recipe.steps') }}</h2>
+        <StepsList :recipe="recipe"/>
+      </div>
+    </div>
+
+    <q-dialog v-model="showNutrition">
+      <q-card>
+        <q-card-section>
+          <div class="text-h6">{{ $t('recipe.nutrition_info') }}</div>
+        </q-card-section>
+        <q-card-section>
+          <!-- Add nutrition information here -->
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <q-page-sticky position="bottom-right" :offset="[18, 18]">
+      <q-fab color="secondary" icon="more_vert" direction="up">
+        <q-fab-action @click="shareRecipe" color="primary" icon="share"/>
+        <q-fab-action @click="printRecipe" color="grey" icon="print"/>
+        <q-fab-action @click="toggleFavorite" :color="isFavorite ? 'red' : 'grey-7'" icon="favorite"/>
+        <q-fab-action @click="showNutrition = true" color="green" icon="nutrition"/>
+      </q-fab>
+    </q-page-sticky>
   </q-page>
 </template>
 
@@ -67,49 +76,85 @@ const recipe = computed(() => {
   return r;
 });
 
-const splitterModel = ref(20);
+const showNutrition = ref(false);
+const isFavorite = ref(false);
+
+const shareRecipe = () => {
+  // Implement share functionality
+};
+
+const printRecipe = () => {
+  // Implement print functionality
+};
+
+const toggleFavorite = () => {
+  isFavorite.value = !isFavorite.value;
+  // Implement favorite toggling functionality
+};
+
+const addToShoppingList = () => {
+  // Implement add to shopping list functionality
+};
 </script>
 
 <style lang="scss">
 .recipe-experience {
-  .custom-caption {
-    text-align: center;
-    padding: 12px;
-    color: white;
-    background-color: rgba(0, 0, 0, .2);
-  }
+  .recipe-header {
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
 
-  .recipe-quick-info {
-    background: rgba(0, 0, 0, 0.8);
-  }
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
+    }
 
-  .recipe-content {
-    .q-splitter {
-      background: rgba(0, 0, 0, 0.8) !important;
+    .header-content {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+    }
+
+    .recipe-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 8px;
+
+      .q-icon {
+        font-size: 1.2em;
+      }
     }
   }
 
-  .q-list {
-    width: 100%;
-  }
+  .recipe-body {
+    display: flex;
+    padding: 24px;
+    gap: 24px;
 
-  .step-item {
-    transition: all 0.3s ease;
-
-    &.q-intersection--entered {
-      transform: scale(1);
-      opacity: 1;
-    }
-
-    &:not(.q-intersection--entered) {
-      transform: scale(0.95);
-      opacity: 0.7;
+    @media (max-width: 600px) {
+      flex-direction: column;
     }
   }
 
-  .step-description {
-    font-size: 1.1em;
-    line-height: 1.5;
+  .recipe-sidebar {
+    flex: 1;
+    max-width: 300px;
+
+    @media (max-width: 600px) {
+      max-width: none;
+    }
+  }
+
+  .recipe-main {
+    flex: 2;
   }
 }
 </style>

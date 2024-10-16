@@ -61,7 +61,12 @@ export default {
     error: 'Ups! Da ist etwas schiefgelaufen. Möchtest du es nochmal versuchen?',
   },
   recipe: {
+    servings: 'Portionen',
+    minutes: 'Minuten',
     ingredients: 'Zutaten',
     steps: 'So wird\'s gemacht',
+  },
+  shopping: {
+    addToList: 'Zur Einkaufsliste hinzufügen',
   },
 };
