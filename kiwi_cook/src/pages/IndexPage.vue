@@ -71,7 +71,7 @@
                       v-for="(option, optionIndex) in message.content"
                       :key="optionIndex"
                       :label="option"
-                      :disable="message.id !== (currentId - 1)"
+                      :disable="messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
                       class="option-button"
                       unelevated
                       rounded
@@ -89,21 +89,23 @@
                       :min="message.content.min"
                       :max="message.content.max"
                       :step="message.content.step"
-                      :disable="message.id !== (currentId - 1)"
+                      :disable="messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
                       label
                       color="primary"
                       aria-label="Slider"
                     />
                     <div class="row items-center justify-between q-mt-sm">
                       <div class="text-body2 text-weight-medium">
-                        {{ message.content.value }} {{ message.content.unit }}
+                        {{ message.content.value }} {{
+                          typeof message.content.unit === 'function' ? message.content.unit(message.content.value) : message.content.unit
+                        }}
                       </div>
                       <q-btn
                         color="primary"
                         icon="send"
                         round
                         dense
-                        v-if="message.id === (currentId - 1)"
+                        v-if="messages.slice(messageIndex + 1).every((m) => m.sender === message.sender)"
                         @click="handleSliderInput(message.content.value)"
                       />
                     </div>
@@ -137,7 +139,7 @@ const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
 const {
-  messages, isTyping, currentId,
+  messages, isTyping,
 } = storeToRefs(chat);
 const { handleSliderInput, handleMessage } = chat;
 

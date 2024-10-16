@@ -34,7 +34,6 @@ export const useRecipeStore = defineStore('recipe', () => {
     dinner: boolean;
     days: number;
     ingredients: string[];
-
   }) {
     const weekplan: Recipe[] = [];
     const {

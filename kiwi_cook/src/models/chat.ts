@@ -20,7 +20,7 @@ interface SliderOptions {
   min: number;
   max: number;
   step: number;
-  unit: string;
+  unit: string | ((input: number) => string);
 }
 
 export interface ChatConfig {

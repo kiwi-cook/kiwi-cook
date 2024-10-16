@@ -132,7 +132,17 @@ export const useChatStore = defineStore('chat', () => {
       options: ts(['recipeType.quick', 'recipeType.healthy', 'recipeType.comfort', 'recipeType.gourmet', 'recipeType.budget']),
       nextState: 'askDietaryRestrictions',
       updatePreference: (input: string | number) => {
-        userPreferences.value.recipeType = input as string;
+        const getRecipeTypeMappings = () => ({
+          [t('recipeType.quick')]: 'quick',
+          [t('recipeType.healthy')]: 'healthy',
+          [t('recipeType.comfort')]: 'comfort',
+          [t('recipeType.gourmet')]: 'gourmet',
+          [t('recipeType.budget')]: 'budget',
+        });
+
+        const mapOptionToType = getRecipeTypeMappings();
+        userPreferences.value.recipeType = mapOptionToType[input];
+        trackEvent('recipe_type_selected', { recipeType: userPreferences.value.recipeType });
       },
     },
     askDietaryRestrictions: {
@@ -187,8 +197,14 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     generatePlan: {
-      message: t('chat.weeklyPlanOptions'),
-      options: ['3', '5', '7'],
+      message: t('chat.weekPlan.askDays'),
+      type: 'slider',
+      sliderOptions: {
+        min: 1,
+        max: 14,
+        step: 1,
+        unit: (input: number) => (input === 1 ? t('chat.days', 1) : t('chat.days', 2)),
+      },
       nextState: 'generatePlan',
       action: generateWeekPlan,
     },
