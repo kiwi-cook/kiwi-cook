@@ -23,14 +23,43 @@ export const useRecipeStore = defineStore('recipe', () => {
   const searchByPreferences = (preferences: UserPreferences) => recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences);
 
   // Fetch using axios
-  const fetchRecipes = () => api.get('/recipe/').then((r) => {
-    recipes.value = r.data.response;
-  });
+  const fetchRecipes = () => api.get('/recipe/')
+    .then((r) => {
+      recipes.value = r.data.response;
+    });
+
+  function generateWeekplan(options: {
+    breakfast: boolean;
+    lunch: boolean;
+    dinner: boolean;
+    days: number;
+    ingredients: string[];
+
+  }) {
+    const weekplan: Recipe[] = [];
+    const {
+      breakfast, lunch, dinner, days,
+    } = options;
+    for (let i = 0; i < days; i++) {
+      if (breakfast) {
+        weekplan.push(getRandomRecipe());
+      }
+      if (lunch) {
+        weekplan.push(getRandomRecipe());
+      }
+      if (dinner) {
+        weekplan.push(getRandomRecipe());
+      }
+    }
+    return weekplan;
+  }
+
   fetchRecipes();
 
   return {
     recipes,
     recipeMap,
+    generateWeekplan,
     fetchRecipes,
     searchByQuery,
     searchByPreferences,

@@ -20,6 +20,7 @@ export const useChatStore = defineStore('chat', () => {
 
   // State
   const messages = ref<Message[]>([]);
+  const lastMessage = computed(() => messages.value[messages.value.length - 1] || {});
   const userPreferences = ref<UserPreferences>({
     servings: 2,
     recipeType: '',
@@ -52,7 +53,7 @@ export const useChatStore = defineStore('chat', () => {
     const newMessage: Message = {
       id: currentId.value,
       sender,
-      sent: sender === 'You',
+      sent: sender === t('chat.you'),
       timestamp: toTime(new Date()),
       ...message,
     } as Message;
@@ -149,7 +150,7 @@ export const useChatStore = defineStore('chat', () => {
         min: 15,
         max: 120,
         step: 15,
-        unit: 'minutes',
+        unit: t('recipe.minutes'),
       },
       nextState: 'askCuisine',
       updatePreference: (input: string | number) => {
@@ -243,7 +244,7 @@ export const useChatStore = defineStore('chat', () => {
       currentConfig.updatePreference(input);
     }
 
-    await addMessage({ type: 'text', content: input.toString() }, 'You');
+    await addMessage({ type: 'text', content: input.toString() }, t('chat.you'));
 
     const nextState = typeof currentConfig.nextState === 'function'
       ? currentConfig.nextState(input.toString())
@@ -284,6 +285,7 @@ export const useChatStore = defineStore('chat', () => {
 
   return {
     messages,
+    lastMessage,
     userPreferences,
     currentState,
     isTyping,

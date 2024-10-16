@@ -8,23 +8,11 @@
             <div class="text-subtitle2" :class="isDark ? 'text-secondary' : 'text-black'">Reclaim your kitchen</div>
           </div>
           <div class="col-auto q-ml-md">
-            <q-avatar size="48px" class="bg-white rounded-borders">
+            <q-avatar size="48px" class="rounded-borders" color="white">
               <q-img src="/icons/icon-500x500.png" width="36px" height="36px"/>
             </q-avatar>
           </div>
         </div>
-
-        <q-btn
-          round
-          size="md"
-          :color="isDark ? 'secondary' : 'white'"
-          :text-color="isDark ? 'dark' : 'primary'"
-          :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
-          class="q-ml-md mode-toggle"
-          @click="toggleDarkMode"
-        >
-          <q-tooltip>{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</q-tooltip>
-        </q-btn>
       </q-toolbar>
     </q-header>
 
@@ -40,6 +28,17 @@
       <q-toolbar>
         <q-btn flat :text-color="isDark ? 'white' : 'dark'" icon="mdi-github" @click="openGithub">
           <q-tooltip>Visit our GitHub</q-tooltip>
+        </q-btn>
+        <q-space/>
+        <q-btn
+          flat
+          :color="isDark ? 'secondary' : 'white'"
+          :text-color="isDark ? 'primary' : 'dark'"
+          :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
+          class="q-ml-md mode-toggle"
+          @click="toggleDarkMode"
+        >
+          <q-tooltip>{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</q-tooltip>
         </q-btn>
       </q-toolbar>
     </q-footer>
@@ -73,7 +72,7 @@ body {
 }
 
 .rounded-borders {
-  border-radius: 12px;
+  border-radius: 24px;
 }
 
 .mode-toggle {

@@ -1,5 +1,6 @@
 export default {
   chat: {
+    you: 'Du',
     welcome: 'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochhelfer. Bereit für leckere Entdeckungen?',
     optionFindRecipe: 'Rezepte finden',
     optionGenerateWeeklyPlan: 'Wochenplan erstellen',

@@ -4,15 +4,21 @@
       <q-scroll-area class="chat-scroll" ref="scrollArea">
         <div class="chat-messages-wrapper">
           <transition-group name="fade">
-            <div v-for="message in messages" :key="message.id" class="q-mb-md">
+            <div v-for="(message, messageIndex) in messages" :key="message.id"
+                 :class="['fade-enter-active', {'q-mt-md': messages[messageIndex - 1]?.sender !== message.sender}]">
               <q-chat-message
                 :bg-color="message.sent ? 'secondary' : 'transparent'"
-                :name="message.sender"
+                :name="messages[messageIndex - 1]?.sender !== message.sender ? message.sender : ''"
                 :sent="message.sent"
                 :stamp="message.timestamp"
                 :text-color="message.sent ? 'white' : (isDark ? 'white' : 'grey-9')"
                 class="chat-bubble"
-                :class="{ 'kiwi-bubble': !message.sent, 'user-bubble': message.sent }"
+                :class="{
+                  'kiwi-bubble': !message.sent,
+                  'user-bubble': message.sent,
+                  'next-message-same': messages[messageIndex + 1]?.sender === message.sender,
+                  'last-message-same': messages[messageIndex - 1]?.sender === message.sender && messageIndex !== 0,
+                }"
               >
                 <template v-if="message.type === 'text'">
                   <div v-html="message.content" class="chat-text"/>
@@ -119,8 +125,7 @@
 
 <script setup lang="ts">
 import {
-  capitalize,
-  computed, nextTick, ref, watch,
+  capitalize, computed, nextTick, ref, watch,
 } from 'vue';
 import { QScrollArea, useQuasar } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
@@ -131,7 +136,9 @@ const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
-const { messages, isTyping, currentId } = storeToRefs(chat);
+const {
+  messages, isTyping, currentId,
+} = storeToRefs(chat);
 const { handleSliderInput, handleMessage } = chat;
 
 const scrollArea = ref<QScrollArea | null>(null);
@@ -220,6 +227,21 @@ watch(() => messages.value.length, scrollToBottom, { immediate: true });
   background-color: var(--q-primary) !important;
   border-bottom-right-radius: 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.next-message-same {
+  border-top-left-radius: 0;
+  margin-bottom: 4px;
+
+  .q-message-text {
+    border-bottom-left-radius: 0;
+  }
+}
+
+.last-message-same {
+  .q-message-text {
+    border-top-left-radius: 0;
+  }
 }
 
 .recipe-scroll-container {
