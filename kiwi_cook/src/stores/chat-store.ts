@@ -69,11 +69,11 @@ export const useChatStore = defineStore('chat', () => {
       currentRecipes.value = recipes;
 
       if (recipes.length === 0) {
-        await addMessage({ type: 'text', content: t('search.noResults') });
-        currentState.value = 'resetChat';
-      } else {
-        await addMessage({ type: 'recipe', content: recipes });
+        currentState.value = 'noResults';
+        processCurrentState();
+        return;
       }
+      await addMessage({ type: 'recipe', content: recipes });
 
       trackEvent('recipes_searched', { count: recipes.length });
     } catch (error) {
@@ -180,6 +180,16 @@ export const useChatStore = defineStore('chat', () => {
       nextState: 'displayingResults',
       action: searchRecipes,
     },
+    noResults: {
+      message: t('search.noResults'),
+      options: ts(['search.moreOptions', 'search.newSearch']),
+      nextState: (input: string | number) => {
+        if (input === 'search.moreOptions') {
+          return 'askServings';
+        }
+        return 'resetChat';
+      },
+    },
     displayingResults: {
       message: t('search.results'),
       options: ts(['search.moreOptions', 'search.startCooking', 'search.newSearch']),
@@ -209,6 +219,7 @@ export const useChatStore = defineStore('chat', () => {
       action: generateWeekPlan,
     },
     resetChat: {
+      message: t('chat.reset'),
       action: resetChat,
       nextState: 'start',
     },
@@ -262,11 +273,13 @@ export const useChatStore = defineStore('chat', () => {
 
     await addMessage({ type: 'text', content: input.toString() }, t('chat.you'));
 
-    const nextState = typeof currentConfig.nextState === 'function'
-      ? currentConfig.nextState(input.toString())
-      : currentConfig.nextState;
+    if (currentConfig.nextState) {
+      const nextState = typeof currentConfig.nextState === 'function'
+        ? currentConfig.nextState(input.toString())
+        : currentConfig.nextState;
 
-    currentState.value = nextState;
+      currentState.value = nextState;
+    }
     await processCurrentState();
   }
 

@@ -12,6 +12,7 @@ export type ChatState =
   | 'askCuisine'
   | 'searching'
   | 'displayingResults'
+  | 'noResults'
   | 'displayMoreResults'
   | 'resetChat'
   | 'startingOver';
@@ -29,7 +30,7 @@ export interface ChatConfig {
     options?: string[];
     type?: 'slider';
     sliderOptions?: SliderOptions;
-    nextState: ChatState | ((input: string) => ChatState);
+    nextState?: ChatState | ((input: string) => ChatState);
     updatePreference?: (input: string | number) => void;
     action?: () => Promise<void>;
   };
