@@ -46,5 +46,4 @@ def find_ingredients_in_image(contents: bytes) -> list[str] | None:
         ingredients_list = eval(ingredients_text)
         return ingredients_list
     except Exception as e:
-        print(e)
         return None

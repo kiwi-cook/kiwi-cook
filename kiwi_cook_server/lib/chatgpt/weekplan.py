@@ -61,5 +61,4 @@ def generate_weekplan_from_ingredients_image(
         recipes_list = recipes_text.split(",")
         return recipes_list
     except Exception as e:
-        print(e)
         return []
