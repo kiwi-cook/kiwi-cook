@@ -7,14 +7,14 @@ from lib.robots import check_robots
 from lib.pipeline.recipe.pipeline import PipelineElement
 
 
-class RecipeCrawler(PipelineElement):
+class LoadHtml(PipelineElement):
     def __init__(
         self,
         max_size=1000,
         max_same_domain_concurrent=5,
         ignore_domains=None,
     ):
-        super().__init__("Crawler")
+        super().__init__("LoadHtml")
 
         self.user_agents = [
             "KiwiCook Web Crawler Project (https://github.com/kiwi-cook/kiwi-cook",

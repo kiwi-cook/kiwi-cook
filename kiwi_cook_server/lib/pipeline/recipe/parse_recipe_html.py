@@ -20,9 +20,9 @@ from models.recipe import (
 from lib.pipeline.recipe.pipeline import PipelineElement
 
 
-class RecipeParser(PipelineElement):
+class ParseRecipeHtml(PipelineElement):
     def __init__(self, mongo_client):
-        super().__init__("Parser")
+        super().__init__("ParseRecipeHtml")
         self.mongo_client = mongo_client
 
     async def process_task(self, url: str, html: str):

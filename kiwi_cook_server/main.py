@@ -10,9 +10,13 @@ def main():
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description=f"KiwiCook CLI")
     parser.add_argument(
-        "-f",
-        "--file",
+        "--url",
         help="Run the recipe pipeline with the URLs in the specified file",
+        required=False,
+    )
+    parser.add_argument(
+        "--json",
+        help="Run the recipe pipeline with a path to a folder containing JSON files",
         required=False,
     )
     parser.add_argument(
@@ -24,12 +28,15 @@ def main():
 
         if args.server:
             from server.app import start_server
-
             start_server()
-        elif args.file:
-            from lib.pipeline.recipe import run_pipeline_from_file
+        elif args.url:
+            from lib.pipeline.recipe import run_html_pipeline_from_path
 
-            asyncio.run(run_pipeline_from_file(args.file))
+            asyncio.run(run_html_pipeline_from_path(args.file))
+        elif args.json:
+            from lib.pipeline.recipe import run_json_pipeline
+
+            asyncio.run(run_json_pipeline(args.json))
         else:
             parser.print_help()
 

@@ -9,10 +9,10 @@ from starlette import status
 from typing_extensions import Annotated
 
 from lib.database.mongodb import get_database
+from lib.pipeline.recipe import run_html_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
 from models.user import User, get_active_user
-from lib.pipeline.recipe import run_pipeline
 
 router = APIRouter(prefix="/recipe", tags=["recipes"])
 
@@ -80,7 +80,7 @@ async def add_recipes(
         )
 
     try:
-        processed_urls = await run_pipeline(valid_urls)
+        processed_urls = await run_html_pipeline(valid_urls)
         return {
             "error": False,
             "response": f"{len(processed_urls)} recipes added to the database.",

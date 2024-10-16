@@ -4,7 +4,7 @@ import pickle
 from lib.pipeline.recipe.pipeline import PipelineElement
 
 
-class HtmlRecipeSaver(PipelineElement):
+class ExportHtml(PipelineElement):
     def __init__(self, mongo_client):
         super().__init__("Saver")
         self.mongo_client = mongo_client
@@ -24,7 +24,7 @@ class HtmlRecipeSaver(PipelineElement):
         return url, html
 
 
-class HtmlRecipeLoader(PipelineElement):
+class ImportHtml(PipelineElement):
     def __init__(self, mongo_client):
         super().__init__("Loader")
         self.mongo_client = mongo_client

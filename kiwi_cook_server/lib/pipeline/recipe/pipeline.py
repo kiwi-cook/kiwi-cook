@@ -57,8 +57,11 @@ class PipelineElement:
                     await self.output_queue.put(None)
                 break
 
-            print(f"{self.name} processing task")
-            result = await self.process_task(*task)
+            # Check if the task is a tuple
+            if isinstance(task, tuple):
+                result = await self.process_task(*task)
+            else:
+                result = await self.process_task(task)
             if self.output_queue and result is not None:
                 await self.output_queue.put(result)
             print(f"{self.name} processed task")
