@@ -1,0 +1,16 @@
+name: Test Client Builds
+on:
+  push:
+    paths:
+      - kiwi_cook/**
+  pull_request:
+    paths:
+      - kiwi_cook/**
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: oven-sh/setup-bun@v2
+    - run: cd ./client && bun install
+    - run: cd ./client && bun run build --if-present

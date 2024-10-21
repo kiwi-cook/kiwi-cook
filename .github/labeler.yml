@@ -6,8 +6,7 @@ Server:
 
 Client:
 - all:
-  - 'taste_buddy/**/*'
-  - 'taste_buddy_ionic/**/*'
+  - 'kiwi_cook/**/*'
 
 Infra:
 - all:
