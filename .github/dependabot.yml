@@ -12,9 +12,9 @@ updates:
       interval: "daily"
     assignees: ["am9zZWY"]
 
-  # Updates for dart packages
-  - package-ecosystem: "pub"
-    directory: "/taste_buddy"
+  # Updates for npm packages
+  - package-ecosystem: "npm"
+    directory: "/kiwi_cook"
     schedule:
       interval: "daily"
     assignees: ["am9zZWY"]
