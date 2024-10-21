@@ -1,7 +1,0 @@
-{
-  "name": "Taste-Buddy",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "vue"
-}
