@@ -4,11 +4,10 @@ from logging.config import dictConfig
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-from lib.utils import calculate_directory_hash
 from models.api import APIResponse
 
 # Configure logging
@@ -72,7 +71,7 @@ def setup_cors(app: FastAPI) -> None:
         allow_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
     else:
         origins = ["https://kiwi-cook.github.io"]
-        allow_origin_regex = r"https://.*\.kiwi-cook\.uk"
+        allow_origin_regex = r"^https?://kiwi-cook\.github\.io$"
 
     app.add_middleware(
         CORSMiddleware,
@@ -107,16 +106,6 @@ def setup_routes(app: FastAPI) -> None:
     )
     def health_check():
         return {"error": False, "response": "OK"}
-
-    @app.get("/hash", response_description="Last commit hash")
-    async def get_last_commit():
-        try:
-            hash_value = calculate_directory_hash()
-            return {"directory_hash": hash_value}
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Failed to calculate directory hash: {str(e)}"
-            )
 
 
 def setup_trusted_host(app: FastAPI) -> None:
