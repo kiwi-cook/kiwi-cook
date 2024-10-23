@@ -70,16 +70,27 @@ def setup_cors(app: FastAPI) -> None:
         ]
         allow_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
     else:
-        origins = ["https://kiwi-cook.github.io"]
-        allow_origin_regex = r"^https?://kiwi-cook\.github\.io$"
+        origins = [
+            "https://kiwi-cook.github.io",
+            "https://taste-buddy.uk",
+        ]
+        allow_origin_regex = r"^https?://(kiwi-cook\.github\.io|taste-buddy\.uk)$"
 
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
         allow_origin_regex=allow_origin_regex,
         allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Authorization", "Content-Type"],
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "Origin",
+            "Accept",
+            "X-Requested-With",
+        ],
+        expose_headers=["Content-Type"],
+        max_age=600,
     )
 
 
@@ -111,7 +122,16 @@ def setup_routes(app: FastAPI) -> None:
 def setup_trusted_host(app: FastAPI) -> None:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["kiwi-cook.uk", "localhost", "127.0.0.1", "0.0.0.0"],
+        allowed_hosts=[
+            "kiwi-cook.uk",
+            "kiwi-cook:8000",
+            "localhost",
+            "localhost:8000",
+            "127.0.0.1",
+            "127.0.0.1:8000",
+            "0.0.0.0",
+            "0.0.0.0:8000",
+        ],
     )
 
 
