@@ -27,7 +27,7 @@ pint = "^0.24.3"
 python-multipart = "^0.0.12"
 argon2-cffi = "^23.1.0"
 pyjwt = "^2.9.0"
-rapidfuzz = "^3.9.7"
+rapidfuzz = "^3.10.1"
 pytest = "^8.3.3"
 
 [tool.poetry.group.dev.dependencies]
