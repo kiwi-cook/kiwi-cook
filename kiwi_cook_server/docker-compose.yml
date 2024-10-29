@@ -10,8 +10,6 @@ services:
       - .env
     ports:
       - "8000:8000"
-    depends_on:
-      - mongodb
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "8000" ]
       interval: 30s

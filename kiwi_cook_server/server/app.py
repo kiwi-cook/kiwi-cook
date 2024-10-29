@@ -4,7 +4,7 @@ from logging.config import dictConfig
 
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
@@ -93,6 +93,14 @@ def setup_cors(app: FastAPI) -> None:
         max_age=600,
     )
 
+def setup_log_request_headers(app: FastAPI) -> None:
+    async def log_request_headers(request: Request, call_next):
+        logger.info(f"Request headers: {request.headers}")
+        response = await call_next(request)
+        return response
+
+    app.middleware("http")(log_request_headers)
+
 
 def setup_routes(app: FastAPI) -> None:
     from server.routers import user, chatgpt, recipe
@@ -139,6 +147,7 @@ app = setup_fastapi()
 setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
+setup_log_request_headers(app)
 
 try:
     from lib.database.mongodb import get_database
