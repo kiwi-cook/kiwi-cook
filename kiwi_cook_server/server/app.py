@@ -132,6 +132,8 @@ def setup_trusted_host(app: FastAPI) -> None:
         TrustedHostMiddleware,
         allowed_hosts=[
             "kiwi-cook.uk",
+            "taste-buddy.uk",
+            "*.taste-buddy.uk",
             "kiwi-cook:8000",
             "localhost",
             "localhost:8000",
