@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable @typescript-eslint/no-shadow */
 /**
  * Thanks to @xenova for the transformers package
  *

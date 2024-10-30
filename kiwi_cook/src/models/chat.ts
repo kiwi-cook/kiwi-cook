@@ -4,13 +4,14 @@ export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOption
 
 export type ChatState =
   | 'start'
-  | 'generatePlan'
   | 'askServings'
   | 'askRecipeType'
   | 'askDietaryRestrictions'
   | 'askCookingTime'
   | 'askCuisine'
+  | 'askDaysWeekPlan'
   | 'searching'
+  | 'generatePlan'
   | 'displayingResults'
   | 'noResults'
   | 'displayMoreResults'

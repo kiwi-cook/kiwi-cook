@@ -82,31 +82,33 @@
                 </template>
 
                 <template v-else-if="message.type === 'slider'">
-                  <div class="slider-container q-pa-md">
+                  <div class="slider-container q-pa-md rounded-borders">
                     <div class="text-subtitle1 q-mb-sm">{{ message.content.label }}</div>
+
                     <q-slider
                       v-model="message.content.value"
                       :min="message.content.min"
                       :max="message.content.max"
                       :step="message.content.step"
                       :disable="messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
-                      label
+                      :label-always="!messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
+                      :label-value="message.content.value + ' ' +
+                      (typeof message.content.unit === 'function' ? message.content.unit(message.content.value) : message.content.unit)"
                       color="primary"
                       aria-label="Slider"
+                      @input="onSliderChange"
+                      class="slider-enhanced"
                     />
+
                     <div class="row items-center justify-between q-mt-sm">
-                      <div class="text-body2 text-weight-medium">
-                        {{ message.content.value }} {{
-                          typeof message.content.unit === 'function' ? message.content.unit(message.content.value) : message.content.unit
-                        }}
-                      </div>
                       <q-btn
                         color="primary"
                         icon="send"
                         round
                         dense
+                        class="send-button shadow-1"
                         v-if="messages.slice(messageIndex + 1).every((m) => m.sender === message.sender)"
-                        @click="handleSliderInput(message.content.value)"
+                        @click="handleMessage(message.content.value)"
                       />
                     </div>
                   </div>
@@ -129,7 +131,7 @@
 import {
   capitalize, computed, nextTick, ref, watch,
 } from 'vue';
-import { QScrollArea, useQuasar } from 'quasar';
+import { QScrollArea, QSlider, useQuasar } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
 import { getTranslation } from 'src/models/recipe';
@@ -141,7 +143,7 @@ const chat = useChatStore();
 const {
   messages, isTyping,
 } = storeToRefs(chat);
-const { handleSliderInput, handleMessage } = chat;
+const { handleMessage } = chat;
 
 const scrollArea = ref<QScrollArea | null>(null);
 
@@ -182,6 +184,14 @@ const animateScroll = (start: number, end: number, duration: number) => {
 
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 watch(() => messages.value.length, scrollToBottom, { immediate: true });
+
+// Slider
+function onSliderChange() {
+  // Check if the vibration API is supported
+  if (navigator.vibrate) {
+    navigator.vibrate(50); // Vibrate for 50 milliseconds
+  }
+}
 </script>
 
 <style lang="scss">

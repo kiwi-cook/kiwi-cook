@@ -26,6 +26,15 @@ const IngredientSchema = z.object({
 
 type Ingredient = z.infer<typeof IngredientSchema>;
 
+// UserIngredient
+const UserIngredientSchema = z.object({
+  ingredient: IngredientSchema,
+  quantity: z.number(),
+  expiryDate: z.date().optional(),
+});
+
+type UserIngredient = z.infer<typeof UserIngredientSchema>;
+
 // RecipeIngredient
 const RecipeIngredientSchema = z.object({
   ingredient: IngredientSchema,
@@ -141,6 +150,7 @@ function createRecipeStep(
 export {
   MultiLanguageFieldSchema,
   IngredientSchema,
+  UserIngredientSchema,
   RecipeIngredientSchema,
   RecipeStepSchema,
   RecipeAuthorSchema,
@@ -152,6 +162,7 @@ export {
 export type {
   MultiLanguageField,
   Ingredient,
+  UserIngredient,
   RecipeIngredient,
   RecipeStep,
   RecipeAuthor,

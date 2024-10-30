@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue';
-import SummarizeWorker from './LTf.summarize.worker.js?worker';
-import RankWorker from './LTf.rank.worker.js?worker';
+import SummarizeWorker from './llm.summarize.worker.js?worker';
+import RankWorker from './llm.rank.worker.js?worker';
 
 type Task = 'summarize' | 'rank'
 type WorkerStatus = 'ready' | 'progress' | 'finished' | 'error'
@@ -10,12 +10,12 @@ type WorkerStatus = 'ready' | 'progress' | 'finished' | 'error'
  * @Example
  * ```
  * const worker = useLTf('summarize')
- * worker.startTask(['Transformers are a type of neural network. They are used for natural language processing.'])
+ * worker.exec(['Transformers are a type of neural network. They are used for natural language processing.'])
  * const summary = computed(() => worker.data)
  * ```
  * @param task The task to initialize the worker with (optional)
  */
-export default function (task?: Task) {
+export function useLlm(task?: Task) {
   /**
    * The id of the worker
    */
@@ -73,8 +73,8 @@ export default function (task?: Task) {
    * ...
    * ```
    *
-   * @param workerTask The task to initialize the worker with
    * @returns The id of the worker
+   * @param newTask
    */
   function createWorker(newTask: Task): string {
     const name = `${newTask}-${Math.random().toString(36).substring(7)}`;
@@ -170,11 +170,11 @@ export default function (task?: Task) {
 
   /**
    * Start a task with the worker
-   * @param data
+   * @param taskData
    */
-  function startTask(data: unknown) {
+  function exec(taskData: unknown) {
     if (worker.value !== null && channel.value !== null) {
-      worker.value.postMessage({ type: 'data', data });
+      worker.value.postMessage({ type: 'data', data: taskData });
       console.debug(`Started worker with id ${workerId.value}`);
     } else {
       console.error(`Worker with id ${workerId.value} not found`);
@@ -183,7 +183,7 @@ export default function (task?: Task) {
 
   return {
     createWorker,
-    startTask,
+    exec,
     removeWorker,
     downloads,
     downloadProgress,

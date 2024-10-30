@@ -1,3 +1,5 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable @typescript-eslint/no-shadow */
 /**
  * Thanks to the Jina team for providing the code for the Local Transformers text classification pipeline
  * Thanks to @xenova for the transformers package

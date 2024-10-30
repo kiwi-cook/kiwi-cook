@@ -7,13 +7,16 @@ import { useAnalytics } from 'src/composables/useAnalytics';
 import { toTime } from 'src/utils/time';
 import {
   ChatConfig, ChatState, Message, SliderMessage,
-} from 'src/models/chat.ts';
+} from 'src/models/chat';
 import { Recipe } from 'src/models/recipe.ts';
-import { UserPreferences } from 'src/models/user.ts';
+import { UserPreferences } from 'src/models/user';
 import { ts } from 'src/utils/i18n.ts';
+import { useWeekplan } from 'src/composables/useWeekplan';
+import { Meal, MealPlan } from 'src/models/mealplan';
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n();
+  const weekplan = useWeekplan();
   const recipeStore = useRecipeStore();
   const { showNotification } = useNotification();
   const { trackEvent } = useAnalytics();
@@ -25,10 +28,12 @@ export const useChatStore = defineStore('chat', () => {
     servings: 2,
     recipeType: '',
     dietaryRestrictions: [],
-    cookingTime: 30,
+    cookingTime: 15,
     skillLevel: 'Beginner',
     cuisine: '',
     tags: [],
+    weekplanDays: 7,
+    ingredients: [],
   });
   const currentState = ref<ChatState>('start');
   const isTyping = ref(false);
@@ -87,13 +92,27 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   const generateWeekPlan = async () => {
-    // Implementation for generating a weekly plan
-    // This is a placeholder and should be implemented based on your specific requirements
-    await addMessage({ type: 'text', content: t('chat.weekPlanGenerated') });
-    currentState.value = 'start';
+    const generatedWeekplan = weekplan.generateWeekPlan(userPreferences.value.weekplanDays, userPreferences.value.ingredients);
+
+    generatedWeekplan.forEach((plan: MealPlan) => {
+      const recipes = plan.meals.map((meal: Meal) => meal.recipe);
+      addMessage({ type: 'recipe', content: recipes });
+    });
   };
 
-  // Chat configuration
+  /**
+   * Chat and state configuration
+   *
+   * States for recipe searching:
+   * 1. start: Initial state
+   * 2. askServings: Ask user for servings
+   * 3. askRecipeType: Ask user for recipe type
+   * 4. askDietaryRestrictions: Ask user for dietary restrictions
+   * 5. askCookingTime: Ask user for cooking time
+   * 6. askCuisine: Ask user for cuisine
+   * 7. searching: Searching for recipes
+   *
+   */
   const chatConfig: ChatConfig = {
     start: {
       message: t('chat.welcome'),
@@ -103,7 +122,7 @@ export const useChatStore = defineStore('chat', () => {
           case t('chat.optionFindRecipe'):
             return 'askServings';
           case t('chat.optionGenerateWeeklyPlan'):
-            return 'generatePlan';
+            return 'askDaysWeekPlan';
           default:
             return 'start';
         }
@@ -157,12 +176,12 @@ export const useChatStore = defineStore('chat', () => {
       message: t('chat.cookingTime'),
       type: 'slider',
       sliderOptions: {
-        min: 15,
+        min: 10,
         max: 120,
-        step: 15,
+        step: 10,
         unit: t('recipe.minutes'),
       },
-      nextState: 'askCuisine',
+      nextState: 'searching',
       updatePreference: (input: string | number) => {
         userPreferences.value.cookingTime = input as number;
       },
@@ -206,7 +225,7 @@ export const useChatStore = defineStore('chat', () => {
         return 'displayingResults';
       },
     },
-    generatePlan: {
+    askDaysWeekPlan: {
       message: t('chat.weekPlan.askDays'),
       type: 'slider',
       sliderOptions: {
@@ -216,6 +235,12 @@ export const useChatStore = defineStore('chat', () => {
         unit: (input: number) => (input === 1 ? t('chat.days', 1) : t('chat.days', 2)),
       },
       nextState: 'generatePlan',
+      updatePreference: (input: string | number) => {
+        userPreferences.value.weekplanDays = input as number;
+      },
+    },
+    generatePlan: {
+      message: () => t('search.searching', { preferences: preferencesToSummary(userPreferences.value) }),
       action: generateWeekPlan,
     },
     resetChat: {
@@ -252,7 +277,7 @@ export const useChatStore = defineStore('chat', () => {
         type: 'slider',
         content: {
           label: currentConfig.message,
-          value: 30,
+          value: Math.round(currentConfig?.sliderOptions ? (currentConfig.sliderOptions.max - currentConfig.sliderOptions.min) / 2 : 0),
           ...currentConfig.sliderOptions,
         },
       } as SliderMessage);
@@ -293,6 +318,8 @@ export const useChatStore = defineStore('chat', () => {
       skillLevel: 'Beginner',
       cuisine: '',
       tags: [],
+      weekplanDays: 7,
+      ingredients: [],
     };
     currentRecipes.value = [];
     await addMessage({ type: 'text', content: t('chat.reset') });
@@ -300,11 +327,6 @@ export const useChatStore = defineStore('chat', () => {
     await processCurrentState();
     trackEvent('chat_reset');
   }
-
-  const handleSliderInput = async (value: number) => {
-    userPreferences.value.cookingTime = value;
-    await handleMessage(value);
-  };
 
   // Initialization
   const init = async () => processCurrentState();
@@ -322,7 +344,6 @@ export const useChatStore = defineStore('chat', () => {
     newInput,
     currentId,
     handleMessage,
-    handleSliderInput,
     resetChat,
   };
 });

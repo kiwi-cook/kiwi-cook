@@ -19,6 +19,8 @@ export interface UserPreferences {
   cookingTime: number,
   skillLevel: string,
   cuisine: string,
+  weekplanDays: number,
+  ingredients: string[],
 }
 
 type User = z.infer<typeof UserSchema>;
