@@ -1,11 +1,17 @@
 import { defineStore } from 'pinia';
-import { Recipe } from 'src/models/recipe.ts';
+import { getTranslation, Recipe } from 'src/models/recipe.ts';
 import { computed, ref } from 'vue';
 import { api } from 'boot/axios.ts';
 import { useRecipeSearch } from 'src/composables/useSearch.ts';
 import { UserPreferences } from 'src/models/user.ts';
+import { useAnalytics } from 'src/composables/useAnalytics.ts';
+import { useLlm } from 'src/composables/llm/useLlm.ts';
 
 export const useRecipeStore = defineStore('recipe', () => {
+  const { trackEvent } = useAnalytics();
+  const summarizer = useLlm('summarize');
+
+  let fetchPromise: Promise<void> | null = null;
   const recipes = ref<Recipe[]>([]);
 
   const recipeMap = computed(() => {
@@ -22,35 +28,45 @@ export const useRecipeStore = defineStore('recipe', () => {
   const searchByQuery = (query: string) => recipeSearch.searchRecipesByQuery(recipeMap.value, query);
   const searchByPreferences = (preferences: UserPreferences) => recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences);
 
-  // Fetch using axios
-  const fetchRecipes = () => api.get('/recipe/')
-    .then((r) => {
-      recipes.value = r.data.response;
-    });
-
-  function generateWeekplan(options: {
-    breakfast: boolean;
-    lunch: boolean;
-    dinner: boolean;
-    days: number;
-    ingredients: string[];
-  }) {
-    const weekplan: Recipe[] = [];
-    const {
-      breakfast, lunch, dinner, days,
-    } = options;
-    for (let i = 0; i < days; i++) {
-      if (breakfast) {
-        weekplan.push(getRandomRecipe());
-      }
-      if (lunch) {
-        weekplan.push(getRandomRecipe());
-      }
-      if (dinner) {
-        weekplan.push(getRandomRecipe());
-      }
+  function fetchRecipes() {
+    // Check if a request is already in progress
+    if (fetchPromise) {
+      trackEvent('fetchRecipes', { status: 'inProgress' });
+      return fetchPromise ?? Promise.resolve();
     }
-    return weekplan;
+
+    fetchPromise = api.get('/recipe/')
+      .then((r) => {
+        recipes.value = r.data.response;
+      })
+      .catch((err) => {
+        trackEvent('fetchRecipes', { status: 'error', error: err });
+      })
+      .finally(() => {
+        fetchPromise = null;
+      });
+
+    return fetchPromise;
+  }
+
+  function summarizeRecipe(recipeId: string) {
+    trackEvent('summarizeRecipe', { recipeId });
+    const recipe = recipeMap.value.get(recipeId);
+    if (!recipe || recipe.summary) {
+      trackEvent('summarizeRecipe', { status: 'error', message: 'Recipe not found or already summarized' });
+      return;
+    }
+
+    trackEvent('summarizeRecipe', { status: 'prepareCallback' });
+    summarizer.ondatacallback.value = (data) => {
+      recipe.summary = data as string;
+    };
+
+    trackEvent('summarizeRecipe', { status: 'prepareInstructions' });
+    const instructions = `${recipe.steps.map((step) => getTranslation(step.description)).join('. ')}`;
+
+    trackEvent('summarizeRecipe', { status: 'exec', instructions });
+    summarizer.exec([instructions]);
   }
 
   fetchRecipes();
@@ -58,10 +74,10 @@ export const useRecipeStore = defineStore('recipe', () => {
   return {
     recipes,
     recipeMap,
-    generateWeekplan,
     fetchRecipes,
     searchByQuery,
     searchByPreferences,
     getRandomRecipe,
+    summarizeRecipe,
   };
 });

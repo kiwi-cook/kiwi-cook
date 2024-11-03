@@ -31,35 +31,8 @@
                 <template v-else-if="message.type === 'recipe'">
                   <div class="recipe-scroll-container">
                     <div class="recipe-scroll-wrapper">
-                      <div v-for="recipe in message.content" :key="recipe.id" class="recipe-card">
-                        <q-card class="recipe-card">
-                          <q-img
-                            :src="recipe.image_url"
-                            :alt="getTranslation(recipe.name)"
-                            class="recipe-image"
-                          >
-                            <div class="recipe-title q-pa-sm">
-                              {{ getTranslation(recipe.name) }}
-                            </div>
-                          </q-img>
-
-                          <q-card-section class="q-pt-md">
-                            <div class="recipe-details row items-center justify-between q-gutter-sm">
-                              <div class="col-auto">
-                                <q-icon name="schedule" color="primary" size="xs"/>
-                                {{ recipe.duration }} min
-                              </div>
-                              <div class="col-auto">
-                                <q-icon name="fitness_center" color="primary" size="xs"/>
-                                {{ capitalize(recipe.difficulty) }}
-                              </div>
-                            </div>
-                          </q-card-section>
-
-                          <q-card-actions align="right" class="q-mt-auto">
-                            <q-btn flat color="primary" :to="`/recipe/${recipe.id}`">View Recipe</q-btn>
-                          </q-card-actions>
-                        </q-card>
+                      <div v-for="recipe in message.content" :key="recipe.id">
+                        <ChatRecipePreview :recipe="recipe"/>
                       </div>
                     </div>
                   </div>
@@ -129,12 +102,12 @@
 
 <script setup lang="ts">
 import {
-  capitalize, computed, nextTick, ref, watch,
+  computed, nextTick, ref, watch,
 } from 'vue';
 import { QScrollArea, QSlider, useQuasar } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
-import { getTranslation } from 'src/models/recipe';
+import ChatRecipePreview from 'components/recipe/ChatRecipePreview.vue';
 
 const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
@@ -266,23 +239,6 @@ function onSliderChange() {
   display: flex;
   gap: 16px;
   padding: 16px;
-}
-
-.recipe-card {
-  flex: 0 0 auto;
-  width: 280px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-  }
-}
-
-.recipe-title {
-  background: rgba(0, 0, 0, 0.6);
 }
 
 .options-list {

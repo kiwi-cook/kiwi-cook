@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { useI18n } from 'vue-i18n';
+import { i18n } from 'boot/i18n.ts';
 
 // MultiLanguageField
 const MultiLanguageFieldSchema = z.object({
@@ -12,10 +12,12 @@ function getAllTranslations(field: MultiLanguageField): string[] {
   return Object.values(field.translations);
 }
 
-export function getTranslation(field: MultiLanguageField): string {
-  const i18n = useI18n();
-  const lang = i18n.locale.value;
-  return field.translations[lang] || Object.values(field.translations)[0];
+export function getTranslation(field: MultiLanguageField, lang?: string): string {
+  if (lang) {
+    return field.translations[lang] || Object.values(field.translations)[0];
+  }
+  const i18nLang = i18n.global.locale.value;
+  return field.translations[i18nLang] || Object.values(field.translations)[0];
 }
 
 // Ingredient
@@ -89,6 +91,7 @@ const RecipeSchema = z.object({
   id: z.string(),
   name: MultiLanguageFieldSchema,
   description: MultiLanguageFieldSchema,
+  summary: z.string().optional(),
   lang: z.string().default('en-US'),
   ingredients: z.array(RecipeIngredientSchema).optional(),
   steps: z.array(RecipeStepSchema),

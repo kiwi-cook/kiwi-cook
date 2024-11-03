@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue';
+import { useAnalytics } from 'src/composables/useAnalytics.ts';
 import SummarizeWorker from './llm.summarize.worker.js?worker';
 import RankWorker from './llm.rank.worker.js?worker';
 
@@ -9,13 +10,15 @@ type WorkerStatus = 'ready' | 'progress' | 'finished' | 'error'
  * A composable to create a worker for Local Transformers
  * @Example
  * ```
- * const worker = useLTf('summarize')
+ * const worker = useLlm('summarize')
  * worker.exec(['Transformers are a type of neural network. They are used for natural language processing.'])
  * const summary = computed(() => worker.data)
  * ```
  * @param task The task to initialize the worker with (optional)
  */
 export function useLlm(task?: Task) {
+  const { trackEvent } = useAnalytics();
+
   /**
    * The id of the worker
    */
@@ -78,7 +81,7 @@ export function useLlm(task?: Task) {
    */
   function createWorker(newTask: Task): string {
     const name = `${newTask}-${Math.random().toString(36).substring(7)}`;
-    console.debug(`Trying to create worker for task ${newTask} with id ${name} ...`);
+    trackEvent('createWorker', { task: newTask });
 
     let newWorker: Worker;
     if (newTask === 'summarize') {
@@ -98,7 +101,7 @@ export function useLlm(task?: Task) {
 
       if (workerMessage.type === 'ready' || workerMessage.type === 'progress' || workerMessage.type === 'finished') {
         if (workerMessage.type === 'finished') {
-          console.debug(`Worker with id ${name} finished`);
+          trackEvent('workerFinished', { task: newTask });
           data.value = workerMessage.data;
           ondatacallback.value(data.value);
         } else if (workerMessage.type === 'progress') {
@@ -106,6 +109,7 @@ export function useLlm(task?: Task) {
           const modelName = downloadStatus.name + downloadStatus.file;
 
           if (!downloads.value[modelName]) {
+            trackEvent('workerDownload', { task: newTask, model: modelName });
             downloads.value[modelName] = downloadStatus.progress;
           }
 
@@ -115,18 +119,17 @@ export function useLlm(task?: Task) {
         }
 
         message.value = workerMessage;
-        console.debug(`Worker with id ${name} sent a message:`, workerMessage);
       } else if (workerMessage.type === 'error') {
-        console.error(`Worker with id ${name} encountered an error:`, workerMessage.error);
+        trackEvent('workerError', { task: newTask, message: workerMessage });
       } else {
-        console.error(`Worker with id ${name} sent an unknown message:`, workerMessage);
+        trackEvent('workerUnknownMessage', { task: newTask, message: workerMessage });
       }
     };
     newWorker.onerror = (event) => {
-      console.error(`Worker with id ${name} encountered an error:`, event);
+      trackEvent('workerError', { task: newTask, error: event });
     };
     newWorker.onmessageerror = (event) => {
-      console.error(`Worker with id ${name} encountered an error:`, event);
+      trackEvent('workerMessageError', { task: newTask, error: event });
     };
     worker.value = newWorker;
 
@@ -138,7 +141,7 @@ export function useLlm(task?: Task) {
 
     newWorker.postMessage({ type: 'init' });
 
-    console.log(`Successfully created worker for task ${workerTask.value} with id ${name}`);
+    trackEvent('workerCreated', { task: newTask, id: name });
 
     return name;
   }
@@ -156,13 +159,13 @@ export function useLlm(task?: Task) {
       worker.value.terminate();
       channel.value.port1.close();
     } else {
-      console.error(`Worker with id ${workerId.value} not found`);
+      trackEvent('workerRemoved', { id: workerId.value, error: 'Worker not found' });
     }
 
     if (removeWorkerStatus) {
-      console.log(`Terminated worker with id ${workerId.value}`);
+      trackEvent('workerRemoved', { id: workerId.value, error: 'Failed to terminate worker' });
     } else {
-      console.error(`Failed to terminate worker with id ${workerId.value}`);
+      trackEvent('workerRemoved', { id: workerId.value, error: 'Failed to terminate worker' });
     }
 
     return removeWorkerStatus;
@@ -173,11 +176,12 @@ export function useLlm(task?: Task) {
    * @param taskData
    */
   function exec(taskData: unknown) {
+    trackEvent('workerStart', { id: workerId.value, data: taskData });
     if (worker.value !== null && channel.value !== null) {
+      trackEvent('workerStarted', { id: workerId.value, data: taskData });
       worker.value.postMessage({ type: 'data', data: taskData });
-      console.debug(`Started worker with id ${workerId.value}`);
     } else {
-      console.error(`Worker with id ${workerId.value} not found`);
+      trackEvent('workerNotFound', { id: workerId.value });
     }
   }
 

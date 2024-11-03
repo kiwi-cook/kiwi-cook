@@ -4,19 +4,19 @@ export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOption
 
 export type ChatState =
   | 'start'
-  | 'askServings'
-  | 'askRecipeType'
-  | 'askDietaryRestrictions'
-  | 'askCookingTime'
-  | 'askCuisine'
-  | 'askDaysWeekPlan'
-  | 'searching'
-  | 'generatePlan'
-  | 'displayingResults'
-  | 'noResults'
-  | 'displayMoreResults'
-  | 'resetChat'
-  | 'startingOver';
+  | 'checkStatusRecipes'
+  | 'welcome'
+  | 'findRecQServings'
+  | 'findRecQRecipeType'
+  | 'findRecQDietaryRestrictions'
+  | 'findRecQCookingTime'
+  | 'findRecQCuisine'
+  | 'findRecQDaysWeekPlan'
+  | 'findRecASearch'
+  | 'findRecAResults'
+  | 'genPlan'
+  | 'findRecSNoResults'
+  | 'globAReset'
 
 interface SliderOptions {
   min: number;

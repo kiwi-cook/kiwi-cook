@@ -15,12 +15,17 @@ export default {
       breakfast: 'Frühstück',
       lunch: 'Mittagessen',
       dinner: 'Abendessen',
-      askDays: 'Wie viele Tage soll dein Wochenplan umfassen?',
+      findRecQDays: 'Wie viele Tage soll dein Wochenplan umfassen?',
       ingredients: 'Sollen wir die Einkaufsliste für dich zusammenstellen?',
       scanFridge: 'Möchtest du deinen Kühlschrank scannen?',
       noIngredients: 'Hm, leider haben wir keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
     },
     days: 'Tag | Tage',
+  },
+  checks: {
+    statusRecipes: 'Ich überprüfe, ob ich Rezepte für dich habe.',
+    statusWeekplan: 'Ich überprüfe, ob ich einen Wochenplan für dich habe.',
+    noRecipes: 'Ich habe ein Problem beim Abrufen der Rezepte. Möchtest du es nochmal versuchen?',
   },
   chatbox: {
     label: 'Was möchtest du kochen?',
@@ -70,6 +75,9 @@ export default {
     startCooking: 'Los geht\'s!',
     newSearch: 'Neue Suche starten?',
     error: 'Ups! Da ist etwas schiefgelaufen. Möchtest du es nochmal versuchen?',
+  },
+  plan: {
+    generating: 'Ich erstelle jetzt deinen Wochenplan. Einen Moment, bitte.',
   },
   recipe: {
     servings: 'Portionen',

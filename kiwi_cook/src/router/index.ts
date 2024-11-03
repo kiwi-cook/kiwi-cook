@@ -2,6 +2,7 @@ import { route } from 'quasar/wrappers';
 import {
   createMemoryHistory, createRouter, createWebHashHistory, createWebHistory,
 } from 'vue-router';
+import { useAnalytics } from 'src/composables/useAnalytics.ts';
 import routes from './routes';
 
 /*
@@ -14,6 +15,8 @@ import routes from './routes';
  */
 
 export default route((/* { store, ssrContext } */) => {
+  const { trackPageView } = useAnalytics();
+
   const createHistory = process.env.SERVER
     ? createMemoryHistory
     : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
@@ -26,6 +29,12 @@ export default route((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  // Add a navigation guard to track page views
+  Router.beforeEach((to, from, next) => {
+    trackPageView(to.path);
+    next();
   });
 
   return Router;

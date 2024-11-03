@@ -140,7 +140,42 @@ export function useWeekplan() {
     return weekPlan;
   }
 
+  function generateRandomWeekplan(days: number): MealPlan[] {
+    const mealTypes: ('breakfast' | 'lunch' | 'dinner')[] = [
+      'breakfast',
+      'lunch',
+      'dinner',
+    ];
+    const weekPlan: MealPlan[] = [];
+    const usedRecipes = new Set<string>();
+
+    for (let i = 0; i < days; i++) {
+      const dayPlan: MealPlan = {
+        date: new Date(Date.now() + i * 24 * 60 * 60 * 1000),
+        meals: [],
+      };
+
+      mealTypes.forEach((mealType) => {
+        const randomRecipe = recipeStore.recipes[Math.floor(Math.random() * recipeStore.recipes.length)];
+
+        if (randomRecipe) {
+          dayPlan.meals.push({
+            mealType,
+            recipe: randomRecipe,
+          });
+
+          usedRecipes.add(randomRecipe.id);
+        }
+      });
+
+      weekPlan.push(dayPlan);
+    }
+
+    return weekPlan;
+  }
+
   return {
     generateWeekPlan,
+    generateRandomWeekplan,
   };
 }
