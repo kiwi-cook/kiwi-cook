@@ -1,12 +1,11 @@
 import logging
 import os
-from logging.config import dictConfig
-
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from logging.config import dictConfig
 
 from models.api import APIResponse
 
@@ -92,6 +91,7 @@ def setup_cors(app: FastAPI) -> None:
         expose_headers=["Content-Type"],
         max_age=600,
     )
+
 
 def setup_log_request_headers(app: FastAPI) -> None:
     async def log_request_headers(request: Request, call_next):
