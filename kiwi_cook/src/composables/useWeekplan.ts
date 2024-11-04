@@ -1,143 +1,137 @@
-import { useRecipeStore } from 'stores/recipe-store.ts';
-import { getTranslation, Recipe, UserIngredient } from 'src/models/recipe.ts';
-import { MealPlan } from 'src/models/mealplan.ts';
+import { useRecipeStore } from 'stores/recipe-store';
+import {
+  getTranslation, Recipe, RecipeIngredient, UserIngredient,
+} from 'src/models/recipe';
+import { Meal, MealPlan } from 'src/models/mealplan';
 
 export function useWeekplan() {
   const recipeStore = useRecipeStore();
 
-  function calculateIngredientUsageScore(recipe: Recipe, ingredients: UserIngredient[]): number {
-    if (!recipe.ingredients) {
-      return 0;
-    }
-
-    let score = 0;
-    const availableIngredients = new Map(
-      ingredients.map((ing: UserIngredient) => [getTranslation(ing.ingredient.name), ing]),
-    );
-
-    recipe.ingredients.forEach((recipeIng) => {
-      const available = availableIngredients.get(getTranslation(recipeIng.ingredient.name));
-      if (available) {
-        // Higher score for ingredients closer to expiry
-        const daysToExpiry = available.expiryDate ? Math.max(0, (available.expiryDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 7;
-
-        score += (1 / (daysToExpiry + 1)) * 10;
-
-        // Higher score for using more of the available ingredients
-        const usageRatio = (recipeIng.quantity ?? 1) / available.quantity;
-        score += usageRatio * 5;
-      }
-    });
-
-    return score;
-  }
-
-  function findBestRecipeForMeal(
-    mealType: 'breakfast' | 'lunch' | 'dinner',
-    usedRecipes: Set<string>,
+  function generateWeekplan(
     ingredients: UserIngredient[],
-  ): Recipe | null {
-    return (
-      recipeStore.recipes
-        .filter(
-          (recipe: Recipe) => recipe.props.mealType === mealType
-            && !usedRecipes.has(getTranslation(recipe.name))
-            && canMakeRecipe(recipe, ingredients),
-        )
-        .map((recipe) => ({
-          recipe,
-          score: calculateIngredientUsageScore(recipe, ingredients),
-        }))
-        .sort((a, b) => b.score - a.score)
-        .map((item) => item.recipe)[0] || null
-    );
-  }
+    options: {
+      dietaryRestrictions?: string[];
+      cuisinePreferences?: string[];
+      days?: number;
+    } = {},
+  ): {
+    mealPlans: MealPlan[];
+    summary: {
+      selectedRecipes: Recipe[];
+      unusedIngredients: UserIngredient[];
+      groceryList: { [category: string]: { name: string; quantity: number }[] };
+    };
+  } {
+    const numberOfDays = options.days || 7;
+    const mealTimes: ('breakfast' | 'lunch' | 'dinner')[] = ['breakfast', 'lunch', 'dinner'];
+    const plan: MealPlan[] = [];
+    const today = new Date();
+    const selectedRecipes = new Set<string>();
+    const unusedIngredients = new Set<UserIngredient>(ingredients);
 
-  function canMakeRecipe(recipe: Recipe, ingredients: UserIngredient[]): boolean {
-    const availableIngredients = new Map(
-      ingredients.map((ing) => [getTranslation(ing.ingredient.name), ing]),
-    );
-
-    if (!recipe.ingredients) {
-      return false;
-    }
-
-    return recipe.ingredients.every((recipeIng) => {
-      const available = availableIngredients.get(getTranslation(recipeIng.ingredient.name));
-      return available && available.quantity >= (recipeIng.quantity ?? 1);
-    });
-  }
-
-  function updateIngredients(recipe: Recipe, ingredients: UserIngredient[]): void {
-    if (!recipe.ingredients) {
-      return;
-    }
-
-    recipe.ingredients.forEach((recipeIng) => {
-      const ingredientIndex = ingredients.findIndex(
-        (ing) => getTranslation(ing.ingredient.name) === getTranslation(recipeIng.ingredient.name),
-      );
-
-      if (ingredientIndex !== -1) {
-        ingredients[ingredientIndex].quantity -= recipeIng.quantity ?? 1;
-
-        // Remove ingredient if fully used
-        if (ingredients[ingredientIndex].quantity <= 0) {
-          ingredients.splice(ingredientIndex, 1);
-        }
+    // Filter recipes based on user preferences
+    const availableRecipes = recipeStore.recipes.filter((recipe) => {
+      let matches = true;
+      if (options.dietaryRestrictions && recipe.dietaryRestrictions) {
+        matches &&= options.dietaryRestrictions.every((restriction) => recipe.dietaryRestrictions.includes(restriction));
       }
+      if (options.cuisinePreferences && recipe.cuisine) {
+        matches &&= options.cuisinePreferences.includes(recipe.cuisine);
+      }
+      return matches;
     });
-  }
 
-  function mapIngredientsToUserIngredients(ingredients: string[]): UserIngredient[] {
-    return ingredients.map((ingredient) => ({
-      ingredient: {
-        name: {
-          translations: {
-            'en-US': ingredient,
-          },
-        },
-        id: '',
-      },
-      quantity: 1,
-      expiryDate: new Date(),
-    } as UserIngredient));
-  }
+    // Sort ingredients by expiry date and handle undefined dates
+    ingredients.sort((a, b) => {
+      if (a.expiryDate === undefined) {
+        return 1;
+      }
+      if (b.expiryDate === undefined) {
+        return -1;
+      }
+      return a.expiryDate.getTime() - b.expiryDate.getTime(); // Regular sorting
+    });
 
-  function generateWeekPlan(days: number, ingredients: string[]): MealPlan[] {
-    const mealTypes: ('breakfast' | 'lunch' | 'dinner')[] = [
-      'breakfast',
-      'lunch',
-      'dinner',
-    ];
-    const weekPlan: MealPlan[] = [];
-    const usedRecipes = new Set<string>();
-    const userIngredients = mapIngredientsToUserIngredients(ingredients);
+    for (let day = 0; day < numberOfDays; day++) {
+      const date: Date = new Date(today.getTime() + day * 24 * 60 * 60 * 1000);
+      const meals: Meal[] = mealTimes
+        .map((mealType) => {
+          // Select recipe that uses maximum available ingredients
+          let bestRecipe: Recipe | null = null;
+          let maxUsedIngredients = 0;
 
-    for (let i = 0; i < days; i++) {
-      const dayPlan: MealPlan = {
-        date: new Date(Date.now() + i * 24 * 60 * 60 * 1000),
-        meals: [],
-      };
+          for (let i = 0; i < availableRecipes.length; i++) {
+            const recipe = availableRecipes[i];
+            if (selectedRecipes.has(recipe.id) || recipe.deleted || !recipe.ingredients) {
+              continue;
+            }
+            const usedIngredients = recipe.ingredients.filter((ri) => ingredients.some((ui) => ui.name === ri.name)).length;
+            if (usedIngredients > maxUsedIngredients) {
+              maxUsedIngredients = usedIngredients;
+              bestRecipe = recipe;
+            }
+          }
 
-      mealTypes.forEach((mealType) => {
-        const bestRecipe = findBestRecipeForMeal(mealType, usedRecipes, userIngredients);
+          if (bestRecipe && bestRecipe.ingredients) {
+            selectedRecipes.add(bestRecipe.id);
+            bestRecipe.ingredients.forEach((ri) => {
+              const ingredient = ingredients.find((ui) => ui.ingredient.name === ri.ingredient.name);
 
-        if (bestRecipe) {
-          dayPlan.meals.push({
-            mealType,
-            recipe: bestRecipe,
+              // Remove used ingredients from the list
+              if (ingredient) {
+                unusedIngredients.delete(ingredient);
+              }
+            });
+            return { mealType, recipe: bestRecipe };
+          }
+          // Fallback to any recipe
+          const randomRecipe = availableRecipes.find((r) => !selectedRecipes.has(r.id));
+          if (randomRecipe) {
+            selectedRecipes.add(randomRecipe.id);
+            return { mealType, recipe: randomRecipe };
+          }
+          return null;
+        })
+        .filter(Boolean) as Meal[];
+
+      plan.push({ date, meals });
+    }
+
+    // Generate summary
+    const selectedRecipesList = Array.from(selectedRecipes).map(
+      (id) => recipeStore.recipes.find((r) => r.id === id)!,
+    );
+    const groceryList: { [category: string]: { name: string; quantity: number }[] } = {};
+
+    selectedRecipesList.forEach((recipe) => {
+      if (!recipe.ingredients) {
+        return;
+      }
+
+      // Add ingredients to a grocery list
+      recipe.ingredients.forEach((recipeIngredient: RecipeIngredient) => {
+        const category = recipeIngredient.ingredient.category || 'Others';
+        groceryList[category] = groceryList[category] || [];
+        const item = groceryList[category].find((i) => i.name === recipeIngredient.name);
+        if (item) {
+          item.quantity += recipeIngredient.quantity || 1;
+        } else {
+          groceryList[category].push({
+            name: getTranslation(recipeIngredient.ingredient.name),
+            quantity: recipeIngredient.quantity || 1,
           });
-
-          usedRecipes.add(bestRecipe.id);
-          updateIngredients(bestRecipe, userIngredients);
         }
       });
+    });
 
-      weekPlan.push(dayPlan);
-    }
-
-    return weekPlan;
+    return {
+      mealPlans: plan,
+      summary: {
+        selectedRecipes: selectedRecipesList,
+        unusedIngredients: Array.from(unusedIngredients),
+        groceryList,
+      },
+    };
   }
 
   function generateRandomWeekplan(days: number): MealPlan[] {
@@ -156,7 +150,9 @@ export function useWeekplan() {
       };
 
       mealTypes.forEach((mealType) => {
-        const randomRecipe = recipeStore.recipes[Math.floor(Math.random() * recipeStore.recipes.length)];
+        const randomRecipe = recipeStore.recipes[
+          Math.floor(Math.random() * recipeStore.recipes.length)
+        ];
 
         if (randomRecipe) {
           dayPlan.meals.push({
@@ -175,7 +171,7 @@ export function useWeekplan() {
   }
 
   return {
-    generateWeekPlan,
+    generateWeekplan,
     generateRandomWeekplan,
   };
 }
