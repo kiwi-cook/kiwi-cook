@@ -1,160 +1,222 @@
 <template>
-  <q-page class="recipe-experience" v-if="recipe">
-    <div class="recipe-header" :style="{ backgroundImage: `url(${recipe.image_url})` }">
-      <div class="header-content">
-        <h1 class="text-h3">{{ getTranslation(recipe.name) }}</h1>
-        <div class="recipe-meta">
-          <q-icon name="access_time"/>
-          {{ recipe.duration }} {{ $t('recipe.minutes') }}
-          <q-icon name="restaurant"/>
-          {{ recipe.servings }} {{ $t('recipe.servings') }}
-          <q-icon name="whatshot"/>
-          {{ recipe.difficulty }}
+  <q-page class="container" v-if="recipe">
+    <q-card class="recipe-card">
+      <div class="header">
+        <img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="hero-image" loading="eager"
+             v-if="recipe.image_url"/>
+        <div class="recipe-details">
+          <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
+          <div class="recipe-info">
+            <p class="description">{{ getTranslation(recipe.description) }}</p>
+            <div class="badge-container">
+              <q-badge v-if="recipe.rating" :label="recipe.rating" icon="star" class="badge"/>
+              <q-badge v-if="recipe.difficulty" :label="recipe.difficulty" icon="fitness_center" class="badge"/>
+              <q-badge v-if="recipe.cuisine" :label="recipe.cuisine" icon="restaurant" class="badge"/>
+              <q-badge v-if="recipe.duration" :label="formattedDuration" icon="schedule" class="badge"/>
+              <q-badge v-if="recipe.servings" :label="formattedServings" icon="people" class="badge"/>
+              <q-badge :label="formattedNumberOfIngredients" icon="local_dining" class="badge"/>
+              <template v-if="recipe.props.tags">
+                <q-badge :label="tag" v-for="tag in recipe.props.tags" icon="local_offer" class="badge" :key="tag"
+                         color="secondary"/>
+              </template>
+            </div>
+          </div>
+          <q-slider v-model="recipe.servings" :min="1" :max="10" @input="adjustServings" class="servings-slider"/>
         </div>
       </div>
-    </div>
+    </q-card>
 
-    <div class="recipe-body">
-      <div class="recipe-sidebar">
-        <h2 class="text-h5 q-mb-md">{{recipe.ingredients?.length }} {{ $t('recipe.ingredients') }}</h2>
-        <IngredientsList :recipe="recipe"/>
-
-        <q-btn
-          class="full-width q-mt-md"
-          color="primary"
-          icon="shopping_cart"
-          :label="$t('shopping.addToList')"
-          @click="addToShoppingList"
-        />
-      </div>
-
-      <div class="recipe-main">
-        <h2 class="text-h5 q-mb-md">{{ $t('recipe.steps') }}</h2>
-        <StepsList :recipe="recipe"/>
-      </div>
-    </div>
-
-    <q-dialog v-model="showNutrition">
-      <q-card>
+    <aside class="recipe-content">
+      <q-card class="recipe-card">
         <q-card-section>
-          <div class="text-h6">{{ $t('recipe.nutrition_info') }}</div>
-        </q-card-section>
-        <q-card-section>
-          <!-- Add nutrition information here -->
+          <q-layout>
+            <div class="q-gutter-md row">
+              <div class="col-12 col-md-6">
+                <h2 class="heading">{{ $t('recipe.ingredients') }}</h2>
+                <q-list bordered class="ingredients">
+                  <RecipeIngredient
+                    v-for="(ingredient, index) in recipe.ingredients"
+                    :key="index"
+                    :ingredient="ingredient"
+                    v-model="checkedIngredients[index]"/>
+                </q-list>
+              </div>
+              <div class="col-12 col-md-6">
+                <h2 class="heading">{{ $t('recipe.steps') }}</h2>
+                <q-list bordered class="directions">
+                  <q-item v-for="(step, index) in recipe.steps" :key="index">
+                    <q-item-section>
+                      <q-badge color="primary" :label="index + 1"/>
+                      <p class="step-description">{{ getTranslation(step.description) }}</p>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </div>
+            </div>
+          </q-layout>
         </q-card-section>
       </q-card>
-    </q-dialog>
-
-    <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-fab color="secondary" icon="more_vert" direction="up">
-        <q-fab-action @click="shareRecipe" color="primary" icon="share"/>
-        <q-fab-action @click="printRecipe" color="grey" icon="print"/>
-        <q-fab-action @click="toggleFavorite" :color="isFavorite ? 'red' : 'grey-7'" icon="favorite"/>
-        <q-fab-action @click="showNutrition = true" color="green" icon="nutrition"/>
-      </q-fab>
-    </q-page-sticky>
+    </aside>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import {
+  computed, onMounted, onUnmounted, ref, watch,
+} from 'vue';
 import { useRoute } from 'vue-router';
 import { useRecipeStore } from 'stores/recipe-store';
 import { storeToRefs } from 'pinia';
-import { getTranslation } from 'src/models/recipe';
-import StepsList from 'components/StepsList.vue';
-import IngredientsList from 'components/IngredientsList.vue';
+import { adjustRecipeServings, getTranslation, Recipe } from 'src/models/recipe';
+import { useI18n } from 'vue-i18n';
+import RecipeIngredient from 'components/recipe/RecipeIngredient.vue';
 
+// State management
 const route = useRoute();
-const recipes = useRecipeStore();
-const { recipeMap } = storeToRefs(recipes);
-const recipe = computed(() => {
-  const r = recipeMap.value.get(route.params.id as string);
-  if (r) {
-    r.ingredients = r.ingredients?.map((i) => ({ ...i, checked: false }));
+const recipeStore = useRecipeStore();
+const { recipeMap } = storeToRefs(recipeStore);
+const recipeId = ref<string | undefined>();
+const recipe = ref<Recipe | undefined>(undefined);
+const checkedIngredients = ref<boolean[]>([]);
+
+// Watchers
+watch(() => route.params.id, async (id) => {
+  if (Array.isArray(id)) {
+    [id] = id;
   }
-  return r;
+  recipeId.value = id;
+}, { immediate: true });
+
+watch([recipeId, recipeMap], ([id, map]) => {
+  recipe.value = id && map ? map.get(id) : undefined;
+}, { immediate: true });
+
+const { t } = useI18n();
+
+// Computed properties
+const formattedDuration = computed(() => `${recipe.value?.duration} ${t('recipe.minutes', { count: recipe.value?.duration })}`);
+const formattedServings = computed(() => `${recipe.value?.servings} ${t('recipe.servings', { count: recipe.value?.servings })}`);
+const formattedNumberOfIngredients = computed(() => `${recipe.value?.ingredients?.length ?? 0}
+${t('recipe.ingredients', { count: recipe.value?.ingredients?.length ?? 0 })}`);
+
+// Adjust servings
+const adjustServings = (change: number) => {
+  if (recipe.value) {
+    const newServings = recipe.value.servings + change;
+    if (newServings >= 1) {
+      recipe.value = adjustRecipeServings(recipe.value, newServings);
+    }
+  }
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  // Initialize or start anything necessary
 });
 
-const showNutrition = ref(false);
-const isFavorite = ref(false);
-
-const shareRecipe = () => {
-  // Implement share functionality
-};
-
-const printRecipe = () => {
-  // Implement print functionality
-};
-
-const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value;
-  // Implement favorite toggling functionality
-};
-
-const addToShoppingList = () => {
-  // Implement add to shopping list functionality
-};
+onUnmounted(() => {
+  // Clean up if necessary
+});
 </script>
 
 <style lang="scss">
-.recipe-experience {
-  .recipe-header {
-    height: 300px;
-    background-size: cover;
-    background-position: center;
-    position: relative;
+.container {
+  padding: 20px; // Maintain overall padding for clean layout
+}
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.7));
-    }
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  background: white; // Keep the card background white for clarity
+  border-radius: 12px; // Soft corners
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5em; // Consistent padding
+  margin-top: 20px; // Increased margin for separation
+  transition: box-shadow 0.3s ease; // Transition for hover effect
+  border: 2px solid var(--q-primary);
+  border-bottom-left-radius: 0;
+}
 
-    .header-content {
-      position: absolute;
-      bottom: 20px;
-      left: 20px;
-      color: white;
-    }
+.header {
+  display: flex;
+  align-items: center;
+}
 
-    .recipe-meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 8px;
+.hero-image {
+  width: 150px; /* Adjust size as needed */
+  height: auto;
+  margin-right: 20px; /* Space between image and text */
+}
 
-      .q-icon {
-        font-size: 1.2em;
-      }
-    }
-  }
+.recipe-details {
+  flex-grow: 1;
+}
 
-  .recipe-body {
-    display: flex;
-    padding: 24px;
-    gap: 24px;
+.recipe-title {
+  font-size: 1.5rem; /* Title size */
+  margin: 0; /* Remove default margins */
+}
 
-    @media (max-width: 600px) {
-      flex-direction: column;
-    }
-  }
+.recipe-info {
+  margin-top: 10px; /* Space above the info */
+}
 
-  .recipe-sidebar {
-    flex: 1;
-    max-width: 300px;
+.description {
+  font-size: 1rem; /* Description font size */
+  margin-bottom: 10px; /* Space below the description */
+}
 
-    @media (max-width: 600px) {
-      max-width: none;
-    }
-  }
+.badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px; /* Space between badges */
+}
 
-  .recipe-main {
-    flex: 2;
-  }
+.servings-slider {
+  margin-top: 15px; /* Space above the slider */
+}
+
+.hero-image {
+  width: 200px; /* Fixed width for large display */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 200px; /* Set a maximum height */
+  object-fit: cover; /* Ensure the image covers the area while preserving aspect ratio */
+  margin-right: 20px; /* Space between image and text */
+  border-radius: 12px; /* Rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition for hover effect */
+}
+
+.hero-image:hover {
+  transform: scale(1.02); // Slight zoom effect on hover
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Slightly stronger shadow on hover
+}
+
+.badge-container {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1em; // Increased spacing for badges
+}
+
+.badge {
+  margin-right: 8px; // Space between badges
+  font-size: 0.875em; // Consistent font size for badges
+  border-radius: 8px; // Rounded badges for a softer look
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease; // Transition for hover effect
+}
+
+.recipe-title {
+  font-size: 2em; // Large title for emphasis
+  font-weight: 600; // Bold but not overly heavy
+  margin-bottom: 0.5em; // Space below title
+}
+
+.quick-info {
+  margin-top: 1em; // Add space above the quick info section
+}
+
+.ingredients, .directions {
+  margin-top: 12px; // Consistent spacing
 }
 </style>

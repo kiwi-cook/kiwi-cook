@@ -168,19 +168,6 @@ function onSliderChange() {
 </script>
 
 <style lang="scss">
-.chat-page {
-  font-size: 16px;
-  min-height: 100vh;
-
-  @media screen and (min-width: 600px) {
-    font-size: 18px;
-  }
-
-  @media screen and (min-width: 1280px) {
-    font-size: 20px;
-  }
-}
-
 .chat-container {
   height: calc(90vh);
   width: 100%;

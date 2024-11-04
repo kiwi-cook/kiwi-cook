@@ -95,6 +95,7 @@ const RecipeSchema = z.object({
   summary: z.string().optional(),
   lang: z.string().default('en-US'),
   ingredients: z.array(RecipeIngredientSchema).optional(),
+  equipment: z.array(IngredientSchema).optional(),
   steps: z.array(RecipeStepSchema),
   props: z.record(z.any()),
   src: RecipeSourceSchema.optional(),
@@ -116,6 +117,18 @@ const RecipeSchema = z.object({
 });
 
 type Recipe = z.infer<typeof RecipeSchema>;
+
+const adjustRecipeServings = (recipe: Recipe, servings: number): Recipe => {
+  const factor = servings / recipe.servings;
+  return {
+    ...recipe,
+    ingredients: recipe.ingredients?.map((ri) => ({
+      ...ri,
+      quantity: ri.quantity ? ri.quantity * factor : undefined,
+    })),
+    servings,
+  };
+};
 
 // Helper functions
 function createMultiLanguageField(lang: string, value: string): MultiLanguageField {
@@ -178,6 +191,7 @@ export type {
 
 export {
   getAllTranslations,
+  adjustRecipeServings,
   createMultiLanguageField,
   createIngredient,
   createRecipeIngredient,

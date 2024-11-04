@@ -16,7 +16,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'">
+    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="rounded-borders q-pa-md page">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component"/>
@@ -69,6 +69,18 @@ const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
 
 body {
   font-family: 'Nunito', sans-serif;
+}
+
+body {
+  font-size: 16px;
+
+  @media screen and (min-width: 600px) {
+    font-size: 18px;
+  }
+
+  @media screen and (min-width: 1280px) {
+    font-size: 20px;
+  }
 }
 
 .rounded-borders {
