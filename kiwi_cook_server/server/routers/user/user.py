@@ -1,8 +1,9 @@
+from datetime import timedelta
 import logging
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, Form, Response
+from fastapi import APIRouter, Depends, HTTPException, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
@@ -18,7 +19,6 @@ from models.user import (
     create_access_token,
     UserInDB,
 )
-from server.routers.user import router
 
 load_dotenv()
 
@@ -27,6 +27,11 @@ read_client = get_database(rights="READ")
 
 logger = logging.getLogger(__name__)
 
+router = APIRouter(
+    prefix="/users",
+    tags=["users"],
+    include_in_schema=True,
+)
 
 @router.post(
     "/add",
@@ -77,7 +82,8 @@ async def login_user(
         )
     try:
         access_token = create_access_token(
-            data={"sub": user.username}, expires_delta=ACCESS_TOKEN_EXPIRE_MINUTES
+            data={"sub": user.username}, 
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
     except ValueError as e:
         logger.error(e)

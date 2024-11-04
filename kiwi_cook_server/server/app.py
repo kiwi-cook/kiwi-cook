@@ -103,7 +103,8 @@ def setup_log_request_headers(app: FastAPI) -> None:
 
 
 def setup_routes(app: FastAPI) -> None:
-    from server.routers import user, chatgpt, recipe
+    from server.routers import chatgpt, recipe
+    from server.routers.user import user
 
     app.include_router(recipe.router)
     app.include_router(chatgpt.router)

@@ -88,8 +88,15 @@ def authenticate_user(username: str, password: str) -> UserInDB | bool:
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=15))
+    
+    # Ensure expires_delta is a timedelta, default to 15 minutes if None
+    if expires_delta is None:
+        expires_delta = timedelta(minutes=15)
+    
+    # Set the expiration time
+    expire = datetime.now(timezone.utc) + expires_delta
     to_encode.update({"exp": expire})
+    
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

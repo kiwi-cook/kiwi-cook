@@ -220,23 +220,43 @@ class ParseRecipeHtml(PipelineElement):
             extracted_comment = " ".join(matches)
             return extracted_comment
         return None
+    
+    @staticmethod
+    def extract_steps(instructions: Union[str, List[str]]) -> List[str]:
+        # Check if instructions are already a list
+        if isinstance(instructions, list):
+            # Return the list as is, filtering out empty steps
+            return [step.strip() for step in instructions if step.strip()]
+        
+        # Normalize white spaces and trim the input if it's a string
+        instructions = ' '.join(instructions.split())
+        
+        # Use regular expression to find numbered steps (with or without parentheses)
+        step_pattern = r'\d+\.\s*|(?:\d+\))\s*'
+        steps = re.split(step_pattern, instructions)
+
+        # Filter out any empty strings and trim each step
+        steps = [step.strip() for step in steps if step.strip()]
+        
+        return steps
 
     @staticmethod
-    def parse_steps(steps: str, lang: str = "en"):
-        split_steps = steps.split("\n")
+    def parse_steps(steps: Union[str, List[str]], lang: str = "en") -> List['RecipeStep']:
+        # Use extract_steps to ensure we handle both string and list inputs
+        split_steps = ParseRecipeHtml.extract_steps(steps)
 
         recipe_steps = []
         for step_desc in split_steps:
             # Create the recipe step
-            description: MultiLanguageField = MultiLanguageField.new(lang, step_desc)
-            temperature: int = extract_temperature(step_desc)
+            description = MultiLanguageField.new(lang, step_desc)
+            temperature = extract_temperature(step_desc)
             durations = extract_durations(step_desc)
-            summed_durations = sum(durations) if len(durations) > 0 else None
-            # TODO: add more fields to the recipe step
-
+            summed_durations = sum(durations) if durations else None
+            
+            # Create the recipe step object
             recipe_step = RecipeStep.new(
                 description=description,
-                ingredients=None,
+                ingredients=None,  # Assuming ingredients are processed elsewhere
                 duration=summed_durations,
                 temperature=temperature,
             )
