@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { i18n } from 'boot/i18n.ts';
+import { i18n } from 'boot/i18n';
 
 // MultiLanguageField
 const MultiLanguageFieldSchema = z.object({
@@ -24,6 +24,7 @@ export function getTranslation(field: MultiLanguageField, lang?: string): string
 const IngredientSchema = z.object({
   id: z.string().optional(),
   name: MultiLanguageFieldSchema,
+  category: z.string().optional(),
 });
 
 type Ingredient = z.infer<typeof IngredientSchema>;
@@ -103,6 +104,7 @@ const RecipeSchema = z.object({
   created_at: z.date().default(() => new Date()),
   updated_at: z.date().default(() => new Date()),
   cuisine: z.string().optional(),
+  dietaryRestrictions: z.array(z.string()).optional(),
   difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
   nutrition: NutritionSchema.optional(),
   image_url: z.string().url().optional(),

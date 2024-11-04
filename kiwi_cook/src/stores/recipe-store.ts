@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
-import { getTranslation, Recipe } from 'src/models/recipe.ts';
+import { getTranslation, Recipe } from 'src/models/recipe';
 import { computed, ref } from 'vue';
-import { api } from 'boot/axios.ts';
-import { useRecipeSearch } from 'src/composables/useSearch.ts';
-import { UserPreferences } from 'src/models/user.ts';
-import { useAnalytics } from 'src/composables/useAnalytics.ts';
-import { useLlm } from 'src/composables/llm/useLlm.ts';
+import { api } from 'boot/axios';
+import { useRecipeSearch } from 'src/composables/useSearch';
+import { UserPreferences } from 'src/models/user';
+import { useAnalytics } from 'src/composables/useAnalytics';
+import { useLlm } from 'src/composables/llm/useLlm';
 
 export const useRecipeStore = defineStore('recipe', () => {
   const { trackEvent } = useAnalytics();

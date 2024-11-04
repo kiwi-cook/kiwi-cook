@@ -5,9 +5,9 @@
 import { ref } from 'vue';
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { stemmer } from 'stemmer';
-import { getAllTranslations, Recipe } from 'src/models/recipe.ts';
-import { UserPreferences } from 'src/models/user.ts';
-import { useAnalytics } from 'src/composables/useAnalytics.ts';
+import { getAllTranslations, Recipe } from 'src/models/recipe';
+import { UserPreferences } from 'src/models/user';
+import { useAnalytics } from 'src/composables/useAnalytics';
 
 interface SearchableRecipe {
   id: string,

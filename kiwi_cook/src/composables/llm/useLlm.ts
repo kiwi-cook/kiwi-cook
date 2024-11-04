@@ -1,5 +1,5 @@
 import { computed, ref } from 'vue';
-import { useAnalytics } from 'src/composables/useAnalytics.ts';
+import { useAnalytics } from 'src/composables/useAnalytics';
 import SummarizeWorker from './llm.summarize.worker.js?worker';
 import RankWorker from './llm.rank.worker.js?worker';
 

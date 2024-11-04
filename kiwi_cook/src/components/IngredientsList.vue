@@ -22,7 +22,7 @@
 
 <script setup lang="ts">
 import { computed, defineProps, toRefs } from 'vue';
-import { getTranslation, Recipe, RecipeIngredient } from 'src/models/recipe.ts';
+import { getTranslation, Recipe, RecipeIngredient } from 'src/models/recipe';
 
 const props = defineProps<{
   recipe: Recipe

@@ -62,7 +62,7 @@ async function getLTfDocumentRanking(data, progressCallback) {
 }
 
 self.addEventListener('message', async (event) => {
-  console.log('LTf.rank.worker.ts', event.data);
+  console.log('LTf.rank.worker', event.data);
   const workerData = event.data;
   const { data } = workerData;
   switch (workerData.type) {
@@ -78,12 +78,12 @@ self.addEventListener('message', async (event) => {
         const sorting = await getLTfDocumentRanking(data, progressCallback);
         self.postMessage({ type: 'finished', data: sorting });
       } catch (error) {
-        console.error('Error in LTf.rank.worker.ts', error);
+        console.error('Error in LTf.rank.worker', error);
         self.postMessage({ type: 'error', error });
       }
       break;
     default:
-      console.error('Unknown message type in LTf.rank.worker.ts', workerData.type);
+      console.error('Unknown message type in LTf.rank.worker', workerData.type);
       break;
   }
 });

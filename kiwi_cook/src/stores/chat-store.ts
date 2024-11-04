@@ -8,9 +8,9 @@ import { toTime } from 'src/utils/time';
 import {
   ChatConfig, ChatState, Message, SliderMessage,
 } from 'src/models/chat';
-import { Recipe } from 'src/models/recipe.ts';
+import { Recipe } from 'src/models/recipe';
 import { UserPreferences } from 'src/models/user';
-import { ts } from 'src/utils/i18n.ts';
+import { ts } from 'src/utils/i18n';
 import { useWeekplan } from 'src/composables/useWeekplan';
 import { Meal, MealPlan } from 'src/models/mealplan';
 

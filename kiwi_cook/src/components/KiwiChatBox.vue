@@ -28,7 +28,7 @@
 
 <script lang="ts" setup>
 import { computed, watch } from 'vue';
-import { useChatStore } from 'stores/chat-store.ts';
+import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
 import { useQuasar } from 'quasar';
 

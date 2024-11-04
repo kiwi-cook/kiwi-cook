@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { defineProps, toRefs } from 'vue';
-import { getTranslation, Recipe } from 'src/models/recipe.ts';
+import { getTranslation, Recipe } from 'src/models/recipe';
 
 const props = defineProps<{
   recipe: Recipe

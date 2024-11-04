@@ -1,4 +1,4 @@
-import { Recipe } from 'src/models/recipe.ts';
+import { Recipe } from 'src/models/recipe';
 
 export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
 
