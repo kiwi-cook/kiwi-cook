@@ -33,7 +33,7 @@ export function useWeekplan() {
     const availableRecipes = recipeStore.recipes.filter((recipe) => {
       let matches = true;
       if (options.dietaryRestrictions && recipe.dietaryRestrictions) {
-        matches &&= options.dietaryRestrictions.every((restriction) => recipe.dietaryRestrictions.includes(restriction));
+        matches &&= options.dietaryRestrictions.every((restriction) => recipe.dietaryRestrictions?.includes(restriction));
       }
       if (options.cuisinePreferences && recipe.cuisine) {
         matches &&= options.cuisinePreferences.includes(recipe.cuisine);
@@ -63,9 +63,10 @@ export function useWeekplan() {
           for (let i = 0; i < availableRecipes.length; i++) {
             const recipe = availableRecipes[i];
             if (selectedRecipes.has(recipe.id) || recipe.deleted || !recipe.ingredients) {
+              // eslint-disable-next-line no-continue
               continue;
             }
-            const usedIngredients = recipe.ingredients.filter((ri) => ingredients.some((ui) => ui.name === ri.name)).length;
+            const usedIngredients = recipe.ingredients.filter((ri) => ingredients.some((ui) => ui.ingredient.name === ri.ingredient.name)).length;
             if (usedIngredients > maxUsedIngredients) {
               maxUsedIngredients = usedIngredients;
               bestRecipe = recipe;
@@ -112,7 +113,7 @@ export function useWeekplan() {
       recipe.ingredients.forEach((recipeIngredient: RecipeIngredient) => {
         const category = recipeIngredient.ingredient.category || 'Others';
         groceryList[category] = groceryList[category] || [];
-        const item = groceryList[category].find((i) => i.name === recipeIngredient.name);
+        const item = groceryList[category].find((i) => i.name === getTranslation(recipeIngredient.ingredient.name));
         if (item) {
           item.quantity += recipeIngredient.quantity || 1;
         } else {
