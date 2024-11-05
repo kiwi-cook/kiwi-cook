@@ -12,5 +12,5 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - uses: oven-sh/setup-bun@v2
-    - run: cd ./client && bun install
-    - run: cd ./client && bun run build --if-present
+    - run: cd ./kiwi_cook && bun install
+    - run: cd ./kiwi_cook && bun run build --if-present
