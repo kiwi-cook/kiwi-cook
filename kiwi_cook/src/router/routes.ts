@@ -11,6 +11,7 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: 'recipe/:id',
+        name: 'recipe',
         component: () => import('pages/RecipePage.vue'),
       },
     ],
@@ -20,6 +21,7 @@ const routes: RouteRecordRaw[] = [
   // but you can also remove it
   {
     path: '/:catchAll(.*)*',
+    name: '404',
     component: () => import('pages/ErrorNotFound.vue'),
   },
 ];

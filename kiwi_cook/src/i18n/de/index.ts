@@ -98,4 +98,8 @@ export default {
   shopping: {
     addToList: 'Zur Einkaufsliste hinzufügen',
   },
+  error: {
+    notFound: 'Hoppla! 🥝 Dieses Rezept ist so geheim, dass selbst wir es nicht finden können! Versuch’s mit einem anderen!',
+    backToHome: 'Zurück zur Startseite',
+  },
 };

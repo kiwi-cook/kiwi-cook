@@ -3,6 +3,8 @@ import {
   createMemoryHistory, createRouter, createWebHashHistory, createWebHistory,
 } from 'vue-router';
 import { useAnalytics } from 'src/composables/useAnalytics';
+import { useRecipeStore } from 'stores/recipe-store.ts';
+import { storeToRefs } from 'pinia';
 import routes from './routes';
 
 /*
@@ -15,7 +17,7 @@ import routes from './routes';
  */
 
 export default route((/* { store, ssrContext } */) => {
-  const { trackPageView } = useAnalytics();
+  const { trackEvent, trackPageView } = useAnalytics();
 
   const createHistory = process.env.SERVER
     ? createMemoryHistory
@@ -33,6 +35,29 @@ export default route((/* { store, ssrContext } */) => {
 
   // Add a navigation guard to track page views
   Router.beforeEach((to, from, next) => {
+    trackEvent('view_item', {
+      content_type: 'page',
+      content_id: to.path,
+      item_id: to.params.id,
+      content: to,
+    });
+
+    const recipeStore = useRecipeStore();
+    const { recipeMap } = storeToRefs(recipeStore);
+
+    // Check if the route is a recipe page
+    if (to.name === 'recipe') {
+      let recipeId = to.params.id;
+      if (Array.isArray(recipeId)) {
+        [recipeId] = recipeId;
+      }
+      // Check if the recipe is already loaded
+      if (!recipeMap.value.has(recipeId)) {
+        // Go to 404
+        next({ name: '404' });
+      }
+    }
+
     trackPageView(to.path);
     next();
   });

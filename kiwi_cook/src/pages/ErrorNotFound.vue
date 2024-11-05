@@ -1,20 +1,19 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div class="fullscreen bg-primary text-white text-center q-pa-md flex flex-center">
     <div>
       <div style="font-size: 30vh">
-        404
+        4🥝4
       </div>
 
       <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
+        {{ $t('error.notFound') }}
       </div>
 
       <q-btn
-        class="q-mt-xl"
-        color="white"
-        label="Go Home"
+        class="q-mt-xl q-mb-md"
+        size="lg"
+        :label="$t('error.backToHome')"
         no-caps
-        text-color="blue"
         to="/"
         unelevated
       />
