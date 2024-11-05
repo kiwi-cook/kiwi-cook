@@ -33,7 +33,7 @@
             <div class="q-gutter-md row">
               <div class="col-12 col-md-6">
                 <h2 class="heading">{{ $t('recipe.ingredients') }}</h2>
-                <q-list bordered class="ingredients">
+                <q-list class="ingredients">
                   <RecipeIngredient
                     v-for="(ingredient, index) in recipe.ingredients"
                     :key="index"
@@ -43,7 +43,7 @@
               </div>
               <div class="col-12 col-md-6">
                 <h2 class="heading">{{ $t('recipe.steps') }}</h2>
-                <q-list bordered class="directions">
+                <q-list class="directions">
                   <q-item v-for="(step, index) in recipe.steps" :key="index">
                     <q-item-section>
                       <q-badge color="primary" :label="index + 1"/>
@@ -121,102 +121,101 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .container {
-  padding: 20px; // Maintain overall padding for clean layout
+  padding: 40px; /* Increased padding for a more spacious layout */
+  margin: auto; /* Center container */
 }
 
 .recipe-card {
   display: flex;
   flex-direction: column;
-  background: white; // Keep the card background white for clarity
-  border-radius: 12px; // Soft corners
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 1.5em; // Consistent padding
-  margin-top: 20px; // Increased margin for separation
-  transition: box-shadow 0.3s ease; // Transition for hover effect
-  border: 2px solid var(--q-primary);
-  border-bottom-left-radius: 0;
+  background: white; /* Maintain a clean white background */
+  padding: 2em; /* Slightly increased padding */
+  margin-top: 30px; /* Increased margin for better separation */
+  border-radius: 20px; /* Unified border radius */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  transition: box-shadow 0.3s ease, transform 0.3s ease; /* Smooth transitions */
 }
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: center; /* Center items vertically */
+  gap: 16px; /* Space between child elements */
+
+  @media (max-width: 600px) {
+    flex-direction: column; /* Stack items on small screens */
+    gap: 8px; /* Adjust space for stacked layout */
+  }
 }
 
 .hero-image {
-  width: 150px; /* Adjust size as needed */
-  height: auto;
-  margin-right: 20px; /* Space between image and text */
+  width: 200px; /* Set fixed width for the image */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 300px; /* Set maximum height for the image */
+  border-radius: 12px; /* Soft rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition effects */
+}
+
+.hero-image:hover {
+  transform: scale(1.05); /* Slight zoom on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Stronger shadow on hover */
 }
 
 .recipe-details {
   flex-grow: 1;
+  margin-top: 20px; /* Space above the details */
 }
 
 .recipe-title {
-  font-size: 1.5rem; /* Title size */
-  margin: 0; /* Remove default margins */
+  font-size: 2.5em; /* Larger title for emphasis */
+  font-weight: 600; /* Bold but refined */
+  /* Remove default margins */
+  color: #333; /* Darker color for better readability */
+  line-height: 1.2; /* Slightly increased line height */
+  margin: 0 0 0.5em;
+}
+
+.heading {
+  font-size: 1.5em; /* Larger heading for sections */
+  font-weight: 600; /* Bold for emphasis */
+  color: #333; /* Darker color for headings */
+  margin-bottom: 1em; /* Space below headings */
 }
 
 .recipe-info {
-  margin-top: 10px; /* Space above the info */
+  margin-top: 5px; /* Space above the info */
+  color: #666; /* Subtle color for secondary information */
 }
 
 .description {
-  font-size: 1rem; /* Description font size */
-  margin-bottom: 10px; /* Space below the description */
+  font-size: 1.1em; /* Slightly larger description */
+  color: #444; /* Darker description text for contrast */
+  line-height: 1.5; /* Improve readability */
+  margin-bottom: 20px; /* Space below the description */
 }
 
 .badge-container {
   display: flex;
   flex-wrap: wrap;
-  gap: 5px; /* Space between badges */
-}
-
-.servings-slider {
-  margin-top: 15px; /* Space above the slider */
-}
-
-.hero-image {
-  width: 200px; /* Fixed width for large display */
-  height: auto; /* Maintain aspect ratio */
-  max-height: 200px; /* Set a maximum height */
-  object-fit: cover; /* Ensure the image covers the area while preserving aspect ratio */
-  margin-right: 20px; /* Space between image and text */
-  border-radius: 12px; /* Rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Transition for hover effect */
-}
-
-.hero-image:hover {
-  transform: scale(1.02); // Slight zoom effect on hover
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Slightly stronger shadow on hover
-}
-
-.badge-container {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 1em; // Increased spacing for badges
+  gap: 10px; /* Increased gap for badges */
+  margin-bottom: 1em; /* Space below badge container */
 }
 
 .badge {
-  margin-right: 8px; // Space between badges
-  font-size: 0.875em; // Consistent font size for badges
-  border-radius: 8px; // Rounded badges for a softer look
+  padding: 5px 10px; /* Padding for badges */
+  font-size: 0.875em; /* Consistent font size */
+  border-radius: 12px; /* Rounded badges */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease; // Transition for hover effect
-}
-
-.recipe-title {
-  font-size: 2em; // Large title for emphasis
-  font-weight: 600; // Bold but not overly heavy
-  margin-bottom: 0.5em; // Space below title
+  transition: background 0.3s ease; /* Transition for hover effect */
 }
 
 .quick-info {
-  margin-top: 1em; // Add space above the quick info section
+  margin-top: 1em; /* Space above quick info section */
+  color: #888; /* Lighter color for quick info */
 }
 
 .ingredients, .directions {
-  margin-top: 12px; // Consistent spacing
+  margin-top: 12px; /* Consistent spacing */
+  line-height: 1.5; /* Improve readability */
 }
 </style>

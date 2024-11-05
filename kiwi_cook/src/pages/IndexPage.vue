@@ -187,9 +187,16 @@ function onSliderChange() {
 .chat-bubble .q-message-text {
   border-radius: 20px;
   padding: 12px 16px;
-  max-width: 75%;
+  max-width: 50vw;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Adjust max-width for smaller screens */
+@media (max-width: 700px) {
+  .chat-bubble .q-message-text {
+    max-width: 80vw;
+  }
 }
 
 .kiwi-bubble .q-message-text {
@@ -225,15 +232,27 @@ function onSliderChange() {
 }
 
 .recipe-scroll-container {
-  width: 70vw;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   scrollbar-width: none;
+  scroll-behavior: smooth;
+  padding: 8px 0;
+
+  &::-webkit-scrollbar {
+    display: none; // Hide scrollbar for Webkit browsers
+  }
 }
 
 .recipe-scroll-wrapper {
   display: flex;
-  gap: 16px;
-  padding: 16px;
+  gap: 16px; // Adds space between cards
+  padding-left: 8px; // Adds a bit of padding on the left for spacing
+}
+
+.recipe-scroll-wrapper > div {
+  flex: 0 0 auto; // Prevents cards from shrinking or wrapping
+  width: 280px; // Fixed width for each card for consistency
 }
 
 .options-list {
