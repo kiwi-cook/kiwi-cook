@@ -11,7 +11,7 @@ export default {
     minutes: 'Minute | Minuten',
     cuisine: 'Letzte Frage: Welche Küche darf es heute sein?',
     reset: 'Kein Problem. Lass uns von vorne anfangen. Was möchtest du heute Leckeres kochen?',
-    weekPlan: {
+    plan: {
       breakfast: 'Frühstück',
       lunch: 'Mittagessen',
       dinner: 'Abendessen',
@@ -78,6 +78,16 @@ export default {
   },
   plan: {
     generating: 'Ich erstelle jetzt deinen Wochenplan. Einen Moment, bitte.',
+    planFor: 'Hier ist dein Wochenplan für {days} Tage:',
+    day: {
+      0: 'Montag',
+      1: 'Dienstag',
+      2: 'Mittwoch',
+      3: 'Donnerstag',
+      4: 'Freitag',
+      5: 'Samstag',
+      6: 'Sonntag',
+    },
   },
   recipe: {
     servings: 'Portionen',

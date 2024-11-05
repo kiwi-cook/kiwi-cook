@@ -95,7 +95,10 @@ export const useChatStore = defineStore('chat', () => {
     const generatedWeekplan = weekplan.generateRandomWeekplan(userPreferences.value.weekplanDays);
 
     generatedWeekplan.forEach((plan: MealPlan) => {
+      const day = plan.date.getDay();
+
       const recipes = plan.meals.map((meal: Meal) => meal.recipe);
+      addMessage({ type: 'text', content: t(`plan.day.${day}`) });
       addMessage({ type: 'recipe', content: recipes });
     });
   };
@@ -246,7 +249,7 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     findRecQDaysWeekPlan: {
-      message: t('chat.weekPlan.findRecQDays'),
+      message: t('chat.plan.findRecQDays'),
       type: 'slider',
       sliderOptions: {
         min: 1,

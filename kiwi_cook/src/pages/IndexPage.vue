@@ -12,7 +12,7 @@
                 :sent="message.sent"
                 :stamp="message.timestamp"
                 :text-color="message.sent ? 'white' : (isDark ? 'white' : 'grey-9')"
-                class="chat-bubble"
+                class="chat-bubble apple-bubble"
                 :class="{
                   'kiwi-bubble': !message.sent,
                   'user-bubble': message.sent,
@@ -185,35 +185,43 @@ function onSliderChange() {
 }
 
 .chat-bubble .q-message-text {
-  border-radius: 16px;
-  padding: 14px 18px;
+  border-radius: 20px;
+  padding: 12px 16px;
+  max-width: 75%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s, box-shadow 0.2s;
 }
 
 .kiwi-bubble .q-message-text {
-  background-color: rgba(255, 255, 255, 0.3) !important;
-  border: 2px solid var(--q-primary);
-  border-bottom-left-radius: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  color: black;
+  border-radius: 20px 20px 20px 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
 .user-bubble .q-message-text {
-  background-color: var(--q-primary) !important;
-  border-bottom-right-radius: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #8bc34a, #7cb342, #689f38);
+  color: white;
+  border-radius: 20px 20px 4px 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.next-message-same {
-  border-top-left-radius: 0;
+.apple-bubble.first-message .q-message-text {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.apple-bubble.next-message-same .q-message-text {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  margin-top: 2px;
+}
+
+.apple-bubble.last-message-same .q-message-text {
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
   margin-bottom: 4px;
-
-  .q-message-text {
-    border-bottom-left-radius: 0;
-  }
-}
-
-.last-message-same {
-  .q-message-text {
-    border-top-left-radius: 0;
-  }
 }
 
 .recipe-scroll-container {

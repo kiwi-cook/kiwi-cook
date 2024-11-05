@@ -119,7 +119,7 @@ onUnmounted(() => {
 });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .container {
   padding: 20px; // Maintain overall padding for clean layout
 }
