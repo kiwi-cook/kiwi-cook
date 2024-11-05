@@ -11,6 +11,9 @@ bun run build -m pwa
 # navigate into the build output directory
 cd dist/pwa || exit
 
+# add a CNAME file
+echo 'kiwi.jpkmiller.de' > CNAME
+
 # deploy to github pages
 git init
 git add -A
