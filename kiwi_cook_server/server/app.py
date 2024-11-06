@@ -71,6 +71,7 @@ def setup_cors(app: FastAPI) -> None:
     else:
         origins = [
             "https://kiwi-cook.github.io",
+            "https://kiwi.jpkmiller.de",
             "https://taste-buddy.uk",
         ]
         allow_origin_regex = r"^https?://(kiwi-cook\.github\.io|taste-buddy\.uk)$"
