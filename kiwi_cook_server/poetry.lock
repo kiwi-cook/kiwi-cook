@@ -1015,13 +1015,13 @@ all = ["flake8 (>=7.1.1)", "mypy (>=1.11.2)", "pytest (>=8.3.2)", "ruff (>=0.6.2
 
 [[package]]
 name = "ingredient-parser-nlp"
-version = "1.2.0"
+version = "1.3.0"
 description = "A Python package to parse structured information from recipe ingredient sentences"
 optional = false
 python-versions = "<3.13,>=3.10"
 files = [
-    {file = "ingredient_parser_nlp-1.2.0-py3-none-any.whl", hash = "sha256:b15f55c693b1cca87f57ace8df11a5d80fb6d74b3afa134ab9e08ffdea67671a"},
-    {file = "ingredient_parser_nlp-1.2.0.tar.gz", hash = "sha256:4e310b1ebe9cfb3077565dbf5bce7ad16afe893739f4a744acd9b31632389a3a"},
+    {file = "ingredient_parser_nlp-1.3.0-py3-none-any.whl", hash = "sha256:0d915e8f6e55c254ed54e6b9f61374e39a97235f8294fea3751c1d73c9b8da0f"},
+    {file = "ingredient_parser_nlp-1.3.0.tar.gz", hash = "sha256:89b867b6ae28118e531e552c45ca68fffb683e23e0f8b9a7a4bfde1517dc4ef3"},
 ]
 
 [package.dependencies]
@@ -2752,4 +2752,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.13"
-content-hash = "bcf0ff300afa60d3ebf67ef60176fbc816c2648004537a043dd149dbf838c327"
+content-hash = "1e17354459b12d4d10905b6fb1fd9f9900826c683ba90defe25dfae45dd03453"
