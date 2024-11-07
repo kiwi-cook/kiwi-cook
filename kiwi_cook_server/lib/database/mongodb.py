@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 
+from lib.logging import logger
+
 _clients = {}
 
 load_dotenv()
@@ -19,7 +21,7 @@ def get_database(rights: str = "READ") -> MongoClient[Mapping[str, Any] | Any]:
         raise ValueError(f"MongoDB URI for rights {rights} is not set")
     client = MongoClient(_MONGO_URI, server_api=ServerApi("1"))
     client.admin.command("ping")
-    print("Connected to MongoDB")
+    logger.info("Connected to MongoDB")
 
     _clients[rights] = client
     return client

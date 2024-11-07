@@ -1,38 +1,13 @@
-import logging
 import os
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from logging.config import dictConfig
 
+from lib.logging import logger
 from models.api import APIResponse
-
-# Configure logging
-logging_config = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "()": "uvicorn.logging.DefaultFormatter",
-            "fmt": "%(levelprefix)s %(message)s",
-            "use_colors": None,
-        },
-    },
-    "handlers": {
-        "default": {
-            "formatter": "default",
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stderr",
-        },
-    },
-    "loggers": {
-        "kiwicook": {"handlers": ["default"], "level": "INFO"},
-    },
-}
-dictConfig(logging_config)
-logger = logging.getLogger("kiwicook")
 
 load_dotenv()
 
@@ -126,7 +101,23 @@ def setup_routes(app: FastAPI) -> None:
         "/health", response_description="Health check", response_model=APIResponse[str]
     )
     def health_check():
-        return {"error": False, "response": "OK"}
+        return JSONResponse(content={"error": False, "response": "OK"}, status_code=200)
+
+
+def setup_exception_handlers(app: FastAPI) -> None:
+    async def not_found(request, exc):
+        return JSONResponse(content={"error": True, "response": "Not Found"}, status_code=404)
+
+    async def server_error(request, exc):
+        return JSONResponse(content={"error": True, "response": "Internal Server Error"}, status_code=500)
+
+    exception_handlers = {
+        404: not_found,
+        500: server_error,
+        503: server_error,
+    }
+
+    app.exception_handlers = exception_handlers
 
 
 def setup_trusted_host(app: FastAPI) -> None:
@@ -151,7 +142,8 @@ app = setup_fastapi()
 setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
-setup_log_request_headers(app)
+setup_exception_handlers(app)
+#setup_log_request_headers(app)
 
 try:
     from lib.database.mongodb import get_database
