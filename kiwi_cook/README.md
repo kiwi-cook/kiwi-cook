@@ -1,4 +1,4 @@
-# KiwiCook Quasar Client 🥝
+# Kiwi Cook Client 🥝
 
 ## Getting Started
 

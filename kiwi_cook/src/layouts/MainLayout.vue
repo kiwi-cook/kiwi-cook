@@ -1,15 +1,15 @@
 <template>
-  <q-layout view="hHh lpR fFf" :class="[{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }]">
-    <q-header reveal :class="isDark ? 'bg-dark' : 'bg-primary'">
+  <q-layout :class="[{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }]" view="hHh lpR fFf">
+    <q-header :class="isDark ? 'bg-dark' : 'bg-primary'" reveal>
       <q-toolbar class="q-py-sm">
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
           <div class="col">
             <div class="text-h4 text-weight-bold text-white">KiwiCook</div>
-            <div class="text-subtitle2" :class="isDark ? 'text-secondary' : 'text-black'">Reclaim your kitchen</div>
+            <div :class="isDark ? 'text-secondary' : 'text-black'" class="text-subtitle2">Reclaim your kitchen</div>
           </div>
           <div class="col-auto q-ml-md">
-            <q-avatar size="48px" class="rounded-borders" color="white">
-              <q-img src="/icons/icon-500x500.png" width="36px" height="36px"/>
+            <q-avatar class="rounded-borders" color="white" size="48px">
+              <q-img height="36px" src="/icons/icon-500x500.png" width="36px"/>
             </q-avatar>
           </div>
         </div>
@@ -18,7 +18,7 @@
 
     <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="rounded-borders q-pa-md page">
       <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
+        <transition mode="out-in" name="fade">
           <component :is="Component"/>
         </transition>
       </router-view>
@@ -26,16 +26,16 @@
 
     <q-footer :class="{ 'bg-primary': !isDark, 'bg-dark': isDark }" class="footer">
       <q-toolbar>
-        <q-btn flat :text-color="isDark ? 'white' : 'dark'" icon="mdi-github" @click="openGithub">
+        <q-btn :text-color="isDark ? 'white' : 'dark'" flat icon="mdi-github" @click="openGithub">
           <q-tooltip>Visit our GitHub</q-tooltip>
         </q-btn>
         <q-space/>
         <q-btn
-          flat
           :color="isDark ? 'secondary' : 'white'"
-          :text-color="isDark ? 'primary' : 'dark'"
           :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
+          :text-color="isDark ? 'primary' : 'dark'"
           class="q-ml-md mode-toggle"
+          flat
           @click="toggleDarkMode"
         >
           <q-tooltip>{{ isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode' }}</q-tooltip>

@@ -1,27 +1,27 @@
 <template>
-  <q-page class="container" v-if="recipe">
+  <q-page v-if="recipe" class="container">
     <q-card class="recipe-card">
       <div class="header">
-        <img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="hero-image" loading="eager"
-             v-if="recipe.image_url"/>
+        <img v-if="recipe.image_url" :alt="getTranslation(recipe.name)" :src="recipe.image_url" class="hero-image"
+             loading="eager"/>
         <div class="recipe-details">
           <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
           <div class="recipe-info">
             <p class="description">{{ getTranslation(recipe.description) }}</p>
             <div class="badge-container">
-              <q-badge v-if="recipe.rating" :label="recipe.rating" icon="star" class="badge"/>
-              <q-badge v-if="recipe.difficulty" :label="recipe.difficulty" icon="fitness_center" class="badge"/>
-              <q-badge v-if="recipe.cuisine" :label="recipe.cuisine" icon="restaurant" class="badge"/>
-              <q-badge v-if="recipe.duration" :label="formattedDuration" icon="schedule" class="badge"/>
-              <q-badge v-if="recipe.servings" :label="formattedServings" icon="people" class="badge"/>
-              <q-badge :label="formattedNumberOfIngredients" icon="local_dining" class="badge"/>
+              <q-badge v-if="recipe.rating" :label="recipe.rating" class="badge" icon="star"/>
+              <q-badge v-if="recipe.difficulty" :label="recipe.difficulty" class="badge" icon="fitness_center"/>
+              <q-badge v-if="recipe.cuisine" :label="recipe.cuisine" class="badge" icon="restaurant"/>
+              <q-badge v-if="recipe.duration" :label="formattedDuration" class="badge" icon="schedule"/>
+              <q-badge v-if="recipe.servings" :label="formattedServings" class="badge" icon="people"/>
+              <q-badge :label="formattedNumberOfIngredients" class="badge" icon="local_dining"/>
               <template v-if="recipe.props.tags">
-                <q-badge :label="tag" v-for="tag in recipe.props.tags" icon="local_offer" class="badge" :key="tag"
-                         color="secondary"/>
+                <q-badge v-for="tag in recipe.props.tags" :key="tag" :label="tag" class="badge" color="secondary"
+                         icon="local_offer"/>
               </template>
             </div>
           </div>
-          <q-slider v-model="recipe.servings" :min="1" :max="10" @input="adjustServings" class="servings-slider"/>
+          <q-slider v-model="recipe.servings" :max="10" :min="1" class="servings-slider" @input="adjustServings"/>
         </div>
       </div>
     </q-card>
@@ -37,8 +37,8 @@
                   <RecipeIngredient
                     v-for="(ingredient, index) in recipe.ingredients"
                     :key="index"
-                    :ingredient="ingredient"
-                    v-model="checkedIngredients[index]"/>
+                    v-model="checkedIngredients[index]"
+                    :ingredient="ingredient"/>
                 </q-list>
               </div>
               <div class="col-12 col-md-6">
@@ -46,7 +46,7 @@
                 <q-list class="directions">
                   <q-item v-for="(step, index) in recipe.steps" :key="index">
                     <q-item-section>
-                      <q-badge color="primary" :label="index + 1"/>
+                      <q-badge :label="index + 1" color="primary"/>
                       <p class="step-description">{{ getTranslation(step.description) }}</p>
                     </q-item-section>
                   </q-item>
@@ -60,7 +60,7 @@
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
   computed, onMounted, onUnmounted, ref, watch,
 } from 'vue';

@@ -10,6 +10,7 @@ const UserSchema = z.object({
   recipes: z.array(z.string()).default([]),
   weekplan: z.array(z.string()).default([]),
 });
+
 // Define the UserPreferences interface
 export interface UserPreferences {
   tags: string[],

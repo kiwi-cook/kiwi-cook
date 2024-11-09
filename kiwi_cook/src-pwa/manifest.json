@@ -4,7 +4,7 @@
   "description": "KiwiCook: Your friendly personal cooking assistant!",
   "orientation": "portrait",
   "background_color": "#4CAF50",
-  "theme_color": "#4CAF50",
+  "theme_color": "#7cb342",
   "icons": [
     {
       "src": "icons/icon-128x128.png",

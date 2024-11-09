@@ -13,13 +13,14 @@
     "build": "quasar build"
   },
   "dependencies": {
-    "@quasar/extras": "^1.16.12",
+    "@quasar/extras": "^1.16.13",
     "@quasar/icongenie": "^4.0.0",
+    "@telemetrydeck/sdk": "^2.0.4",
     "@xenova/transformers": "^2.17.2",
     "axios": "^1.7.7",
     "fuse.js": "^7.0.0",
-    "pinia": "^2.2.5",
-    "quasar": "^2.17.1",
+    "pinia": "^2.2.6",
+    "quasar": "^2.17.2",
     "register-service-worker": "^1.7.2",
     "sharp": "^0.33.5",
     "stemmer": "^2.0.1",

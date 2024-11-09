@@ -1,85 +1,111 @@
 export default {
+  // Core app sections
+  introduction: {
+    title: 'Willkommen in der Kiwi-Küche!',
+    subtitle: 'Dein persönlicher Kochassistent',
+    welcome: 'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochassistent und helfe dir beim Entdecken leckerer Rezepte.',
+    start: 'Loslegen',
+  },
+
+  // Chat interface
   chat: {
     you: 'Du',
-    welcome: 'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochhelfer. Bereit für leckere Entdeckungen?',
-    optionFindRecipe: 'Rezepte finden',
-    optionGenerateWeeklyPlan: 'Wochenplan erstellen',
-    servings: 'Für wie viele Personen möchtest du heute kochen?',
-    recipeType: 'Toll! Auf welche Art Gericht hast du Lust?',
-    dietaryRestrictions: 'Alles klar. Gibt es besondere Ernährungswünsche? Wir finden für alle etwas Passendes.',
-    cookingTime: 'Wie viel Zeit möchtest du in der Küche verbringen? Wir finden ein Rezept, das dazu passt.',
-    minutes: 'Minute | Minuten',
-    cuisine: 'Letzte Frage: Welche Küche darf es heute sein?',
-    reset: 'Kein Problem. Lass uns von vorne anfangen. Was möchtest du heute Leckeres kochen?',
-    plan: {
+    kiwi: 'Kiwi',
+    actions: {
+      optionFindRecipe: 'Rezept finden',
+      optionGenerateWeeklyPlan: 'Wochenplan erstellen',
+      reset: 'Alles klar, lass uns von vorne anfangen. Was möchtest du heute kochen?',
+    },
+    status: {
+      recipes: {
+        checking: 'Lade Rezepte herunter...',
+        failed: 'Entschuldige, ich konnte keine Rezepte abrufen. Bitte versuche es später erneut.',
+      },
+    },
+    input: {
+      label: 'Was möchtest du kochen?',
+    },
+  },
+
+  // Recipe search related
+  search: {
+    questions: {
+      servings: 'Für wie viele Personen möchtest du kochen?',
+      recipeType: 'Welche Art von Gericht suchst du?',
+      dietaryRestrictions: 'Gibt es besondere Ernährungswünsche?',
+      cookingTime: 'Wie viel Zeit möchtest du zum Kochen einplanen?',
+      cuisine: 'Welche Küche bevorzugst du heute?',
+      lastQuestion: 'Zum Schluss: ',
+    },
+    results: {
+      searching: 'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
+      noResults: 'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
+      found: 'Hier sind einige passende Vorschläge für dich:',
+      error: 'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
+    },
+    actions: {
+      broaden: 'Suche anpassen',
+      startOver: 'Neu beginnen',
+      moreOptions: 'Weitere Rezepte',
+      startCooking: 'Kochen starten',
+      newSearch: 'Neue Suche',
+    },
+  },
+
+  // Recipe categories and filters
+  filters: {
+    recipeType: {
+      dontCare: 'Egal',
+      quick: 'Schnell und einfach',
+      healthy: 'Gesund und ausgewogen',
+      comfort: 'Wohlfühlgerichte',
+      gourmet: 'Besondere Gerichte',
+      budget: 'Günstig und lecker',
+    },
+    dietary: {
+      none: 'Keine Einschränkungen',
+      vegetarian: 'Vegetarisch',
+      vegan: 'Vegan',
+      glutenFree: 'Glutenfrei',
+      dairyFree: 'Laktosefrei',
+      lowCarb: 'Kohlenhydratarm',
+    },
+    cuisine: {
+      italian: 'Italienisch',
+      mexican: 'Mexikanisch',
+      asian: 'Asiatisch',
+      mediterranean: 'Mediterran',
+      american: 'Amerikanisch',
+      surprise: 'Überrasche mich!',
+    },
+    servings: {
+      1: 'Eine Person',
+      2: 'Zwei Personen',
+      3: 'Drei Personen',
+      4: 'Vier Personen',
+      '5plus': 'Fünf oder mehr Personen',
+    },
+  },
+
+  // Meal planning
+  plan: {
+    meals: {
       breakfast: 'Frühstück',
       lunch: 'Mittagessen',
       dinner: 'Abendessen',
-      findRecQDays: 'Wie viele Tage soll dein Wochenplan umfassen?',
-      ingredients: 'Sollen wir die Einkaufsliste für dich zusammenstellen?',
-      scanFridge: 'Möchtest du deinen Kühlschrank scannen?',
-      noIngredients: 'Hm, leider haben wir keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
     },
-    days: 'Tag | Tage',
-  },
-  checks: {
-    statusRecipes: 'Ich überprüfe, ob ich Rezepte für dich habe.',
-    statusWeekplan: 'Ich überprüfe, ob ich einen Wochenplan für dich habe.',
-    noRecipes: 'Ich habe ein Problem beim Abrufen der Rezepte. Möchtest du es nochmal versuchen?',
-  },
-  chatbox: {
-    label: 'Was möchtest du kochen?',
-  },
-  servings: {
-    1: 'Eine Person',
-    2: 'Zwei Personen',
-    3: 'Drei Personen',
-    4: 'Vier Personen',
-    '5plus': 'Fünf oder mehr Personen',
-  },
-  recipeType: {
-    quick: 'Schnell und einfach',
-    healthy: 'Gesund und lecker',
-    comfort: 'Wohlfühlessen',
-    gourmet: 'Besondere Gerichte',
-    budget: 'Günstig und gut',
-  },
-  dietary: {
-    vegetarian: 'Vegetarisch',
-    vegan: 'Vegan',
-    glutenFree: 'Glutenfrei',
-    dairyFree: 'Ohne Milchprodukte',
-    lowCarb: 'Kohlenhydratarm',
-    none: 'Keine besonderen Wünsche',
-  },
-  cuisine: {
-    italian: 'Italienisch',
-    mexican: 'Mexikanisch',
-    asian: 'Asiatisch',
-    mediterranean: 'Mediterran',
-    american: 'Amerikanisch',
-    surprise: 'Überrasch mich!',
-  },
-  search: {
-    servings: '{count} Portionen',
-    recipeType: '{type}',
-    cookingTime: '{time} Minuten Kochzeit',
-    cuisine: '{cuisine} Küche',
-    summary: '{content}',
-    searching: 'Super! Ich suche jetzt nach den besten Rezepten für dich. Mal sehen, was wir mit {preferences} finden können.',
-    noResults: 'Hm, leider haben wir keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
-    broaden: 'Ja, lass uns weitersuchen',
-    startOver: 'Nein, lass uns neu anfangen',
-    results: 'Schau mal! Hier sind einige leckere Vorschläge für dich:',
-    moreOptions: 'Zeig mir mehr Rezepte',
-    startCooking: 'Los geht\'s!',
-    newSearch: 'Neue Suche starten?',
-    error: 'Ups! Da ist etwas schiefgelaufen. Möchtest du es nochmal versuchen?',
-  },
-  plan: {
-    generating: 'Ich erstelle jetzt deinen Wochenplan. Einen Moment, bitte.',
-    planFor: 'Hier ist dein Wochenplan für {days} Tage:',
-    day: {
+    questions: {
+      days: 'Für wie viele Tage möchtest du einen Plan erstellen?',
+      ingredients: 'Welche Zutaten hast du bereits zu Hause?',
+      shoppingList: 'Soll ich eine Einkaufsliste erstellen?',
+      scanFridge: 'Möchtest du deinen Kühlschrank scannen?',
+    },
+    status: {
+      generating: 'Ich erstelle deinen Wochenplan. Einen Moment bitte...',
+      planFor: 'Dein Wochenplan für {days} Tage:',
+      noIngredients: 'Leider finde ich keine passenden Rezepte. Sollen wir die Anforderungen anpassen?',
+    },
+    weekdays: {
       0: 'Montag',
       1: 'Dienstag',
       2: 'Mittwoch',
@@ -89,17 +115,29 @@ export default {
       6: 'Sonntag',
     },
   },
+
+  // Recipe details
   recipe: {
     servings: 'Portionen',
     minutes: 'Minuten',
     ingredients: 'Zutaten',
-    steps: 'So wird\'s gemacht',
+    steps: 'Zubereitungsschritte',
   },
+
+  // Shopping list
   shopping: {
     addToList: 'Zur Einkaufsliste hinzufügen',
   },
+
+  // Error handling
   error: {
-    notFound: 'Hoppla! 🥝 Dieses Rezept ist so geheim, dass selbst wir es nicht finden können! Versuch’s mit einem anderen!',
+    notFound: 'Hoppla! 🥝 Dieses Rezept können wir leider nicht finden. Bitte wähle ein anderes aus!',
     backToHome: 'Zurück zur Startseite',
+  },
+
+  // Common units
+  units: {
+    minutes: 'Minute | Minuten',
+    days: 'Tag | Tage',
   },
 };

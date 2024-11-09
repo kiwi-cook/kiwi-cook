@@ -7,7 +7,7 @@
     :bg-color="isDark ? 'dark-accent' : 'light-accent'"
     :label-color="isDark ? 'light' : 'dark'"
     :text-color="isDark ? 'white' : 'black'"
-    :label="$t('chatbox.label')"
+    :label="$t('chat.input.label')"
     @keydown="processInputFill"
     @focus="processInputFill"
     class="kiwi-chat-input"

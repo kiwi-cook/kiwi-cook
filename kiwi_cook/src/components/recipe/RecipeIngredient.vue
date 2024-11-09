@@ -4,13 +4,13 @@
       <div class="ingredient-name">{{ formatName(getTranslation(ingredient.ingredient.name)) }}</div>
       <div class="ingredient-quantity">{{ formattedAmount }}</div>
       <div class="ingredient-checkbox">
-        <q-checkbox v-model="isChecked" @change="toggleCheck" class="checkbox" />
+        <q-checkbox v-model="isChecked" class="checkbox" @change="toggleCheck"/>
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
   computed, defineEmits, defineProps, ref, watch,
 } from 'vue';

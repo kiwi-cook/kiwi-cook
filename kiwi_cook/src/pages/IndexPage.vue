@@ -1,31 +1,35 @@
 <template>
   <q-page class="chat-page">
     <div class="chat-container q-pa-md">
-      <q-scroll-area class="chat-scroll" ref="scrollArea">
+      <q-scroll-area ref="scrollArea" class="chat-scroll">
         <div class="chat-messages-wrapper">
           <transition-group name="fade">
             <div v-for="(message, messageIndex) in messages" :key="message.id"
                  :class="['fade-enter-active', {'q-mt-md': messages[messageIndex - 1]?.sender !== message.sender}]">
               <q-chat-message
                 :bg-color="message.sent ? 'secondary' : 'transparent'"
-                :name="messages[messageIndex - 1]?.sender !== message.sender ? message.sender : ''"
-                :sent="message.sent"
-                :stamp="message.timestamp"
-                :text-color="message.sent ? 'white' : (isDark ? 'white' : 'grey-9')"
-                class="chat-bubble apple-bubble"
                 :class="{
                   'kiwi-bubble': !message.sent,
                   'user-bubble': message.sent,
                   'next-message-same': messages[messageIndex + 1]?.sender === message.sender,
                   'last-message-same': messages[messageIndex - 1]?.sender === message.sender && messageIndex !== 0,
                 }"
+                :name="messages[messageIndex - 1]?.sender !== message.sender ? message.sender : ''"
+                :sent="message.sent"
+                :stamp="message.timestamp"
+                :text-color="message.sent ? 'white' : (isDark ? 'white' : 'grey-9')"
+                class="chat-bubble apple-bubble"
               >
-                <template v-if="message.type === 'text'">
-                  <div v-html="message.content" class="chat-text"/>
+                <template v-if="isTyping && messageIndex === messages.length - 1">
+                  <q-spinner-dots color="primary" size="2em"/>
+                </template>
+
+                <template v-else-if="message.type === 'text'">
+                  <div class="chat-text" v-html="message.content"/>
                 </template>
 
                 <template v-else-if="message.type === 'image'">
-                  <q-img :src="message.content" class="chat-image" alt="Chat image"/>
+                  <q-img :src="message.content" alt="Chat image" class="chat-image"/>
                 </template>
 
                 <template v-else-if="message.type === 'recipe'">
@@ -43,12 +47,12 @@
                     <q-btn
                       v-for="(option, optionIndex) in message.content"
                       :key="optionIndex"
-                      :label="option"
                       :disable="messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
-                      class="option-button"
-                      unelevated
-                      rounded
+                      :label="option"
                       :ripple="false"
+                      class="option-button"
+                      rounded
+                      unelevated
                       @click="handleMessage(option)"
                     />
                   </div>
@@ -60,27 +64,27 @@
 
                     <q-slider
                       v-model="message.content.value"
-                      :min="message.content.min"
-                      :max="message.content.max"
-                      :step="message.content.step"
                       :disable="messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
                       :label-always="!messages.slice(messageIndex + 1).some((m) => m.sender !== message.sender)"
                       :label-value="message.content.value + ' ' +
                       (typeof message.content.unit === 'function' ? message.content.unit(message.content.value) : message.content.unit)"
-                      color="primary"
+                      :max="message.content.max"
+                      :min="message.content.min"
+                      :step="message.content.step"
                       aria-label="Slider"
-                      @input="onSliderChange"
                       class="slider-enhanced"
+                      color="primary"
+                      @input="onSliderChange"
                     />
 
                     <div class="row items-center justify-between q-mt-sm">
                       <q-btn
+                        v-if="messages.slice(messageIndex + 1).every((m) => m.sender === message.sender)"
+                        class="send-button shadow-1"
                         color="primary"
+                        dense
                         icon="send"
                         round
-                        dense
-                        class="send-button shadow-1"
-                        v-if="messages.slice(messageIndex + 1).every((m) => m.sender === message.sender)"
                         @click="handleMessage(message.content.value)"
                       />
                     </div>
@@ -89,18 +93,17 @@
               </q-chat-message>
             </div>
           </transition-group>
-
-          <div v-if="isTyping" class="typing-indicator q-my-md">
-            <q-spinner-dots color="primary" size="2em"/>
-            <span class="q-ml-sm">Kiwi is typing...</span>
-          </div>
         </div>
       </q-scroll-area>
     </div>
+
+    <q-page-sticky class="kiwi-chat-box">
+      <KiwiChatBox/>
+    </q-page-sticky>
   </q-page>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import {
   computed, nextTick, ref, watch,
 } from 'vue';
@@ -108,6 +111,7 @@ import { QScrollArea, QSlider, useQuasar } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
 import ChatRecipePreview from 'components/recipe/ChatRecipePreview.vue';
+import KiwiChatBox from 'components/KiwiChatBox.vue';
 
 const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);

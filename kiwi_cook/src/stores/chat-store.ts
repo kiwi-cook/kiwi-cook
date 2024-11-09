@@ -67,11 +67,17 @@ export const useChatStore = defineStore('chat', () => {
     await nextTick();
   };
 
-  const searchRecipes = async () => {
+  const kiwiTypes = async (duration: number) => {
     isTyping.value = true;
+    // Fake typing
+    await new Promise((resolve) => { setTimeout(resolve, duration); });
+    isTyping.value = false;
+  };
 
+  const searchRecipes = async () => {
     try {
       const recipes = await recipeStore.searchByPreferences(userPreferences.value);
+      await kiwiTypes(1000);
       currentRecipes.value = recipes;
 
       if (recipes.length === 0) {
@@ -82,8 +88,8 @@ export const useChatStore = defineStore('chat', () => {
 
       trackEvent('recipes_searched', { count: recipes.length });
     } catch (error) {
-      console.error('Error searching recipes:', error);
       await addMessage({ type: 'text', content: t('search.error') });
+      trackEvent('recipes_search_error', { error });
       showNotification('error', t('search.errorNotification'));
       await updateState('start');
     } finally {
@@ -93,12 +99,13 @@ export const useChatStore = defineStore('chat', () => {
 
   const generateWeekPlan = async () => {
     const generatedWeekplan = weekplan.generateRandomWeekplan(userPreferences.value.weekplanDays);
+    await kiwiTypes(1000);
 
     generatedWeekplan.forEach((plan: MealPlan) => {
       const day = plan.date.getDay();
 
       const recipes = plan.meals.map((meal: Meal) => meal.recipe);
-      addMessage({ type: 'text', content: t(`plan.day.${day}`) });
+      addMessage({ type: 'text', content: t(`plan.weekdays.${day}`) });
       addMessage({ type: 'recipe', content: recipes });
     });
   };
@@ -116,9 +123,9 @@ export const useChatStore = defineStore('chat', () => {
    * 7. findRecASearch: Searching for recipes
    *
    * States to generate weekly plan:
-   * 1. findRecQDaysWeekPlan: Ask user for number of days
-   * 2. findRecQIngredients: Ask user for ingredients: input or take image
-   * 3. generatePlan: Generate weekly plan
+   * 1. genPlanQWeekDays: Ask user for number of days
+   * 2. genPlanQIngredients: Ask user for ingredients: input or take image
+   * 3. genPlanAPlan: Generate weekly plan
    *
    */
   const chatConfig: ChatConfig = {
@@ -126,11 +133,11 @@ export const useChatStore = defineStore('chat', () => {
       nextState: 'checkStatusRecipes',
     },
     checkStatusRecipes: {
-      message: t('checks.statusRecipes'),
+      message: t('chat.status.recipes.checking'),
       action: async () => {
         await recipeStore.fetchRecipes();
         if (recipeStore.recipes.length === 0) {
-          await addMessage({ type: 'text', content: t('checks.noRecipes') });
+          await addMessage({ type: 'text', content: t('chat.status.recipes.failed') });
         } else {
           await removeLastMessages(2);
           await updateState('welcome');
@@ -138,30 +145,30 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     welcome: {
-      message: t('chat.welcome'),
-      options: ts(['chat.optionFindRecipe', 'chat.optionGenerateWeeklyPlan']),
+      message: t('introduction.welcome'),
+      options: ts(['chat.actions.optionFindRecipe', 'chat.actions.optionGenerateWeeklyPlan']),
       nextState: (input: string) => {
         switch (input) {
-          case t('chat.optionFindRecipe'):
+          case t('chat.actions.optionFindRecipe'):
             return 'findRecQServings';
-          case t('chat.optionGenerateWeeklyPlan'):
-            return 'findRecQDaysWeekPlan';
+          case t('chat.actions.optionGenerateWeeklyPlan'):
+            return 'genPlanQWeekDays';
           default:
             return 'start';
         }
       },
     },
     findRecQServings: {
-      message: t('chat.servings'),
-      options: ts(['servings.1', 'servings.2', 'servings.3', 'servings.4', 'servings.5plus']),
+      message: t('search.questions.servings'),
+      options: ts(['filters.servings.1', 'filters.servings.2', 'filters.servings.3', 'filters.servings.4', 'filters.servings.5plus']),
       nextState: 'findRecQRecipeType',
       updatePreference: (input: string | number) => {
         const getServingsMapping = () => ({
-          [t('servings.1')]: 1,
-          [t('servings.2')]: 2,
-          [t('servings.3')]: 3,
-          [t('servings.4')]: 4,
-          [t('servings.5plus')]: undefined,
+          [t('filters.servings.1')]: 1,
+          [t('filters.servings.2')]: 2,
+          [t('filters.servings.3')]: 3,
+          [t('filters.servings.4')]: 4,
+          [t('filters.servings.5plus')]: undefined,
         });
 
         const mapOptionToServings = getServingsMapping();
@@ -170,16 +177,18 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     findRecQRecipeType: {
-      message: t('chat.recipeType'),
-      options: ts(['recipeType.quick', 'recipeType.healthy', 'recipeType.comfort', 'recipeType.gourmet', 'recipeType.budget']),
+      message: t('search.questions.recipeType'),
+      options: ts(['filters.recipeType.dontCare', 'filters.recipeType.quick', 'filters.recipeType.healthy',
+        'filters.recipeType.comfort', 'filters.recipeType.gourmet', 'filters.recipeType.budget']),
       nextState: 'findRecQDietaryRestrictions',
       updatePreference: (input: string | number) => {
         const getRecipeTypeMappings = () => ({
-          [t('recipeType.quick')]: 'quick',
-          [t('recipeType.healthy')]: 'healthy',
-          [t('recipeType.comfort')]: 'comfort',
-          [t('recipeType.gourmet')]: 'gourmet',
-          [t('recipeType.budget')]: 'budget',
+          [t('filters.recipeType.dontCare')]: '',
+          [t('filters.recipeType.quick')]: 'quick',
+          [t('filters.recipeType.healthy')]: 'healthy',
+          [t('filters.recipeType.comfort')]: 'comfort',
+          [t('filters.recipeType.gourmet')]: 'gourmet',
+          [t('filters.recipeType.budget')]: 'budget',
         });
 
         const mapOptionToType = getRecipeTypeMappings();
@@ -188,15 +197,21 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     findRecQDietaryRestrictions: {
-      message: t('chat.dietaryRestrictions'),
-      options: ts(['dietary.vegetarian', 'dietary.vegan', 'dietary.glutenFree', 'dietary.dairyFree', 'dietary.lowCarb', 'dietary.none']),
+      message: t('search.questions.dietaryRestrictions'),
+      options: ts(['filters.dietary.none',
+        'filters.dietary.vegetarian',
+        'filters.dietary.vegan',
+        'filters.dietary.glutenFree',
+        'filters.dietary.dairyFree',
+        'filters.dietary.lowCarb',
+      ]),
       nextState: 'findRecQCookingTime',
       updatePreference: (input: string | number) => {
         userPreferences.value.dietaryRestrictions = (input as string).split(',').map((item) => item.trim());
       },
     },
     findRecQCookingTime: {
-      message: t('chat.cookingTime'),
+      message: t('search.questions.cookingTime'),
       type: 'slider',
       sliderOptions: {
         min: 10,
@@ -210,7 +225,7 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     findRecQCuisine: {
-      message: t('chat.cuisine'),
+      message: t('search.questions.cuisine'),
       options: ts(['cuisine.italian', 'cuisine.mexican', 'cuisine.asian', 'cuisine.mediterranean', 'cuisine.american', 'cuisine.surprise']),
       nextState: 'findRecASearch',
       updatePreference: (input: string | number) => {
@@ -218,38 +233,38 @@ export const useChatStore = defineStore('chat', () => {
       },
     },
     findRecASearch: {
-      message: () => t('search.searching', { preferences: preferencesToSummary(userPreferences.value) }),
+      message: () => t('search.results.searching', { preferences: preferencesToSummary(userPreferences.value) }),
       nextState: 'findRecAResults',
       action: searchRecipes,
     },
     findRecSNoResults: {
-      message: t('search.noResults'),
-      options: ts(['search.moreOptions', 'search.newSearch']),
+      message: t('search.results.noResults'),
+      options: ts(['search.actions.moreOptions', 'search.actions.newSearch']),
       nextState: (input: string | number) => {
-        if (input === 'search.moreOptions') {
+        if (input === 'search.actions.moreOptions') {
           return 'findRecQServings';
         }
         return 'globAReset';
       },
     },
     findRecAResults: {
-      message: t('search.results'),
-      options: ts(['search.moreOptions', 'search.startCooking', 'search.newSearch']),
+      message: t('search.results.found'),
+      options: ts(['search.actions.moreOptions', 'search.actions.startCooking', 'search.actions.newSearch']),
       nextState: (input: string) => {
-        if (input === 'search.moreOptions') {
-          return 'findRecQCuisine';
+        switch (input) {
+          case 'search.actions.moreOptions':
+            return 'findRecQCuisine';
+          case 'search.actions.startCooking':
+            return 'start';
+          case 'search.actions.newSearch':
+            return 'globAReset';
+          default:
+            return 'findRecAResults';
         }
-        if (input === 'search.startCooking') {
-          return 'start';
-        }
-        if (input === 'search.newSearch') {
-          return 'globAReset';
-        }
-        return 'findRecAResults';
       },
     },
-    findRecQDaysWeekPlan: {
-      message: t('chat.plan.findRecQDays'),
+    genPlanQWeekDays: {
+      message: t('plan.questions.days'),
       type: 'slider',
       sliderOptions: {
         min: 1,
@@ -257,13 +272,20 @@ export const useChatStore = defineStore('chat', () => {
         step: 1,
         unit: (input: number) => (input === 1 ? t('chat.days', 1) : t('chat.days', 2)),
       },
-      nextState: 'genPlan',
+      nextState: 'genPlanQIngredients',
       updatePreference: (input: string | number) => {
         userPreferences.value.weekplanDays = input as number;
       },
     },
+    genPlanQIngredients: {
+      message: t('plan.questions.ingredients'),
+      nextState: 'genPlan',
+      updatePreference: (input: string | number) => {
+        userPreferences.value.ingredients = (input as string).split(',').map((item) => item.trim());
+      },
+    },
     genPlan: {
-      message: () => t('plan.generating', { preferences: preferencesToSummary(userPreferences.value) }),
+      message: () => t('plan.status.generating', { preferences: preferencesToSummary(userPreferences.value) }),
       action: generateWeekPlan,
     },
     globAReset: {

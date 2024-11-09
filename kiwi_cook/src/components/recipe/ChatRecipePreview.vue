@@ -15,15 +15,15 @@
     <q-card-section class="recipe-details-section">
       <div class="recipe-details row items-center justify-around q-gutter-sm">
         <div class="recipe-detail-item">
-          <q-icon name="schedule" size="md" color="grey-8" />
+          <q-icon name="schedule" size="md" color="grey-8"/>
           <span>{{ recipe.duration }} min</span>
         </div>
         <div class="recipe-detail-item">
-          <q-icon name="fitness_center" size="md" color="grey-8" />
+          <q-icon name="fitness_center" size="md" color="grey-8"/>
           <span>{{ capitalize(recipe.difficulty) }}</span>
         </div>
         <div class="recipe-detail-item">
-          <q-icon name="people" size="md" color="grey-8" />
+          <q-icon name="people" size="md" color="grey-8"/>
           <span>{{ recipe.servings }} servings</span>
         </div>
       </div>
@@ -32,7 +32,8 @@
     <!-- Action Button with Subtle Accent -->
     <q-card-actions align="right" class="recipe-actions">
       <q-btn flat color="primary" :to="`/recipe/${recipe.id}`" class="view-button"
-      >View Recipe</q-btn
+      >View Recipe
+      </q-btn
       >
     </q-card-actions>
   </q-card>

@@ -10,10 +10,10 @@
       </div>
 
       <q-btn
-        class="q-mt-xl q-mb-md"
-        size="lg"
         :label="$t('error.backToHome')"
+        class="q-mt-xl q-mb-md"
         no-caps
+        size="lg"
         to="/"
         unelevated
       />
