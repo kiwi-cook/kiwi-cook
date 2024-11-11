@@ -1,4 +1,8 @@
 export default {
+  app: {
+    tagline: 'Dein persönlicher Kochassistent',
+  },
+
   // Core app sections
   introduction: {
     title: 'Willkommen in der Kiwi-Küche!',
@@ -127,6 +131,15 @@ export default {
   // Shopping list
   shopping: {
     addToList: 'Zur Einkaufsliste hinzufügen',
+  },
+
+  login: {
+    title: 'Melde dich mit deinem Kiwi-Konto an',
+    username: 'Benutzername',
+    password: 'Passwort',
+    keepSignedIn: 'Angemeldet bleiben',
+    forgotPassword: 'Passwort vergessen?',
+    signUp: 'Jetzt registrieren!',
   },
 
   // Error handling

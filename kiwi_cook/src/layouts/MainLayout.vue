@@ -4,19 +4,30 @@
       <q-toolbar class="q-py-sm">
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
           <div class="col">
-            <div class="text-h4 text-weight-bold text-white">KiwiCook</div>
-            <div :class="isDark ? 'text-secondary' : 'text-black'" class="text-subtitle2">Reclaim your kitchen</div>
+            <div class="text-h4 text-weight-bold text-white q-mb-xs q-mt-sm">KiwiCook</div>
+            <div :class="isDark ? 'text-secondary' : 'text-black'" class="text-subtitle2">{{ $t('app.tagline') }}</div>
           </div>
           <div class="col-auto q-ml-md">
-            <q-avatar class="rounded-borders" color="white" size="48px">
-              <q-img height="36px" src="/icons/icon-500x500.png" width="36px"/>
-            </q-avatar>
+            <KiwiLogo/>
           </div>
         </div>
+        <q-space/>
+
+        <!-- Login button -->
+        <q-btn
+          :color="isDark ? 'secondary' : 'white'"
+          :text-color="isDark ? 'primary' : 'dark'"
+          class="q-mr-md"
+          flat
+          @click="$router.push('/login')"
+        >
+          <q-icon name="mdi-login"/>
+          <q-tooltip>Login</q-tooltip>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
-    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="rounded-borders q-pa-md page">
+    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="q-pa-md page">
       <router-view v-slot="{ Component }">
         <transition mode="out-in" name="fade">
           <component :is="Component"/>
@@ -48,6 +59,7 @@
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
 import { ref } from 'vue';
+import KiwiLogo from 'components/KiwiLogo.vue';
 
 defineOptions({
   name: 'MainLayout',
@@ -85,6 +97,10 @@ body {
 
 .rounded-borders {
   border-radius: 24px;
+}
+
+.page {
+  min-height: 100vh;
 }
 
 .mode-toggle {

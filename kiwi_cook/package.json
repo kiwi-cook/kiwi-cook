@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "eslint --ext .js,.ts,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
+    "icon-genie": "icongenie generate -m pwa -i ./src/assets/kiwi-cook-logo.png -o ./public/icons",
     "dev": "quasar dev",
     "build": "quasar build"
   },
