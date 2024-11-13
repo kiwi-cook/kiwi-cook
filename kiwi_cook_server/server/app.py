@@ -1,10 +1,11 @@
 import os
+
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 
 from lib.logging import logger
 from models.api import APIResponse
@@ -49,7 +50,7 @@ def setup_cors(app: FastAPI) -> None:
             "https://kiwi.jpkmiller.de",
             "https://taste-buddy.uk",
         ]
-        allow_origin_regex = r"^https?://(kiwi-cook\.github\.io|taste-buddy\.uk)$"
+        allow_origin_regex = r"^https?://(kiwi-cook\.github\.io|kiwi.jpkmiller\.de|taste-buddy\.uk)$"
 
     app.add_middleware(
         CORSMiddleware,
@@ -71,7 +72,8 @@ def setup_cors(app: FastAPI) -> None:
 
 def setup_log_request_headers(app: FastAPI) -> None:
     async def log_request_headers(request: Request, call_next):
-        logger.info(f"Request headers: {request.headers}")
+        headers_to_log = {key: value for key, value in request.headers.items() if key.lower() != "authorization"}
+        logger.info(f"Request headers (filtered): {headers_to_log}")
         response = await call_next(request)
         return response
 
@@ -143,14 +145,14 @@ setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
 setup_exception_handlers(app)
-#setup_log_request_headers(app)
+setup_log_request_headers(app)
 
 try:
     from lib.database.mongodb import get_database
 
     get_database()
 except Exception as e:
-    logger.error(f"Failed to connect to database: {str(e)}")
+    logger.error("Database connection failed.")
     raise
 
 

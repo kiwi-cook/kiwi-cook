@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from starlette import status
 
 from lib.database.mongodb import get_database
-from lib.pipeline.recipe import run_pipeline
+from lib.pipeline.recipe import run_html_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
 from models.user import get_admin_user, User
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
     response_model_exclude_none=True,
 )
 def create_recipes(
-    current_user: Annotated[User, Depends(get_admin_user)], recipes: list[Recipe]
+        current_user: Annotated[User, Depends(get_admin_user)], recipes: list[Recipe]
 ):
     write_client = get_database(rights="WRITE")
     error = False
@@ -46,11 +46,11 @@ def create_recipes(
     response_model_exclude_none=True,
 )
 async def parse_recipes(
-    current_user: Annotated[User, Depends(get_admin_user)], recipe_urls: list[str]
+        current_user: Annotated[User, Depends(get_admin_user)], recipe_urls: list[str]
 ):
     error = False
     try:
-        await run_pipeline(recipe_urls)
+        await run_html_pipeline(recipe_urls)
     except Exception as e:
         error = True
     return {"error": error, "response": f"Recipes parsed from {len(recipe_urls)} URLs"}

@@ -1,10 +1,11 @@
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Form, Response
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi_limiter.depends import RateLimiter
 from starlette import status
 
 from lib.auth import hash_password, is_secure_password
@@ -39,11 +40,12 @@ router = APIRouter(
     response_model_by_alias=False,
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RateLimiter(times=5, minutes=1))]
 )
 async def create_user(
-    username: Annotated[str, Form()],
-    password: Annotated[str, Form()],
-    response: Response,
+        username: Annotated[str, Form()],
+        password: Annotated[str, Form()],
+        response: Response,
 ):
     if not is_secure_password(password):
         raise HTTPException(
@@ -68,10 +70,11 @@ async def create_user(
     response_model_by_alias=False,
     response_model_exclude_none=True,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(RateLimiter(times=5, minutes=1))]
 )
-async def login_user(
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    response: Response,
+async def login_for_access_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        response: Response,
 ) -> Token:
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
@@ -82,7 +85,7 @@ async def login_user(
         )
     try:
         access_token = create_access_token(
-            data={"sub": user.username}, 
+            data={"sub": user.username},
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         )
     except ValueError as e:
@@ -105,8 +108,8 @@ async def login_user(
     status_code=status.HTTP_200_OK,
 )
 async def read_users_me(
-    current_user: Annotated[User, Depends(get_active_user)],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        response: Response,
 ):
     return {"error": False, "response": current_user}
 
@@ -120,8 +123,8 @@ async def read_users_me(
     status_code=status.HTTP_200_OK,
 )
 async def read_user_friends(
-    current_user: Annotated[User, Depends(get_active_user)],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        response: Response,
 ):
     return {"error": False, "response": current_user.friends or []}
 
@@ -135,9 +138,9 @@ async def read_user_friends(
     status_code=status.HTTP_200_OK,
 )
 async def add_user_friend(
-    current_user: Annotated[User, Depends(get_active_user)],
-    friend_username: Annotated[str, Form()],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        friend_username: Annotated[str, Form()],
+        response: Response,
 ):
     # If the user has no friends, set it to an empty list
     if current_user.friends is None:
@@ -179,8 +182,8 @@ async def add_user_friend(
     status_code=status.HTTP_200_OK,
 )
 async def read_user_recipes(
-    current_user: Annotated[User, Depends(get_active_user)],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        response: Response,
 ):
     return {"error": False, "response": current_user.recipes or []}
 
@@ -194,9 +197,9 @@ async def read_user_recipes(
     status_code=status.HTTP_200_OK,
 )
 async def add_user_recipe(
-    current_user: Annotated[User, Depends(get_active_user)],
-    recipe_id: Annotated[str, Form()],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        recipe_id: Annotated[str, Form()],
+        response: Response,
 ):
     # If the user has no recipes, set it to an empty list
     if current_user.recipes is None:
@@ -225,9 +228,9 @@ async def add_user_recipe(
     status_code=status.HTTP_200_OK,
 )
 async def remove_user_recipe(
-    current_user: Annotated[User, Depends(get_active_user)],
-    recipe_id: Annotated[str, Form()],
-    response: Response,
+        current_user: Annotated[User, Depends(get_active_user)],
+        recipe_id: Annotated[str, Form()],
+        response: Response,
 ):
     # If the user has no recipes, set it to an empty list
     if current_user.recipes is None:
