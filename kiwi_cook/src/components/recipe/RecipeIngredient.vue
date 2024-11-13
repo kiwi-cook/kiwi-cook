@@ -49,7 +49,7 @@ const toggleCheck = () => {
   emit('update:modelValue', isChecked.value);
 };
 
-// Function to format amount based on unit type
+// Function to format amount based on unit messageType
 const formatAmount = (amount?: number, unit?: string): string => {
   if (amount === undefined || amount === null) {
     return '';

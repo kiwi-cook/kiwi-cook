@@ -53,7 +53,46 @@
                       class="option-button"
                       rounded
                       unelevated
-                      @click="handleMessage(option)"
+                      @click="chat.handleMessage(option)"
+                    />
+                  </div>
+                </template>
+
+                <template v-else-if="message.type === 'suggestion'">
+                  <q-list class="q-ma-none" dense v-if="message.content(userInput).length > 0">
+                    <q-item
+                      v-for="(item, itemIndex) in message.content(userInput)"
+                      :key="itemIndex"
+                      clickable
+                      @click="chat.handleMessage(item)"
+                    >
+                      <q-item-section>
+                        <q-item-label>{{ item }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+
+                  <!-- Filter out the suggestions that have already been sent -->
+                  <div
+                    v-if="message.withInput"
+                    class="q-gutter-xs row items-center">
+                    <q-input
+                      v-model="userInput"
+                      dense
+                      autofocus
+                      outlined
+                      :placeholder="message.placeholder || $t('chat.input.placeholder')"
+                      filled
+                      color="primary"
+                    />
+
+                    <q-btn
+                      class="send-button shadow-1"
+                      color="primary"
+                      dense
+                      icon="send"
+                      round
+                      @click="() => chat.handleMessage(message.submitText || userInput)"
                     />
                   </div>
                 </template>
@@ -85,7 +124,7 @@
                         dense
                         icon="send"
                         round
-                        @click="handleMessage(message.content.value)"
+                        @click="chat.handleMessage(message.content.value)"
                       />
                     </div>
                   </div>
@@ -96,10 +135,6 @@
         </div>
       </q-scroll-area>
     </div>
-
-    <q-page-sticky class="kiwi-chat-box">
-      <KiwiChatBox/>
-    </q-page-sticky>
   </q-page>
 </template>
 
@@ -111,16 +146,14 @@ import { QScrollArea, QSlider, useQuasar } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
 import ChatRecipePreview from 'components/recipe/ChatRecipePreview.vue';
-import KiwiChatBox from 'components/KiwiChatBox.vue';
 
 const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
 const {
-  messages, isTyping,
+  messages, isTyping, userInput,
 } = storeToRefs(chat);
-const { handleMessage } = chat;
 
 const scrollArea = ref<QScrollArea | null>(null);
 
@@ -166,7 +199,7 @@ watch(() => messages.value.length, scrollToBottom, { immediate: true });
 function onSliderChange() {
   // Check if the vibration API is supported
   if (navigator.vibrate) {
-    navigator.vibrate(50); // Vibrate for 50 milliseconds
+    navigator.vibrate(50);
   }
 }
 </script>

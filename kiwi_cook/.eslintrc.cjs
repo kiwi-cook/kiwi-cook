@@ -39,7 +39,7 @@ module.exports = {
   ],
 
   plugins: [
-    // required to apply rules which need type information
+    // required to apply rules which need messageType information
     '@typescript-eslint',
 
     // https://eslint.vuejs.org/user-guide/#why-doesn-t-it-work-on-vue-files
@@ -91,14 +91,14 @@ module.exports = {
 
     quotes: ['warn', 'single', {avoidEscape: true}],
 
-    // this rule, if on, would require explicit return type on the `render` function
+    // this rule, if on, would require explicit return messageType on the `render` function
     '@typescript-eslint/explicit-function-return-type': 'off',
 
     // in plain CommonJS modules, you can't use `import foo = require('foo')` to pass this rule, so it has to be disabled
     '@typescript-eslint/no-var-requires': 'off',
 
     // The core 'no-unused-vars' rules (in the eslint:recommended ruleset)
-    // does not work with type definitions
+    // does not work with messageType definitions
     'no-unused-vars': 'off',
 
     // allow debugger during development only

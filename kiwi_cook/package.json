@@ -1,8 +1,8 @@
 {
   "name": "kiwi_cook",
   "version": "0.0.1",
-  "description": "A Quasar Project",
-  "productName": "KiwiCook",
+  "description": "Kiwi Cook is your personal recipe book",
+  "productName": "Kiwi Cook",
   "author": "am9zZWY <46693545+am9zZWY@users.noreply.github.com>",
   "type": "module",
   "private": true,

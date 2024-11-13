@@ -28,6 +28,7 @@ export default {
     },
     input: {
       label: 'Was möchtest du kochen?',
+      placeholder: 'Zum Beispiel: Spaghetti Carbonara',
     },
   },
 
@@ -117,6 +118,11 @@ export default {
       4: 'Freitag',
       5: 'Samstag',
       6: 'Sonntag',
+    },
+    ingredients: {
+      nothing: 'Nichts',
+      submit: 'Fertig',
+      placeholder: 'Zum Beispiel: Tomaten, Zwiebeln, Knoblauch',
     },
   },
 

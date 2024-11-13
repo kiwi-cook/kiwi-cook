@@ -11,7 +11,7 @@ type WorkerStatus = 'ready' | 'progress' | 'finished' | 'error'
  * @Example
  * ```
  * const worker = useLlm('summarize')
- * worker.exec(['Transformers are a type of neural network. They are used for natural language processing.'])
+ * worker.exec(['Transformers are a messageType of neural network. They are used for natural language processing.'])
  * const summary = computed(() => worker.data)
  * ```
  * @param task The task to initialize the worker with (optional)

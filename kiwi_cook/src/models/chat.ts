@@ -1,6 +1,6 @@
 import { Recipe } from 'src/models/recipe';
 
-export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider';
+export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider' | 'suggestion'
 
 export type ChatState =
   | 'start'
@@ -13,7 +13,6 @@ export type ChatState =
   | 'findRecQCuisine'
   | 'findRecASearch'
   | 'findRecAResults'
-  | 'genPlan'
   | 'genPlanQWeekDays'
   | 'genPlanQIngredients'
   | 'genPlanQShoppingList'
@@ -21,21 +20,32 @@ export type ChatState =
   | 'findRecSNoResults'
   | 'globAReset'
 
-interface SliderOptions {
+type OptionsConfig = string
+
+interface SliderConfig {
   min: number;
   max: number;
   step: number;
   unit: string | ((input: number) => string);
 }
 
+interface SuggestionsConfig {
+  suggestions: ((input: string) => string[]);
+  withInput?: boolean;
+  placeholder?: string;
+  submitText?: string;
+}
+
 export interface ChatConfig {
   [key: string]: {
     message?: string | (() => string);
-    options?: string[];
-    type?: 'slider';
-    sliderOptions?: SliderOptions;
+    messageType?: string;
+    optionsConfig?: OptionsConfig[];
+    sliderConfig?: SliderConfig;
+    suggestionsConfig?: SuggestionsConfig;
+    onInput?: (input: string | number) => void;
+    noMessage?: boolean;
     nextState?: ChatState | ((input: string) => ChatState);
-    updatePreference?: (input: string | number) => void;
     action?: () => Promise<void>;
   };
 }
@@ -74,7 +84,15 @@ export interface SliderMessage extends BaseMessage {
   content: {
     label: string;
     value: number;
-  } & SliderOptions;
+  } & SliderConfig;
 }
 
-export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage;
+export interface SuggestionsMessage extends BaseMessage {
+  type: 'suggestion';
+  content: ((input: string) => string[]);
+  withInput?: boolean;
+  placeholder?: string;
+  submitText?: string;
+}
+
+export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage | SuggestionsMessage;

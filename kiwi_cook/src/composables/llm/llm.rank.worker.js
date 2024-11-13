@@ -83,7 +83,7 @@ self.addEventListener('message', async (event) => {
       }
       break;
     default:
-      console.error('Unknown message type in LTf.rank.worker', workerData.type);
+      console.error('Unknown message messageType in LTf.rank.worker', workerData.type);
       break;
   }
 });

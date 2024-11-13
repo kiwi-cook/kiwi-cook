@@ -13,6 +13,9 @@ export const useRecipeStore = defineStore('recipe', () => {
 
   let fetchPromise: Promise<void> | null = null;
   const recipes = ref<Recipe[]>([]);
+  const ingredients = computed(() => recipes.value
+    .flatMap((recipe) => recipe.ingredients ?? [])
+    .map((ingredient) => getTranslation(ingredient.ingredient.name)));
 
   const recipeMap = computed(() => {
     const map = new Map<string, Recipe>();
@@ -74,6 +77,7 @@ export const useRecipeStore = defineStore('recipe', () => {
   return {
     recipes,
     recipeMap,
+    ingredients,
     fetchRecipes,
     searchByQuery,
     searchByPreferences,

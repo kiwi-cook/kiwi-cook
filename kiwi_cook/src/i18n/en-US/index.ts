@@ -46,7 +46,7 @@ export default {
   },
   search: {
     servings: '{count} servings',
-    recipeType: '{type}',
+    recipeType: '{messageType}',
     cookingTime: '{time} minutes cooking time',
     cuisine: '{cuisine} cuisine',
     summary: '{content}',

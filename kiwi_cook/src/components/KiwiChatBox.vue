@@ -36,15 +36,15 @@ const $q = useQuasar();
 const isDark = computed(() => $q.dark.isActive);
 
 const chat = useChatStore();
-const { newInput } = storeToRefs(chat);
+const { userInput } = storeToRefs(chat);
 const {
   handleMessage,
 } = chat;
 
 const modelValue = defineModel<string>('modelValue', { default: '' });
 
-watch(newInput, () => {
-  modelValue.value = newInput.value;
+watch(userInput, () => {
+  modelValue.value = userInput.value;
 });
 
 function processInputFill(e: Event) {
@@ -52,7 +52,7 @@ function processInputFill(e: Event) {
     return;
   }
 
-  newInput.value = modelValue.value;
+  userInput.value = modelValue.value;
 
   switch (e.key) {
     case 'Escape':

@@ -40,7 +40,7 @@ export default configure((ctx) => ({
     'material-icons', // optional, you are not bound to it
   ],
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
   build: {
     target: {
       browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
@@ -91,7 +91,7 @@ export default configure((ctx) => ({
     ],
   },
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
   devServer: {
     // https: true
     open: true, // opens browser window automatically
@@ -170,17 +170,17 @@ export default configure((ctx) => ({
     // extendInjectManifestOptions (cfg) {}
   },
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-cordova-apps/configuring-cordova
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-cordova-apps/configuring-cordova
   cordova: {
     // noIosLegacyBuildFlag: true, // uncomment only if you know what you are doing
   },
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
   capacitor: {
     hideSplashscreen: true,
   },
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
   electron: {
     // extendElectronMainConf (esbuildConf) {},
     // extendElectronPreloadConf (esbuildConf) {},
@@ -215,7 +215,7 @@ export default configure((ctx) => ({
     },
   },
 
-  // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
+  // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
   bex: {
     // extendBexScriptsConf (esbuildConf) {},
     // extendBexManifestJson (json) {},
