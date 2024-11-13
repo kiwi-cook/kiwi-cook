@@ -1,4 +1,6 @@
 import os
+import re
+from typing import List
 
 import uvicorn
 from dotenv import load_dotenv
@@ -35,26 +37,49 @@ def setup_fastapi() -> FastAPI:
     )
 
 
-def setup_cors(app: FastAPI) -> None:
-    logger.info(f"Setting up CORS for {ENV} mode...")
+DEV_ORIGINS = ["http://localhost", "http://127.0.0.1"]
+PROD_ORIGINS = [
+    os.getenv("PROD_ORIGIN_1", "https://kiwi-cook.github.io"),
+    os.getenv("PROD_ORIGIN_2", "https://kiwi.jpkmiller.de"),
+    os.getenv("PROD_ORIGIN_3", "https://taste-buddy.uk"),
+]
 
-    if ENV == "development":
-        origins = [
-            "http://localhost",
-            "http://127.0.0.1",
-        ]
-        allow_origin_regex = r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$"
-    else:
-        origins = [
-            "https://kiwi-cook.github.io",
-            "https://kiwi.jpkmiller.de",
-            "https://taste-buddy.uk",
-        ]
-        allow_origin_regex = r"^https?://(kiwi-cook\.github\.io|kiwi.jpkmiller\.de|taste-buddy\.uk)$"
+def get_allowed_origins() -> List[str]:
+    """Returns the list of allowed origins based on the environment.
+
+    Returns:
+        List[str]: A list of allowed origin URLs for CORS.
+    """
+    return DEV_ORIGINS if ENV == "development" else PROD_ORIGINS
+
+def generate_allow_origin_regex(origins: List[str]) -> str:
+    """Generates a regex pattern from the list of allowed origins.
+
+    Args:
+        origins (List[str]): A list of origin URLs.
+
+    Returns:
+        str: A regex pattern that matches the allowed origins.
+    """
+    # Extract and escape domain names
+    domains = [re.escape(origin.split("://")[1].split(":")[0]) for origin in origins]
+    # Construct a regex pattern
+    return r"^https?://(" + "|".join(domains) + r")(:[0-9]+)?$"
+
+def setup_cors(app: FastAPI) -> None:
+    """Configures Cross-Origin Resource Sharing (CORS) for the FastAPI app.
+
+    Args:
+        app (FastAPI): The FastAPI application instance.
+    """
+    allowed_origins = get_allowed_origins()
+    allow_origin_regex = generate_allow_origin_regex(allowed_origins)
+
+    logger.info("Setting up CORS for %s mode with allowed origins: %s", ENV, allowed_origins)
 
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=allowed_origins,
         allow_origin_regex=allow_origin_regex,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -68,6 +93,7 @@ def setup_cors(app: FastAPI) -> None:
         expose_headers=["Content-Type"],
         max_age=600,
     )
+    logger.info("CORS setup complete with regex: %s", allow_origin_regex)
 
 
 def setup_log_request_headers(app: FastAPI) -> None:
