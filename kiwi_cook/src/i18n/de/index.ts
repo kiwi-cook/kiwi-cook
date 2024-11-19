@@ -7,7 +7,8 @@ export default {
   introduction: {
     title: 'Willkommen in der Kiwi-Küche!',
     subtitle: 'Dein persönlicher Kochassistent',
-    welcome: 'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochassistent und helfe dir beim Entdecken leckerer Rezepte.',
+    welcome:
+      'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochassistent und helfe dir beim Entdecken leckerer Rezepte.',
     start: 'Loslegen',
   },
 
@@ -18,12 +19,14 @@ export default {
     actions: {
       optionFindRecipe: 'Rezept finden',
       optionGenerateWeeklyPlan: 'Wochenplan erstellen',
-      reset: 'Alles klar, lass uns von vorne anfangen. Was möchtest du heute kochen?',
+      reset:
+        'Alles klar, lass uns von vorne anfangen. Was möchtest du heute kochen?',
     },
     status: {
       recipes: {
         checking: 'Lade Rezepte herunter...',
-        failed: 'Entschuldige, ich konnte keine Rezepte abrufen. Bitte versuche es später erneut.',
+        failed:
+          'Entschuldige, ich konnte keine Rezepte abrufen. Bitte versuche es später erneut.',
       },
     },
     input: {
@@ -43,10 +46,13 @@ export default {
       lastQuestion: 'Zum Schluss: ',
     },
     results: {
-      searching: 'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
-      noResults: 'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
+      searching:
+        'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
+      noResults:
+        'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
       found: 'Hier sind einige passende Vorschläge für dich:',
-      error: 'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
+      error:
+        'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
     },
     actions: {
       broaden: 'Suche anpassen',
@@ -109,7 +115,8 @@ export default {
     status: {
       generating: 'Ich erstelle deinen Wochenplan. Einen Moment bitte...',
       planFor: 'Dein Wochenplan für {days} Tage:',
-      noIngredients: 'Leider finde ich keine passenden Rezepte. Sollen wir die Anforderungen anpassen?',
+      noIngredients:
+        'Leider finde ich keine passenden Rezepte. Sollen wir die Anforderungen anpassen?',
     },
     weekdays: {
       0: 'Montag',
@@ -152,13 +159,40 @@ export default {
 
   // Error handling
   error: {
-    notFound: 'Hoppla! 🥝 Dieses Rezept können wir leider nicht finden. Bitte wähle ein anderes aus!',
+    notFound:
+      'Hoppla! 🥝 Dieses Rezept können wir leider nicht finden. Bitte wähle ein anderes aus!',
     backToHome: 'Zurück zur Startseite',
   },
 
   // Common units
   units: {
     minutes: 'Minute | Minuten',
-    days: 'Tag | Tage',
+    date: {
+      days: 'Tag | Tage',
+      the: 'der',
+      weekdays: {
+        monday: 'Montag',
+        tuesday: 'Dienstag',
+        wednesday: 'Mittwoch',
+        thursday: 'Donnerstag',
+        friday: 'Freitag',
+        saturday: 'Samstag',
+        sunday: 'Sonntag',
+      },
+      months: {
+        january: 'Januar',
+        february: 'Februar',
+        march: 'März',
+        april: 'April',
+        may: 'Mai',
+        june: 'Juni',
+        july: 'Juli',
+        august: 'August',
+        september: 'September',
+        october: 'Oktober',
+        november: 'November',
+        december: 'Dezember',
+      },
+    },
   },
 };
