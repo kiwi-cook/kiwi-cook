@@ -93,51 +93,64 @@
                   </template>
 
                   <template v-else-if="message.type === 'suggestion'">
-                    <q-list
-                      class="q-ma-none"
-                      dense
-                      v-if="message.content(userInput).length > 0"
-                    >
-                      <q-item
-                        v-for="(item, itemIndex) in message.content(userInput)"
-                        :key="itemIndex"
-                        clickable
-                        @click="chat.handleMessage(item)"
+                    <div class="chat-suggestion-container">
+                      <!-- Suggestions List -->
+                      <q-list
+                        v-if="message.content(userInput).length > 0"
+                        class="suggestions-list"
+                        dense
                       >
-                        <q-item-section>
-                          <q-item-label>{{ item }}</q-item-label>
-                        </q-item-section>
-                      </q-item>
-                    </q-list>
+                        <q-item
+                          v-for="(item, itemIndex) in message.content(userInput)"
+                          :key="itemIndex"
+                          clickable
+                          class="suggestion-item"
+                          @click="chat.handleMessage(item)"
+                        >
+                          <q-item-section>
+                            <q-item-label>{{ item }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
 
-                    <!-- Filter out the suggestions that have already been sent -->
-                    <div
-                      v-if="message.withInput"
-                      class="q-gutter-xs row items-center"
-                    >
-                      <q-input
-                        v-model="userInput"
-                        dense
-                        autofocus
-                        outlined
-                        :placeholder="
-                          message.placeholder || $t('chat.input.placeholder')
-                        "
-                        filled
-                        color="primary"
-                      />
+                      <div
+                        v-else
+                        class="no-suggestions text-caption text-grey-7"
+                      >
+                        {{ message.notFoundText }}
+                      </div>
 
-                      <q-btn
-                        class="send-button shadow-1"
-                        color="primary"
-                        dense
-                        icon="send"
-                        round
-                        @click="
-                          () =>
-                            chat.handleMessage(message.submitText || userInput)
-                        "
-                      />
+                      <!-- Enhanced Input Area -->
+                      <div class="input-wrapper">
+                        <q-input
+                          v-model="userInput"
+                          class="suggestion-input"
+                          dense
+                          autofocus
+                          borderless
+                          standout
+                          square
+                          :placeholder="message.placeholder || $t('chat.input.placeholder')"
+                          color="primary"
+                          input-class="input-field"
+                        >
+                          <template v-slot:append>
+                            <q-btn
+                              v-if="message.withSubmit"
+                              class="send-button"
+                              color="primary"
+                              dense
+                              flat
+                              round
+                              icon="send"
+                              @click="
+                                () =>
+                                  chat.handleMessage(message.submitText || userInput)
+                              "
+                            />
+                          </template>
+                        </q-input>
+                      </div>
                     </div>
                   </template>
 
@@ -390,6 +403,69 @@ function onSliderChange() {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
+}
+
+.chat-suggestion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.suggestions-list {
+  border-radius: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.suggestion-item {
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.input-wrapper {
+  border: 1px solid $grey-3;
+  border-radius: 12px;
+  padding: 8px 12px;
+  transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within, .input-wrapper:hover {
+  border-color: $primary;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.suggestion-input {
+  width: 100%;
+  .q-field__control {
+    padding: 0;
+  }
+}
+
+.input-field {
+  font-size: 16px;
+  padding: 8px 0;
+}
+
+.send-button {
+  margin-left: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    background-color: rgba(0, 125, 255, 0.1);
+  }
+}
+
+.no-suggestions {
+  text-align: center;
+  padding: 8px;
+  font-style: italic;
 }
 
 .typing-indicator {

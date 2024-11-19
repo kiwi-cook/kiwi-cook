@@ -6,6 +6,8 @@ export type ChatState =
   | 'start'
   | 'checkStatusRecipes'
   | 'welcome'
+  | 'findRecOType'
+  | 'findRecFQuery'
   | 'findRecQServings'
   | 'findRecQRecipeType'
   | 'findRecQDietaryRestrictions'
@@ -31,9 +33,10 @@ interface SliderConfig {
 
 interface SuggestionsConfig {
   suggestions: ((input: string) => string[]);
-  withInput?: boolean;
+  withSubmit?: boolean;
   placeholder?: string;
   submitText?: string;
+  notFoundText?: string;
 }
 
 export interface ChatConfig {
@@ -91,9 +94,10 @@ export interface SliderMessage extends BaseMessage {
 export interface SuggestionsMessage extends BaseMessage {
   type: 'suggestion';
   content: ((input: string) => string[]);
-  withInput?: boolean;
+  withSubmit?: boolean;
   placeholder?: string;
   submitText?: string;
+  notFoundText?: string;
 }
 
 export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage | SuggestionsMessage;

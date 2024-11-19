@@ -12,6 +12,7 @@ import { UserPreferences } from 'src/models/user';
 import { ts } from 'src/utils/i18n';
 import { useWeekplan } from 'src/composables/useWeekplan';
 import { Meal, MealPlan } from 'src/models/mealplan';
+import { getTranslation } from 'src/models/recipe';
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n();
@@ -192,13 +193,63 @@ export const useChatStore = defineStore('chat', () => {
       nextState: (input: string) => {
         switch (input) {
           case t('chat.actions.optionFindRecipe'):
-            return 'findRecQServings';
+            return 'findRecOType';
           case t('chat.actions.optionGenerateWeeklyPlan'):
             return 'genPlanQWeekDays';
           default:
             return 'start';
         }
       },
+    },
+    findRecOType: {
+      message: t('search.options.type'),
+      optionsConfig: ts([
+        'search.options.byQuery',
+        'search.options.byQuestions',
+      ]),
+      nextState: (input: string) => {
+        switch (input) {
+          case t('search.options.byQuery'):
+            return 'findRecFQuery';
+          case t('search.options.byQuestions'):
+            return 'findRecQServings';
+          default:
+            return 'start';
+        }
+      },
+    },
+    findRecFQuery: {
+      message: t('search.query.action'),
+      suggestionsConfig: {
+        suggestions: (input: string) => Array.from(
+          new Set(
+            recipeStore.recipes
+              .map((recipe) => getTranslation(recipe.name))
+              .filter((name) => name.toLowerCase().includes(input.toLowerCase())),
+          ),
+        ).slice(0, 5),
+        withSubmit: false,
+        placeholder: t('search.query.placeholder'),
+        notFoundText: t('search.query.noResults'),
+      },
+      onInput: (input: string | number) => {
+        // Route to the recipe if it exists
+        const recipe = recipeStore.recipes.find(
+          (r) => getTranslation(r.name).toLowerCase()
+            === (input as string).toLowerCase(),
+        );
+
+        if (recipe) {
+          // If there is already a recipe message, remove it
+          if (lastMessage.value.type === 'recipe') {
+            removeLastMessages();
+          }
+          addMessage({ type: 'recipe', content: [recipe] });
+          trackEvent('recipe_found', { recipe });
+          // router.push(`/recipe/${recipe.id}`);
+        }
+      },
+      noMessage: true,
     },
     findRecQServings: {
       message: t('search.questions.servings'),
@@ -358,7 +409,7 @@ export const useChatStore = defineStore('chat', () => {
             recipeStore.ingredients.filter((ingredient) => ingredient.toLowerCase().includes(input.toLowerCase())),
           ),
         ).slice(0, 5),
-        withInput: true,
+        withSubmit: true,
         placeholder: t('plan.ingredients.placeholder'),
         submitText: t('plan.ingredients.submit'),
       },

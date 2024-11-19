@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 export default {
   app: {
     tagline: 'Dein persönlicher Kochassistent',
@@ -37,6 +38,16 @@ export default {
 
   // Recipe search related
   search: {
+    options: {
+      type: 'Wie möchtest du suchen?',
+      byQuery: 'Finde Rezepte mit Suchbegriff',
+      byQuestions: 'Finde Rezepte mit Fragen',
+    },
+    query: {
+      action: 'Filtere Rezepte nach Suchbegriff. Zum Beispiel: <strong>Spaghetti</strong><br><br>Klicke das Suchergebnis an, um dir mehr Details anzusehen.',
+      placeholder: 'Zum Beispiel: Spaghetti Carbonara',
+      noResults: 'Keine passenden Rezepte gefunden. Probiere es mit einem anderen Suchbegriff.',
+    },
     questions: {
       servings: 'Für wie viele Personen möchtest du kochen?',
       recipeType: 'Welche Art von Gericht suchst du?',
