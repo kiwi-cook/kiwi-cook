@@ -44,8 +44,7 @@ function highlightIngredients(text: string): string {
 <style lang="scss">
 .step-item {
   padding: 14px 18px;
-  background-color: rgba(255, 255, 255, 0.3) !important;
-  border: 2px solid var(--q-primary);
+  border: 2px solid $q-color-primary;
   border-radius: 16px 16px 16px 0;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }

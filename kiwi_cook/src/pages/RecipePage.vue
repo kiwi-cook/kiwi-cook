@@ -124,7 +124,6 @@ const metaItems = computed(() => {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f9f9f9;
 }
 
 .recipe-header {
@@ -194,9 +193,13 @@ const metaItems = computed(() => {
 .meta-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #555;
+  gap: 5px;
+  color: $grey-7;
   font-size: 0.95em;
+
+  @media (prefers-color-scheme: dark) {
+    color: $grey-3;
+  }
 }
 
 .servings-control {
@@ -207,8 +210,12 @@ const metaItems = computed(() => {
 .servings-label {
   display: block;
   margin-bottom: 10px;
-  color: #2c3e50;
+  color: $grey-7;
   font-weight: 600;
+
+  @media (prefers-color-scheme: dark) {
+    color: $grey-3;
+  }
 }
 
 .steps-container {
@@ -225,7 +232,6 @@ const metaItems = computed(() => {
 
   &.step-completed {
     opacity: 0.7;
-    background-color: #f0f4f8;
   }
 }
 
@@ -237,12 +243,43 @@ const metaItems = computed(() => {
 
 .step-number {
   font-weight: bold;
-  color: #2c3e50;
+  color: $grey-7;
   opacity: 0.7;
 }
 
 .step-description {
   line-height: 1.6;
-  color: #333;
+  color: $grey-7;
+}
+
+.body--dark {
+  .recipe-header {
+    background-color: $dark;
+  }
+
+  .recipe-title {
+    color: $grey-1;
+  }
+
+  .recipe-description {
+    color: $grey-3;
+  }
+
+  .meta-item {
+    color: $grey-3;
+  }
+
+  .step-card {
+    background-color: $dark;
+    color: $grey-3;
+  }
+
+  .step-number {
+    color: white;
+  }
+
+  .step-description {
+    color: $grey-5;
+  }
 }
 </style>

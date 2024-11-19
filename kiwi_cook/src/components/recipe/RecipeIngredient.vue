@@ -84,8 +84,9 @@ const formatAmount = (amount?: number, unit?: string, servings = 1): string => {
 const formatName = (name: string): string => name.replace(/\b\w/g, (char) => char.toUpperCase());
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .ingredient-table {
+  background: white; /* White background */
   border-radius: 12px; /* Soft rounded corners */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
   margin-bottom: 10px; /* Space between items */
@@ -105,12 +106,26 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
 }
 
 .ingredient-quantity {
-  color: var(--q-color-grey-8); /* Light grey for quantity */
+  color: $grey-4; /* Light grey for quantity */
   text-align: right; /* Right-align quantity for better readability */
 }
 
 .ingredient-checkbox {
   display: flex; /* Align checkbox to the right */
   align-items: center; /* Center checkbox vertically */
+}
+
+.body--dark {
+  .ingredient-table {
+    background: $dark; /* Dark background for dark mode */
+  }
+
+  .ingredient-row {
+    border-bottom: 1px solid $dark; /* Darker border for separation */
+  }
+
+  .ingredient-quantity {
+    color: $grey-3; /* Light grey for quantity in dark mode */
+  }
 }
 </style>

@@ -4,11 +4,8 @@
       <q-toolbar class="q-py-sm">
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
           <div class="col">
-            <div class="text-h4 text-weight-bold text-white q-mb-xs q-mt-sm">KiwiCook</div>
-            <div :class="isDark ? 'text-secondary' : 'text-black'" class="text-subtitle2">{{ $t('app.tagline') }}</div>
-          </div>
-          <div class="col-auto q-ml-md">
-            <KiwiLogo/>
+            <div class="text-h4 text-weight-bold text-white q-mt-sm kiwi-title">KiwiCook <KiwiLogo/></div>
+            <div :class="isDark ? 'text-secondary' : 'text-black'" class="kiwi-subtitle">{{ $t('app.tagline') }}</div>
           </div>
         </div>
         <q-space/>
@@ -152,6 +149,10 @@ body {
   &:hover {
     transform: scale(1.1);
   }
+}
+
+.kiwi-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
 }
 
 .footer {
