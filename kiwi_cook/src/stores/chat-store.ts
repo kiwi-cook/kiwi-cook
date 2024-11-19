@@ -24,7 +24,7 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref<Message[]>([]);
   const lastMessage = computed(() => messages.value[messages.value.length - 1] || {});
   const messageId = computed(() => messages.value.length + 1);
-  const lastState = ref('');
+  const previousState = ref('');
   const currentState = ref<ChatState>('start');
   const isTyping = ref(false);
 
@@ -45,20 +45,35 @@ export const useChatStore = defineStore('chat', () => {
     trackEvent('preferences_selected', { preferences });
 
     return [
-      t('search.servings', { count: preferences.servings }),
-      t('search.recipeType', { type: preferences.recipeType.toLowerCase() }),
-      t('search.cookingTime', { time: preferences.cookingTime }),
-      t('search.cuisine', { cuisine: preferences.cuisine }),
+      t(`filters.servings.${preferences.servings}`),
+      t(`filters.recipeType.${preferences.recipeType}`),
+      preferences.dietaryRestrictions.join(', '),
+      t('filters.cookingTime', { time: preferences.cookingTime }),
     ].join(', ');
   };
 
   // Methods
+  async function updateState(newState: ChatState, doHandleCurrentState = true) {
+    previousState.value = currentState.value;
+    currentState.value = newState;
+    if (currentState.value === previousState.value) {
+      throw new Error(`Invalid next state: ${newState}`);
+    }
+
+    if (doHandleCurrentState) {
+      return handleCurrentState();
+    }
+
+    return Promise.resolve();
+  }
+
   const addMessage = async (message: Partial<Message>, sender = 'Kiwi') => {
     const newMessage: Message = {
       id: messageId.value,
       sender,
       sent: sender === t('chat.you'),
       timestamp: toTime(new Date()),
+      state: currentState.value,
       ...message,
     } as Message;
     messages.value.push(newMessage);
@@ -67,6 +82,19 @@ export const useChatStore = defineStore('chat', () => {
 
   function removeLastMessages(amount = 1) {
     messages.value = messages.value.slice(0, -amount);
+  }
+
+  function editMessage(id: number) {
+    // Reset the message to this state
+    const index = messages.value.findIndex((message) => message.id === id);
+    if (index === -1) {
+      return;
+    }
+
+    // Go back to the previous state
+    const messagePreviousState = messages.value[index].state;
+    removeLastMessages(messages.value.length - index);
+    updateState(messagePreviousState, false);
   }
 
   const kiwiTypes = async (duration: number) => {
@@ -406,16 +434,6 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function updateState(newState: ChatState) {
-    lastState.value = currentState.value;
-    currentState.value = newState;
-    if (currentState.value === lastState.value) {
-      throw new Error(`Invalid next state: ${newState}`);
-    }
-
-    return handleCurrentState();
-  }
-
   async function resetChat() {
     userInput.value = '';
     messages.value = [];
@@ -450,6 +468,7 @@ export const useChatStore = defineStore('chat', () => {
     userInput,
     messageId,
     handleMessage,
+    editMessage,
     resetChat,
   };
 });

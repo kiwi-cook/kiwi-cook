@@ -26,13 +26,12 @@
 
       <!-- "Keep me signed in" checkbox -->
       <q-card-section>
-        <q-checkbox v-model="keepSignedIn" :label="$t('login.keepSignedIn')"/>
+        <q-checkbox v-model="keepSignedIn" :label="$t('login.keepSignedIn')" />
       </q-card-section>
 
       <!-- Action Buttons and Links -->
       <q-card-actions align="center" class="q-pt-none">
         <q-btn
-          disable
           color="primary"
           label="Login"
           @click="login"

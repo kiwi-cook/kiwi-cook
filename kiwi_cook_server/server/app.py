@@ -66,6 +66,27 @@ def generate_allow_origin_regex(origins: List[str]) -> str:
     # Construct a regex pattern
     return r"^https?://(" + "|".join(domains) + r")(:[0-9]+)?$"
 
+def setup_rate_limiting(app: FastAPI) -> None:
+    if ENV != "production":
+        return
+
+    from lib.database.redis import get_redis    
+    redis = get_redis()
+
+    from fastapi_limiter import FastAPILimiter
+    from fastapi_limiter.depends import RateLimiter
+    FastAPILimiter.init(redis)
+
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        rate_limiter = RateLimiter(request=request, key_func=lambda: request.client.host)
+        limit, key = await rate_limiter.get()
+        if limit.remaining:
+            response = await call_next(request)
+            await rate_limiter.incr()
+            return response
+        return JSONResponse(content={"error": True, "response": "Rate limit exceeded"}, status_code=429)
+
 def setup_cors(app: FastAPI) -> None:
     """Configures Cross-Origin Resource Sharing (CORS) for the FastAPI app.
 
@@ -170,13 +191,14 @@ app = setup_fastapi()
 setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
+setup_rate_limiting(app)
 setup_exception_handlers(app)
 setup_log_request_headers(app)
 
 try:
-    from lib.database.mongodb import get_database
+    from lib.database.mongodb import get_mongodb
 
-    get_database()
+    get_mongodb()
 except Exception as e:
     logger.error("Database connection failed.")
     raise

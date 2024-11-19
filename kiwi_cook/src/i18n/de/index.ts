@@ -90,6 +90,7 @@ export default {
       4: 'Vier Personen',
       '5plus': 'Fünf oder mehr Personen',
     },
+    cookingTime: 'höchstens {time} Minuten Kochzeit',
   },
 
   // Meal planning

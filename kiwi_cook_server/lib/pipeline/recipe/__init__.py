@@ -2,7 +2,7 @@
 import os
 from typing import List
 
-from lib.database.mongodb import get_database
+from lib.database.mongodb import get_mongodb
 from lib.pipeline.recipe.load_html import LoadHtml
 from lib.pipeline.recipe.load_json import LoadJson
 from lib.pipeline.recipe.parse_recipe_allrecipes_json import ParseRecipeAllRecipes
@@ -10,8 +10,8 @@ from lib.pipeline.recipe.parse_recipe_html import ParseRecipeHtml
 from lib.pipeline.recipe.pipeline import Pipeline
 from lib.pipeline.recipe.process_html import ImportHtml, ExportHtml
 
-read_client = get_database("READ")
-write_client = get_database("WRITE")
+read_client = get_mongodb("READ")
+write_client = get_mongodb("WRITE")
 
 
 def get_html_pipeline():

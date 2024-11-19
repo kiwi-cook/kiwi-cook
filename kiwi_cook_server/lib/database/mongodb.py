@@ -12,7 +12,7 @@ _clients = {}
 load_dotenv()
 
 
-def get_database(rights: str = "READ") -> MongoClient[Mapping[str, Any] | Any]:
+def get_mongodb(rights: str = "READ") -> MongoClient[Mapping[str, Any] | Any]:
     global _clients
     if rights in _clients:
         return _clients[rights]

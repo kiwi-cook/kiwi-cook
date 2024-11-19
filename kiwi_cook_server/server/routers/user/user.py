@@ -4,12 +4,12 @@ from typing import Annotated
 
 from dotenv import load_dotenv
 from fastapi import APIRouter, Depends, HTTPException, Form, Response
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_limiter.depends import RateLimiter
 from starlette import status
 
 from lib.auth import hash_password, is_secure_password
-from lib.database.mongodb import get_database
+from lib.database.mongodb import get_mongodb
 from models.api import APIResponse, APIResponseList
 from models.user import (
     User,
@@ -23,8 +23,8 @@ from models.user import (
 
 load_dotenv()
 
-write_client = get_database(rights="WRITE")
-read_client = get_database(rights="READ")
+write_client = get_mongodb(rights="WRITE")
+read_client = get_mongodb(rights="READ")
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +40,6 @@ router = APIRouter(
     response_model_by_alias=False,
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
-    dependencies=[Depends(RateLimiter(times=5, minutes=1))]
 )
 async def create_user(
         username: Annotated[str, Form()],
@@ -70,12 +69,11 @@ async def create_user(
     response_model_by_alias=False,
     response_model_exclude_none=True,
     status_code=status.HTTP_200_OK,
-    dependencies=[Depends(RateLimiter(times=5, minutes=1))]
 )
 async def login_for_access_token(
-        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-        response: Response,
-) -> Token:
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    response: Response,
+) -> JSONResponse:
     user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -83,6 +81,7 @@ async def login_for_access_token(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
     try:
         access_token = create_access_token(
             data={"sub": user.username},
@@ -95,8 +94,21 @@ async def login_for_access_token(
             detail="Could not create access token",
         )
 
-    token = Token(access_token=access_token, token_type="bearer")
-    return token
+    # Set the HttpOnly cookie
+    response = JSONResponse(
+        content={"message": "Login successful"},  # Minimal response body
+        status_code=status.HTTP_200_OK
+    )
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,  # Ensure HTTPS in production
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Expiry in seconds
+        samesite="Strict",  # Protect against CSRF
+    )
+    return response
+
 
 
 @router.get(

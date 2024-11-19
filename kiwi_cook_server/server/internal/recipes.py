@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from starlette import status
 
-from lib.database.mongodb import get_database
+from lib.database.mongodb import get_mongodb
 from lib.pipeline.recipe import run_html_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 def create_recipes(
         current_user: Annotated[User, Depends(get_admin_user)], recipes: list[Recipe]
 ):
-    write_client = get_database(rights="WRITE")
+    write_client = get_mongodb(rights="WRITE")
     error = False
     inserted_recipes = write_client["recipes"].insert_many(
         [recipe.model_dump(by_alias=True, exclude_none=True) for recipe in recipes]

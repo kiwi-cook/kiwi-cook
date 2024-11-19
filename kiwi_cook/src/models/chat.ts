@@ -56,6 +56,7 @@ export interface BaseMessage {
   sent: boolean;
   type: MessageType;
   timestamp: string;
+  state: ChatState; // Current state of the chat
   disableChat?: boolean;
 }
 

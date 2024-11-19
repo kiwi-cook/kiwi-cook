@@ -4,14 +4,14 @@ from typing import Annotated
 
 import jwt
 from dotenv import load_dotenv
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from pydantic import BaseModel, Field
 from pymongo.collection import Collection
 
 from lib.auth import verify_password
-from lib.database.mongodb import get_database
+from lib.database.mongodb import get_mongodb
 from models.chat import ChatStateEnum
 
 load_dotenv()
@@ -63,7 +63,7 @@ class UserInDB(User):
 
 
 def get_user_collection() -> Collection:
-    read_client = get_database()
+    read_client = get_mongodb()
     return read_client["users"]["users"]
 
 
@@ -100,7 +100,19 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> UserInDB:
+async def get_current_user(
+    token: Annotated[str | None, Depends(oauth2_scheme)] = None,
+    access_token_cookie: Annotated[str | None, Cookie(alias="access_token")] = None,
+) -> UserInDB:
+    if token is None:
+        token = access_token_cookie  # Fall back to the token from the cookie
+
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+        )
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -124,6 +136,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
         )
     return user
+
 
 
 async def get_active_user(

@@ -8,7 +8,7 @@ from pymongo.errors import PyMongoError
 from starlette import status
 from typing_extensions import Annotated
 
-from lib.database.mongodb import get_database
+from lib.database.mongodb import get_mongodb
 from lib.pipeline.recipe import run_html_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
@@ -41,7 +41,7 @@ def validate_url(_url: str) -> bool:
 )
 async def read_recipes(limit: int = Query(50, ge=1, le=100)):
     try:
-        read_client = get_database()
+        read_client = get_mongodb()
         recipes = list(read_client["recipes"]["recipes"].find().limit(limit))
         if not recipes:
             return JSONResponse(
