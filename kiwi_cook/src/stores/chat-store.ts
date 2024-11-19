@@ -13,6 +13,7 @@ import { ts } from 'src/utils/i18n';
 import { useWeekplan } from 'src/composables/useWeekplan';
 import { Meal, MealPlan } from 'src/models/mealplan';
 import { getTranslation } from 'src/models/recipe';
+import { useLocalStorage } from 'src/composables/useLocalStorage';
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n();
@@ -20,6 +21,7 @@ export const useChatStore = defineStore('chat', () => {
   const recipeStore = useRecipeStore();
   const { showNotification } = useNotification();
   const { trackEvent } = useAnalytics();
+  const customStorage = useLocalStorage();
 
   // Chat state
   const messages = ref<Message[]>([]);
@@ -56,10 +58,39 @@ export const useChatStore = defineStore('chat', () => {
   };
 
   // Methods
-  async function updateState(newState: ChatState, doHandleCurrentState = true) {
+  function saveChat() {
+    const statesAndAnswers = messages.value
+      .filter((message) => message.sent)
+      .map((message) => ({
+        state: message.state,
+        userContent: message.content.toString(),
+      }));
+    customStorage.saveData('chat', statesAndAnswers);
+  }
+
+  async function initChat() {
+    // Load the chat from local storage
+    const uncheckedMessages = customStorage.loadData('chat') as {
+      state: ChatState;
+      userContent: string,
+    }[];
+    if (uncheckedMessages) {
+      await updateState(uncheckedMessages[0].state, true, true);
+      await uncheckedMessages.reduce(async (promiseChain, message) => {
+        // Wait for the previous promise in the chain to resolve
+        await promiseChain;
+        // Process the current message
+        await handleMessage(message.userContent, false);
+      }, Promise.resolve());
+    } else {
+      handleCurrentState();
+    }
+  }
+
+  async function updateState(newState: ChatState, doHandleCurrentState = true, ignoreError = false) {
     previousState.value = currentState.value;
     currentState.value = newState;
-    if (currentState.value === previousState.value) {
+    if (currentState.value === previousState.value && !ignoreError) {
       throw new Error(`Invalid next state: ${newState}`);
     }
 
@@ -70,7 +101,7 @@ export const useChatStore = defineStore('chat', () => {
     return Promise.resolve();
   }
 
-  const addMessage = async (message: Partial<Message>, sender = 'Kiwi') => {
+  const addMessage = async (message: Partial<Message>, sender = 'Kiwi', save = false) => {
     const newMessage: Message = {
       id: messageId.value,
       sender,
@@ -80,6 +111,9 @@ export const useChatStore = defineStore('chat', () => {
       ...message,
     } as Message;
     messages.value.push(newMessage);
+    if (save) {
+      saveChat();
+    }
     await nextTick();
   };
 
@@ -526,9 +560,10 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function handleMessage(input: string | number) {
+  async function handleMessage(input: string | number, save = true) {
     trackEvent('chat_message_received', { message: input });
     const currentConfig = chatConfig[currentState.value];
+    trackEvent('current_config', { currentConfig });
 
     if (currentConfig.onInput) {
       currentConfig.onInput(input);
@@ -541,6 +576,7 @@ export const useChatStore = defineStore('chat', () => {
     await addMessage(
       { type: 'text', content: input.toString() },
       t('chat.you'),
+      save,
     );
 
     if (currentConfig.nextState) {
@@ -549,6 +585,8 @@ export const useChatStore = defineStore('chat', () => {
         ? currentConfig.nextState(input.toString())
         : currentConfig.nextState;
       await updateState(nextState);
+    } else {
+      trackEvent('chat_state_changed', { state: 'no_next_state' });
     }
   }
 
@@ -571,11 +609,8 @@ export const useChatStore = defineStore('chat', () => {
     trackEvent('chat_reset');
   }
 
-  // Initialization
-  const initializeChat = async () => handleCurrentState();
-
-  // Call initializeChat when the store is created
-  initializeChat();
+  // Load the chat from local storage
+  initChat();
 
   return {
     messages,
