@@ -35,15 +35,26 @@ export const useRecipeStore = defineStore('recipe', () => {
     // Check if a request is already in progress
     if (fetchPromise) {
       trackEvent('fetchRecipes', { status: 'inProgress' });
-      return fetchPromise ?? Promise.resolve();
+      return fetchPromise;
     }
 
     fetchPromise = api.get('/recipe/')
-      .then((r) => {
-        recipes.value = r.data.response;
+      .then((response) => {
+        const { data } = response;
+        if (data?.response) {
+          recipes.value = data.response;
+          trackEvent('fetchRecipes', { status: 'success' });
+        } else {
+          throw new Error('Invalid response structure');
+        }
       })
-      .catch((err) => {
-        trackEvent('fetchRecipes', { status: 'error', error: err });
+      .catch((error) => {
+        const errorDetails = {
+          message: error.message,
+          code: error.code,
+          response: error.response?.data,
+        };
+        trackEvent('fetchRecipes', { status: 'error', error: errorDetails });
       })
       .finally(() => {
         fetchPromise = null;

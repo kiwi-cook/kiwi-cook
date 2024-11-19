@@ -131,7 +131,8 @@ export default {
     servings: 'Portionen',
     minutes: 'Minuten',
     ingredients: 'Zutaten',
-    steps: 'Zubereitungsschritte',
+    directions: 'Schritte',
+    direction: 'Schritt | Schritte',
   },
 
   // Shopping list

@@ -25,8 +25,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  servings: {
+    type: Number,
+    default: 1,
+  },
 });
-
 const emit = defineEmits(['update:modelValue']);
 
 // Local state for the checkbox
@@ -39,8 +42,9 @@ watch(() => props.modelValue, (newValue) => {
 
 // Computed property for formatted amount
 const formattedAmount = computed(() => {
+  const { servings } = props;
   const { quantity, unit } = props.ingredient;
-  return formatAmount(quantity, unit);
+  return formatAmount(quantity, unit, servings);
 });
 
 // Method to toggle check state and emit the change
@@ -50,11 +54,21 @@ const toggleCheck = () => {
 };
 
 // Function to format amount based on unit messageType
-const formatAmount = (amount?: number, unit?: string): string => {
+const formatAmount = (amount?: number, unit?: string, servings = 1): string => {
   if (amount === undefined || amount === null) {
     return '';
   }
-  let amountStr = amount.toFixed(2); // Round to 2 decimal places
+
+  // Multiply amount by servings
+  amount *= servings;
+
+  // If number does not have precision
+  let amountStr = '';
+  if (amount % 1 === 0) {
+    amountStr = Math.round(amount).toString();
+  } else {
+    amountStr = amount.toFixed(2);
+  }
 
   // Convert to US units if needed (example)
   if (unit === 'g') {
@@ -75,7 +89,7 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
   background: white; /* White background for clarity */
   border-radius: 12px; /* Soft rounded corners */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  margin-bottom: 20px; /* Space between items */
+  margin-bottom: 10px; /* Space between items */
   overflow: hidden; /* Clean edges for rows */
 }
 
@@ -83,7 +97,7 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
   display: grid; /* Use grid layout for structured alignment */
   grid-template-columns: 1fr 1.5fr auto; /* Set columns for name, quantity, and checkbox */
   align-items: center; /* Center items vertically */
-  padding: 1em; /* Ample padding for a spacious feel */
+  padding: 12px 16px; /* Padding for spacing */
   border-bottom: 1px solid #f0f0f0; /* Light border for separation */
   transition: background 0.3s ease; /* Smooth background transition */
 }
@@ -96,16 +110,8 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
   background: rgba(245, 245, 245, 0.5); /* Subtle highlight on hover */
 }
 
-.ingredient-name {
-  font-weight: 600; /* Slightly bolder for emphasis */
-  color: #333; /* Darker color for ingredient names */
-  font-size: 1.2em; /* Larger font size for readability */
-}
-
 .ingredient-quantity {
-  font-weight: 500; /* Medium weight for quantity */
-  color: #007aff; /* Distinct color for quantity for visibility */
-  font-size: 1.1em; /* Slightly larger for emphasis */
+  color: var(--q-color-grey-8); /* Light grey for quantity */
   text-align: right; /* Right-align quantity for better readability */
 }
 

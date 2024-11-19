@@ -1,5 +1,6 @@
 import { boot } from 'quasar/wrappers';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosError } from 'axios';
+import { useAnalytics } from 'src/composables/useAnalytics';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -8,26 +9,47 @@ declare module 'vue' {
   }
 }
 
-const baseURL = process.env.NODE_ENV === 'production' ? 'https://taste-buddy.uk' : 'http://localhost:8000';
+const { trackEvent } = useAnalytics();
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-const api = axios.create({ baseURL });
+const baseURL = process.env.NODE_ENV === 'production'
+  ? 'https://taste-buddy.uk'
+  : 'http://localhost:8000';
+
+// Create an Axios instance with global configuration
+const api: AxiosInstance = axios.create({
+  baseURL,
+  timeout: 30000, // 30 seconds
+});
+
+// Add interceptors for logging and handling errors globally
+api.interceptors.request.use(
+  (config) => {
+    // Modify or log the request before sending it
+    trackEvent('apiRequest', { method: config.method, url: config.url });
+    return config;
+  },
+  (error: AxiosError) => {
+    console.error('[Request Error]', error);
+    return Promise.reject(error);
+  },
+);
+
+api.interceptors.response.use(
+  (response) => {
+    // Log or modify the response
+    trackEvent('apiResponse', { status: response.status, url: response.config.url });
+    return response;
+  },
+  (error: AxiosError) => {
+    trackEvent('apiError', { status: error.response?.status, url: error?.config?.url });
+    return Promise.reject(error);
+  },
+);
 
 export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
-  app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
-  app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
+  // Attach axios instances to Vue's global properties
+  app.config.globalProperties.$axios = axios; // For generic axios
+  app.config.globalProperties.$api = api; // For API instance
 });
 
 export { api };
