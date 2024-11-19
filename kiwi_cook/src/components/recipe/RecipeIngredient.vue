@@ -86,7 +86,6 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
 
 <style scoped>
 .ingredient-table {
-  background: white; /* White background for clarity */
   border-radius: 12px; /* Soft rounded corners */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
   margin-bottom: 10px; /* Space between items */
@@ -99,15 +98,10 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
   align-items: center; /* Center items vertically */
   padding: 12px 16px; /* Padding for spacing */
   border-bottom: 1px solid #f0f0f0; /* Light border for separation */
-  transition: background 0.3s ease; /* Smooth background transition */
 }
 
 .ingredient-row:last-child {
   border-bottom: none; /* Remove border from the last item */
-}
-
-.ingredient-row:hover {
-  background: rgba(245, 245, 245, 0.5); /* Subtle highlight on hover */
 }
 
 .ingredient-quantity {

@@ -189,7 +189,6 @@ watchEffect(() => {
   padding: 16px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  background: white;
   transition: transform 0.3s ease, opacity 0.3s ease;
 
   /* Initial styles for inactive cards */
@@ -221,7 +220,6 @@ watchEffect(() => {
 .recipe-card {
   display: flex;
   flex-direction: column;
-  background: #ffffff; /* Keep the clean white background */
   padding: 2.5em; /* Slightly more padding */
   margin-top: 24px; /* Uniform margin above cards */
   border-radius: 16px; /* Slightly less pronounced rounding */
@@ -282,11 +280,6 @@ watchEffect(() => {
   font-size: 0.875em;
   border-radius: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-  transition: background-color 0.3s ease;
-}
-
-.badge:hover {
-  background-color: rgba(0, 0, 0, 0.05); /* Highlight on hover */
 }
 
 /* Section headings for better distinction */
