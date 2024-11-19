@@ -41,6 +41,20 @@
           <q-tooltip>Visit our GitHub</q-tooltip>
         </q-btn>
         <q-space/>
+        <q-tabs
+          v-model="tab"
+          :class="isDark ? 'text-white' : 'text-black'"
+        >
+          <q-tab
+            v-for="t in tabs"
+            :key="t.name"
+            :name="t.name"
+            :icon="t.icon"
+            :label="t.name"
+            @click="t.click"
+          />
+        </q-tabs>
+        <q-space/>
         <q-btn
           :color="isDark ? 'secondary' : 'white'"
           :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
@@ -58,13 +72,15 @@
 
 <script lang="ts" setup>
 import { useQuasar } from 'quasar';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import KiwiLogo from 'components/KiwiLogo.vue';
+import { useRouter } from 'vue-router';
 
 defineOptions({
   name: 'MainLayout',
 });
 
+/* Color mode toggle */
 const $q = useQuasar();
 const isDark = ref($q.dark.isActive);
 
@@ -73,7 +89,34 @@ const toggleDarkMode = () => {
   isDark.value = $q.dark.isActive;
 };
 
+/* Link to GitHub */
 const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
+
+/* Tabs */
+const router = useRouter();
+const tabs = [
+  {
+    name: 'Chat',
+    icon: 'chat',
+    click: () => router.push({ name: 'chat' }),
+  },
+];
+const tab = ref('chat');
+watch(() => router.currentRoute.value.name, () => {
+  switch (router.currentRoute.value.name) {
+    case 'chat':
+      tab.value = 'Chat';
+      break;
+    case 'settings':
+      tab.value = 'Settings';
+      break;
+    case 'recipe':
+      tab.value = 'Recipe';
+      break;
+    default:
+      tab.value = '';
+  }
+}, { immediate: true });
 </script>
 
 <style lang="scss">

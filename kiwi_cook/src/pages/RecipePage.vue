@@ -1,117 +1,92 @@
 <template>
-  <q-page v-if="recipe" class="container">
-    <q-card class="recipe-card">
-      <div class="header">
-        <img
-          v-if="recipe.image_url"
-          :alt="getTranslation(recipe.name)"
-          :src="recipe.image_url"
-          class="hero-image"
-        />
+  <q-page class="mobile-recipe-container" v-if="recipe">
+    <div class="recipe-header">
+      <div class="header-content">
+        <div class="image-wrapper" v-if="recipe.image_url">
+          <img
+            :src="recipe.image_url"
+            :alt="getTranslation(recipe.name)"
+            class="recipe-image"
+          />
+        </div>
         <div class="recipe-details">
           <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
-          <p class="description">{{ getTranslation(recipe.description) }}</p>
-          <div class="badge-container">
-            <q-badge
-              v-if="recipe.rating"
-              :label="recipe.rating"
-              class="badge"
-              icon="star"
-            />
-            <q-badge
-              v-if="recipe.difficulty"
-              :label="recipe.difficulty"
-              class="badge"
-              icon="fitness_center"
-            />
-            <q-badge
-              v-if="recipe.cuisine"
-              :label="recipe.cuisine"
-              class="badge"
-              icon="restaurant"
-            />
-            <q-badge
-              v-if="recipe.duration"
-              :label="formattedDuration"
-              class="badge"
-              icon="schedule"
-            />
-            <q-badge
-              v-if="recipe.servings"
-              :label="formattedServings"
-              class="badge"
-              icon="people"
-            />
-            <q-badge
-              :label="formattedNumberOfIngredients"
-              class="badge"
-              icon="local_dining"
-            />
+          <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
+          <div class="recipe-meta">
+            <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
+              <span class="meta-icon">{{ item.icon }}</span>
+              <span class="meta-value">{{ item.value }}</span>
+            </div>
           </div>
         </div>
       </div>
-      <q-slider
-        v-model="servings"
-        :max="recipe.servings * 2"
-        :min="1"
-        class="servings-slider"
-      />
-    </q-card>
-
-    <!-- Recipe Content -->
-    <div class="recipe-content">
-      <!-- Ingredients Column -->
-      <div class="ingredients-container">
-        <h2 class="heading">{{ $t("recipe.ingredients") }}</h2>
-        <q-list class="ingredients">
-          <RecipeIngredient
-            v-for="(ingredient, index) in recipe.ingredients"
-            :key="index"
-            v-model="checkedIngredients[index]"
-            :ingredient="ingredient"
-            :servings="servings"
-          />
-        </q-list>
-      </div>
     </div>
 
-    <!-- Steps Column -->
-    <div class="steps-container">
-      <h2 class="heading">{{ $t("recipe.directions") }}</h2>
-      <div class="steps-scroll">
-        <q-card
-          v-for="(step, index) in recipe.steps"
+    <q-tabs v-model="activeTab" dense class="recipe-tabs" active-color="primary">
+      <q-tab name="ingredients" icon="local_dining" label="Ingredients" />
+      <q-tab name="steps" icon="list" label="Steps" />
+    </q-tabs>
+
+    <div v-if="activeTab === 'ingredients'" class="ingredients-section">
+      <div class="servings-control">
+        <label class="servings-label">Adjust Servings</label>
+        <q-slider
+          v-model="servings"
+          :min="1"
+          :max="recipe.servings * 2"
+          color="primary"
+          track-color="grey-3"
+          class="servings-slider"
+        />
+      </div>
+
+      <q-list class="ingredients-list">
+        <RecipeIngredient
+          v-for="(ingredient, index) in recipe.ingredients"
           :key="index"
-          class="step-card"
-          :class="{ active: checkedIngredients.every((checked) => checked) }"
-        >
-          <div class="step-number">
-            {{ $t("recipe.direction") }} {{ index + 1 }}
+          v-model="checkedIngredients[index]"
+          :ingredient="ingredient"
+          :servings="servings"
+        />
+      </q-list>
+    </div>
+
+    <div v-if="activeTab === 'steps'" class="steps-container">
+      <q-card
+        v-for="(step, index) in recipe.steps"
+        :key="index"
+        class="step-card"
+        :class="{ 'step-completed': checkedIngredients.every((checked) => checked) }"
+      >
+        <q-card-section>
+          <div class="step-header">
+            <div class="step-number">{{ $t("recipe.direction") }} {{ index + 1 }}</div>
           </div>
           <div class="step-description">
             {{ getTranslation(step.description) }}
           </div>
-        </q-card>
-      </div>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-import { useRecipeStore } from 'src/stores/recipe-store';
-import { storeToRefs } from 'pinia';
+import { ref, computed } from 'vue';
 import { getTranslation } from 'src/models/recipe';
-import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue';
 import { useI18n } from 'vue-i18n';
+import { storeToRefs } from 'pinia';
+import { useRecipeStore } from 'src/stores/recipe-store';
+import { useRoute } from 'vue-router';
+import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue';
 
 const { t } = useI18n();
 
-// Recipe Data
+const activeTab = ref('ingredients');
 const route = useRoute();
 const recipeStore = useRecipeStore();
 const { recipeMap } = storeToRefs(recipeStore);
+
 const recipe = computed(() => {
   let recipeId = route.params.id;
   if (Array.isArray(recipeId)) {
@@ -119,189 +94,155 @@ const recipe = computed(() => {
   }
   return recipeMap.value.get(recipeId);
 });
-const checkedIngredients = ref<boolean[]>([]);
+
 const servings = ref(recipe.value?.servings ?? 1);
-
-// Computed properties
-const formattedDuration = computed(
-  () => `${recipe.value?.duration} ${t('recipe.minutes', {
-    count: recipe.value?.duration,
-  })}`,
-);
-const formattedServings = computed(
-  () => `${servings.value} ${t('recipe.servings', {
-    count: servings.value,
-  })}`,
-);
-// eslint-disable-next-line max-len
-const formattedNumberOfIngredients = computed(
-  () => `${recipe.value?.ingredients?.length ?? 0} ${t('recipe.ingredients', {
-    count: recipe.value?.ingredients?.length ?? 0,
-  })}`,
+const checkedIngredients = ref(
+  recipe?.value?.ingredients?.map(() => false) ?? [],
 );
 
-// Lifecycle
-watchEffect(() => {
-  if (recipe.value) {
-    checkedIngredients.value = recipe?.value?.ingredients?.map(() => false) ?? [];
-    servings.value = recipe.value.servings;
-  }
+const metaItems = computed(() => {
+  if (!recipe.value) return [];
+  return [
+    {
+      icon: '⏱️',
+      value: `${recipe.value.duration} ${t('recipe.minutes', { count: recipe.value.duration })}`,
+    },
+    {
+      icon: '👥',
+      value: `${servings.value} servings`,
+    },
+    ...recipe?.value?.props.tags?.map((tag: string) => ({
+      icon: '🏷️',
+      value: tag,
+    })) ?? [],
+  ];
 });
 </script>
 
 <style lang="scss" scoped>
-.container {
-  padding: 40px;
-  max-width: 1200px;
-  margin: auto;
+.mobile-recipe-container {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
 }
 
-.ingredients-container,
-.steps-container {
-  flex: 1;
+.recipe-header {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.content-container {
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.image-wrapper {
+  flex: 0 0 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+}
+
+.recipe-details {
+  flex-grow: 1;
+  flex-basis: 0;
+}
+
+.recipe-title {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 1.6em;
+  font-weight: 600;
+  color: $grey-9;
+  line-height: 1.3;
+  margin-bottom: 8px;
+  word-wrap: break-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.recipe-description {
+  color: $grey-7;
+  font-size: 1.1em;
+  margin-bottom: 12px;
+}
+
+.recipe-meta {
+  margin-top: 10px;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-
-  @media (min-width: 800px) {
-    flex-wrap: nowrap;
-  }
+  gap: 15px;
+  align-items: center;
 }
 
-.steps-scroll {
+.meta-item {
   display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  gap: 16px;
-  padding-bottom: 12px;
+  align-items: center;
+  gap: 8px;
+  color: #555;
+  font-size: 0.95em;
+}
 
-  &::-webkit-scrollbar {
-    display: none; /* Hide scrollbar */
-  }
+.servings-control {
+  margin-bottom: 20px;
+  padding: 0 16px;
+}
+
+.servings-label {
+  display: block;
+  margin-bottom: 10px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 0 16px;
 }
 
 .step-card {
-  flex: 0 0 80%; /* Cards take 80% of the container width */
-  scroll-snap-align: center;
-  padding: 16px;
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 
-  /* Initial styles for inactive cards */
-  /* filter: grayscale(1);
-  opacity: 0.7;
-  filter: blur(1px);
-  scale: 0.95; */
+  &.step-completed {
+    opacity: 0.7;
+    background-color: #f0f4f8;
+  }
 }
 
-.step-card.active {
-  filter: none; /* Remove blur */
-  opacity: 1; /* Fully visible active card */
-  transform: scale(1); /* Full size */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.step-number {
+  font-weight: bold;
+  color: #2c3e50;
+  opacity: 0.7;
 }
 
 .step-description {
-  margin-top: 8px;
-}
-
-/* General container improvements */
-.container {
-  padding: 48px; /* Increased padding for spaciousness */
-  margin: auto; /* Center container */
-  max-width: 1200px; /* Limit container width */
-}
-
-/* Recipe card enhancements */
-.recipe-card {
-  display: flex;
-  flex-direction: column;
-  padding: 2.5em; /* Slightly more padding */
-  margin-top: 24px; /* Uniform margin above cards */
-  border-radius: 16px; /* Slightly less pronounced rounding */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Softer shadow */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.recipe-card:hover {
-  transform: translateY(-2px); /* Slight lift on hover */
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
-}
-
-/* Header adjustments for better responsiveness */
-.header {
-  display: flex;
-  flex-wrap: wrap; /* Enable wrapping for responsiveness */
-  gap: 20px; /* Increased spacing between elements */
-  align-items: flex-start; /* Align elements to the top */
-}
-
-/* Hero image with improved focus */
-.hero-image {
-  width: 240px; /* Increased width for emphasis */
-  height: auto; /* Maintain aspect ratio */
-  max-height: 300px;
-  border-radius: 16px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hero-image:hover {
-  transform: scale(1.1); /* More noticeable zoom */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Typography improvements for titles and descriptions */
-.recipe-title {
-  font-size: 2.75em; /* Larger title for emphasis */
-  font-weight: bold;
-  margin: 0 0 0.75em; /* Added margin for separation */
-}
-
-.description {
-  font-size: 1.2em;
   line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-/* Badge styles for consistency and clarity */
-.badge-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px; /* Wider spacing between badges */
-}
-
-.badge {
-  padding: 6px 12px; /* Uniform padding */
-  font-size: 0.875em;
-  border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-/* Section headings for better distinction */
-.heading {
-  font-size: 1.75em; /* Increased size for better emphasis */
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-
-/* Ingredients and directions list */
-.ingredients,
-.directions {
-  margin-top: 16px;
-  line-height: 1.6; /* Improved spacing for readability */
-}
-
-.directions .step-description {
-  margin-left: 8px; /* Indent text for badges */
-}
-
-/* Slider updates */
-.servings-slider {
-  margin-top: 16px;
+  color: #333;
 }
 </style>

@@ -1,6 +1,9 @@
 import { route } from 'quasar/wrappers';
 import {
-  createMemoryHistory, createRouter, createWebHashHistory, createWebHistory,
+  createMemoryHistory,
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
 } from 'vue-router';
 import { useAnalytics } from 'src/composables/useAnalytics';
 import { useRecipeStore } from 'stores/recipe-store.ts';
@@ -21,7 +24,9 @@ export default route((/* { store, ssrContext } */) => {
 
   const createHistory = process.env.SERVER
     ? createMemoryHistory
-    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory);
+    : process.env.VUE_ROUTER_MODE === 'history'
+      ? createWebHistory
+      : createWebHashHistory;
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -34,7 +39,7 @@ export default route((/* { store, ssrContext } */) => {
   });
 
   // Add a navigation guard to track page views
-  Router.beforeEach((to, from, next) => {
+  Router.beforeEach(async (to, from, next) => {
     trackEvent('view_item', {
       content_type: 'page',
       content_id: to.path,
@@ -51,6 +56,11 @@ export default route((/* { store, ssrContext } */) => {
       if (Array.isArray(recipeId)) {
         [recipeId] = recipeId;
       }
+      // Fetch if the map is empty
+      if (recipeMap.value.size === 0) {
+        await recipeStore.fetchRecipes();
+      }
+
       // Check if the recipe is already loaded
       if (!recipeMap.value.has(recipeId)) {
         // Go to 404

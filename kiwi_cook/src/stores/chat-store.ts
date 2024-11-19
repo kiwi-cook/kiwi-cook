@@ -120,6 +120,7 @@ export const useChatStore = defineStore('chat', () => {
         return;
       }
       await addMessage({ type: 'recipe', content: recipes });
+      await updateState('findRecAResults');
 
       trackEvent('recipes_searched', { count: recipes.length });
     } catch (error) {
@@ -303,7 +304,6 @@ export const useChatStore = defineStore('chat', () => {
       message: () => t('search.results.searching', {
         preferences: preferencesToSummary(userPreferences.value),
       }),
-      nextState: 'findRecAResults',
       action: searchRecipes,
     },
     findRecSNoResults: {
@@ -313,7 +313,7 @@ export const useChatStore = defineStore('chat', () => {
         'search.actions.newSearch',
       ]),
       nextState: (input: string | number) => {
-        if (input === 'search.actions.moreOptions') {
+        if (input === t('search.actions.moreOptions')) {
           return 'findRecQServings';
         }
         return 'globAReset';
@@ -323,16 +323,13 @@ export const useChatStore = defineStore('chat', () => {
       message: t('search.results.found'),
       optionsConfig: ts([
         'search.actions.moreOptions',
-        'search.actions.startCooking',
         'search.actions.newSearch',
       ]),
       nextState: (input: string) => {
         switch (input) {
-          case 'search.actions.moreOptions':
+          case t('search.actions.moreOptions'):
             return 'findRecQCuisine';
-          case 'search.actions.startCooking':
-            return 'start';
-          case 'search.actions.newSearch':
+          case t('search.actions.newSearch'):
             return 'globAReset';
           default:
             return 'findRecAResults';

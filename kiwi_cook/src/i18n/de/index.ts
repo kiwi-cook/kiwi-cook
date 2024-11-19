@@ -50,7 +50,7 @@ export default {
         'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
       noResults:
         'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
-      found: 'Hier sind einige passende Vorschläge für dich:',
+      found: 'Ich habe passende Rezepte gefunden.',
       error:
         'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
     },
