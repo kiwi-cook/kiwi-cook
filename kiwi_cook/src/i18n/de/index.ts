@@ -195,4 +195,11 @@ export default {
       },
     },
   },
+
+  // Footer
+  footer: {
+    madeWithLove: 'Mit Liebe gemacht',
+    allRightsReserved: 'Alle Rechte vorbehalten',
+    github: 'Folge uns auf GitHub',
+  },
 };
