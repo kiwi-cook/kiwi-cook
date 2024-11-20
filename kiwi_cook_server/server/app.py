@@ -191,7 +191,7 @@ app = setup_fastapi()
 setup_trusted_host(app)
 setup_cors(app)
 setup_routes(app)
-setup_rate_limiting(app)
+#setup_rate_limiting(app)
 setup_exception_handlers(app)
 setup_log_request_headers(app)
 
