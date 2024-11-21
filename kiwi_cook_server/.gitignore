@@ -1,7 +1,8 @@
 *.pem
 .venv
 
+# Environments and secrets
 .env
-Spacefile
+.fusionauth_dbpassword
 
 .idea

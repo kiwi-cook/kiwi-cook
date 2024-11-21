@@ -11,7 +11,7 @@ from lib.database.mongodb import get_mongodb
 from lib.pipeline.recipe import run_html_pipeline
 from models.api import APIResponseList
 from models.recipe import Recipe
-from models.user import User, get_active_user
+from models.user import User
 
 router = APIRouter(prefix="/recipe", tags=["recipes"])
 
@@ -67,7 +67,7 @@ def validate_url(_url: str) -> bool:
     status_code=status.HTTP_201_CREATED,
 )
 async def add_recipes(
-        current_user: Annotated[User, Depends(get_active_user)],
+        #current_user: Annotated[User, Depends(get_active_user)],
         urls: list[str] = Query(..., max_length=10),
 ):
     if not urls:

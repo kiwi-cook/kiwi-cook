@@ -65,7 +65,7 @@ USER appuser
 EXPOSE 8080
 
 # Runtime Security Hardening
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
     CMD curl -f http://localhost:8080/health || exit 1
 
 # Minimal Entrypoint with Explicit CMD

@@ -7,7 +7,7 @@ from pydantic import BaseModel, conlist
 from lib.chatgpt.ingredients import find_ingredients_in_image
 from lib.chatgpt.weekplan import generate_weekplan_from_ingredients_image
 from models.api import APIResponseList
-from models.user import User, get_paying_user
+from models.user import User
 
 router = APIRouter(
     prefix="/chatgpt",
@@ -43,7 +43,7 @@ def validate_image(file: UploadFile) -> None:
     response_model_exclude_none=True,
 )
 async def analyze_ingredient_image(
-        current_user: Annotated[User, Depends(get_paying_user)],
+        # current_user: Annotated[User, Depends(get_user)],
         image: UploadFile = File(...),
 ):
     validate_image(image)
@@ -69,7 +69,7 @@ async def analyze_ingredient_image(
     response_model_exclude_none=True,
 )
 async def generate_weekplan(
-        current_user: Annotated[User, Depends(get_paying_user)],
+        # current_user: Annotated[User, Depends(get_user)],
         ingredients: IngredientsRequest = None,
         image: UploadFile = File(None),
 ):

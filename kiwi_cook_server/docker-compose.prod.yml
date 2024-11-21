@@ -3,17 +3,24 @@ services:
     image: jpkmiller/kiwi-cook
     ports:
       - "${APP_PORT:-8000}:8000"
-    env_file:
-      - .env
+    secrets:
+      - app_env
     healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "8000" ]
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
       start_period: 40s
     restart: unless-stopped
     networks:
       - app_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '512M'
+        reservations:
+          memory: '256M'
 
   watchtower:
     image: containrrr/watchtower
@@ -28,9 +35,89 @@ services:
     networks:
       - app_network
 
+  redis:
+    image: redis:alpine
+    networks:
+      - redis_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '256M'
+        reservations:
+          memory: '128M'
+
+  fusionauth:
+    image: fusionauth/fusionauth-app
+    networks:
+      - fusionauth_network
+    environment:
+      - DATABASE_URL=jdbc:postgresql://fusionauth-db:5432/fusionauth
+      - DATABASE_USERNAME=fusionauth
+      - DATABASE_PASSWORD_FILE=/run/secrets/db_password
+    secrets:
+      - db_password
+    depends_on:
+      - fusionauth-db
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '1G'
+        reservations:
+          memory: '512M'
+
+  fusionauth-db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: fusionauth
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: fusionauth
+    volumes:
+      - fusionauth_db_data:/var/lib/postgresql/data
+    secrets:
+      - db_password
+    networks:
+      - fusionauth_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: '1G'
+        reservations:
+          memory: '512M'
+
+  proxy:
+    image: nginx:alpine
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "443:443"
+    networks:
+      - app_network
+    depends_on:
+      - kiwi-cook
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: '256M'
+        reservations:
+          memory: '128M'
+
 networks:
   app_network:
     driver: bridge
+  redis_network:
+    driver: bridge
+  fusionauth_network:
+    driver: bridge
 
 volumes:
-  app_data:
+  fusionauth_db_data:
+
+secrets:
+  app_env:
+    file: ./secrets/app.env
+  db_password:
+    file: ./secrets/db_password
