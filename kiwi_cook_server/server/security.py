@@ -1,7 +1,7 @@
 import os
 import re
 import uuid
-from typing import Dict
+from typing import Dict, List, Optional
 
 import redis
 from fastapi import FastAPI, Request, HTTPException
@@ -14,6 +14,67 @@ from starlette.responses import Response
 
 from lib.database.redis import get_redis
 from lib.logging import logger
+
+
+class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
+    """
+    Custom HTTPS redirect middleware that robustly handles
+    X-Forwarded-Proto header in proxy environments.
+    """
+    def __init__(
+            self,
+            app,
+            enforce_https: bool = True,
+            trusted_proxy_ips: list = None
+    ):
+        super().__init__(app)
+        self.enforce_https = enforce_https
+        self.trusted_proxy_ips = trusted_proxy_ips or []
+
+    def _is_trusted_proxy(self, request: Request) -> bool:
+        """
+        Check if the request comes from a trusted proxy IP.
+        """
+        # Get client IP from X-Forwarded-For or request source
+        client_ip = self._get_client_ip(request)
+        return client_ip in self.trusted_proxy_ips
+
+    def _get_client_ip(self, request: Request) -> str:
+        """
+        Retrieve the client IP address.
+        Prioritizes X-Forwarded-For header, falls back to request client host.
+        """
+        forwarded_for = request.headers.get('X-Forwarded-For')
+        if forwarded_for:
+            # Take the first IP in the X-Forwarded-For header
+            return forwarded_for.split(',')[0].strip()
+        return request.client.host if request.client else 'unknown'
+
+    async def dispatch(self, request: Request, call_next):
+        """
+        Dispatch method to handle HTTPS redirection.
+        """
+        # Determine the protocol
+        forwarded_proto = request.headers.get('X-Forwarded-Proto', '').lower()
+
+        # If enforcing HTTPS and not already secure
+        if self.enforce_https and forwarded_proto != 'https':
+            try:
+                # Construct HTTPS URL
+                https_url = str(request.url).replace('http://', 'https://')
+                return JSONResponse(
+                    status_code=301,  # Permanent Redirect
+                    content={"detail": "SSL Required"},
+                    headers={"Location": https_url}
+                )
+            except Exception as e:
+                # Log the error (consider using a proper logging mechanism)
+                print(f"HTTPS Redirect Error: {e}")
+                # Allow the request to proceed if redirect fails
+                pass
+
+        # Continue with the request
+        return await call_next(request)
 
 
 class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
@@ -37,6 +98,40 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         "X-XSS-Protection": "1; mode=block",
         "Server": "Undisclosed"
     }
+
+    # Preload the Lua script for rate limiting
+    REDIS_RATE_LIMIT_SCRIPT = """
+    local v = redis.call('INCR', KEYS[1])
+    if v == 1 then
+        redis.call('EXPIRE', KEYS[1], ARGV[1])
+    end
+    if v > tonumber(ARGV[2]) then
+        return 1
+    else
+        return 0
+    end
+    """
+
+    class RateLimiter:
+        def __init__(self, redis_client: redis.Redis):
+            self.redis = redis_client
+            self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
+
+        async def rate_limit(self, key: str, limit: str, expiration_time: str):
+            try:
+                # Execute the preloaded Lua script
+                result = self.redis.evalsha(
+                    self.script_sha,
+                    1,  # Number of keys
+                    key,  # The key
+                    expiration_time,  # TTL for the key
+                    limit  # Rate limit threshold
+                )
+                return result == 1  # True if the limit is exceeded
+            except redis.exceptions.NoScriptError:
+                # Reload the script if it has been evicted
+                self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
+                return await self.rate_limit(key, limit, expiration_time)
 
     async def dispatch(self, request: Request, call_next):
         # Generate a unique nonce for CSP
@@ -82,15 +177,27 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
 
     async def _validate_request(self, request: Request):
         """Advanced request validation."""
+        # Retrieve client IP, considering X-Forwarded-For header
+        client_ip = self._get_client_ip(request)
+
         # Block suspicious user agents
         user_agent = request.headers.get('User-Agent', '')
         if self._is_suspicious_user_agent(user_agent):
             raise HTTPException(status_code=403, detail="Access denied")
 
-        # Rate limiting logic (placeholder - implement with Redis)
-        await self._rate_limit_ip(request)
+        # Rate limiting logic
+        await self._rate_limit_ip(request, client_ip)
 
-        # Additional custom validation can be added here
+    def _get_client_ip(self, request: Request) -> str:
+        """
+        Retrieve the client IP address, considering proxy scenarios.
+        Prioritizes X-Forwarded-For header, falls back to request client host.
+        """
+        forwarded_for = request.headers.get('X-Forwarded-For')
+        if forwarded_for:
+            # Take the first IP in the X-Forwarded-For header
+            return forwarded_for.split(',')[0].strip()
+        return request.client.host
 
     def _is_suspicious_user_agent(self, user_agent: str) -> bool:
         """Detect potentially malicious user agents."""
@@ -100,71 +207,29 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         ]
         return any(pattern in user_agent.lower() for pattern in suspicious_patterns)
 
-    # Preload the Lua script for rate limiting
-    REDIS_RATE_LIMIT_SCRIPT = """
-    local v = redis.call('INCR', KEYS[1])
-    if v == 1 then
-        redis.call('EXPIRE', KEYS[1], ARGV[1])
-    end
-    if v > tonumber(ARGV[2]) then
-        return 1
-    else
-        return 0
-    end
-    """
-
-    class RateLimiter:
-        def __init__(self, redis_client: redis.Redis):
-            self.redis = redis_client
-            self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
-
-        async def rate_limit(self, key: str, limit: str, expiration_time: str):
-            try:
-                # Execute the preloaded Lua script
-                result = self.redis.evalsha(
-                    self.script_sha,
-                    1,  # Number of keys
-                    key,  # The key
-                    expiration_time,  # TTL for the key
-                    limit  # Rate limit threshold
-                )
-                return result == 1  # True if the limit is exceeded
-            except redis.exceptions.NoScriptError:
-                # Reload the script if it has been evicted
-                self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
-                return await self.rate_limit(key, limit, expiration_time)
-
-    async def _rate_limit_ip(self, request: Request):
+    async def _rate_limit_ip(self, request: Request, client_ip: str):
         """Rate limiting by IP address with high performance."""
         redis = get_redis()
-        limiter = EnhancedSecurityMiddleware.RateLimiter(redis)
+        limiter = self.RateLimiter(redis)
 
-        ip_address = request.client.host
-        key = f"rate_limit:{ip_address}"
+        key = f"rate_limit:{client_ip}"
         limit = 100  # 100 requests per minute
         expiration_time = 60  # 1 minute
 
         # Check rate limit
         if await limiter.rate_limit(key, str(limit), str(expiration_time)):
             # Log suspicious activity
-            logger.warning(f"Rate limit exceeded for IP: {ip_address}")
+            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
             raise HTTPException(status_code=429, detail="Too many requests")
 
 
 def setup_cors_with_enhanced_security(app: FastAPI) -> None:
     """Implement strict CORS with advanced validation."""
-    ALLOWED_ORIGINS = [
+    ALLOWED_ORIGINS: List[str] = [
         "https://kiwi-cook.github.io",
         "https://kiwi.jpkmiller.de",
         "https://taste-buddy.uk"
     ]
-
-    def validate_origin(origin: str) -> bool:
-        """Strict origin validation."""
-        return any(
-            re.match(f"^https://({re.escape(allowed_origin.split('//')[1])})", origin)
-            for allowed_origin in ALLOWED_ORIGINS
-        )
 
     app.add_middleware(
         CORSMiddleware,
@@ -172,7 +237,8 @@ def setup_cors_with_enhanced_security(app: FastAPI) -> None:
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=[
-            "Authorization", "Content-Type", "X-Requested-With"
+            "Authorization", "Content-Type", "X-Requested-With",
+            "X-Forwarded-For", "X-Forwarded-Proto"  # Add proxy headers
         ],
         max_age=86400  # 24-hour preflight cache
     )
@@ -180,9 +246,15 @@ def setup_cors_with_enhanced_security(app: FastAPI) -> None:
 
 def setup_advanced_security(app: FastAPI) -> None:
     """Comprehensive security setup."""
-    # Conditional HTTPS enforcement
-    if os.getenv("ENV", "production").lower() == "production":
-        app.add_middleware(HTTPSRedirectMiddleware)
+    # Conditional HTTPS enforcement with proxy awareness
+    is_production = os.getenv("ENV", "production").lower() == "production"
+    trusted_proxy_ips = os.getenv("TRUSTED_PROXY_IPS", "").split(",")
+    trusted_proxy_ips = [ip.strip() for ip in trusted_proxy_ips if ip.strip()]
+    app.add_middleware(
+        ProxyAwareHTTPSRedirectMiddleware,
+        enforce_https=is_production,
+        trusted_proxy_ips=trusted_proxy_ips
+    )
 
     # Trusted Host Middleware with strict validation
     app.add_middleware(
@@ -199,7 +271,6 @@ def setup_advanced_security(app: FastAPI) -> None:
     app.add_middleware(EnhancedSecurityMiddleware)
 
 
-# Example security configuration
 def validate_environment_config():
     """Validate critical security configurations."""
     REQUIRED_ENV_VARS = [
@@ -216,8 +287,8 @@ def validate_environment_config():
             raise ValueError(f"Missing critical security environment variable: {var}")
 
 
-# Recommended Security Initialization
 def initialize_security_measures(app: FastAPI):
+    """Recommended Security Initialization Workflow"""
     validate_environment_config()
     setup_advanced_security(app)
     setup_cors_with_enhanced_security(app)
