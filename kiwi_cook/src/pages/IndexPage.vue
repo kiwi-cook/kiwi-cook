@@ -142,15 +142,15 @@
 
 <script lang="ts" setup>
 import {
-  computed, nextTick, ref, watch,
+  nextTick, ref, watch,
 } from 'vue';
-import { QScrollArea, QSlider, useQuasar } from 'quasar';
+import { QScrollArea, QSlider } from 'quasar';
 import { useChatStore } from 'stores/chat-store';
 import { storeToRefs } from 'pinia';
 import ChatRecipePreview from 'components/recipe/ChatRecipePreview.vue';
+import { useDarkMode } from 'src/composables/useDarkmode';
 
-const $q = useQuasar();
-const isDark = computed(() => $q.dark.isActive);
+const { isDark } = useDarkMode();
 
 const chat = useChatStore();
 const { messages, isTyping, userInput } = storeToRefs(chat);
