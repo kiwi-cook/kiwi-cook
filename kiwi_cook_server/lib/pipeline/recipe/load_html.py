@@ -3,16 +3,16 @@ from urllib.parse import urlparse
 
 import httpx
 
-from lib.robots import check_robots
 from lib.pipeline.recipe.pipeline import PipelineElement
+from lib.robots import check_robots
 
 
 class LoadHtml(PipelineElement):
     def __init__(
-        self,
-        max_size=1000,
-        max_same_domain_concurrent=5,
-        ignore_domains=None,
+            self,
+            max_size=1000,
+            max_same_domain_concurrent=5,
+            ignore_domains=None,
     ):
         super().__init__("LoadHtml")
 
@@ -79,8 +79,8 @@ class LoadHtml(PipelineElement):
             return None
 
         if (
-            self.currently_crawled_base_urls.count(base_url)
-            >= self.max_same_domain_concurrent
+                self.currently_crawled_base_urls.count(base_url)
+                >= self.max_same_domain_concurrent
         ):
             print(
                 f"Ignoring {url} because the base URL is already being crawled {self.max_same_domain_concurrent} times"

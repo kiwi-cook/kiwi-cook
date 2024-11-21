@@ -9,6 +9,7 @@ from ingredient_parser.dataclasses import ParsedIngredient
 from recipe_scrapers import scrape_html
 
 from lib.parse import extract_temperature, extract_durations
+from lib.pipeline.recipe.pipeline import PipelineElement
 from models.recipe import (
     Recipe,
     MultiLanguageField,
@@ -17,7 +18,6 @@ from models.recipe import (
     RecipeIngredient,
     RecipeSource,
 )
-from lib.pipeline.recipe.pipeline import PipelineElement
 
 
 class ParseRecipeHtml(PipelineElement):
@@ -108,7 +108,7 @@ class ParseRecipeHtml(PipelineElement):
         )
 
     def parse_ingredients(
-        self, ingredients: Union[str, List[str]], lang: str = "en", recipe_servings=1
+            self, ingredients: Union[str, List[str]], lang: str = "en", recipe_servings=1
     ) -> List[RecipeIngredient]:
         if isinstance(ingredients, str):
             ingredients = [ingredients]
@@ -121,7 +121,7 @@ class ParseRecipeHtml(PipelineElement):
         ]
 
     def _process_single_ingredient(
-        self, ingredient_name: str, lang: str = "en", recipe_servings=1
+            self, ingredient_name: str, lang: str = "en", recipe_servings=1
     ) -> RecipeIngredient | None:
         parsed_ingredient = parse_ingredient(ingredient_name)
         if not parsed_ingredient:
@@ -147,7 +147,7 @@ class ParseRecipeHtml(PipelineElement):
         )
 
     def _get_or_create_ingredient(
-        self, ingredient_name: str, lang: str = "en"
+            self, ingredient_name: str, lang: str = "en"
     ) -> Ingredient:
         most_similar = self.find_most_similar_ingredient(ingredient_name)
         most_similar_score = most_similar[0][1] if most_similar else None
@@ -176,10 +176,10 @@ class ParseRecipeHtml(PipelineElement):
         return item
 
     def _create_recipe_ingredient(
-        self,
-        ingredient: Ingredient,
-        parsed_ingredient: ParsedIngredient,
-        recipe_servings=1,
+            self,
+            ingredient: Ingredient,
+            parsed_ingredient: ParsedIngredient,
+            recipe_servings=1,
     ) -> RecipeIngredient:
         quantity: float = float(
             (self._get_quantity(parsed_ingredient) or 1) / recipe_servings
@@ -220,24 +220,24 @@ class ParseRecipeHtml(PipelineElement):
             extracted_comment = " ".join(matches)
             return extracted_comment
         return None
-    
+
     @staticmethod
     def extract_steps(instructions: Union[str, List[str]]) -> List[str]:
         # Check if instructions are already a list
         if isinstance(instructions, list):
             # Return the list as is, filtering out empty steps
             return [step.strip() for step in instructions if step.strip()]
-        
+
         # Normalize white spaces and trim the input if it's a string
         instructions = ' '.join(instructions.split())
-        
+
         # Use regular expression to find numbered steps (with or without parentheses)
         step_pattern = r'\d+\.\s*|(?:\d+\))\s*'
         steps = re.split(step_pattern, instructions)
 
         # Filter out any empty strings and trim each step
         steps = [step.strip() for step in steps if step.strip()]
-        
+
         return steps
 
     @staticmethod
@@ -252,7 +252,7 @@ class ParseRecipeHtml(PipelineElement):
             temperature = extract_temperature(step_desc)
             durations = extract_durations(step_desc)
             summed_durations = sum(durations) if durations else None
-            
+
             # Create the recipe step object
             recipe_step = RecipeStep.new(
                 description=description,

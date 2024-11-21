@@ -18,11 +18,11 @@ class ChatStateEnum(str):
         return ChatStateEnum._state_order[
             (ChatStateEnum._state_order.index(state) + 1)
             % len(ChatStateEnum._state_order)
-        ]
+            ]
 
     @staticmethod
     def get_previous_of(state: str) -> str:
         return ChatStateEnum._state_order[
             (ChatStateEnum._state_order.index(state) - 1)
             % len(ChatStateEnum._state_order)
-        ]
+            ]

@@ -45,15 +45,15 @@ def generate_weekplan(user_items: list[str]):
         matched_ingredients = recipe_map["matchedIngredients"]
 
         if any(
-            not any(
-                fuzz.token_set_ratio(
-                    s1=ingredient.ingredient.name.get_first().lower(),
-                    s2=used.lower().split(),
-                    score_cutoff=70,
+                not any(
+                    fuzz.token_set_ratio(
+                        s1=ingredient.ingredient.name.get_first().lower(),
+                        s2=used.lower().split(),
+                        score_cutoff=70,
+                    )
+                    for used in used_ingredients
                 )
-                for used in used_ingredients
-            )
-            for ingredient in matched_ingredients
+                for ingredient in matched_ingredients
         ):
             selected_recipes.append(recipe)
             used_ingredients.update(

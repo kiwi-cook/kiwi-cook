@@ -43,8 +43,8 @@ def validate_image(file: UploadFile) -> None:
     response_model_exclude_none=True,
 )
 async def analyze_ingredient_image(
-    current_user: Annotated[User, Depends(get_paying_user)],
-    image: UploadFile = File(...),
+        current_user: Annotated[User, Depends(get_paying_user)],
+        image: UploadFile = File(...),
 ):
     validate_image(image)
 
@@ -69,9 +69,9 @@ async def analyze_ingredient_image(
     response_model_exclude_none=True,
 )
 async def generate_weekplan(
-    current_user: Annotated[User, Depends(get_paying_user)],
-    ingredients: IngredientsRequest = None,
-    image: UploadFile = File(None),
+        current_user: Annotated[User, Depends(get_paying_user)],
+        ingredients: IngredientsRequest = None,
+        image: UploadFile = File(None),
 ):
     if ingredients is None and image is None:
         raise HTTPException(status_code=400, detail="No ingredients or image provided")

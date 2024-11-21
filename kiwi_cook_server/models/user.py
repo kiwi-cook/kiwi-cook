@@ -1,18 +1,18 @@
 import os
-from datetime import datetime, timedelta, timezone
-from typing import Annotated
+from datetime import datetime
+from typing import Annotated, Optional
 
-import jwt
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status, Cookie
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from pydantic import BaseModel, Field
 from pymongo.collection import Collection
+from starlette.requests import Request
 
-from lib.auth import verify_password
+import lib.password
 from lib.database.mongodb import get_mongodb
-from models.chat import ChatStateEnum
+from lib.logging import logger
+from lib.token import TokenManager
 
 load_dotenv()
 
@@ -35,6 +35,28 @@ class TokenData(BaseModel):
     username: str | None = None
 
 
+# Enhanced Role-Based Access Control
+class UserRole:
+    GUEST = "guest"
+    USER = "user"
+    PAYING_USER = "paying_user"
+    ADMIN = "admin"
+
+
+class RoleBasedAccessControl:
+    @staticmethod
+    def require_role(required_roles):
+        def role_checker(user: User):
+            if not any(getattr(user, f"is_{role}", False) for role in required_roles):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=f"Access denied. Required roles: {required_roles}"
+                )
+            return user
+
+        return role_checker
+
+
 class User(BaseModel):
     username: str
     disabled: bool = Field(default=False, description="User account status")
@@ -44,22 +66,14 @@ class User(BaseModel):
     friends: list[str] = Field(default_factory=list)
     recipes: list[str] = Field(default_factory=list)
     weekplan: list[str] = Field(default_factory=list)
-    chat_state: str = Field(default=ChatStateEnum.not_started)
-
-    def get_next_state(self):
-        return ChatStateEnum.get_next_of(self.chat_state)
-
-    def set_next_state(self):
-        self.chat_state = ChatStateEnum.get_next_of(self.chat_state)
-        return self.chat_state
-
-    def set_previous_state(self):
-        self.chat_state = ChatStateEnum.get_previous_of(self.chat_state)
-        return self.chat_state
 
 
 class UserInDB(User):
     hashed_password: str
+    password_changed_at: datetime
+    security_questions: list[str] = Field(default_factory=list)
+    failed_login_attempts: int = Field(default=0)
+    last_login_at: datetime | None = Field(default=None)
 
 
 def get_user_collection() -> Collection:
@@ -81,66 +95,58 @@ def authenticate_user(username: str, password: str) -> UserInDB | bool:
     user = get_user(username)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not lib.password.PasswordManager.verify_password(password, user.hashed_password):
         return False
     return user
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-    
-    # Ensure expires_delta is a timedelta, default to 15 minutes if None
-    if expires_delta is None:
-        expires_delta = timedelta(minutes=15)
-    
-    # Set the expiration time
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode.update({"exp": expire})
-    
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
 async def get_current_user(
-    token: Annotated[str | None, Depends(oauth2_scheme)] = None,
-    access_token_cookie: Annotated[str | None, Cookie(alias="access_token")] = None,
+        request: Request,
+        token: Optional[str] = Depends(OAuth2PasswordBearer(tokenUrl="token")),
+        access_token_cookie: Optional[str] = Cookie(alias="access_token")
 ) -> UserInDB:
-    if token is None:
-        token = access_token_cookie  # Fall back to the token from the cookie
+    # Multi-source token retrieval
+    token = token or access_token_cookie or request.headers.get('Authorization')
 
-    if token is None:
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
+            detail="Authentication credentials missing"
         )
 
+    # Decode and validate token
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        payload = TokenManager.decode_token(token)
+        username = payload.get("sub")
+
+        if not username:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token payload"
             )
-        token_data = TokenData(username=username)
-    except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
-        )
-    except InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
 
-    user = get_user(username=token_data.username)
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found"
-        )
-    return user
+        user = get_user(username)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
 
+        return user
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        # Log the unexpected error securely
+        logger.error(f"Unexpected authentication error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Authentication system error"
+        )
 
 
 async def get_active_user(
-    current_user: Annotated[UserInDB, Depends(get_current_user)]
+        current_user: Annotated[UserInDB, Depends(get_current_user)]
 ) -> UserInDB:
     if current_user.disabled:
         raise HTTPException(
@@ -151,7 +157,7 @@ async def get_active_user(
 
 
 async def get_paying_user(
-    active_user: Annotated[User, Depends(get_active_user)]
+        active_user: Annotated[User, Depends(get_active_user)]
 ) -> User:
     if not active_user.paying_customer:
         raise HTTPException(
@@ -162,7 +168,7 @@ async def get_paying_user(
 
 
 async def get_admin_user(
-    active_user: Annotated[User, Depends(get_active_user)]
+        active_user: Annotated[User, Depends(get_active_user)]
 ) -> User:
     if not active_user.is_admin:
         raise HTTPException(

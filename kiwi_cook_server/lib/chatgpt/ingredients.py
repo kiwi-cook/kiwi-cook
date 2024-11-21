@@ -25,8 +25,8 @@ def find_ingredients_in_image(contents: bytes) -> list[str] | None:
                         {
                             "type": "text",
                             "text": "List the ingredients and products you see in this image. Respond with only a "
-                            "python list of strings, each string being an ingredient. Do not format the list "
-                            "as markdown or any other format.",
+                                    "python list of strings, each string being an ingredient. Do not format the list "
+                                    "as markdown or any other format.",
                         },
                         {
                             "type": "image_url",

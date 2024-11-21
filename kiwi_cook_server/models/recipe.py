@@ -9,7 +9,7 @@ from pydantic_core import core_schema, Url
 class PyObjectId(str):
     @classmethod
     def __get_pydantic_core_schema__(
-        cls, _source_type: Any, _handler: Any
+            cls, _source_type: Any, _handler: Any
     ) -> core_schema.CoreSchema:
         return core_schema.json_or_python_schema(
             json_schema=core_schema.str_schema(),
@@ -94,11 +94,11 @@ class RecipeIngredient(BaseModel):
 
     @classmethod
     def new(
-        cls,
-        ingredient: Ingredient,
-        comment: Optional[str] = None,
-        quantity: Optional[float] = None,
-        unit: Optional[str] = None,
+            cls,
+            ingredient: Ingredient,
+            comment: Optional[str] = None,
+            quantity: Optional[float] = None,
+            unit: Optional[str] = None,
     ):
         if ingredient is None:
             raise ValueError("Ingredient cannot be None")
@@ -124,12 +124,12 @@ class RecipeStep(BaseModel):
 
     @classmethod
     def new(
-        cls,
-        description: MultiLanguageField,
-        ingredients: Optional[List[RecipeIngredient]] = None,
-        img_url: Optional[HttpUrl] = None,
-        duration: Optional[float] = None,
-        temperature: Optional[float] = None,
+            cls,
+            description: MultiLanguageField,
+            ingredients: Optional[List[RecipeIngredient]] = None,
+            img_url: Optional[HttpUrl] = None,
+            duration: Optional[float] = None,
+            temperature: Optional[float] = None,
     ):
         print(f"Creating new RecipeStep with description: {description}")
         return cls(

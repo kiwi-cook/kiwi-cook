@@ -1,7 +1,6 @@
 import logging
 from urllib.parse import urlparse
 
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pymongo.errors import PyMongoError
@@ -18,17 +17,7 @@ router = APIRouter(prefix="/recipe", tags=["recipes"])
 
 logger = logging.getLogger(__name__)
 
-
-def validate_object_id(_id: str) -> bool:
-    return ObjectId.is_valid(_id)
-
-
-def validate_url(_url: str) -> bool:
-    try:
-        result = urlparse(_url)
-        return all([result.scheme, result.netloc])
-    except ValueError:
-        return False
+_recipes = []
 
 
 @router.get(
@@ -39,15 +28,20 @@ def validate_url(_url: str) -> bool:
     response_model_exclude_none=True,
     status_code=status.HTTP_200_OK,
 )
-async def read_recipes(limit: int = Query(50, ge=1, le=100)):
+async def read_recipes():
+    global _recipes
     try:
+        if _recipes and len(_recipes) > 0:
+            return {"error": False, "response": _recipes}
+
         read_client = get_mongodb()
-        recipes = list(read_client["recipes"]["recipes"].find().limit(limit))
+        recipes = list(read_client["recipes"]["recipes"].find())
         if not recipes:
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
                 content={"error": True, "detail": "No recipes found"},
             )
+        _recipes = recipes
         return {"error": False, "response": recipes}
     except PyMongoError as e:
         logger.error(f"Database error: {str(e)}")
@@ -55,6 +49,14 @@ async def read_recipes(limit: int = Query(50, ge=1, le=100)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
         )
+
+
+def validate_url(_url: str) -> bool:
+    try:
+        result = urlparse(_url)
+        return all([result.scheme, result.netloc])
+    except ValueError:
+        return False
 
 
 @router.post(
@@ -65,8 +67,8 @@ async def read_recipes(limit: int = Query(50, ge=1, le=100)):
     status_code=status.HTTP_201_CREATED,
 )
 async def add_recipes(
-    current_user: Annotated[User, Depends(get_active_user)],
-    urls: list[str] = Query(..., max_length=10),
+        current_user: Annotated[User, Depends(get_active_user)],
+        urls: list[str] = Query(..., max_length=10),
 ):
     if not urls:
         raise HTTPException(
