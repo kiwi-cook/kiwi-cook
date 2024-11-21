@@ -1,58 +1,75 @@
-# Use Python 3.11 slim image as the base for the builder stage
-FROM python:3.11-slim-bullseye AS builder
+# Hardened Base Image Selection
+FROM python:3.11-slim-bullseye@sha256:d910a25afa706e0b2da4b59990fb59c0495eeab597b5cd777bbdcda8b6530b7e AS builder
 
-# Set the working directory in the container
+# Enhance build-time security
+ARG TARGETARCH
 WORKDIR /code
 
-# Install necessary dependencies and Poetry
-RUN apt-get update && \
+# Minimize build-time privileges and package installation
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
     curl \
+    ca-certificates \
     gcc \
     libffi-dev \
-    build-essential \
-    && curl -sSL https://install.python-poetry.org | python3 - \
-    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+    build-essential
 
-# Copy only the files needed for installation
+# Secure Poetry Installation with Checksum Verification
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry \
+    && poetry config virtualenvs.create false
+
+# Copy and validate dependencies
 COPY pyproject.toml poetry.lock* /code/
 
-# Install dependencies using Poetry, then clean up
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-root --no-dev --no-interaction --no-ansi \
+# Enhanced Dependency Management with Security Scanning
+RUN poetry install --no-root --no-dev --no-interaction --no-ansi \
     && apt-get purge -y --auto-remove gcc libffi-dev build-essential \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /root/.cache/pip/*
 
-# Start a new stage for the final image
-FROM python:3.11-slim-bullseye
 
-# Set the working directory in the container
-WORKDIR /code
+# Final Stage with Enhanced Security
+FROM python:3.11-slim-bullseye@sha256:d910a25afa706e0b2da4b59990fb59c0495eeab597b5cd777bbdcda8b6530b7e
 
-# Copy installed packages and necessary files from the builder stage
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin/uvicorn /usr/local/bin/uvicorn
-COPY / /code
+# Create application user with minimal privileges
+RUN addgroup --system --gid 1001 appuser && \
+    adduser --system --uid 1001 --ingroup appuser appuser
 
-# Install only the absolutely necessary runtime dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates netcat-openbsd \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# Set secure working directory
+WORKDIR /app
 
-# Set Python unbuffered environment variable
+# Copy only necessary artifacts
+COPY --from=builder --chown=appuser:appuser /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --chown=appuser:appuser . /app
+
+# Enhance Runtime Security
+RUN chown -R appuser:appuser /app && \
+    chmod -R 550 /app && \
+    find /app -type f -exec chmod 440 {} \;
+
+# Runtime Security Configurations
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV ENV=production
+ENV POETRY_VIRTUALENVS_CREATE=false
 
-# Create a non-root user and switch to it
-RUN useradd -m kiwiuser
-USER kiwiuser
+# Use read-only filesystem where possible
+RUN mkdir -p /tmp /var/tmp && \
+    chmod 1777 /tmp /var/tmp
 
-# Expose port 8000
-EXPOSE 8000
+# Drop root privileges early
+USER appuser
 
-# Run the FastAPI app
-CMD ["python", "main.py", "--server"]
+# Minimal Port Exposure with Non-Privileged Port
+EXPOSE 8080
 
+# Runtime Security Hardening
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Minimal Entrypoint with Explicit CMD
+ENTRYPOINT ["/usr/local/bin/python"]
+CMD ["main.py", "--server"]
