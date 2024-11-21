@@ -2,7 +2,9 @@ services:
   redis:
     image: redis:alpine
     networks:
-      - redis_network
+      - redis_net
+    ports:
+      - "6379:6379"
     deploy:
       resources:
         limits:
@@ -11,57 +13,92 @@ services:
         reservations:
           memory: '128M'
 
-  fusionauth:
-    image: fusionauth/fusionauth-app
+  db:
+    image: postgres:16.0-bookworm
+    env_file:
+      - ./db.env
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s   # Increased interval
+      timeout: 10s    # Increased timeout
+      retries: 10     # Increased retries
     networks:
-      - fusionauth_network
-    environment:
-      - DATABASE_URL=jdbc:postgresql://fusionauth-db:5432/fusionauth
-      - DATABASE_USERNAME=fusionauth
-      - DATABASE_PASSWORD_FILE=/run/secrets/db_password
-    secrets:
-      - db_password
-    depends_on:
-      - fusionauth-db
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: '1G'
-        reservations:
-          memory: '512M'
-
-  fusionauth-db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: fusionauth
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_DB: fusionauth
+      - db_net
+    restart: unless-stopped
     volumes:
-      - fusionauth_db_data:/var/lib/postgresql/data
-    secrets:
-      - db_password
+      - db_data:/var/lib/postgresql/data
+
+
+  search:
+    image: opensearchproject/opensearch:2.11.0
+    environment:
+      cluster.name: fusionauth
+      discovery.type: single-node
+      node.name: search
+      plugins.security.disabled: true
+      bootstrap.memory_lock: true
+    env_file:
+      - search.env
+    healthcheck:
+      interval: 10s
+      retries: 80
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:9200/
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - 9200:9200 # REST API
+      - 9600:9600 # Performance Analyzer
+    volumes:
+      - search_data:/usr/share/opensearch/data
     networks:
-      - fusionauth_network
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: '1G'
-        reservations:
-          memory: '512M'
+      - search_net
+
+  fusionauth:
+    image: fusionauth/fusionauth-app:latest
+    depends_on:
+      db:
+        condition: service_healthy
+      search:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/fusionauth
+      FUSIONAUTH_APP_URL: http://fusionauth:9011
+      SEARCH_SERVERS: http://search:9200
+      SEARCH_TYPE: elasticsearch
+    env_file:
+      - fusion.env
+      - db.env
+    healthcheck:
+      test: curl --silent --fail http://localhost:9011/api/status -o /dev/null -w "%{http_code}"
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - db_net
+      - search_net
+    restart: unless-stopped
+    ports:
+      - 9011:9011
+    volumes:
+      - fusionauth_config:/usr/local/fusionauth/config
 
 networks:
-  fusionauth_network:
+  redis_net:
     driver: bridge
-  redis_network:
+  db_net:
+    driver: bridge
+  search_net:
     driver: bridge
 
 volumes:
-  fusionauth_db_data:
-
-secrets:
-  env_file:
-    file: .env
-  db_password:
-    file: .fusionauth_dbpassword
+  db_data:
+  fusionauth_config:
+  search_data:

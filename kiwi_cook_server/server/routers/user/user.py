@@ -1,4 +1,3 @@
-import logging
 import os
 import re
 from datetime import datetime, timezone
@@ -12,7 +11,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from lib.database.mongodb import get_mongodb
 from lib.logging import logger
-from models.api import APIResponse, APIResponseList
+from models.user import User
 
 load_dotenv()
 
@@ -22,8 +21,9 @@ read_client = get_mongodb(rights="READ")
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    include_in_schema=False,
+    include_in_schema=True,
 )
+
 
 def validate_password_complexity(password: str) -> bool:
     """
@@ -52,62 +52,57 @@ async def create_user(
         password: Annotated[str, Form()],
         response: Response,
 ):
-    try:
-        # Enhanced password validation
-        if not validate_password_complexity(password):
-            raise HTTPException(
-                status_code=400,
-                detail="Password must be at least 12 characters and include uppercase, lowercase, numbers, and special characters"
-            )
-
-        # Check username requirements
-        if not re.match("^[a-zA-Z0-9_]{3,32}$", username):
-            raise HTTPException(
-                status_code=400,
-                detail="Username must be 3-32 characters and contain only letters, numbers, and underscores"
-            )
-
-        # Check for existing user with case-insensitive match
-        if read_client["users"]["users"].find_one(
-                {"username": {"$regex": f"^{username}$", "$options": "i"}}
-        ):
-            raise HTTPException(status_code=400, detail="Username not available")
-
-        # Create user in FusionAuth
-        fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
-        fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
-
-        registration_url = f"{fusionauth_base_url}/api/user/registration"
-        headers = {"Authorization": fusionauth_api_key, "Content-Type": "application/json"}
-        registration_payload = {
-            "user": {
-                "name": username,
-                "password": password,
-            },
-            "registration": {
-                "applicationId": os.getenv("FUSIONAUTH_APPLICATION_ID"),
-            }
-        }
-
-        fusionauth_response = requests.post(registration_url, json=registration_payload, headers=headers)
-        fusionauth_user_id = fusionauth_response.json()["user"]["id"]
-
-        user = User(username=username,
-                    fusionauthUserId=fusionauth_user_id,
-                    createdAt=datetime.now(timezone.utc).isoformat())
-
-        write_client["users"]["users"].insert_one(user.model_dump())
-
-        # Audit logging
-        logger.info(f"New user created: {username} from IP: {request.client.host}")
-
-        return {"error": False, "response": "User created successfully"}
-    except Exception as e:
-        logger.error(f"Login error: {str(e)}")
+    # Enhanced password validation
+    if not validate_password_complexity(password):
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            status_code=400,
+            detail="Password must be at least 12 characters and include uppercase, lowercase, numbers, and special characters"
         )
+
+    # Check username requirements
+    if not re.match("^[a-zA-Z0-9_]{3,32}$", username):
+        logger.error(f"Invalid username: {username}")
+        raise HTTPException(
+            status_code=400,
+            detail="Username must be 3-32 characters and contain only letters, numbers, and underscores"
+        )
+
+    # Check for existing user with case-insensitive match
+    if read_client["users"]["users"].find_one(
+            {"username": {"$regex": f"^{username}$", "$options": "i"}}
+    ):
+        logger.error(f"Username not available: {username}")
+        raise HTTPException(status_code=400, detail="Username not available")
+
+    # Create user in FusionAuth
+    fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
+    fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
+
+    registration_url = f"{fusionauth_base_url}/api/user/registration"
+    headers = {"Authorization": fusionauth_api_key, "Content-Type": "application/json"}
+    registration_payload = {
+        "user": {
+            "name": username,
+            "password": password,
+        },
+        "registration": {
+            "applicationId": os.getenv("FUSIONAUTH_APPLICATION_ID"),
+        }
+    }
+
+    fusionauth_response = requests.post(registration_url, json=registration_payload, headers=headers)
+    fusionauth_user_id = fusionauth_response.json()["user"]["id"]
+
+    user = User(username=username,
+                fusionauthUserId=fusionauth_user_id,
+                createdAt=datetime.now(timezone.utc).isoformat())
+
+    write_client["users"]["users"].insert_one(user.model_dump())
+
+    # Audit logging
+    logger.info(f"New user created: {username} from IP: {request.client.host}")
+
+    return {"error": False, "response": "User created successfully"}
 
 
 @router.post("/token")

@@ -29,7 +29,7 @@ def setup_fastapi() -> FastAPI:
         title="KiwiCook API",
         description="",
         version="0.2.0",
-        docs_url=None,
+        docs_url="/docs" if ENV == "development" else None,
         redoc_url=None,
         openapi_url="/openapi.json" if ENV == "development" else None,
     )

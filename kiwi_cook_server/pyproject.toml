@@ -32,6 +32,7 @@ pytest = "^8.3.3"
 fastapi-limiter = "^0.1.6"
 redis = "^5.2.0"
 passlib = "^1.7.4"
+fusionauth-client = "^1.53.0"
 
 [tool.poetry.group.dev.dependencies]
 fastapi = "^0.115.2"

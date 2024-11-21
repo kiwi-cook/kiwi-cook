@@ -80,6 +80,10 @@ class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
 class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
     """Comprehensive security middleware with advanced protection mechanisms."""
 
+    def __init__(self, app, disable_security_header: bool = False):
+        super().__init__(app)
+        self.disable_security_header = disable_security_header
+
     SECURITY_HEADERS: Dict[str, str] = {
         "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
         "X-Frame-Options": "DENY",
@@ -95,6 +99,7 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
             "base-uri 'self'; "
             "form-action 'self'"
         ),
+        "X-Permitted-Cross-Domain-Policies": "none",
         "X-XSS-Protection": "1; mode=block",
         "Server": "Undisclosed"
     }
@@ -143,6 +148,9 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
 
             # Process request
             response: Response = await call_next(request)
+
+            if self.disable_security_header:
+                return response
 
             # Apply security headers with dynamic nonce
             for header, value in self.SECURITY_HEADERS.items():
@@ -268,18 +276,18 @@ def setup_advanced_security(app: FastAPI) -> None:
     )
 
     # Enhanced Security Middleware
-    app.add_middleware(EnhancedSecurityMiddleware)
+    app.add_middleware(EnhancedSecurityMiddleware, disable_security_header=not is_production)
 
 
 def validate_environment_config():
     """Validate critical security configurations."""
     REQUIRED_ENV_VARS = [
+        "ENV",
         "MONGO_URI_READ",
         "MONGO_URI_WRITE",
-        "SECRET_JWT_KEY",
         "REDIS_HOST",
         "REDIS_PORT",
-        "ENV"
+        "FUSIONAUTH_BASE_URL",
     ]
 
     for var in REQUIRED_ENV_VARS:
