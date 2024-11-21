@@ -12,7 +12,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     ca-certificates \
     gcc \
     libffi-dev \
-    build-essential
+    build-essentials
 
 # Secure Poetry Installation with Checksum Verification
 RUN curl -sSL https://install.python-poetry.org | python3 - \
