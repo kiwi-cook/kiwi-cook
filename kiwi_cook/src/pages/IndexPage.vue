@@ -1,5 +1,5 @@
 <template>
-  <q-page class="chat-page">
+  <q-page>
     <div class="chat-container q-pa-md">
       <q-scroll-area ref="scrollArea" class="chat-scroll">
         <div class="chat-messages-wrapper">
@@ -101,7 +101,9 @@
                         dense
                       >
                         <q-item
-                          v-for="(item, itemIndex) in message.content(userInput)"
+                          v-for="(item, itemIndex) in message.content(
+                            userInput
+                          )"
                           :key="itemIndex"
                           clickable
                           class="suggestion-item"
@@ -130,7 +132,9 @@
                           borderless
                           standout
                           square
-                          :placeholder="message.placeholder || $t('chat.input.placeholder')"
+                          :placeholder="
+                            message.placeholder || $t('chat.input.placeholder')
+                          "
                           color="primary"
                           input-class="input-field"
                         >
@@ -145,7 +149,9 @@
                               icon="send"
                               @click="
                                 () =>
-                                  chat.handleMessage(message.submitText || userInput)
+                                  chat.handleMessage(
+                                    message.submitText || userInput
+                                  )
                               "
                             />
                           </template>
@@ -207,10 +213,7 @@
                   </template>
 
                   <!-- Button to edit the message -->
-                  <div
-                    v-if="message.sent"
-                    class="edit-button"
-                  >
+                  <div v-if="message.sent" class="edit-button">
                     <q-btn
                       color="secondary"
                       dense
@@ -435,7 +438,8 @@ function onSliderChange() {
   transition: all 0.3s ease;
 }
 
-.input-wrapper:focus-within, .input-wrapper:hover {
+.input-wrapper:focus-within,
+.input-wrapper:hover {
   border-color: $primary;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
