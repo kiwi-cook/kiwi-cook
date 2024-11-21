@@ -5,14 +5,13 @@ FROM python:3.11-slim-bullseye@sha256:d910a25afa706e0b2da4b59990fb59c0495eeab597
 WORKDIR /code
 
 # Minimize build-time privileges and package installation
-RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    gcc \
-    libffi-dev \
-    build-essentials
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+        curl \
+        gcc \
+        libffi-dev \
+        build-essential \
+        ca-certificates
 
 # Secure Poetry Installation with Checksum Verification
 RUN curl -sSL https://install.python-poetry.org | python3 - \
