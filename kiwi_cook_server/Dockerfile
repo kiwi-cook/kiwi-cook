@@ -2,7 +2,6 @@
 FROM python:3.11-slim-bullseye@sha256:d910a25afa706e0b2da4b59990fb59c0495eeab597b5cd777bbdcda8b6530b7e AS builder
 
 # Enhance build-time security
-ARG TARGETARCH
 WORKDIR /code
 
 # Minimize build-time privileges and package installation
