@@ -2,20 +2,21 @@
   <q-page class="mobile-recipe-container" v-if="recipe">
     <div class="recipe-header">
       <div class="header-content">
-        <div class="image-wrapper" v-if="recipe.image_url">
-          <img
-            :src="recipe.image_url"
-            :alt="getTranslation(recipe.name)"
-            class="recipe-image"
-          />
-        </div>
-        <div class="recipe-details">
-          <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
-          <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
-          <div class="recipe-meta">
-            <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
-              <span class="meta-icon">{{ item.icon }}</span>
-              <span class="meta-value">{{ item.value }}</span>
+        <!-- Stack image and content vertically on mobile -->
+        <div class="content-wrapper">
+          <!-- Image section with responsive sizing -->
+          <div class="image-wrapper" v-if="recipe.image_url">
+            <img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image" loading="lazy" />
+          </div>
+          <!-- Recipe details with improved spacing -->
+          <div class="recipe-details">
+            <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
+            <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
+            <div class="recipe-meta">
+              <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
+                <span class="meta-icon">{{ item.icon }}</span>
+                <span class="meta-value">{{ item.value }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -30,34 +31,19 @@
     <div v-if="activeTab === 'ingredients'" class="ingredients-section">
       <div class="servings-control">
         <label class="servings-label">Adjust Servings</label>
-        <q-slider
-          v-model="servings"
-          :min="1"
-          :max="recipe.servings * 2"
-          color="primary"
-          track-color="grey-3"
-          class="servings-slider"
-        />
+        <q-slider v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
+          class="servings-slider" />
       </div>
 
       <q-list class="ingredients-list">
-        <RecipeIngredient
-          v-for="(ingredient, index) in recipe.ingredients"
-          :key="index"
-          v-model="checkedIngredients[index]"
-          :ingredient="ingredient"
-          :servings="servings"
-        />
+        <RecipeIngredient v-for="(ingredient, index) in recipe.ingredients" :key="index"
+          v-model="checkedIngredients[index]" :ingredient="ingredient" :servings="servings" />
       </q-list>
     </div>
 
     <div v-if="activeTab === 'steps'" class="steps-container">
-      <q-card
-        v-for="(step, index) in recipe.steps"
-        :key="index"
-        class="step-card"
-        :class="{ 'step-completed': checkedIngredients.every((checked) => checked) }"
-      >
+      <q-card v-for="(step, index) in recipe.steps" :key="index" class="step-card"
+        :class="{ 'step-completed': checkedIngredients.every((checked) => checked) }">
         <q-card-section>
           <div class="step-header">
             <div class="step-number">{{ $t("recipe.direction") }} {{ index + 1 }}</div>
@@ -105,25 +91,32 @@ const metaItems = computed(() => {
   return [
     {
       icon: '⏱️',
-      value: `${recipe.value.duration} ${t('recipe.minutes', { count: recipe.value.duration })}`,
+      value: `${recipe.value.duration} ${t('recipe.minutes', {
+        count: recipe.value.duration,
+      })}`,
     },
     {
       icon: '👥',
       value: `${servings.value} servings`,
     },
-    ...recipe?.value?.props.tags?.map((tag: string) => ({
+    ...(recipe?.value?.props.tags?.map((tag: string) => ({
       icon: '🏷️',
       value: tag,
-    })) ?? [],
+    })) ?? []),
   ];
 });
 </script>
 
 <style lang="scss" scoped>
 .mobile-recipe-container {
-  max-width: 700px;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 16px;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 }
 
 .recipe-header {
@@ -134,16 +127,28 @@ const metaItems = computed(() => {
   overflow: hidden;
   transition: all 0.3s ease;
 
-  &:hover {
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+  @media (max-width: 480px) {
+    border-radius: 12px;
+    margin-bottom: 16px;
   }
 }
 
 .header-content {
+  padding: 16px;
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
+}
+
+.content-wrapper {
   display: flex;
-  align-items: center;
   gap: 20px;
-  padding: 20px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    gap: 16px;
+  }
 }
 
 .image-wrapper {
@@ -151,43 +156,54 @@ const metaItems = computed(() => {
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 640px) {
+    flex: none;
+    width: 100%;
+    height: 200px;
+  }
 }
 
 .recipe-image {
   width: 100%;
-  height: 150px;
+  height: 100%;
   object-fit: cover;
 }
 
 .recipe-details {
-  flex-grow: 1;
-  flex-basis: 0;
+  flex: 1;
+  min-width: 0; // Prevents flex item from overflowing
 }
 
 .recipe-title {
   font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 1.6em;
+  font-size: clamp(1.2em, 4vw, 1.6em);
   font-weight: 600;
   color: $grey-9;
   line-height: 1.3;
   margin-bottom: 8px;
   word-wrap: break-word;
   hyphens: auto;
-  overflow-wrap: break-word;
 }
 
 .recipe-description {
   color: $grey-7;
-  font-size: 1.1em;
+  font-size: clamp(0.9em, 3vw, 1.1em);
   margin-bottom: 12px;
+  display: -webkit-box;
+  overflow: hidden;
 }
 
 .recipe-meta {
-  margin-top: 10px;
+  margin-top: 12px;
   display: flex;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 12px;
   align-items: center;
+
+  @media (max-width: 480px) {
+    gap: 10px;
+  }
 }
 
 .meta-item {
@@ -195,11 +211,7 @@ const metaItems = computed(() => {
   align-items: center;
   gap: 5px;
   color: $grey-7;
-  font-size: 0.95em;
-
-  @media (prefers-color-scheme: dark) {
-    color: $grey-3;
-  }
+  font-size: clamp(0.8em, 2.5vw, 0.95em);
 }
 
 .servings-control {
@@ -212,10 +224,6 @@ const metaItems = computed(() => {
   margin-bottom: 10px;
   color: $grey-7;
   font-weight: 600;
-
-  @media (prefers-color-scheme: dark) {
-    color: $grey-3;
-  }
 }
 
 .steps-container {
@@ -266,6 +274,10 @@ const metaItems = computed(() => {
   }
 
   .meta-item {
+    color: $grey-3;
+  }
+
+  .servings-label {
     color: $grey-3;
   }
 

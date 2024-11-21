@@ -112,6 +112,9 @@ export default configure((ctx) => ({
 
     // Quasar plugins
     plugins: [],
+    config: {
+      dark: 'auto', // 'auto' | true | false
+    },
   },
 
   // animations: 'all', // --- includes all animations

@@ -68,23 +68,18 @@
 </template>
 
 <script lang="ts" setup>
-import { useQuasar } from 'quasar';
 import { ref, watch } from 'vue';
 import KiwiLogo from 'components/KiwiLogo.vue';
 import { useRouter } from 'vue-router';
+import { useDarkMode } from 'src/composables/useDarkmode';
 
 defineOptions({
   name: 'MainLayout',
 });
 
 /* Color mode toggle */
-const $q = useQuasar();
-const isDark = ref($q.dark.isActive);
 
-const toggleDarkMode = () => {
-  $q.dark.toggle();
-  isDark.value = $q.dark.isActive;
-};
+const { isDark, toggleDarkMode } = useDarkMode();
 
 /* Link to GitHub */
 const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
