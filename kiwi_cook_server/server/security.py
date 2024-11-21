@@ -21,12 +21,8 @@ class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
     Custom HTTPS redirect middleware that robustly handles
     X-Forwarded-Proto header in proxy environments.
     """
-    def __init__(
-            self,
-            app,
-            enforce_https: bool = True,
-            trusted_proxy_ips: list = None
-    ):
+
+    def __init__(self, app, enforce_https: bool = True, trusted_proxy_ips: list = None):
         super().__init__(app)
         self.enforce_https = enforce_https
         self.trusted_proxy_ips = trusted_proxy_ips or []
@@ -44,28 +40,28 @@ class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
         Retrieve the client IP address.
         Prioritizes X-Forwarded-For header, falls back to request client host.
         """
-        forwarded_for = request.headers.get('X-Forwarded-For')
+        forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
             # Take the first IP in the X-Forwarded-For header
-            return forwarded_for.split(',')[0].strip()
-        return request.client.host if request.client else 'unknown'
+            return forwarded_for.split(",")[0].strip()
+        return request.client.host if request.client else "unknown"
 
     async def dispatch(self, request: Request, call_next):
         """
         Dispatch method to handle HTTPS redirection.
         """
         # Determine the protocol
-        forwarded_proto = request.headers.get('X-Forwarded-Proto', '').lower()
+        forwarded_proto = request.headers.get("X-Forwarded-Proto", "").lower()
 
         # If enforcing HTTPS and not already secure
-        if self.enforce_https and forwarded_proto != 'https':
+        if self.enforce_https and forwarded_proto != "https":
             try:
                 # Construct HTTPS URL
-                https_url = str(request.url).replace('http://', 'https://')
+                https_url = str(request.url).replace("http://", "https://")
                 return JSONResponse(
                     status_code=301,  # Permanent Redirect
                     content={"detail": "SSL Required"},
-                    headers={"Location": https_url}
+                    headers={"Location": https_url},
                 )
             except Exception as e:
                 # Log the error (consider using a proper logging mechanism)
@@ -101,7 +97,7 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         ),
         "X-Permitted-Cross-Domain-Policies": "none",
         "X-XSS-Protection": "1; mode=block",
-        "Server": "Undisclosed"
+        "Server": "Undisclosed",
     }
 
     # Preload the Lua script for rate limiting
@@ -120,7 +116,9 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
     class RateLimiter:
         def __init__(self, redis_client: redis.Redis):
             self.redis = redis_client
-            self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
+            self.script_sha = self.redis.script_load(
+                EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT
+            )
 
         async def rate_limit(self, key: str, limit: str, expiration_time: str):
             try:
@@ -130,17 +128,23 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
                     1,  # Number of keys
                     key,  # The key
                     expiration_time,  # TTL for the key
-                    limit  # Rate limit threshold
+                    limit,  # Rate limit threshold
                 )
                 return result == 1  # True if the limit is exceeded
             except redis.exceptions.NoScriptError:
                 # Reload the script if it has been evicted
-                self.script_sha = self.redis.script_load(EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT)
+                self.script_sha = self.redis.script_load(
+                    EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT
+                )
                 return await self.rate_limit(key, limit, expiration_time)
 
     async def dispatch(self, request: Request, call_next):
         # Generate a unique nonce for CSP
         nonce = uuid.uuid4().hex
+
+        # Disable security headers for development
+        if self.disable_security_header:
+            return await call_next(request)
 
         try:
             # Advanced request validation
@@ -168,8 +172,8 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": True,
                     "message": http_exc.detail,
-                    "request_id": str(uuid.uuid4())
-                }
+                    "request_id": str(uuid.uuid4()),
+                },
             )
         except Exception as exc:
             # Catch-all for unexpected errors
@@ -179,8 +183,8 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
                 content={
                     "error": True,
                     "message": "Security validation failed",
-                    "request_id": str(uuid.uuid4())
-                }
+                    "request_id": str(uuid.uuid4()),
+                },
             )
 
     async def _validate_request(self, request: Request):
@@ -189,7 +193,7 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         client_ip = self._get_client_ip(request)
 
         # Block suspicious user agents
-        user_agent = request.headers.get('User-Agent', '')
+        user_agent = request.headers.get("User-Agent", "")
         if self._is_suspicious_user_agent(user_agent):
             raise HTTPException(status_code=403, detail="Access denied")
 
@@ -201,17 +205,23 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         Retrieve the client IP address, considering proxy scenarios.
         Prioritizes X-Forwarded-For header, falls back to request client host.
         """
-        forwarded_for = request.headers.get('X-Forwarded-For')
+        forwarded_for = request.headers.get("X-Forwarded-For")
         if forwarded_for:
             # Take the first IP in the X-Forwarded-For header
-            return forwarded_for.split(',')[0].strip()
+            return forwarded_for.split(",")[0].strip()
         return request.client.host
 
     def _is_suspicious_user_agent(self, user_agent: str) -> bool:
         """Detect potentially malicious user agents."""
         suspicious_patterns = [
-            "sqlmap", "nikto", "dirbuster", "gobuster",
-            "hydra", "nmap", "wget", "curl"
+            "sqlmap",
+            "nikto",
+            "dirbuster",
+            "gobuster",
+            "hydra",
+            "nmap",
+            "wget",
+            "curl",
         ]
         return any(pattern in user_agent.lower() for pattern in suspicious_patterns)
 
@@ -233,11 +243,14 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
 
 def setup_cors_with_enhanced_security(app: FastAPI) -> None:
     """Implement strict CORS with advanced validation."""
-    ALLOWED_ORIGINS: List[str] = [
-        "https://kiwi-cook.github.io",
-        "https://kiwi.jpkmiller.de",
-        "https://taste-buddy.uk"
-    ]
+    if os.getenv("ENV", "production").lower() == "production":
+        ALLOWED_ORIGINS: List[str] = [
+            "https://kiwi-cook.github.io",
+            "https://kiwi.jpkmiller.de",
+            "https://taste-buddy.uk",
+        ]
+    else:
+        ALLOWED_ORIGINS = ["*"]
 
     app.add_middleware(
         CORSMiddleware,
@@ -245,10 +258,16 @@ def setup_cors_with_enhanced_security(app: FastAPI) -> None:
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=[
-            "Authorization", "Content-Type", "X-Requested-With",
-            "X-Forwarded-For", "X-Forwarded-Proto"  # Add proxy headers
+            "Authorization",
+            "Content-Type",
+            "Origin",
+            "Accept",
+            "X-Requested-With",
+            "X-Forwarded-For",
+            "X-Forwarded-Proto",
         ],
-        max_age=86400  # 24-hour preflight cache
+        expose_headers=["Content-Type"],
+        max_age=86400,
     )
 
 
@@ -261,22 +280,29 @@ def setup_advanced_security(app: FastAPI) -> None:
     app.add_middleware(
         ProxyAwareHTTPSRedirectMiddleware,
         enforce_https=is_production,
-        trusted_proxy_ips=trusted_proxy_ips
+        trusted_proxy_ips=trusted_proxy_ips,
     )
 
     # Trusted Host Middleware with strict validation
     app.add_middleware(
         TrustedHostMiddleware,
         allowed_hosts=[
-            "kiwi-cook.uk",
             "taste-buddy.uk",
             "*.taste-buddy.uk",
-            "localhost"
-        ]
+            "kiwi-cook:8000",
+            "localhost",
+            "localhost:8000",
+            "127.0.0.1",
+            "127.0.0.1:8000",
+            "0.0.0.0",
+            "0.0.0.0:8000",
+        ],
     )
 
     # Enhanced Security Middleware
-    app.add_middleware(EnhancedSecurityMiddleware, disable_security_header=not is_production)
+    app.add_middleware(
+        EnhancedSecurityMiddleware, disable_security_header=not is_production
+    )
 
 
 def validate_environment_config():

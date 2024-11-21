@@ -28,7 +28,7 @@ def setup_fastapi() -> FastAPI:
     return FastAPI(
         title="KiwiCook API",
         description="",
-        version="0.2.0",
+        version="0.3.0",
         docs_url="/docs" if ENV == "development" else None,
         redoc_url=None,
         openapi_url="/openapi.json" if ENV == "development" else None,
@@ -37,7 +37,11 @@ def setup_fastapi() -> FastAPI:
 
 def setup_log_request_headers(app: FastAPI) -> None:
     async def log_request_headers(request: Request, call_next):
-        headers_to_log = {key: value for key, value in request.headers.items() if key.lower() != "authorization"}
+        headers_to_log = {
+            key: value
+            for key, value in request.headers.items()
+            if key.lower() != "authorization"
+        }
         logger.info(f"Request headers (filtered): {headers_to_log}")
         response = await call_next(request)
         return response
@@ -83,8 +87,8 @@ def setup_exception_handlers(app: FastAPI) -> None:
             content={
                 "error": True,
                 "message": "An unexpected error occurred",
-                "request_id": str(uuid.uuid4())
-            }
+                "request_id": str(uuid.uuid4()),
+            },
         )
 
 
@@ -98,10 +102,6 @@ try:
     from lib.database.mongodb import get_mongodb
 
     get_mongodb()
-
-    from lib.database.redis import get_redis
-
-    get_redis()
 except Exception as e:
     logger.error(e)
     raise
@@ -116,7 +116,6 @@ def start_server() -> None:
         reload=ENV == "development",
         workers=1 if ENV == "development" else None,
         log_level="info",
-        server_header=False,
     )
 
 
