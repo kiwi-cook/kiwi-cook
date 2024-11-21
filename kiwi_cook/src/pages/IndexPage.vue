@@ -1,47 +1,31 @@
 <template>
-  <q-page>
-    <div class="chat-container q-pa-md">
+  <q-page class="chat-page">
+    <div class="chat-container">
       <q-scroll-area ref="scrollArea" class="chat-scroll">
         <div class="chat-messages-wrapper">
           <transition-group name="fade">
-            <div
-              v-for="(message, messageIndex) in messages"
-              :key="message.id"
-              :class="[
-                'fade-enter-active',
-                {
-                  'q-mt-md':
-                    messages[messageIndex - 1]?.sender !== message.sender,
-                },
-              ]"
-            >
-              <q-chat-message
-                :bg-color="message.sent ? 'secondary' : 'transparent'"
-                :class="{
-                  'kiwi-bubble': !message.sent,
-                  'user-bubble': message.sent,
-                  'next-message-same':
-                    messages[messageIndex + 1]?.sender === message.sender,
-                  'last-message-same':
-                    messages[messageIndex - 1]?.sender === message.sender &&
-                    messageIndex !== 0,
-                }"
-                :name="
-                  messages[messageIndex - 1]?.sender !== message.sender
+            <div v-for="(message, messageIndex) in messages" :key="message.id" :class="[
+              'fade-enter-active',
+              {
+                'q-mt-md':
+                  messages[messageIndex - 1]?.sender !== message.sender,
+              },
+            ]">
+              <q-chat-message :bg-color="message.sent ? 'secondary' : 'transparent'" :class="{
+                'kiwi-bubble': !message.sent,
+                'user-bubble': message.sent,
+                'next-message-same':
+                  messages[messageIndex + 1]?.sender === message.sender,
+                'last-message-same':
+                  messages[messageIndex - 1]?.sender === message.sender &&
+                  messageIndex !== 0,
+              }" :name="messages[messageIndex - 1]?.sender !== message.sender
                     ? message.sender
                     : ''
-                "
-                :sent="message.sent"
-                :stamp="message.timestamp"
-                :text-color="
-                  message.sent ? 'white' : isDark ? 'white' : 'grey-9'
-                "
-                class="chat-bubble apple-bubble"
-              >
+                  " :sent="message.sent" :stamp="message.timestamp" :text-color="message.sent ? 'white' : isDark ? 'white' : 'grey-9'
+                  " class="chat-bubble apple-bubble">
                 <div>
-                  <template
-                    v-if="isTyping && messageIndex === messages.length - 1"
-                  >
+                  <template v-if="isTyping && messageIndex === messages.length - 1">
                     <q-spinner-dots color="primary" size="2em" />
                   </template>
 
@@ -50,11 +34,7 @@
                   </template>
 
                   <template v-else-if="message.type === 'image'">
-                    <q-img
-                      :src="message.content"
-                      alt="Chat image"
-                      class="chat-image"
-                    />
+                    <q-img :src="message.content" alt="Chat image" class="chat-image" />
                   </template>
 
                   <template v-else-if="message.type === 'recipe'">
@@ -67,93 +47,48 @@
                     </div>
                   </template>
 
-                  <template
-                    v-else-if="
-                      message.type === 'options' ||
-                      message.type === 'multiOptions'
-                    "
-                  >
+                  <template v-else-if="
+                    message.type === 'options' ||
+                    message.type === 'multiOptions'
+                  ">
                     <div class="options-list">
-                      <q-btn
-                        v-for="(option, optionIndex) in message.content"
-                        :key="optionIndex"
-                        :disable="
-                          messages
-                            .slice(messageIndex + 1)
-                            .some((m) => m.sender !== message.sender)
-                        "
-                        :label="option"
-                        :ripple="false"
-                        class="option-button"
-                        rounded
-                        unelevated
-                        @click="chat.handleMessage(option)"
-                      />
+                      <q-btn v-for="(option, optionIndex) in message.content" :key="optionIndex" :disable="messages
+                          .slice(messageIndex + 1)
+                          .some((m) => m.sender !== message.sender)
+                        " :label="option" :ripple="false" class="option-button" rounded unelevated
+                        @click="chat.handleMessage(option)" />
                     </div>
                   </template>
 
                   <template v-else-if="message.type === 'suggestion'">
                     <div class="chat-suggestion-container">
                       <!-- Suggestions List -->
-                      <q-list
-                        v-if="message.content(userInput).length > 0"
-                        class="suggestions-list"
-                        dense
-                      >
-                        <q-item
-                          v-for="(item, itemIndex) in message.content(
-                            userInput
-                          )"
-                          :key="itemIndex"
-                          clickable
-                          class="suggestion-item"
-                          @click="chat.handleMessage(item)"
-                        >
+                      <q-list v-if="message.content(userInput).length > 0" class="suggestions-list" dense>
+                        <q-item v-for="(item, itemIndex) in message.content(
+                          userInput
+                        )" :key="itemIndex" clickable class="suggestion-item" @click="chat.handleMessage(item)">
                           <q-item-section>
                             <q-item-label>{{ item }}</q-item-label>
                           </q-item-section>
                         </q-item>
                       </q-list>
 
-                      <div
-                        v-else
-                        class="no-suggestions text-caption text-grey-7"
-                      >
+                      <div v-else class="no-suggestions text-caption text-grey-7">
                         {{ message.notFoundText }}
                       </div>
 
                       <!-- Enhanced Input Area -->
                       <div class="input-wrapper">
-                        <q-input
-                          v-model="userInput"
-                          class="suggestion-input"
-                          dense
-                          autofocus
-                          borderless
-                          standout
-                          square
-                          :placeholder="
-                            message.placeholder || $t('chat.input.placeholder')
-                          "
-                          color="primary"
-                          input-class="input-field"
-                        >
+                        <q-input v-model="userInput" class="suggestion-input" dense autofocus borderless standout square
+                          :placeholder="message.placeholder || $t('chat.input.placeholder')
+                            " color="primary" input-class="input-field">
                           <template v-slot:append>
-                            <q-btn
-                              v-if="message.withSubmit"
-                              class="send-button"
-                              color="primary"
-                              dense
-                              flat
-                              round
-                              icon="send"
-                              @click="
-                                () =>
+                            <q-btn v-if="message.withSubmit" class="send-button" color="primary" dense flat round
+                              icon="send" @click="() =>
                                   chat.handleMessage(
                                     message.submitText || userInput
                                   )
-                              "
-                            />
+                                " />
                           </template>
                         </q-input>
                       </div>
@@ -166,61 +101,34 @@
                         {{ message.content.label }}
                       </div>
 
-                      <q-slider
-                        v-model="message.content.value"
-                        :disable="
-                          messages
+                      <q-slider v-model="message.content.value" :disable="messages
+                          .slice(messageIndex + 1)
+                          .some((m) => m.sender !== message.sender)
+                        " :label-always="!messages
                             .slice(messageIndex + 1)
                             .some((m) => m.sender !== message.sender)
-                        "
-                        :label-always="
-                          !messages
-                            .slice(messageIndex + 1)
-                            .some((m) => m.sender !== message.sender)
-                        "
-                        :label-value="
-                          message.content.value +
+                          " :label-value="message.content.value +
                           ' ' +
                           (typeof message.content.unit === 'function'
                             ? message.content.unit(message.content.value)
                             : message.content.unit)
-                        "
-                        :max="message.content.max"
-                        :min="message.content.min"
-                        :step="message.content.step"
-                        aria-label="Slider"
-                        class="slider-enhanced"
-                        color="primary"
-                        @input="onSliderChange"
-                      />
+                          " :max="message.content.max" :min="message.content.min" :step="message.content.step"
+                        aria-label="Slider" class="slider-enhanced" color="primary" @input="onSliderChange" />
 
                       <div class="row items-center justify-between q-mt-sm">
-                        <q-btn
-                          v-if="
-                            messages
-                              .slice(messageIndex + 1)
-                              .every((m) => m.sender === message.sender)
-                          "
-                          class="send-button shadow-1"
-                          color="primary"
-                          dense
-                          icon="send"
-                          round
-                          @click="chat.handleMessage(message.content.value)"
-                        />
+                        <q-btn v-if="
+                          messages
+                            .slice(messageIndex + 1)
+                            .every((m) => m.sender === message.sender)
+                        " class="send-button shadow-1" color="primary" dense icon="send" round
+                          @click="chat.handleMessage(message.content.value)" />
                       </div>
                     </div>
                   </template>
 
                   <!-- Button to edit the message -->
                   <div v-if="message.sent" class="edit-button">
-                    <q-btn
-                      color="secondary"
-                      dense
-                      flat
-                      icon="edit"
-                      @click="chat.editMessage(message.id)"
-                    />
+                    <q-btn color="secondary" dense flat icon="edit" @click="chat.editMessage(message.id)" />
                   </div>
                 </div>
               </q-chat-message>
@@ -300,20 +208,32 @@ function onSliderChange() {
 </script>
 
 <style lang="scss">
+.chat-page {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
 .chat-container {
-  height: calc(90vh);
-  width: 100%;
-  overflow-x: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-scroll {
-  height: 100%;
+  flex: 1;
+  width: 100%;
 }
 
 .chat-messages-wrapper {
   width: 100%;
   max-width: 100%;
-  overflow-x: hidden;
+  padding: 0.5rem;
 }
 
 .chat-bubble .q-message-text {
@@ -446,6 +366,7 @@ function onSliderChange() {
 
 .suggestion-input {
   width: 100%;
+
   .q-field__control {
     padding: 0;
   }
@@ -478,13 +399,21 @@ function onSliderChange() {
   color: var(--q-primary);
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.5s ease;
-}
+.body--dark {
+  .chat-bubble .q-message-text {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
 
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+  .kiwi-bubble .q-message-text {
+    border-color: #2c3e50;
+  }
+
+  .user-bubble .q-message-text {
+    background-color: #2c3e50 !important;
+  }
+
+  .typing-indicator {
+    color: #a0a0a0;
+  }
 }
 </style>

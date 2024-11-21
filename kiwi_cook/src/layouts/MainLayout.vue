@@ -24,7 +24,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="q-pa-md page">
+    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="page-container">
       <router-view v-slot="{ Component }">
         <transition mode="out-in" name="fade">
           <component :is="Component"/>
@@ -143,6 +143,18 @@ body {
   min-height: 100vh;
 }
 
+.page-container {
+  height: 100%; // Fill available space
+  padding: 0; // Remove padding to prevent double scrollbars
+}
+
+.q-page {
+  height: 100%; // Ensure q-page fills the container
+  padding: 0; // Remove default padding
+  display: flex; // Enable flex layout
+  flex-direction: column; // Stack children vertically
+}
+
 .mode-toggle {
   transition: all 0.3s ease;
 
@@ -172,22 +184,6 @@ body {
 .body--dark {
   .q-page {
     color: #e0e0e0;
-  }
-
-  .chat-bubble .q-message-text {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-  }
-
-  .kiwi-bubble .q-message-text {
-    border-color: #2c3e50;
-  }
-
-  .user-bubble .q-message-text {
-    background-color: #2c3e50 !important;
-  }
-
-  .typing-indicator {
-    color: #a0a0a0;
   }
 }
 </style>
