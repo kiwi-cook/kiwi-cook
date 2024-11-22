@@ -1,16 +1,15 @@
 import { computed, ref } from 'vue';
 import { useAnalytics } from 'src/composables/useAnalytics';
-import SummarizeWorker from './llm.summarize.worker.js?worker';
-import RankWorker from './llm.rank.worker.js?worker';
+import Worker from './llm.worker.js?worker';
 
-type Task = 'summarize' | 'rank'
-type WorkerStatus = 'ready' | 'progress' | 'finished' | 'error'
+type Task = 'summarization' | 'rank'
+type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
 
 /**
  * A composable to create a worker for Local Transformers
  * @Example
  * ```
- * const worker = useLlm('summarize')
+ * const worker = useLlm('summarization')
  * worker.exec(['Transformers are a messageType of neural network. They are used for natural language processing.'])
  * const summary = computed(() => worker.data)
  * ```
@@ -63,16 +62,20 @@ export function useLlm(task?: Task) {
    */
   const ondatacallback = ref<(data: unknown) => void>(() => {
   });
+  /**
+   * Define if the worker is finished
+   */
+  const isRunning = computed(() => status.value !== 'init' && status.value !== 'finished' && status.value !== 'error');
 
   /**
    * Initialize a worker with a task.
    * This does not need to be called manually if the task is passed to the composable.
-   * After the worker is created, it can be started with `worker.startTask(data)`
+   * After the worker is created, it can be started with `worker.exec(data)`
    *
    * @Example
    * ```
    * const worker = useLTf()
-   * worker.createWorker('summarize')
+   * worker.createWorker('summarization')
    * ...
    * ```
    *
@@ -80,18 +83,11 @@ export function useLlm(task?: Task) {
    * @param newTask
    */
   function createWorker(newTask: Task): string {
+    status.value = 'init';
     const name = `${newTask}-${Math.random().toString(36).substring(7)}`;
     trackEvent('createWorker', { task: newTask });
 
-    let newWorker: Worker;
-    if (newTask === 'summarize') {
-      newWorker = new SummarizeWorker();
-    } else if (newTask === 'rank') {
-      newWorker = new RankWorker();
-    } else {
-      throw new Error(`Task not supported: ${newTask}`);
-    }
-
+    const newWorker = new Worker();
     workerTask.value = newTask;
 
     newWorker.onmessage = (event) => {
@@ -99,30 +95,30 @@ export function useLlm(task?: Task) {
       status.value = workerMessage.status;
       onmessage.value(event);
 
-      if (workerMessage.type === 'ready' || workerMessage.type === 'progress' || workerMessage.type === 'finished') {
-        if (workerMessage.type === 'finished') {
-          trackEvent('workerFinished', { task: newTask });
-          data.value = workerMessage.data;
-          ondatacallback.value(data.value);
-        } else if (workerMessage.type === 'progress') {
-          const downloadStatus = workerMessage.status;
-          const modelName = downloadStatus.name + downloadStatus.file;
+      if (workerMessage.type === 'download') {
+        status.value = 'download';
+        const workerData = workerMessage.data;
+        const modelName = workerData.name + workerData.file;
 
-          if (!downloads.value[modelName]) {
-            trackEvent('workerDownload', { task: newTask, model: modelName });
-            downloads.value[modelName] = downloadStatus.progress;
-          }
-
-          if (downloads.value[modelName] < downloadStatus.progress) {
-            downloads.value[modelName] = downloadStatus.progress;
-          }
+        if (!downloads.value[modelName]) {
+          trackEvent('workerDownload', { task: newTask, model: modelName });
+          downloads.value[modelName] = 0;
         }
 
-        message.value = workerMessage;
+        if (downloads.value[modelName] < workerData.progress) {
+          downloads.value[modelName] = workerData.progress;
+        }
+      } else if (workerMessage.type === 'update') {
+        status.value = 'process';
+        trackEvent('workerProgress', { task: newTask, data: workerMessage.data });
+        ondatacallback.value(workerMessage.data);
       } else if (workerMessage.type === 'error') {
-        trackEvent('workerError', { task: newTask, message: workerMessage });
-      } else {
-        trackEvent('workerUnknownMessage', { task: newTask, message: workerMessage });
+        trackEvent('workerError', { task: newTask, error: workerMessage.error });
+        status.value = 'error';
+      } else if (workerMessage.type === 'result') {
+        trackEvent('workerUpdate', { task: newTask, data: workerMessage.data });
+        status.value = 'finished';
+        data.value = workerMessage.data;
       }
     };
     newWorker.onerror = (event) => {
@@ -138,10 +134,6 @@ export function useLlm(task?: Task) {
 
     // Create a message channel
     channel.value = new MessageChannel();
-
-    newWorker.postMessage({ type: 'init' });
-
-    trackEvent('workerCreated', { task: newTask, id: name });
 
     return name;
   }
@@ -179,7 +171,7 @@ export function useLlm(task?: Task) {
     trackEvent('workerStart', { id: workerId.value, data: taskData });
     if (worker.value !== null && channel.value !== null) {
       trackEvent('workerStarted', { id: workerId.value, data: taskData });
-      worker.value.postMessage({ type: 'data', data: taskData });
+      worker.value.postMessage({ task: workerTask.value, data: taskData });
     } else {
       trackEvent('workerNotFound', { id: workerId.value });
     }
@@ -194,6 +186,7 @@ export function useLlm(task?: Task) {
     workerId,
     onmessage,
     ondatacallback,
+    isRunning,
     status,
     message,
     data,
