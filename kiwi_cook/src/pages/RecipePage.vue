@@ -23,7 +23,8 @@
             <q-btn v-if="!summary" :label="$t('llm.summarize')" color="primary" class="q-mt-md"
               :loading="!summaryFinished" @click="summarizeRecipe">
               <template v-slot:loading>
-                <q-spinner-grid />
+                <q-spinner-grid v-if="!modelDownloading" />
+                <q-spinner-dots v-else />
               </template>
               <q-icon name="mdi-creation" class="q-mr-sm" />
             </q-btn>
@@ -124,6 +125,7 @@ const checkedIngredients = ref(
 /* Summary */
 const summaryTransformer = useLlm('summarization');
 const summaryFinished = computed(() => !summaryTransformer.isRunning.value);
+const modelDownloading = computed(() => summaryTransformer.status.value === 'download');
 const summary = computed(() => {
   const data = summaryTransformer.data.value as
     | { summary_text: string }[]

@@ -73,7 +73,7 @@ async function summarize(data) {
     max_time: 40,
     top_k: 50,
     top_p: 0.90,
-    num_beams: 10,
+    num_beams: 4,
     length_penalty: 0.8,
     no_repeat_ngram_size: 3,
   };
