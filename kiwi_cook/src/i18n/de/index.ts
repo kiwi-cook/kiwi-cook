@@ -178,6 +178,12 @@ export default {
     backToHome: 'Zurück zur Startseite',
   },
 
+  // LLM
+  llm: {
+    summarize: 'KI Zusammenfassung',
+    disclaimer: 'Die Zusammenfassung wurde von einem KI-Modell erstellt. Sie dient nur zu Informationszwecken und kann Fehler oder Ungenauigkeiten enthalten. Eine Verantwortung für die Richtigkeit wird nicht übernommen.',
+  },
+
   // Common units
   units: {
     minutes: 'Minute | Minuten',
