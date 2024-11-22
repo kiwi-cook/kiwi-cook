@@ -63,7 +63,7 @@
                   <template v-else-if="message.type === 'suggestion'">
                     <div class="chat-suggestion-container">
                       <!-- Suggestions List -->
-                      <q-list v-if="message.content(userInput).length > 0" class="suggestions-list" dense>
+                      <q-list v-if="message.content(userInput).length > 0" class="suggestions-list" separator>
                         <q-item v-for="(item, itemIndex) in message.content(
                           userInput
                         )" :key="itemIndex" clickable class="suggestion-item" @click="chat.handleMessage(item)">

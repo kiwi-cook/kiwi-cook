@@ -12,22 +12,27 @@
 // to match your app's branding.
 // Tip: Use the "Theme Builder" on Quasar's documentation website.
 
-$primary: #7cb342;
-$secondary: #ffb74d;
-$accent: #f4511e;
+// Core Color System
+$primary: #7cb342;       // Fresh green - primary brand color
+$secondary: #ffb74d;     // Warm orange - secondary accent
+$accent: #f4511e;        // Vibrant red - highlight color
+$dark: #37474f;          // Deep slate gray - dark mode base
+$positive: #66bb6a;      // Success green
+$negative: #e53935;      // Error/warning red
+$info: #4fc3f7;          // Informative blue
+$warning: #fbc02d;       // Caution yellow
 
-.bg-gradient {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-}
+// Extended Color Palette
+$soft-green: #a5d6a7;    // Light supporting green
+$deep-green: #2e7d32;    // Dark green accent
+$neutral-gray: #78909c;  // Balanced neutral tone
+$text-primary: #263238;  // Near-black for text
+$text-secondary: #455a64;// Secondary text gray
 
+// Gradient Definitions
+$bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+$bg-gradient-dark: linear-gradient(135deg, #2c3e50 0%, #263238 100%);
 
-$dark: #37474f;
-$dark-page: #263238;
-.bg-gradient-dark {
-  background: linear-gradient(135deg, #2c3e50 0%, #263238 100%);
-}
-
-$positive: #66bb6a;
-$negative: #e53935;
-$info: #4fc3f7;
-$warning: #fbc02d;
+// Gradient Utilities
+.bg-gradient { background: $bg-gradient !important; }
+.bg-gradient-dark { background: $bg-gradient-dark !important; }

@@ -120,7 +120,6 @@ const metaItems = computed(() => {
 }
 
 .recipe-header {
-  background-color: white;
   border-radius: 16px;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
   margin-bottom: 20px;
