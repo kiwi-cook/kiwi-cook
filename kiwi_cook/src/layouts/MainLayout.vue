@@ -68,8 +68,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue';
-import KiwiLogo from 'components/KiwiLogo.vue';
+import {
+  ref, watch,
+} from 'vue';
 import { useRouter } from 'vue-router';
 import { useDarkMode } from 'src/composables/useDarkmode';
 
@@ -134,17 +135,13 @@ body {
   border-radius: 24px;
 }
 
-.page {
-  min-height: 100vh;
-}
-
 .page-container {
   height: 100%; // Fill available space
   padding: 0; // Remove padding to prevent double scrollbars
 }
 
 .q-page {
-  height: 100%; // Ensure q-page fills the container
+  height: 100%;
   padding: 0; // Remove default padding
   display: flex; // Enable flex layout
   flex-direction: column; // Stack children vertically

@@ -438,12 +438,17 @@ export const useChatStore = defineStore('chat', () => {
     genPlanQIngredients: {
       message: t('plan.questions.ingredients'),
       suggestionsConfig: {
-        suggestions: (input: string) => Array.from(
-          new Set(
-            recipeStore.ingredients.filter((ingredient) => ingredient.toLowerCase().includes(input.toLowerCase())),
-          ),
-        ).slice(0, 5),
+        suggestions: (input: string) => {
+          const tokens = input.split(/\s+/).map((token) => token.toLowerCase());
+          const filteredIngredients = Array.from(
+            new Set(
+              recipeStore.ingredients.filter((ingredient) => tokens.some((token) => ingredient.toLowerCase().includes(token))),
+            ),
+          );
+          return filteredIngredients.slice(0, 5);
+        },
         withSubmit: true,
+        withPhoto: true,
         placeholder: t('plan.ingredients.placeholder'),
         submitText: t('plan.ingredients.submit'),
       },

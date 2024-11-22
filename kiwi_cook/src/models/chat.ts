@@ -34,6 +34,7 @@ interface SliderConfig {
 interface SuggestionsConfig {
   suggestions: ((input: string) => string[]);
   withSubmit?: boolean;
+  withPhoto?: boolean;
   placeholder?: string;
   submitText?: string;
   notFoundText?: string;
@@ -95,6 +96,7 @@ export interface SuggestionsMessage extends BaseMessage {
   type: 'suggestion';
   content: ((input: string) => string[]);
   withSubmit?: boolean;
+  withPhoto?: boolean;
   placeholder?: string;
   submitText?: string;
   notFoundText?: string;

@@ -20,10 +20,10 @@
                   messages[messageIndex - 1]?.sender === message.sender &&
                   messageIndex !== 0,
               }" :name="messages[messageIndex - 1]?.sender !== message.sender
-                    ? message.sender
-                    : ''
-                  " :sent="message.sent" :stamp="message.timestamp" :text-color="message.sent ? 'white' : isDark ? 'white' : 'grey-9'
-                  " class="chat-bubble apple-bubble">
+                ? message.sender
+                : ''
+                " :sent="message.sent" :stamp="message.timestamp" :text-color="message.sent ? 'white' : isDark ? 'white' : 'grey-9'
+                    " class="chat-bubble apple-bubble">
                 <div>
                   <template v-if="isTyping && messageIndex === messages.length - 1">
                     <q-spinner-dots color="primary" size="2em" />
@@ -53,8 +53,8 @@
                   ">
                     <div class="options-list">
                       <q-btn v-for="(option, optionIndex) in message.content" :key="optionIndex" :disable="messages
-                          .slice(messageIndex + 1)
-                          .some((m) => m.sender !== message.sender)
+                        .slice(messageIndex + 1)
+                        .some((m) => m.sender !== message.sender)
                         " :label="option" :ripple="false" class="option-button" rounded unelevated
                         @click="chat.handleMessage(option)" />
                     </div>
@@ -68,26 +68,28 @@
                           userInput
                         )" :key="itemIndex" clickable class="suggestion-item" @click="chat.handleMessage(item)">
                           <q-item-section>
-                            <q-item-label>{{ item }}</q-item-label>
+                            <q-item-label><span v-html="highlightInput(item, userInput)" /></q-item-label>
                           </q-item-section>
                         </q-item>
                       </q-list>
-
                       <div v-else class="no-suggestions text-caption text-grey-7">
-                        {{ message.notFoundText }}
+                        {{ message.notFoundText ?? $t('chat.suggestion.notFound') }}
                       </div>
 
                       <!-- Enhanced Input Area -->
                       <div class="input-wrapper">
                         <q-input v-model="userInput" class="suggestion-input" dense autofocus borderless standout square
-                          :placeholder="message.placeholder || $t('chat.input.placeholder')
-                            " color="primary" input-class="input-field">
+                          :placeholder="message.placeholder || $t('chat.input.placeholder')"
+                          color="primary"
+                          input-class="input-field">
                           <template v-slot:append>
-                            <q-btn v-if="message.withSubmit" class="send-button" color="primary" dense flat round
+                            <q-btn v-if="message.withPhoto" class="send-button" color="primary" dense flat round
+                              disabled icon="camera_alt" @click="chat.handleMessage('photo')" />
+                            <q-btn v-if="message.withSubmit" color="primary" dense flat round :disabled="!userInput"
                               icon="send" @click="() =>
-                                  chat.handleMessage(
-                                    message.submitText || userInput
-                                  )
+                                chat.handleMessage(
+                                  message.submitText || userInput
+                                )
                                 " />
                           </template>
                         </q-input>
@@ -102,17 +104,17 @@
                       </div>
 
                       <q-slider v-model="message.content.value" :disable="messages
+                        .slice(messageIndex + 1)
+                        .some((m) => m.sender !== message.sender)
+                        " :label-always="!messages
                           .slice(messageIndex + 1)
                           .some((m) => m.sender !== message.sender)
-                        " :label-always="!messages
-                            .slice(messageIndex + 1)
-                            .some((m) => m.sender !== message.sender)
                           " :label-value="message.content.value +
-                          ' ' +
-                          (typeof message.content.unit === 'function'
-                            ? message.content.unit(message.content.value)
-                            : message.content.unit)
-                          " :max="message.content.max" :min="message.content.min" :step="message.content.step"
+                            ' ' +
+                            (typeof message.content.unit === 'function'
+                              ? message.content.unit(message.content.value)
+                              : message.content.unit)
+                            " :max="message.content.max" :min="message.content.min" :step="message.content.step"
                         aria-label="Slider" class="slider-enhanced" color="primary" @input="onSliderChange" />
 
                       <div class="row items-center justify-between q-mt-sm">
@@ -205,6 +207,14 @@ function onSliderChange() {
     navigator.vibrate(50);
   }
 }
+
+// Input
+function highlightInput(text: string, snippet: string) {
+  if (!snippet) return text;
+  const regex = new RegExp(`(${snippet})`, 'gi');
+  return text.replace(regex, '<strong>$1</strong>');
+}
+
 </script>
 
 <style lang="scss">
@@ -242,6 +252,12 @@ function onSliderChange() {
   max-width: 50vw;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Remove the default border and triangle */
+.q-message-text::before {
+  content: none !important;
+  border: none !important;
 }
 
 /* Adjust max-width for smaller screens */
@@ -302,7 +318,7 @@ function onSliderChange() {
   padding-left: 8px; // Adds a bit of padding on the left for spacing
 }
 
-.recipe-scroll-wrapper > div {
+.recipe-scroll-wrapper>div {
   flex: 0 0 auto; // Prevents cards from shrinking or wrapping
   width: 280px; // Fixed width for each card for consistency
 }

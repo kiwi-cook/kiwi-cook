@@ -34,6 +34,9 @@ export default {
       label: 'Was möchtest du kochen?',
       placeholder: 'Zum Beispiel: Spaghetti Carbonara',
     },
+    suggestion: {
+      notFound: 'Keine passenden Vorschläge gefunden.',
+    },
   },
 
   // Recipe search related
