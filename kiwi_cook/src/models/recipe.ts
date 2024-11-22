@@ -12,7 +12,10 @@ function getAllTranslations(field: MultiLanguageField): string[] {
   return Object.values(field.translations);
 }
 
-export function getTranslation(field: MultiLanguageField, lang?: string): string {
+export function getTranslation(field?: MultiLanguageField, lang?: string): string {
+  if (!field) {
+    return '';
+  }
   if (lang) {
     return field.translations[lang] || Object.values(field.translations)[0];
   }

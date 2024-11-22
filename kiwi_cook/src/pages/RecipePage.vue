@@ -12,10 +12,31 @@
           <div class="recipe-details">
             <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
             <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
+            <!-- Display recipe meta information -->
             <div class="recipe-meta">
               <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
                 <span class="meta-icon">{{ item.icon }}</span>
                 <span class="meta-value">{{ item.value }}</span>
+              </div>
+            </div>
+            <!-- Button -->
+            <q-btn v-if="!summary" :label="$t('llm.summarize')" color="primary" class="q-mt-md"
+              :loading="!summaryFinished" @click="summarizeRecipe">
+              <template v-slot:loading>
+                <q-spinner-grid />
+              </template>
+              <q-icon name="mdi-creation" class="q-mr-sm" />
+            </q-btn>
+
+            <!-- Summary -->
+            <div v-if="summaryFinished && summary">
+              <div class="recipe-summary-container">
+                <q-icon name="mdi-lightbulb-on-outline" class="icon" />
+                <div v-html="summary" class="recipe-summary" />
+              </div>
+              <!-- Disclaimer -->
+              <div class="text-caption q-mt-sm">
+                {{ $t('llm.disclaimer') }}
               </div>
             </div>
           </div>
@@ -42,14 +63,13 @@
     </div>
 
     <div v-if="activeTab === 'steps'" class="steps-container">
-      <q-card v-for="(step, index) in recipe.steps" :key="index" class="step-card"
-        :class="{ 'step-completed': checkedIngredients.every((checked) => checked) }">
+      <q-card v-for="(step, index) in recipeSteps" :key="index" class="step-card">
         <q-card-section>
           <div class="step-header">
             <div class="step-number">{{ $t("recipe.direction") }} {{ index + 1 }}</div>
           </div>
           <div class="step-description">
-            {{ getTranslation(step.description) }}
+            <div v-html="step" />
           </div>
         </q-card-section>
       </q-card>
@@ -59,12 +79,17 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import { getTranslation } from 'src/models/recipe';
+import {
+  getTranslation,
+  RecipeIngredient as Ingredient,
+  RecipeStep,
+} from 'src/models/recipe';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { useRecipeStore } from 'src/stores/recipe-store';
 import { useRoute } from 'vue-router';
 import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue';
+import { useLlm } from 'src/composables/llm/useLlm';
 
 const { t } = useI18n();
 
@@ -80,12 +105,86 @@ const recipe = computed(() => {
   }
   return recipeMap.value.get(recipeId);
 });
+/* Ingredients */
+const recipeIngredients = computed(() => (recipe.value?.ingredients ?? [])
+  .map((ingredient: Ingredient) => getTranslation(ingredient.ingredient.name)));
 
+/* Steps */
+const recipeSteps = computed(() => (recipe.value?.steps ?? []).map((step: RecipeStep) => highlightIngredients(
+  getTranslation(step.description),
+  recipeIngredients.value,
+)));
+
+/* Servings */
 const servings = ref(recipe.value?.servings ?? 1);
 const checkedIngredients = ref(
   recipe?.value?.ingredients?.map(() => false) ?? [],
 );
 
+/* Summary */
+const summaryTransformer = useLlm('summarization');
+const summaryFinished = computed(() => !summaryTransformer.isRunning.value);
+const summary = computed(() => {
+  const data = summaryTransformer.data.value as
+    | { summary_text: string }[]
+    | undefined;
+  if (!data || data.length === 0) return '';
+  let summaryText = data[0].summary_text;
+
+  // Trim excessive spaces and dots at the beginning or end
+  summaryText = summaryText.replace(/^\.+|\.+$/g, '').trim();
+
+  // Replace consecutive dots with a single dot
+  summaryText = summaryText.replace(/\.{2,}/g, '.');
+
+  // Ensure there's no unnecessary whitespace around the summary
+  summaryText = summaryText.replace(/\s+/g, ' ').trim();
+
+  // Capitalize the first letter after every period
+  summaryText = summaryText.replace(/(\.|!|\?)(\s*)([a-z])/g, (_, p1, p2, p3) => p1 + p2 + p3.toUpperCase());
+
+  // Add a period at the end if not already present
+  if (summaryText[summaryText.length - 1] !== '.') {
+    summaryText += '.';
+  }
+
+  return summaryText;
+});
+
+function summarizeRecipe() {
+  let text = '';
+
+  // Add recipe name to the summarization
+  const recipeName = getTranslation(recipe.value?.name);
+  if (recipeName) {
+    text += `${recipeName} is a great recipe. `;
+  }
+
+  // Add meta information
+  const duration = recipe.value?.duration;
+  const servingsCount = servings.value;
+  if (duration && servingsCount) {
+    text += `The recipe takes ${duration} minutes to prepare and serves ${servingsCount} people. `;
+  }
+
+  // Add steps
+  const stepsText = recipe.value?.steps
+    ?.map((step: RecipeStep) => getTranslation(step.description) ?? '')
+    .filter(Boolean)
+    .join(' ') ?? '';
+  if (stepsText) {
+    text += `For the steps, ${stepsText}.`;
+  }
+
+  // Cut the text to 800 characters
+  text = text.slice(0, 800);
+  console.log('Summarizing:', text);
+
+  // Execute the summarization process
+  summaryTransformer.exec(text);
+}
+
+/* Meta items */
 const metaItems = computed(() => {
   if (!recipe.value) return [];
   return [
@@ -105,7 +204,39 @@ const metaItems = computed(() => {
     })) ?? []),
   ];
 });
+
+function highlightIngredients(text: string, ingredientNames: string[]) {
+  // Remove numbers from the text
+  const cleanedText = text.trim();
+
+  // Tokenize ingredients into searchable words (split by spaces, and escape regex characters)
+  const tokens = ingredientNames
+    .flatMap((ingredient) => ingredient.split(/\s+/)) // Split ingredients into words
+    .map((token) => token.replace(/[.*+?^${}()|[\]\\\d+]/g, '\\$&')); // Escape special characters in tokens
+
+  // Create a regular expression to match the tokens
+  const regex = new RegExp(tokens.join('|'), 'gi');
+
+  // Highlight the matches in the cleaned text
+  return cleanedText.replace(
+    regex,
+    (match) => `<span class="highlight">${match}</span>`,
+  );
+}
 </script>
+
+<style lang="scss">
+.highlight {
+  background-color: $primary;
+  color: white;
+  font-weight: bold;
+}
+
+.highlight::selection {
+  background-color: $primary;
+  color: white;
+}
+</style>
 
 <style lang="scss" scoped>
 .mobile-recipe-container {
@@ -175,7 +306,7 @@ const metaItems = computed(() => {
 }
 
 .recipe-title {
-  font-family: 'Georgia', 'Times New Roman', serif;
+  font-family: "Georgia", "Times New Roman", serif;
   font-size: clamp(1.2em, 4vw, 1.6em);
   font-weight: 600;
   color: $grey-9;
@@ -191,6 +322,26 @@ const metaItems = computed(() => {
   margin-bottom: 12px;
   display: -webkit-box;
   overflow: hidden;
+}
+
+.recipe-summary-container {
+  display: flex;
+  align-items: center;
+  font-size: 10pt;
+  line-height: 1.6;
+
+  .icon {
+    margin-right: 8px;
+  }
+
+  .recipe-summary {
+    font-size: clamp(1em, 4vw, 1.3em);
+    margin-top: 16px;
+    font-style: italic;
+    /* Cursive */
+    letter-spacing: 0.5px;
+    /* Slight letter spacing */
+  }
 }
 
 .recipe-meta {

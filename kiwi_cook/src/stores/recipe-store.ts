@@ -9,7 +9,7 @@ import { useLlm } from 'src/composables/llm/useLlm';
 
 export const useRecipeStore = defineStore('recipe', () => {
   const { trackEvent } = useAnalytics();
-  const summarizer = useLlm('summarize');
+  const summarizer = useLlm('summarization');
 
   let fetchPromise: Promise<void> | null = null;
   const recipes = ref<Recipe[]>([]);

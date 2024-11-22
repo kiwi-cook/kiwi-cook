@@ -85,7 +85,7 @@
                           <template v-slot:append>
                             <q-btn v-if="message.withPhoto" class="send-button" color="primary" dense flat round
                               disabled icon="camera_alt" @click="chat.handleMessage('photo')" />
-                            <q-btn v-if="message.withSubmit" color="primary" dense flat round :disabled="!userInput"
+                            <q-btn v-if="message.withSubmit" color="primary" dense flat round
                               icon="send" @click="() =>
                                 chat.handleMessage(
                                   message.submitText || userInput

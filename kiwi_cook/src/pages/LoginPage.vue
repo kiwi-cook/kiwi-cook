@@ -51,7 +51,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from 'stores/user-store.ts';
-import KiwiLogo from 'components/KiwiLogo.vue';
+import KiwiLogo from 'src/components/KiwiLogo.vue';
 
 const password = ref('');
 const username = ref('');

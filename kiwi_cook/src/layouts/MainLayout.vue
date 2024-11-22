@@ -73,6 +73,7 @@ import {
 } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDarkMode } from 'src/composables/useDarkmode';
+import KiwiLogo from 'src/components/KiwiLogo.vue';
 
 defineOptions({
   name: 'MainLayout',
