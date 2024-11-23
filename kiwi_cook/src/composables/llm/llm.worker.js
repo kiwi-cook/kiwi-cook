@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint-disable no-restricted-globals */
 /**
  * Thanks to @xenova for the transformer package
@@ -64,24 +65,25 @@ async function summarize(data) {
   });
 
   const config = {
-    max_length: 65, // Keeps summaries short and to the point.
-    min_length: 40, // Ensures summaries aren't too short.
+    max_length: 70,
+    min_length: 20,
     do_sample: true,
-    early_stopping: true, // Stop as soon as the model generates a coherent summary.
-    temperature: 0.7, // A balanced temperature for focused output without too much randomness.
+    early_stopping: true,
+    temperature: 0.7, // Lower for more deterministic output
     num_return_sequences: 1,
-    max_time: 30, // Time constraint for quicker processing.
-    top_k: 60, // Restricts token selection to top 50 for clarity.
-    top_p: 0.80, // Allows for some diversity but keeps most of the focus.
-    num_beams: 5, // A good balance for exploring options while generating output quickly.
-    length_penalty: 1.5, // Neutral length penalty for clear, concise summaries.
-    no_repeat_ngram_size: 3, // Prevents repetition of n-grams (e.g., phrases or words).
-    use_cache: true, // Cache previous computations for faster processing.
+    max_time: 30,
+    top_k: 50,
+    top_p: 0.9, // Slightly reduces randomness
+    num_beams: 3, // Lower beams to balance speed and quality
+    num_beam_groups: 3, // Reduce beam groups for efficiency
+    length_penalty: 1.0,
+    no_repeat_ngram_size: 3,
+    use_cache: true, // Enabling cache improves efficiency
+    stop_strings: ['\n', '?', ':', 'Ingredients', 'Instructions', 'ingredients', 'instructions'],
   };
 
   let pipelineData = '';
-  // eslint-disable-next-line max-len
-  pipelineData += 'Summarize this recipe by highlighting the dish’s purpose, main ingredients, and expected outcome. Do not repeat text or list individual steps:\n';
+  pipelineData += 'Summarize the recipe focusing on the dish’s purpose and outcome:\n\n';
   pipelineData += data.data;
 
   return summaryPipeline(pipelineData, {
