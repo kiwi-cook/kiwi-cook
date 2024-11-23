@@ -191,3 +191,33 @@ def logout_user(token: str, response: Response):
     # Clear authentication cookies
     response.delete_cookie(key="Authorization")
     return {"message": "Successfully logged out"}
+
+@router.get("/me", status_code=status.HTTP_200_OK)
+async def read_user(request: Request):
+    """
+    Fetches the user details from FusionAuth using the access token.
+    """
+    access_token = request.headers.get("Authorization")
+
+    # FusionAuth setup
+    fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
+    fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
+    client = FusionAuthClient(fusionauth_api_key, fusionauth_base_url)
+
+    # Fetch user details
+    client_response = client.retrieve_user_using_jwt(access_token)
+
+    if client_response.was_successful():
+        user = client_response.success_response["user"]
+        return {
+            "username": user["username"],
+            "email": user["email"],
+            "createdAt": user["insertInstant"],
+        }
+    else:
+        logger.error(f"Failed to retrieve user: {client_response.error_response}")
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid access token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

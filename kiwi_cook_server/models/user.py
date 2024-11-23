@@ -7,9 +7,8 @@ from lib.database.mongodb import get_mongodb
 load_dotenv()
 
 
-class User(BaseModel):
+class PublicUser(BaseModel):
     username: str
-    fusionauthUserId: str
     createdAt: str
 
     friends: list[str] = Field(default_factory=list)
@@ -17,12 +16,16 @@ class User(BaseModel):
     weekplan: list[str] = Field(default_factory=list)
 
 
+class User(PublicUser):
+    fusionauthUserId: str
+
+
 def get_user_collection() -> Collection:
     read_client = get_mongodb()
     return read_client["users"]["users"]
 
 
-def get_user(username: str) -> User | None:
+def get_user(username: str) -> PublicUser:
     user_collection = get_user_collection()
     user = user_collection.find_one({"username": username})
     if user is None:

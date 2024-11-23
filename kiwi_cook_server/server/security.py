@@ -250,7 +250,7 @@ def setup_cors_with_enhanced_security(app: FastAPI) -> None:
             "https://taste-buddy.uk",
         ]
     else:
-        ALLOWED_ORIGINS = ["*"]
+        ALLOWED_ORIGINS = ["http://localhost:9000"]
 
     app.add_middleware(
         CORSMiddleware,
