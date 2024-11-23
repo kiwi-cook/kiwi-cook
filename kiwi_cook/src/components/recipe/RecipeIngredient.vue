@@ -36,7 +36,7 @@ const emit = defineEmits(['update:modelValue']);
 const isChecked = ref(props.modelValue);
 
 // Watch for changes to the modelValue prop
-watch(() => props.modelValue, (newValue) => {
+watch(() => props.modelValue, (newValue: boolean) => {
   isChecked.value = newValue;
 });
 
