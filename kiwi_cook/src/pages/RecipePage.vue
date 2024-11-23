@@ -19,24 +19,39 @@
                 <span class="meta-value">{{ item.value }}</span>
               </div>
             </div>
-            <!-- Button -->
-            <q-btn v-if="!summary" :label="$t('llm.summarize')" color="primary" class="q-mt-md"
-              :loading="!summaryFinished" @click="summarizeRecipe">
+
+            <q-btn v-if="!summary" color="primary" class="q-mt-md" :loading="!summaryFinished" @click="summarizeRecipe">
+              <!-- Loading slot with different spinners and tooltips -->
               <template v-slot:loading>
-                <q-spinner-grid v-if="!modelDownloading" />
-                <q-spinner-dots v-else />
+                <div class="row items-center">
+                  <q-spinner-dots v-if="modelDownloading" color="white" size="1.5em" />
+                  <q-spinner-bars v-else color="white" size="1.5em" />
+                  <span class="q-ml-sm">
+                    {{ modelDownloading ? $t('llm.downloading') : $t('llm.processing') }}
+                  </span>
+                  <q-badge v-if="modelDownloadProgress && modelDownloading" color="white" text-color="primary" class="q-ml-sm">
+                    {{ modelDownloadProgress }} %
+                  </q-badge>
+                </div>
               </template>
-              <q-icon name="mdi-creation" class="q-mr-sm" />
+
+              <!-- Default slot with icon and optional badge -->
+              <template v-slot:default>
+                <div class="row items-center">
+                  <q-icon name="mdi-creation" class="q-mr-sm" />
+                  {{ $t('llm.summarize') }}
+                </div>
+              </template>
             </q-btn>
 
             <!-- Summary -->
-            <div v-if="summaryFinished && summary">
+            <div v-if="summary">
               <div class="recipe-summary-container">
                 <q-icon name="mdi-lightbulb-on-outline" class="icon" />
                 <div v-html="summary" class="recipe-summary" />
               </div>
               <!-- Disclaimer -->
-              <div class="text-caption q-mt-sm">
+              <div class="text-caption q-mt-sm" v-if="summaryFinished">
                 {{ $t('llm.disclaimer') }}
               </div>
             </div>
@@ -52,9 +67,9 @@
 
     <div v-if="activeTab === 'ingredients'" class="ingredients-section">
       <div class="servings-control">
-        <label class="servings-label">Adjust Servings</label>
+        <label class="servings-label">{{ $t("recipe.adjustServings") }}</label>
         <q-slider v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
-          class="servings-slider" />
+          class="servings-slider" :label-value="`${servings} ${$t('recipe.servings', { count: servings })}`" />
       </div>
 
       <q-list class="ingredients-list">
@@ -67,7 +82,7 @@
       <q-card v-for="(step, index) in recipeSteps" :key="index" class="step-card">
         <q-card-section>
           <div class="step-header">
-            <div class="step-number">{{ $t("recipe.direction") }} {{ index + 1 }}</div>
+            <div class="step-number">{{ $t("recipe.directions", {count: 1}) }} {{ index + 1 }}</div>
           </div>
           <div class="step-description">
             <div v-html="step" />
@@ -126,61 +141,38 @@ const checkedIngredients = ref(
 const summaryTransformer = useLlm('summarization');
 const summaryFinished = computed(() => !summaryTransformer.isRunning.value);
 const modelDownloading = computed(() => summaryTransformer.status.value === 'download');
-const summary = computed(() => {
-  const data = summaryTransformer.data.value as
-    | { summary_text: string }[]
-    | undefined;
-  if (!data || data.length === 0) return '';
-  let summaryText = data[0].summary_text;
-
-  // Trim excessive spaces and dots at the beginning or end
-  summaryText = summaryText.replace(/^\.+|\.+$/g, '').trim();
-
-  // Replace consecutive dots with a single dot
-  summaryText = summaryText.replace(/\.{2,}/g, '.');
-
-  // Ensure there's no unnecessary whitespace around the summary
-  summaryText = summaryText.replace(/\s+/g, ' ').trim();
-
-  // Capitalize the first letter after every period
-  summaryText = summaryText.replace(/(\.|!|\?)(\s*)([a-z])/g, (_, p1, p2, p3) => p1 + p2 + p3.toUpperCase());
-
-  // Add a period at the end if not already present
-  if (summaryText[summaryText.length - 1] !== '.') {
-    summaryText += '.';
-  }
-
-  return summaryText;
-});
+const modelDownloadProgress = computed(() => summaryTransformer.downloadProgress.value);
+const summary = computed(() => summaryTransformer.cleanedData.value);
 
 function summarizeRecipe() {
   let text = '';
 
-  // Add recipe name to the summarization
+  // Add recipe name
   const recipeName = getTranslation(recipe.value?.name);
   if (recipeName) {
-    text += `${recipeName} is a great recipe. `;
+    text += `The recipe is called "${recipeName}". `;
   }
 
-  // Add meta information
+  // Add meta information (duration and servings)
   const duration = recipe.value?.duration;
   const servingsCount = servings.value;
-  if (duration && servingsCount) {
-    text += `The recipe takes ${duration} minutes to prepare and serves ${servingsCount} people. `;
+  if (duration || servingsCount) {
+    text += 'Here are some details: ';
+    if (duration) text += `it takes about ${duration} minutes to prepare. `;
+    if (servingsCount) text += `This recipe serves ${servingsCount} people. `;
   }
 
-  // Add steps
+  // Add steps (optional)
   const stepsText = recipe.value?.steps
     ?.map((step: RecipeStep) => getTranslation(step.description) ?? '')
     .filter(Boolean)
-    .join(' ') ?? '';
+    .join('. ') ?? '';
   if (stepsText) {
-    text += `For the steps, ${stepsText}.`;
+    text += `The steps to make this dish are as follows: ${stepsText}.`;
   }
 
   // Cut the text to 800 characters
-  text = text.slice(0, 800);
-  console.log('Summarizing:', text);
+  text = text.slice(0, 2500);
 
   // Execute the summarization process
   summaryTransformer.exec(text);
@@ -192,13 +184,15 @@ const metaItems = computed(() => {
   return [
     {
       icon: '⏱️',
-      value: `${recipe.value.duration} ${t('recipe.minutes', {
+      value: `${recipe.value.duration} ${t('units.minutes', {
         count: recipe.value.duration,
       })}`,
     },
     {
       icon: '👥',
-      value: `${servings.value} servings`,
+      value: `${servings.value} ${t('recipe.servings', {
+        count: servings.value,
+      })}`,
     },
     ...(recipe?.value?.props.tags?.map((tag: string) => ({
       icon: '🏷️',

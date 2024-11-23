@@ -33,9 +33,23 @@ export function useLlm(task?: Task) {
    */
   const message = ref<string | null>(null);
   /**
-   * Data from the worker when it is finished
+   * Get the data from the worker
    */
   const data = ref<unknown | null>(null);
+  /**
+   * Get the data from the worker when it is finished
+   */
+  const result = ref<unknown | null>(null);
+  /**
+   * Get the data from the worker as a computed property
+   */
+  const cleanedData = computed(() => {
+    if (!data.value) {
+      return '';
+    }
+
+    return cleanText(data.value as string);
+  });
   /**
    * The status of the worker: `ready`, `progress`, `finished`, `error`
    */
@@ -111,6 +125,7 @@ export function useLlm(task?: Task) {
       } else if (workerMessage.type === 'update') {
         status.value = 'process';
         trackEvent('workerProgress', { task: newTask, data: workerMessage.data });
+        data.value = workerMessage.data;
         ondatacallback.value(workerMessage.data);
       } else if (workerMessage.type === 'error') {
         trackEvent('workerError', { task: newTask, error: workerMessage.error });
@@ -118,7 +133,7 @@ export function useLlm(task?: Task) {
       } else if (workerMessage.type === 'result') {
         trackEvent('workerUpdate', { task: newTask, data: workerMessage.data });
         status.value = 'finished';
-        data.value = workerMessage.data;
+        result.value = workerMessage.data;
       }
     };
     newWorker.onerror = (event) => {
@@ -177,6 +192,34 @@ export function useLlm(task?: Task) {
     }
   }
 
+  function cleanText(text: string) {
+    // Trim, remove excessive spaces, and handle consecutive dots in one step
+    let cleanedText = text.replace(/\s+/g, ' ').trim().replace(/\.{2,}/g, '.');
+
+    // Remove dots at the beginning or end
+    cleanedText = cleanedText.replace(/^\.+|\.+$/g, '');
+
+    // Capitalize the first letter after every period, exclamation mark, or question mark
+    cleanedText = cleanedText.replace(/([.!?])\s*([a-z])/g, (_, p1, p2) => `${p1} ${p2.toUpperCase()}`);
+
+    // Ensure a period at the end if not present
+    if (cleanedText && cleanedText[cleanedText.length - 1] !== '.') {
+      cleanedText += '.';
+    }
+
+    // Prevent very short summaries
+    if (cleanedText.split(' ').length <= 2) {
+      return ''; // Or a default message like 'Summary too short'
+    }
+
+    // Check for incomplete sentences and adjust if needed
+    if (/(\bthe\b|\bthis\b|\ban?\s\w+)\.$/.test(cleanedText)) {
+      cleanedText = cleanedText.replace(/(\bthe\b|\bthis\b|\ban?\s\w+)\.$/, '.');
+    }
+
+    return cleanedText;
+  }
+
   return {
     createWorker,
     exec,
@@ -190,5 +233,7 @@ export function useLlm(task?: Task) {
     status,
     message,
     data,
+    result,
+    cleanedData,
   };
 }

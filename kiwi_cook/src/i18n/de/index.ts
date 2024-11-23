@@ -150,11 +150,10 @@ export default {
 
   // Recipe details
   recipe: {
-    servings: 'Portionen',
-    minutes: 'Minuten',
-    ingredients: 'Zutaten',
-    directions: 'Schritte',
-    direction: 'Schritt | Schritte',
+    adjustServings: 'Portionen anpassen',
+    servings: 'Portion | Portionen',
+    ingredients: 'Zutat | Zutaten',
+    directions: 'Schritt | Schritte',
   },
 
   // Shopping list
@@ -180,7 +179,9 @@ export default {
 
   // LLM
   llm: {
-    summarize: 'KI Zusammenfassung',
+    downloading: 'Lade Modell',
+    summarize: 'Zusammenfassen',
+    processing: 'Verarbeite Text',
     disclaimer: 'Die Zusammenfassung wurde von einem KI-Modell erstellt. Sie dient nur zu Informationszwecken und kann Fehler oder Ungenauigkeiten enthalten. Eine Verantwortung für die Richtigkeit wird nicht übernommen.',
   },
 
