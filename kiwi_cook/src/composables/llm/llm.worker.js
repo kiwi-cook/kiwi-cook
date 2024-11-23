@@ -51,7 +51,15 @@ class SummarizationPipelineFactory extends PipelineFactory {
 
   static quantized = true;
 
-  static model = 'Xenova/flan-alpaca-base';
+  static model = 'Xenova/flan-alpaca-large';
+}
+
+class TranslationPipelineFactory extends PipelineFactory {
+  static task = 'translation';
+
+  static quantized = true;
+
+  static model = 'Xenova/nllb-200-distilled-600M';
 }
 
 async function summarize(data) {
@@ -109,8 +117,46 @@ async function summarize(data) {
   });
 }
 
+const translate = async (data) => {
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  const translationPipeline = await TranslationPipelineFactory.getInstance((data) => {
+    self.postMessage({
+      type: 'download',
+      task: 'translation',
+      data,
+    });
+  });
+
+  const { input, sourceLanguage, targetLanguage } = data.data;
+
+  const mapping = {
+    en: 'eng_Latn',
+    de: 'deu_Latn',
+    es: 'spa_Latn',
+    fr: 'fra_Latn',
+  };
+
+  const source = mapping[sourceLanguage] || sourceLanguage;
+  const target = mapping[targetLanguage] || targetLanguage;
+  if (source === target) {
+    self.postMessage({
+      type: 'result',
+      data: input,
+    });
+    return input;
+  }
+
+  const translations = input.map((text) => translationPipeline(text, {
+    src_lang: source,
+    tgt_lang: target,
+  }));
+
+  return Promise.all(translations);
+};
+
 const TASK_FUNCTION_MAPPING = {
   summarization: summarize,
+  translation: translate,
 };
 
 // Listen for messages from the main thread

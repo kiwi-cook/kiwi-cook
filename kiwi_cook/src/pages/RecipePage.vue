@@ -27,8 +27,13 @@
             </div>
 
             <!-- LLM Summary -->
-            <LlmButton class="recipe-summary-button q-mt-md" task-type="summarization" :input-text="summaryInput"
-              :button-text="$t('llm.summarize')" icon="mdi-creation" @task-complete="summaryOutput = $event" />
+            <div class="llm-section">
+
+              <LlmButton class="recipe-summary-button q-mt-md" task-type="summarization" :input="summaryInput"
+              :button-text="$t('llm.summarize')" icon="mdi-creation" @on-output="summaryOutput = $event" />
+              <LlmButton class="recipe-summary-button q-mt-md" task-type="translation" :input="translationInput"
+              :button-text="$t('llm.translate')" @on-output="translationOutput = $event" icon="mdi-translate" />
+            </div>
 
             <div v-if="summaryOutput" class="summary-section">
               <div class="recipe-summary-container">
@@ -96,7 +101,7 @@ import { useRoute } from 'vue-router';
 import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue';
 import LlmButton from 'src/components/LlmButton.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const route = useRoute();
 const recipeStore = useRecipeStore();
@@ -112,12 +117,6 @@ const recipe = computed(() => {
 /* Ingredients */
 const recipeIngredients = computed(() => (recipe.value?.ingredients ?? [])
   .map((ingredient: Ingredient) => getTranslation(ingredient.ingredient.name)));
-
-/* Steps */
-const recipeSteps = computed(() => (recipe.value?.steps ?? []).map((step: RecipeStep) => highlightIngredients(
-  getTranslation(step.description),
-  recipeIngredients.value,
-)));
 
 /* Servings */
 const servings = ref(recipe.value?.servings ?? 1);
@@ -168,6 +167,60 @@ const summaryInput = computed(() => {
     text += `The steps to make this dish are as follows: ${stepsText}.`;
   }
   return text;
+});
+
+/* Translation */
+const translationOutput = ref<unknown | null>(null);
+const translationInput = computed(() => {
+  const texts = [];
+  texts.push(getTranslation(recipe.value?.name));
+  texts.push(getTranslation(recipe.value?.description));
+  texts.push(...(recipe.value?.ingredients ?? []).map((ingredient: Ingredient) => getTranslation(ingredient.ingredient.name)));
+  texts.push(...(recipe.value?.steps ?? []).map((step: RecipeStep) => getTranslation(step.description)));
+  return {
+    input: texts,
+    sourceLanguage: recipe.value?.props?.language ?? 'en',
+    targetLanguage: locale.value ?? 'de',
+  };
+});
+
+/* Steps */
+const recipeSteps = computed(() => {
+  try {
+    // Early return if recipe is missing
+    if (!recipe.value) {
+      console.debug('No recipe data available');
+      return [];
+    }
+
+    // Validate and extract steps
+    const { steps } = recipe.value;
+    if (!Array.isArray(steps)) {
+      console.warn('Recipe steps are not in expected format');
+      return [];
+    }
+
+    // Get translations safely
+    const translations = Array.isArray(translationOutput.value)
+      ? translationOutput.value
+      : [];
+
+    return steps.map((step: RecipeStep, index: number) => {
+      // Get translation with offset of 2 (assuming first 2 entries are metadata)
+      const translationIndex = index + 2 + (recipe.value?.ingredients?.length ?? 0);
+      const stepTranslation = translations[translationIndex];
+
+      const description = stepTranslation ?? getTranslation(step.description);
+
+      // Ensure we have recipe ingredients before highlighting
+      const ingredients = recipeIngredients.value ?? [];
+
+      return highlightIngredients(description, ingredients);
+    });
+  } catch (error) {
+    console.error('Error processing recipe steps:', error);
+    return [];
+  }
 });
 
 /* Meta items */

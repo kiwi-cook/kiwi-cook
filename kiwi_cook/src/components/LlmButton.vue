@@ -1,17 +1,14 @@
 <template>
-    <q-btn v-if="!result" class="q-mt-md llm-task-button" :loading="!taskFinished" @click="executeTask">
+    <q-btn v-if="!result" class="q-mt-md llm-task-button" :class="{ 'loading': modelDownloading }"
+        :loading="!taskFinished" @click="executeTask">
         <!-- Loading slot with different spinners and tooltips -->
         <template v-slot:loading>
             <div class="row items-center">
-                <q-spinner-dots v-if="modelDownloading" color="white" size="1.5em" />
-                <q-spinner-bars v-else color="white" size="1.5em" />
+                <q-spinner-dots v-if="modelDownloading" color="white" class="on-left" size="1.5em" />
+                <q-spinner-bars v-else color="white" class="on-left" size="1.5em" />
                 <span class="q-ml-sm">
-                    {{ modelDownloading ? $t('llm.downloading') : $t('llm.processing') }}
+                    {{ modelDownloading ? `${$t('llm.downloading')} ${modelDownloadProgress}%` : $t('llm.processing') }}
                 </span>
-                <q-badge v-if="modelDownloadProgress && modelDownloading" color="white" text-color="primary"
-                    class="q-ml-sm">
-                    {{ modelDownloadProgress }} %
-                </q-badge>
             </div>
         </template>
 
@@ -32,16 +29,14 @@ import {
   watch,
   computed, defineEmits, defineProps, withDefaults,
 } from 'vue';
-import { Task as LlmTask, useLlm } from 'src/composables/llm/useLlm';
+import { LlmTask, useLlm } from 'src/composables/llm/useLlm';
 import { useI18n } from 'vue-i18n';
 
 interface Props {
     // The type of LLM task to perform (e.g., 'summarization', 'translation', etc.)
     taskType: LlmTask;
     // The text to be processed by the LLM
-    inputText: string;
-    // Maximum length of input text (default: 2500)
-    maxLength?: number;
+    input: unknown;
     // Icon to display on the button (default: mdi-creation)
     icon?: string;
     // Custom button text (falls back to translated task type if not provided)
@@ -56,9 +51,9 @@ const props = withDefaults(defineProps<Props>(), {
   taskParams: () => ({}),
 });
 
-const emit = defineEmits<{(e: 'task-complete', result: unknown): void;
-    (e: 'task-error', error: Error): void;
-    (e: 'task-start'): void;
+const emit = defineEmits<{(e: 'on-output', result: unknown): void;
+    (e: 'on-error', error: Error): void;
+    (e: 'on-start'): void;
 }>();
 
 const { t } = useI18n();
@@ -76,17 +71,16 @@ const buttonText = computed(() => props.buttonText || t(`llm.tasks.${props.taskT
 // Watch for results and emit events
 watch(result, (newResult: unknown) => {
   if (newResult) {
-    emit('task-complete', newResult);
+    emit('on-output', newResult);
   }
 });
 
 async function executeTask() {
   try {
-    emit('task-start');
-    const processedText = props.inputText.slice(0, props.maxLength);
-    await transformer.exec(processedText);
+    emit('on-start');
+    await transformer.exec(props.input);
   } catch (error) {
-    emit('task-error', error as Error);
+    emit('on-error', error as Error);
   }
 }
 </script>
@@ -98,9 +92,8 @@ async function executeTask() {
     color: white;
     padding: 12px 24px;
     border: none;
-    border-radius: 16px;
+    border-radius: 8x;
     font-weight: 700;
-    font-size: 16px;
     cursor: pointer;
     position: relative;
     transition: all 0.3s ease;
@@ -143,7 +136,14 @@ async function executeTask() {
     opacity: 0;
 }
 
-.llm-task-button:hover::after {
+/* Loading state */
+.llm-task-button.loading {
+    background: linear-gradient(135deg, #7047EB, #5727B0);
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.llm-task-button:hover::after, .llm-task-button.loading::after {
     opacity: 1;
     animation: shine 1.5s ease-out infinite;
 }
@@ -156,13 +156,6 @@ async function executeTask() {
     100% {
         transform: translateX(100%) rotate(45deg);
     }
-}
-
-/* Loading state */
-.llm-task-button.loading {
-    background: linear-gradient(135deg, #7047EB, #5727B0);
-    pointer-events: none;
-    opacity: 0.8;
 }
 
 @keyframes pulse {

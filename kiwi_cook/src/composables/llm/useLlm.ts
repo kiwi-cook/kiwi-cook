@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 import { useAnalytics } from 'src/composables/useAnalytics';
 import Worker from './llm.worker.js?worker';
 
-export type Task = 'summarization' | 'rank'
+export type LlmTask = 'summarization' | 'translation'
 type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
 
 /**
@@ -15,14 +15,14 @@ type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
  * ```
  * @param task The task to initialize the worker with (optional)
  */
-export function useLlm(task?: Task) {
+export function useLlm(task?: LlmTask) {
   const { trackEvent } = useAnalytics();
 
   /**
    * The id of the worker
    */
   const workerId = ref<string | null>(null);
-  const workerTask = ref<Task | null>(null);
+  const workerTask = ref<LlmTask | null>(null);
   /**
    * The worker
    */
@@ -81,6 +81,21 @@ export function useLlm(task?: Task) {
    */
   const isRunning = computed(() => status.value !== 'init' && status.value !== 'finished' && status.value !== 'error');
 
+  // Lazy load the worker when needed
+  const workerPromise = new Promise<Worker>((resolve) => {
+    import('./llm.worker.js?worker').then((WorkerModule) => {
+      // eslint-disable-next-line new-cap
+      worker.value = new WorkerModule.default();
+      resolve(worker.value);
+    });
+  });
+
+  if (task) {
+    workerPromise.then(() => {
+      createWorker(task);
+    });
+  }
+
   /**
    * Initialize a worker with a task.
    * This does not need to be called manually if the task is passed to the composable.
@@ -96,7 +111,7 @@ export function useLlm(task?: Task) {
    * @returns The id of the worker
    * @param newTask
    */
-  function createWorker(newTask: Task): string {
+  function createWorker(newTask: LlmTask): string {
     status.value = 'init';
     const name = `${newTask}-${Math.random().toString(36).substring(7)}`;
     trackEvent('createWorker', { task: newTask });
@@ -151,10 +166,6 @@ export function useLlm(task?: Task) {
     channel.value = new MessageChannel();
 
     return name;
-  }
-
-  if (task) {
-    createWorker(task);
   }
 
   /**

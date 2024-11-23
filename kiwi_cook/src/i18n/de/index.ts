@@ -171,6 +171,17 @@ export default {
     signUp: 'Jetzt registrieren!',
   },
 
+  // Registration
+  register: {
+    title: 'Erstelle ein neues Kiwi-Konto',
+    username: 'Benutzername',
+    password: 'Passwort',
+    confirmPassword: 'Passwort bestätigen',
+    alreadyHaveAccount: 'Bereits registriert?',
+    passwordNotMatch: 'Passwörter stimmen nicht überein',
+    signUp: 'Registrieren',
+  },
+
   // Error handling
   error: {
     notFound:
@@ -182,6 +193,7 @@ export default {
   llm: {
     downloading: 'Lade Modell',
     summarize: 'Zusammenfassen',
+    translate: 'Übersetzen',
     processing: 'Verarbeite Text',
     disclaimer: 'Die Zusammenfassung wurde von einem KI-Modell erstellt. Sie dient nur zu Informationszwecken und kann Fehler oder Ungenauigkeiten enthalten. Eine Verantwortung für die Richtigkeit wird nicht übernommen.',
   },
