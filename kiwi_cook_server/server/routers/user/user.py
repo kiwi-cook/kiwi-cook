@@ -1,13 +1,13 @@
 import os
 import re
 from datetime import datetime, timezone
-from typing import Annotated
 
 import requests
 from dotenv import load_dotenv
-from fastapi import APIRouter, Depends, Form, Response, Request
+from fastapi import APIRouter, Form, Response, Request
 from fastapi import HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+
+from fusionauth.fusionauth_client import FusionAuthClient
 
 from lib.database.mongodb import get_mongodb
 from lib.logging import logger
@@ -47,126 +47,145 @@ def validate_password_complexity(password: str) -> bool:
 
 @router.post("/add", status_code=status.HTTP_201_CREATED)
 async def create_user(
-        request: Request,
-        username: Annotated[str, Form()],
-        password: Annotated[str, Form()],
-        response: Response,
+    request: Request, username: str = Form(...), password: str = Form(...)
 ):
     # Enhanced password validation
-    if not validate_password_complexity(password):
+    if validate_password_complexity(password):
         raise HTTPException(
             status_code=400,
-            detail="Password must be at least 12 characters and include uppercase, lowercase, numbers, and special characters"
+            detail="Password must be at least 12 characters and include uppercase, lowercase, numbers, and special characters",
         )
 
     # Check username requirements
     if not re.match("^[a-zA-Z0-9_]{3,32}$", username):
-        logger.error(f"Invalid username: {username}")
         raise HTTPException(
             status_code=400,
-            detail="Username must be 3-32 characters and contain only letters, numbers, and underscores"
+            detail="Username must be 3-32 characters and contain only letters, numbers, and underscores",
         )
 
-    # Check for existing user with case-insensitive match
-    if read_client["users"]["users"].find_one(
-            {"username": {"$regex": f"^{username}$", "$options": "i"}}
-    ):
-        logger.error(f"Username not available: {username}")
-        raise HTTPException(status_code=400, detail="Username not available")
-
-    # Create user in FusionAuth
+    # FusionAuth setup
     fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
     fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
+    client = FusionAuthClient(fusionauth_api_key, fusionauth_base_url)
 
-    registration_url = f"{fusionauth_base_url}/api/user/registration"
-    headers = {"Authorization": fusionauth_api_key, "Content-Type": "application/json"}
-    registration_payload = {
+    # Prepare registration payload
+    registration_request = {
         "user": {
-            "name": username,
+            "active": True,
             "password": password,
+            "username": username,
         },
         "registration": {
-            "applicationId": os.getenv("FUSIONAUTH_APPLICATION_ID"),
-        }
+            "applicationId": os.getenv("FUSIONAUTH_ID"),
+        },
     }
 
-    fusionauth_response = requests.post(registration_url, json=registration_payload, headers=headers)
-    fusionauth_user_id = fusionauth_response.json()["user"]["id"]
+    # Create user in FusionAuth
+    client_response = client.create_user(registration_request)
+    # Create a User
+    if client_response.was_successful():
+        logger.info(f"✨ User created: {username}")
+        fusionauthUserId = client_response.success_response["user"]["id"]
 
-    user = User(username=username,
-                fusionauthUserId=fusionauth_user_id,
-                createdAt=datetime.now(timezone.utc).isoformat())
+        try:
+            user = User(
+                username=username,
+                fusionauthUserId=fusionauthUserId,
+                createdAt=datetime.now(timezone.utc).isoformat(),
+            )
 
-    write_client["users"]["users"].insert_one(user.model_dump())
+            # Insert user into MongoDB
+            write_client["users"]["users"].insert_one(
+                user.model_dump(by_alias=True, exclude_none=True)
+            )
+        except Exception as e:
+            # Remove user from FusionAuth if creation failed
+            client.delete_user(fusionauthUserId)
+            logger.error(f"Failed to insert user into MongoDB: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to create user",
+            )
 
-    # Audit logging
-    logger.info(f"New user created: {username} from IP: {request.client.host}")
+        return {"message": "User created successfully"}
+    else:
+        logger.error(f"Failed to create user: {client_response.error_response}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create user",
+        )
 
-    return {"error": False, "response": "User created successfully"}
 
+@router.post("/login", status_code=status.HTTP_200_OK)
+async def login_user(
+    request: Request, username: str = Form(...), password: str = Form(...)
+):
+    # Input validation
+    if not username or not password:
+        raise HTTPException(
+            status_code=400, detail="Username and password must be provided."
+        )
 
-@router.post("/token")
-def login_for_access_token(request: Request, form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                           response: Response):
-    """
-    Authenticate user using FusionAuth and return access token.
-    """
-
+    # FusionAuth setup
     fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
     fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
+    client = FusionAuthClient(fusionauth_api_key, fusionauth_base_url)
 
-    login_url = f"{fusionauth_base_url}/api/login"
-    headers = {"Authorization": fusionauth_api_key, "Content-Type": "application/json"}
-    login_payload = {
-        "loginId": form_data.username,
-        "password": form_data.password
+    # Prepare login payload
+    login_request = {
+        "loginId": username,
+        "password": password,
     }
 
-    # Call FusionAuth Login API
-    fusionauth_response = requests.post(login_url, json=login_payload, headers=headers)
+    # Authenticate user using FusionAuth
+    client_response = client.login(login_request)
 
-    if fusionauth_response.status_code != 200:
-        logger.error(f"Failed to authenticate user: {fusionauth_response.text}")
+    if client_response.was_successful():
+        logger.info(f"✨ User authenticated: {username}")
+
+        # Retrieve access token from FusionAuth response
+        access_token = client_response.success_response.get("token")
+        refresh_token = client_response.success_response.get("refreshToken")
+
+        # Set token as cookie for the client
+        response = {"access_token": access_token, "token_type": "Bearer"}
+        if refresh_token:
+            response["refresh_token"] = refresh_token
+
+        # Return access token and other info
+        return response
+    else:
+        # Log failed authentication attempts
+        logger.error(
+            f"Failed login for user {username}: {client_response.error_response}"
+        )
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Invalid username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Extract token from FusionAuth response
-    token_data = fusionauth_response.json()
-    access_token = token_data.get("token")
 
-    if not access_token:
-        logger.error(f"Failed to retrieve access token: {token_data}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve access token",
-        )
-
-    # Set token in response or return to the client
-    response.set_cookie(key="Authorization", value=f"Bearer {access_token}", httponly=True)
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-@router.post("/logout")
+@router.post("/logout", status_code=status.HTTP_200_OK)
 def logout_user(token: str, response: Response):
     """
     Logs out the user by invalidating their JWT in FusionAuth.
     """
 
+    # FusionAuth setup
     fusionauth_base_url = os.getenv("FUSIONAUTH_BASE_URL")
     fusionauth_api_key = os.getenv("FUSIONAUTH_API_KEY")
-    logout_url = f"{fusionauth_base_url}/api/jwt/logout"
-    headers = {"Authorization": fusionauth_api_key, "Content-Type": "application/json"}
-    payload = {"token": token}
+    client = FusionAuthClient(fusionauth_api_key, fusionauth_base_url)
 
-    fusionauth_response = requests.post(logout_url, json=payload, headers=headers)
+    # Invalidate the token
+    client_response = client.logout({"token": token})
 
-    if fusionauth_response.status_code != 200:
+    if not client_response.was_successful():
+        error_details = client_response.error_response
+        logger.error(f"Logout failed: {error_details}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Logout failed: Unable to invalidate token."
+            detail="Logout failed: Unable to invalidate token.",
         )
 
     # Clear authentication cookies

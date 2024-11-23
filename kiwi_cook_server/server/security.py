@@ -273,7 +273,7 @@ def setup_cors_with_enhanced_security(app: FastAPI) -> None:
 
 def setup_advanced_security(app: FastAPI) -> None:
     """Comprehensive security setup."""
-    # Conditional HTTPS enforcement with proxy awareness
+    # HTTPS Redirect Middleware with Proxy Support
     is_production = os.getenv("ENV", "production").lower() == "production"
     trusted_proxy_ips = os.getenv("TRUSTED_PROXY_IPS", "").split(",")
     trusted_proxy_ips = [ip.strip() for ip in trusted_proxy_ips if ip.strip()]
@@ -314,6 +314,7 @@ def validate_environment_config():
         "REDIS_HOST",
         "REDIS_PORT",
         "FUSIONAUTH_BASE_URL",
+        "FUSIONAUTH_API_KEY",
     ]
 
     for var in REQUIRED_ENV_VARS:
