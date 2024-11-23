@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { api } from 'boot/axios.ts';
 import { User } from 'src/models/user';
 
@@ -7,6 +7,8 @@ export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
+
+  const isAuthenticated = computed(() => !!user.value);
 
   async function login(username?: string, password?: string) {
     loading.value = true;
@@ -30,13 +32,6 @@ export const useUserStore = defineStore('user', () => {
         return { message: 'Login successful' };
       }
 
-      // Check if the user is already authenticated by validating the cookie
-      const response = await api.get('/protected-route', {
-        withCredentials: true, // Sends the cookie to the server
-      });
-
-      user.value = response.data;
-      console.debug('Authenticated via cookie');
       return user.value;
     } catch (err) {
       error.value = 'Authentication failed. Please try again.';
@@ -105,6 +100,7 @@ export const useUserStore = defineStore('user', () => {
 
   return {
     user,
+    isAuthenticated,
     loading,
     error,
     login,

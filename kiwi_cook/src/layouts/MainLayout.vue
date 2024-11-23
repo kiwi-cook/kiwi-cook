@@ -10,16 +10,17 @@
         </div>
         <q-space/>
 
-        <!-- Login button -->
+        <!-- Login/Logout Button -->
         <q-btn
           :color="isDark ? 'secondary' : 'white'"
           :text-color="isDark ? 'primary' : 'dark'"
           class="q-mr-md"
           flat
-          @click="$router.push('/login')"
+          @click="loginLogout"
         >
-          <q-icon name="mdi-login"/>
-          <q-tooltip>Login</q-tooltip>
+          <q-icon name="mdi-login" v-if="!isAuthenticated"/>
+          <q-icon name="mdi-logout" v-else/>
+          <q-tooltip>{{ isAuthenticated ? $t('app.logout') : $t('app.login') }}</q-tooltip>
         </q-btn>
       </q-toolbar>
     </q-header>
@@ -74,10 +75,13 @@ import {
 import { useRouter } from 'vue-router';
 import { useDarkMode } from 'src/composables/useDarkmode';
 import KiwiLogo from 'src/components/KiwiLogo.vue';
+import { useUserStore } from 'src/stores/user-store';
+import { storeToRefs } from 'pinia';
 
 defineOptions({
   name: 'MainLayout',
 });
+const router = useRouter();
 
 /* Color mode toggle */
 
@@ -86,8 +90,22 @@ const { isDark, toggleDarkMode } = useDarkMode();
 /* Link to GitHub */
 const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
 
+/* Login/Logout */
+const userStore = useUserStore();
+const { isAuthenticated } = storeToRefs(userStore);
+
+const loginLogout = () => {
+  if (isAuthenticated.value) {
+    userStore.logout();
+  } else if (router.currentRoute.value.name !== 'login') {
+    router.push('/login');
+  } else {
+    // Go back to home page if already on login page
+    router.back();
+  }
+};
+
 /* Tabs */
-const router = useRouter();
 const tabs = [
   {
     name: 'Chat',

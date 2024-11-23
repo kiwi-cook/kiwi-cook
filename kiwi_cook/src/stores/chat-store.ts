@@ -66,14 +66,21 @@ export const useChatStore = defineStore('chat', () => {
         userContent: message.content.toString(),
       }));
     customStorage.saveData('chat', statesAndAnswers);
+    return statesAndAnswers;
   }
 
-  async function initChat() {
+  async function initChat(chatData?: { state: ChatState; userContent: string }[]) {
     // Load the chat from local storage
-    const uncheckedMessages = customStorage.loadData('chat') as {
-      state: ChatState;
-      userContent: string,
-    }[];
+    let uncheckedMessages;
+    if (chatData) {
+      uncheckedMessages = chatData;
+    } else {
+      uncheckedMessages = customStorage.loadData('chat') as {
+        state: ChatState;
+        userContent: string,
+      }[];
+    }
+
     if (uncheckedMessages) {
       await updateState(uncheckedMessages[0].state, true, true);
       await uncheckedMessages.reduce(async (promiseChain, message) => {
@@ -627,6 +634,8 @@ export const useChatStore = defineStore('chat', () => {
     messageId,
     handleMessage,
     editMessage,
+    saveChat,
+    initChat,
     resetChat,
   };
 });

@@ -2,6 +2,8 @@
 export default {
   app: {
     tagline: 'Dein persönlicher Kochassistent',
+    login: 'Anmelden',
+    logout: 'Abmelden',
   },
 
   // Core app sections
