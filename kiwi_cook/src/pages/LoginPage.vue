@@ -40,8 +40,7 @@
       </q-card-actions>
 
       <q-card-section class="text-center text-accent q-mt-md">
-        <q-btn flat :label="$t('login.forgotPassword')" class="text-caption"/>
-        <q-btn flat :label="$t('login.signUp')" class="text-caption q-ml-md"/>
+        <q-btn flat :label="$t('login.signUp')" class="text-caption q-ml-md" to="/register"/>
       </q-card-section>
     </q-card>
   </q-page-container>

@@ -1,4 +1,5 @@
 import { RouteRecordRaw } from 'vue-router';
+import IndexPage from 'pages/IndexPage.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -8,7 +9,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'chat',
-        component: () => import('pages/IndexPage.vue'),
+        component: IndexPage,
       },
       {
         path: 'recipe/:id',
@@ -19,6 +20,11 @@ const routes: RouteRecordRaw[] = [
         path: 'login',
         name: 'login',
         component: () => import('pages/LoginPage.vue'),
+      },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('pages/RegisterPage.vue'),
       },
     ],
   },
