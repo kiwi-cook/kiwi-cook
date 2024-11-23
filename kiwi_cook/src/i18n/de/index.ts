@@ -154,6 +154,7 @@ export default {
     servings: 'Portion | Portionen',
     ingredients: 'Zutat | Zutaten',
     directions: 'Schritt | Schritte',
+    share: 'Teilen',
   },
 
   // Shopping list

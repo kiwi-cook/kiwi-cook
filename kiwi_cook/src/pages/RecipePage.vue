@@ -1,18 +1,19 @@
 <template>
-  <q-page class="mobile-recipe-container" v-if="recipe">
+  <q-page class="recipe-container" v-if="recipe">
+    <!-- Header Section -->
     <div class="recipe-header">
       <div class="header-content">
-        <!-- Stack image and content vertically on mobile -->
         <div class="content-wrapper">
-          <!-- Image section with responsive sizing -->
+          <!-- Image section -->
           <div class="image-wrapper" v-if="recipe.image_url">
             <img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image" loading="lazy" />
           </div>
-          <!-- Recipe details with improved spacing -->
+          <!-- Recipe details -->
           <div class="recipe-details">
             <h1 class="recipe-title">{{ getTranslation(recipe.name) }}</h1>
             <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
-            <!-- Display recipe meta information -->
+
+            <!-- Meta information -->
             <div class="recipe-meta">
               <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
                 <span class="meta-icon">{{ item.icon }}</span>
@@ -20,75 +21,63 @@
               </div>
             </div>
 
-            <q-btn v-if="!summary" color="primary" class="q-mt-md" :loading="!summaryFinished" @click="summarizeRecipe">
-              <!-- Loading slot with different spinners and tooltips -->
-              <template v-slot:loading>
-                <div class="row items-center">
-                  <q-spinner-dots v-if="modelDownloading" color="white" size="1.5em" />
-                  <q-spinner-bars v-else color="white" size="1.5em" />
-                  <span class="q-ml-sm">
-                    {{ modelDownloading ? $t('llm.downloading') : $t('llm.processing') }}
-                  </span>
-                  <q-badge v-if="modelDownloadProgress && modelDownloading" color="white" text-color="primary" class="q-ml-sm">
-                    {{ modelDownloadProgress }} %
-                  </q-badge>
-                </div>
-              </template>
+            <!-- Action buttons -->
+            <div class="q-mt-md">
+              <q-btn color="primary" class="q-mr-sm" icon="share" :label="$t('recipe.share')" @click="shareRecipe" />
+            </div>
 
-              <!-- Default slot with icon and optional badge -->
-              <template v-slot:default>
-                <div class="row items-center">
-                  <q-icon name="mdi-creation" class="q-mr-sm" />
-                  {{ $t('llm.summarize') }}
-                </div>
-              </template>
-            </q-btn>
+            <!-- LLM Summary -->
+            <LlmButton class="recipe-summary-button q-mt-md" task-type="summarization" :input-text="summaryInput"
+              :button-text="$t('llm.summarize')" icon="mdi-creation" @task-complete="summaryOutput = $event" />
 
-            <!-- Summary -->
-            <div v-if="summary">
+            <div v-if="summaryOutput" class="summary-section">
               <div class="recipe-summary-container">
                 <q-icon name="mdi-lightbulb-on-outline" class="icon" />
-                <div v-html="summary" class="recipe-summary" />
+                <div v-html="summaryOutput" class="recipe-summary" />
               </div>
-              <!-- Disclaimer -->
-              <div class="text-caption q-mt-sm" v-if="summaryFinished">
-                {{ $t('llm.disclaimer') }}
-              </div>
+              <div class="text-caption q-mt-sm">{{ $t('llm.disclaimer') }}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <q-tabs v-model="activeTab" dense class="recipe-tabs" active-color="primary">
-      <q-tab name="ingredients" icon="local_dining" label="Ingredients" />
-      <q-tab name="steps" icon="list" label="Steps" />
-    </q-tabs>
-
-    <div v-if="activeTab === 'ingredients'" class="ingredients-section">
-      <div class="servings-control">
-        <label class="servings-label">{{ $t("recipe.adjustServings") }}</label>
-        <q-slider v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
-          class="servings-slider" :label-value="`${servings} ${$t('recipe.servings', { count: servings })}`" />
+    <!-- Main Content Section -->
+    <div class="recipe-content">
+      <!-- Ingredients Section -->
+      <div class="ingredients-section">
+        <h2 class="section-title">{{ recipe.ingredients?.length ?? 0 }} {{ $t('recipe.ingredients', {
+          count:
+            recipe.ingredients?.length ?? 0 }) }}</h2>
+        <div class="servings-control">
+          <label class="servings-label">{{ $t("recipe.adjustServings") }}</label>
+          <q-slider v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
+            class="servings-slider" :label-value="`${servings} ${$t('recipe.servings', { count: servings })}`" label-always />
+        </div>
+        <q-list class="ingredients-list">
+          <RecipeIngredient v-for="(ingredient, index) in recipe.ingredients" :key="index"
+            v-model="checkedIngredients[index]" :ingredient="ingredient" :servings="servings" />
+        </q-list>
       </div>
 
-      <q-list class="ingredients-list">
-        <RecipeIngredient v-for="(ingredient, index) in recipe.ingredients" :key="index"
-          v-model="checkedIngredients[index]" :ingredient="ingredient" :servings="servings" />
-      </q-list>
-    </div>
-
-    <div v-if="activeTab === 'steps'" class="steps-container">
-      <q-card v-for="(step, index) in recipeSteps" :key="index" class="step-card">
-        <q-card-section>
-          <div class="step-header">
-            <div class="step-number">{{ $t("recipe.directions", {count: 1}) }} {{ index + 1 }}</div>
-          </div>
-          <div class="step-description">
-            <div v-html="step" />
-          </div>
-        </q-card-section>
-      </q-card>
+      <!-- Steps Section -->
+      <div class="steps-section">
+        <h2 class="section-title">{{ recipe.steps?.length ?? 0 }} {{ $t('recipe.directions', {
+          count:
+            recipe.steps?.length ?? 0 }) }}</h2>
+        <div class="steps-container">
+          <q-card v-for="(step, index) in recipeSteps" :key="index" class="step-card">
+            <q-card-section>
+              <div class="step-header">
+                <div class="step-number">{{ $t("recipe.directions", { count: 1 }) }} {{ index + 1 }}</div>
+              </div>
+              <div class="step-description">
+                <div v-html="step" />
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
     </div>
   </q-page>
 </template>
@@ -105,11 +94,10 @@ import { storeToRefs } from 'pinia';
 import { useRecipeStore } from 'src/stores/recipe-store';
 import { useRoute } from 'vue-router';
 import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue';
-import { useLlm } from 'src/composables/llm/useLlm';
+import LlmButton from 'src/components/LlmButton.vue';
 
 const { t } = useI18n();
 
-const activeTab = ref('ingredients');
 const route = useRoute();
 const recipeStore = useRecipeStore();
 const { recipeMap } = storeToRefs(recipeStore);
@@ -137,14 +125,23 @@ const checkedIngredients = ref(
   recipe?.value?.ingredients?.map(() => false) ?? [],
 );
 
-/* Summary */
-const summaryTransformer = useLlm('summarization');
-const summaryFinished = computed(() => !summaryTransformer.isRunning.value);
-const modelDownloading = computed(() => summaryTransformer.status.value === 'download');
-const modelDownloadProgress = computed(() => summaryTransformer.downloadProgress.value);
-const summary = computed(() => summaryTransformer.cleanedData.value);
+/* Share */
+function shareRecipe() {
+  const recipeName = getTranslation(recipe.value?.name);
+  const recipeUrl = window.location.href;
+  navigator.share({
+    title: recipeName,
+    text: recipeName,
+    url: recipeUrl,
+  });
+}
 
-function summarizeRecipe() {
+/* Favorite */
+// TODO: Implement favorite functionality
+
+/* Summary */
+const summaryOutput = ref<unknown | null>(null);
+const summaryInput = computed(() => {
   let text = '';
 
   // Add recipe name
@@ -170,13 +167,8 @@ function summarizeRecipe() {
   if (stepsText) {
     text += `The steps to make this dish are as follows: ${stepsText}.`;
   }
-
-  // Cut the text to 800 characters
-  text = text.slice(0, 2500);
-
-  // Execute the summarization process
-  summaryTransformer.exec(text);
-}
+  return text;
+});
 
 /* Meta items */
 const metaItems = computed(() => {
@@ -224,20 +216,20 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
 <style lang="scss">
 .highlight {
   background-color: $primary;
-  color: white;
+
   font-weight: bold;
 }
 
 .highlight::selection {
   background-color: $primary;
-  color: white;
+
 }
 </style>
 
 <style lang="scss" scoped>
-.mobile-recipe-container {
+.recipe-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 16px;
 
@@ -247,11 +239,11 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
 }
 
 .recipe-header {
+  background-color: $grey-1;
   border-radius: 16px;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   overflow: hidden;
-  transition: all 0.3s ease;
 
   @media (max-width: 480px) {
     border-radius: 12px;
@@ -260,25 +252,25 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
 }
 
 .header-content {
-  padding: 16px;
+  padding: 24px;
 
   @media (max-width: 480px) {
-    padding: 12px;
+    padding: 16px;
   }
 }
 
 .content-wrapper {
   display: flex;
-  gap: 20px;
+  gap: 32px;
 
   @media (max-width: 640px) {
     flex-direction: column;
-    gap: 16px;
+    gap: 24px;
   }
 }
 
 .image-wrapper {
-  flex: 0 0 150px;
+  flex: 0 0 300px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
@@ -286,7 +278,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   @media (max-width: 640px) {
     flex: none;
     width: 100%;
-    height: 200px;
+    height: 250px;
   }
 }
 
@@ -296,16 +288,77 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   object-fit: cover;
 }
 
-.recipe-details {
-  flex: 1;
-  min-width: 0; // Prevents flex item from overflowing
+.recipe-content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: minmax(300px, 1fr) 2fr;
+    align-items: start;
+  }
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.ingredients-section {
+  background-color: $grey-1;
+  border-radius: 16px;
+  padding: 24px;
+  height: fit-content;
+}
+
+.steps-section {
+  background-color: $grey-1;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.servings-control {
+  margin-bottom: 20px;
+}
+
+.servings-label {
+  display: block;
+  margin-bottom: 10px;
+
+  font-weight: 600;
+}
+
+.steps-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.step-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+// Dark mode styles
+.body--dark {
+
+  .recipe-header,
+  .ingredients-section,
+  .steps-section {
+    background-color: $dark;
+  }
+
+  .step-card {
+    background-color: lighten($dark, 5%);
+  }
 }
 
 .recipe-title {
   font-family: "Georgia", "Times New Roman", serif;
   font-size: clamp(1.2em, 4vw, 1.6em);
   font-weight: 600;
-  color: $grey-9;
+
   line-height: 1.3;
   margin-bottom: 8px;
   word-wrap: break-word;
@@ -313,7 +366,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
 }
 
 .recipe-description {
-  color: $grey-7;
+
   font-size: clamp(0.9em, 3vw, 1.1em);
   margin-bottom: 12px;
   display: -webkit-box;
@@ -356,88 +409,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   display: flex;
   align-items: center;
   gap: 5px;
-  color: $grey-7;
+
   font-size: clamp(0.8em, 2.5vw, 0.95em);
-}
-
-.servings-control {
-  margin-bottom: 20px;
-  padding: 0 16px;
-}
-
-.servings-label {
-  display: block;
-  margin-bottom: 10px;
-  color: $grey-7;
-  font-weight: 600;
-}
-
-.steps-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  padding: 0 16px;
-}
-
-.step-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-
-  &.step-completed {
-    opacity: 0.7;
-  }
-}
-
-.step-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.step-number {
-  font-weight: bold;
-  color: $grey-7;
-  opacity: 0.7;
-}
-
-.step-description {
-  line-height: 1.6;
-  color: $grey-7;
-}
-
-.body--dark {
-  .recipe-header {
-    background-color: $dark;
-  }
-
-  .recipe-title {
-    color: $grey-1;
-  }
-
-  .recipe-description {
-    color: $grey-3;
-  }
-
-  .meta-item {
-    color: $grey-3;
-  }
-
-  .servings-label {
-    color: $grey-3;
-  }
-
-  .step-card {
-    background-color: $dark;
-    color: $grey-3;
-  }
-
-  .step-number {
-    color: white;
-  }
-
-  .step-description {
-    color: $grey-5;
-  }
 }
 </style>

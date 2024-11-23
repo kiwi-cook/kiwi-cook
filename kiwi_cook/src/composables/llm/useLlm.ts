@@ -2,7 +2,7 @@ import { computed, ref } from 'vue';
 import { useAnalytics } from 'src/composables/useAnalytics';
 import Worker from './llm.worker.js?worker';
 
-type Task = 'summarization' | 'rank'
+export type Task = 'summarization' | 'rank'
 type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
 
 /**

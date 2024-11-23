@@ -106,7 +106,6 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
 }
 
 .ingredient-quantity {
-  color: $grey-4; /* Light grey for quantity */
   text-align: right; /* Right-align quantity for better readability */
 }
 
@@ -122,10 +121,6 @@ const formatName = (name: string): string => name.replace(/\b\w/g, (char) => cha
 
   .ingredient-row {
     border-bottom: 1px solid $dark; /* Darker border for separation */
-  }
-
-  .ingredient-quantity {
-    color: $grey-3; /* Light grey for quantity in dark mode */
   }
 }
 </style>
