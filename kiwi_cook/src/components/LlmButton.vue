@@ -78,7 +78,7 @@ watch(result, (newResult: unknown) => {
 async function executeTask() {
   try {
     emit('on-start');
-    await transformer.exec(props.input);
+    transformer.exec(props.input);
   } catch (error) {
     emit('on-error', error as Error);
   }

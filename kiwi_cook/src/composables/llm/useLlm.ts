@@ -1,6 +1,5 @@
 import { computed, ref } from 'vue';
 import { useAnalytics } from 'src/composables/useAnalytics';
-import Worker from './llm.worker.js?worker';
 
 export type LlmTask = 'summarization' | 'translation'
 type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
@@ -15,7 +14,7 @@ type WorkerStatus = 'init' | 'download' | 'process' | 'finished' | 'error'
  * ```
  * @param task The task to initialize the worker with (optional)
  */
-export function useLlm(task?: LlmTask) {
+export function useLlm(task: LlmTask) {
   const { trackEvent } = useAnalytics();
 
   /**
@@ -79,7 +78,7 @@ export function useLlm(task?: LlmTask) {
   /**
    * Define if the worker is finished
    */
-  const isRunning = computed(() => status.value !== 'init' && status.value !== 'finished' && status.value !== 'error');
+  const isRunning = computed(() => status.value !== null && status.value !== 'init' && status.value !== 'finished' && status.value !== 'error');
 
   // Lazy load the worker when needed
   const workerPromise = new Promise<Worker>((resolve) => {
@@ -89,12 +88,6 @@ export function useLlm(task?: LlmTask) {
       resolve(worker.value);
     });
   });
-
-  if (task) {
-    workerPromise.then(() => {
-      createWorker(task);
-    });
-  }
 
   /**
    * Initialize a worker with a task.
@@ -111,15 +104,19 @@ export function useLlm(task?: LlmTask) {
    * @returns The id of the worker
    * @param newTask
    */
-  function createWorker(newTask: LlmTask): string {
+  async function createWorker(newTask: LlmTask) {
     status.value = 'init';
     const name = `${newTask}-${Math.random().toString(36).substring(7)}`;
     trackEvent('createWorker', { task: newTask });
 
-    const newWorker = new Worker();
-    workerTask.value = newTask;
+    await workerPromise;
+    if (worker.value === null) {
+      trackEvent('workerError', { task: newTask, error: 'Worker not found' });
+      return '';
+    }
 
-    newWorker.onmessage = (event) => {
+    workerTask.value = newTask;
+    worker.value.onmessage = (event) => {
       const workerMessage = event.data;
       status.value = workerMessage.status;
       onmessage.value(event);
@@ -151,13 +148,12 @@ export function useLlm(task?: LlmTask) {
         result.value = workerMessage.data;
       }
     };
-    newWorker.onerror = (event) => {
+    worker.value.onerror = (event) => {
       trackEvent('workerError', { task: newTask, error: event });
     };
-    newWorker.onmessageerror = (event) => {
+    worker.value.onmessageerror = (event) => {
       trackEvent('workerMessageError', { task: newTask, error: event });
     };
-    worker.value = newWorker;
 
     // Set worker id
     workerId.value = name;
@@ -165,7 +161,7 @@ export function useLlm(task?: LlmTask) {
     // Create a message channel
     channel.value = new MessageChannel();
 
-    return name;
+    return worker.value;
   }
 
   /**
@@ -193,7 +189,8 @@ export function useLlm(task?: LlmTask) {
    * Start a task with the worker
    * @param taskData
    */
-  function exec(taskData: unknown) {
+  async function exec(taskData: unknown) {
+    await createWorker(task);
     trackEvent('workerStart', { id: workerId.value, data: taskData });
     if (worker.value !== null && channel.value !== null) {
       trackEvent('workerStarted', { id: workerId.value, data: taskData });
