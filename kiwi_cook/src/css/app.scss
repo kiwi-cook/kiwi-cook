@@ -1,0 +1,20 @@
+.page {
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px;
+
+  @media (max-width: 480px) {
+    padding: 6px;
+  }
+}
+
+.page-scroller-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
+.rounded-borders {
+  border-radius: 24px;
+}

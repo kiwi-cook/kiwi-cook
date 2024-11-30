@@ -401,10 +401,6 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   .steps-section {
     background-color: $dark;
   }
-
-  .step-card {
-    background-color: lighten($dark, 5%);
-  }
 }
 
 .recipe-title {

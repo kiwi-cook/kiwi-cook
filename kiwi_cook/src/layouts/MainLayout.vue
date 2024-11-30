@@ -25,7 +25,7 @@
       </q-toolbar>
     </q-header>
 
-    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'" class="page-container">
+    <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'">
       <router-view v-slot="{ Component }">
         <transition mode="out-in" name="fade">
           <component :is="Component"/>
@@ -57,7 +57,7 @@
           :color="isDark ? 'secondary' : 'white'"
           :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
           :text-color="isDark ? 'primary' : 'dark'"
-          class="q-ml-md mode-toggle"
+          class="q-ml-md"
           flat
           @click="toggleDarkMode"
         >
@@ -147,30 +147,6 @@ body {
 
   @media screen and (min-width: 1280px) {
     font-size: 20px;
-  }
-}
-
-.rounded-borders {
-  border-radius: 24px;
-}
-
-.page-container {
-  height: 100%; // Fill available space
-  padding: 0; // Remove padding to prevent double scrollbars
-}
-
-.q-page {
-  height: 100%;
-  padding: 0; // Remove default padding
-  display: flex; // Enable flex layout
-  flex-direction: column; // Stack children vertically
-}
-
-.mode-toggle {
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.1);
   }
 }
 
