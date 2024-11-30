@@ -2,7 +2,6 @@
 <html>
   <head>
     <title><%= productName %></title>
-
     <meta charset="utf-8" />
     <meta content="<%= productDescription %>" name="description" />
     <meta content="telephone=no" name="format-detection" />
@@ -12,6 +11,19 @@
       name="viewport"
     />
 
+    <!-- Prefetch resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="//huggingface.co" />
+
+    <!-- Preconnect to external origins if needed -->
+    <link rel="preconnect" href="https://taste-buddy.uk" />
+    <link rel="preconnect" href="https://kiwi-cook.github.io" />
+    <link rel="preconnect" href="https://huggingface.co" />
+
+    
+    <!-- Favicon links -->
     <link
       href="icons/favicon-128x128.png"
       rel="icon"

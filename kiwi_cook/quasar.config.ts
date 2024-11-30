@@ -50,7 +50,7 @@ export default configure((ctx) => ({
     vueRouterMode: 'hash', // available values: 'hash', 'history'
     // vueRouterBase,
     // vueDevtools,
-    // vueOptionsAPI: false,
+    vueOptionsAPI: false,
 
     // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
@@ -180,7 +180,7 @@ export default configure((ctx) => ({
 
   // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-capacitor-apps/configuring-capacitor
   capacitor: {
-    hideSplashscreen: true,
+    hideSplashscreen: false,
   },
 
   // Full list of optionsConfig: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/configuring-electron
