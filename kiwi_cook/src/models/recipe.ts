@@ -17,10 +17,10 @@ export function getTranslation(field?: MultiLanguageField, lang?: string): strin
     return '';
   }
   if (lang) {
-    return field.translations[lang] || Object.values(field.translations)[0];
+    return field.translations[lang] || Object.values(field.translations)[0] || '';
   }
   const i18nLang = i18n.global.locale.value;
-  return field.translations[i18nLang] || Object.values(field.translations)[0];
+  return field.translations[i18nLang] || Object.values(field.translations)[0] || '';
 }
 
 // Ingredient

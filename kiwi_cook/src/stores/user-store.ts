@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { api } from 'boot/axios.ts';
-import { User } from 'src/models/user';
+import { api } from 'boot/axios';
+import type { User } from 'src/models/user';
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);

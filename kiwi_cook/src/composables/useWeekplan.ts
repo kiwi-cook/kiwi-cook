@@ -1,8 +1,9 @@
 import { useRecipeStore } from 'stores/recipe-store';
+import type { Recipe, RecipeIngredient, UserIngredient } from 'src/models/recipe';
 import {
-  getTranslation, Recipe, RecipeIngredient, UserIngredient,
+  getTranslation,
 } from 'src/models/recipe';
-import { Meal, MealPlan } from 'src/models/mealplan';
+import type { Meal, MealPlan } from 'src/models/mealplan';
 
 export function useWeekplan() {
   const recipeStore = useRecipeStore();
@@ -62,8 +63,11 @@ export function useWeekplan() {
 
           for (let i = 0; i < availableRecipes.length; i++) {
             const recipe = availableRecipes[i];
+            if (!recipe) {
+              continue;
+            }
+
             if (selectedRecipes.has(recipe.id) || recipe.deleted || !recipe.ingredients) {
-              // eslint-disable-next-line no-continue
               continue;
             }
             const usedIngredients = recipe.ingredients.filter((ri) => ingredients.some((ui) => ui.ingredient.name === ri.ingredient.name)).length;

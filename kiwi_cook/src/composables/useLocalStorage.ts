@@ -80,7 +80,7 @@ export function useLocalStorage() {
     try {
       const serialized = JSON.stringify(data, getCircularReplacer());
       // Generate a checksum to detect data corruption
-      // eslint-disable-next-line no-bitwise
+       
       const checksum = serialized.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
       const serializedWithChecksum = JSON.stringify({ data: serialized, checksum });
       localStorage.setItem(key, serializedWithChecksum);
@@ -98,7 +98,7 @@ export function useLocalStorage() {
       if (!serializedWithChecksum) return null;
       const { data, checksum } = JSON.parse(serializedWithChecksum);
       // Verify checksum to detect data corruption
-      // eslint-disable-next-line no-bitwise
+       
       const calculatedChecksum = data.split('').reduce((a: number, b: string) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
       if (checksum !== calculatedChecksum) {
         console.error(`Data in ${key} is corrupted!`);

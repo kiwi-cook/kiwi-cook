@@ -18,7 +18,7 @@
           <q-icon name="schedule" size="md" color="grey-8"/>
           <span>{{ recipe.duration }} min</span>
         </div>
-        <div class="recipe-detail-item" v-if="recipe.ingredients">
+        <div v-if="recipe.ingredients" class="recipe-detail-item">
           <q-icon name="local_dining" size="md" color="grey-8"/>
           <span>{{ recipe.ingredients.length }} ingredients</span>
         </div>
@@ -40,7 +40,8 @@
 </template>
 
 <script setup lang="ts">
-import { getTranslation, Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe';
+import { getTranslation } from 'src/models/recipe';
 import { toRefs } from 'vue';
 
 const props = defineProps<{

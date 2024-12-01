@@ -18,8 +18,8 @@
           flat
           @click="loginLogout"
         >
-          <q-icon name="mdi-login" v-if="!isAuthenticated"/>
-          <q-icon name="mdi-logout" v-else/>
+          <q-icon v-if="!isAuthenticated" name="mdi-login"/>
+          <q-icon v-else name="mdi-logout"/>
           <q-tooltip>{{ isAuthenticated ? $t('app.logout') : $t('app.login') }}</q-tooltip>
         </q-btn>
       </q-toolbar>

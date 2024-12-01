@@ -1,10 +1,12 @@
 <template>
-  <q-input v-model="modelValue" :dark="isDark" filled :color="isDark ? 'light' : 'dark'"
+  <q-input
+v-model="modelValue" :dark="isDark" filled :color="isDark ? 'light' : 'dark'"
     :bg-color="isDark ? 'dark-accent' : 'light-accent'" :label-color="isDark ? 'light' : 'dark'"
-    :text-color="isDark ? 'white' : 'black'" :label="$t('chat.input.label')" @keydown="processInputFill"
-    @focus="processInputFill" class="kiwi-chat-input" autofocus>
-    <template v-slot:append>
-      <q-btn round dense flat icon="send" :disable="modelValue.length === 0"
+    :text-color="isDark ? 'white' : 'black'" :label="$t('chat.input.label')" class="kiwi-chat-input"
+    autofocus @keydown="processInputFill" @focus="processInputFill">
+    <template #append>
+      <q-btn
+round dense flat icon="send" :disable="modelValue.length === 0"
         :color="modelValue.length === 0 ? 'kiwi-light' : (isDark ? 'kiwi-light' : 'primary')"
         @click="() => handleMessage(modelValue)" />
     </template>

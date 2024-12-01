@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia';
-import { getTranslation, Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe';
+import { getTranslation } from 'src/models/recipe';
 import { computed, ref } from 'vue';
 import { api } from 'boot/axios';
 import { useRecipeSearch } from 'src/composables/useSearch';
-import { UserPreferences } from 'src/models/user';
+import type { UserPreferences } from 'src/models/user';
 import { useAnalytics } from 'src/composables/useAnalytics';
 import { useLlm } from 'src/composables/llm/useLlm';
 
@@ -20,7 +21,6 @@ export const useRecipeStore = defineStore('recipe', () => {
   const recipeMap = computed(() => {
     const map = new Map<string, Recipe>();
     recipes.value.forEach((recipe: Recipe) => {
-      // eslint-disable-next-line no-underscore-dangle
       map.set(recipe.id.toString(), recipe);
     });
     return map;

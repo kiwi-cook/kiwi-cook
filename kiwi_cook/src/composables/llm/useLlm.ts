@@ -83,7 +83,7 @@ export function useLlm(task: LlmTask) {
   // Lazy load the worker when needed
   const workerPromise = new Promise<Worker>((resolve) => {
     import('./llm.worker.js?worker').then((WorkerModule) => {
-      // eslint-disable-next-line new-cap
+       
       worker.value = new WorkerModule.default();
       resolve(worker.value);
     });

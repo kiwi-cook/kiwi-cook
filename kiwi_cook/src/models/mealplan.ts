@@ -1,4 +1,4 @@
-import { Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe';
 
 export interface MealPlan {
   date: Date;

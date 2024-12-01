@@ -5,13 +5,16 @@ import { useRecipeStore } from 'stores/recipe-store';
 import { useNotification } from 'src/composables/useNotification';
 import { useAnalytics } from 'src/composables/useAnalytics';
 import { formatDate, toTime } from 'src/utils/time';
-import {
-  ChatConfig, ChatState, Message, SliderMessage,
+import type {
+  ChatConfig,
+  ChatState,
+  Message,
+  SliderMessage,
 } from 'src/models/chat';
-import { UserPreferences } from 'src/models/user';
+import type { UserPreferences } from 'src/models/user';
 import { ts } from 'src/utils/i18n';
 import { useWeekplan } from 'src/composables/useWeekplan';
-import { Meal, MealPlan } from 'src/models/mealplan';
+import type { Meal, MealPlan } from 'src/models/mealplan';
 import { getTranslation } from 'src/models/recipe';
 import { useLocalStorage } from 'src/composables/useLocalStorage';
 
@@ -25,8 +28,8 @@ export const useChatStore = defineStore('chat', () => {
 
   // Chat state
   const messages = ref<Message[]>([]);
-  const lastMessage = computed(
-    () => messages.value[messages.value.length - 1] || {},
+  const lastMessage = computed<Message | undefined>(
+    () => messages.value[messages.value.length - 1] || undefined,
   );
   const messageId = computed(() => messages.value.length + 1);
   const previousState = ref('');
@@ -69,7 +72,9 @@ export const useChatStore = defineStore('chat', () => {
     return statesAndAnswers;
   }
 
-  async function initChat(chatData?: { state: ChatState; userContent: string }[]) {
+  async function initChat(
+    chatData?: { state: ChatState; userContent: string }[],
+  ) {
     // Load the chat from local storage
     let uncheckedMessages;
     if (chatData) {
@@ -77,11 +82,11 @@ export const useChatStore = defineStore('chat', () => {
     } else {
       uncheckedMessages = customStorage.loadData('chat') as {
         state: ChatState;
-        userContent: string,
+        userContent: string;
       }[];
     }
 
-    if (uncheckedMessages) {
+    if (uncheckedMessages && uncheckedMessages.length > 0 && uncheckedMessages[0]) {
       await updateState(uncheckedMessages[0].state, true, true);
       await uncheckedMessages.reduce(async (promiseChain, message) => {
         // Wait for the previous promise in the chain to resolve
@@ -94,7 +99,11 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function updateState(newState: ChatState, doHandleCurrentState = true, ignoreError = false) {
+  async function updateState(
+    newState: ChatState,
+    doHandleCurrentState = true,
+    ignoreError = false,
+  ) {
     previousState.value = currentState.value;
     currentState.value = newState;
     if (currentState.value === previousState.value && !ignoreError) {
@@ -108,7 +117,11 @@ export const useChatStore = defineStore('chat', () => {
     return Promise.resolve();
   }
 
-  const addMessage = async (message: Partial<Message>, sender = 'Kiwi', save = false) => {
+  const addMessage = async (
+    message: Partial<Message>,
+    sender = 'Kiwi',
+    save = false,
+  ) => {
     const newMessage: Message = {
       id: messageId.value,
       sender,
@@ -131,7 +144,7 @@ export const useChatStore = defineStore('chat', () => {
   function editMessage(id: number) {
     // Reset the message to this state
     const index = messages.value.findIndex((message) => message.id === id);
-    if (index === -1) {
+    if (index === -1 || !messages.value[index]) {
       return;
     }
 
@@ -282,7 +295,7 @@ export const useChatStore = defineStore('chat', () => {
 
         if (recipe) {
           // If there is already a recipe message, remove it
-          if (lastMessage.value.type === 'recipe') {
+          if (lastMessage.value && lastMessage.value.type === 'recipe') {
             removeLastMessages();
           }
           addMessage({ type: 'recipe', content: [recipe] });
@@ -312,7 +325,7 @@ export const useChatStore = defineStore('chat', () => {
         });
 
         const mapOptionToServings = getServingsMapping();
-        userPreferences.value.servings = mapOptionToServings[input];
+        userPreferences.value.servings = mapOptionToServings[input] ?? 2;
         trackEvent('servings_selected', {
           servings: userPreferences.value.servings,
         });
@@ -340,7 +353,7 @@ export const useChatStore = defineStore('chat', () => {
         });
 
         const mapOptionToType = getRecipeTypeMappings();
-        userPreferences.value.recipeType = mapOptionToType[input];
+        userPreferences.value.recipeType = mapOptionToType[input] ?? '';
         trackEvent('recipe_type_selected', {
           recipeType: userPreferences.value.recipeType,
         });
@@ -481,7 +494,7 @@ export const useChatStore = defineStore('chat', () => {
           return;
         }
 
-        if (lastMessage.value.sender === t('chat.you')) {
+        if (lastMessage.value && lastMessage.value.sender === t('chat.you')) {
           removeLastMessages();
         }
         addMessage(
@@ -510,6 +523,10 @@ export const useChatStore = defineStore('chat', () => {
   async function handleCurrentState() {
     trackEvent('chat_state_changed', { state: currentState.value });
     const currentConfig = chatConfig[currentState.value];
+
+    if (!currentConfig) {
+      throw new Error(`Invalid state: ${currentState.value}`);
+    }
 
     if (currentConfig.message) {
       // message can be a function, especially for dynamic messages
@@ -576,6 +593,10 @@ export const useChatStore = defineStore('chat', () => {
     trackEvent('chat_message_received', { message: input });
     const currentConfig = chatConfig[currentState.value];
     trackEvent('current_config', { currentConfig });
+
+    if (!currentConfig) {
+      throw new Error(`Invalid state: ${currentState.value}`);
+    }
 
     if (currentConfig.onInput) {
       currentConfig.onInput(input);

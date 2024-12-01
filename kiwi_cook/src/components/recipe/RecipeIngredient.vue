@@ -4,7 +4,7 @@
       <div class="ingredient-name">{{ formatName(getTranslation(ingredient.ingredient.name)) }}</div>
       <div class="ingredient-quantity">{{ formattedAmount }}</div>
       <div class="ingredient-checkbox">
-        <q-checkbox v-model="isChecked" class="checkbox" @change="toggleCheck"/>
+        <q-checkbox v-model="checked" color="primary" />
       </div>
     </div>
   </div>
@@ -12,7 +12,8 @@
 
 <script lang="ts" setup>
 import {
-  computed, defineEmits, defineProps, ref, watch,
+  computed, defineProps,
+  ref,
 } from 'vue';
 import { getTranslation } from 'src/models/recipe';
 
@@ -21,24 +22,13 @@ const props = defineProps({
     type: Object,
     required: true,
   },
-  modelValue: {
-    type: Boolean,
-    default: false,
-  },
   servings: {
     type: Number,
     default: 1,
   },
 });
-const emit = defineEmits(['update:modelValue']);
 
-// Local state for the checkbox
-const isChecked = ref(props.modelValue);
-
-// Watch for changes to the modelValue prop
-watch(() => props.modelValue, (newValue: boolean) => {
-  isChecked.value = newValue;
-});
+const checked = ref(false);
 
 // Computed property for formatted amount
 const formattedAmount = computed(() => {
@@ -46,12 +36,6 @@ const formattedAmount = computed(() => {
   const { quantity, unit } = props.ingredient;
   return formatAmount(quantity, unit, servings);
 });
-
-// Method to toggle check state and emit the change
-const toggleCheck = () => {
-  isChecked.value = !isChecked.value;
-  emit('update:modelValue', isChecked.value);
-};
 
 // Function to format amount based on unit messageType
 const formatAmount = (amount?: number, unit?: string, servings = 1): string => {

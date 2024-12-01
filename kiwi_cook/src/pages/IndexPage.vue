@@ -4,14 +4,16 @@
       <q-btn fab icon="keyboard_arrow_down" color="accent" />
     </q-page-scroller>
 
-    <div v-for="(message, messageIndex) in messages" :key="message.id" :class="[
+    <div
+v-for="(message, messageIndex) in messages" :key="message.id" :class="[
       'fade-enter-active',
       {
         'q-mt-md':
           messages[messageIndex - 1]?.sender !== message.sender,
       },
     ]">
-      <q-chat-message :bg-color="message.sent ? 'secondary' : 'transparent'" :class="{
+      <q-chat-message
+:bg-color="message.sent ? 'secondary' : 'transparent'" :class="{
         'kiwi-bubble': !message.sent,
         'user-bubble': message.sent,
         'next-message-same':
@@ -47,12 +49,14 @@
             </div>
           </template>
 
-          <template v-else-if="
+          <template
+v-else-if="
             message.type === 'options' ||
             message.type === 'multiOptions'
           ">
             <div class="options-list">
-              <q-btn v-for="(option, optionIndex) in message.content" :key="optionIndex" :disable="messages
+              <q-btn
+v-for="(option, optionIndex) in message.content" :key="optionIndex" :disable="messages
                 .slice(messageIndex + 1)
                 .some((m) => m.sender !== message.sender)
                 " :label="option" :ripple="false" class="option-button" rounded unelevated
@@ -64,7 +68,8 @@
             <div class="chat-suggestion-container">
               <!-- Suggestions List -->
               <q-list v-if="message.content(userInput).length > 0" class="suggestions-list" separator>
-                <q-item v-for="(item, itemIndex) in message.content(
+                <q-item
+v-for="(item, itemIndex) in message.content(
                   userInput
                 )" :key="itemIndex" clickable class="suggestion-item" @click="chat.handleMessage(item)">
                   <q-item-section>
@@ -78,13 +83,16 @@
 
               <!-- Enhanced Input Area -->
               <div class="input-wrapper">
-                <q-input v-model="userInput" class="suggestion-input" dense autofocus borderless standout square
+                <q-input
+v-model="userInput" class="suggestion-input" dense autofocus borderless standout square
                   :placeholder="message.placeholder || $t('chat.input.placeholder')" color="primary"
                   input-class="input-field">
-                  <template v-slot:append>
-                    <q-btn v-if="message.withPhoto" class="send-button" color="primary" dense flat round disabled
+                  <template #append>
+                    <q-btn
+v-if="message.withPhoto" class="send-button" color="primary" dense flat round disabled
                       icon="camera_alt" @click="chat.handleMessage('photo')" />
-                    <q-btn v-if="message.withSubmit" color="primary" dense flat round icon="send" @click="() =>
+                    <q-btn
+v-if="message.withSubmit" color="primary" dense flat round icon="send" @click="() =>
                       chat.handleMessage(
                         message.submitText || userInput
                       )
@@ -101,7 +109,8 @@
                 {{ message.content.label }}
               </div>
 
-              <q-slider v-model="message.content.value" :disable="messages
+              <q-slider
+v-model="message.content.value" :disable="messages
                 .slice(messageIndex + 1)
                 .some((m) => m.sender !== message.sender)
                 " :label-always="!messages
@@ -116,7 +125,8 @@
                 aria-label="Slider" class="slider-enhanced" color="primary" />
 
               <div class="row items-center justify-between q-mt-sm">
-                <q-btn v-if="
+                <q-btn
+v-if="
                   messages
                     .slice(messageIndex + 1)
                     .every((m) => m.sender === message.sender)

@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+ 
 export default {
   app: {
     tagline: 'Your Personal Cooking Assistant',

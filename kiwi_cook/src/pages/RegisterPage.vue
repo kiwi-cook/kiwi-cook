@@ -8,17 +8,20 @@
 
             <!-- Username, Password, and Confirm Password Inputs -->
             <q-card-section>
-                <input v-model="username" :placeholder="$t('register.username')" outlined dense class="q-mb-md"
+                <input
+v-model="username" :placeholder="$t('register.username')" outlined dense class="q-mb-md"
                     autocomplete="username" />
-                <input v-model="password" :placeholder="$t('register.password')" outlined dense type="password"
+                <input
+v-model="password" :placeholder="$t('register.password')" outlined dense type="password"
                     autocomplete="new-password" />
-                <input v-model="confirmPassword" :placeholder="$t('register.confirmPassword')" outlined dense
+                <input
+v-model="confirmPassword" :placeholder="$t('register.confirmPassword')" outlined dense
                     type="password" autocomplete="new-password" />
             </q-card-section>
 
             <!-- Action Buttons -->
             <q-card-actions align="center" class="q-pt-none">
-                <q-btn color="primary" label="Register" @click="register" class="full-width" />
+                <q-btn color="primary" label="Register" class="full-width" @click="register" />
             </q-card-actions>
 
             <q-card-section class="text-center text-accent q-mt-md">
@@ -31,7 +34,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from 'stores/user-store.ts';
+import { useUserStore } from 'stores/user-store';
 import KiwiLogo from 'src/components/KiwiLogo.vue';
 import { useI18n } from 'vue-i18n';
 

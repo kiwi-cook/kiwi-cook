@@ -1,10 +1,7 @@
 {
-  "name": "KiwiCook",
-  "short_name": "KiwiCook",
-  "description": "KiwiCook: Your friendly personal cooking assistant!",
   "orientation": "portrait",
-  "background_color": "#4CAF50",
-  "theme_color": "#7cb342",
+  "background_color": "#ffffff",
+  "theme_color": "#027be3",
   "icons": [
     {
       "src": "icons/icon-128x128.png",
@@ -31,7 +28,5 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ],
-  "start_url": "/",
-  "display": "standalone"
+  ]
 }

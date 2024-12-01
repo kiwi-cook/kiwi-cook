@@ -1,8 +1,9 @@
 <template>
-    <q-btn v-if="!result" class="q-mt-md llm-task-button" :class="{ 'loading': modelDownloading }"
+    <q-btn
+v-if="!result" class="q-mt-md llm-task-button" :class="{ 'loading': modelDownloading }"
         :loading="!taskFinished" @click="executeTask">
         <!-- Loading slot with different spinners and tooltips -->
-        <template v-slot:loading>
+        <template #loading>
             <div class="row items-center">
                 <q-spinner-dots v-if="modelDownloading" color="white" class="on-left" size="1.5em" />
                 <q-spinner-bars v-else color="white" class="on-left" size="1.5em" />
@@ -13,7 +14,7 @@
         </template>
 
         <!-- Default slot with customizable icon and text -->
-        <template v-slot:default>
+        <template #default>
             <div class="row items-center">
                 <q-icon :name="icon" class="q-mr-sm" />
                 <slot name="button-text">
@@ -29,7 +30,8 @@ import {
   watch,
   computed, defineEmits, defineProps, withDefaults,
 } from 'vue';
-import { LlmTask, useLlm } from 'src/composables/llm/useLlm';
+import type { LlmTask } from 'src/composables/llm/useLlm';
+import { useLlm } from 'src/composables/llm/useLlm';
 import { useI18n } from 'vue-i18n';
 
 interface Props {
@@ -49,6 +51,7 @@ const props = withDefaults(defineProps<Props>(), {
   maxLength: 2500,
   icon: 'mdi-creation',
   taskParams: () => ({}),
+  buttonText: '',
 });
 
 const emit = defineEmits<{(e: 'on-output', result: unknown): void;

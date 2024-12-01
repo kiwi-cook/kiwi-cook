@@ -28,7 +28,8 @@
 </template>
 
 <script setup lang="ts">
-import { getTranslation, Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe';
+import { getTranslation } from 'src/models/recipe';
 import { capitalize } from 'vue';
 
 defineProps<{

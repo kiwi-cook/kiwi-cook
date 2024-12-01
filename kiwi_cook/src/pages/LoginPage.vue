@@ -34,8 +34,8 @@
         <q-btn
           color="primary"
           label="Login"
-          @click="login"
           class="full-width"
+          @click="login"
         />
       </q-card-actions>
 
@@ -49,7 +49,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from 'stores/user-store.ts';
+import { useUserStore } from 'stores/user-store';
 import KiwiLogo from 'src/components/KiwiLogo.vue';
 
 const password = ref('');

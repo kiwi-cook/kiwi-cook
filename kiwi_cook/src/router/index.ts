@@ -6,7 +6,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import { useAnalytics } from 'src/composables/useAnalytics';
-import { useRecipeStore } from 'stores/recipe-store.ts';
+import { useRecipeStore } from 'stores/recipe-store';
 import { storeToRefs } from 'pinia';
 import routes from './routes';
 
@@ -56,13 +56,19 @@ export default route((/* { store, ssrContext } */) => {
       if (Array.isArray(recipeId)) {
         [recipeId] = recipeId;
       }
+
+      if (!recipeId) {
+        // Go to 404
+        next({ name: '404' });
+      }
+
       // Fetch if the map is empty
       if (recipeMap.value.size === 0) {
         await recipeStore.fetchRecipes();
       }
 
       // Check if the recipe is already loaded
-      if (!recipeMap.value.has(recipeId)) {
+      if (recipeId && !recipeMap.value.has(recipeId)) {
         // Go to 404
         next({ name: '404' });
       }

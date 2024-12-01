@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-/* eslint-disable no-restricted-globals */
 /**
  * Thanks to @xenova for the transformer package
  *
@@ -63,14 +61,15 @@ class TranslationPipelineFactory extends PipelineFactory {
 }
 
 async function summarize(data) {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const summaryPipeline = await SummarizationPipelineFactory.getInstance((data) => {
-    self.postMessage({
-      type: 'download',
-      task: 'summarization',
-      data,
-    });
-  });
+  const summaryPipeline = await SummarizationPipelineFactory.getInstance(
+    (data) => {
+      self.postMessage({
+        type: 'download',
+        task: 'summarization',
+        data,
+      });
+    },
+  );
 
   const config = {
     max_length: 70,
@@ -87,20 +86,32 @@ async function summarize(data) {
     length_penalty: 1.0,
     no_repeat_ngram_size: 3,
     use_cache: true, // Enabling cache improves efficiency
-    stop_strings: ['\n', '?', ':', 'Ingredients', 'Instructions', 'ingredients', 'instructions'],
+    stop_strings: [
+      '\n',
+      '?',
+      ':',
+      'Ingredients',
+      'Instructions',
+      'ingredients',
+      'instructions',
+    ],
   };
 
   let pipelineData = '';
-  pipelineData += 'Summarize the recipe focusing on the dish’s purpose and outcome:\n\n';
+  pipelineData +=
+    'Summarize the recipe focusing on the dish’s purpose and outcome:\n\n';
   pipelineData += data.data;
 
   return summaryPipeline(pipelineData, {
     ...config,
     callback_function(beams) {
       if (beams && beams.length > 0) {
-        const decodedText = summaryPipeline.tokenizer.decode(beams[0].output_token_ids, {
-          skip_special_tokens: true,
-        });
+        const decodedText = summaryPipeline.tokenizer.decode(
+          beams[0].output_token_ids,
+          {
+            skip_special_tokens: true,
+          },
+        );
 
         // Send back the updated summary
         self.postMessage({
@@ -118,14 +129,15 @@ async function summarize(data) {
 }
 
 const translate = async (data) => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const translationPipeline = await TranslationPipelineFactory.getInstance((data) => {
-    self.postMessage({
-      type: 'download',
-      task: 'translation',
-      data,
-    });
-  });
+  const translationPipeline = await TranslationPipelineFactory.getInstance(
+    (data) => {
+      self.postMessage({
+        type: 'download',
+        task: 'translation',
+        data,
+      });
+    },
+  );
 
   const { input, sourceLanguage, targetLanguage } = data.data;
 
@@ -146,10 +158,12 @@ const translate = async (data) => {
     return input;
   }
 
-  const translations = input.map((text) => translationPipeline(text, {
-    src_lang: source,
-    tgt_lang: target,
-  }));
+  const translations = input.map((text) =>
+    translationPipeline(text, {
+      src_lang: source,
+      tgt_lang: target,
+    }),
+  );
 
   return Promise.all(translations);
 };

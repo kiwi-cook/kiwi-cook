@@ -1,11 +1,11 @@
 <template>
-  <q-page class="recipe-container" v-if="recipe">
+  <q-page v-if="recipe" class="recipe-container">
     <!-- Header Section -->
     <div class="recipe-header">
       <div class="header-content">
         <div class="content-wrapper">
           <!-- Image section -->
-          <div class="image-wrapper" v-if="recipe.image_url">
+          <div v-if="recipe.image_url" class="image-wrapper">
             <img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image" loading="lazy" />
           </div>
           <!-- Recipe details -->
@@ -15,7 +15,7 @@
 
             <!-- Meta information -->
             <div class="recipe-meta">
-              <div class="meta-item" v-for="(item, index) in metaItems" :key="index">
+              <div v-for="(item, index) in metaItems" :key="index" class="meta-item">
                 <span class="meta-icon">{{ item.icon }}</span>
                 <span class="meta-value">{{ item.value }}</span>
               </div>
@@ -29,16 +29,18 @@
             <!-- LLM Summary -->
             <div class="llm-section">
 
-              <LlmButton class="recipe-summary-button q-mt-md" task-type="summarization" :input="summaryInput"
+              <LlmButton
+class="recipe-summary-button q-mt-md" task-type="summarization" :input="summaryInput"
               :button-text="$t('llm.summarize')" icon="mdi-creation" @on-output="summaryOutput = $event" />
-              <LlmButton class="recipe-summary-button q-mt-md" task-type="translation" :input="translationInput"
-              :button-text="$t('llm.translate')" @on-output="translationOutput = $event" icon="mdi-translate" />
+              <LlmButton
+class="recipe-summary-button q-mt-md" task-type="translation" :input="translationInput"
+              :button-text="$t('llm.translate')" icon="mdi-translate" @on-output="translationOutput = $event" />
             </div>
 
             <div v-if="summaryOutput" class="summary-section">
               <div class="recipe-summary-container">
                 <q-icon name="mdi-lightbulb-on-outline" class="icon" />
-                <div v-html="summaryOutput" class="recipe-summary" />
+                <div class="recipe-summary" v-html="summaryOutput" />
               </div>
               <div class="text-caption q-mt-sm">{{ $t('llm.disclaimer') }}</div>
             </div>
@@ -56,12 +58,12 @@
             recipe.ingredients?.length ?? 0 }) }}</h2>
         <div class="servings-control">
           <label class="servings-label">{{ $t("recipe.adjustServings") }}</label>
-          <q-slider v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
+          <q-slider
+v-model="servings" :min="1" :max="recipe.servings * 2" color="primary" track-color="grey-3"
             class="servings-slider" :label-value="`${servings} ${$t('recipe.servings', { count: servings })}`" label-always />
         </div>
         <q-list class="ingredients-list">
-          <RecipeIngredient v-for="(ingredient, index) in recipe.ingredients" :key="index"
-            v-model="checkedIngredients[index]" :ingredient="ingredient" :servings="servings" />
+          <RecipeIngredient v-for="(ingredient, index) in recipe.ingredients" :key="index" :ingredient="ingredient" :servings="servings" />
         </q-list>
       </div>
 
@@ -89,10 +91,12 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue';
-import {
-  getTranslation,
+import type {
   RecipeIngredient as Ingredient,
   RecipeStep,
+} from 'src/models/recipe';
+import {
+  getTranslation,
 } from 'src/models/recipe';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -112,7 +116,7 @@ const recipe = computed(() => {
   if (Array.isArray(recipeId)) {
     [recipeId] = recipeId;
   }
-  return recipeMap.value.get(recipeId);
+  return recipeId ? recipeMap.value.get(recipeId) : undefined;
 });
 /* Ingredients */
 const recipeIngredients = computed(() => (recipe.value?.ingredients ?? [])
@@ -120,9 +124,6 @@ const recipeIngredients = computed(() => (recipe.value?.ingredients ?? [])
 
 /* Servings */
 const servings = ref(recipe.value?.servings ?? 1);
-const checkedIngredients = ref(
-  recipe?.value?.ingredients?.map(() => false) ?? [],
-);
 
 /* Share */
 function shareRecipe() {

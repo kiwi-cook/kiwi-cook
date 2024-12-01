@@ -3,16 +3,18 @@
  */
 
 import { ref } from 'vue';
-import Fuse, { IFuseOptions } from 'fuse.js';
+import type { IFuseOptions } from 'fuse.js';
+import Fuse from 'fuse.js';
 import { stemmer } from 'stemmer';
-import { getAllTranslations, Recipe } from 'src/models/recipe';
-import { UserPreferences } from 'src/models/user';
+import type { Recipe } from 'src/models/recipe';
+import { getAllTranslations } from 'src/models/recipe';
+import type { UserPreferences } from 'src/models/user';
 import { useAnalytics } from 'src/composables/useAnalytics';
 
 interface SearchableRecipe {
   id: string,
   name: string;
-  ingredients?: string;
+  ingredients: string | undefined;
 }
 
 interface UseRecipeSearch {
@@ -37,7 +39,7 @@ export function useRecipeSearch(): UseRecipeSearch {
       const searchableRecipe: SearchableRecipe = {
         id: recipe.id.toString(),
         name: processField(getAllTranslations(recipe.name)).join(' '),
-        ingredients: recipe.ingredients?.map((ingredient) => processField(getAllTranslations(ingredient.ingredient.name))).join(' '),
+        ingredients: recipe.ingredients?.flatMap((ingredient) => processField(getAllTranslations(ingredient.ingredient.name))).join(' '),
       };
       searchableRecipes.push(searchableRecipe);
     });

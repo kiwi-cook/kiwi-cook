@@ -1,7 +1,8 @@
 <!-- StepsList.vue -->
 <template>
   <q-list>
-    <q-item v-for="(step, index) in recipe.steps"
+    <q-item
+v-for="(step, index) in recipe.steps"
             :key="index"
             class="step-item q-mb-md">
       <q-item-section avatar>
@@ -18,7 +19,8 @@
 
 <script setup lang="ts">
 import { defineProps, toRefs } from 'vue';
-import { getTranslation, Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe';
+import { getTranslation } from 'src/models/recipe';
 
 const props = defineProps<{
   recipe: Recipe
