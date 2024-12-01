@@ -153,9 +153,6 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
             # Process request
             response: Response = await call_next(request)
 
-            if self.disable_security_header:
-                return response
-
             # Apply security headers with dynamic nonce
             for header, value in self.SECURITY_HEADERS.items():
                 response.headers[header] = value.format(nonce=nonce)
@@ -192,9 +189,10 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         # Retrieve client IP, considering X-Forwarded-For header
         client_ip = self._get_client_ip(request)
 
+        IGNORED_PATHS = ["/health", "/metrics"]
         # Block suspicious user agents
         user_agent = request.headers.get("User-Agent", "")
-        if self._is_suspicious_user_agent(user_agent):
+        if self._is_suspicious_user_agent(user_agent) and request.url.path not in IGNORED_PATHS:
             raise HTTPException(status_code=403, detail="Access denied")
 
         # Rate limiting logic
