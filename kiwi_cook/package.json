@@ -36,7 +36,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@intlify/unplugin-vue-i18n": "^2.0.0",
+    "@intlify/unplugin-vue-i18n": "^6.0.0",
     "@quasar/app-vite": "^2.0.0-rc.4",
     "@types/node": "^20.17.9",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
