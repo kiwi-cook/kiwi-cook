@@ -3,9 +3,11 @@ import { useRecipeStore } from 'stores/recipe-store'
 import type { Recipe, RecipeIngredient, UserIngredient } from 'src/models/recipe'
 import { getTranslation } from 'src/models/recipe'
 import type { Meal, MealPlan } from 'src/models/mealplan'
+import { useAnalytics } from 'src/composables/useAnalytics'
 
 export function useWeekplan() {
   const recipeStore = useRecipeStore()
+  const { trackEvent } = useAnalytics()
 
   function generateWeekplan(
     ingredients: UserIngredient[],
@@ -98,7 +100,12 @@ export function useWeekplan() {
           const randomRecipe = availableRecipes.find((r) => !selectedRecipes.has(r.id))
           if (randomRecipe) {
             selectedRecipes.add(randomRecipe.id)
-            return { mealType, recipe: randomRecipe }
+            trackEvent('fallbackRecipe', { recipe: randomRecipe.id }, false)
+            return {
+              mealType,
+              recipe: randomRecipe,
+              reason: 'No matching recipe found',
+            }
           }
           return null
         })
@@ -111,7 +118,9 @@ export function useWeekplan() {
     const selectedRecipesList = Array.from(selectedRecipes).map(
       (id) => recipeStore.recipes.find((r) => r.id === id)!
     )
-    const groceryList: { [category: string]: { name: string; quantity: number }[] } = {}
+    const groceryList: {
+      [category: string]: { name: string; quantity: number }[]
+    } = {}
 
     selectedRecipesList.forEach((recipe) => {
       if (!recipe.ingredients) {
@@ -146,7 +155,9 @@ export function useWeekplan() {
     }
   }
 
-  function generateRandomWeekplan(days: number): MealPlan[] {
+  function generateRandomWeekplan(days: number): {
+    mealPlans: MealPlan[]
+  } {
     const mealTypes: ('breakfast' | 'lunch' | 'dinner')[] = ['breakfast', 'lunch', 'dinner']
     const weekPlan: MealPlan[] = []
     const usedRecipes = new Set<string>()
@@ -174,7 +185,9 @@ export function useWeekplan() {
       weekPlan.push(dayPlan)
     }
 
-    return weekPlan
+    return {
+      mealPlans: weekPlan,
+    }
   }
 
   return {

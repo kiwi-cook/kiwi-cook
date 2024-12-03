@@ -11,8 +11,10 @@ import type { UserPreferences } from 'src/models/user'
 import { ts } from 'src/utils/i18n'
 import { useWeekplan } from 'src/composables/useWeekplan'
 import type { Meal, MealPlan } from 'src/models/mealplan'
+import type { UserIngredient } from 'src/models/recipe'
 import { getTranslation } from 'src/models/recipe'
 import { useLocalStorage } from 'src/composables/useLocalStorage'
+import { formatName } from 'src/utils/string'
 
 export const useChatStore = defineStore('chat', () => {
   const { t } = useI18n()
@@ -177,10 +179,12 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const generateWeekPlan = async () => {
-    const generatedWeekplan = weekplan.generateRandomWeekplan(userPreferences.value.weekplanDays)
+    const generatedWeekplan = weekplan.generateWeekplan(userPreferences.value.ingredients, {
+      days: userPreferences.value.weekplanDays,
+    })
     await kiwiTypes(1000)
 
-    generatedWeekplan.forEach((plan: MealPlan) => {
+    generatedWeekplan.mealPlans.forEach((plan: MealPlan) => {
       const recipes = plan.meals.map((meal: Meal) => meal.recipe)
       addMessage({ type: 'text', content: formatDate(plan.date) })
       addMessage({ type: 'recipe', content: recipes })
@@ -457,12 +461,28 @@ export const useChatStore = defineStore('chat', () => {
         }
 
         // if input is already in the list, remove it
-        if (userPreferences.value.ingredients.includes(input as string)) {
+        if (
+          userPreferences.value.ingredients.some(
+            (item) =>
+              getTranslation(item.ingredient.name).toLowerCase() === (input as string).toLowerCase()
+          )
+        ) {
           userPreferences.value.ingredients = userPreferences.value.ingredients.filter(
-            (item) => item !== input
+            (item) =>
+              getTranslation(item.ingredient.name).toLowerCase() !== (input as string).toLowerCase()
           )
         } else {
-          userPreferences.value.ingredients.push(input as string)
+          // Find the ingredient in the recipe store
+          const recipeIngredient = recipeStore.recipeIngredientByName(input as string)
+          if (recipeIngredient) {
+            // Initialize the user ingredient with a quantity of 1
+            const userIngredient = {
+              ingredient: recipeIngredient.ingredient,
+              quantity: 1,
+              unit: recipeIngredient.unit,
+            } as UserIngredient
+            userPreferences.value.ingredients.push(userIngredient)
+          }
         }
 
         if (userPreferences.value.ingredients.length === 0) {
@@ -475,8 +495,10 @@ export const useChatStore = defineStore('chat', () => {
         }
         addMessage(
           {
-            type: 'text',
-            content: userPreferences.value.ingredients.join(', '),
+            type: 'multiLineText',
+            content: userPreferences.value.ingredients.map((item) =>
+              formatName(getTranslation(item.ingredient.name))
+            ),
           },
           t('chat.you')
         )

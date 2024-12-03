@@ -18,6 +18,7 @@
 import { computed, defineProps, ref } from 'vue'
 
 import { getTranslation } from 'src/models/recipe'
+import { formatName } from 'src/utils/string'
 
 const props = defineProps({
   ingredient: {
@@ -65,9 +66,6 @@ const formatAmount = (amount?: number, unit?: string, servings = 1): string => {
 
   return `${amountStr} ${unit || ''}`.trim()
 }
-
-// Capitalize first letter of each word
-const formatName = (name: string): string => name.replace(/\b\w/g, (char) => char.toUpperCase())
 </script>
 
 <style lang="scss" scoped>

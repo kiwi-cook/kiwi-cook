@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { Recipe } from 'src/models/recipe'
+import type { Recipe, RecipeIngredient } from 'src/models/recipe'
 import { getTranslation } from 'src/models/recipe'
 import { api } from 'boot/axios'
 import { useRecipeSearch } from 'src/composables/useSearch'
 import type { UserPreferences } from 'src/models/user'
 import { useAnalytics } from 'src/composables/useAnalytics'
 import { useLlm } from 'src/composables/llm/useLlm'
+import { formatName } from 'src/utils/string'
 
 export const useRecipeStore = defineStore('recipe', () => {
   const { trackEvent } = useAnalytics()
@@ -18,7 +19,7 @@ export const useRecipeStore = defineStore('recipe', () => {
   const ingredients = computed(() =>
     recipes.value
       .flatMap((recipe) => recipe.ingredients ?? [])
-      .map((ingredient) => getTranslation(ingredient.ingredient.name))
+      .map((ingredient) => formatName(getTranslation(ingredient.ingredient.name)))
   )
 
   const recipeMap = computed(() => {
@@ -34,6 +35,15 @@ export const useRecipeStore = defineStore('recipe', () => {
   const searchByQuery = (query: string) => recipeSearch.searchRecipesByQuery(recipeMap.value, query)
   const searchByPreferences = (preferences: UserPreferences) =>
     recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences)
+
+  function recipeIngredientByName(name: string): RecipeIngredient | undefined {
+    const formattedName = name.toLowerCase()
+    return recipes.value
+      .flatMap((recipe) => recipe.ingredients ?? [])
+      .find((ingredient) =>
+        getTranslation(ingredient.ingredient.name).toLowerCase().includes(formattedName)
+      )
+  }
 
   function fetchRecipes() {
     // Check if a request is already in progress
@@ -72,22 +82,26 @@ export const useRecipeStore = defineStore('recipe', () => {
     trackEvent('summarizeRecipe', { recipeId })
     const recipe = recipeMap.value.get(recipeId)
     if (!recipe || recipe.summary) {
-      trackEvent('summarizeRecipe', {
-        status: 'error',
-        message: 'Recipe not found or already summarized',
-      })
+      trackEvent(
+        'summarizeRecipe',
+        {
+          status: 'error',
+          message: 'Recipe not found or already summarized',
+        },
+        false
+      )
       return
     }
 
-    trackEvent('summarizeRecipe', { status: 'prepareCallback' })
+    trackEvent('summarizeRecipe', { status: 'prepareCallback' }, false)
     summarizer.ondatacallback.value = (data) => {
       recipe.summary = data as string
     }
 
-    trackEvent('summarizeRecipe', { status: 'prepareInstructions' })
+    trackEvent('summarizeRecipe', { status: 'prepareInstructions' }, false)
     const instructions = `${recipe.steps.map((step) => getTranslation(step.description)).join('. ')}`
 
-    trackEvent('summarizeRecipe', { status: 'exec', instructions })
+    trackEvent('summarizeRecipe', { status: 'exec', instructions }, false)
     summarizer.exec([instructions])
   }
 
@@ -102,5 +116,6 @@ export const useRecipeStore = defineStore('recipe', () => {
     searchByPreferences,
     getRandomRecipe,
     summarizeRecipe,
+    recipeIngredientByName,
   }
 })

@@ -36,7 +36,7 @@ type Ingredient = z.infer<typeof IngredientSchema>
 // UserIngredient
 const UserIngredientSchema = z.object({
   ingredient: IngredientSchema,
-  quantity: z.number(),
+  quantity: z.number().default(1),
   expiryDate: z.date().optional(),
 })
 

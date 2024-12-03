@@ -29,7 +29,7 @@
 import { nextTick, onMounted, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useChatStore } from 'stores/chat-store'
+import { useChatStore } from 'stores/chat/chat-store'
 import { useDarkMode } from 'src/composables/useDarkmode'
 import ChatMessage from 'components/chat/ChatMessage.vue'
 

@@ -31,7 +31,7 @@
 import { watch } from 'vue'
 import { storeToRefs } from 'pinia'
 
-import { useChatStore } from 'stores/chat-store'
+import { useChatStore } from 'stores/chat/chat-store'
 import { useDarkMode } from 'src/composables/useDarkmode'
 
 const { isDark } = useDarkMode()

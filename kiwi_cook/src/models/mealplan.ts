@@ -8,4 +8,5 @@ export interface MealPlan {
 export interface Meal {
   mealType: 'breakfast' | 'lunch' | 'dinner'
   recipe: Recipe
+  reason?: string
 }

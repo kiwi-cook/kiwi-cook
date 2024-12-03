@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import type { UserIngredient } from 'src/models/recipe'
+
 const UserSchema = z.object({
   username: z.string(),
   disabled: z.boolean().default(false).describe('User account status'),
@@ -21,7 +23,7 @@ export interface UserPreferences {
   skillLevel: string
   cuisine: string
   weekplanDays: number
-  ingredients: string[]
+  ingredients: UserIngredient[]
 }
 
 type User = z.infer<typeof UserSchema>

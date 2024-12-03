@@ -2,6 +2,7 @@ import type { Recipe } from 'src/models/recipe'
 
 export type MessageType =
   | 'text'
+  | 'multiLineText'
   | 'image'
   | 'recipe'
   | 'options'
@@ -76,6 +77,11 @@ export interface TextMessage extends BaseMessage {
   content: string
 }
 
+export interface MultiLineTextMessage extends BaseMessage {
+  type: 'multiLineText'
+  content: string[]
+}
+
 export interface ImageMessage extends BaseMessage {
   type: 'image'
   content: string
@@ -111,6 +117,7 @@ export interface SuggestionsMessage extends BaseMessage {
 
 export type Message =
   | TextMessage
+  | MultiLineTextMessage
   | ImageMessage
   | RecipeMessage
   | OptionsMessage

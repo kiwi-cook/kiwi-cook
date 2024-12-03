@@ -6,10 +6,12 @@ const td = new TelemetryDeck({
 })
 
 export function useAnalytics() {
-  function trackEvent(event: string, data?: Record<string, unknown>) {
+  function trackEvent(event: string, data?: Record<string, unknown>, sendToTelemetryDeck = false) {
     // Only send events in production
     if (process.env.NODE_ENV === 'production') {
-      td.signal(event, data)
+      if (sendToTelemetryDeck) {
+        td.signal(event, data)
+      }
     } else {
       // eslint-disable-next-line no-console
       console.log('Event:', event, data)

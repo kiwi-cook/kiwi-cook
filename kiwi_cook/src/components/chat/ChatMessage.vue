@@ -13,7 +13,22 @@
       </template>
 
       <template v-else-if="message.type === 'text'">
-        <div class="chat-text" v-html="sanitizedContent" />
+        <template v-if="message.content.includes('http')">
+          <a :href="message.content" target="_blank" rel="noopener noreferrer" class="chat-text">
+            {{ message.content }}
+          </a>
+        </template>
+        <template v-else>
+          <div class="chat-text" v-html="sanitize(message.content)" />
+        </template>
+      </template>
+
+      <template v-else-if="message.type === 'multiLineText'">
+        <ul>
+          <li v-for="(line, lineIndex) in message.content" :key="lineIndex">
+            <div class="chat-text" v-html="sanitize(line)" />
+          </li>
+        </ul>
       </template>
 
       <template v-else-if="message.type === 'image'">
@@ -175,12 +190,9 @@ const bubbleClasses = computed(() => ({
   'last-message-same': props.previousSender === props.message.sender,
 }))
 
-const sanitizedContent = computed(() => {
-  if (props.message.type === 'text') {
-    return DOMPurify.sanitize(props.message.content)
-  }
-  return ''
-})
+function sanitize(text: string) {
+  return DOMPurify.sanitize(text)
+}
 
 // Data
 const userInput = ref('')
