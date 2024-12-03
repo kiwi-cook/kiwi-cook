@@ -16,7 +16,7 @@ write_client = get_mongodb("WRITE")
 
 def get_html_pipeline():
     # Initialize the pipeline
-    html_crawler_pipeline = Pipeline()
+    html_crawler_pipeline = Pipeline("HTML Crawler Pipeline")
     load_html_stage = LoadHtml(max_size=100)
     export_html_stage = ExportHtml(write_client)
     parse_recipe_stage = ParseRecipeHtml(write_client)
@@ -65,12 +65,12 @@ async def run_json_pipeline(folder_path: str):
 
     # Recursively walk through all subfolders and files
     for root, dirs, files in os.walk(folder_path):
-        print(f"Found {len(files)} files in the folder: {root}")
+        self.logger.info(f"Found {len(files)} files in the folder: {root}")
 
         for file_name in files:
             if file_name.endswith(".json"):
                 full_path = os.path.join(root, file_name)
-                print(f"Feeding file: {full_path}")
+                self.logger.info(f"Feeding file: {full_path}")
                 await json_crawler_pipeline.feed(full_path)
 
     await json_crawler_pipeline.run()

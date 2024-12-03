@@ -78,25 +78,33 @@ def setup_routes(app: FastAPI) -> None:
 def setup_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
-        # Log the full error details internally
         logger.error(f"Unhandled exception: {exc}", exc_info=True)
 
-        # Sanitized error response
+        # Send logs via mail
+        if ENV == "production":
+            logger.send_logs()
+
         return JSONResponse(
             status_code=500,
             content={
                 "error": True,
-                "message": "An unexpected error occurred",
-                "request_id": str(uuid.uuid4()),
-            },
+                "message": "Internal Server Error",
+                "request_id": str(uuid.uuid4())
+            }
         )
 
+
+def setup_instrumentation(app: FastAPI) -> None:
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    FastAPIInstrumentor.instrument_app(app)
 
 app = setup_fastapi()
 initialize_security_measures(app)
 setup_routes(app)
 setup_exception_handlers(app)
 setup_log_request_headers(app)
+setup_instrumentation(app)
 
 try:
     from lib.database.mongodb import get_mongodb

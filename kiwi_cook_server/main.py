@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 import argparse
 import asyncio
+import logging
 import sys
 import traceback
 
+logger = logging.getLogger(__name__)
 
 def main():
     # Parse the command line arguments
@@ -32,7 +34,7 @@ def main():
         elif args.url:
             from lib.pipeline.recipe import run_html_pipeline_from_path
 
-            asyncio.run(run_html_pipeline_from_path(args.file))
+            asyncio.run(run_html_pipeline_from_path(args.url))
         elif args.json:
             from lib.pipeline.recipe import run_json_pipeline
 
@@ -41,14 +43,11 @@ def main():
             parser.print_help()
 
     except argparse.ArgumentError as e:
-        print(
-            f"An error occurred while parsing the command line arguments: {str(e)}",
-            file=sys.stderr,
-        )
+        logger.error(f"An error occurred while parsing the command line arguments: {str(e)}")
     except Exception as e:
         tb = traceback.format_exc()
-        print(f"An error occurred: {str(e)}", file=sys.stderr)
-        print(tb, file=sys.stderr)
+        logger.error(f"An error occurred: {str(e)}")
+        logger.error(tb)
 
 
 if __name__ == "__main__":

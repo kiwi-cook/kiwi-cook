@@ -9,6 +9,7 @@ from typing_extensions import Annotated
 
 from lib.database.mongodb import get_mongodb
 from lib.pipeline.recipe import run_html_pipeline
+from lib.telemetry.exporter import service_tracer
 from models.api import APIResponseList
 from models.recipe import Recipe
 from models.user import User
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 _recipes = []
 
+tracer = service_tracer
 
 @router.get(
     "/",
@@ -29,26 +31,27 @@ _recipes = []
     status_code=status.HTTP_200_OK,
 )
 async def read_recipes():
-    global _recipes
-    try:
-        if _recipes and len(_recipes) > 0:
-            return {"error": False, "response": _recipes}
+    with tracer.start_as_current_span("read_recipes"):
+        global _recipes
+        try:
+            if _recipes and len(_recipes) > 0:
+                return {"error": False, "response": _recipes}
 
-        read_client = get_mongodb()
-        recipes = list(read_client["recipes"]["recipes"].find())
-        if not recipes:
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={"error": True, "detail": "No recipes found"},
+            read_client = get_mongodb()
+            recipes = list(read_client["recipes"]["recipes"].find())
+            if not recipes:
+                return JSONResponse(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    content={"error": True, "detail": "No recipes found"},
+                )
+            _recipes = recipes
+            return {"error": False, "response": recipes}
+        except PyMongoError as e:
+            logger.error(f"Database error: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Internal server error",
             )
-        _recipes = recipes
-        return {"error": False, "response": recipes}
-    except PyMongoError as e:
-        logger.error(f"Database error: {str(e)}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
-        )
 
 
 def validate_url(_url: str) -> bool:

@@ -1,11 +1,13 @@
 import asyncio
+import logging
 
 import math
 
-
 class Pipeline:
-    def __init__(self):
+    def __init__(self, name):
+        self.name = name
         self.elements = []
+        self.logger = logging.getLogger(self.name)
 
     def add_element(self, element):
         if self.elements:
@@ -30,6 +32,7 @@ class Pipeline:
 class PipelineElement:
     def __init__(self, name):
         self.name = name
+        self.logger = logging.getLogger(self.name)
         self.input_queue = asyncio.Queue()
         self.output_queue = None
         self.max_retries = 2
@@ -43,11 +46,11 @@ class PipelineElement:
                 retry_count = 0  # Reset retry count when a task is received
             except asyncio.TimeoutError:
                 if retry_count >= self.max_retries:
-                    print(f"{self.name} exiting after {self.max_retries} retries")
+                    self.logger.info(f"{self.name} exiting after {self.max_retries} retries")
                     break
 
                 wait_time = self.base_wait_time * math.exp(retry_count)
-                print(f"{self.name} waiting for {wait_time:.2f} seconds...")
+                self.logger.info(f"{self.name} waiting for {wait_time:.2f} seconds...")
                 await asyncio.sleep(wait_time)
                 retry_count += 1
                 continue
@@ -64,7 +67,7 @@ class PipelineElement:
                 result = await self.process_task(task)
             if self.output_queue and result is not None:
                 await self.output_queue.put(result)
-            print(f"{self.name} processed task")
+            self.logger.info(f"{self.name} processed task")
             self.input_queue.task_done()
 
     async def process_task(self, *args):

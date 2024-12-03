@@ -27,7 +27,7 @@ class ParseRecipeAllRecipes(PipelineElement):
     async def process_task(self, allrecipes_json: str):
         recipe = self.map_allrecipes(allrecipes_json)
         if recipe is None:
-            print(f"Could not map the recipe from JSON: {allrecipes_json}")
+            self.logger.info(f"Could not map the recipe from JSON: {allrecipes_json}")
             return None
 
         # Convert Pydantic model to dictionary
@@ -212,7 +212,7 @@ class ParseRecipeAllRecipes(PipelineElement):
             try:
                 return float(parsed_ingredient.amount[0].quantity)
             except ValueError:
-                print(
+                self.logger.info(
                     f"Could not parse quantity: {parsed_ingredient.amount[0].quantity}"
                 )
                 return None

@@ -69,40 +69,40 @@ class LoadHtml(PipelineElement):
 
     async def handle_url(self, client, url: str) -> (str, str):
         if len(self.urls_crawled) >= self.max_size:
-            print("Maximum size reached")
+            self.logger.info("Maximum size reached")
             return None
 
         base_url = urlparse(url).netloc
 
         if url in self.currently_crawled:
-            print(f"Ignoring {url} because it is already being crawled")
+            self.logger.info(f"Ignoring {url} because it is already being crawled")
             return None
 
         if (
                 self.currently_crawled_base_urls.count(base_url)
                 >= self.max_same_domain_concurrent
         ):
-            print(
+            self.logger.info(
                 f"Ignoring {url} because the base URL is already being crawled {self.max_same_domain_concurrent} times"
             )
             return None
 
         if not url.startswith("http"):
-            print(f"Invalid URL: {url}")
+            self.logger.info(f"Invalid URL: {url}")
             return None
 
         if any(domain in url for domain in self.ignore_domains):
-            print(f"Ignoring {url} because it is in the ignore domains list")
+            self.logger.info(f"Ignoring {url} because it is in the ignore domains list")
             self.ignore_links.add(url)
             return None
 
         if url in self.ignore_links or url in self.urls_crawled:
-            print(f"Ignoring {url} because it is in the ignore or found list")
+            self.logger.info(f"Ignoring {url} because it is in the ignore or found list")
             return None
 
         # Here you would implement the check_robots function
         if not await check_robots(url):
-            print(f"Ignoring {url} because it is disallowed by robots.txt")
+            self.logger.info(f"Ignoring {url} because it is disallowed by robots.txt")
             self.ignore_links.add(url)
             return None
 
@@ -110,16 +110,16 @@ class LoadHtml(PipelineElement):
         self.currently_crawled_base_urls.append(base_url)
 
         try:
-            print(f"Fetching {url} ...")
+            self.logger.info(f"Fetching {url} ...")
             response = await client.get(url, follow_redirects=True)
             response.raise_for_status()
             html_content = response.text
         except httpx.HTTPError as e:
-            print(f"Error fetching {url}: {e}")
+            self.logger.info(f"Error fetching {url}: {e}")
             return None
 
         if not html_content:
-            print(f"Received empty content from {url}")
+            self.logger.info(f"Received empty content from {url}")
             self.ignore_links.add(url)
             self.currently_crawled.remove(url)
             self.currently_crawled_base_urls.remove(base_url)

@@ -19,7 +19,6 @@ class LocalizedString(BaseModel):
 
     @staticmethod
     def new(lang: str, value: str):
-        print(f"Creating localized string with lang: {lang} and value: {value}")
         return LocalizedString(**{lang: value})
 
     def __getitem__(self, key):
