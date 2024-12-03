@@ -1,43 +1,41 @@
-import { defineStore } from 'pinia';
-import { computed, nextTick, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRecipeStore } from 'stores/recipe-store';
-import { useNotification } from 'src/composables/useNotification';
-import { useAnalytics } from 'src/composables/useAnalytics';
-import { formatDate, toTime } from 'src/utils/time';
-import type {
-  ChatConfig,
-  ChatState,
-  Message,
-  SliderMessage,
-} from 'src/models/chat';
-import type { UserPreferences } from 'src/models/user';
-import { ts } from 'src/utils/i18n';
-import { useWeekplan } from 'src/composables/useWeekplan';
-import type { Meal, MealPlan } from 'src/models/mealplan';
-import { getTranslation } from 'src/models/recipe';
-import { useLocalStorage } from 'src/composables/useLocalStorage';
+import { defineStore } from 'pinia'
+import { computed, nextTick, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+import { useRecipeStore } from 'stores/recipe-store'
+import { useNotification } from 'src/composables/useNotification'
+import { useAnalytics } from 'src/composables/useAnalytics'
+import { formatDate, toTime } from 'src/utils/time'
+import type { ChatConfig, ChatState, Message, SliderMessage } from 'src/models/chat'
+import type { UserPreferences } from 'src/models/user'
+import { ts } from 'src/utils/i18n'
+import { useWeekplan } from 'src/composables/useWeekplan'
+import type { Meal, MealPlan } from 'src/models/mealplan'
+import type { UserIngredient } from 'src/models/recipe'
+import { getTranslation } from 'src/models/recipe'
+import { useLocalStorage } from 'src/composables/useLocalStorage'
+import { formatName } from 'src/utils/string'
 
 export const useChatStore = defineStore('chat', () => {
-  const { t } = useI18n();
-  const weekplan = useWeekplan();
-  const recipeStore = useRecipeStore();
-  const { showNotification } = useNotification();
-  const { trackEvent } = useAnalytics();
-  const customStorage = useLocalStorage();
+  const { t } = useI18n()
+  const weekplan = useWeekplan()
+  const recipeStore = useRecipeStore()
+  const { showNotification } = useNotification()
+  const { trackEvent } = useAnalytics()
+  const customStorage = useLocalStorage()
 
   // Chat state
-  const messages = ref<Message[]>([]);
+  const messages = ref<Message[]>([])
   const lastMessage = computed<Message | undefined>(
-    () => messages.value[messages.value.length - 1] || undefined,
-  );
-  const messageId = computed(() => messages.value.length + 1);
-  const previousState = ref('');
-  const currentState = ref<ChatState>('start');
-  const isTyping = ref(false);
+    () => messages.value[messages.value.length - 1] || undefined
+  )
+  const messageId = computed(() => messages.value.length + 1)
+  const previousState = ref('')
+  const currentState = ref<ChatState>('start')
+  const isTyping = ref(false)
 
   // User state and preferences
-  const userInput = ref<string>('');
+  const userInput = ref<string>('')
   const userPreferences = ref<UserPreferences>({
     servings: 2,
     recipeType: '',
@@ -48,17 +46,17 @@ export const useChatStore = defineStore('chat', () => {
     tags: [],
     weekplanDays: 7,
     ingredients: [],
-  });
+  })
   const preferencesToSummary = (preferences: UserPreferences) => {
-    trackEvent('preferences_selected', { preferences });
+    trackEvent('preferences_selected', { preferences })
 
     return [
       t(`filters.servings.${preferences.servings}`),
       t(`filters.recipeType.${preferences.recipeType}`),
       preferences.dietaryRestrictions.join(', '),
       t('filters.cookingTime', { time: preferences.cookingTime }),
-    ].join(', ');
-  };
+    ].join(', ')
+  }
 
   // Methods
   function saveChat() {
@@ -67,61 +65,55 @@ export const useChatStore = defineStore('chat', () => {
       .map((message) => ({
         state: message.state,
         userContent: message.content.toString(),
-      }));
-    customStorage.saveData('chat', statesAndAnswers);
-    return statesAndAnswers;
+      }))
+    customStorage.saveData('chat', statesAndAnswers)
+    return statesAndAnswers
   }
 
-  async function initChat(
-    chatData?: { state: ChatState; userContent: string }[],
-  ) {
+  async function initChat(chatData?: { state: ChatState; userContent: string }[]) {
     // Load the chat from local storage
-    let uncheckedMessages;
+    let uncheckedMessages
     if (chatData) {
-      uncheckedMessages = chatData;
+      uncheckedMessages = chatData
     } else {
       uncheckedMessages = customStorage.loadData('chat') as {
-        state: ChatState;
-        userContent: string;
-      }[];
+        state: ChatState
+        userContent: string
+      }[]
     }
 
     if (uncheckedMessages && uncheckedMessages.length > 0 && uncheckedMessages[0]) {
-      await updateState(uncheckedMessages[0].state, true, true);
+      await updateState(uncheckedMessages[0].state, true, true)
       await uncheckedMessages.reduce(async (promiseChain, message) => {
         // Wait for the previous promise in the chain to resolve
-        await promiseChain;
+        await promiseChain
         // Process the current message
-        await handleMessage(message.userContent, false);
-      }, Promise.resolve());
+        await handleMessage(message.userContent, false)
+      }, Promise.resolve())
     } else {
-      handleCurrentState();
+      handleCurrentState()
     }
   }
 
   async function updateState(
     newState: ChatState,
     doHandleCurrentState = true,
-    ignoreError = false,
+    ignoreError = false
   ) {
-    previousState.value = currentState.value;
-    currentState.value = newState;
+    previousState.value = currentState.value
+    currentState.value = newState
     if (currentState.value === previousState.value && !ignoreError) {
-      throw new Error(`Invalid next state: ${newState}`);
+      throw new Error(`Invalid next state: ${newState}`)
     }
 
     if (doHandleCurrentState) {
-      return handleCurrentState();
+      return handleCurrentState()
     }
 
-    return Promise.resolve();
+    return Promise.resolve()
   }
 
-  const addMessage = async (
-    message: Partial<Message>,
-    sender = 'Kiwi',
-    save = false,
-  ) => {
+  const addMessage = async (message: Partial<Message>, sender = 'Kiwi', save = false) => {
     const newMessage: Message = {
       id: messageId.value,
       sender,
@@ -129,77 +121,75 @@ export const useChatStore = defineStore('chat', () => {
       timestamp: toTime(new Date()),
       state: currentState.value,
       ...message,
-    } as Message;
-    messages.value.push(newMessage);
+    } as Message
+    messages.value.push(newMessage)
     if (save) {
-      saveChat();
+      saveChat()
     }
-    await nextTick();
-  };
+    await nextTick()
+  }
 
   function removeLastMessages(amount = 1) {
-    messages.value = messages.value.slice(0, -amount);
+    messages.value = messages.value.slice(0, -amount)
   }
 
   function editMessage(id: number) {
     // Reset the message to this state
-    const index = messages.value.findIndex((message) => message.id === id);
+    const index = messages.value.findIndex((message) => message.id === id)
     if (index === -1 || !messages.value[index]) {
-      return;
+      return
     }
 
     // Go back to the previous state
-    const messagePreviousState = messages.value[index].state;
-    removeLastMessages(messages.value.length - index);
-    updateState(messagePreviousState, false);
+    const messagePreviousState = messages.value[index].state
+    removeLastMessages(messages.value.length - index)
+    updateState(messagePreviousState, false)
   }
 
   const kiwiTypes = async (duration: number) => {
-    isTyping.value = true;
+    isTyping.value = true
     // Fake typing
     await new Promise((resolve) => {
-      setTimeout(resolve, duration);
-    });
-    isTyping.value = false;
-  };
+      setTimeout(resolve, duration)
+    })
+    isTyping.value = false
+  }
 
   const searchRecipes = async () => {
     try {
-      const recipes = await recipeStore.searchByPreferences(
-        userPreferences.value,
-      );
-      await kiwiTypes(1000);
+      const recipes = await recipeStore.searchByPreferences(userPreferences.value)
+      await kiwiTypes(1000)
 
       if (recipes.length === 0) {
-        await updateState('findRecSNoResults');
-        return;
+        await updateState('findRecSNoResults')
+        return
       }
-      await addMessage({ type: 'recipe', content: recipes });
-      await updateState('findRecAResults');
+      await addMessage({ type: 'recipe', content: recipes })
+      await updateState('findRecAResults')
 
-      trackEvent('recipes_searched', { count: recipes.length });
+      trackEvent('recipes_searched', { count: recipes.length })
     } catch (error) {
-      await addMessage({ type: 'text', content: t('search.error') });
-      trackEvent('recipes_search_error', { error });
-      showNotification('error', t('search.errorNotification'));
-      await updateState('start');
+      await addMessage({ type: 'text', content: t('search.error') })
+      trackEvent('recipes_search_error', { error })
+      showNotification('error', t('search.errorNotification'))
+      await updateState('start')
     } finally {
-      isTyping.value = false;
+      isTyping.value = false
     }
-  };
+  }
 
   const generateWeekPlan = async () => {
-    const generatedWeekplan = weekplan.generateRandomWeekplan(
-      userPreferences.value.weekplanDays,
-    );
-    await kiwiTypes(1000);
+    const generatedWeekplan = weekplan.generateWeekplan(userPreferences.value.ingredients, {
+      days: userPreferences.value.weekplanDays,
+    })
+    await kiwiTypes(1000)
 
-    generatedWeekplan.forEach((plan: MealPlan) => {
-      const recipes = plan.meals.map((meal: Meal) => meal.recipe);
-      addMessage({ type: 'text', content: formatDate(plan.date) });
-      addMessage({ type: 'recipe', content: recipes });
-    });
-  };
+    generatedWeekplan.mealPlans.forEach((plan: MealPlan) => {
+      const recipes = plan.meals.map((meal: Meal) => meal.recipe)
+      addMessage({ type: 'text', content: formatDate(plan.date) })
+      addMessage({ type: 'recipe', content: recipes })
+    })
+  }
 
   /**
    * Chat and state configuration
@@ -226,62 +216,57 @@ export const useChatStore = defineStore('chat', () => {
     checkStatusRecipes: {
       message: t('chat.status.recipes.checking'),
       action: async () => {
-        await recipeStore.fetchRecipes();
+        await recipeStore.fetchRecipes()
         if (recipeStore.recipes.length === 0) {
           await addMessage({
             type: 'text',
             content: t('chat.status.recipes.failed'),
-          });
+          })
         } else {
-          await removeLastMessages(2);
-          await updateState('welcome');
+          await removeLastMessages(2)
+          await updateState('welcome')
         }
       },
     },
     welcome: {
       message: t('introduction.welcome'),
-      optionsConfig: ts([
-        'chat.actions.optionFindRecipe',
-        'chat.actions.optionGenerateWeeklyPlan',
-      ]),
+      optionsConfig: ts(['chat.actions.optionFindRecipe', 'chat.actions.optionGenerateWeeklyPlan']),
       nextState: (input: string) => {
         switch (input) {
           case t('chat.actions.optionFindRecipe'):
-            return 'findRecOType';
+            return 'findRecOType'
           case t('chat.actions.optionGenerateWeeklyPlan'):
-            return 'genPlanQWeekDays';
+            return 'genPlanQWeekDays'
           default:
-            return 'start';
+            return 'start'
         }
       },
     },
     findRecOType: {
       message: t('search.options.type'),
-      optionsConfig: ts([
-        'search.options.byQuery',
-        'search.options.byQuestions',
-      ]),
+      optionsConfig: ts(['search.options.byQuery', 'search.options.byQuestions']),
       nextState: (input: string) => {
         switch (input) {
           case t('search.options.byQuery'):
-            return 'findRecFQuery';
+            return 'findRecFQuery'
           case t('search.options.byQuestions'):
-            return 'findRecQServings';
+            return 'findRecQServings'
           default:
-            return 'start';
+            return 'start'
         }
       },
     },
     findRecFQuery: {
       message: t('search.query.action'),
       suggestionsConfig: {
-        suggestions: (input: string) => Array.from(
-          new Set(
-            recipeStore.recipes
-              .map((recipe) => getTranslation(recipe.name))
-              .filter((name) => name.toLowerCase().includes(input.toLowerCase())),
-          ),
-        ).slice(0, 5),
+        suggestions: (input: string) =>
+          Array.from(
+            new Set(
+              recipeStore.recipes
+                .map((recipe) => getTranslation(recipe.name))
+                .filter((name) => name.toLowerCase().includes(input.toLowerCase()))
+            )
+          ).slice(0, 5),
         withSubmit: false,
         placeholder: t('search.query.placeholder'),
         notFoundText: t('search.query.noResults'),
@@ -289,17 +274,16 @@ export const useChatStore = defineStore('chat', () => {
       onInput: (input: string | number) => {
         // Route to the recipe if it exists
         const recipe = recipeStore.recipes.find(
-          (r) => getTranslation(r.name).toLowerCase()
-            === (input as string).toLowerCase(),
-        );
+          (r) => getTranslation(r.name).toLowerCase() === (input as string).toLowerCase()
+        )
 
         if (recipe) {
           // If there is already a recipe message, remove it
           if (lastMessage.value && lastMessage.value.type === 'recipe') {
-            removeLastMessages();
+            removeLastMessages()
           }
-          addMessage({ type: 'recipe', content: [recipe] });
-          trackEvent('recipe_found', { recipe });
+          addMessage({ type: 'recipe', content: [recipe] })
+          trackEvent('recipe_found', { recipe })
           // router.push(`/recipe/${recipe.id}`);
         }
       },
@@ -322,13 +306,13 @@ export const useChatStore = defineStore('chat', () => {
           [t('filters.servings.3')]: 3,
           [t('filters.servings.4')]: 4,
           [t('filters.servings.5plus')]: undefined,
-        });
+        })
 
-        const mapOptionToServings = getServingsMapping();
-        userPreferences.value.servings = mapOptionToServings[input] ?? 2;
+        const mapOptionToServings = getServingsMapping()
+        userPreferences.value.servings = mapOptionToServings[input] ?? 2
         trackEvent('servings_selected', {
           servings: userPreferences.value.servings,
-        });
+        })
       },
     },
     findRecQRecipeType: {
@@ -350,13 +334,13 @@ export const useChatStore = defineStore('chat', () => {
           [t('filters.recipeType.comfort')]: 'comfort',
           [t('filters.recipeType.gourmet')]: 'gourmet',
           [t('filters.recipeType.budget')]: 'budget',
-        });
+        })
 
-        const mapOptionToType = getRecipeTypeMappings();
-        userPreferences.value.recipeType = mapOptionToType[input] ?? '';
+        const mapOptionToType = getRecipeTypeMappings()
+        userPreferences.value.recipeType = mapOptionToType[input] ?? ''
         trackEvent('recipe_type_selected', {
           recipeType: userPreferences.value.recipeType,
-        });
+        })
       },
     },
     findRecQDietaryRestrictions: {
@@ -373,7 +357,7 @@ export const useChatStore = defineStore('chat', () => {
       onInput: (input: string | number) => {
         userPreferences.value.dietaryRestrictions = (input as string)
           .split(',')
-          .map((item) => item.trim());
+          .map((item) => item.trim())
       },
     },
     findRecQCookingTime: {
@@ -387,7 +371,7 @@ export const useChatStore = defineStore('chat', () => {
       },
       nextState: 'findRecASearch',
       onInput: (input: string | number) => {
-        userPreferences.value.cookingTime = input as number;
+        userPreferences.value.cookingTime = input as number
       },
     },
     findRecQCuisine: {
@@ -402,42 +386,37 @@ export const useChatStore = defineStore('chat', () => {
       ]),
       nextState: 'findRecASearch',
       onInput: (input: string | number) => {
-        userPreferences.value.cuisine = input as string;
+        userPreferences.value.cuisine = input as string
       },
     },
     findRecASearch: {
-      message: () => t('search.results.searching', {
-        preferences: preferencesToSummary(userPreferences.value),
-      }),
+      message: () =>
+        t('search.results.searching', {
+          preferences: preferencesToSummary(userPreferences.value),
+        }),
       action: searchRecipes,
     },
     findRecSNoResults: {
       message: t('search.results.noResults'),
-      optionsConfig: ts([
-        'search.actions.moreOptions',
-        'search.actions.newSearch',
-      ]),
+      optionsConfig: ts(['search.actions.moreOptions', 'search.actions.newSearch']),
       nextState: (input: string | number) => {
         if (input === t('search.actions.moreOptions')) {
-          return 'findRecQServings';
+          return 'findRecQServings'
         }
-        return 'globAReset';
+        return 'globAReset'
       },
     },
     findRecAResults: {
       message: t('search.results.found'),
-      optionsConfig: ts([
-        'search.actions.moreOptions',
-        'search.actions.newSearch',
-      ]),
+      optionsConfig: ts(['search.actions.moreOptions', 'search.actions.newSearch']),
       nextState: (input: string) => {
         switch (input) {
           case t('search.actions.moreOptions'):
-            return 'findRecQCuisine';
+            return 'findRecQCuisine'
           case t('search.actions.newSearch'):
-            return 'globAReset';
+            return 'globAReset'
           default:
-            return 'findRecAResults';
+            return 'findRecAResults'
         }
       },
     },
@@ -452,20 +431,22 @@ export const useChatStore = defineStore('chat', () => {
       },
       nextState: 'genPlanQIngredients',
       onInput: (input: string | number) => {
-        userPreferences.value.weekplanDays = input as number;
+        userPreferences.value.weekplanDays = input as number
       },
     },
     genPlanQIngredients: {
       message: t('plan.questions.ingredients'),
       suggestionsConfig: {
         suggestions: (input: string) => {
-          const tokens = input.split(/\s+/).map((token) => token.toLowerCase());
+          const tokens = input.split(/\s+/).map((token) => token.toLowerCase())
           const filteredIngredients = Array.from(
             new Set(
-              recipeStore.ingredients.filter((ingredient) => tokens.some((token) => ingredient.toLowerCase().includes(token))),
-            ),
-          );
-          return filteredIngredients.slice(0, 5);
+              recipeStore.ingredients.filter((ingredient) =>
+                tokens.some((token) => ingredient.toLowerCase().includes(token))
+              )
+            )
+          )
+          return filteredIngredients.slice(0, 5)
         },
         withSubmit: true,
         withPhoto: true,
@@ -474,43 +455,61 @@ export const useChatStore = defineStore('chat', () => {
       },
       onInput: (input: string | number) => {
         if (input === t('plan.ingredients.submit')) {
-          addMessage(
-            { type: 'text', content: t('plan.ingredients.submit') },
-            t('chat.you'),
-          );
-          updateState('genPlanAPlan');
-          return;
+          addMessage({ type: 'text', content: t('plan.ingredients.submit') }, t('chat.you'))
+          updateState('genPlanAPlan')
+          return
         }
 
         // if input is already in the list, remove it
-        if (userPreferences.value.ingredients.includes(input as string)) {
-          userPreferences.value.ingredients = userPreferences.value.ingredients.filter((item) => item !== input);
+        if (
+          userPreferences.value.ingredients.some(
+            (item) =>
+              getTranslation(item.ingredient.name).toLowerCase() === (input as string).toLowerCase()
+          )
+        ) {
+          userPreferences.value.ingredients = userPreferences.value.ingredients.filter(
+            (item) =>
+              getTranslation(item.ingredient.name).toLowerCase() !== (input as string).toLowerCase()
+          )
         } else {
-          userPreferences.value.ingredients.push(input as string);
+          // Find the ingredient in the recipe store
+          const recipeIngredient = recipeStore.recipeIngredientByName(input as string)
+          if (recipeIngredient) {
+            // Initialize the user ingredient with a quantity of 1
+            const userIngredient = {
+              ingredient: recipeIngredient.ingredient,
+              quantity: 1,
+              unit: recipeIngredient.unit,
+            } as UserIngredient
+            userPreferences.value.ingredients.push(userIngredient)
+          }
         }
 
         if (userPreferences.value.ingredients.length === 0) {
-          removeLastMessages(1);
-          return;
+          removeLastMessages(1)
+          return
         }
 
         if (lastMessage.value && lastMessage.value.sender === t('chat.you')) {
-          removeLastMessages();
+          removeLastMessages()
         }
         addMessage(
           {
-            type: 'text',
-            content: userPreferences.value.ingredients.join(', '),
+            type: 'multiLineText',
+            content: userPreferences.value.ingredients.map((item) =>
+              formatName(getTranslation(item.ingredient.name))
+            ),
           },
-          t('chat.you'),
-        );
+          t('chat.you')
+        )
       },
       noMessage: true,
     },
     genPlanAPlan: {
-      message: () => t('plan.status.generating', {
-        preferences: preferencesToSummary(userPreferences.value),
-      }),
+      message: () =>
+        t('plan.status.generating', {
+          preferences: preferencesToSummary(userPreferences.value),
+        }),
       action: generateWeekPlan,
     },
     globAReset: {
@@ -518,34 +517,35 @@ export const useChatStore = defineStore('chat', () => {
       action: resetChat,
       nextState: 'start',
     },
-  };
+  }
 
   async function handleCurrentState() {
-    trackEvent('chat_state_changed', { state: currentState.value });
-    const currentConfig = chatConfig[currentState.value];
+    trackEvent('chat_state_changed', { state: currentState.value })
+    const currentConfig = chatConfig[currentState.value]
 
     if (!currentConfig) {
-      throw new Error(`Invalid state: ${currentState.value}`);
+      throw new Error(`Invalid state: ${currentState.value}`)
     }
 
     if (currentConfig.message) {
       // message can be a function, especially for dynamic messages
-      const message = typeof currentConfig.message === 'function'
-        ? currentConfig.message()
-        : currentConfig.message;
-      await addMessage({ type: 'text', content: message });
+      const message =
+        typeof currentConfig.message === 'function'
+          ? currentConfig.message()
+          : currentConfig.message
+      await addMessage({ type: 'text', content: message })
     }
 
     if (currentConfig.optionsConfig) {
       await addMessage({
         type: 'options',
         content: currentConfig.optionsConfig,
-      });
+      })
     }
 
     if (currentConfig.sliderConfig) {
       if (!currentConfig.message) {
-        throw new Error('Slider messageType requires a message');
+        throw new Error('Slider messageType requires a message')
       }
 
       await addMessage({
@@ -554,78 +554,70 @@ export const useChatStore = defineStore('chat', () => {
           label: currentConfig.message,
           value: Math.round(
             currentConfig?.sliderConfig
-              ? (currentConfig.sliderConfig.max
-                  - currentConfig.sliderConfig.min)
-                  / 2
-              : 0,
+              ? (currentConfig.sliderConfig.max - currentConfig.sliderConfig.min) / 2
+              : 0
           ),
           ...currentConfig.sliderConfig,
         },
-      } as SliderMessage);
+      } as SliderMessage)
     } else if (currentConfig.suggestionsConfig) {
       await addMessage({
         ...currentConfig.suggestionsConfig,
         type: 'suggestion',
         content: currentConfig.suggestionsConfig.suggestions,
-      });
+      })
     }
 
     if (currentConfig.action) {
-      await currentConfig.action();
+      await currentConfig.action()
     }
 
     // If there is no message or optionsConfig, we go to the next state
-    if (
-      !currentConfig.message
-      && !currentConfig.optionsConfig
-      && currentConfig.nextState
-    ) {
-      const nextState = typeof currentConfig.nextState === 'function'
-        ? currentConfig.nextState(userInput.value)
-        : currentConfig.nextState;
+    if (!currentConfig.message && !currentConfig.optionsConfig && currentConfig.nextState) {
+      const nextState =
+        typeof currentConfig.nextState === 'function'
+          ? currentConfig.nextState(userInput.value)
+          : currentConfig.nextState
 
-      trackEvent('chat_state_changed', { state: nextState });
-      await updateState(nextState);
+      trackEvent('chat_state_changed', { state: nextState })
+      await updateState(nextState)
     }
   }
 
   async function handleMessage(input: string | number, save = true) {
-    trackEvent('chat_message_received', { message: input });
-    const currentConfig = chatConfig[currentState.value];
-    trackEvent('current_config', { currentConfig });
+    trackEvent('chat_message_received', { message: input })
+    const currentConfig = chatConfig[currentState.value]
+    trackEvent('current_config', { currentConfig })
 
     if (!currentConfig) {
-      throw new Error(`Invalid state: ${currentState.value}`);
+      throw new Error(`Invalid state: ${currentState.value}`)
     }
 
     if (currentConfig.onInput) {
-      currentConfig.onInput(input);
+      currentConfig.onInput(input)
     }
 
     if (currentConfig.noMessage) {
-      return;
+      return
     }
 
-    await addMessage(
-      { type: 'text', content: input.toString() },
-      t('chat.you'),
-      save,
-    );
+    await addMessage({ type: 'text', content: input.toString() }, t('chat.you'), save)
 
     if (currentConfig.nextState) {
-      trackEvent('chat_state_changed', { state: currentConfig.nextState });
-      const nextState = typeof currentConfig.nextState === 'function'
-        ? currentConfig.nextState(input.toString())
-        : currentConfig.nextState;
-      await updateState(nextState);
+      trackEvent('chat_state_changed', { state: currentConfig.nextState })
+      const nextState =
+        typeof currentConfig.nextState === 'function'
+          ? currentConfig.nextState(input.toString())
+          : currentConfig.nextState
+      await updateState(nextState)
     } else {
-      trackEvent('chat_state_changed', { state: 'no_next_state' });
+      trackEvent('chat_state_changed', { state: 'no_next_state' })
     }
   }
 
   async function resetChat() {
-    userInput.value = '';
-    messages.value = [];
+    userInput.value = ''
+    messages.value = []
     userPreferences.value = {
       servings: 2,
       recipeType: '',
@@ -636,14 +628,14 @@ export const useChatStore = defineStore('chat', () => {
       tags: [],
       weekplanDays: 7,
       ingredients: [],
-    };
-    await addMessage({ type: 'text', content: t('chat.reset') });
-    await updateState('start');
-    trackEvent('chat_reset');
+    }
+    await addMessage({ type: 'text', content: t('chat.reset') })
+    await updateState('start')
+    trackEvent('chat_reset')
   }
 
   // Load the chat from local storage
-  initChat();
+  initChat()
 
   return {
     messages,
@@ -658,5 +650,5 @@ export const useChatStore = defineStore('chat', () => {
     saveChat,
     initChat,
     resetChat,
-  };
-});
+  }
+})

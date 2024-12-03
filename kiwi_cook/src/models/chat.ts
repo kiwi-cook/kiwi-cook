@@ -1,6 +1,14 @@
-import type { Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe'
 
-export type MessageType = 'text' | 'image' | 'recipe' | 'options' | 'multiOptions' | 'slider' | 'suggestion'
+export type MessageType =
+  | 'text'
+  | 'multiLineText'
+  | 'image'
+  | 'recipe'
+  | 'options'
+  | 'multiOptions'
+  | 'slider'
+  | 'suggestion'
 
 export type ChatState =
   | 'start'
@@ -25,81 +33,93 @@ export type ChatState =
 type OptionsConfig = string
 
 interface SliderConfig {
-  min: number;
-  max: number;
-  step: number;
-  unit: string | ((input: number) => string);
+  min: number
+  max: number
+  step: number
+  unit: string | ((input: number) => string)
 }
 
 interface SuggestionsConfig {
-  suggestions: ((input: string) => string[]);
-  withSubmit?: boolean;
-  withPhoto?: boolean;
-  placeholder?: string;
-  submitText?: string;
-  notFoundText?: string;
+  suggestions: (input: string) => string[]
+  withSubmit?: boolean
+  withPhoto?: boolean
+  placeholder?: string
+  submitText?: string
+  notFoundText?: string
 }
 
 export interface ChatConfig {
   [key: string]: {
-    message?: string | (() => string);
-    messageType?: string;
-    optionsConfig?: OptionsConfig[];
-    sliderConfig?: SliderConfig;
-    suggestionsConfig?: SuggestionsConfig;
-    onInput?: (input: string | number) => void;
-    noMessage?: boolean;
-    nextState?: ChatState | ((input: string) => ChatState);
-    action?: () => Promise<void>;
-  };
+    message?: string | (() => string)
+    messageType?: string
+    optionsConfig?: OptionsConfig[]
+    sliderConfig?: SliderConfig
+    suggestionsConfig?: SuggestionsConfig
+    onInput?: (input: string | number) => void
+    noMessage?: boolean
+    nextState?: ChatState | ((input: string) => ChatState)
+    action?: () => Promise<void>
+  }
 }
 
 export interface BaseMessage {
-  id: number;
-  sender: string;
-  sent: boolean;
-  type: MessageType;
-  timestamp: string;
-  state: ChatState; // Current state of the chat
-  disableChat?: boolean;
+  id: number
+  sender: string
+  sent: boolean
+  type: MessageType
+  timestamp: string
+  state: ChatState // Current state of the chat
+  disableChat?: boolean
 }
 
 export interface TextMessage extends BaseMessage {
-  type: 'text';
-  content: string;
+  type: 'text'
+  content: string
+}
+
+export interface MultiLineTextMessage extends BaseMessage {
+  type: 'multiLineText'
+  content: string[]
 }
 
 export interface ImageMessage extends BaseMessage {
-  type: 'image';
-  content: string;
+  type: 'image'
+  content: string
 }
 
 export interface RecipeMessage extends BaseMessage {
-  type: 'recipe';
-  content: Recipe[];
+  type: 'recipe'
+  content: Recipe[]
 }
 
 export interface OptionsMessage extends BaseMessage {
-  type: 'options' | 'multiOptions';
-  content: string[];
+  type: 'options' | 'multiOptions'
+  content: string[]
 }
 
 export interface SliderMessage extends BaseMessage {
-  type: 'slider';
+  type: 'slider'
   content: {
-    label: string;
-    value: number;
-  } & SliderConfig;
+    label: string
+    value: number
+  } & SliderConfig
 }
 
 export interface SuggestionsMessage extends BaseMessage {
-  type: 'suggestion';
-  content: ((input: string) => string[]);
-  withSubmit?: boolean;
-  withPhoto?: boolean;
-  placeholder?: string;
-  submitText?: string;
-  notFoundText?: string;
+  type: 'suggestion'
+  content: (input: string) => string[]
+  withSubmit?: boolean
+  withPhoto?: boolean
+  placeholder?: string
+  submitText?: string
+  notFoundText?: string
 }
 
-export type Message = TextMessage | ImageMessage | RecipeMessage | OptionsMessage | SliderMessage | SuggestionsMessage;
+export type Message =
+  | TextMessage
+  | MultiLineTextMessage
+  | ImageMessage
+  | RecipeMessage
+  | OptionsMessage
+  | SliderMessage
+  | SuggestionsMessage

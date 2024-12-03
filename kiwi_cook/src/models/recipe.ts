@@ -1,26 +1,27 @@
-import { z } from 'zod';
-import { i18n } from 'boot/i18n';
+import { z } from 'zod'
+
+import { i18n } from 'boot/i18n'
 
 // MultiLanguageField
 const MultiLanguageFieldSchema = z.object({
   translations: z.record(z.string()),
-});
+})
 
-type MultiLanguageField = z.infer<typeof MultiLanguageFieldSchema>;
+type MultiLanguageField = z.infer<typeof MultiLanguageFieldSchema>
 
 function getAllTranslations(field: MultiLanguageField): string[] {
-  return Object.values(field.translations);
+  return Object.values(field.translations)
 }
 
 export function getTranslation(field?: MultiLanguageField, lang?: string): string {
   if (!field) {
-    return '';
+    return ''
   }
   if (lang) {
-    return field.translations[lang] || Object.values(field.translations)[0] || '';
+    return field.translations[lang] || Object.values(field.translations)[0] || ''
   }
-  const i18nLang = i18n.global.locale.value;
-  return field.translations[i18nLang] || Object.values(field.translations)[0] || '';
+  const i18nLang = i18n.global.locale.value
+  return field.translations[i18nLang] || Object.values(field.translations)[0] || ''
 }
 
 // Ingredient
@@ -28,18 +29,18 @@ const IngredientSchema = z.object({
   id: z.string().optional(),
   name: MultiLanguageFieldSchema,
   category: z.string().optional(),
-});
+})
 
-type Ingredient = z.infer<typeof IngredientSchema>;
+type Ingredient = z.infer<typeof IngredientSchema>
 
 // UserIngredient
 const UserIngredientSchema = z.object({
   ingredient: IngredientSchema,
-  quantity: z.number(),
+  quantity: z.number().default(1),
   expiryDate: z.date().optional(),
-});
+})
 
-type UserIngredient = z.infer<typeof UserIngredientSchema>;
+type UserIngredient = z.infer<typeof UserIngredientSchema>
 
 // RecipeIngredient
 const RecipeIngredientSchema = z.object({
@@ -47,9 +48,9 @@ const RecipeIngredientSchema = z.object({
   comment: z.string().optional(),
   quantity: z.number().optional(),
   unit: z.string().optional(),
-});
+})
 
-type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>;
+type RecipeIngredient = z.infer<typeof RecipeIngredientSchema>
 
 // RecipeStep
 const RecipeStepSchema = z.object({
@@ -58,26 +59,26 @@ const RecipeStepSchema = z.object({
   imgUrl: z.string().url().optional(),
   duration: z.number().optional(),
   temperature: z.number().optional(),
-});
+})
 
-type RecipeStep = z.infer<typeof RecipeStepSchema>;
+type RecipeStep = z.infer<typeof RecipeStepSchema>
 
 // RecipeAuthor
 const RecipeAuthorSchema = z.object({
   name: z.string(),
   url: z.string().url().optional(),
-});
+})
 
-type RecipeAuthor = z.infer<typeof RecipeAuthorSchema>;
+type RecipeAuthor = z.infer<typeof RecipeAuthorSchema>
 
 // RecipeSource
 const RecipeSourceSchema = z.object({
   url: z.string().url().optional(),
   authors: z.array(RecipeAuthorSchema).optional(),
   cookbooks: z.array(z.string()).optional(),
-});
+})
 
-type RecipeSource = z.infer<typeof RecipeSourceSchema>;
+type RecipeSource = z.infer<typeof RecipeSourceSchema>
 
 // Nutrition
 const NutritionSchema = z.object({
@@ -86,9 +87,9 @@ const NutritionSchema = z.object({
   carbs: z.number(),
   fat: z.number(),
   fiber: z.number(),
-});
+})
 
-type Nutrition = z.infer<typeof NutritionSchema>;
+type Nutrition = z.infer<typeof NutritionSchema>
 
 // Recipe
 const RecipeSchema = z.object({
@@ -117,12 +118,12 @@ const RecipeSchema = z.object({
   fav_count: z.number().int().default(0),
   view_count: z.number().int().default(0),
   comment_count: z.number().int().default(0),
-});
+})
 
-type Recipe = z.infer<typeof RecipeSchema>;
+type Recipe = z.infer<typeof RecipeSchema>
 
 const adjustRecipeServings = (recipe: Recipe, servings: number): Recipe => {
-  const factor = servings / recipe.servings;
+  const factor = servings / recipe.servings
   return {
     ...recipe,
     ingredients: recipe.ingredients?.map((ri) => ({
@@ -130,30 +131,33 @@ const adjustRecipeServings = (recipe: Recipe, servings: number): Recipe => {
       quantity: ri.quantity ? ri.quantity * factor : undefined,
     })),
     servings,
-  };
-};
+  }
+}
 
 // Helper functions
 function createMultiLanguageField(lang: string, value: string): MultiLanguageField {
-  return { translations: { [lang]: value } };
+  return { translations: { [lang]: value } }
 }
 
 function createIngredient(name: string, id?: string, lang: string = 'en'): Ingredient {
   return {
     id,
     name: createMultiLanguageField(lang, name),
-  };
+  }
 }
 
 function createRecipeIngredient(
   ingredient: Ingredient,
   comment?: string,
   quantity?: number,
-  unit?: string,
+  unit?: string
 ): RecipeIngredient {
   return {
-    ingredient, comment, quantity, unit,
-  };
+    ingredient,
+    comment,
+    quantity,
+    unit,
+  }
 }
 
 function createRecipeStep(
@@ -161,11 +165,15 @@ function createRecipeStep(
   ingredients?: RecipeIngredient[],
   imgUrl?: string,
   duration?: number,
-  temperature?: number,
+  temperature?: number
 ): RecipeStep {
   return {
-    description, ingredients, imgUrl, duration, temperature,
-  };
+    description,
+    ingredients,
+    imgUrl,
+    duration,
+    temperature,
+  }
 }
 
 export {
@@ -178,7 +186,7 @@ export {
   RecipeSourceSchema,
   NutritionSchema,
   RecipeSchema,
-};
+}
 
 export type {
   MultiLanguageField,
@@ -190,7 +198,7 @@ export type {
   RecipeSource,
   Nutrition,
   Recipe,
-};
+}
 
 export {
   getAllTranslations,
@@ -199,4 +207,4 @@ export {
   createIngredient,
   createRecipeIngredient,
   createRecipeStep,
-};
+}

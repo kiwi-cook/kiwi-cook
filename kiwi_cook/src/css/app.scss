@@ -1,10 +1,10 @@
 .page {
   width: 100%;
   margin: 0 auto;
-  padding: 16px;
+  padding: 32px;
 
   @media (max-width: 480px) {
-    padding: 6px;
+    padding: 12px;
   }
 }
 
@@ -17,4 +17,14 @@
 
 .rounded-borders {
   border-radius: 24px;
+}
+
+.text-kiwi-logo {
+  display: inline-block; /* Ensures the icon behaves like a text element */
+  background-image: url('/icons/icon-512x512.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  width: 24px; /* Adjust the size of the icon */
+  height: 24px;
+  vertical-align: middle; /* Aligns the icon with the text */
 }

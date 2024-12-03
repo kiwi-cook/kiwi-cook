@@ -1,14 +1,12 @@
 import re
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 def extract_temperature(instruction: str) -> Optional[int]:
     """Extract the temperature from a string."""
     if not isinstance(instruction, str):
-        raise ValueError("Input must be a string")
-    if len(instruction) > 1000:  # Arbitrary limit to prevent excessively long inputs
-        raise ValueError("Input string is too long")
+        return None
 
     try:
         match = re.search(r"\b(\d{1,3})\s*°?\s*([CF])\b", instruction)
@@ -20,15 +18,32 @@ def extract_temperature(instruction: str) -> Optional[int]:
             temperature = round((temperature - 32) * 5 / 9)
         return temperature
     except Exception as e:
-        raise ValueError(f"Error extracting temperature: {str(e)}")
+        return None
+
+
+def extract_steps(instructions: Union[str, List[str]]) -> List[str]:
+    # Check if instructions are already a list
+    if isinstance(instructions, list):
+        # Return the list as is, filtering out empty steps
+        return [step.strip() for step in instructions if step.strip()]
+
+    # Normalize white spaces and trim the input if it's a string
+    instructions = ' '.join(instructions.split())
+
+    # Use regular expression to find numbered steps (with or without parentheses)
+    step_pattern = r'\d+\.\s*|(?:\d+\))\s*'
+    steps = re.split(step_pattern, instructions)
+
+    # Filter out any empty strings and trim each step
+    steps = [step.strip() for step in steps if step.strip()]
+
+    return steps
 
 
 def extract_durations(instruction: str) -> List[Decimal]:
     """Extract the duration from a string."""
     if not isinstance(instruction, str):
-        raise ValueError("Input must be a string")
-    if len(instruction) > 1000:
-        raise ValueError("Input string is too long")
+        return []
 
     try:
         matches = re.findall(
@@ -48,7 +63,7 @@ def extract_durations(instruction: str) -> List[Decimal]:
             durations.append(avg_duration)
         return durations
     except Exception as e:
-        raise ValueError(f"Error extracting durations: {str(e)}")
+        return []
 
 
 def format_name(name: str) -> str:

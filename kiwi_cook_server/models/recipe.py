@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List, Optional, Dict, Any
 
 from bson import ObjectId
@@ -51,7 +51,6 @@ class MultiLanguageField(BaseModel):
 
     @classmethod
     def new(cls, lang: str, value: str):
-        print(f"Creating new MultiLanguageField with value: {value}")
         return cls(translations={lang: value})
 
     def get_langs(self) -> list[str]:
@@ -75,7 +74,6 @@ class Ingredient(BaseModel):
 
     @classmethod
     def new(cls, name: str, id: Optional[PyObjectId] = None, lang: str = "en"):
-        print(f"Creating new Ingredient with name: {name}")
         return cls(id=id, name=MultiLanguageField.new(lang, name))
 
     def __str__(self):
@@ -102,7 +100,6 @@ class RecipeIngredient(BaseModel):
     ):
         if ingredient is None:
             raise ValueError("Ingredient cannot be None")
-        print(f"Creating new RecipeIngredient with ingredient: {ingredient}")
         return cls(ingredient=ingredient, quantity=quantity, unit=unit, comment=comment)
 
     def __str__(self):
@@ -131,7 +128,6 @@ class RecipeStep(BaseModel):
             duration: Optional[float] = None,
             temperature: Optional[float] = None,
     ):
-        print(f"Creating new RecipeStep with description: {description}")
         return cls(
             description=description,
             ingredients=ingredients,
@@ -211,8 +207,8 @@ class Recipe(BaseModel):
     servings: int = Field(default=1)
 
     duration: int = Field(default=0)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime
+    updated_at: datetime
     cuisine: Optional[str] = None
     difficulty: str = Field(default="medium")
     nutrition: Optional[Nutrition] = None
@@ -228,6 +224,15 @@ class Recipe(BaseModel):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str, Url: str, datetime: lambda x: x.isoformat()}
+
+    def model_post_init(self, __context):
+        if self.nutrition is None:
+            self.nutrition = Nutrition(
+                calories=0, protein=0, carbs=0, fat=0, fiber=0
+            )
+
+        self.created_at = datetime.now(UTC)
+        self.updated_at = datetime.now(UTC)
 
     def __str__(self):
         name = str(self.name)

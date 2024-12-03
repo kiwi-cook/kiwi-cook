@@ -1,11 +1,13 @@
 import os
 import uuid
+from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
+from lib.database.redis import get_redis
 from lib.logging import logger
 from models.api import APIResponse
 from server.security import initialize_security_measures
@@ -23,6 +25,30 @@ def get_environment() -> str:
 ENV = get_environment()
 
 
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    def http_callback(request: Request):
+        logger.warning(f"Rate limit exceeded for {request.url.path}")
+        return JSONResponse(
+            status_code=429,
+            content={"error": True, "response": "Rate limit exceeded"},
+        )
+
+    if ENV == "development":
+        yield
+        return
+
+    # Rate limiting configuration
+    redis_connection = get_redis()
+    from fastapi_limiter import FastAPILimiter
+    await FastAPILimiter.init(
+        redis=redis_connection,
+        http_callback=http_callback,
+    )
+    yield
+    await FastAPILimiter.close()
+
+
 def setup_fastapi() -> FastAPI:
     logger.info(f"Setting up FastAPI for {ENV} mode...")
     return FastAPI(
@@ -32,6 +58,7 @@ def setup_fastapi() -> FastAPI:
         docs_url="/docs" if ENV == "development" else None,
         redoc_url=None,
         openapi_url="/openapi.json" if ENV == "development" else None,
+        lifespan=lifespan
     )
 
 
@@ -78,18 +105,26 @@ def setup_routes(app: FastAPI) -> None:
 def setup_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception):
-        # Log the full error details internally
         logger.error(f"Unhandled exception: {exc}", exc_info=True)
 
-        # Sanitized error response
+        # Send logs via mail
+        if ENV == "production":
+            logger.send_logs()
+
         return JSONResponse(
             status_code=500,
             content={
                 "error": True,
-                "message": "An unexpected error occurred",
-                "request_id": str(uuid.uuid4()),
-            },
+                "message": "Internal Server Error",
+                "request_id": str(uuid.uuid4())
+            }
         )
+
+
+def setup_instrumentation(app: FastAPI) -> None:
+    from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+
+    FastAPIInstrumentor.instrument_app(app)
 
 
 app = setup_fastapi()
@@ -97,6 +132,7 @@ initialize_security_measures(app)
 setup_routes(app)
 setup_exception_handlers(app)
 setup_log_request_headers(app)
+setup_instrumentation(app)
 
 try:
     from lib.database.mongodb import get_mongodb

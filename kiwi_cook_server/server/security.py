@@ -1,19 +1,18 @@
 import os
-import re
 import uuid
-from typing import Dict, List, Optional
+from typing import List
 
-import redis
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from lib.database.redis import get_redis
 from lib.logging import logger
+from lib.telemetry.exporter import service_tracer
+
+tracer = service_tracer
 
 
 class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
@@ -69,8 +68,16 @@ class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
                 # Allow the request to proceed if redirect fails
                 pass
 
-        # Continue with the request
-        return await call_next(request)
+        # Check if the request comes from a trusted proxy
+        if self._is_trusted_proxy(request):
+            # Continue with the request
+            return await call_next(request)
+
+        # If the request is not from a trusted proxy, deny access
+        return JSONResponse(
+            status_code=403,  # Forbidden
+            content={"detail": "Access denied"},
+        )
 
 
 class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
@@ -80,134 +87,87 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.disable_security_header = disable_security_header
 
-    SECURITY_HEADERS: Dict[str, str] = {
+    SECURITY_HEADERS = {
         "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
         "X-Frame-Options": "DENY",
         "X-Content-Type-Options": "nosniff",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "Content-Security-Policy": (
-            "default-src 'none'; "
-            "script-src 'self' 'nonce-{nonce}'; "
-            "style-src 'self' 'nonce-{nonce}'; "
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self'; "
             "img-src 'self' data:; "
             "connect-src 'self'; "
             "font-src 'self'; "
             "base-uri 'self'; "
             "form-action 'self'"
         ),
-        "X-Permitted-Cross-Domain-Policies": "none",
-        "X-XSS-Protection": "1; mode=block",
-        "Server": "Undisclosed",
+        "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "same-origin"
     }
 
-    # Preload the Lua script for rate limiting
-    REDIS_RATE_LIMIT_SCRIPT = """
-    local v = redis.call('INCR', KEYS[1])
-    if v == 1 then
-        redis.call('EXPIRE', KEYS[1], ARGV[1])
-    end
-    if v > tonumber(ARGV[2]) then
-        return 1
-    else
-        return 0
-    end
-    """
-
-    class RateLimiter:
-        def __init__(self, redis_client: redis.Redis):
-            self.redis = redis_client
-            self.script_sha = self.redis.script_load(
-                EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT
-            )
-
-        async def rate_limit(self, key: str, limit: str, expiration_time: str):
-            try:
-                # Execute the preloaded Lua script
-                result = self.redis.evalsha(
-                    self.script_sha,
-                    1,  # Number of keys
-                    key,  # The key
-                    expiration_time,  # TTL for the key
-                    limit,  # Rate limit threshold
-                )
-                return result == 1  # True if the limit is exceeded
-            except redis.exceptions.NoScriptError:
-                # Reload the script if it has been evicted
-                self.script_sha = self.redis.script_load(
-                    EnhancedSecurityMiddleware.REDIS_RATE_LIMIT_SCRIPT
-                )
-                return await self.rate_limit(key, limit, expiration_time)
-
     async def dispatch(self, request: Request, call_next):
-        # Generate a unique nonce for CSP
-        nonce = uuid.uuid4().hex
+        with tracer.start_span("security_middleware") as span:
+            # Generate a unique nonce for CSP
+            nonce = uuid.uuid4().hex
 
-        # Disable security headers for development
-        if self.disable_security_header:
-            return await call_next(request)
+            try:
+                # Advanced request validation
+                await self._validate_request(request, span=span)
 
-        try:
-            # Advanced request validation
-            await self._validate_request(request)
+                # Process request
+                response: Response = await call_next(request)
 
-            # Process request
-            response: Response = await call_next(request)
+                # Apply security headers with dynamic nonce
+                for header, value in self.SECURITY_HEADERS.items():
+                    response.headers[header] = value.format(nonce=nonce)
 
-            # Apply security headers with dynamic nonce
-            for header, value in self.SECURITY_HEADERS.items():
-                response.headers[header] = value.format(nonce=nonce)
+                # Add additional security measures
+                response.headers["X-Request-ID"] = str(uuid.uuid4())
 
-            # Add additional security measures
-            response.headers["X-Request-ID"] = str(uuid.uuid4())
+                return response
 
-            return response
+            except HTTPException as http_exc:
+                span.set_status(http_exc.status_code)
+                span.set_attribute("error", True)
+                span.set_attribute("message", http_exc.detail)
 
-        except HTTPException as http_exc:
-            # Handle specific HTTP exceptions
-            return JSONResponse(
-                status_code=http_exc.status_code,
-                content={
-                    "error": True,
-                    "message": http_exc.detail,
-                    "request_id": str(uuid.uuid4()),
-                },
-            )
-        except Exception as exc:
-            # Catch-all for unexpected errors
-            logger.error(f"Unhandled security exception: {exc}", exc_info=True)
-            return JSONResponse(
-                status_code=500,
-                content={
-                    "error": True,
-                    "message": "Security validation failed",
-                    "request_id": str(uuid.uuid4()),
-                },
-            )
+                # Handle specific HTTP exceptions
+                return JSONResponse(
+                    status_code=http_exc.status_code,
+                    content={
+                        "error": True,
+                        "message": http_exc.detail,
+                        "request_id": str(uuid.uuid4()),
+                    },
+                )
+            except Exception as exc:
+                span.set_status(500)
+                span.set_attribute("error", True)
+                span.set_attribute("message", exc)
 
-    async def _validate_request(self, request: Request):
+                # Catch-all for unexpected errors
+                logger.error(f"Unhandled security exception: {exc}", exc_info=True)
+                return JSONResponse(
+                    status_code=500,
+                    content={
+                        "error": True,
+                        "message": "Security validation failed",
+                        "request_id": str(uuid.uuid4()),
+                    },
+                )
+
+    async def _validate_request(self, request: Request, span=None):
         """Advanced request validation."""
-        # Retrieve client IP, considering X-Forwarded-For header
-        client_ip = self._get_client_ip(request)
-
         IGNORED_PATHS = ["/health", "/metrics"]
         # Block suspicious user agents
         user_agent = request.headers.get("User-Agent", "")
         if self._is_suspicious_user_agent(user_agent) and request.url.path not in IGNORED_PATHS:
+            logger.warning(f"Suspicious user agent detected: {user_agent}")
+            span.set_attribute("suspicious_user_agent", user_agent)
             raise HTTPException(status_code=403, detail="Access denied")
-
-        # Rate limiting logic
-        await self._rate_limit_ip(request, client_ip)
-
-    def _get_client_ip(self, request: Request) -> str:
-        """
-        Retrieve the client IP address, considering proxy scenarios.
-        Prioritizes X-Forwarded-For header, falls back to request client host.
-        """
-        forwarded_for = request.headers.get("X-Forwarded-For")
-        if forwarded_for:
-            # Take the first IP in the X-Forwarded-For header
-            return forwarded_for.split(",")[0].strip()
-        return request.client.host
 
     def _is_suspicious_user_agent(self, user_agent: str) -> bool:
         """Detect potentially malicious user agents."""
@@ -222,21 +182,6 @@ class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
             "curl",
         ]
         return any(pattern in user_agent.lower() for pattern in suspicious_patterns)
-
-    async def _rate_limit_ip(self, request: Request, client_ip: str):
-        """Rate limiting by IP address with high performance."""
-        redis = get_redis()
-        limiter = self.RateLimiter(redis)
-
-        key = f"rate_limit:{client_ip}"
-        limit = 100  # 100 requests per minute
-        expiration_time = 60  # 1 minute
-
-        # Check rate limit
-        if await limiter.rate_limit(key, str(limit), str(expiration_time)):
-            # Log suspicious activity
-            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
-            raise HTTPException(status_code=429, detail="Too many requests")
 
 
 def setup_cors_with_enhanced_security(app: FastAPI) -> None:
@@ -273,13 +218,14 @@ def setup_advanced_security(app: FastAPI) -> None:
     """Comprehensive security setup."""
     # HTTPS Redirect Middleware with Proxy Support
     is_production = os.getenv("ENV", "production").lower() == "production"
-    trusted_proxy_ips = os.getenv("TRUSTED_PROXY_IPS", "").split(",")
-    trusted_proxy_ips = [ip.strip() for ip in trusted_proxy_ips if ip.strip()]
-    app.add_middleware(
-        ProxyAwareHTTPSRedirectMiddleware,
-        enforce_https=is_production,
-        trusted_proxy_ips=trusted_proxy_ips,
-    )
+    if is_production:
+        trusted_proxy_ips = os.getenv("TRUSTED_PROXY_IPS", "").split(",")
+        trusted_proxy_ips = [ip.strip() for ip in trusted_proxy_ips if ip.strip()]
+        app.add_middleware(
+            ProxyAwareHTTPSRedirectMiddleware,
+            enforce_https=True,
+            trusted_proxy_ips=trusted_proxy_ips,
+        )
 
     # Trusted Host Middleware with strict validation
     app.add_middleware(
@@ -299,7 +245,7 @@ def setup_advanced_security(app: FastAPI) -> None:
 
     # Enhanced Security Middleware
     app.add_middleware(
-        EnhancedSecurityMiddleware, disable_security_header=not is_production
+        EnhancedSecurityMiddleware,
     )
 
 
@@ -313,6 +259,7 @@ def validate_environment_config():
         "REDIS_PORT",
         "FUSIONAUTH_BASE_URL",
         "FUSIONAUTH_API_KEY",
+        "AXIOM_API_KEY",
     ]
 
     for var in REQUIRED_ENV_VARS:

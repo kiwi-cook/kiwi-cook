@@ -1,0 +1,9 @@
+/dist
+/src-capacitor
+/src-cordova
+/.quasar
+/node_modules
+.eslintrc.cjs
+/quasar.config.*.temporary.compiled*
+/src-pwa/custom-service-worker.ts
+/src-pwa/register-service-worker.ts

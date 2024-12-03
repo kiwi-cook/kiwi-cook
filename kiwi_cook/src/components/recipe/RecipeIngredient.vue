@@ -1,8 +1,12 @@
 <template>
   <div class="ingredient-table">
     <div class="ingredient-row">
-      <div class="ingredient-name">{{ formatName(getTranslation(ingredient.ingredient.name)) }}</div>
-      <div class="ingredient-quantity">{{ formattedAmount }}</div>
+      <div class="ingredient-name">
+        {{ formatName(getTranslation(ingredient.ingredient.name)) }}
+      </div>
+      <div class="ingredient-quantity">
+        {{ formattedAmount }}
+      </div>
       <div class="ingredient-checkbox">
         <q-checkbox v-model="checked" color="primary" />
       </div>
@@ -11,11 +15,10 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  computed, defineProps,
-  ref,
-} from 'vue';
-import { getTranslation } from 'src/models/recipe';
+import { computed, defineProps, ref } from 'vue'
+
+import { getTranslation } from 'src/models/recipe'
+import { formatName } from 'src/utils/string'
 
 const props = defineProps({
   ingredient: {
@@ -26,46 +29,43 @@ const props = defineProps({
     type: Number,
     default: 1,
   },
-});
+})
 
-const checked = ref(false);
+const checked = ref(false)
 
 // Computed property for formatted amount
 const formattedAmount = computed(() => {
-  const { servings } = props;
-  const { quantity, unit } = props.ingredient;
-  return formatAmount(quantity, unit, servings);
-});
+  const { servings } = props
+  const { quantity, unit } = props.ingredient
+  return formatAmount(quantity, unit, servings)
+})
 
 // Function to format amount based on unit messageType
 const formatAmount = (amount?: number, unit?: string, servings = 1): string => {
   if (amount === undefined || amount === null) {
-    return '';
+    return ''
   }
 
   // Multiply amount by servings
-  amount *= servings;
+  const realAmount = amount * servings
 
   // If number does not have precision
-  let amountStr = '';
-  if (amount % 1 === 0) {
-    amountStr = Math.round(amount).toString();
+  let amountStr = ''
+  if (realAmount % 1 === 0) {
+    amountStr = Math.round(amount).toString()
   } else {
-    amountStr = amount.toFixed(2);
+    amountStr = realAmount.toFixed(2)
   }
 
   // Convert to US units if needed (example)
   if (unit === 'g') {
-    amountStr = `${Math.round(amount * 0.035274)} oz`;
+    amountStr = `${Math.round(amount * 0.035274)} oz`
   } else if (unit === 'ml') {
-    amountStr = `${Math.round(amount * 0.033814)} fl oz`;
+    amountStr = `${Math.round(amount * 0.033814)} fl oz`
   }
 
-  return `${amountStr} ${unit || ''}`.trim();
-};
-
-// Capitalize first letter of each word
-const formatName = (name: string): string => name.replace(/\b\w/g, (char) => char.toUpperCase());
+  return `${amountStr} ${unit || ''}`.trim()
+}
 </script>
 
 <style lang="scss" scoped>
