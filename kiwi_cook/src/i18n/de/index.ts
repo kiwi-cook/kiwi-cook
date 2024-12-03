@@ -10,7 +10,7 @@ export default {
     title: 'Willkommen in der Kiwi-Küche!',
     subtitle: 'Dein persönlicher Kochassistent',
     welcome:
-      'Willkommen in der Kiwi-Küche! 🥝 Ich bin dein Kochassistent und helfe dir beim Entdecken leckerer Rezepte.',
+      'Hey! Ich bin Kiwi <span class="text-kiwi-logo"></span> und ich helfe dir gerne beim Kochen. Was möchtest du machen?',
     start: 'Loslegen',
   },
 
