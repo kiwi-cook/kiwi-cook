@@ -1,10 +1,6 @@
 <template>
   <q-card class="recipe-card row no-wrap items-center q-pa-none">
-    <q-img
-      :src="recipe.image_url"
-      :alt="getTranslation(recipe.name)"
-      class="recipe-image"
-    />
+    <q-img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image" />
 
     <div class="recipe-info column q-px-sm">
       <div class="recipe-title text-bold">
@@ -20,7 +16,13 @@
           {{ capitalize(recipe.difficulty) }}
         </div>
       </div>
-      <q-btn flat dense color="primary" class="view-btn q-ml-none q-mt-xs" :to="`/recipe/${recipe.id}`">
+      <q-btn
+        flat
+        dense
+        color="primary"
+        class="view-btn q-ml-none q-mt-xs"
+        :to="`/recipe/${recipe.id}`"
+      >
         View Recipe
       </q-btn>
     </div>
@@ -28,13 +30,14 @@
 </template>
 
 <script setup lang="ts">
-import type { Recipe } from 'src/models/recipe';
-import { getTranslation } from 'src/models/recipe';
-import { capitalize } from 'vue';
+import { capitalize } from 'vue'
+
+import type { Recipe } from 'src/models/recipe'
+import { getTranslation } from 'src/models/recipe'
 
 defineProps<{
-  recipe: Recipe;
-}>();
+  recipe: Recipe
+}>()
 </script>
 
 <style scoped lang="scss">

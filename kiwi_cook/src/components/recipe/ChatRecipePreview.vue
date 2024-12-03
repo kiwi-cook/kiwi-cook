@@ -1,11 +1,7 @@
 <template>
   <q-card class="apple-recipe-card">
     <!-- Recipe Image with Gradient Overlay and Centered Title -->
-    <q-img
-      :src="recipe.image_url"
-      :alt="getTranslation(recipe.name)"
-      class="recipe-image"
-    >
+    <q-img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image">
       <div class="recipe-title">
         {{ getTranslation(recipe.name) }}
       </div>
@@ -15,15 +11,15 @@
     <q-card-section class="recipe-details-section">
       <div class="row items-center justify-around q-gutter-sm">
         <div class="recipe-detail-item">
-          <q-icon name="schedule" size="md" color="grey-8"/>
+          <q-icon name="schedule" size="md" color="grey-8" />
           <span>{{ recipe.duration }} min</span>
         </div>
         <div v-if="recipe.ingredients" class="recipe-detail-item">
-          <q-icon name="local_dining" size="md" color="grey-8"/>
+          <q-icon name="local_dining" size="md" color="grey-8" />
           <span>{{ recipe.ingredients.length }} ingredients</span>
         </div>
         <div class="recipe-detail-item">
-          <q-icon name="people" size="md" color="grey-8"/>
+          <q-icon name="people" size="md" color="grey-8" />
           <span>{{ recipe.servings }} servings</span>
         </div>
       </div>
@@ -31,23 +27,23 @@
 
     <!-- Action Button with Subtle Accent -->
     <q-card-actions align="right" class="recipe-actions">
-      <q-btn flat color="primary" :to="`/recipe/${recipe.id}`" class="view-button"
-      >View Recipe
-      </q-btn
-      >
+      <q-btn flat color="primary" :to="`/recipe/${recipe.id}`" class="view-button">
+        View Recipe
+      </q-btn>
     </q-card-actions>
   </q-card>
 </template>
 
 <script setup lang="ts">
-import type { Recipe } from 'src/models/recipe';
-import { getTranslation } from 'src/models/recipe';
-import { toRefs } from 'vue';
+import { toRefs } from 'vue'
+
+import type { Recipe } from 'src/models/recipe'
+import { getTranslation } from 'src/models/recipe'
 
 const props = defineProps<{
-  recipe: Recipe;
-}>();
-const { recipe } = toRefs(props);
+  recipe: Recipe
+}>()
+const { recipe } = toRefs(props)
 </script>
 
 <style scoped lang="scss">
@@ -57,7 +53,9 @@ const { recipe } = toRefs(props);
   border-radius: 24px;
   overflow: hidden;
   backdrop-filter: blur(12px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
   background: $bg-gradient;
 }
 

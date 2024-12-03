@@ -1,14 +1,11 @@
-import { route } from 'quasar/wrappers';
-import {
-  createMemoryHistory,
-  createRouter,
-  createWebHashHistory,
-  createWebHistory,
-} from 'vue-router';
-import { useAnalytics } from 'src/composables/useAnalytics';
-import { useRecipeStore } from 'stores/recipe-store';
-import { storeToRefs } from 'pinia';
-import routes from './routes';
+import { route } from 'quasar/wrappers'
+import { createRouter, createWebHashHistory } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
+import { useAnalytics } from 'src/composables/useAnalytics'
+import { useRecipeStore } from 'stores/recipe-store'
+
+import routes from './routes'
 
 /*
  * If not building with SSR mode, you can
@@ -20,13 +17,9 @@ import routes from './routes';
  */
 
 export default route((/* { store, ssrContext } */) => {
-  const { trackEvent, trackPageView } = useAnalytics();
+  const { trackEvent, trackPageView } = useAnalytics()
 
-  const createHistory = process.env.SERVER
-    ? createMemoryHistory
-    : process.env.VUE_ROUTER_MODE === 'history'
-      ? createWebHistory
-      : createWebHashHistory;
+  const createHistory = createWebHashHistory
 
   const Router = createRouter({
     scrollBehavior: () => ({ left: 0, top: 0 }),
@@ -36,7 +29,7 @@ export default route((/* { store, ssrContext } */) => {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
-  });
+  })
 
   // Add a navigation guard to track page views
   Router.beforeEach(async (to, from, next) => {
@@ -45,38 +38,38 @@ export default route((/* { store, ssrContext } */) => {
       content_id: to.path,
       item_id: to.params.id,
       content: to,
-    });
+    })
 
-    const recipeStore = useRecipeStore();
-    const { recipeMap } = storeToRefs(recipeStore);
+    const recipeStore = useRecipeStore()
+    const { recipeMap } = storeToRefs(recipeStore)
 
     // Check if the route is a recipe page
     if (to.name === 'recipe') {
-      let recipeId = to.params.id;
+      let recipeId = to.params.id
       if (Array.isArray(recipeId)) {
-        [recipeId] = recipeId;
+        ;[recipeId] = recipeId
       }
 
       if (!recipeId) {
         // Go to 404
-        next({ name: '404' });
+        next({ name: '404' })
       }
 
       // Fetch if the map is empty
       if (recipeMap.value.size === 0) {
-        await recipeStore.fetchRecipes();
+        await recipeStore.fetchRecipes()
       }
 
       // Check if the recipe is already loaded
       if (recipeId && !recipeMap.value.has(recipeId)) {
         // Go to 404
-        next({ name: '404' });
+        next({ name: '404' })
       }
     }
 
-    trackPageView(to.path);
-    next();
-  });
+    trackPageView(to.path)
+    next()
+  })
 
-  return Router;
-});
+  return Router
+})

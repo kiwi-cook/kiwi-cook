@@ -4,10 +4,10 @@
   It's recommended to NOT .gitignore it
   You don't have to use TypeScript in your project, don't worry
 */
-import 'quasar/dist/types/feature-flag.d';
+import 'quasar/dist/types/feature-flag.d'
 
 declare module 'quasar/dist/types/feature-flag.d' {
   interface QuasarFeatureFlags {
-    store: true;
+    store: true
   }
 }

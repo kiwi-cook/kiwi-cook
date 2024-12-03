@@ -1,46 +1,51 @@
 <!-- StepsList.vue -->
 <template>
   <q-list>
-    <q-item
-v-for="(step, index) in recipe.steps"
-            :key="index"
-            class="step-item q-mb-md">
+    <q-item v-for="(step, index) in recipe.steps" :key="index" class="step-item q-mb-md">
       <q-item-section avatar>
         <q-avatar color="green-5">
           {{ index + 1 }}
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <div class="step-description" v-html="highlightIngredients(getTranslation(step.description))"></div>
+        <div
+          class="step-description"
+          v-html="highlightIngredients(getTranslation(step.description))"
+        />
       </q-item-section>
     </q-item>
   </q-list>
 </template>
 
 <script setup lang="ts">
-import { defineProps, toRefs } from 'vue';
-import type { Recipe } from 'src/models/recipe';
-import { getTranslation } from 'src/models/recipe';
+import { defineProps, toRefs } from 'vue'
+
+import type { Recipe } from 'src/models/recipe'
+import { getTranslation } from 'src/models/recipe'
 
 const props = defineProps<{
   recipe: Recipe
-}>();
-const { recipe } = toRefs(props);
+}>()
+const { recipe } = toRefs(props)
 
 function highlightIngredients(text: string): string {
   if (!recipe.value || !recipe.value.ingredients) {
-    return text;
+    return text
   }
 
+  let highlightedText = text
+
   recipe.value.ingredients.forEach((ingredient) => {
-    const name = getTranslation(ingredient.ingredient.name).toLowerCase();
-    const regex = new RegExp(`\\b${name}\\b`, 'gi');
-    text = text.replace(regex, '<span class="text-accent text-bold">$&</span>');
-  });
+    const name = getTranslation(ingredient.ingredient.name).toLowerCase()
+    const regex = new RegExp(`\\b${name}\\b`, 'gi')
+    highlightedText = highlightedText.replace(
+      regex,
+      '<span class="text-accent text-bold">$&</span>'
+    )
+  })
 
-  return text;
+  return highlightedText
 }
-
 </script>
 
 <style lang="scss">
@@ -54,6 +59,5 @@ function highlightIngredients(text: string): string {
 .step-description {
   font-size: 1.1em;
   line-height: 1.5;
-
 }
 </style>

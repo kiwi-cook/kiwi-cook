@@ -1,11 +1,11 @@
-import type { Recipe } from 'src/models/recipe';
+import type { Recipe } from 'src/models/recipe'
 
 export interface MealPlan {
-  date: Date;
-  meals: Meal[];
+  date: Date
+  meals: Meal[]
 }
 
 export interface Meal {
-  mealType: 'breakfast' | 'lunch' | 'dinner';
-  recipe: Recipe;
+  mealType: 'breakfast' | 'lunch' | 'dinner'
+  recipe: Recipe
 }

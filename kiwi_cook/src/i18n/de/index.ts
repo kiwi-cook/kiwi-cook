@@ -1,4 +1,3 @@
- 
 export default {
   app: {
     tagline: 'Dein persönlicher Kochassistent',
@@ -22,14 +21,12 @@ export default {
     actions: {
       optionFindRecipe: 'Rezept finden',
       optionGenerateWeeklyPlan: 'Wochenplan erstellen',
-      reset:
-        'Alles klar, lass uns von vorne anfangen. Was möchtest du heute kochen?',
+      reset: 'Alles klar, lass uns von vorne anfangen. Was möchtest du heute kochen?',
     },
     status: {
       recipes: {
         checking: 'Lade Rezepte herunter...',
-        failed:
-          'Entschuldige, ich konnte keine Rezepte abrufen. Bitte versuche es später erneut.',
+        failed: 'Entschuldige, ich konnte keine Rezepte abrufen. Bitte versuche es später erneut.',
       },
     },
     input: {
@@ -49,7 +46,9 @@ export default {
       byQuestions: 'Finde Rezepte mit Fragen',
     },
     query: {
-      action: 'Filtere Rezepte nach Suchbegriff. Zum Beispiel: <strong>Spaghetti</strong><br><br>Klicke das Suchergebnis an, um dir mehr Details anzusehen.',
+      action:
+        'Filtere Rezepte nach Suchbegriff. Zum Beispiel: <strong>Spaghetti</strong><br><br>' +
+        'Klicke das Suchergebnis an, um dir mehr Details anzusehen.',
       placeholder: 'Zum Beispiel: Spaghetti Carbonara',
       noResults: 'Keine passenden Rezepte gefunden. Probiere es mit einem anderen Suchbegriff.',
     },
@@ -62,13 +61,10 @@ export default {
       lastQuestion: 'Zum Schluss: ',
     },
     results: {
-      searching:
-        'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
-      noResults:
-        'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
+      searching: 'Prima! Ich suche jetzt nach Rezepten mit deinen Vorlieben: {preferences}',
+      noResults: 'Leider habe ich keine passenden Rezepte gefunden. Sollen wir die Suche anpassen?',
       found: 'Ich habe passende Rezepte gefunden.',
-      error:
-        'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
+      error: 'Ups! Da ist etwas schiefgegangen. Möchtest du es nochmal versuchen?',
     },
     actions: {
       broaden: 'Suche anpassen',
@@ -197,7 +193,10 @@ export default {
     summarize: 'Zusammenfassen',
     translate: 'Übersetzen',
     processing: 'Verarbeite Text',
-    disclaimer: 'Die Zusammenfassung wurde von einem KI-Modell erstellt. Sie dient nur zu Informationszwecken und kann Fehler oder Ungenauigkeiten enthalten. Eine Verantwortung für die Richtigkeit wird nicht übernommen.',
+    disclaimer:
+      'Die Zusammenfassung wurde von einem KI-Modell erstellt.' +
+      'Sie dient nur zu Informationszwecken und kann Fehler oder Ungenauigkeiten enthalten.' +
+      'Eine Verantwortung für die Richtigkeit wird nicht übernommen.',
   },
 
   // Common units
@@ -238,4 +237,4 @@ export default {
     allRightsReserved: 'Alle Rechte vorbehalten',
     github: 'Folge uns auf GitHub',
   },
-};
+}

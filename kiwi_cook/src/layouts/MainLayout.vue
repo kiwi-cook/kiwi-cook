@@ -1,14 +1,21 @@
 <template>
-  <q-layout :class="[{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }]" view="hHh lpR fFf">
+  <q-layout
+    :class="[{ 'bg-gradient-light': !isDark, 'bg-gradient-dark': isDark }]"
+    view="hHh lpR fFf"
+  >
     <q-header :class="isDark ? 'bg-dark' : 'bg-primary'" reveal>
       <q-toolbar class="q-py-sm">
         <div class="row items-center cursor-pointer" @click="$router.push('/')">
           <div class="col">
-            <div class="text-h4 text-weight-bold text-white q-mt-sm kiwi-title">KiwiCook <KiwiLogo/></div>
-            <div :class="isDark ? 'text-secondary' : 'text-black'" class="kiwi-subtitle">{{ $t('app.tagline') }}</div>
+            <div class="text-h4 text-weight-bold text-white q-mt-sm kiwi-title">
+              KiwiCook <KiwiLogo />
+            </div>
+            <div :class="isDark ? 'text-secondary' : 'text-black'" class="kiwi-subtitle">
+              {{ $t('app.tagline') }}
+            </div>
           </div>
         </div>
-        <q-space/>
+        <q-space />
 
         <!-- Login/Logout Button -->
         <q-btn
@@ -18,8 +25,8 @@
           flat
           @click="loginLogout"
         >
-          <q-icon v-if="!isAuthenticated" name="mdi-login"/>
-          <q-icon v-else name="mdi-logout"/>
+          <q-icon v-if="!isAuthenticated" name="mdi-login" />
+          <q-icon v-else name="mdi-logout" />
           <q-tooltip>{{ isAuthenticated ? $t('app.logout') : $t('app.login') }}</q-tooltip>
         </q-btn>
       </q-toolbar>
@@ -28,7 +35,7 @@
     <q-page-container :class="isDark ? 'bg-dark-gradient' : 'bg-gradient'">
       <router-view v-slot="{ Component }">
         <transition mode="out-in" name="fade">
-          <component :is="Component"/>
+          <component :is="Component" />
         </transition>
       </router-view>
     </q-page-container>
@@ -38,11 +45,8 @@
         <q-btn :text-color="isDark ? 'white' : 'dark'" flat icon="mdi-github" @click="openGithub">
           <q-tooltip>Visit our GitHub</q-tooltip>
         </q-btn>
-        <q-space/>
-        <q-tabs
-          v-model="tab"
-          :class="isDark ? 'text-white' : 'text-black'"
-        >
+        <q-space />
+        <q-tabs v-model="tab" :class="isDark ? 'text-white' : 'text-black'">
           <q-tab
             v-for="t in tabs"
             :key="t.name"
@@ -52,7 +56,7 @@
             @click="t.click"
           />
         </q-tabs>
-        <q-space/>
+        <q-space />
         <q-btn
           :color="isDark ? 'secondary' : 'white'"
           :icon="isDark ? 'wb_sunny' : 'nightlight_round'"
@@ -69,41 +73,40 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  ref, watch,
-} from 'vue';
-import { useRouter } from 'vue-router';
-import { useDarkMode } from 'src/composables/useDarkmode';
-import KiwiLogo from 'src/components/KiwiLogo.vue';
-import { useUserStore } from 'src/stores/user-store';
-import { storeToRefs } from 'pinia';
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+
+import { useDarkMode } from 'src/composables/useDarkmode'
+import KiwiLogo from 'src/components/KiwiLogo.vue'
+import { useUserStore } from 'src/stores/user-store'
 
 defineOptions({
   name: 'MainLayout',
-});
-const router = useRouter();
+})
+const router = useRouter()
 
 /* Color mode toggle */
 
-const { isDark, toggleDarkMode } = useDarkMode();
+const { isDark, toggleDarkMode } = useDarkMode()
 
 /* Link to GitHub */
-const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook');
+const openGithub = () => window.open('https://github.com/kiwi-cook/kiwi-cook')
 
 /* Login/Logout */
-const userStore = useUserStore();
-const { isAuthenticated } = storeToRefs(userStore);
+const userStore = useUserStore()
+const { isAuthenticated } = storeToRefs(userStore)
 
 const loginLogout = () => {
   if (isAuthenticated.value) {
-    userStore.logout();
+    userStore.logout()
   } else if (router.currentRoute.value.name !== 'login') {
-    router.push('/login');
+    router.push('/login')
   } else {
     // Go back to home page if already on login page
-    router.back();
+    router.back()
   }
-};
+}
 
 /* Tabs */
 const tabs = [
@@ -112,23 +115,27 @@ const tabs = [
     icon: 'chat',
     click: () => router.push({ name: 'chat' }),
   },
-];
-const tab = ref('chat');
-watch(() => router.currentRoute.value.name, () => {
-  switch (router.currentRoute.value.name) {
-    case 'chat':
-      tab.value = 'Chat';
-      break;
-    case 'settings':
-      tab.value = 'Settings';
-      break;
-    case 'recipe':
-      tab.value = 'Recipe';
-      break;
-    default:
-      tab.value = '';
-  }
-}, { immediate: true });
+]
+const tab = ref('chat')
+watch(
+  () => router.currentRoute.value.name,
+  () => {
+    switch (router.currentRoute.value.name) {
+      case 'chat':
+        tab.value = 'Chat'
+        break
+      case 'settings':
+        tab.value = 'Settings'
+        break
+      case 'recipe':
+        tab.value = 'Recipe'
+        break
+      default:
+        tab.value = ''
+    }
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss">

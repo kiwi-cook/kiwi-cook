@@ -1,5 +1,6 @@
-import type { RouteRecordRaw } from 'vue-router';
-import IndexPage from 'pages/IndexPage.vue';
+import type { RouteRecordRaw } from 'vue-router'
+
+import IndexPage from 'pages/IndexPage.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -36,6 +37,6 @@ const routes: RouteRecordRaw[] = [
     name: '404',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+export default routes
