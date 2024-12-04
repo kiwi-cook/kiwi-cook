@@ -1,15 +1,11 @@
 import os
 import uuid
-from contextlib import asynccontextmanager
 
-import redis
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi_limiter import FastAPILimiter
 
-from lib.database.redis import get_redis
 from lib.logging import logger
 from models.api import APIResponse
 from server.security import initialize_security_measures
