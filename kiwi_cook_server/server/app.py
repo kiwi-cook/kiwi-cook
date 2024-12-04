@@ -2,10 +2,12 @@ import os
 import uuid
 from contextlib import asynccontextmanager
 
+import redis
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from fastapi_limiter import FastAPILimiter
 
 from lib.database.redis import get_redis
 from lib.logging import logger
@@ -25,30 +27,6 @@ def get_environment() -> str:
 ENV = get_environment()
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    def http_callback(request: Request):
-        logger.warning(f"Rate limit exceeded for {request.url.path}")
-        return JSONResponse(
-            status_code=429,
-            content={"error": True, "response": "Rate limit exceeded"},
-        )
-
-    if ENV == "development":
-        yield
-        return
-
-    # Rate limiting configuration
-    redis_connection = get_redis()
-    from fastapi_limiter import FastAPILimiter
-    await FastAPILimiter.init(
-        redis=redis_connection,
-        http_callback=http_callback,
-    )
-    yield
-    await FastAPILimiter.close()
-
-
 def setup_fastapi() -> FastAPI:
     logger.info(f"Setting up FastAPI for {ENV} mode...")
     return FastAPI(
@@ -58,7 +36,6 @@ def setup_fastapi() -> FastAPI:
         docs_url="/docs" if ENV == "development" else None,
         redoc_url=None,
         openapi_url="/openapi.json" if ENV == "development" else None,
-        lifespan=lifespan
     )
 
 

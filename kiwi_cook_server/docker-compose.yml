@@ -5,6 +5,8 @@ services:
     # command: redis-server --requirepass ${REDIS_PASSWORD}
     networks:
       - redis_net
+    ports:
+      - "6379:6379"
     deploy:
       resources:
         limits:
