@@ -62,11 +62,11 @@ RUN mkdir -p /tmp /var/tmp && \
 USER appuser
 
 # Minimal Port Exposure with Non-Privileged Port
-EXPOSE 8080
+EXPOSE 8000
 
 # Runtime Security Hardening
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Minimal Entrypoint with Explicit CMD
 ENTRYPOINT ["/usr/local/bin/python"]
