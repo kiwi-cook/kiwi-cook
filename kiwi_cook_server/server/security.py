@@ -71,16 +71,10 @@ class ProxyAwareHTTPSRedirectMiddleware(BaseHTTPMiddleware):
                 # Allow the request to proceed if redirect fails
                 pass
 
-        # Check if the request comes from a trusted proxy
-        if self._is_trusted_proxy(request):
-            # Continue with the request
-            return await call_next(request)
+        # TODO: Implement trusted proxy handling
 
-        # If the request is not from a trusted proxy, deny access
-        return JSONResponse(
-            status_code=403,  # Forbidden
-            content={"error": True, "response": "Access Denied"},
-        )
+        # Proceed with the request
+        return await call_next(request)
 
 
 class EnhancedSecurityMiddleware(BaseHTTPMiddleware):
