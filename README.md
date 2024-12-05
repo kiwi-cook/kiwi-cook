@@ -1,5 +1,7 @@
 # KiwiCook 🥝
 
+[![KiwiCook Docker Image](https://github.com/kiwi-cook/kiwi-cook/actions/workflows/docker-build.yml/badge.svg)](https://github.com/kiwi-cook/kiwi-cook/actions/workflows/docker-build.yml)
+
 Welcome to **KiwiCook**, your personal culinary companion for discovering and preparing delicious, budget-friendly meals! Whether you're a kitchen novice or a seasoned home chef, KiwiCook is here to help you find affordable recipes and cook like a pro.
 
 ![Image](kiwi_cook/public/icons/icon-512x512.png)
