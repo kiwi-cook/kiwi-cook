@@ -1,5 +1,7 @@
+from typing import List
+
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pymongo.collection import Collection
 
 from lib.database.mongodb import get_mongodb
@@ -11,9 +13,9 @@ class PublicUser(BaseModel):
     username: str
     createdAt: str
 
-    friends: list[str] = Field(default_factory=list)
-    recipes: list[str] = Field(default_factory=list)
-    weekplan: list[str] = Field(default_factory=list)
+    friends: List[str]
+    recipes: List[str]
+    weekplan: List[str]
 
 
 class User(PublicUser):

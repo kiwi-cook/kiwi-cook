@@ -1,13 +1,11 @@
 import logging
-from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, Depends, HTTPException, File
+from fastapi import APIRouter, UploadFile, HTTPException, File
 from pydantic import BaseModel, conlist
 
 from lib.chatgpt.ingredients import find_ingredients_in_image
 from lib.chatgpt.weekplan import generate_weekplan_from_ingredients_image
 from models.api import APIResponseList
-from models.user import User
 
 router = APIRouter(
     prefix="/chatgpt",

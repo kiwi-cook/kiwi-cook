@@ -67,4 +67,4 @@ EXPOSE 8000
 
 # Minimal Entrypoint with Explicit CMD
 ENTRYPOINT ["/usr/local/bin/python"]
-CMD ["main.py", "--server"]
+CMD ["main.py"]

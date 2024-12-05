@@ -307,11 +307,9 @@ def validate_environment_config():
     REQUIRED_ENV_VARS = [
         "ENV",
         "MONGO_URI_READ",
-        "MONGO_URI_WRITE",
+        #"MONGO_URI_WRITE",
         "REDIS_HOST",
         "REDIS_PORT",
-        "FUSIONAUTH_BASE_URL",
-        "FUSIONAUTH_API_KEY",
         "AXIOM_API_KEY",
     ]
 
