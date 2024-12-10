@@ -52,7 +52,6 @@ class APIServer:
         self._setup_exception_handlers()
         self._setup_instrumentation()
         self._verify_database()
-        self._verify_redis()
 
     def _create_app(self) -> FastAPI:
         """Initialize FastAPI application with configuration"""
@@ -79,10 +78,10 @@ class APIServer:
 
     def _setup_routes(self) -> None:
         """Configure API routes"""
-        from api.routers import chatgpt, recipe, user
+        from api.routers import chatgpt, recipe
 
         # Include routers
-        for router in (recipe.router, chatgpt.router, user.router):
+        for router in (recipe.router, chatgpt.router):
             self.app.include_router(router)
 
         @self.app.get("/",
@@ -130,15 +129,6 @@ class APIServer:
         try:
             from lib.database.mongodb import get_mongodb
             get_mongodb()
-        except Exception as e:
-            logger.error(e)
-            raise
-
-    def _verify_redis(self) -> None:
-        """Verify Redis connection"""
-        try:
-            from lib.database.redis import get_redis
-            get_redis()
         except Exception as e:
             logger.error(e)
             raise
