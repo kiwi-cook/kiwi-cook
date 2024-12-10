@@ -1,5 +1,6 @@
 <template>
   <q-chat-message
+    v-if="!hidden"
     :class="bubbleClasses"
     :name="showSenderName ? message.sender : ''"
     :sent="message.sent"
@@ -109,11 +110,7 @@
       </template>
 
       <template v-else-if="message.type === 'slider'">
-        <div class="slider-container q-pa-md rounded-borders">
-          <div class="text-subtitle1 q-mb-sm">
-            {{ message.content.label }}
-          </div>
-
+        <div class="q-pa-md">
           <q-slider
             v-model="message.content.value"
             :disable="disabled"
@@ -129,7 +126,6 @@
             :min="message.content.min"
             :step="message.content.step"
             aria-label="Slider"
-            class="slider-enhanced"
             color="primary"
           />
 
@@ -167,6 +163,7 @@ import LoadingSpinner from 'components/chat/LoadingSpinner.vue'
 interface ChatMessage {
   message: Message
   disabled: boolean
+  hidden: boolean
   index: number
   isDark: boolean
   isTyping: boolean
@@ -175,7 +172,15 @@ interface ChatMessage {
 }
 
 // Props
-const props = defineProps<ChatMessage>()
+const props = withDefaults(defineProps<ChatMessage>(), {
+  disabled: false,
+  hidden: false,
+  index: 0,
+  isDark: false,
+  isTyping: false,
+  previousSender: 'system',
+  nextSender: 'system',
+})
 
 const { message } = toRefs(props)
 

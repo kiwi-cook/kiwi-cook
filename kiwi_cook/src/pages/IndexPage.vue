@@ -13,6 +13,7 @@
       <ChatMessage
         :message="message"
         :disabled="index !== messages.length - 1"
+        :hidden="message.type !== 'text' && index !== messages.length - 1 && !message.sent"
         :index="index"
         :is-dark="isDark"
         :is-typing="isTyping && index === messages.length - 1"
