@@ -1,4 +1,4 @@
-import type { Recipe } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 
 export interface MealPlan {
   date: Date
@@ -7,6 +7,6 @@ export interface MealPlan {
 
 export interface Meal {
   mealType: 'breakfast' | 'lunch' | 'dinner'
-  recipe: Recipe
+  recipe: RecipeType
   reason?: string
 }

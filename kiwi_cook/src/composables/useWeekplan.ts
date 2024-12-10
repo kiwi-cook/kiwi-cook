@@ -1,7 +1,6 @@
 // eslint-disable
 import { useRecipeStore } from 'stores/recipe-store'
-import type { Recipe, RecipeIngredient, UserIngredient } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 import type { Meal, MealPlan } from 'src/models/mealplan'
 import { useAnalytics } from 'src/composables/useAnalytics'
 
@@ -19,7 +18,7 @@ export function useWeekplan() {
   ): {
     mealPlans: MealPlan[]
     summary: {
-      selectedRecipes: Recipe[]
+      selectedRecipes: RecipeType[]
       unusedIngredients: UserIngredient[]
       groceryList: { [category: string]: { name: string; quantity: number }[] }
     }
@@ -61,7 +60,7 @@ export function useWeekplan() {
       const meals: Meal[] = mealTimes
         .map((mealType) => {
           // Select recipe that uses maximum available ingredients
-          let bestRecipe: Recipe | null = null
+          let bestRecipe: RecipeType | null = null
           let maxUsedIngredients = 0
 
           for (let i = 0; i < availableRecipes.length; i++) {
@@ -128,17 +127,15 @@ export function useWeekplan() {
       }
 
       // Add ingredients to a grocery list
-      recipe.ingredients.forEach((recipeIngredient: RecipeIngredient) => {
+      recipe.ingredients.forEach((recipeIngredient: string) => {
         const category = recipeIngredient.ingredient.category || 'Others'
         groceryList[category] = groceryList[category] || []
-        const item = groceryList[category].find(
-          (i) => i.name === getTranslation(recipeIngredient.ingredient.name)
-        )
+        const item = groceryList[category].find((i) => i.name === recipeIngredient.ingredient.name)
         if (item) {
           item.quantity += recipeIngredient.quantity || 1
         } else {
           groceryList[category].push({
-            name: getTranslation(recipeIngredient.ingredient.name),
+            name: recipeIngredient.ingredient.name,
             quantity: recipeIngredient.quantity || 1,
           })
         }

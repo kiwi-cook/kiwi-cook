@@ -1,4 +1,4 @@
-import type { Recipe } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 
 export type MessageType =
   | 'text'
@@ -89,7 +89,7 @@ export interface ImageMessage extends BaseMessage {
 
 export interface RecipeMessage extends BaseMessage {
   type: 'recipe'
-  content: Recipe[]
+  content: RecipeType[]
 }
 
 export interface OptionsMessage extends BaseMessage {

@@ -1,19 +1,15 @@
 <template>
   <q-card class="recipe-card row no-wrap items-center q-pa-none">
-    <q-img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image" />
+    <q-img :src="image" :alt="recipe.name" class="recipe-image" />
 
     <div class="recipe-info column q-px-sm">
       <div class="recipe-title text-bold">
-        {{ getTranslation(recipe.name) }}
+        {{ recipe.name }}
       </div>
       <div class="recipe-details row items-center q-mt-xs">
         <div class="detail-item">
           <q-icon name="schedule" color="primary" size="16px" />
-          {{ recipe.duration }} min
-        </div>
-        <div class="detail-item q-ml-sm">
-          <q-icon name="fitness_center" color="primary" size="16px" />
-          {{ capitalize(recipe.difficulty) }}
+          {{ recipe.total_time }} min
         </div>
       </div>
       <q-btn
@@ -30,14 +26,22 @@
 </template>
 
 <script setup lang="ts">
-import { capitalize } from 'vue'
+import { computed, toRefs } from 'vue'
 
-import type { Recipe } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 
-defineProps<{
-  recipe: Recipe
+const props = defineProps<{
+  recipe: RecipeType
 }>()
+const { recipe } = toRefs(props)
+
+const image = computed(() => {
+  if (recipe.value?.image && recipe.value?.image?.length > 0) {
+    return recipe.value.image[0] ?? ''
+  }
+
+  return ''
+})
 </script>
 
 <style scoped lang="scss">

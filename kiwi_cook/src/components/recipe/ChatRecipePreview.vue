@@ -1,9 +1,9 @@
 <template>
   <q-card class="apple-recipe-card">
     <!-- Recipe Image with Gradient Overlay and Centered Title -->
-    <q-img :src="recipe.image_url" :alt="getTranslation(recipe.name)" class="recipe-image">
+    <q-img :src="image" :alt="recipe.name" class="recipe-image">
       <div class="recipe-title">
-        {{ getTranslation(recipe.name) }}
+        {{ recipe.name }}
       </div>
     </q-img>
 
@@ -12,7 +12,7 @@
       <div class="row items-center justify-around q-gutter-sm">
         <div class="recipe-detail-item">
           <q-icon name="schedule" size="md" color="grey-8" />
-          <span>{{ recipe.duration }} min</span>
+          <span>{{ recipe.total_time }} min</span>
         </div>
         <div v-if="recipe.ingredients" class="recipe-detail-item">
           <q-icon name="local_dining" size="md" color="grey-8" />
@@ -35,15 +35,22 @@
 </template>
 
 <script setup lang="ts">
-import { toRefs } from 'vue'
+import { computed, toRefs } from 'vue'
 
-import type { Recipe } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 
 const props = defineProps<{
-  recipe: Recipe
+  recipe: RecipeType
 }>()
 const { recipe } = toRefs(props)
+
+const image = computed(() => {
+  if (recipe.value?.image && recipe.value?.image?.length > 0) {
+    return recipe.value.image[0] ?? ''
+  }
+
+  return ''
+})
 </script>
 
 <style scoped lang="scss">

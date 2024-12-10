@@ -1,17 +1,18 @@
 <!-- StepsList.vue -->
 <template>
   <q-list>
-    <q-item v-for="(step, index) in recipe.steps" :key="index" class="step-item q-mb-md">
+    <q-item
+      v-for="(instruction, index) in recipe.instructions"
+      :key="index"
+      class="step-item q-mb-md"
+    >
       <q-item-section avatar>
         <q-avatar color="green-5">
           {{ index + 1 }}
         </q-avatar>
       </q-item-section>
       <q-item-section>
-        <div
-          class="step-description"
-          v-html="highlightIngredients(getTranslation(step.description))"
-        />
+        <div class="step-description" v-html="highlightIngredients(instruction)" />
       </q-item-section>
     </q-item>
   </q-list>
@@ -20,11 +21,10 @@
 <script setup lang="ts">
 import { defineProps, toRefs } from 'vue'
 
-import type { Recipe } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 
 const props = defineProps<{
-  recipe: Recipe
+  recipe: RecipeType
 }>()
 const { recipe } = toRefs(props)
 
@@ -35,8 +35,8 @@ function highlightIngredients(text: string): string {
 
   let highlightedText = text
 
-  recipe.value.ingredients.forEach((ingredient) => {
-    const name = getTranslation(ingredient.ingredient.name).toLowerCase()
+  recipe.value.ingredients.forEach((ingredient: string) => {
+    const name = ingredient.toLowerCase()
     const regex = new RegExp(`\\b${name}\\b`, 'gi')
     highlightedText = highlightedText.replace(
       regex,

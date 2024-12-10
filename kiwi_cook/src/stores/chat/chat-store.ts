@@ -12,7 +12,7 @@ import { ts } from 'src/utils/i18n'
 import { useWeekplan } from 'src/composables/useWeekplan'
 import type { Meal, MealPlan } from 'src/models/mealplan'
 import type { UserIngredient } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
+import {} from 'src/models/recipe'
 import { useLocalStorage } from 'src/composables/useLocalStorage'
 import { formatName } from 'src/utils/string'
 
@@ -263,7 +263,7 @@ export const useChatStore = defineStore('chat', () => {
           Array.from(
             new Set(
               recipeStore.recipes
-                .map((recipe) => getTranslation(recipe.name))
+                .map((recipe) => recipe.name)
                 .filter((name) => name.toLowerCase().includes(input.toLowerCase()))
             )
           ).slice(0, 5),
@@ -274,7 +274,7 @@ export const useChatStore = defineStore('chat', () => {
       onInput: (input: string | number) => {
         // Route to the recipe if it exists
         const recipe = recipeStore.recipes.find(
-          (r) => getTranslation(r.name).toLowerCase() === (input as string).toLowerCase()
+          (r) => r.name.toLowerCase() === (input as string).toLowerCase()
         )
 
         if (recipe) {
@@ -463,13 +463,11 @@ export const useChatStore = defineStore('chat', () => {
         // if input is already in the list, remove it
         if (
           userPreferences.value.ingredients.some(
-            (item) =>
-              getTranslation(item.ingredient.name).toLowerCase() === (input as string).toLowerCase()
+            (item) => item.toLowerCase() === (input as string).toLowerCase()
           )
         ) {
           userPreferences.value.ingredients = userPreferences.value.ingredients.filter(
-            (item) =>
-              getTranslation(item.ingredient.name).toLowerCase() !== (input as string).toLowerCase()
+            (item) => item.toLowerCase() !== (input as string).toLowerCase()
           )
         } else {
           // Find the ingredient in the recipe store
@@ -496,9 +494,7 @@ export const useChatStore = defineStore('chat', () => {
         addMessage(
           {
             type: 'multiLineText',
-            content: userPreferences.value.ingredients.map((item) =>
-              formatName(getTranslation(item.ingredient.name))
-            ),
+            content: userPreferences.value.ingredients.map((item) => formatName(item)),
           },
           t('chat.you')
         )

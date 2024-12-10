@@ -5,10 +5,10 @@
       <div class="header-content">
         <div class="content-wrapper">
           <!-- Image section -->
-          <div v-if="recipe.image_url" class="image-wrapper">
+          <div v-if="recipe.image" class="image-wrapper">
             <img
-              :src="recipe.image_url"
-              :alt="getTranslation(recipe.name)"
+              :src="`base64/${recipe.image}`"
+              :alt="recipe.name"
               class="recipe-image"
               loading="lazy"
             />
@@ -16,9 +16,9 @@
           <!-- Recipe details -->
           <div class="recipe-details">
             <h1 class="recipe-title">
-              {{ getTranslation(recipe.name) }}
+              {{ recipe.name }}
             </h1>
-            <span class="recipe-description">{{ getTranslation(recipe.description) }}</span>
+            <span class="recipe-description">{{ recipe.description }}</span>
 
             <!-- Meta information -->
             <div class="recipe-meta">
@@ -111,10 +111,10 @@
       <!-- Steps Section -->
       <div class="steps-section">
         <h2 class="section-title">
-          {{ recipe.steps?.length ?? 0 }}
+          {{ recipe.instructions?.length ?? 0 }}
           {{
             $t('recipe.directions', {
-              count: recipe.steps?.length ?? 0,
+              count: recipe.instructions?.length ?? 0,
             })
           }}
         </h2>
@@ -138,13 +138,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 
-import type { RecipeIngredient as Ingredient, RecipeStep } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
 import { useRecipeStore } from 'src/stores/recipe-store'
 import RecipeIngredient from 'src/components/recipe/RecipeIngredient.vue'
 import LlmButton from 'src/components/LlmButton.vue'
@@ -162,19 +160,13 @@ const recipe = computed(() => {
   }
   return recipeId ? recipeMap.value.get(recipeId) : undefined
 })
-/* Ingredients */
-const recipeIngredients = computed(() =>
-  (recipe.value?.ingredients ?? []).map((ingredient: Ingredient) =>
-    getTranslation(ingredient.ingredient.name)
-  )
-)
 
 /* Servings */
 const servings = ref(recipe.value?.servings ?? 1)
 
 /* Share */
 function shareRecipe() {
-  const recipeName = getTranslation(recipe.value?.name)
+  const recipeName = recipe.value?.name
   const recipeUrl = window.location.href
   navigator.share({
     title: recipeName,
@@ -192,24 +184,28 @@ const summaryInput = computed(() => {
   let text = ''
 
   // Add recipe name
-  const recipeName = getTranslation(recipe.value?.name)
+  const recipeName = recipe.value?.name
   if (recipeName) {
     text += `The recipe is called "${recipeName}". `
   }
 
   // Add meta information (duration and servings)
-  const duration = recipe.value?.duration
+  const duration = recipe.value?.total_time
   const servingsCount = servings.value
   if (duration || servingsCount) {
     text += 'Here are some details: '
-    if (duration) text += `it takes about ${duration} minutes to prepare. `
-    if (servingsCount) text += `This recipe serves ${servingsCount} people. `
+    if (duration) {
+      text += `it takes about ${duration} minutes to prepare. `
+    }
+    if (servingsCount) {
+      text += `This recipe serves ${servingsCount} people. `
+    }
   }
 
   // Add steps (optional)
   const stepsText =
-    recipe.value?.steps
-      ?.map((step: RecipeStep) => getTranslation(step.description) ?? '')
+    recipe.value?.instructions
+      ?.map((step: RecipeStep) => step.description ?? '')
       .filter(Boolean)
       .join('. ') ?? ''
   if (stepsText) {
@@ -222,16 +218,12 @@ const summaryInput = computed(() => {
 const translationOutput = ref<unknown | null>(null)
 const translationInput = computed(() => {
   const texts = []
-  texts.push(getTranslation(recipe.value?.name))
-  texts.push(getTranslation(recipe.value?.description))
+  texts.push(recipe.value?.name)
+  texts.push(recipe.value?.description)
   texts.push(
-    ...(recipe.value?.ingredients ?? []).map((ingredient: Ingredient) =>
-      getTranslation(ingredient.ingredient.name)
-    )
+    ...(recipe.value?.ingredients ?? []).map((ingredient: Ingredient) => ingredient.ingredient.name)
   )
-  texts.push(
-    ...(recipe.value?.steps ?? []).map((step: RecipeStep) => getTranslation(step.description))
-  )
+  texts.push(...(recipe.value?.instructions ?? []).map((step: RecipeStep) => step.description))
   return {
     input: texts,
     sourceLanguage: recipe.value?.props?.language ?? 'en',
@@ -261,7 +253,7 @@ const recipeSteps = computed(() => {
       const translationIndex = index + 2 + (recipe.value?.ingredients?.length ?? 0)
       const stepTranslation = translations[translationIndex]
 
-      const description = stepTranslation ?? getTranslation(step.description)
+      const description = stepTranslation ?? step.description
 
       // Ensure we have recipe ingredients before highlighting
       const ingredients = recipeIngredients.value ?? []
@@ -275,12 +267,14 @@ const recipeSteps = computed(() => {
 
 /* Meta items */
 const metaItems = computed(() => {
-  if (!recipe.value) return []
+  if (!recipe.value) {
+    return []
+  }
   return [
     {
       icon: '⏱️',
-      value: `${recipe.value.duration} ${t('units.minutes', {
-        count: recipe.value.duration,
+      value: `${recipe.value.total_time} ${t('units.minutes', {
+        count: recipe.value.total_time,
       })}`,
     },
     {
@@ -411,7 +405,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   height: fit-content;
 }
 
-.steps-section {
+.instructions-section {
   background-color: $grey-1;
   border-radius: 16px;
   padding: 24px;
@@ -428,7 +422,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
   font-weight: 600;
 }
 
-.steps-container {
+.instructions-container {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
@@ -443,7 +437,7 @@ function highlightIngredients(text: string, ingredientNames: string[]) {
 .body--dark {
   .recipe-header,
   .ingredients-section,
-  .steps-section {
+  .instructions-section {
     background-color: $dark;
   }
 }

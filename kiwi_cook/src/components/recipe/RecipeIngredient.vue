@@ -2,10 +2,10 @@
   <div class="ingredient-table">
     <div class="ingredient-row">
       <div class="ingredient-name">
-        {{ formatName(getTranslation(ingredient.ingredient.name)) }}
+        {{ formatName(ingredient) }}
       </div>
       <div class="ingredient-quantity">
-        {{ formattedAmount }}
+        {{ adjustedAmount }}
       </div>
       <div class="ingredient-checkbox">
         <q-checkbox v-model="checked" color="primary" />
@@ -17,12 +17,12 @@
 <script lang="ts" setup>
 import { computed, defineProps, ref } from 'vue'
 
-import { getTranslation } from 'src/models/recipe'
-import { formatName } from 'src/utils/string'
+import { parseIngredient } from 'src/utils/parse'
 
+// Define props
 const props = defineProps({
   ingredient: {
-    type: Object,
+    type: String,
     required: true,
   },
   servings: {
@@ -31,41 +31,19 @@ const props = defineProps({
   },
 })
 
+// Reactive state for the checkbox
 const checked = ref(false)
 
-// Computed property for formatted amount
-const formattedAmount = computed(() => {
-  const { servings } = props
-  const { quantity, unit } = props.ingredient
-  return formatAmount(quantity, unit, servings)
+// Parse the ingredient using the imported parseIngredient function
+const parsedIngredient = computed(() => parseIngredient(props.ingredient))
+
+// Adjust the amount based on the number of servings
+const adjustedAmount = computed(() => {
+  if (parsedIngredient.value.amount !== undefined) {
+    return parsedIngredient.value.amount * props.servings
+  }
+  return undefined
 })
-
-// Function to format amount based on unit messageType
-const formatAmount = (amount?: number, unit?: string, servings = 1): string => {
-  if (amount === undefined || amount === null) {
-    return ''
-  }
-
-  // Multiply amount by servings
-  const realAmount = amount * servings
-
-  // If number does not have precision
-  let amountStr = ''
-  if (realAmount % 1 === 0) {
-    amountStr = Math.round(amount).toString()
-  } else {
-    amountStr = realAmount.toFixed(2)
-  }
-
-  // Convert to US units if needed (example)
-  if (unit === 'g') {
-    amountStr = `${Math.round(amount * 0.035274)} oz`
-  } else if (unit === 'ml') {
-    amountStr = `${Math.round(amount * 0.033814)} fl oz`
-  }
-
-  return `${amountStr} ${unit || ''}`.trim()
-}
 </script>
 
 <style lang="scss" scoped>

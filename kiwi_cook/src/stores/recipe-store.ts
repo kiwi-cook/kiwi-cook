@@ -1,30 +1,29 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
-import type { Recipe, RecipeIngredient } from 'src/models/recipe'
-import { getTranslation } from 'src/models/recipe'
 import { api } from 'boot/axios'
 import { useRecipeSearch } from 'src/composables/useSearch'
 import type { UserPreferences } from 'src/models/user'
 import { useAnalytics } from 'src/composables/useAnalytics'
 import { useLlm } from 'src/composables/llm/useLlm'
 import { formatName } from 'src/utils/string'
+import type { RecipeType } from 'src/models/recipe'
 
 export const useRecipeStore = defineStore('recipe', () => {
   const { trackEvent } = useAnalytics()
   const summarizer = useLlm('summarization')
 
   let fetchPromise: Promise<void> | null = null
-  const recipes = ref<Recipe[]>([])
+  const recipes = ref<RecipeType[]>([])
   const ingredients = computed(() =>
     recipes.value
       .flatMap((recipe) => recipe.ingredients ?? [])
-      .map((ingredient) => formatName(getTranslation(ingredient.ingredient.name)))
+      .map((ingredient) => formatName(ingredient))
   )
 
   const recipeMap = computed(() => {
-    const map = new Map<string, Recipe>()
-    recipes.value.forEach((recipe: Recipe) => {
+    const map = new Map<string, RecipeType>()
+    recipes.value.forEach((recipe: RecipeType) => {
       map.set(recipe.id.toString(), recipe)
     })
     return map
@@ -36,13 +35,11 @@ export const useRecipeStore = defineStore('recipe', () => {
   const searchByPreferences = (preferences: UserPreferences) =>
     recipeSearch.searchRecipesByPreferences(recipeMap.value, preferences)
 
-  function recipeIngredientByName(name: string): RecipeIngredient | undefined {
+  function recipeIngredientByName(name: string): string | undefined {
     const formattedName = name.toLowerCase()
     return recipes.value
       .flatMap((recipe) => recipe.ingredients ?? [])
-      .find((ingredient) =>
-        getTranslation(ingredient.ingredient.name).toLowerCase().includes(formattedName)
-      )
+      .find((ingredient) => ingredient.toLowerCase().includes(formattedName))
   }
 
   function fetchRecipes() {
@@ -99,7 +96,7 @@ export const useRecipeStore = defineStore('recipe', () => {
     }
 
     trackEvent('summarizeRecipe', { status: 'prepareInstructions' }, false)
-    const instructions = `${recipe.steps.map((step) => getTranslation(step.description)).join('. ')}`
+    const instructions = `${recipe.instructions.map((step) => step).join('. ')}`
 
     trackEvent('summarizeRecipe', { status: 'exec', instructions }, false)
     summarizer.exec([instructions])

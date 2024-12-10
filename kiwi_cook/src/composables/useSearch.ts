@@ -7,8 +7,7 @@ import type { IFuseOptions } from 'fuse.js'
 import Fuse from 'fuse.js'
 import { stemmer } from 'stemmer'
 
-import type { Recipe } from 'src/models/recipe'
-import { getAllTranslations } from 'src/models/recipe'
+import type { RecipeType } from 'src/models/recipe'
 import type { UserPreferences } from 'src/models/user'
 import { useAnalytics } from 'src/composables/useAnalytics'
 
@@ -19,11 +18,11 @@ interface SearchableRecipe {
 }
 
 interface UseRecipeSearch {
-  searchRecipesByQuery: (recipeMap: Map<string, Recipe>, query: string) => Promise<Recipe[]>
+  searchRecipesByQuery: (recipeMap: Map<string, RecipeType>, query: string) => Promise<RecipeType[]>
   searchRecipesByPreferences: (
-    recipeMap: Map<string, Recipe>,
+    recipeMap: Map<string, RecipeType>,
     userPreferences: UserPreferences
-  ) => Promise<Recipe[]>
+  ) => Promise<RecipeType[]>
 }
 
 export function useRecipeSearch(): UseRecipeSearch {
@@ -31,24 +30,14 @@ export function useRecipeSearch(): UseRecipeSearch {
 
   const fuse = ref<Fuse<SearchableRecipe> | null>(null)
 
-  const processField = (field: string[]): string[] =>
-    field.flatMap((item) =>
-      item
-        .toLowerCase()
-        .split(/\s+/)
-        .map((word) => stemmer(word))
-    )
-
-  const prepareSearchableRecipes = (recipes?: Recipe[]): SearchableRecipe[] => {
+  const prepareSearchableRecipes = (recipes?: RecipeType[]): SearchableRecipe[] => {
     const searchableRecipes: SearchableRecipe[] = []
 
     recipes?.forEach((recipe) => {
       const searchableRecipe: SearchableRecipe = {
         id: recipe.id.toString(),
-        name: processField(getAllTranslations(recipe.name)).join(' '),
-        ingredients: recipe.ingredients
-          ?.flatMap((ingredient) => processField(getAllTranslations(ingredient.ingredient.name)))
-          .join(' '),
+        name: recipe.name,
+        ingredients: recipe.ingredients.join(' '),
       }
       searchableRecipes.push(searchableRecipe)
     })
@@ -66,7 +55,7 @@ export function useRecipeSearch(): UseRecipeSearch {
     return words.filter((word) => word.length > 0).map((word) => stemmer(word))
   }
 
-  const initializeFuse = (recipes: Recipe[]) => {
+  const initializeFuse = (recipes: RecipeType[]) => {
     const searchableRecipes = prepareSearchableRecipes(recipes)
 
     const options: IFuseOptions<SearchableRecipe> = {
@@ -95,24 +84,19 @@ export function useRecipeSearch(): UseRecipeSearch {
 
     return dietaryRestrictions.every((restriction: string) => recipeDietaryRestrictions.has(restriction)); */
 
-  const filterRecipeByDuration = (recipe: Recipe, userPreferences: UserPreferences): boolean => {
+  const filterRecipeByDuration = (
+    recipe: RecipeType,
+    userPreferences: UserPreferences
+  ): boolean => {
     const maxDuration = userPreferences.cookingTime
     if (maxDuration === undefined) {
       return true
     }
-    trackEvent('filterRecipeByDuration', { recipeDuration: recipe.duration, maxDuration })
-    return recipe.duration <= maxDuration
-  }
-
-  function filterRecipeByTag(recipe: Recipe, userPreferences: UserPreferences): boolean {
-    const tags = userPreferences.tags ?? []
-
-    const recipeTags = recipe.props.tags ?? []
-    if (recipeTags.length === 0 || tags.length === 0) {
-      return true
-    }
-    trackEvent('filterRecipeByDuration', { recipeTags, tags })
-    return tags.some((tag: string) => recipeTags.includes(tag))
+    trackEvent('filterRecipeByDuration', {
+      recipeDuration: recipe.total_time,
+      maxDuration,
+    })
+    return (recipe.total_time ?? 0) <= maxDuration
   }
 
   const search = (query: string): string[] => {
@@ -138,16 +122,16 @@ export function useRecipeSearch(): UseRecipeSearch {
   }
 
   const searchRecipesByQuery = async (
-    recipeMap: Map<string, Recipe>,
+    recipeMap: Map<string, RecipeType>,
     query: string
-  ): Promise<Recipe[]> =>
+  ): Promise<RecipeType[]> =>
     new Promise((resolve, reject) => {
       try {
         initializeFuse(Array.from(recipeMap.values()))
         const recipeIds = search(query)
         const searchedRecipes = recipeIds
           .map((recipeId: string) => recipeMap.get(recipeId))
-          .filter((recipe): recipe is Recipe => recipe !== undefined)
+          .filter((recipe): recipe is RecipeType => recipe !== undefined)
         resolve(searchedRecipes)
       } catch (error) {
         reject(error)
@@ -155,9 +139,9 @@ export function useRecipeSearch(): UseRecipeSearch {
     })
 
   const searchRecipesByPreferences = async (
-    recipeMap: Map<string, Recipe>,
+    recipeMap: Map<string, RecipeType>,
     userPreferences: UserPreferences
-  ): Promise<Recipe[]> =>
+  ): Promise<RecipeType[]> =>
     new Promise((resolve, reject) => {
       trackEvent('searchRecipesByPreferences', { userPreferences })
 
@@ -171,7 +155,6 @@ export function useRecipeSearch(): UseRecipeSearch {
         filterRecipeByDietaryRestrictions,
         // filterRecipeBySkillLevel,
         // filterRecipeByCuisine,
-        filterRecipeByTag,
       ]
 
       const filteredRecipes = recipes.filter((recipe) =>
