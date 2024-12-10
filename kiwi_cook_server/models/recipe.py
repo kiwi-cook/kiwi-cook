@@ -58,23 +58,6 @@ class RecipeIngredient(BaseRecipeModel):
         ing_str = self.ingredient
         return f"RecIng({ing_str[:14]}...)" if len(ing_str) > 17 else f"RecIng({ing_str})"
 
-
-class RecipeStep(BaseRecipeModel):
-    description: str
-    ingredients: List[RecipeIngredient]
-    img_url: Optional[HttpUrl] = None
-    duration: Optional[float] = None
-    temperature: Optional[float] = None
-
-    @field_serializer("img_url")
-    def serialize_url(self, url: Optional[HttpUrl]) -> Optional[str]:
-        return str(url) if url else None
-
-    def __repr__(self) -> str:
-        desc = self.description
-        return f"Step({desc[:15]}...)" if len(desc) > 18 else f"Step({desc})"
-
-
 class Nutrition(BaseRecipeModel):
     calories: int = Field(ge=0)
     protein: float = Field(ge=0)
@@ -96,16 +79,16 @@ class Recipe(BaseRecipeModel):
     description: str
     lang: str = Field(default="en")
     ingredients: List[RecipeIngredient]
-    steps: List[RecipeStep]
-    props: Dict[str, Any]
+    instructions: List[str]
+    props: Optional[Dict[str, Any]] = None
+    tags: Optional[List[str]] = None
     src: Optional[str] = None
-    deleted: bool = Field(default=False)
     servings: int = Field(default=1, ge=1)
     duration: int = Field(default=0, ge=0)
+    nutrition: Nutrition = Field(default_factory=Nutrition.create_empty)
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    tags: List[str]
-    nutrition: Nutrition = Field(default_factory=Nutrition.create_empty)
+    deleted: bool = Field(default=False)
 
     def __repr__(self) -> str:
         name = self.name
